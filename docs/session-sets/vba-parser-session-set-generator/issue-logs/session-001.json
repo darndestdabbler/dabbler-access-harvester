@@ -1,0 +1,84 @@
+[
+  {
+    "id": "non-retrospective-rows",
+    "round": 1,
+    "severity": "Major",
+    "issue": "Findings #1, #2, #6, #20 grounded in VBA parser plan / docs/test-cases/, not import-set artifacts. Spec requires evidence in import-set artifacts.",
+    "status": "fixed",
+    "resolution": "Cut all four rows. Remaining 16 rows all ground in import-set artifacts. Added one new row (#12, 'orchestrator-matches-target') and renumbered 1-18."
+  },
+  {
+    "id": "wrong-session-target-for-verifier-guidance",
+    "round": 1,
+    "severity": "Major",
+    "issue": "Original #9 ('list files for verifier') targeted Session 3 stubs, but verifier-prompt guidance is meta-instruction, not stub content.",
+    "status": "fixed",
+    "resolution": "Moved to Session 4 playbook (now #11). Reworded to 'per-task-category verification-prompt assembly recipe \u2014 meta-guidance, not stub content'."
+  },
+  {
+    "id": "import-specific-finding-misbucketed",
+    "round": 1,
+    "severity": "Major",
+    "issue": "Original #12 ('code-import scrub') targeted Session 4 playbook, but parser is clean-room from MS-VBAL spec \u2014 no wholesale code import is planned.",
+    "status": "fixed",
+    "resolution": "Rebucketed to no-op (now #18) with rationale citing the plan's preamble 'Clean-room implementation from Microsoft's [MS-VBAL] specification \u2014 no derivation from Rubberduck or other GPL-licensed sources'."
+  },
+  {
+    "id": "weak-or-mismatched-evidence-pointers",
+    "round": 1,
+    "severity": "Major",
+    "issue": "#3, #5, #14, #18 had vague or mismatched citations.",
+    "status": "fixed",
+    "resolution": "Tightened all four. #3 (now #1) cites Session 1 = $1.98 / 3 rounds vs Sessions 2-5 = $0.08-$0.21 / 1-2 rounds with explicit session-review file references. #5 (now #3) re-grounded on R2-DISPOSITION-BUCKET-COMPLETENESS plus issue-logs/session-001.json resolution; clarified the finding is about disposition labels not bucket-spec-compliant. #14 (now #9) added the max_tier=1 fallback as the operational half (per the promoted convention's text). #18 (now #13) cites activity-log.json explicitly."
+  },
+  {
+    "id": "missing-high-signal-routing-finding",
+    "round": 1,
+    "severity": "Major",
+    "issue": "Retrospective omitted the project-guidance Convention 'When the orchestrator's model matches the routing target, handle in-conversation rather than calling route()' \u2014 directly relevant to Session 4 playbook calibration.",
+    "status": "fixed",
+    "resolution": "Added new Session 4 finding (#12) citing project-guidance.md Conventions section with explicit note that session-verification is the non-negotiable exception."
+  },
+  {
+    "id": "residual-non-retrospective-row-17",
+    "round": 2,
+    "severity": "Major",
+    "issue": "Round-2 row #17 (schema reconciliation deferred) was grounded in project-guidance.md Principles, not import-set artifacts. Verifier judged it an integration-planning observation, not a retrospective lesson.",
+    "status": "fixed",
+    "resolution": "Cut row #17 entirely. Renumbered original #18 (no-op stale-path-scrub) to #17. Updated 'Adopt-now action map' Defer line to be removed; No-op line updated. Updated Disposition definitions to note 'none in this round'."
+  },
+  {
+    "id": "row-1-evidence-still-overstates-citation",
+    "round": 2,
+    "severity": "Major",
+    "issue": "Round-2 row #1 said 'four mechanical sessions verified on round 1' but actuals show Session 3 took 2 rounds (Minor exit-code issue). Also 'dominated by retry rounds' was an inferred claim.",
+    "status": "fixed",
+    "resolution": "Row #1 rewritten as a narrower, defensible claim: explicit per-session cost+round counts (Session 1 $1.98/3, Session 2 $0.08/1, Session 3 $0.11/2, Session 4 $0.21/1, Session 5 $0.13/1, Session 6 $0.23/2). Wording changed from 'dominated by retry rounds' to 'gap concentrated in multi-round verification'. Round-1 success count updated to '3 of 6 times in this set'."
+  },
+  {
+    "id": "row-2-set-wide-volume-claim-not-shown",
+    "round": 2,
+    "severity": "Medium",
+    "issue": "Round-2 row #2 claimed internal inconsistencies were the 'highest-volume verifier finding category in the import set' (set-wide), but evidence was Session 1 only.",
+    "status": "fixed",
+    "resolution": "Row #2 narrowed to 'Within Session 1 of the import set ... internal inconsistencies were the dominant verifier finding category'. Added the contextual link that Session 1 of the import set is the closest analogue to Session 2 of *this* generator set."
+  },
+  {
+    "id": "row-1-cost-gap-still-partly-inferential",
+    "round": 3,
+    "severity": "Medium",
+    "issue": "Round-3 row #1 still used 'gap concentrated in multi-round verification' which goes beyond cited evidence; Session 6 ($0.23, 2 rounds) sat near Session 4 ($0.21, 1 round).",
+    "status": "fixed",
+    "resolution": "Rewrote row #1 to a purely descriptive statement: '3-round plan-author session was the clear cost outlier; remaining five sessions clustered at the low end ($0.08-$0.23 each), with three (Sessions 2/4/5) verified on round 1.' Removed the verification-concentration framing.",
+    "note": "Round 3 was the second and final retry under Step 7. No Critical or Major issues remained \u2014 Medium fixes applied directly without further re-verification."
+  },
+  {
+    "id": "row-2-new-context-clause-needs-citation-tightening",
+    "round": 3,
+    "severity": "Medium",
+    "issue": "Round-3 row #2 still used 'dominant verifier finding category' (a ranking claim) and embedded the analogue clause in finding text rather than rationale.",
+    "status": "fixed",
+    "resolution": "Softened 'dominant verifier finding category' to 'recurring verifier theme'. Moved the 'plan-author session is the closest analogue to Session 2 of this generator' clause from finding text to the rationale column.",
+    "note": "Round 3 was the second and final retry under Step 7. No Critical or Major issues remained \u2014 Medium fixes applied directly without further re-verification."
+  }
+]
