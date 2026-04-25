@@ -191,6 +191,35 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ## Harvester-Specific Lessons
 
+### Stale-Path Scrub On Imported Dev Tools, Even When Plan Says "Import-As-Is"
+
+- **Context:** Importing developer utility scripts (Python tools, side
+  scripts, samples) from a sibling repo where the import plan
+  dispositions them `import-as-is`. First hit in Session 6 of
+  `accessexportertemp1-import` on `tools/validate_against_yaml.py`.
+- **Failure or friction:** Session 6 imported the script per its
+  `import-as-is` disposition. The script still referenced sibling-repo
+  paths and class names (`AccessExporter`, `sample-output/`,
+  `AccessExporter.Core/`). Even though the verification prompt
+  explicitly disclosed this as deferred-by-design per the import plan,
+  round-1 verification flagged it as Major Correctness anyway and
+  required a fix-and-reverify round (~$0.11 of extra verifier cost,
+  ~5 minutes of orchestrator time).
+- **Lesson:** "Import-as-is" applies to behavior, not to repo-local
+  strings. Hardcoded sibling paths and stale namespace references in
+  imported dev tools are verifier-magnets even with disclosure. The
+  cost of a 5-minute mechanical scrub at import time is lower than
+  the cost of a re-verification round. Disclosure does prevent
+  false-positive hallucinations of missing code, but it does not
+  immunize a real correctness gap a fresh reader can see in the file.
+- **Action for future sessions:** When importing dev-utility scripts
+  (Python, shell, etc.) from a sibling repo, do a mechanical scrub
+  for sibling-repo paths and namespace references in the same step
+  that imports them — even when the plan says `import-as-is`. Treat
+  this as part of the namespace-rewrite mechanical work, not as a
+  behavioral edit. Only escalate to the human if the scrub reveals a
+  real semantic change.
+
 ### `session-verification` Needs A `task_type_overrides` Entry, Or `route()` Will Pick The Orchestrator's Own Provider
 
 - **Context:** End-of-session Step 6 cross-provider verification.
