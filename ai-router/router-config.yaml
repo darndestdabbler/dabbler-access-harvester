@@ -225,6 +225,17 @@ routing:
     # on heuristic scoring to land there indirectly.
     uat-plan-generation: opus
     uat-coverage-review: opus
+    # End-of-session cross-provider verification. Pinned to gpt-5-4
+    # (OpenAI) so a Claude (Anthropic) orchestrator gets a genuinely
+    # cross-provider review by calling route() per the workflow doc
+    # verbatim — without this override, route() would default to opus
+    # (Anthropic = the orchestrator's own provider) and miss the
+    # cross-provider intent. Calibrated for the Claude orchestrator;
+    # if a Codex (OpenAI) or Gemini (Google) orchestrator runs a
+    # session, swap this value so it lands on a different-provider
+    # Tier-3 model (opus for Codex/Gemini, gpt-5-4 stays correct for
+    # Claude). See docs/planning/lessons-learned.md.
+    session-verification: gpt-5-4
 
 # --- Delegation ---
 # Guidance for orchestrators (Claude Code / Codex / Gemini) on which

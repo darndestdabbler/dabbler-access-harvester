@@ -191,5 +191,38 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ## Harvester-Specific Lessons
 
-*(This section will fill in as the project executes. New lessons learned
-during harvester sessions go here, not in the seeded section above.)*
+### `session-verification` Needs A `task_type_overrides` Entry, Or `route()` Will Pick The Orchestrator's Own Provider
+
+- **Context:** End-of-session Step 6 cross-provider verification.
+  Sessions 1 and 2 of `accessexportertemp1-import` both hit it.
+- **Failure or friction:** The workflow doc Step 6 says to call
+  `route(task_type="session-verification", complexity_hint=70, ...)`,
+  but `session-verification` was not in
+  `routing.task_type_overrides`. With Claude Opus as the
+  orchestrator, the tier picker resolves complexity 70 → tier 3 →
+  `opus` (Anthropic = the orchestrator's own provider), defeating
+  the cross-provider intent. The Session 1 orchestrator worked
+  around this with `query("gpt-5-4", task_type="session-verification")`.
+  Session 2 hit the identical issue and used the same workaround,
+  confirming the pattern.
+- **Lesson:** `route()` selection is provider-agnostic — it picks the
+  cheapest Tier-N model regardless of which orchestrator is calling.
+  For task types that *must* be cross-provider, an explicit
+  `task_type_overrides` entry is required, and the chosen model has
+  to be from a different provider than the orchestrator. There is no
+  one-value-fits-all answer because the workflow allows the human to
+  swap the orchestrator session-to-session — the override is
+  calibrated for the *expected* orchestrator and the human
+  re-calibrates if they switch.
+- **Action for future sessions:** The router-config.yaml override is
+  now in place (`session-verification: gpt-5-4`, calibrated for the
+  Claude orchestrator). Future Claude-led sessions can call
+  `route(task_type="session-verification", ...)` per the workflow
+  doc verbatim and get a cross-provider review automatically. **If
+  the human switches the orchestrator to Codex (OpenAI) or Gemini
+  (Google) for a future session, swap the override value before
+  starting** — for Codex use `opus` (or `sonnet`), for Gemini use
+  `opus` or `gpt-5-4`. Until that swap, do *not* use `route()` for
+  session-verification under the wrong orchestrator; fall back to
+  `query("<cross-provider-model>", task_type="session-verification")`
+  as Sessions 1 and 2 did.
