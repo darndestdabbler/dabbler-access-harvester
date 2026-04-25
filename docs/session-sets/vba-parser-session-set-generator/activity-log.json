@@ -262,6 +262,254 @@
           "costUsd": 0.00263875
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/read-retrospective",
+      "dateTime": "2026-04-25T22:52:37.779188+00:00",
+      "description": "Read harvester-import-retrospective.md adopt-now rows for Session 3 stubs (#2 verbatim authority, #3 enumerated values, #4 no human-blocking gates, #5 OQs only for genuine forks, #6 lean shape).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/iterate-children",
+      "dateTime": "2026-04-25T22:52:37.780244+00:00",
+      "description": "Created 18 child folders under docs/session-sets/. Slugs verbatim from session-set-tree.md row column 2: parser-foundations, vba-spec-study, vba-lexical-and-expression-grammar, vba-statement-and-module-grammar, vba-grammar-validation, parser-infrastructure, resolver-declarations-and-scopes, resolver-references-and-with-blocks, resolver-default-members-and-inference, access-metadata-extraction, access-symbol-table-and-types, jet-sql-grammar-and-parser, jet-sql-resolution-and-dynamic, enrichment-queries-and-forms, enrichment-events-and-validation, enrichment-functions-navigation-review, schema-finalization-and-docs, integration-testing-and-acceptance.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/route-stub-parser-foundations",
+      "dateTime": "2026-04-25T22:52:37.781242+00:00",
+      "description": "Authored docs/session-sets/parser-foundations/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #1 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/route-stub-vba-spec-study",
+      "dateTime": "2026-04-25T22:52:37.781242+00:00",
+      "description": "Authored docs/session-sets/vba-spec-study/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #2 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/route-stub-vba-lexical-and-expression-grammar",
+      "dateTime": "2026-04-25T22:52:37.782253+00:00",
+      "description": "Authored docs/session-sets/vba-lexical-and-expression-grammar/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #3 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/route-stub-vba-statement-and-module-grammar",
+      "dateTime": "2026-04-25T22:52:37.783250+00:00",
+      "description": "Authored docs/session-sets/vba-statement-and-module-grammar/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #4 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/route-stub-vba-grammar-validation",
+      "dateTime": "2026-04-25T22:52:37.783250+00:00",
+      "description": "Authored docs/session-sets/vba-grammar-validation/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #5 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/route-stub-parser-infrastructure",
+      "dateTime": "2026-04-25T22:52:37.784249+00:00",
+      "description": "Authored docs/session-sets/parser-infrastructure/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #6 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/route-stub-resolver-declarations-and-scopes",
+      "dateTime": "2026-04-25T22:52:37.785252+00:00",
+      "description": "Authored docs/session-sets/resolver-declarations-and-scopes/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #7 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-3/route-stub-resolver-references-and-with-blocks",
+      "dateTime": "2026-04-25T22:52:37.786118+00:00",
+      "description": "Authored docs/session-sets/resolver-references-and-with-blocks/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #8 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 11,
+      "stepKey": "session-3/route-stub-resolver-default-members-and-inference",
+      "dateTime": "2026-04-25T22:52:37.786118+00:00",
+      "description": "Authored docs/session-sets/resolver-default-members-and-inference/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #9 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 12,
+      "stepKey": "session-3/route-stub-access-metadata-extraction",
+      "dateTime": "2026-04-25T22:52:37.787163+00:00",
+      "description": "Authored docs/session-sets/access-metadata-extraction/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #10 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 13,
+      "stepKey": "session-3/route-stub-access-symbol-table-and-types",
+      "dateTime": "2026-04-25T22:52:37.788160+00:00",
+      "description": "Authored docs/session-sets/access-symbol-table-and-types/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #11 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 14,
+      "stepKey": "session-3/route-stub-jet-sql-grammar-and-parser",
+      "dateTime": "2026-04-25T22:52:37.789160+00:00",
+      "description": "Authored docs/session-sets/jet-sql-grammar-and-parser/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #12 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 15,
+      "stepKey": "session-3/route-stub-jet-sql-resolution-and-dynamic",
+      "dateTime": "2026-04-25T22:52:37.790160+00:00",
+      "description": "Authored docs/session-sets/jet-sql-resolution-and-dynamic/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #13 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 16,
+      "stepKey": "session-3/route-stub-enrichment-queries-and-forms",
+      "dateTime": "2026-04-25T22:52:37.790160+00:00",
+      "description": "Authored docs/session-sets/enrichment-queries-and-forms/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #14 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 17,
+      "stepKey": "session-3/route-stub-enrichment-events-and-validation",
+      "dateTime": "2026-04-25T22:52:37.791160+00:00",
+      "description": "Authored docs/session-sets/enrichment-events-and-validation/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #15 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 18,
+      "stepKey": "session-3/route-stub-enrichment-functions-navigation-review",
+      "dateTime": "2026-04-25T22:52:37.792160+00:00",
+      "description": "Authored docs/session-sets/enrichment-functions-navigation-review/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #16 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 19,
+      "stepKey": "session-3/route-stub-schema-finalization-and-docs",
+      "dateTime": "2026-04-25T22:52:37.793153+00:00",
+      "description": "Authored docs/session-sets/schema-finalization-and-docs/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #17 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 20,
+      "stepKey": "session-3/route-stub-integration-testing-and-acceptance",
+      "dateTime": "2026-04-25T22:52:37.794162+00:00",
+      "description": "Authored docs/session-sets/integration-testing-and-acceptance/spec.md in-conversation (Opus orchestrator + planning pins to Opus -> handle in-conversation per project-guidance.md Convention). Stub references tree row #18 verbatim for slug, plan-phase coverage, prereqs, session count, and output paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 21,
+      "stepKey": "session-3/verify",
+      "dateTime": "2026-04-25T22:58:53.422271+00:00",
+      "description": "End-of-session cross-provider verification round 1 via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 37750,
+          "outputTokens": 17661,
+          "costUsd": 0.35929
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 22,
+      "stepKey": "session-3/verify-round-2",
+      "dateTime": "2026-04-25T23:06:55.240080+00:00",
+      "description": "Round-2 cross-provider verification via gpt-5-4 after applying 1 CRITICAL + 2 MAJOR + 1 MINOR round-1 fixes.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 38784,
+          "outputTokens": 8645,
+          "costUsd": 0.22663499999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 23,
+      "stepKey": "session-3/verify-round-3",
+      "dateTime": "2026-04-25T23:08:54.834168+00:00",
+      "description": "Round-3 (final) cross-provider verification via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3548,
+          "outputTokens": 1534,
+          "costUsd": 0.03188
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 24,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-25T23:10:04.515936+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 4 via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1447,
+          "outputTokens": 99,
+          "costUsd": 0.00279875
+        }
+      ]
     }
   ]
 }
