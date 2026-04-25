@@ -29,18 +29,27 @@ sessions get the cheapest-capable model on every routed call.
 
 The deliverables are:
 
-1. **`session-set-tree.md`** — a hierarchical map: VBA-parser-plan →
+1. **`harvester-import-retrospective.md`** — a structured retrospective
+   of the completed `accessexportertemp1-import` session set, with
+   one row per finding flagged adopt-now / defer-to-integration /
+   no-op. Adopted findings inform the decomposition, stubs, and
+   playbook produced by the later sessions of this set. This
+   retrospective is the first artifact because a sloppy decomposition
+   multiplies cost across every child session set that follows; the
+   harvester-import set is the only directly comparable data we have
+   on this repo.
+2. **`session-set-tree.md`** — a hierarchical map: VBA-parser-plan →
    child session sets → rough session count per child → dependency
    graph between children. One row per child session set with
    purpose, scope, prerequisites, estimated session count, and
    pointers into the plan.
-2. **One stub `spec.md` per child session set**, written with enough
+3. **One stub `spec.md` per child session set**, written with enough
    scope detail that a future orchestrator can execute it without
    re-deriving the plan. Stubs use the standard session-set spec
    format (Project Overview / Features / Session Plan), but session
    step lists are abbreviated when later refinement is expected — the
    stub records the *shape* of the work, not necessarily every step.
-3. **`routing-playbook.md`** — for each kind of work the child sets
+4. **`routing-playbook.md`** — for each kind of work the child sets
    contain (grammar authoring, parser-infrastructure code,
    AST-shape design, symbol-resolution algorithm design,
    schema validation, regression-corpus authoring, etc.), the
@@ -57,7 +66,74 @@ plans.
 
 ---
 
-## Feature 1: Plan Decomposition (Session 1)
+## Feature 1: Harvester-Import Retrospective (Session 1)
+
+### Scope
+
+Read the completed `accessexportertemp1-import` session set's artifacts
+end-to-end and produce `harvester-import-retrospective.md`: a structured
+list of findings that should shape the VBA-parser plan's decomposition,
+stubs, or routing playbook.
+
+The retrospective is **not** a project history. It is a focused
+working document whose only purpose is to make the next three
+sessions of *this* set better calibrated.
+
+Inputs to read directly (do not route the read):
+
+- `docs/session-sets/accessexportertemp1-import/import-plan.md`
+- `docs/session-sets/accessexportertemp1-import/change-log.md`
+- `docs/session-sets/accessexportertemp1-import/ai-assignment.md`
+  (every Actuals block — actuals vs. recommendation deviations are
+  the highest-signal calibration data)
+- `docs/session-sets/accessexportertemp1-import/session-reviews/session-*.md`
+  (verifier output, especially any ISSUES_FOUND rounds)
+- `docs/session-sets/accessexportertemp1-import/issue-logs/`
+- `docs/planning/lessons-learned.md` (entries added or promoted as a
+  result of the import set)
+- `docs/planning/project-guidance.md` Conventions section, focused on
+  any conventions promoted or expanded as a result of the import set
+- The `docs/VBA-Parser-Migration-Harvester-Plan.md` plan itself, with
+  an eye to where harvester-import discoveries shift the plan's
+  session shapes, task-type choices, or risk areas
+
+For each finding, capture:
+
+- **Finding** — one-sentence statement of what the import set revealed.
+- **Evidence pointer** — which artifact and section/round it came from.
+- **Disposition** — exactly one of:
+  - **adopt-now** — apply during this generator session set's later
+    sessions (decomposition, stubs, or playbook). The row names
+    *which* later session and *what* it should change.
+  - **defer-to-integration** — applies later, when the parser
+    actually plugs into `AccessHarvester.Core`. Recorded so the
+    integration session set can act on it; not actioned now.
+  - **no-op** — true of harvester import but does not generalize to
+    parser work. Recorded so the next person doesn't re-derive it.
+- **Rationale** — one sentence on why the disposition holds.
+
+Use `route(task_type="analysis", complexity_hint=65)` for the
+synthesis. The cross-provider verifier should challenge the
+adopt-now / defer / no-op call on each row, not just the wording.
+
+### Standards
+
+- The retrospective is **opinionated**. "Possibly relevant"
+  findings without a concrete adoption path are noise; either
+  attach a disposition or drop the finding.
+- Findings must point at evidence in the actual artifacts. A finding
+  the orchestrator can't ground in a specific session-review file,
+  ai-assignment Actuals block, lessons-learned entry, or
+  issue-logs entry should be cut.
+- Each adopt-now finding names the later session it informs (Session
+  2 decomposition, Session 3 stubs, or Session 4 playbook) and the
+  specific change it implies. "Be careful" is not a change.
+- Cross-reference any conventions/principles promoted out of the
+  import set so the decomposition doesn't re-derive them.
+
+---
+
+## Feature 2: Plan Decomposition (Session 2)
 
 ### Scope
 
@@ -101,7 +177,7 @@ synthesis-heavy planning earns Opus.
 
 ---
 
-## Feature 2: Stub Specs (Session 2)
+## Feature 3: Stub Specs (Session 3)
 
 ### Scope
 
@@ -122,7 +198,7 @@ A stub spec contains:
   *"Session N step list to be elaborated by the orchestrator
   executing it; this stub records the shape only."*
 - The same routing notes that apply to that child (pulled from
-  `routing-playbook.md`, see Feature 3) inlined in a "**Routing
+  `routing-playbook.md`, see Feature 4) inlined in a "**Routing
   notes**" section so a future orchestrator does not have to
   cross-reference back.
 
@@ -147,7 +223,7 @@ stub is a separate routed call so failures are localized.
 
 ---
 
-## Feature 3: Routing Playbook (Session 3)
+## Feature 4: Routing Playbook (Session 4)
 
 ### Scope
 
@@ -204,26 +280,72 @@ mandatory.
 
 ## Session Plan
 
-### Session 1 of 3: Plan Decomposition
+### Session 1 of 4: Harvester-Import Retrospective
+
+**Inputs:** the completed `accessexportertemp1-import` session set's
+artifacts (import-plan.md, change-log.md, ai-assignment.md
+Actuals blocks, session-reviews/, issue-logs/) plus
+`docs/planning/lessons-learned.md` and `docs/planning/project-guidance.md`
+Conventions section.
 
 **Steps:**
-1. Read `docs/VBA-Parser-Migration-Harvester-Plan.md` end-to-end
+1. Read every input artifact directly (do not route).
+2. Read `docs/VBA-Parser-Migration-Harvester-Plan.md` once with the
+   retrospective lens — i.e., where in the plan would each
+   harvester-import discovery shift session shape, task-type
+   choice, or risk?
+3. Draft a finding table (Finding / Evidence pointer / Disposition /
+   Rationale) and route synthesis:
+   `route(task_type="analysis", complexity_hint=65,
+   content=<finding table draft + plan summary + relevant
+   conventions/lessons>)`. The verifier should challenge each
+   row's adopt-now / defer / no-op call, not just wording.
+4. Iterate based on verifier output. Maximum 2 retries.
+5. Write `docs/session-sets/vba-parser-session-set-generator/harvester-import-retrospective.md`
+   with the final finding table.
+6. End-of-session cross-provider verification (the mandatory
+   `session-verification` task type).
+
+**Creates:**
+- `docs/session-sets/vba-parser-session-set-generator/harvester-import-retrospective.md`
+
+**Touches:** none
+
+**Ends with:** retrospective committed; adopt-now findings named for
+the specific later session (2/3/4) they inform.
+
+**Progress keys:** `session-1/read-import-artifacts`,
+`session-1/read-plan-with-lens`, `session-1/draft-findings`,
+`session-1/route-synthesis`, `session-1/write-retrospective`,
+`session-1/verify`
+
+---
+
+### Session 2 of 4: Plan Decomposition
+
+**Inputs:** Session 1's `harvester-import-retrospective.md` (apply
+every adopt-now row whose target is "Session 2 decomposition").
+
+**Steps:**
+1. Verify Session 1's retrospective exists. Extract the adopt-now
+   rows that target Session 2 decomposition.
+2. Read `docs/VBA-Parser-Migration-Harvester-Plan.md` end-to-end
    directly (do not route the read).
-2. Read every fixture under `docs/test-cases/` (input + expected
+3. Read every fixture under `docs/test-cases/` (input + expected
    output pairs) directly.
-3. Tabulate: which plan sections does each test case exercise? Note
+4. Tabulate: which plan sections does each test case exercise? Note
    plan sections with no test case yet.
-4. Route the decomposition draft:
+5. Route the decomposition draft:
    `route(task_type="planning", complexity_hint=80,
-   content=<plan summary + test-case table + initial cut at child
-   session sets>)`. Verifier should challenge over- and
-   under-decomposition, dependency cycles, and missing test-case
-   coverage.
-5. Iterate based on verifier output. Maximum 2 retries.
-6. Write `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md`
+   content=<plan summary + test-case table + retrospective
+   adopt-now rows + initial cut at child session sets>)`. Verifier
+   should challenge over- and under-decomposition, dependency cycles,
+   missing test-case coverage, **and** whether each adopt-now row
+   was actually applied.
+6. Iterate based on verifier output. Maximum 2 retries.
+7. Write `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md`
    with the final decomposition + DAG.
-7. End-of-session cross-provider verification (this is the
-   `session-verification` task type, mandatory).
+8. End-of-session cross-provider verification.
 
 **Creates:**
 - `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md`
@@ -231,58 +353,72 @@ mandatory.
 **Touches:** none
 
 **Ends with:** session-set-tree committed; child session-set names
-finalized.
+finalized; retrospective adopt-now rows for decomposition resolved.
 
-**Progress keys:** `session-1/read-plan`, `session-1/read-fixtures`,
-`session-1/build-coverage-table`, `session-1/route-decomposition`,
-`session-1/write-tree`, `session-1/verify`
+**Progress keys:** `session-2/read-retrospective`,
+`session-2/read-plan`, `session-2/read-fixtures`,
+`session-2/build-coverage-table`, `session-2/route-decomposition`,
+`session-2/write-tree`, `session-2/verify`
 
 ---
 
-### Session 2 of 3: Stub Specs
+### Session 3 of 4: Stub Specs
+
+**Inputs:** Session 1's retrospective (adopt-now rows targeting
+Session 3 stubs) + Session 2's `session-set-tree.md`.
 
 **Steps:**
-1. Verify Session 1's `session-set-tree.md` exists and lists every
-   child session set.
+1. Verify Session 2's `session-set-tree.md` exists and lists every
+   child session set. Extract retrospective adopt-now rows that
+   target Session 3 stubs.
 2. For each child session set named in the tree:
    a. Create `docs/session-sets/<child-slug>/` folder.
    b. Route a stub spec via
       `route(task_type="planning", complexity_hint=70, content=<the
-      child's row from the tree + relevant plan section excerpt>)`.
+      child's row from the tree + relevant plan section excerpt +
+      any retrospective adopt-now rows that apply to this child>)`.
    c. Save as `docs/session-sets/<child-slug>/spec.md`.
 3. Build + test: not applicable (no code touched).
 4. End-of-session cross-provider verification — pass the verifier
-   the tree plus a sample of the generated stub specs and ask "are
-   the stubs internally consistent and do they collectively cover
-   the plan?"
+   the tree, a sample of the generated stub specs, and the
+   retrospective adopt-now rows; ask "are the stubs internally
+   consistent, do they collectively cover the plan, and did they
+   apply the adopt-now rows?"
 
 **Creates:** one `spec.md` per child session set named in the tree.
 
 **Touches:** none
 
-**Ends with:** every child session set has a committed stub spec.
+**Ends with:** every child session set has a committed stub spec;
+retrospective adopt-now rows for stubs resolved.
 
-**Progress keys:** `session-2/iterate-children`,
-`session-2/route-stub-<slug>` (one key per child),
-`session-2/verify`
+**Progress keys:** `session-3/read-retrospective`,
+`session-3/iterate-children`,
+`session-3/route-stub-<slug>` (one key per child),
+`session-3/verify`
 
 ---
 
-### Session 3 of 3: Routing Playbook + Change Log
+### Session 4 of 4: Routing Playbook + Change Log
+
+**Inputs:** Session 1's retrospective (adopt-now rows targeting
+Session 4 playbook) + Session 3's stub-spec inventory.
 
 **Steps:**
-1. Verify Session 2's stubs exist.
+1. Verify Session 3's stubs exist. Extract retrospective adopt-now
+   rows that target Session 4 playbook.
 2. Re-read the plan with an eye to *kinds of work* (grammar,
    AST design, schema, regression, etc.).
 3. Route the playbook draft:
    `route(task_type="architecture", complexity_hint=80,
    content=<plan summary + stub-spec inventory + current
-   router-config.yaml>)`. Auto-verified cross-provider.
+   router-config.yaml + retrospective adopt-now rows for
+   playbook>)`. Auto-verified cross-provider.
 4. Iterate on verifier feedback. Max 2 retries.
 5. Write
    `docs/session-sets/vba-parser-session-set-generator/routing-playbook.md`.
 6. **Last session — generate `change-log.md`** via
-   `route(task_type="summarization", content=<the three sessions'
+   `route(task_type="summarization", content=<the four sessions'
    deliverables summarized>)`. Save in this session set's folder.
 7. Build + test: not applicable.
 8. End-of-session cross-provider verification.
@@ -302,11 +438,12 @@ finalized.
 **Ends with:** routing playbook committed, change-log committed,
 session set marked complete.
 
-**Progress keys:** `session-3/reread-plan`,
-`session-3/route-playbook`, `session-3/write-playbook`,
-`session-3/verify`, `session-3/route-changelog`,
-`session-3/commit-push`, `session-3/notify`,
-`session-3/reorganization-review`
+**Progress keys:** `session-4/read-retrospective`,
+`session-4/reread-plan`,
+`session-4/route-playbook`, `session-4/write-playbook`,
+`session-4/verify`, `session-4/route-changelog`,
+`session-4/commit-push`, `session-4/notify`,
+`session-4/reorganization-review`
 
 ---
 
