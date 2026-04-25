@@ -65,14 +65,19 @@ Claude Opus 4.7 @ effort=high
 | 4 | reasoning | session-verification | gpt-5-4 | high | Per `task_type_overrides`; mandatory cross-provider gate for the set of stubs. |
 
 **Actuals (filled after the session runs):**
-- Orchestrator used: TBD
-- Total routed cost: TBD
-- Deviations from recommendation: TBD
-- Notes for next-session calibration: TBD
+- Orchestrator used: Claude Opus 4.7 @ effort=high (1M context). Matches recommendation.
+- Total routed cost: ~$0.62 across 4 calls (gpt-5-4 verification rounds 1+2+3 = $0.36 + $0.23 + $0.03 = $0.62; gemini-pro next-orchestrator recommendation = $0.0028).
+- Deviations from recommendation: none on orchestrator. Per the "orchestrator matches routing target" Convention, all 18 stub-spec `planning` syntheses (which would route to Opus per `task_type_overrides`) were handled in-conversation rather than via 18 separate `route()` calls -- the single largest cost saver.
+- Notes for next-session calibration: Verification took 3 rounds, all artifact-drift / standardization-discipline defects (NOT scope/content gaps), continuing the dominant pattern from Session 2. Round 1: 1 CRITICAL ("Canonical tree row" verbatim block missing) + 2 MAJOR (Prerequisite frontmatter prose vs. grep-able paths; routing-note inconsistency on `architecture` "uncalibrated" labeling and `schema-validation` Sonnet-pinned context) + 1 MINOR (over-specified implementation detail in 5 stubs). Round 2: 2 residual MAJORs (4 conditional routing notes still missing standard labels; one new human-blocking OQ in `integration-testing-and-acceptance` reopened a fork the parent tree resolves). Round 3: VERIFIED. The "tree as single source of truth" discipline (retrospective adopt-now `#2`) requires a literal "Canonical tree row" block in every stub, not paraphrase -- this is the cheapest fix to land before Session 4 starts (Session 4's playbook will reference these stubs the same way). For Session 4, the same artifact-drift class will hit the routing playbook; pre-empting it with a "playbook entries cite the tree's column-by-column row verbatim" discipline at draft time is the cheapest defense. Session 3 prompt size (~156KB / 38K input tokens per round) was the upper bound on per-round verification cost in this set and reflects the 18-stub fan-out; Session 4 will be smaller (one playbook).
+
+**Next session orchestrator recommendation (Session 4):**
+Claude Sonnet 4.6 @ effort=medium
+
+**Rationale:** Session 4's primary deliverable is a single `architecture`-pinned playbook synthesis call that the router dispatches to Opus regardless of orchestrator tier. Session 3 demonstrated that Opus-as-orchestrator did not prevent multi-round verification on artifact-drift defects -- the dominant cost lever is verifier-prompt discipline, not orchestrator tier -- so a mid-tier orchestrator is sufficient.
 
 ## Session 4 of 4: Routing Playbook + Change Log
 
-**Recommended orchestrator:** Claude Sonnet 4.6 @ effort=medium
+**Recommended orchestrator:** Claude Sonnet 4.6 @ effort=medium *(unchanged from original; Session 3's actuals confirmed orchestrator tier is not the dominant lever on artifact-drift defects, so the original Sonnet@medium recommendation stands.)*
 **Rationale:** The primary deliverable is generated via a single, high-stakes `architecture` call that is pinned to Opus. A mid-tier orchestrator is sufficient to manage this call and the subsequent low-complexity `summarization` task.
 **Estimated routed cost:** $1.00 - $2.00
 
