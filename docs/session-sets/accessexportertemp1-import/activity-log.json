@@ -221,6 +221,129 @@
           "costUsd": 0.062283
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/verify-prereqs",
+      "dateTime": "2026-04-25T19:20:13.080427+00:00",
+      "description": "Verified Session 2 prerequisites: AccessHarvester.sln, AccessHarvester.Core.csproj, AccessHarvester.Cli.csproj, Abstractions.cs, AccessComSession.cs, AccessNode.cs all present.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/import-extractors",
+      "dateTime": "2026-04-25T19:20:13.081423+00:00",
+      "description": "Imported SaveAsTextExporter.cs, QueryExporter.cs, TableExporter.cs, RelationshipExporter.cs into AccessHarvester.Core/Extraction/. Namespace rewritten from AccessExporter.Core.Extraction -> AccessHarvester.Core.Extraction; otherwise byte-identical.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/import-pipeline",
+      "dateTime": "2026-04-25T19:20:13.081423+00:00",
+      "description": "Imported Pipeline.cs into AccessHarvester.Core/. Namespace rewritten. Translators and enrichers in Default() set to Array.Empty<> for Session 3 (Session 4 fills them in). WriteDefaultsArtifact resource name updated to AccessHarvester.Core.Resources.property-defaults.json.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/wire-cli",
+      "dateTime": "2026-04-25T19:20:13.082423+00:00",
+      "description": "Replaced stub Program.cs in AccessHarvester.Cli with full implementation matching the sibling (extract/translate/run subcommands, hand-rolled arg parser, --json-status flag). Namespace rewritten. Usage text updated to AccessHarvester.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/copy-sample",
+      "dateTime": "2026-04-25T19:20:13.083424+00:00",
+      "description": "Copied samples/MiniComplex.accdb from ../AccessExporterTemp1/samples/ to samples/.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/build",
+      "dateTime": "2026-04-25T19:20:13.084435+00:00",
+      "description": "dotnet build AccessHarvester.sln: Build succeeded. 0 Warnings, 0 Errors. Time 2.73s.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/run-extract",
+      "dateTime": "2026-04-25T19:20:13.084435+00:00",
+      "description": "Ran: AccessHarvester extract --db samples/MiniComplex.accdb --out tmp/raw-output --json-status. Result: 32 objects extracted (Forms:4, Reports:3, Macros:2, ModulesAndClasses:1, Queries:8, Tables:8, Relationships:6), 0 failures. raw/ directory tree verified. Exit code 0.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/dotnet-test",
+      "dateTime": "2026-04-25T19:20:13.085423+00:00",
+      "description": "dotnet test: no test projects in solution yet (test project lands in Session 5). Command exited with no output.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/verify",
+      "dateTime": "2026-04-25T19:22:20.879500+00:00",
+      "description": "Cross-provider session-verification via route(task_type='session-verification') => gpt-5-4. Tokens: 9998 in / 4453 out. Cost: $0.0918.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9998,
+          "outputTokens": 4453,
+          "costUsd": 0.09179000000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-3/verify-round2",
+      "dateTime": "2026-04-25T19:23:17.466821+00:00",
+      "description": "Round 2 re-verification after fixing exit-code-1 for ArgumentException. Model: gpt-5-4. Cost: $0.0151.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2883,
+          "outputTokens": 526,
+          "costUsd": 0.0150975
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 11,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-25T19:24:00.627390+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 4. Model: gemini-pro. Cost: $0.0016.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 553,
+          "outputTokens": 90,
+          "costUsd": 0.0015912500000000002
+        }
+      ]
     }
   ]
 }

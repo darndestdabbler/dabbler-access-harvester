@@ -55,11 +55,20 @@
 | 8 | reasoning | session-verification | gpt-5-4 | high | Per `task_type_overrides`; mandatory cross-provider gate. |
 
 **Actuals (filled after the session runs):**
+- Orchestrator used: Claude Code Sonnet 4.6 @ effort=medium (default)
+- Total routed cost: ~$0.11 (2x session-verification + 1x next-orchestrator analysis)
+- Deviations from recommendation: None. Sonnet was the right fit.
+- Notes for next-session calibration: Session 3 was straightforward mechanical import. One minor verifier finding (exit-code-1 for ArgumentException) fixed in round 2. The intentional deviation (Pipeline.Default() with empty translators/enrichers) was correctly disclosed and accepted by the verifier.
+
+**Next session orchestrator recommendation (Session 4):**
+Claude Code Opus 4.7 @ effort=high
+
+**Rationale:** Session 4's scope moves beyond mechanical file porting into logical integration, requiring correct wiring of the translation and enrichment pipeline stages. This increased complexity justifies a more capable model to ensure a correct first-pass implementation and reduce verification cycles.
 
 ## Session 4 of 6: Translation + Enrichment Phases
 
 **Recommended orchestrator:** Claude Code Sonnet 4.6 @ effort=medium
-**Rationale:** While this session involves importing a larger number of files (~10), the work remains mechanical (copy, rename, wire up). The integration complexity is low and does not justify a top-tier orchestrator.
+**Rationale:** While this session involves importing a larger number of files (~10), the work remains mechanical (copy, rename, wire up). The integration complexity is low and does not justify a top-tier orchestrator. (Updated recommendation from Session 3 actuals: Opus 4.7 @ high effort -- see above.)
 **Estimated routed cost:** < $0.25
 
 | Step | Type | route() task_type | Model | Effort/thinking | Rationale |
