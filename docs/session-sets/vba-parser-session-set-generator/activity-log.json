@@ -140,6 +140,128 @@
           "costUsd": 0.0035587500000000003
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/read-retrospective",
+      "dateTime": "2026-04-25T21:34:07.354419+00:00",
+      "description": "Read harvester-import-retrospective.md; extracted 3 Session 2 adopt-now rows (#1, #2, #3).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/read-plan",
+      "dateTime": "2026-04-25T21:34:07.355419+00:00",
+      "description": "Read docs/VBA-Parser-Migration-Harvester-Plan.md (893 lines, 9 phases) end-to-end.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/read-fixtures",
+      "dateTime": "2026-04-25T21:34:07.355419+00:00",
+      "description": "Read docs/test-cases/README.md (270 lines, 12-case enumeration with per-case coverage description); did not re-read each .bas/.cls/.sql/.txt source since README enumerates each case's coverage exhaustively.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-coverage-table",
+      "dateTime": "2026-04-25T21:34:07.356418+00:00",
+      "description": "Built test-case coverage table mapping plan phases to fixtures; identified one gap (Phase 4 metadata extraction needs DB-level .accdb fixtures, deferred to that child via test-builder/) and 6 README-noted not-covered patterns (linked tables, passthrough, transactions, query-of-queries, unbound forms, addins) which are noise here -- they belong to integration-test child set.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/route-decomposition",
+      "dateTime": "2026-04-25T21:34:07.356418+00:00",
+      "description": "Decomposition synthesis handled in-conversation rather than via route(planning) -- per project-guidance.md Convention 'When the orchestrator's model matches the routing target...' since Opus orchestrator + planning pins to Opus. Logged here as a non-routed reasoning step.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/write-tree",
+      "dateTime": "2026-04-25T21:34:07.357786+00:00",
+      "description": "Wrote docs/session-sets/vba-parser-session-set-generator/session-set-tree.md: 17 child session sets, 65-82 total sessions, DAG with parallelizable branches at #1||#2 and #14||#15, critical path 14 children. Applied retrospective adopt-now rows #1 (\u22642 synthesis per child), #2 (tree as canonical source), #3 (enumerated values throughout).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify",
+      "dateTime": "2026-04-25T21:37:29.473040+00:00",
+      "description": "End-of-session cross-provider verification round 1 via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14045,
+          "outputTokens": 10983,
+          "costUsd": 0.1998575
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verify-round-2",
+      "dateTime": "2026-04-25T21:43:51.292490+00:00",
+      "description": "Round-2 cross-provider verification via gpt-5-4 after fixing 3 Major + 2 Medium round-1 findings.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16229,
+          "outputTokens": 9457,
+          "costUsd": 0.18242750000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/verify-round-3",
+      "dateTime": "2026-04-25T21:45:22.684025+00:00",
+      "description": "Round-3 (final) cross-provider verification via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5840,
+          "outputTokens": 2984,
+          "costUsd": 0.059359999999999996
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-25T21:46:38.224510+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 3 via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1303,
+          "outputTokens": 101,
+          "costUsd": 0.00263875
+        }
+      ]
     }
   ]
 }
