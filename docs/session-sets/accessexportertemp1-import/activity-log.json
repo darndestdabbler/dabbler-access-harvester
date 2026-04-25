@@ -133,6 +133,77 @@
           "costUsd": 0.161815
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/verify-prereqs",
+      "dateTime": "2026-04-25T15:58:08.330566+00:00",
+      "description": "Verified Session 1 deliverable: import-plan.md status='APPROVED 2026-04-25'; all 3 OQs resolved; commit 31b6c7c locked the OQ resolutions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/create-solution",
+      "dateTime": "2026-04-25T15:58:08.330566+00:00",
+      "description": "Created AccessHarvester.sln + AccessHarvester.Core.csproj + AccessHarvester.Cli.csproj. TargetFramework=net10.0, ImplicitUsings/Nullable enabled, RootNamespace+AssemblyName match import-plan (Core: AccessHarvester.Core; Cli: assembly name 'AccessHarvester' exe). EmbeddedResource entries deferred to Session 4 with the resources themselves.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/import-abstractions",
+      "dateTime": "2026-04-25T15:58:08.331566+00:00",
+      "description": "Imported Abstractions.cs from sibling Com/Abstractions/Abstractions.cs. Namespace AccessExporter.Core.Abstractions -> AccessHarvester.Core.Abstractions; using AccessExporter.Core.Com -> using AccessHarvester.Core.Com. Otherwise byte-identical (import-as-is per plan).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/import-com",
+      "dateTime": "2026-04-25T15:58:08.331566+00:00",
+      "description": "Imported Com/AccessComSession.cs from sibling. Namespace rewritten. Carries [assembly: SupportedOSPlatform(\"windows\")] on line 4 (verified) which places the assembly-level Windows gate on AccessHarvester.Core. AccessHarvester.Cli inherits via project reference; no separate attribute needed in CLI per import-plan.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/import-model",
+      "dateTime": "2026-04-25T15:58:08.331566+00:00",
+      "description": "Imported Model/AccessNode.cs. Namespace AccessExporter.Core.Model -> AccessHarvester.Core.Model. Otherwise byte-identical (import-as-is per plan).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/build",
+      "dateTime": "2026-04-25T15:58:08.332574+00:00",
+      "description": "Wrote stub Program.cs in AccessHarvester.Cli (prints placeholder usage; returns 1 for no-args, 0 otherwise \u2014 matches sibling exit-code shape). Ran `dotnet build AccessHarvester.sln`: Build succeeded. 0 Warnings, 0 Errors. Time 2.84s. SDK 11.0.100-preview built net10.0 target cleanly (preview-SDK NETSDK1057 informational message; runtime 10.0.5 present).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify",
+      "dateTime": "2026-04-25T15:58:08.332574+00:00",
+      "description": "Cross-provider session verification via query('gpt-5-4', task_type='session-verification'). Same query()-not-route() workaround as Session 1: router-config.yaml has no task_type_override for session-verification, so route() would default to opus (Anthropic = my own provider) and miss the cross-provider intent. This is now the 2nd repetition; promotion candidate for Conventions in Step 9 (last-session reorganization) \u2014 config fix or explicit lesson.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 10710,
+          "outputTokens": 3385,
+          "costUsd": 0.07755
+        }
+      ]
     }
   ]
 }
