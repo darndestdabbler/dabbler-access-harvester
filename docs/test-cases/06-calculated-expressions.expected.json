@@ -1,0 +1,489 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "expression",
+    "location": {
+      "file": "06-calculated-expressions.txt",
+      "startLine": 1,
+      "startColumn": 1,
+      "endLine": 30,
+      "endColumn": 1
+    },
+    "originalSource": "(see source file - 6 expressions)"
+  },
+  "items": [
+    {
+      "itemKind": "expression",
+      "context": "controlSource",
+      "expression": {
+        "originalText": "=Nz([SubTotal],0) + Nz([TaxAmount],0) - Nz([Discount],0) + Nz([ShippingCharge],0)",
+        "parsed": {
+          "kind": "binaryOp",
+          "op": "+",
+          "operands": [
+            {
+              "kind": "binaryOp",
+              "op": "-",
+              "left": {
+                "kind": "binaryOp",
+                "op": "+",
+                "left": {
+                  "kind": "call",
+                  "callee": "Nz",
+                  "args": [
+                    "[SubTotal]",
+                    0
+                  ]
+                },
+                "right": {
+                  "kind": "call",
+                  "callee": "Nz",
+                  "args": [
+                    "[TaxAmount]",
+                    0
+                  ]
+                }
+              },
+              "right": {
+                "kind": "call",
+                "callee": "Nz",
+                "args": [
+                  "[Discount]",
+                  0
+                ]
+              }
+            },
+            {
+              "kind": "call",
+              "callee": "Nz",
+              "args": [
+                "[ShippingCharge]",
+                0
+              ]
+            }
+          ],
+          "notes": "Total computation with Nz wrapping for null safety"
+        },
+        "references": [
+          {
+            "originalText": "[SubTotal]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "control",
+            "resolvedTarget": {
+              "kind": "control",
+              "name": "SubTotal",
+              "container": "rptInvoice",
+              "type": "TextBox"
+            },
+            "confidence": 0.85,
+            "notes": "Resolved against report's record source field list and control collection. Could be either field or control reference; in expression context they're equivalent.",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "originalText": "[TaxAmount]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "control",
+            "resolvedTarget": {
+              "kind": "control",
+              "name": "TaxAmount",
+              "container": "rptInvoice",
+              "type": "TextBox"
+            },
+            "confidence": 0.85,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "originalText": "[Discount]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "control",
+            "resolvedTarget": {
+              "kind": "control",
+              "name": "Discount",
+              "container": "rptInvoice",
+              "type": "TextBox"
+            },
+            "confidence": 0.85,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "originalText": "[ShippingCharge]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "control",
+            "resolvedTarget": {
+              "kind": "control",
+              "name": "ShippingCharge",
+              "container": "rptInvoice",
+              "type": "TextBox"
+            },
+            "confidence": 0.85,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          }
+        ],
+        "inferredType": "Currency"
+      }
+    },
+    {
+      "itemKind": "expression",
+      "context": "controlSource",
+      "expression": {
+        "originalText": "=IIf(IsNull([DateOfBirth]),\"Unknown\",IIf(DateDiff(\"yyyy\",[DateOfBirth],Date())<18,\"Minor\",IIf(DateDiff(\"yyyy\",[DateOfBirth],Date())<65,\"Adult\",\"Senior\")))",
+        "parsed": {
+          "kind": "call",
+          "callee": "IIf",
+          "args": [
+            {
+              "kind": "call",
+              "callee": "IsNull",
+              "args": [
+                "[DateOfBirth]"
+              ]
+            },
+            {
+              "kind": "literal",
+              "literalKind": "string",
+              "value": "Unknown"
+            },
+            {
+              "kind": "call",
+              "callee": "IIf",
+              "args": [
+                {
+                  "kind": "binaryOp",
+                  "op": "<",
+                  "left": "DateDiff('yyyy', [DateOfBirth], Date())",
+                  "right": 18
+                },
+                {
+                  "kind": "literal",
+                  "literalKind": "string",
+                  "value": "Minor"
+                },
+                {
+                  "kind": "call",
+                  "callee": "IIf",
+                  "args": [
+                    {
+                      "kind": "binaryOp",
+                      "op": "<",
+                      "left": "DateDiff('yyyy', [DateOfBirth], Date())",
+                      "right": 65
+                    },
+                    {
+                      "kind": "literal",
+                      "literalKind": "string",
+                      "value": "Adult"
+                    },
+                    {
+                      "kind": "literal",
+                      "literalKind": "string",
+                      "value": "Senior"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        "references": [
+          {
+            "originalText": "[DateOfBirth]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "field",
+            "resolvedTarget": {
+              "kind": "field",
+              "name": "DateOfBirth",
+              "container": "frmClient.recordSource",
+              "type": "DateTime"
+            },
+            "confidence": 0.9,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          }
+        ],
+        "inferredType": "String"
+      }
+    },
+    {
+      "itemKind": "expression",
+      "context": "validationRule",
+      "expression": {
+        "originalText": "Between #1/1/2000# And Date()",
+        "parsed": {
+          "kind": "between",
+          "expr": {
+            "kind": "implicitField",
+            "notes": "Validation rules apply to the field they're attached to; the expression operates on tblPermits.IssueDate implicitly."
+          },
+          "low": {
+            "kind": "literal",
+            "literalKind": "date",
+            "value": "2000-01-01"
+          },
+          "high": {
+            "kind": "call",
+            "callee": "Date",
+            "args": []
+          }
+        },
+        "references": [],
+        "inferredType": "Boolean",
+        "notes": "Validation expression, not control source. Translates to: x => x >= new DateTime(2000,1,1) && x <= DateTime.Today"
+      }
+    },
+    {
+      "itemKind": "expression",
+      "context": "controlSource",
+      "expression": {
+        "originalText": "=[Address1] & IIf(IsNull([Address2]) Or [Address2]=\"\",\"\",\", \" & [Address2]) & \", \" & [City] & \", \" & [State] & \"  \" & [ZipCode]",
+        "parsed": {
+          "kind": "binaryOp",
+          "op": "&",
+          "isStringConcatenation": true,
+          "components": [
+            "[Address1]",
+            "IIf(IsNull([Address2]) Or [Address2]='', '', ', ' & [Address2])",
+            "', '",
+            "[City]",
+            "', '",
+            "[State]",
+            "'  '",
+            "[ZipCode]"
+          ]
+        },
+        "references": [
+          {
+            "originalText": "[Address1]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "field",
+            "resolvedTarget": {
+              "kind": "field",
+              "name": "Address1",
+              "container": "frmCaseDetail.recordSource",
+              "type": "String"
+            },
+            "confidence": 0.9,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "originalText": "[Address2]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "field",
+            "resolvedTarget": {
+              "kind": "field",
+              "name": "Address2",
+              "container": "frmCaseDetail.recordSource",
+              "type": "String"
+            },
+            "confidence": 0.9,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "originalText": "[City]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "field",
+            "resolvedTarget": {
+              "kind": "field",
+              "name": "City",
+              "container": "frmCaseDetail.recordSource",
+              "type": "String"
+            },
+            "confidence": 0.9,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "originalText": "[State]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "field",
+            "resolvedTarget": {
+              "kind": "field",
+              "name": "State",
+              "container": "frmCaseDetail.recordSource",
+              "type": "String"
+            },
+            "confidence": 0.9,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "originalText": "[ZipCode]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "field",
+            "resolvedTarget": {
+              "kind": "field",
+              "name": "ZipCode",
+              "container": "frmCaseDetail.recordSource",
+              "type": "String"
+            },
+            "confidence": 0.9,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          }
+        ],
+        "inferredType": "String"
+      }
+    },
+    {
+      "itemKind": "expression",
+      "context": "defaultValue",
+      "expression": {
+        "originalText": "=IIf(Month(Date())>=7,Year(Date())+1,Year(Date()))",
+        "parsed": {
+          "kind": "call",
+          "callee": "IIf",
+          "args": [
+            {
+              "kind": "binaryOp",
+              "op": ">=",
+              "left": "Month(Date())",
+              "right": 7
+            },
+            {
+              "kind": "binaryOp",
+              "op": "+",
+              "left": "Year(Date())",
+              "right": 1
+            },
+            "Year(Date())"
+          ],
+          "notes": "Computes current fiscal year for fiscal year starting July 1. Returns calendar year if Jan-Jun, calendar year + 1 if Jul-Dec."
+        },
+        "references": [],
+        "inferredType": "Long"
+      }
+    },
+    {
+      "itemKind": "expression",
+      "context": "controlSource",
+      "expression": {
+        "originalText": "=DCount(\"*\",\"tblCases\",\"AssignedCaseworkerID = \" & [cboCaseworker] & \" AND Status IN ('Open','Pending Review')\") & \" active\"",
+        "parsed": {
+          "kind": "binaryOp",
+          "op": "&",
+          "isStringConcatenation": true,
+          "left": {
+            "kind": "call",
+            "callee": "DCount",
+            "args": [
+              {
+                "kind": "literal",
+                "literalKind": "string",
+                "value": "*"
+              },
+              {
+                "kind": "literal",
+                "literalKind": "string",
+                "value": "tblCases"
+              },
+              {
+                "kind": "binaryOp",
+                "op": "&",
+                "isStringConcatenation": true,
+                "constructedCriteria": true
+              }
+            ]
+          },
+          "right": {
+            "kind": "literal",
+            "literalKind": "string",
+            "value": " active"
+          }
+        },
+        "references": [
+          {
+            "originalText": "[cboCaseworker]",
+            "resolutionStatus": "resolved",
+            "referenceKind": "control",
+            "resolvedTarget": {
+              "kind": "control",
+              "name": "cboCaseworker",
+              "container": "frmDashboard",
+              "type": "ComboBox"
+            },
+            "confidence": 0.85,
+            "notes": "References sibling control on same form. In control-source expression context, [name] resolves first to record-source fields, then to controls on the form.",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          }
+        ],
+        "inferredType": "String",
+        "notes": "Domain function in calculated control source - this evaluates on every form Repaint, which can be a performance issue. Migration target should compute server-side or via separate query/method."
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": [
+    {
+      "severity": "info",
+      "code": "HARV-I050",
+      "message": "Calculated control source uses domain function (DCount). Performance concern: evaluates on every repaint. Migration target should compute via dedicated method or computed property.",
+      "location": {
+        "startLine": 28,
+        "startColumn": 1,
+        "endLine": 28,
+        "endColumn": 130
+      }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I051",
+      "message": "Address concatenation pattern detected: build full address from components with conditional Address2. Migration target: dedicated FormatAddress method on Client model.",
+      "location": {
+        "startLine": 19,
+        "startColumn": 1,
+        "endLine": 19,
+        "endColumn": 130
+      }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I052",
+      "message": "Fiscal year calculation pattern (July-start). Common across multiple databases in state government context. Suggest centralizing as FiscalCalendar.GetCurrentFiscalYear() utility in shared library.",
+      "location": {
+        "startLine": 22,
+        "startColumn": 1,
+        "endLine": 22,
+        "endColumn": 60
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W050",
+      "message": "Age categorization uses DateDiff('yyyy', ...) which counts year-boundary crossings, not actual completed years. A person born 12/31/2000 will be counted as age 1 on 1/1/2001. Migration target should use accurate age calculation if precise age categories matter.",
+      "location": {
+        "startLine": 13,
+        "startColumn": 1,
+        "endLine": 13,
+        "endColumn": 130
+      }
+    }
+  ]
+}

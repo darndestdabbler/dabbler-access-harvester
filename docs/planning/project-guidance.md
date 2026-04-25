@@ -1,0 +1,279 @@
+# Project Guidance — Dabbler Access Harvester
+
+> **Purpose:** The single source of truth for durable strategic
+> commitments (Principles) and specific rules and patterns (Conventions)
+> that apply to this repo and to follow-on harvester / parser work.
+
+Read this file before every AI-led session. Use it as the first-stop
+reference before changing architecture, parser strategy, output schema,
+testing approach, or workflow assets.
+
+Session-set specs may narrow the scope for a particular effort, but they
+should not silently violate anything here without explicit human
+approval.
+
+The file has two top-level sections:
+
+- **Principles** — durable strategic commitments (the *why* and *what*).
+  Slow to change; every principle should explain the reasoning behind
+  itself.
+- **Conventions** — specific rules, patterns, values, and code styles
+  (the *how*). Faster to change; often promoted from successful
+  lessons or demoted from over-general principles.
+
+When a principle implies a specific rule, put the principle under
+Principles and the concrete rule under Conventions. At the end of every
+session set the orchestrator proposes reorganization candidates —
+promotions from Lessons to Conventions/Principles, demotions,
+relocations — and the human accepts or rejects each (see
+`docs/ai-led-session-workflow.md` Step 9, post-notify).
+
+---
+
+## Principles
+
+### Project Scope And Audience
+
+- The harvester's goal is to produce structured metadata (and structured
+  parse trees of VBA / Access expressions) at sufficient fidelity that a
+  downstream AI can reliably interpret and document the original Access
+  application's behavior. **AI interpretation is explicitly out of scope
+  for this repo** — this codebase is mechanical extraction and
+  deterministic enrichment.
+- The downstream consumer is an AI agent, not a human reviewer. Outputs
+  are JSON; layouts and styling do not matter; precision, completeness,
+  and machine-readability do.
+- There is no UI surface in this repo. The end-of-session quality gate
+  is automated build / unit + integration tests / schema validation,
+  backed by mandatory cross-provider AI verification. There is no
+  human-UAT layer.
+
+### Output Architecture
+
+- Use the three-tier output model carried over from the source codebase:
+  `raw/` (Access-native artifacts: SaveAsText output, DAO JSON dumps),
+  `kb/` (clean parsed JSON — AccessNode tree for Forms/Reports,
+  pass-through for Queries/Tables/Relationships), `ir/` (`kb/` plus
+  mechanical enrichments — geometry, label resolution, property
+  decoding, VBA signatures, macro actions).
+- **Interpretive slots remain null at the `ir/` tier.** Fields like
+  `purpose`, `notes`, `intent`, etc. are reserved for the AI consumer
+  to fill downstream. The harvester does not guess at semantics.
+- The VBA parser produces its own structured output (currently
+  `harvester-schema.v0.json` under `docs/test-cases/`). For now this
+  schema is kept independent of the `raw/kb/ir` schemas; reconciliation
+  is a future-work decision, not an early commitment.
+- Keep enrichers chainable per category: the first reads `kb/`,
+  subsequent ones read+rewrite the `ir/` file in place. Categories
+  without an enricher pass through unchanged.
+
+### VBA Parser Strategy
+
+- The parser must produce structured output that is **deterministic**
+  given the same input. AI consumers will diff parser output across
+  runs to detect changes; non-determinism breaks that workflow.
+- **Unresolvable constructs are explicit, not silent.** When the parser
+  cannot resolve a name, an SQL parameter, a dynamic SQL fragment, or
+  a late-bound call, it emits a node with provenance metadata (e.g.,
+  `{ source: "unresolved", reason: "<string>" }`) rather than
+  swallowing the construct or substituting a guess. Test case 08
+  (`08-unresolvable.bas`) is the canonical example.
+- Test cases in `docs/test-cases/` are the source of truth for parser
+  behavior. The `<n>.expected.json` file pinned next to each input is
+  the contract; parser changes are validated by re-running each input
+  and comparing against the expected output.
+- Prefer a real grammar over regex pattern-matching. Even when a
+  feature could be extracted with a regex (e.g., procedure
+  signatures), the maintenance cost of a half-grammar exceeds the
+  cost of doing it properly once.
+
+### Platform And Runtime
+
+- C# / .NET 10. Stay on the current .NET LTS line unless the human
+  explicitly approves a change.
+- The COM-based Access extractor requires Windows + Microsoft Access
+  installed and is gated `[SupportedOSPlatform("windows")]`. Hermetic
+  unit tests (parser, enrichers, schema validators) run anywhere;
+  integration tests against committed `.accdb` fixtures use
+  `[SkippableFact]` to skip on non-Windows or where Access is
+  unavailable.
+- Synthetic test DBs are built by Python (`pywin32` + Access COM) under
+  `test-builder/`. Committed `.accdb` artifacts are checked into
+  `tests/.../SyntheticDbs/` so integration runs do not depend on a
+  rebuild step.
+
+### Lean By Default
+
+Carried forward from the source codebase: the user's preference is
+**lean — don't add features, abstractions, or safety nets beyond what
+the task in front of you requires.** This is non-trivial guidance for
+LLM orchestrators, which tend to over-engineer when in doubt. Specific
+applications:
+
+- Don't add a defensive `try/catch` around code that has no realistic
+  failure path. If the catch block does nothing meaningful, the catch
+  is noise.
+- Don't introduce an interface for a single implementation just because
+  it might one day have a second.
+- Don't write a fallback heuristic when the only known input format is
+  the one the test fixtures use. The fallback is dead code that still
+  needs maintenance.
+- Don't generate auto-detection tooling to second-guess the data
+  (e.g., name-scanners that "suggest" likely-PII columns the
+  business already curates) when the consumer is downstream tooling
+  that can ask for the curated answer directly.
+
+### Testing Hierarchy
+
+Testing follows this order of preference:
+
+1. **Strict unit tests.** Use them for any logic that can be isolated
+   from I/O, runtime infrastructure, or COM. Structure code so the
+   pure-logic portions are factored into methods, services, or helpers
+   that can be exercised without integration setup.
+2. **Schema and contract tests.** Validate harvester output against
+   `harvester-schema.v0.json` (parser) and any `kb/` / `ir/` schema
+   (extraction). Treat schema drift as a real defect, not a cosmetic
+   one — the downstream AI consumer's prompts depend on schema shape.
+3. **Hermetic integration tests** against committed synthetic
+   `.accdb` fixtures. These exercise the full pipeline on inputs whose
+   expected output is checked in. Use `[SkippableFact]` so non-Windows
+   runs skip cleanly.
+4. **End-to-end tests** against larger committed sample DBs (e.g.,
+   `samples/NorthwindDevEdition.accdb`) for confidence on real-world
+   inputs.
+5. **Cross-provider AI verification** at end of session — the last
+   line of defense before commit.
+
+### Precedence
+
+When guidance appears in multiple places, apply it in this order:
+
+1. Explicit human direction in the current conversation
+2. Session-specific spec requirements
+3. This document
+4. Supporting planning notes and roadmaps
+
+If those sources conflict in a meaningful way, stop and confirm with
+the human before proceeding.
+
+---
+
+## Conventions
+
+### Code Style
+
+- Namespaces: `AccessHarvester.Cli`, `AccessHarvester.Core`,
+  `AccessHarvester.Tests`. (Preliminary — Session Set #1 confirms or
+  adjusts.)
+- PascalCase for public members; `_camelCase` for private fields.
+- Nullable reference types enabled.
+- All async methods return `Task` and use the `Async` suffix.
+- COM-touching code is gated `[SupportedOSPlatform("windows")]` at the
+  assembly level (see `Com/AccessComSession.cs` in the source
+  codebase).
+
+### Output JSON Conventions
+
+- Provenance fields use a `{ source, ... }` shape (e.g.,
+  `Label: { source: "attached", text: "First Name" }`,
+  `Label: { source: "unresolved" }`). Consumers should never need to
+  special-case missing keys — emit explicit `unresolved` rather than
+  omitting the field.
+- Numeric units are explicit in field names where ambiguity is
+  possible: `GeometryIn: { X, Y, W, H }` for inches alongside the
+  raw twip values, not a bare `Geometry`.
+- Only emit fields Access actually wrote — do not synthesize zeros or
+  default values to fill gaps. The downstream consumer reads omission
+  as "Access default for this property"; synthesizing zeros loses
+  that signal. The exception is provenance fields above, where the
+  emitted record is *about* the absence.
+
+### Testing Conventions
+
+- Factor pure-logic portions out of mixed-responsibility methods so
+  they can be strict-unit-tested. Do not keep mixed-responsibility
+  methods intact when the pure-logic portion can be split out.
+- Hermetic unit tests are preferred over integration tests when the
+  logic does not depend on Access COM.
+- For the parser specifically, every new feature lands with a test
+  case under `docs/test-cases/` — input file plus
+  `<n>.expected.json`. The PR / session that adds the feature also
+  adds the test case.
+- Build and test should be run **sequentially**, not in parallel —
+  file-lock contention against the same worktree on Windows
+  obscures the real validation result.
+
+### Workflow Expectations
+
+- Before every session, read this file and
+  `docs/planning/lessons-learned.md`.
+- Save verifier output raw and never edit session-review files after
+  they are written.
+- Log every AI-led session step in the active session set.
+- AI instruction documents (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`)
+  reference this file and `docs/ai-led-session-workflow.md` so future
+  agent runs inherit the same durable expectations.
+- When the human gives a session instruction or decision that appears
+  durable enough to guide future sessions or future projects, ask
+  whether it should be incorporated into this document.
+- When a failure reveals a reusable strategy, recommend a
+  corresponding update to `docs/planning/lessons-learned.md`.
+- **Send related files to the cross-provider verifier or disclaim
+  what is out of scope.** Before calling
+  `route(task_type="session-verification")`, include related files
+  the verifier might reasonably look for, or disclose them in an
+  out-of-scope section of the prompt. Missing context produces false
+  positives about "missing" code that actually lives in a sibling
+  file; the verifier only sees what the prompt includes. Especially
+  important here because the harvester's pipeline crosses many
+  files (extractor → translator → enricher → schema), and any one
+  session typically only touches one stage.
+- **Mark `[Obsolete]` instead of deleting types whose consumers a
+  future session already owns.** Before physically deleting a type
+  whose consumers number in the dozens and a later session is
+  scheduled to rewrite those consumers, mark `[Obsolete]` instead.
+  The compiler warnings surface on every consumer so no reference
+  slips through, the build stays green, and the deletion lands
+  naturally in the session that rewrites the last consumer.
+  Disclose the deviation in the end-of-session verification prompt.
+- **When the orchestrator's model matches the routing target for a
+  given task type, handle the task in-conversation rather than
+  calling `route()`.** A `route()` call into the orchestrator's own
+  model gives fresh context (occasionally useful for stochastic
+  independence) but also pays the provider's API cost to summon
+  another instance of the same judgment. The non-negotiable
+  exception is `session-verification`, which MUST go through the
+  router regardless, because the whole point is a cross-provider
+  second opinion. Complements the existing Delegation Discipline
+  criteria in `docs/ai-led-session-workflow.md`.
+- **Use `route(task_type="summarization")` for narrative prose
+  outputs** (change logs, session summaries, release notes).
+  Reserve `route(task_type="documentation")` for code-doc generation
+  — its prompt template wraps content in a "document this code"
+  frame that mis-fits free-form prose and produces Gemini 400s. If
+  a `summarization` call returns Gemini 400 on a prompt above ~2KB,
+  pin `max_tier=1` (forces Gemini Flash, which is more forgiving on
+  long prose).
+- **Pin mechanical-correspondence task types to Sonnet rather than
+  Opus** in `routing.task_type_overrides`. Mechanical-correspondence
+  tasks (schema validation, AST-vs-source diffing, parse-tree shape
+  comparison against an expected fixture, redaction audits) are
+  pattern matching with placeholder substitution — Sonnet at default
+  effort handles them at a fraction of the cost. Keep
+  cross-provider verification on so the cheaper model's
+  false-VERIFIED risk is mitigated. Synthesis tasks (architecture,
+  parser-grammar design, novel test-case authoring, plan
+  generation) earn Opus.
+
+### Cross-Repo Coordination
+
+- This repo borrows code from `../AccessExporterTemp1`. That sibling
+  repo is **not under git** (per its BATON.md), so changes there are
+  not reversible by `git reset`. When importing code, prefer
+  copying over symlinking, and treat the imported snapshot as the
+  starting point — divergence from the source codebase is expected
+  and fine.
+- The VBA parser plan and `docs/test-cases/` already live in this
+  repo and are scoped to this project from the start; no import
+  needed there.

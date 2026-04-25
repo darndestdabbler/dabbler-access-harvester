@@ -1,0 +1,448 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.gov/harvester-schema.v0.json",
+  "title": "Access Migration Harvester Output (provisional)",
+  "description": "Provisional schema for the harvester's structured output. Version 0.x is iterative and will change before v1.0.",
+  "type": "object",
+  "required": ["schemaVersion", "source", "items"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "description": "Schema version this document conforms to.",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$"
+    },
+    "source": {
+      "type": "object",
+      "description": "Information about what was harvested.",
+      "required": ["kind", "location"],
+      "properties": {
+        "kind": {
+          "enum": ["procedure", "query", "expression", "form", "report", "database"]
+        },
+        "location": {
+          "$ref": "#/$defs/sourceLocation"
+        },
+        "hostContext": {
+          "type": "object",
+          "description": "Context for resolving Me, controls, etc. Populated when source is a form/report module.",
+          "properties": {
+            "hostKind": { "enum": ["form", "report", "class", "standard"] },
+            "hostName": { "type": "string" },
+            "controlsAvailable": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/controlMetadata" }
+            }
+          }
+        },
+        "originalSource": {
+          "type": "string",
+          "description": "Verbatim source code as harvested. Preserved for review and traceability."
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "description": "Harvested entities. A procedure produces one item; a complex expression may produce one item with nested references.",
+      "items": { "$ref": "#/$defs/harvestedItem" }
+    },
+    "unresolvedItems": {
+      "type": "array",
+      "description": "Constructs the harvester could not fully process. Empty array means complete coverage.",
+      "items": { "$ref": "#/$defs/unresolvedItem" }
+    },
+    "diagnostics": {
+      "type": "array",
+      "description": "Non-blocking warnings or notes about the harvested item.",
+      "items": { "$ref": "#/$defs/diagnostic" }
+    }
+  },
+  "$defs": {
+    "sourceLocation": {
+      "type": "object",
+      "required": ["startLine", "startColumn"],
+      "properties": {
+        "file": { "type": "string" },
+        "module": { "type": "string" },
+        "startLine": { "type": "integer", "minimum": 1 },
+        "startColumn": { "type": "integer", "minimum": 1 },
+        "endLine": { "type": "integer", "minimum": 1 },
+        "endColumn": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "controlMetadata": {
+      "type": "object",
+      "required": ["name", "controlType"],
+      "properties": {
+        "name": { "type": "string" },
+        "controlType": {
+          "enum": [
+            "TextBox", "ComboBox", "ListBox", "CheckBox", "OptionButton", "OptionGroup",
+            "Label", "CommandButton", "Subform", "Subreport", "TabControl", "Page",
+            "Image", "BoundObjectFrame", "UnboundObjectFrame", "Line", "Rectangle",
+            "Hyperlink", "AttachmentControl", "NavigationControl", "WebBrowser"
+          ]
+        },
+        "boundField": { "type": "string" },
+        "controlSource": { "type": "string", "description": "May be a field name or an expression like =[Field1] & [Field2]" },
+        "rowSource": { "type": "string" },
+        "rowSourceType": { "enum": ["Table/Query", "Value List", "Field List"] },
+        "boundColumn": { "type": "integer" },
+        "columnCount": { "type": "integer" }
+      }
+    },
+    "harvestedItem": {
+      "oneOf": [
+        { "$ref": "#/$defs/procedureItem" },
+        { "$ref": "#/$defs/queryItem" },
+        { "$ref": "#/$defs/expressionItem" }
+      ]
+    },
+    "procedureItem": {
+      "type": "object",
+      "required": ["itemKind", "name", "procedureKind", "signature", "body"],
+      "properties": {
+        "itemKind": { "const": "procedure" },
+        "name": { "type": "string" },
+        "procedureKind": {
+          "enum": ["Sub", "Function", "PropertyGet", "PropertyLet", "PropertySet", "EventHandler"]
+        },
+        "visibility": { "enum": ["Public", "Private", "Friend"] },
+        "isStatic": { "type": "boolean" },
+        "eventBinding": {
+          "type": "object",
+          "description": "Populated when procedureKind is EventHandler.",
+          "properties": {
+            "controlName": { "type": "string" },
+            "eventName": { "type": "string" },
+            "resolvedControl": { "$ref": "#/$defs/resolvedReference" }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "properties": {
+            "parameters": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/parameter" }
+            },
+            "returnType": { "type": "string", "description": "VBA type name; absent for Sub." }
+          }
+        },
+        "classification": {
+          "type": "object",
+          "description": "Migration-relevant categorization.",
+          "properties": {
+            "purposeTags": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "validation", "cascadingUpdate", "filterSearch", "navigation",
+                  "sideEffect", "calculation", "formattingDisplay", "dataAccess",
+                  "externalIO", "mixed", "deadCode", "utility"
+                ]
+              }
+            },
+            "purity": { "enum": ["pure", "dataAccess", "uiBound", "externalIO", "mixed", "unknown"] },
+            "complexity": { "type": "integer", "description": "Cyclomatic complexity." },
+            "linesOfCode": { "type": "integer" },
+            "translatability": {
+              "enum": ["mechanical", "structured", "ambiguous", "manualReview"]
+            }
+          }
+        },
+        "body": {
+          "type": "object",
+          "description": "Structured representation of the procedure body.",
+          "properties": {
+            "statements": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/statement" }
+            },
+            "references": {
+              "type": "array",
+              "description": "All resolved (and unresolved) identifier references in this procedure.",
+              "items": { "$ref": "#/$defs/resolvedReference" }
+            },
+            "calls": {
+              "type": "array",
+              "description": "Procedure calls made from this body.",
+              "items": { "$ref": "#/$defs/callSite" }
+            },
+            "sqlStrings": {
+              "type": "array",
+              "description": "SQL strings detected in this body, parsed where possible.",
+              "items": { "$ref": "#/$defs/sqlReference" }
+            }
+          }
+        }
+      }
+    },
+    "queryItem": {
+      "type": "object",
+      "required": ["itemKind", "name", "queryType", "sql"],
+      "properties": {
+        "itemKind": { "const": "query" },
+        "name": { "type": "string" },
+        "queryType": {
+          "enum": ["Select", "MakeTable", "Update", "Delete", "Insert", "Crosstab", "Union", "DataDefinition", "PassThrough"]
+        },
+        "sql": {
+          "type": "object",
+          "properties": {
+            "originalText": { "type": "string" },
+            "parsed": { "$ref": "#/$defs/parsedSql" },
+            "parameters": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/queryParameter" }
+            }
+          }
+        },
+        "abstraction": {
+          "type": "object",
+          "description": "Suggested method signature for migration.",
+          "properties": {
+            "suggestedMethodName": { "type": "string" },
+            "suggestedParameters": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/parameter" }
+            },
+            "returnShape": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "type": { "type": "string" },
+                  "nullable": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "expressionItem": {
+      "type": "object",
+      "required": ["itemKind", "expression"],
+      "properties": {
+        "itemKind": { "const": "expression" },
+        "context": {
+          "enum": ["controlSource", "validationRule", "defaultValue", "rowSource", "queryColumn", "calculatedField", "conditionalFormat"]
+        },
+        "expression": {
+          "type": "object",
+          "properties": {
+            "originalText": { "type": "string" },
+            "parsed": { "$ref": "#/$defs/expressionAst" },
+            "references": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/resolvedReference" }
+            },
+            "inferredType": { "type": "string" }
+          }
+        }
+      }
+    },
+    "parameter": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "byRef": { "type": "boolean" },
+        "optional": { "type": "boolean" },
+        "paramArray": { "type": "boolean" },
+        "defaultValue": { "type": "string" },
+        "derivedFrom": {
+          "type": "string",
+          "description": "Where this parameter was derived from in the source. e.g., 'lifted from Forms!frmCustomers!txtCustomerID reference'"
+        }
+      }
+    },
+    "statement": {
+      "type": "object",
+      "required": ["kind", "location"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "assignment", "set", "call", "if", "select", "for", "forEach", "doLoop", "while",
+            "with", "exit", "return", "errorHandler", "raiseError", "declaration", "comment",
+            "directive", "labelled", "gosub", "goto", "stop", "end", "raw"
+          ]
+        },
+        "location": { "$ref": "#/$defs/sourceLocation" },
+        "summary": { "type": "string", "description": "Human-readable summary for review." },
+        "details": {
+          "type": "object",
+          "description": "Kind-specific structured detail. Open-ended; varies by statement kind."
+        }
+      }
+    },
+    "resolvedReference": {
+      "type": "object",
+      "required": ["originalText", "location", "resolutionStatus"],
+      "properties": {
+        "originalText": { "type": "string" },
+        "location": { "$ref": "#/$defs/sourceLocation" },
+        "resolutionStatus": {
+          "enum": ["resolved", "partiallyResolved", "unresolved", "ambiguous"]
+        },
+        "referenceKind": {
+          "enum": [
+            "control", "form", "report", "field", "table", "query",
+            "procedure", "function", "variable", "parameter", "constant",
+            "enum", "type", "module", "builtIn", "domainFunction",
+            "objectModel", "external", "implicit"
+          ]
+        },
+        "resolvedTarget": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "kind": { "type": "string" },
+                "name": { "type": "string" },
+                "container": { "type": "string", "description": "e.g., form name for a control, module name for a procedure" },
+                "fullyQualifiedName": { "type": "string" },
+                "type": { "type": "string" }
+              }
+            },
+            { "type": "null", "description": "Use null when resolutionStatus is 'unresolved' and no candidate target exists." }
+          ]
+        },
+        "implicitContext": {
+          "type": "object",
+          "description": "When the original text used Me, !, ., or other implicit references, this records what was made explicit.",
+          "properties": {
+            "implicitOf": { "type": "string", "description": "What the implicit prefix expanded to. e.g., 'Me', 'Forms!frmCustomers'" },
+            "viaWithBlock": { "type": "boolean" },
+            "viaDefaultMember": { "type": "boolean" }
+          }
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Resolver's confidence; 1.0 means deterministic, lower values flag heuristic resolution."
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "callSite": {
+      "type": "object",
+      "required": ["calleeText", "location"],
+      "properties": {
+        "calleeText": { "type": "string" },
+        "location": { "$ref": "#/$defs/sourceLocation" },
+        "resolvedCallee": { "$ref": "#/$defs/resolvedReference" },
+        "arguments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "originalText": { "type": "string" },
+              "named": { "type": "string", "description": "Argument name if used named-argument syntax." },
+              "parsed": { "$ref": "#/$defs/expressionAst" }
+            }
+          }
+        }
+      }
+    },
+    "sqlReference": {
+      "type": "object",
+      "required": ["originalText", "location", "constructionMode"],
+      "properties": {
+        "originalText": { "type": "string" },
+        "location": { "$ref": "#/$defs/sourceLocation" },
+        "constructionMode": {
+          "enum": ["literal", "concatenated", "dynamic", "fromQueryDef", "external"]
+        },
+        "parsed": { "$ref": "#/$defs/parsedSql" },
+        "templateCandidates": {
+          "type": "array",
+          "description": "For concatenated/dynamic SQL, the resolved template forms with parameter slots.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "template": { "type": "string" },
+              "parameterBindings": {
+                "type": "array",
+                "items": { "$ref": "#/$defs/queryParameter" }
+              },
+              "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "parsedSql": {
+      "type": "object",
+      "description": "Structured SQL AST. Open-ended; only common constructs typed strictly.",
+      "properties": {
+        "queryType": { "type": "string" },
+        "select": { "type": "array", "items": { "type": "object" } },
+        "from": { "type": "array", "items": { "type": "object" } },
+        "joins": { "type": "array", "items": { "type": "object" } },
+        "where": { "type": "object" },
+        "groupBy": { "type": "array", "items": { "type": "object" } },
+        "having": { "type": "object" },
+        "orderBy": { "type": "array", "items": { "type": "object" } },
+        "transformPivot": { "type": "object" },
+        "raw": { "type": "string", "description": "Original SQL text preserved." }
+      }
+    },
+    "queryParameter": {
+      "type": "object",
+      "required": ["name", "source"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "source": {
+          "enum": ["formControl", "userPrompt", "namedParameter", "vbaExpression", "concatenatedVariable"]
+        },
+        "resolvedReference": { "$ref": "#/$defs/resolvedReference" }
+      }
+    },
+    "expressionAst": {
+      "type": "object",
+      "description": "Recursive expression AST. Use 'kind' to discriminate.",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "enum": [
+            "literal", "identifier", "memberAccess", "indexAccess", "bangAccess",
+            "call", "binaryOp", "unaryOp", "parens", "ternaryFn", "newExpr", "typeOf",
+            "between", "in", "isNull", "or", "and", "not", "implicitField",
+            "subquery"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "unresolvedItem": {
+      "type": "object",
+      "required": ["reason", "location"],
+      "properties": {
+        "reason": {
+          "enum": [
+            "unresolvedReference", "dynamicSqlTooComplex", "ambiguousResolution",
+            "unsupportedConstruct", "parseFailure", "missingMetadata", "circularReference"
+          ]
+        },
+        "location": { "$ref": "#/$defs/sourceLocation" },
+        "originalText": { "type": "string" },
+        "context": { "type": "string", "description": "Surrounding context for human review." },
+        "suggestedNextStep": { "type": "string" }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "required": ["severity", "message"],
+      "properties": {
+        "severity": { "enum": ["info", "warning", "error"] },
+        "message": { "type": "string" },
+        "location": { "$ref": "#/$defs/sourceLocation" },
+        "code": { "type": "string", "description": "Stable code for filtering, e.g., HARV-W001." }
+      }
+    }
+  }
+}

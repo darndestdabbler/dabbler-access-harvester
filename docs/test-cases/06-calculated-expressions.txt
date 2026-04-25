@@ -1,0 +1,28 @@
+' ============================================================
+' TEST CASE 6: Calculated control source expressions
+' Source: form/report design properties (control sources, validation rules, default values)
+' Difficulty: MEDIUM-HIGH
+' Tests: expression parsing in non-VBA context, IIf nesting, Nz, format functions,
+'        cross-control references, parameter-style references
+' 
+' These are NOT VBA code - they appear as the ControlSource property of textboxes
+' on a form/report. Each is a single expression evaluated by Access at runtime.
+' ============================================================
+
+' --- Expression 6a: ControlSource of txtTotalDue on rptInvoice ---
+=Nz([SubTotal],0) + Nz([TaxAmount],0) - Nz([Discount],0) + Nz([ShippingCharge],0)
+
+' --- Expression 6b: ControlSource of txtAgeCategory on frmClient ---
+=IIf(IsNull([DateOfBirth]),"Unknown",IIf(DateDiff("yyyy",[DateOfBirth],Date())<18,"Minor",IIf(DateDiff("yyyy",[DateOfBirth],Date())<65,"Adult","Senior")))
+
+' --- Expression 6c: ValidationRule on tblPermits.IssueDate ---
+Between #1/1/2000# And Date()
+
+' --- Expression 6d: ControlSource of txtFullAddress on frmCaseDetail ---
+=[Address1] & IIf(IsNull([Address2]) Or [Address2]="","",", " & [Address2]) & ", " & [City] & ", " & [State] & "  " & [ZipCode]
+
+' --- Expression 6e: DefaultValue of cboFiscalYear on frmReportFilters ---
+=IIf(Month(Date())>=7,Year(Date())+1,Year(Date()))
+
+' --- Expression 6f: ControlSource of txtCaseworkerLoad on frmDashboard ---
+=DCount("*","tblCases","AssignedCaseworkerID = " & [cboCaseworker] & " AND Status IN ('Open','Pending Review')") & " active"

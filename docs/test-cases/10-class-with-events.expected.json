@@ -1,0 +1,387 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "10-class-with-events.cls",
+      "module": "clsCaseAuditor",
+      "startLine": 1,
+      "startColumn": 1,
+      "endLine": 162,
+      "endColumn": 1
+    },
+    "originalSource": "(see source file)"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "Class_Initialize",
+      "procedureKind": "EventHandler",
+      "visibility": "Private",
+      "isStatic": false,
+      "eventBinding": {
+        "controlName": "Class",
+        "eventName": "Initialize",
+        "resolvedControl": {
+          "originalText": "Class",
+          "location": { "startLine": 30, "startColumn": 13, "endLine": 30, "endColumn": 18 },
+          "resolutionStatus": "resolved",
+          "referenceKind": "objectModel",
+          "resolvedTarget": {
+            "kind": "classLifecycle",
+            "name": "clsCaseAuditor.Initialize",
+            "container": "clsCaseAuditor",
+            "type": "Void"
+          },
+          "confidence": 1.0,
+          "notes": "Implicit class lifecycle event - fires when New is called or instance otherwise created"
+        }
+      },
+      "signature": { "parameters": [] },
+      "classification": {
+        "purposeTags": ["utility"],
+        "purity": "uiBound",
+        "complexity": 1,
+        "linesOfCode": 4,
+        "translatability": "mechanical",
+        "notes": "Maps to constructor in target language"
+      },
+      "body": {
+        "statements": [
+          { "kind": "assignment", "location": { "startLine": 31, "startColumn": 5 }, "summary": "Initialize m_AuditEnabled = True" },
+          { "kind": "set", "location": { "startLine": 32, "startColumn": 5 }, "summary": "Create Scripting.Dictionary instance for snapshot storage" }
+        ],
+        "references": [],
+        "calls": [
+          {
+            "calleeText": "CreateObject",
+            "location": { "startLine": 32, "startColumn": 32, "endLine": 32, "endColumn": 65 },
+            "resolvedCallee": {
+              "originalText": "CreateObject",
+              "location": { "startLine": 32, "startColumn": 32, "endLine": 32, "endColumn": 44 },
+              "resolutionStatus": "resolved",
+              "referenceKind": "builtIn",
+              "resolvedTarget": { "kind": "builtInFunction", "name": "CreateObject", "type": "Object" },
+              "confidence": 1.0,
+              "notes": "Late-bound Scripting.Dictionary. Migration target: use typed Dictionary<string, object> or similar."
+            }
+          }
+        ],
+        "sqlStrings": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "AttachToForm",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          { "name": "frmTarget", "type": "Form", "byRef": true }
+        ]
+      },
+      "classification": {
+        "purposeTags": ["utility"],
+        "purity": "uiBound",
+        "complexity": 1,
+        "linesOfCode": 5,
+        "translatability": "structured",
+        "notes": "Attaching the WithEvents form is the moment the class begins receiving form events. In a Blazor migration, this becomes a service registration / scoped instance bound to a component lifetime."
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "set",
+            "location": { "startLine": 41, "startColumn": 5 },
+            "summary": "Bind m_Form WithEvents target. After this assignment, m_Form_BeforeUpdate, m_Form_AfterUpdate, m_Form_Close will fire when the form's events fire.",
+            "details": {
+              "withEventsBinding": {
+                "field": "m_Form",
+                "fieldType": "Form",
+                "boundFrom": "frmTarget parameter",
+                "wiredEvents": ["BeforeUpdate", "AfterUpdate", "Close"]
+              }
+            }
+          },
+          { "kind": "assignment", "location": { "startLine": 42, "startColumn": 5 }, "summary": "Capture form name as audit entity name" },
+          { "kind": "call", "location": { "startLine": 45, "startColumn": 5 }, "summary": "Capture initial snapshot of form values" }
+        ],
+        "references": [],
+        "calls": [
+          {
+            "calleeText": "CaptureSnapshot",
+            "location": { "startLine": 45, "startColumn": 5, "endLine": 45, "endColumn": 20 },
+            "resolvedCallee": {
+              "originalText": "CaptureSnapshot",
+              "location": { "startLine": 45, "startColumn": 5, "endLine": 45, "endColumn": 20 },
+              "resolutionStatus": "resolved",
+              "referenceKind": "procedure",
+              "resolvedTarget": {
+                "kind": "procedure",
+                "name": "CaptureSnapshot",
+                "container": "clsCaseAuditor",
+                "fullyQualifiedName": "clsCaseAuditor.CaptureSnapshot",
+                "type": "Void"
+              },
+              "confidence": 1.0,
+              "notes": "Resolved within class scope (Private member)"
+            }
+          }
+        ],
+        "sqlStrings": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "EntityName_Get",
+      "procedureKind": "PropertyGet",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": { "parameters": [], "returnType": "String" },
+      "classification": {
+        "purposeTags": ["utility"],
+        "purity": "pure",
+        "complexity": 1,
+        "linesOfCode": 1,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [
+          { "kind": "assignment", "location": { "startLine": 50, "startColumn": 5 }, "summary": "Return m_AuditEntityName" }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "EntityName_Let",
+      "procedureKind": "PropertyLet",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          { "name": "sValue", "type": "String", "byRef": false, "notes": "ByVal explicit on Property Let" }
+        ]
+      },
+      "classification": {
+        "purposeTags": ["utility"],
+        "purity": "uiBound",
+        "complexity": 1,
+        "linesOfCode": 1,
+        "translatability": "mechanical",
+        "notes": "Property Get + Let pair maps cleanly to a C# auto-property or computed property"
+      },
+      "body": {
+        "statements": [
+          { "kind": "assignment", "location": { "startLine": 54, "startColumn": 5 }, "summary": "Assign m_AuditEntityName = sValue" }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "m_Form_BeforeUpdate",
+      "procedureKind": "EventHandler",
+      "visibility": "Private",
+      "isStatic": false,
+      "eventBinding": {
+        "controlName": "m_Form",
+        "eventName": "BeforeUpdate",
+        "resolvedControl": {
+          "originalText": "m_Form",
+          "location": { "startLine": 67, "startColumn": 13, "endLine": 67, "endColumn": 19 },
+          "resolutionStatus": "resolved",
+          "referenceKind": "variable",
+          "resolvedTarget": {
+            "kind": "withEventsField",
+            "name": "m_Form",
+            "container": "clsCaseAuditor",
+            "type": "Form",
+            "fullyQualifiedName": "clsCaseAuditor.m_Form"
+          },
+          "confidence": 1.0,
+          "notes": "Event sink for WithEvents-declared field. Fires when whatever Form is currently assigned to m_Form raises its BeforeUpdate event. The form being audited is determined at runtime via AttachToForm."
+        }
+      },
+      "signature": {
+        "parameters": [
+          { "name": "Cancel", "type": "Integer", "byRef": true }
+        ]
+      },
+      "classification": {
+        "purposeTags": ["sideEffect", "validation"],
+        "purity": "uiBound",
+        "complexity": 3,
+        "linesOfCode": 7,
+        "translatability": "structured",
+        "notes": "Auto-stamp ModifiedBy and ModifiedDate before save. Common audit pattern. Migration target: model interceptor or middleware in EF SaveChanges override."
+      },
+      "body": {
+        "statements": [
+          { "kind": "if", "location": { "startLine": 68, "startColumn": 5 }, "summary": "Early-exit if auditing disabled" },
+          { "kind": "if", "location": { "startLine": 71, "startColumn": 5 }, "summary": "Stamp ModifiedBy with current user if blank" },
+          { "kind": "assignment", "location": { "startLine": 74, "startColumn": 5 }, "summary": "Stamp ModifiedDate with current time" }
+        ],
+        "references": [
+          {
+            "originalText": "m_Form!ModifiedBy",
+            "location": { "startLine": 71, "startColumn": 16, "endLine": 71, "endColumn": 33 },
+            "resolutionStatus": "partiallyResolved",
+            "referenceKind": "control",
+            "resolvedTarget": {
+              "kind": "control",
+              "name": "ModifiedBy",
+              "container": "<runtime form>",
+              "type": "Variant"
+            },
+            "confidence": 0.5,
+            "notes": "Bang access on a generic Form variable. ModifiedBy is assumed to exist on the attached form, but the harvester cannot verify this without knowing which form(s) AttachToForm is called with. Migration target should require an interface or convention guaranteeing ModifiedBy/ModifiedDate fields exist."
+          }
+        ],
+        "calls": [
+          {
+            "calleeText": "CurrentUser",
+            "location": { "startLine": 72, "startColumn": 30, "endLine": 72, "endColumn": 42 },
+            "resolvedCallee": {
+              "originalText": "CurrentUser",
+              "location": { "startLine": 72, "startColumn": 30, "endLine": 72, "endColumn": 42 },
+              "resolutionStatus": "resolved",
+              "referenceKind": "objectModel",
+              "resolvedTarget": { "kind": "function", "name": "CurrentUser", "container": "Access.Application" },
+              "confidence": 1.0
+            }
+          }
+        ],
+        "sqlStrings": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "LogChanges",
+      "procedureKind": "Sub",
+      "visibility": "Private",
+      "isStatic": false,
+      "signature": { "parameters": [] },
+      "classification": {
+        "purposeTags": ["dataAccess", "sideEffect"],
+        "purity": "dataAccess",
+        "complexity": 7,
+        "linesOfCode": 25,
+        "translatability": "manualReview",
+        "notes": "Iterates form controls, compares to snapshot, INSERTs change rows. Migration target: structured audit log via EF interceptor, change tracker, or SQL Server temporal tables."
+      },
+      "body": {
+        "statements": [
+          { "kind": "for", "location": { "startLine": 121, "startColumn": 5 }, "summary": "For Each ctl In m_Form.Controls" },
+          { "kind": "if", "location": { "startLine": 122, "startColumn": 9 }, "summary": "Filter to TextBox/ComboBox/CheckBox via TypeOf" },
+          { "kind": "if", "location": { "startLine": 125, "startColumn": 13 }, "summary": "Conditionally INSERT audit log row when value changed" }
+        ],
+        "references": [
+          {
+            "originalText": "m_Form.Controls",
+            "location": { "startLine": 121, "startColumn": 17, "endLine": 121, "endColumn": 32 },
+            "resolutionStatus": "resolved",
+            "referenceKind": "objectModel",
+            "resolvedTarget": {
+              "kind": "property",
+              "name": "Controls",
+              "container": "Access.Form",
+              "type": "Access.Controls"
+            },
+            "confidence": 1.0
+          }
+        ],
+        "calls": [],
+        "sqlStrings": [
+          {
+            "originalText": "INSERT INTO tblAuditLog (EntityName, FieldName, OldValue, NewValue, ChangedBy, ChangedDate) VALUES ('...', '...', '...', '...', '...', Now())",
+            "location": { "startLine": 128, "startColumn": 17, "endLine": 137, "endColumn": 50 },
+            "constructionMode": "concatenated",
+            "templateCandidates": [
+              {
+                "template": "INSERT INTO tblAuditLog (EntityName, FieldName, OldValue, NewValue, ChangedBy, ChangedDate) VALUES (?, ?, ?, ?, ?, Now())",
+                "parameterBindings": [
+                  { "name": "p_EntityName", "type": "String", "source": "vbaExpression" },
+                  { "name": "p_FieldName", "type": "String", "source": "vbaExpression" },
+                  { "name": "p_OldValue", "type": "String", "source": "vbaExpression" },
+                  { "name": "p_NewValue", "type": "String", "source": "vbaExpression" },
+                  { "name": "p_ChangedBy", "type": "String", "source": "vbaExpression" }
+                ],
+                "confidence": 0.95,
+                "notes": "Quote-escape via Replace(...,\"'\",\"''\") detected on OldValue and NewValue. Migration target should use parameterized INSERT and drop manual escaping."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "IAuditLogger_LogEvent",
+      "procedureKind": "Sub",
+      "visibility": "Private",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          { "name": "EventType", "type": "String", "byRef": true },
+          { "name": "Description", "type": "String", "byRef": true }
+        ]
+      },
+      "classification": {
+        "purposeTags": ["dataAccess", "sideEffect"],
+        "purity": "dataAccess",
+        "complexity": 1,
+        "linesOfCode": 8,
+        "translatability": "structured",
+        "notes": "Interface method via Implements. Migration: explicit interface implementation in target language."
+      },
+      "body": {
+        "statements": [
+          { "kind": "set", "location": { "startLine": 152, "startColumn": 5 }, "summary": "Get CurrentDb" },
+          { "kind": "call", "location": { "startLine": 153, "startColumn": 5 }, "summary": "Execute INSERT into tblAuditLog" }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": [
+    {
+      "severity": "info",
+      "code": "HARV-I100",
+      "message": "Class implements IAuditLogger interface via Implements directive. Three interface members detected (LogEvent, Enabled, plus expected close-out). Migration target: explicit interface implementation in C# (class : IAuditLogger).",
+      "location": { "startLine": 19, "startColumn": 1, "endLine": 19, "endColumn": 25 }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I101",
+      "message": "WithEvents pattern: m_Form is a private field declared WithEvents As Form. Three event sinks detected: m_Form_BeforeUpdate, m_Form_AfterUpdate, m_Form_Close. Migration target: in Blazor, this maps to a service that subscribes to component events; in WPF/MVVM it maps to weak event subscription. The form-as-late-bound-target pattern is unusual in modern frameworks.",
+      "location": { "startLine": 22, "startColumn": 1, "endLine": 22, "endColumn": 35 }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I102",
+      "message": "Property Get/Let pairs for EntityName and Enabled. Migration target: auto-properties or explicit getter/setter.",
+      "location": { "startLine": 49, "startColumn": 1, "endLine": 65, "endColumn": 16 }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W100",
+      "message": "Audit assumes form has ModifiedBy and ModifiedDate fields. No interface or runtime check enforces this. If AttachToForm is called with a form lacking these fields, the bang access will fail at runtime. Migration target: define IAuditableForm interface or model-level audit fields.",
+      "location": { "startLine": 71, "startColumn": 5, "endLine": 74, "endColumn": 28 }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W101",
+      "message": "Audit log INSERT uses string concatenation with manual quote escaping. SQL injection risk if any audited field value contains carefully crafted SQL. Migration target: parameterized SQL.",
+      "location": { "startLine": 128, "startColumn": 17, "endLine": 137, "endColumn": 50 }
+    }
+  ]
+}

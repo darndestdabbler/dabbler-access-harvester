@@ -1,0 +1,340 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "database",
+    "location": {
+      "file": "11-autoexec-startup-chain.bas",
+      "startLine": 1,
+      "startColumn": 1,
+      "endLine": 110,
+      "endColumn": 1
+    },
+    "originalSource": "(see source file: AutoExec macro definition + mdlStartup module)"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "AutoExec",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": { "parameters": [] },
+      "classification": {
+        "purposeTags": ["navigation", "utility"],
+        "purity": "uiBound",
+        "complexity": 3,
+        "linesOfCode": 0,
+        "translatability": "structured",
+        "notes": "AutoExec is not a VBA procedure - it is an Access macro stored in MSysObjects with a special name that triggers automatic execution at database open. The harvester extracts macro actions from MSysObjects.LvExtra and represents them as a structured action list, parallel to procedures."
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "raw",
+            "location": { "startLine": 17, "startColumn": 1, "endLine": 17, "endColumn": 26 },
+            "summary": "Macro Action 1: SetWarnings(Warnings On = No)",
+            "details": {
+              "macroAction": {
+                "actionName": "SetWarnings",
+                "arguments": { "WarningsOn": false },
+                "notes": "Suppresses confirmation dialogs for the rest of the session."
+              }
+            }
+          },
+          {
+            "kind": "call",
+            "location": { "startLine": 19, "startColumn": 1, "endLine": 20, "endColumn": 32 },
+            "summary": "Macro Action 2: RunCode(Function Name = Initialize())",
+            "details": {
+              "macroAction": {
+                "actionName": "RunCode",
+                "arguments": { "FunctionName": "Initialize()" },
+                "callsVbaProcedure": "Initialize"
+              }
+            }
+          },
+          {
+            "kind": "raw",
+            "location": { "startLine": 21, "startColumn": 1, "endLine": 22, "endColumn": 27 },
+            "summary": "Macro Action 3: SetWarnings(Warnings On = Yes)",
+            "details": {
+              "macroAction": {
+                "actionName": "SetWarnings",
+                "arguments": { "WarningsOn": true }
+              }
+            }
+          }
+        ],
+        "references": [],
+        "calls": [
+          {
+            "calleeText": "Initialize",
+            "location": { "startLine": 20, "startColumn": 21, "endLine": 20, "endColumn": 33 },
+            "resolvedCallee": {
+              "originalText": "Initialize",
+              "location": { "startLine": 20, "startColumn": 21, "endLine": 20, "endColumn": 33 },
+              "resolutionStatus": "resolved",
+              "referenceKind": "function",
+              "resolvedTarget": {
+                "kind": "function",
+                "name": "Initialize",
+                "container": "mdlStartup",
+                "fullyQualifiedName": "mdlStartup.Initialize",
+                "type": "Boolean"
+              },
+              "confidence": 1.0,
+              "notes": "Bridge from macro action to VBA function. Resolves the call by name across the project's standard modules."
+            }
+          }
+        ],
+        "sqlStrings": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "Initialize",
+      "procedureKind": "Function",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": { "parameters": [], "returnType": "Boolean" },
+      "classification": {
+        "purposeTags": ["dataAccess", "navigation", "sideEffect", "utility"],
+        "purity": "mixed",
+        "complexity": 9,
+        "linesOfCode": 70,
+        "translatability": "structured",
+        "notes": "Application startup. Migration target: ASP.NET Core startup pipeline plus authentication middleware. The user-from-Windows-login pattern maps to Windows Authentication or claims-based auth."
+      },
+      "body": {
+        "statements": [
+          { "kind": "errorHandler", "location": { "startLine": 35, "startColumn": 5 }, "summary": "On Error GoTo ErrHandler" },
+          { "kind": "assignment", "location": { "startLine": 37, "startColumn": 5 }, "summary": "Record application start time" },
+          { "kind": "if", "location": { "startLine": 43, "startColumn": 5 }, "summary": "Set debug mode if 'DEBUG' present in command-line args" },
+          { "kind": "set", "location": { "startLine": 53, "startColumn": 5 }, "summary": "Open recordset to look up user by Windows login" },
+          { "kind": "if", "location": { "startLine": 60, "startColumn": 5 }, "summary": "If user not found, message and quit application" },
+          { "kind": "assignment", "location": { "startLine": 67, "startColumn": 5 }, "summary": "Compute fiscal year (July 1 start)" },
+          { "kind": "call", "location": { "startLine": 71, "startColumn": 5 }, "summary": "INSERT session log entry" },
+          {
+            "kind": "select",
+            "location": { "startLine": 76, "startColumn": 5, "endLine": 89, "endColumn": 14 },
+            "summary": "Open switchboard form based on user role",
+            "details": {
+              "selectExpression": "g_UserRole",
+              "branches": [
+                { "case": "Administrator", "action": "DoCmd.OpenForm frmAdminSwitchboard" },
+                { "case": "Caseworker", "action": "DoCmd.OpenForm frmCaseworkerHome" },
+                { "case": "Supervisor", "action": "DoCmd.OpenForm frmSupervisorDashboard" },
+                { "case": "ReadOnly", "action": "DoCmd.OpenForm frmReadOnlyView" },
+                { "case": "Else", "action": "DoCmd.OpenForm frmMainSwitchboard" }
+              ],
+              "navigationPattern": {
+                "type": "roleBasedDispatch",
+                "drivenBy": "g_UserRole",
+                "candidateForms": [
+                  "frmAdminSwitchboard",
+                  "frmCaseworkerHome",
+                  "frmSupervisorDashboard",
+                  "frmReadOnlyView",
+                  "frmMainSwitchboard"
+                ]
+              }
+            }
+          }
+        ],
+        "references": [
+          {
+            "originalText": "g_AppStartTime",
+            "location": { "startLine": 37, "startColumn": 5, "endLine": 37, "endColumn": 19 },
+            "resolutionStatus": "resolved",
+            "referenceKind": "variable",
+            "resolvedTarget": {
+              "kind": "moduleVariable",
+              "name": "g_AppStartTime",
+              "container": "mdlStartup",
+              "fullyQualifiedName": "mdlStartup.g_AppStartTime",
+              "type": "Date"
+            },
+            "confidence": 1.0,
+            "notes": "Public module variable acts as application-wide global. Migration target: scoped or singleton service holding session state."
+          },
+          {
+            "originalText": "g_UserRole",
+            "location": { "startLine": 76, "startColumn": 17, "endLine": 76, "endColumn": 27 },
+            "resolutionStatus": "resolved",
+            "referenceKind": "variable",
+            "resolvedTarget": {
+              "kind": "moduleVariable",
+              "name": "g_UserRole",
+              "container": "mdlStartup",
+              "type": "String"
+            },
+            "confidence": 1.0
+          }
+        ],
+        "calls": [
+          {
+            "calleeText": "Command",
+            "location": { "startLine": 41, "startColumn": 16, "endLine": 41, "endColumn": 25 },
+            "resolvedCallee": {
+              "originalText": "Command",
+              "location": { "startLine": 41, "startColumn": 16, "endLine": 41, "endColumn": 25 },
+              "resolutionStatus": "resolved",
+              "referenceKind": "builtIn",
+              "resolvedTarget": { "kind": "builtInFunction", "name": "Command", "type": "String" },
+              "confidence": 1.0,
+              "notes": "Returns command-line argument string passed to msaccess.exe via /cmd switch. Migration target: standard command-line argument parsing or environment configuration."
+            }
+          },
+          {
+            "calleeText": "Environ",
+            "location": { "startLine": 50, "startColumn": 16, "endLine": 50, "endColumn": 23 },
+            "resolvedCallee": {
+              "originalText": "Environ",
+              "location": { "startLine": 50, "startColumn": 16, "endLine": 50, "endColumn": 23 },
+              "resolutionStatus": "resolved",
+              "referenceKind": "builtIn",
+              "resolvedTarget": { "kind": "builtInFunction", "name": "Environ", "type": "String" },
+              "confidence": 1.0,
+              "notes": "Reads environment variable. USERNAME is the Windows login. Migration target: WindowsIdentity.GetCurrent() or HttpContext.User in ASP.NET."
+            }
+          },
+          {
+            "calleeText": "Application.Quit",
+            "location": { "startLine": 63, "startColumn": 9, "endLine": 63, "endColumn": 41 },
+            "resolvedCallee": {
+              "originalText": "Application.Quit",
+              "location": { "startLine": 63, "startColumn": 9, "endLine": 63, "endColumn": 25 },
+              "resolutionStatus": "resolved",
+              "referenceKind": "objectModel",
+              "resolvedTarget": { "kind": "method", "name": "Quit", "container": "Access.Application", "type": "Void" },
+              "confidence": 1.0,
+              "notes": "Closes Access entirely. Migration target: redirect to unauthorized page; do not terminate the host process."
+            }
+          },
+          {
+            "calleeText": "GetAppVersion",
+            "location": { "startLine": 73, "startColumn": 53, "endLine": 73, "endColumn": 68 },
+            "resolvedCallee": {
+              "originalText": "GetAppVersion",
+              "location": { "startLine": 73, "startColumn": 53, "endLine": 73, "endColumn": 68 },
+              "resolutionStatus": "resolved",
+              "referenceKind": "function",
+              "resolvedTarget": {
+                "kind": "function",
+                "name": "GetAppVersion",
+                "container": "mdlStartup",
+                "type": "String"
+              },
+              "confidence": 1.0
+            }
+          }
+        ],
+        "sqlStrings": [
+          {
+            "originalText": "\"SELECT UserID, UserName, RoleName FROM tblUsers INNER JOIN tblRoles ON tblUsers.RoleID = tblRoles.RoleID WHERE WinLogon = '\" & sWinUser & \"' AND Active = True\"",
+            "location": { "startLine": 53, "startColumn": 31, "endLine": 57, "endColumn": 50 },
+            "constructionMode": "concatenated",
+            "templateCandidates": [
+              {
+                "template": "SELECT UserID, UserName, RoleName FROM tblUsers INNER JOIN tblRoles ON tblUsers.RoleID = tblRoles.RoleID WHERE WinLogon = ? AND Active = True",
+                "parameterBindings": [
+                  {
+                    "name": "p_WinLogon",
+                    "type": "String",
+                    "source": "vbaExpression",
+                    "resolvedReference": {
+                      "originalText": "sWinUser",
+                      "location": { "startLine": 50, "startColumn": 5, "endLine": 50, "endColumn": 13 },
+                      "resolutionStatus": "resolved",
+                      "referenceKind": "variable",
+                      "resolvedTarget": { "kind": "variable", "name": "sWinUser", "type": "String" },
+                      "confidence": 1.0
+                    }
+                  }
+                ],
+                "confidence": 0.95
+              }
+            ]
+          },
+          {
+            "originalText": "\"INSERT INTO tblSessionLog (UserID, StartTime, AppVersion) VALUES (\" & g_CurrentUserID & \", Now(), '\" & GetAppVersion() & \"')\"",
+            "location": { "startLine": 71, "startColumn": 16, "endLine": 73, "endColumn": 70 },
+            "constructionMode": "concatenated",
+            "templateCandidates": [
+              {
+                "template": "INSERT INTO tblSessionLog (UserID, StartTime, AppVersion) VALUES (?, Now(), ?)",
+                "parameterBindings": [
+                  { "name": "p_UserID", "type": "Long", "source": "vbaExpression" },
+                  { "name": "p_AppVersion", "type": "String", "source": "vbaExpression" }
+                ],
+                "confidence": 0.95
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "GetAppVersion",
+      "procedureKind": "Function",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": { "parameters": [], "returnType": "String" },
+      "classification": {
+        "purposeTags": ["utility"],
+        "purity": "pure",
+        "complexity": 1,
+        "linesOfCode": 1,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [
+          { "kind": "assignment", "location": { "startLine": 109, "startColumn": 5 }, "summary": "Hard-coded return value '2.4.1'" }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": [
+    {
+      "severity": "info",
+      "code": "HARV-I110",
+      "message": "AutoExec entry point detected. Macro chain: SetWarnings -> RunCode(Initialize) -> SetWarnings. Initialize is the effective application entry. Migration target: ASP.NET Core Program.cs / startup pipeline.",
+      "location": { "startLine": 1, "startColumn": 1, "endLine": 22, "endColumn": 27 }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I111",
+      "message": "Role-based startup dispatch identified. 5 candidate forms map to 5 roles. Migration target: role-based routing or claims-based redirect. Each candidate form is also an entry point and should be migrated as a top-level route.",
+      "location": { "startLine": 76, "startColumn": 5, "endLine": 89, "endColumn": 14 }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I112",
+      "message": "User authentication via Environ('USERNAME') + tblUsers lookup. Migration target: Windows Authentication, OIDC, or claims-based auth. The tblUsers/tblRoles join provides the authorization model.",
+      "location": { "startLine": 50, "startColumn": 5, "endLine": 65, "endColumn": 12 }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I113",
+      "message": "Public module-level variables (g_*) used as application-wide globals. Six globals identified. Migration target: scoped or singleton service holding session state, or claims attached to authenticated user.",
+      "location": { "startLine": 27, "startColumn": 1, "endLine": 32, "endColumn": 27 }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W110",
+      "message": "Hard-coded version string updated manually on each release (line 109). Build-time injection of version is preferred to avoid manual update / staleness.",
+      "location": { "startLine": 109, "startColumn": 5, "endLine": 109, "endColumn": 30 }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W111",
+      "message": "User lookup uses string concatenation of Environ('USERNAME') into SQL. If USERNAME contains special characters (rare on Windows but possible with manipulated environments), this is a SQL injection vector. Migration target should use parameterized queries.",
+      "location": { "startLine": 53, "startColumn": 31, "endLine": 57, "endColumn": 50 }
+    }
+  ]
+}

@@ -1,0 +1,396 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "07-legacy-patterns.bas",
+      "module": "modLegacyImport",
+      "startLine": 12,
+      "startColumn": 1,
+      "endLine": 95,
+      "endColumn": 13
+    },
+    "originalSource": "(see source file)"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "ImportClientBatch",
+      "procedureKind": "Function",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          {
+            "name": "sFilePath",
+            "type": "String",
+            "byRef": true,
+            "optional": false,
+            "notes": "$ suffix in declaration is type-declaration character for String. Default ByRef in VBA - rare to use ByVal explicitly."
+          }
+        ],
+        "returnType": "Variant",
+        "notes": "Return type Variant is used to allow returning either a Long (success row count) or a String (error message). Migration target should split into Result<int, string> pattern or throw on failure."
+      },
+      "classification": {
+        "purposeTags": [
+          "dataAccess",
+          "externalIO",
+          "sideEffect",
+          "mixed"
+        ],
+        "purity": "externalIO",
+        "complexity": 18,
+        "linesOfCode": 80,
+        "translatability": "manualReview",
+        "notes": "High complexity, multiple control-flow patterns, late-bound COM, mixed return types - requires careful manual translation"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "directive",
+            "summary": "Option Compare Database",
+            "details": {
+              "directive": "Option Compare",
+              "value": "Database"
+            },
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "declaration",
+            "summary": "Local variable declarations with line numbers and type-declaration suffixes",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "errorHandler",
+            "location": {
+              "startLine": 90,
+              "startColumn": 5
+            },
+            "summary": "On Error Resume Next - errors are silently swallowed unless explicitly checked via Err.Number"
+          },
+          {
+            "kind": "set",
+            "summary": "Late-bind to Excel.Application via CreateObject",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "if",
+            "summary": "Check oExcel Is Nothing; GoTo NoExcel label on failure",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "for",
+            "summary": "Loop over Excel rows from 2 to lRow",
+            "details": {
+              "containsGoSub": true,
+              "containsGoTo": true
+            },
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "gosub",
+            "location": {
+              "startLine": 230,
+              "startColumn": 1
+            },
+            "summary": "GoSub ValidateRow - legacy subroutine call with shared local state"
+          },
+          {
+            "kind": "labelled",
+            "location": {
+              "startLine": 449,
+              "startColumn": 1
+            },
+            "summary": "Label 'ValidateRow:' marks GoSub target"
+          }
+        ],
+        "references": [
+          {
+            "originalText": "vData",
+            "location": {
+              "startLine": 50,
+              "startColumn": 9
+            },
+            "resolutionStatus": "resolved",
+            "referenceKind": "variable",
+            "resolvedTarget": {
+              "kind": "variable",
+              "name": "vData",
+              "type": "Variant"
+            },
+            "confidence": 1.0,
+            "notes": "Implicit Variant declaration - 'Dim vData' with no type. Holds 2D array from Excel UsedRange.Value."
+          },
+          {
+            "originalText": "i&",
+            "location": {
+              "startLine": 40,
+              "startColumn": 9
+            },
+            "resolutionStatus": "resolved",
+            "referenceKind": "variable",
+            "resolvedTarget": {
+              "kind": "variable",
+              "name": "i",
+              "type": "Long"
+            },
+            "confidence": 1.0,
+            "notes": "& suffix is type-declaration character for Long"
+          },
+          {
+            "originalText": "sFilePath$",
+            "location": {
+              "startLine": 12,
+              "startColumn": 32
+            },
+            "resolutionStatus": "resolved",
+            "referenceKind": "parameter",
+            "resolvedTarget": {
+              "kind": "parameter",
+              "name": "sFilePath",
+              "type": "String"
+            },
+            "confidence": 1.0,
+            "notes": "$ suffix is type-declaration character for String"
+          },
+          {
+            "originalText": "oExcel",
+            "location": {
+              "startLine": 100,
+              "startColumn": 9
+            },
+            "resolutionStatus": "resolved",
+            "referenceKind": "variable",
+            "resolvedTarget": {
+              "kind": "variable",
+              "name": "oExcel",
+              "type": "Object"
+            },
+            "confidence": 1.0,
+            "notes": "Late-bound; declared as Object. Members like .Workbooks.Open, .Quit cannot be statically resolved without binding to Excel type library."
+          },
+          {
+            "originalText": "oExcel.Workbooks.Open",
+            "location": {
+              "startLine": 120,
+              "startColumn": 19
+            },
+            "resolutionStatus": "unresolved",
+            "referenceKind": "external",
+            "resolvedTarget": null,
+            "confidence": 0.0,
+            "notes": "Late-bound member access on Object-typed variable. Requires Excel type library binding for resolution. Migration target may need to handle Excel integration via OpenXML or similar non-COM library."
+          },
+          {
+            "originalText": "rs!ClientName",
+            "location": {
+              "startLine": 280,
+              "startColumn": 1
+            },
+            "resolutionStatus": "partiallyResolved",
+            "referenceKind": "field",
+            "resolvedTarget": {
+              "kind": "recordsetField",
+              "name": "ClientName",
+              "container": "tblClients",
+              "type": "String"
+            },
+            "confidence": 0.7,
+            "notes": "rs declared as Object (late-bound) so Bang access cannot be statically verified. Resolved against tblClients schema via inference from OpenRecordset(\"tblClients\")."
+          }
+        ],
+        "calls": [
+          {
+            "calleeText": "CreateObject",
+            "location": {
+              "startLine": 100,
+              "startColumn": 18
+            },
+            "resolvedCallee": {
+              "originalText": "CreateObject",
+              "resolutionStatus": "resolved",
+              "referenceKind": "builtIn",
+              "resolvedTarget": {
+                "kind": "builtInFunction",
+                "name": "CreateObject",
+                "type": "Object"
+              },
+              "confidence": 1.0,
+              "notes": "Late binding via CreateObject. Migration target should consider whether COM dependency is necessary or whether modern alternatives apply.",
+              "location": {
+                "startLine": 100,
+                "startColumn": 18
+              }
+            },
+            "arguments": [
+              {
+                "originalText": "\"Excel.Application\"",
+                "parsed": {
+                  "kind": "literal",
+                  "literalKind": "string",
+                  "value": "Excel.Application"
+                }
+              }
+            ]
+          }
+        ],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [
+    {
+      "reason": "unsupportedConstruct",
+      "location": {
+        "startLine": 12,
+        "startColumn": 1,
+        "endLine": 95,
+        "endColumn": 13
+      },
+      "originalText": "Line numbers (10, 20, 30, ...) used throughout",
+      "context": "Procedure uses BASIC-style line numbers as statement labels. Allowed in VBA but rare in modern code. Parser must accept; migration can drop them.",
+      "suggestedNextStep": "Parser accepts line numbers as optional leading tokens on statements; migration drops them entirely."
+    },
+    {
+      "reason": "unsupportedConstruct",
+      "location": {
+        "startLine": 230,
+        "startColumn": 9,
+        "endLine": 230,
+        "endColumn": 28
+      },
+      "originalText": "GoSub ValidateRow ... Return",
+      "context": "Legacy GoSub/Return pattern. Subroutine accesses procedure-scoped variables (sErr, vData, i) directly. No parameters or return values.",
+      "suggestedNextStep": "Migration target: extract as private method that takes the row data and current state as explicit parameters and returns a validation result. The original implicit-state pattern does not survive translation."
+    },
+    {
+      "reason": "unresolvedReference",
+      "location": {
+        "startLine": 120,
+        "startColumn": 19,
+        "endLine": 120,
+        "endColumn": 50
+      },
+      "originalText": "oExcel.Workbooks.Open(sFilePath$)",
+      "context": "Late-bound COM member access. Cannot resolve Workbooks.Open signature without binding to Excel type library.",
+      "suggestedNextStep": "Migration target: replace COM Excel integration with OpenXML SDK (DocumentFormat.OpenXml) or ClosedXML for .xlsx, or with explicit Excel COM interop wrapper if Excel automation is genuinely needed."
+    }
+  ],
+  "diagnostics": [
+    {
+      "severity": "warning",
+      "code": "HARV-W060",
+      "message": "On Error Resume Next at procedure top level. All errors are silently ignored unless explicitly checked via Err.Number. This is a serious code quality issue: errors in OpenRecordset, AddNew, Update, etc. will silently fail. Migration target should use try/catch with explicit error handling per operation.",
+      "location": {
+        "startLine": 90,
+        "startColumn": 5,
+        "endLine": 90,
+        "endColumn": 25
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W061",
+      "message": "Mixed return type: Variant function returns Long on success and String on failure (rows 430, 560, 580). Callers must check type at runtime. Migration target should use Result<int, string> pattern, exception throwing, or out-parameter with bool return.",
+      "location": {
+        "startLine": 12,
+        "startColumn": 1,
+        "endLine": 95,
+        "endColumn": 13
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W062",
+      "message": "GoSub/Return pattern at line 230 with implicit state sharing. Subroutine reads/writes procedure-scoped variables directly. Translation requires extracting as method with explicit parameters.",
+      "location": {
+        "startLine": 230,
+        "startColumn": 9,
+        "endLine": 550,
+        "endColumn": 11
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W063",
+      "message": "Late-bound COM (CreateObject + Object-typed variable). Member access cannot be statically validated. Migration target may need replacement library (OpenXML SDK for Excel) and explicit member checking.",
+      "location": {
+        "startLine": 100,
+        "startColumn": 5,
+        "endLine": 100,
+        "endColumn": 50
+      }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I060",
+      "message": "Type-declaration character suffixes used: $ (String) on sFilePath, sErr; & (Long) on i, j, lRow, lCol. Modern style declares types via 'As' keyword. Equivalent semantically; migration normalizes to explicit types.",
+      "location": {
+        "startLine": 12,
+        "startColumn": 1,
+        "endLine": 80,
+        "endColumn": 30
+      }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I061",
+      "message": "Line numbers used throughout (10, 20, 30, ...). Legal but archaic. Useful for legacy 'Resume <line>' patterns; this code does not appear to use Resume <line>. Migration drops line numbers.",
+      "location": {
+        "startLine": 12,
+        "startColumn": 1,
+        "endLine": 95,
+        "endColumn": 13
+      }
+    },
+    {
+      "severity": "info",
+      "code": "HARV-I062",
+      "message": "Magic number: dbOpenDynaset = 2 used as literal at line 180 instead of named constant. Migration target should use enum.",
+      "location": {
+        "startLine": 180,
+        "startColumn": 41,
+        "endLine": 180,
+        "endColumn": 42
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W064",
+      "message": "GoTo-based control flow with multiple labels (NoExcel, OpenFailed, NextRow). Combined with On Error Resume Next, control flow is non-trivial to follow. Migration target should restructure as guard clauses with explicit returns.",
+      "location": {
+        "startLine": 12,
+        "startColumn": 1,
+        "endLine": 95,
+        "endColumn": 13
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W065",
+      "message": "SSN handling: code stores partial SSN as '***-**-' & Right(CStr(value), 4). Confirm intent: is full SSN being intentionally redacted on import, or is original SSN expected to be available elsewhere? PII handling may have compliance implications in state government context (HIPAA, state privacy laws).",
+      "location": {
+        "startLine": 300,
+        "startColumn": 9,
+        "endLine": 300,
+        "endColumn": 65
+      }
+    }
+  ]
+}

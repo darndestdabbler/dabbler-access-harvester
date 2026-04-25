@@ -1,0 +1,335 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "08-unresolvable.bas",
+      "module": "modConfigDriven",
+      "startLine": 13,
+      "startColumn": 1,
+      "endLine": 65,
+      "endColumn": 8
+    },
+    "originalSource": "(see source file)"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "OpenFormByConfig",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          {
+            "name": "sConfigKey",
+            "type": "String",
+            "byRef": true,
+            "optional": false
+          }
+        ]
+      },
+      "classification": {
+        "purposeTags": [
+          "navigation",
+          "sideEffect",
+          "mixed"
+        ],
+        "purity": "mixed",
+        "complexity": 8,
+        "linesOfCode": 50,
+        "translatability": "manualReview",
+        "notes": "Configuration-driven dispatch with Eval(), dynamic form name, dynamic callback. Cannot be statically analyzed. Migration requires understanding of the data in tblFormConfig at runtime, which the harvester cannot see."
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "set",
+            "summary": "Open recordset on tblFormConfig filtered by config key",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "if",
+            "summary": "Exit if no config found",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "assignment",
+            "summary": "Read FormName from config",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "assignment",
+            "summary": "Read FilterTemplate from config",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "assignment",
+            "summary": "Substitute {CurrentUser} placeholder",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "assignment",
+            "summary": "Substitute {Today} placeholder",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "doLoop",
+            "summary": "Loop substituting {Eval:expr} placeholders by evaluating arbitrary VBA via Eval()",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "call",
+            "summary": "DoCmd.OpenForm with dynamic form name and filter",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          },
+          {
+            "kind": "call",
+            "summary": "Conditional Application.Run with dynamic callback name",
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          }
+        ],
+        "references": [
+          {
+            "originalText": "rs!FormName",
+            "resolutionStatus": "resolved",
+            "referenceKind": "field",
+            "resolvedTarget": {
+              "kind": "recordsetField",
+              "name": "FormName",
+              "container": "tblFormConfig",
+              "type": "String"
+            },
+            "confidence": 0.95,
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          }
+        ],
+        "calls": [
+          {
+            "calleeText": "Eval",
+            "location": {
+              "startLine": 47,
+              "startColumn": 23,
+              "endLine": 47,
+              "endColumn": 33
+            },
+            "resolvedCallee": {
+              "originalText": "Eval",
+              "resolutionStatus": "resolved",
+              "referenceKind": "objectModel",
+              "resolvedTarget": {
+                "kind": "function",
+                "name": "Eval",
+                "container": "Access.Application",
+                "type": "Variant"
+              },
+              "confidence": 1.0,
+              "notes": "Eval() evaluates arbitrary VBA expressions at runtime. Content comes from a database table - can contain ANY valid VBA. No static analysis possible.",
+              "location": {
+                "startLine": 47,
+                "startColumn": 23,
+                "endLine": 47,
+                "endColumn": 33
+              }
+            }
+          },
+          {
+            "calleeText": "DoCmd.OpenForm",
+            "location": {
+              "startLine": 56,
+              "startColumn": 5
+            },
+            "resolvedCallee": {
+              "originalText": "DoCmd.OpenForm",
+              "resolutionStatus": "resolved",
+              "referenceKind": "objectModel",
+              "resolvedTarget": {
+                "kind": "method",
+                "name": "OpenForm",
+                "container": "Access.DoCmd",
+                "type": "Void"
+              },
+              "confidence": 1.0,
+              "location": {
+                "startLine": 56,
+                "startColumn": 5
+              }
+            },
+            "arguments": [
+              {
+                "originalText": "sFormName",
+                "parsed": {
+                  "kind": "identifier",
+                  "name": "sFormName"
+                },
+                "notes": "Form name is a runtime String, not a compile-time identifier. Cannot determine which form is opened."
+              }
+            ]
+          },
+          {
+            "calleeText": "Application.Run",
+            "location": {
+              "startLine": 64,
+              "startColumn": 9
+            },
+            "resolvedCallee": {
+              "originalText": "Application.Run",
+              "resolutionStatus": "resolved",
+              "referenceKind": "objectModel",
+              "resolvedTarget": {
+                "kind": "method",
+                "name": "Run",
+                "container": "Access.Application",
+                "type": "Variant"
+              },
+              "confidence": 1.0,
+              "notes": "Application.Run dispatches to a procedure by name string. Equivalent to reflection-based invocation. Target procedure cannot be determined statically.",
+              "location": {
+                "startLine": 64,
+                "startColumn": 9
+              }
+            }
+          }
+        ],
+        "sqlStrings": [
+          {
+            "originalText": "\"SELECT FormName, FilterTemplate, OpenArgsTemplate FROM tblFormConfig WHERE ConfigKey = '\" & sConfigKey & \"'\"",
+            "constructionMode": "concatenated",
+            "templateCandidates": [
+              {
+                "template": "SELECT FormName, FilterTemplate, OpenArgsTemplate FROM tblFormConfig WHERE ConfigKey = ?",
+                "parameterBindings": [
+                  {
+                    "name": "p_ConfigKey",
+                    "type": "String",
+                    "source": "concatenatedVariable"
+                  }
+                ],
+                "confidence": 0.95
+              }
+            ],
+            "location": {
+              "startLine": 1,
+              "startColumn": 1
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "unresolvedItems": [
+    {
+      "reason": "unsupportedConstruct",
+      "location": {
+        "startLine": 47,
+        "startColumn": 23,
+        "endLine": 47,
+        "endColumn": 40
+      },
+      "originalText": "Eval(sExpr)",
+      "context": "Procedure evaluates arbitrary VBA expressions read from tblFormConfig.FilterTemplate. The expressions are stored as data, not code. Static analysis cannot determine what expressions will execute. Migration requires either: (a) preserving Eval() semantics with a runtime expression engine, (b) replacing config-driven Eval with structured config (e.g., predicate trees), or (c) inventorying actual values in tblFormConfig and translating each individually as a special case.",
+      "suggestedNextStep": "Recommended: extract all values currently stored in tblFormConfig.FilterTemplate, classify by pattern, and design typed replacements for each pattern class. Eval() does not have a clean migration path."
+    },
+    {
+      "reason": "unsupportedConstruct",
+      "location": {
+        "startLine": 56,
+        "startColumn": 5,
+        "endLine": 56,
+        "endColumn": 50
+      },
+      "originalText": "DoCmd.OpenForm sFormName, , , sFilter",
+      "context": "Form name is a runtime String value read from tblFormConfig.FormName. The harvester cannot determine which forms might be opened. Affects navigation graph, dependency analysis, and dead-code detection.",
+      "suggestedNextStep": "Inventory distinct values of tblFormConfig.FormName and treat each as a possible navigation target. Migration target should explicitly enumerate the supported form set rather than leaving form selection data-driven, OR maintain the data-driven dispatch with a typed registry pattern."
+    },
+    {
+      "reason": "unsupportedConstruct",
+      "location": {
+        "startLine": 64,
+        "startColumn": 9,
+        "endLine": 64,
+        "endColumn": 60
+      },
+      "originalText": "Application.Run sCallback, sFormName, sFilter",
+      "context": "Procedure name is a runtime String read from tblFormConfig.Callback. Equivalent to reflection-based dispatch. Cannot determine which procedures might be invoked.",
+      "suggestedNextStep": "Inventory distinct values of tblFormConfig.Callback. If small set: replace with explicit dispatch (switch). If large or open-ended: migration target needs registry pattern or rejection of this design."
+    },
+    {
+      "reason": "missingMetadata",
+      "location": {
+        "startLine": 13,
+        "startColumn": 1,
+        "endLine": 65,
+        "endColumn": 8
+      },
+      "originalText": "Procedure depends on contents of tblFormConfig",
+      "context": "Static analysis of this procedure is incomplete without inspection of the actual data in tblFormConfig. The procedure is a generic dispatcher; its behavior is determined entirely by configuration data. Suggest harvester additionally extract tblFormConfig contents and treat each row as an effective code path.",
+      "suggestedNextStep": "Run a separate metadata pass that extracts the full contents of tblFormConfig (FormName, FilterTemplate, OpenArgsTemplate, Callback for every row). Each row becomes an effective specification that downstream tooling can analyze individually."
+    }
+  ],
+  "diagnostics": [
+    {
+      "severity": "error",
+      "code": "HARV-E001",
+      "message": "Eval() of database-stored expressions: this is the worst case for static analysis and a security concern (effectively allows code injection via tblFormConfig data). Migration MUST address this; cannot be carried forward as-is.",
+      "location": {
+        "startLine": 47,
+        "startColumn": 23,
+        "endLine": 47,
+        "endColumn": 40
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W080",
+      "message": "Configuration-driven dispatch is sometimes valuable but defeats static analysis. Consider whether the dispatch flexibility is actually needed, or whether the original developer used config-driven design where simpler explicit dispatch would suffice.",
+      "location": {
+        "startLine": 13,
+        "startColumn": 1,
+        "endLine": 65,
+        "endColumn": 8
+      }
+    },
+    {
+      "severity": "warning",
+      "code": "HARV-W081",
+      "message": "SQL injection vector: sConfigKey is concatenated into SQL without parameterization. If sConfigKey is ever derived from untrusted input, this is exploitable. Migration target must use parameterized queries.",
+      "location": {
+        "startLine": 21,
+        "startColumn": 31,
+        "endLine": 23,
+        "endColumn": 50
+      }
+    }
+  ]
+}
