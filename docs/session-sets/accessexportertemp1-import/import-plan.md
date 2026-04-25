@@ -3,7 +3,9 @@
 > **Session Set:** `docs/session-sets/accessexportertemp1-import/`
 > **Author:** Session 1 of 6 (Discovery + Import Plan)
 > **Created:** 2026-04-25
-> **Status:** Draft pending human approval of "Open questions" below.
+> **Status:** **APPROVED 2026-04-25.** All three open questions resolved
+> by the human; Session 2 cleared to begin. See "Open questions" section
+> for the resolutions.
 
 This plan dispositions every top-level folder and significant file in
 `../AccessExporterTemp1/` into one of four buckets, per Session 1 of
@@ -146,9 +148,9 @@ so the disposition is auditable.
 | `samples/NorthwindDevEdition.accdb` | import-as-is | `samples/NorthwindDevEdition.accdb` | Session 6 (target of `validate_against_yaml.py`). |
 | `samples/ProjectBoard.accdb` | import-as-is | `samples/ProjectBoard.accdb` | Session 6 |
 | `samples/FormAndReportDefaults.accdb` | import-as-is | `samples/FormAndReportDefaults.accdb` | Session 6 — **explicitly named in spec Feature 4**, no human gate needed. Ground-truth source for `property-defaults.json`; keeping it lets the human re-run `tools/generate_property_defaults.py` against newer Access versions. |
-| `samples/MasterDbPropertyExtractor.accdb` | import-as-is *(pending OQ #2 — drops to out-of-scope if human elects to drop)* | `samples/MasterDbPropertyExtractor.accdb` | Session 6. VBA tool that exports control properties to YAML; only needed to regenerate the YAML dumps. Recommend keep. |
-| `samples/FormsAndReportsYaml/FormAndReportDefaults.accdb.yaml` | import-as-is *(pending OQ #2 — drops to out-of-scope if human elects to drop)* | `samples/FormsAndReportsYaml/FormAndReportDefaults.accdb.yaml` | Session 6. Consumed by `tools/generate_property_defaults.py`. |
-| `samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml` | import-as-is *(pending OQ #2 — drops to out-of-scope if human elects to drop)* | `samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml` | Session 6. Consumed by `tools/validate_against_yaml.py`. |
+| `samples/MasterDbPropertyExtractor.accdb` | import-as-is | `samples/MasterDbPropertyExtractor.accdb` | Session 6. VBA tool that exports control properties to YAML. **OQ #2 resolved 2026-04-25: human chose to keep.** |
+| `samples/FormsAndReportsYaml/FormAndReportDefaults.accdb.yaml` | import-as-is | `samples/FormsAndReportsYaml/FormAndReportDefaults.accdb.yaml` | Session 6. Consumed by `tools/generate_property_defaults.py`. **OQ #2 resolved 2026-04-25.** |
+| `samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml` | import-as-is | `samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml` | Session 6. Consumed by `tools/validate_against_yaml.py`. **OQ #2 resolved 2026-04-25.** |
 | `samples/Reports/orders-by-customer.rdf.json` | out-of-scope | — | Per BATON: "Target-platform `.rdf.json` examples (user-provided; NOT this tool's output format)". This is downstream-tool target schema, irrelevant to the harvester's mission. |
 | `samples/Reports/sales-by-product.rdf.json` | out-of-scope | — | Same reasoning. |
 
@@ -187,11 +189,11 @@ of `dotnet test`.
 | `GeometryEnricherTests.cs` | import-as-is | `tests/AccessHarvester.Tests/GeometryEnricherTests.cs` | Session 5 (per spec) |
 | `LabelResolverTests.cs` | import-as-is | `tests/AccessHarvester.Tests/LabelResolverTests.cs` | Session 5 (per spec) |
 | `SyntheticDbIntegrationTests.cs` | import-with-edits | `tests/AccessHarvester.Tests/SyntheticDbIntegrationTests.cs` | Session 5. Edits: (a) drop the proximity-test UAT-emission path that calls `UatChecklist.CollectProximityItems` (the `UatChecklist` helper is out-of-scope per spec); (b) **simplify the proximity test method to a pipeline-runs-and-produces-output assertion** — same shape as the other label integration tests, minus the UAT comparison. The `SyntheticDbs/labels_proximity.accdb` fixture is retained so a future label-quality session set can re-introduce richer assertions. The geometry + three non-proximity label tests (`labels_attached`, `labels_from_name`, `labels_binding`) survive intact. |
-| `AccessTextParserTests.cs` | import-as-is *(pending OQ #1 — drops to out-of-scope if human elects to drop)* | `tests/AccessHarvester.Tests/AccessTextParserTests.cs` | Session 5. Hermetic; covers `AccessTextParser` which IS imported. |
-| `MacroXmlParserTests.cs` | import-as-is *(pending OQ #1 — drops to out-of-scope if human elects to drop)* | `tests/AccessHarvester.Tests/MacroXmlParserTests.cs` | Session 5. Hermetic; covers `MacroXmlParser` which IS imported. |
-| `PropertyDecoderTests.cs` | import-as-is *(pending OQ #1 — drops to out-of-scope if human elects to drop)* | `tests/AccessHarvester.Tests/PropertyDecoderTests.cs` | Session 5. Hermetic; covers `PropertyDecoder` which IS imported. |
-| `TextCapacityEnricherTests.cs` | import-as-is *(pending OQ #1 — drops to out-of-scope if human elects to drop)* | `tests/AccessHarvester.Tests/TextCapacityEnricherTests.cs` | Session 5. Hermetic; covers `TextCapacityEnricher` which IS imported. |
-| `VbaSignatureParserTests.cs` | import-as-is *(pending OQ #1 — drops to out-of-scope if human elects to drop)* | `tests/AccessHarvester.Tests/VbaSignatureParserTests.cs` | Session 5. Hermetic; covers `VbaSignatureParser` which IS imported. |
+| `AccessTextParserTests.cs` | import-as-is | `tests/AccessHarvester.Tests/AccessTextParserTests.cs` | Session 5. Hermetic; covers `AccessTextParser` which IS imported. |
+| `MacroXmlParserTests.cs` | import-as-is | `tests/AccessHarvester.Tests/MacroXmlParserTests.cs` | Session 5. Hermetic; covers `MacroXmlParser` which IS imported. |
+| `PropertyDecoderTests.cs` | import-as-is | `tests/AccessHarvester.Tests/PropertyDecoderTests.cs` | Session 5. Hermetic; covers `PropertyDecoder` which IS imported. |
+| `TextCapacityEnricherTests.cs` | import-as-is | `tests/AccessHarvester.Tests/TextCapacityEnricherTests.cs` | Session 5. Hermetic; covers `TextCapacityEnricher` which IS imported. |
+| `VbaSignatureParserTests.cs` | import-as-is | `tests/AccessHarvester.Tests/VbaSignatureParserTests.cs` | Session 5. Hermetic; covers `VbaSignatureParser` which IS imported. |
 | `UatChecklist.cs` | out-of-scope | — | UAT-emission machinery. |
 | `UatChecklistTests.cs` | out-of-scope | — | UAT-emission machinery. |
 | `UatGroundTruth/labels_proximity.uat.json` | out-of-scope | — | UAT machinery. |
@@ -240,24 +242,33 @@ spec is the source of truth.
 - **Session 5 — Tests + Synthetic DB Builder:**
   `AccessHarvester.Tests.csproj`, `GeometryEnricherTests.cs`,
   `LabelResolverTests.cs`, `SyntheticDbIntegrationTests.cs` (with
-  proximity-UAT path elided), 5 `SyntheticDbs/*.accdb` fixtures,
-  full `test-builder/` Python project. **Pending Open question #1:**
-  also `AccessTextParserTests.cs`, `MacroXmlParserTests.cs`,
+  proximity-UAT path elided and the proximity test simplified to a
+  pipeline-runs assertion per OQ #3), 5 `SyntheticDbs/*.accdb`
+  fixtures, full `test-builder/` Python project, plus the five
+  additional hermetic unit-test files (per OQ #1):
+  `AccessTextParserTests.cs`, `MacroXmlParserTests.cs`,
   `PropertyDecoderTests.cs`, `TextCapacityEnricherTests.cs`,
   `VbaSignatureParserTests.cs`.
 - **Session 6 — Samples + Tools + README:**
   remaining `samples/*.accdb` (including `FormAndReportDefaults.accdb`,
-  spec-required), `tools/validate_against_yaml.py`, root `README.md`,
-  `change-log.md` for this session set. **Pending Open question #2:**
-  `samples/MasterDbPropertyExtractor.accdb`, `samples/FormsAndReportsYaml/`.
+  spec-required, plus `MasterDbPropertyExtractor.accdb` per OQ #2),
+  `samples/FormsAndReportsYaml/` (per OQ #2),
+  `tools/validate_against_yaml.py`, root `README.md`,
+  `change-log.md` for this session set.
 
 ---
 
 ## Open questions for the human
 
-These must be answered before Session 2 begins.
+**ALL THREE RESOLVED 2026-04-25.** Resolutions inlined under each
+question below.
 
 ### #1 — Five additional hermetic unit-test files
+
+**RESOLUTION (human, 2026-04-25): Import all five.** Disposition rows
+for the five test files are unconditional `import-as-is` for Session 5.
+
+
 
 The spec's Session 5 step list names only `GeometryEnricherTests.cs`
 and `LabelResolverTests.cs` as the hermetic unit tests to import. The
@@ -280,6 +291,10 @@ named files provide. **Recommendation: import all five as-is in Session
 unit-test files, drop them, or pick a subset?
 
 ### #2 — `MasterDbPropertyExtractor.accdb` + `FormsAndReportsYaml/`
+
+**RESOLUTION (human, 2026-04-25): Keep.** Both
+`samples/MasterDbPropertyExtractor.accdb` and the two
+`samples/FormsAndReportsYaml/*.yaml` files import as-is in Session 6.
 
 The dev-tool chain that supports regeneration of the
 `property-defaults.json` resource and the Northwind YAML validation
@@ -309,6 +324,12 @@ Two valid stances for the items above:
 YAML dumps but drop `MasterDbPropertyExtractor.accdb` until needed)?
 
 ### #3 — Replacement for label-quality UAT review
+
+**RESOLUTION (human, 2026-04-25): Defer.** Drop the UAT machinery
+here (out-of-scope dispositions stand); track in a future session set
+if proximity hit rate proves a problem. The proximity integration test
+is simplified to a pipeline-runs-and-produces-output assertion as
+already specified.
 
 The sibling's `UatChecklist.cs` / `UatEmitted/` / `UatGroundTruth/`
 machinery supports a human-graded review of label-resolution quality
