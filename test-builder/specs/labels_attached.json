@@ -1,0 +1,56 @@
+{
+  "formName": "frmLabelsAttached",
+  "caption": "Phase B - Round 1: attached labels",
+  "recordSource": "",
+  "hasHeader": false,
+  "hasFooter": false,
+  "width_twips": 10080,
+  "detailHeight_twips": 4320,
+  "controls": [
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "txtFirstName",
+      "left_twips": 1440,
+      "top_twips": 0,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "labelText": "First Name",
+      "tag": "attached_basic_textbox"
+    },
+    {
+      "type": "combo",
+      "section": "detail",
+      "name": "cmbCountry",
+      "left_twips": 1440,
+      "top_twips": 720,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "labelText": "Country",
+      "tag": "attached_combobox"
+    },
+    {
+      "type": "checkbox",
+      "section": "detail",
+      "name": "chkActive",
+      "left_twips": 1440,
+      "top_twips": 1440,
+      "width_twips": 360,
+      "height_twips": 360,
+      "labelText": "Active?",
+      "tag": "attached_checkbox"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "txtAttachedBeatsBinding",
+      "left_twips": 1440,
+      "top_twips": 2160,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "controlSource": "ShouldBeIgnored",
+      "labelText": "Custom Label",
+      "tag": "attached_beats_round_4_binding"
+    }
+  ]
+}

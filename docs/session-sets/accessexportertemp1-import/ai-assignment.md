@@ -100,7 +100,18 @@ Claude Code Sonnet 4.6 @ effort=medium
 | 7 | mechanical | — | — | — | Run `dotnet test`. |
 | 8 | reasoning | session-verification | gpt-5-4 | high | Per `task_type_overrides`; mandatory cross-provider gate. |
 
+
 **Actuals (filled after the session runs):**
+- Orchestrator used: Claude Code Sonnet 4.6 @ effort=medium (default)
+- Total routed cost: ~$0.13 (1x session-verification + 1x next-orchestrator analysis)
+- Deviations from recommendation: None. Sonnet was correctly calibrated for this mechanical session.
+- Notes for next-session calibration: Session 5 was entirely mechanical (csproj + 9 C# imports with namespace rewrite + fixtures + Python import). VERIFIED round 1. The only non-trivial edit was the SyntheticDbIntegrationTests proximity test simplification (UAT removal), which was a straightforward targeted change. Session 6 includes a documentation route and reorganization review; whether that warrants Opus depends on the review complexity.
+
+**Next session orchestrator recommendation (Session 6):**
+Claude Opus 4.7 @ effort=medium
+
+**Rationale:**
+Session 6 contains a high-stakes reorganization review step where existing project guidance recommends a top-tier model. Using Opus is the safest option to ensure a quality outcome on this final synthesis task, while a medium effort setting appropriately balances cost for the session's more mechanical steps.
 
 ## Session 6 of 6: Samples + Tools + README + Change Log
 

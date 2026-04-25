@@ -504,6 +504,103 @@
           "costUsd": 0.00237375
         }
       ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 1,
+      "stepKey": "session-5/verify-prereqs",
+      "dateTime": "2026-04-25T19:46:36.273205+00:00",
+      "description": "Verified Session 4 prerequisites: Translation/, Enrichment/, Resources/, Pipeline.cs, Program.cs all present.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 2,
+      "stepKey": "session-5/create-test-proj",
+      "dateTime": "2026-04-25T19:46:36.274996+00:00",
+      "description": "Created tests/AccessHarvester.Tests/AccessHarvester.Tests.csproj targeting net10.0 with xunit 2.9.2, SkippableFact 1.4.13. Added to AccessHarvester.sln.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 3,
+      "stepKey": "session-5/import-unit-tests",
+      "dateTime": "2026-04-25T19:46:36.275333+00:00",
+      "description": "Imported 8 hermetic unit test files (GeometryEnricherTests, LabelResolverTests, AccessTextParserTests, MacroXmlParserTests, PropertyDecoderTests, TextCapacityEnricherTests, VbaSignatureParserTests as-is; SyntheticDbIntegrationTests with-edits: UAT fields removed, proximity test simplified to pipeline-runs-and-produces-output assertion per import-plan OQ #3).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 4,
+      "stepKey": "session-5/import-fixtures",
+      "dateTime": "2026-04-25T19:46:36.277444+00:00",
+      "description": "Copied 5 SyntheticDbs/*.accdb fixtures from sibling: geometry_basic, labels_attached, labels_binding, labels_from_name, labels_proximity.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 5,
+      "stepKey": "session-5/import-test-builder",
+      "dateTime": "2026-04-25T19:46:36.278444+00:00",
+      "description": "Imported test-builder/ Python project: builder.py, create_from_spec.py, build_synthetic.py, README.md, specs/{geometry_basic,labels_attached,labels_binding,labels_from_name,labels_proximity}.json. __pycache__ left behind per import-plan.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 6,
+      "stepKey": "session-5/build",
+      "dateTime": "2026-04-25T19:46:36.279444+00:00",
+      "description": "dotnet build AccessHarvester.sln -> Build succeeded, 0 errors, 0 warnings.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 7,
+      "stepKey": "session-5/run-tests",
+      "dateTime": "2026-04-25T19:46:36.280444+00:00",
+      "description": "dotnet test: 93 passed, 2 skipped. All hermetic unit tests pass (all 5 test classes). Integration tests: 5 SyntheticDb tests pass (geometry_basic + 4 label fixtures); 2 Northwind tests skipped (NorthwindDevEdition.accdb not yet present \u2014 lands in Session 6).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 8,
+      "stepKey": "session-5/verify",
+      "dateTime": "2026-04-25T19:49:18.064655+00:00",
+      "description": "Cross-provider session-verification via route(task_type=\"session-verification\") => gpt-5-4. Tokens: 24782 in / 3749 out. Cost: $0.1182.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 24782,
+          "outputTokens": 3749,
+          "costUsd": 0.11818999999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 9,
+      "stepKey": "session-5/next-orchestrator-recommendation",
+      "dateTime": "2026-04-25T19:50:17.579696+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 6. Model: gemini-pro. Cost: $0.0017.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 680,
+          "outputTokens": 84,
+          "costUsd": 0.00169
+        }
+      ]
     }
   ]
 }

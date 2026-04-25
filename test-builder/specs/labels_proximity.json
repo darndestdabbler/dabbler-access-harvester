@@ -1,0 +1,151 @@
+{
+  "formName": "frmLabelsProximity",
+  "caption": "Phase B - Round 2: proximity (UAT)",
+  "recordSource": "",
+  "hasHeader": false,
+  "hasFooter": false,
+  "width_twips": 14400,
+  "detailHeight_twips": 14400,
+  "controls": [
+    {
+      "type": "label",
+      "section": "detail",
+      "name": "lblCustomerName",
+      "caption": "Customer Name",
+      "left_twips": 0,
+      "top_twips": 0,
+      "width_twips": 1440,
+      "height_twips": 360,
+      "tag": "proximity_clear_horizontal_label"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "Text1",
+      "left_twips": 1500,
+      "top_twips": 0,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "tag": "proximity_clear_horizontal_target"
+    },
+
+    {
+      "type": "label",
+      "section": "detail",
+      "name": "lblPhone",
+      "caption": "Phone",
+      "left_twips": 0,
+      "top_twips": 2880,
+      "width_twips": 720,
+      "height_twips": 360,
+      "tag": "proximity_dominant_winner_label"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "Text2",
+      "left_twips": 780,
+      "top_twips": 2880,
+      "width_twips": 1440,
+      "height_twips": 360,
+      "tag": "proximity_dominant_winner_close"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "Text3",
+      "left_twips": 5760,
+      "top_twips": 2880,
+      "width_twips": 1440,
+      "height_twips": 360,
+      "tag": "proximity_dominant_winner_far"
+    },
+
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "Text4",
+      "left_twips": 720,
+      "top_twips": 5760,
+      "width_twips": 720,
+      "height_twips": 360,
+      "tag": "proximity_adversarial_left_control"
+    },
+    {
+      "type": "label",
+      "section": "detail",
+      "name": "lblShared",
+      "caption": "Shared",
+      "left_twips": 2160,
+      "top_twips": 5760,
+      "width_twips": 720,
+      "height_twips": 360,
+      "tag": "proximity_adversarial_label"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "Text5",
+      "left_twips": 3600,
+      "top_twips": 5760,
+      "width_twips": 720,
+      "height_twips": 360,
+      "tag": "proximity_adversarial_right_control"
+    },
+
+    {
+      "type": "label",
+      "section": "detail",
+      "name": "lblAlpha",
+      "caption": "Alpha",
+      "left_twips": 0,
+      "top_twips": 8640,
+      "width_twips": 720,
+      "height_twips": 360,
+      "tag": "proximity_two_labels_left"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "Text6",
+      "left_twips": 2160,
+      "top_twips": 8640,
+      "width_twips": 720,
+      "height_twips": 360,
+      "tag": "proximity_two_labels_target"
+    },
+    {
+      "type": "label",
+      "section": "detail",
+      "name": "lblBeta",
+      "caption": "Beta",
+      "left_twips": 4320,
+      "top_twips": 8640,
+      "width_twips": 720,
+      "height_twips": 360,
+      "tag": "proximity_two_labels_right"
+    },
+
+    {
+      "type": "label",
+      "section": "detail",
+      "name": "lblEmail",
+      "caption": "Email",
+      "left_twips": 0,
+      "top_twips": 11520,
+      "width_twips": 1440,
+      "height_twips": 360,
+      "tag": "proximity_vertical_label"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "Text7",
+      "left_twips": 0,
+      "top_twips": 11940,
+      "width_twips": 1440,
+      "height_twips": 360,
+      "tag": "proximity_vertical_target"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "formName": "frmGeometryBasic",
+  "caption": "Phase A - Geometry basic",
+  "recordSource": "",
+  "hasHeader": false,
+  "hasFooter": false,
+  "width_twips": 10080,
+  "detailHeight_twips": 2160,
+  "controls": [
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "txtOriginWholeInch",
+      "left_twips": 0,
+      "top_twips": 0,
+      "width_twips": 1440,
+      "height_twips": 360,
+      "tag": "geometry_origin_whole_inch"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "txtOffsetWholeInches",
+      "left_twips": 2880,
+      "top_twips": 0,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "tag": "geometry_offset_whole_inches"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "txtFractional",
+      "left_twips": 360,
+      "top_twips": 720,
+      "width_twips": 720,
+      "height_twips": 360,
+      "tag": "geometry_quarter_inch_position"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "txtNonRound",
+      "left_twips": 1500,
+      "top_twips": 720,
+      "width_twips": 1500,
+      "height_twips": 360,
+      "tag": "geometry_non_round_1500_twips"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "txtWide",
+      "left_twips": 0,
+      "top_twips": 1440,
+      "width_twips": 8640,
+      "height_twips": 540,
+      "tag": "geometry_wide_control"
+    }
+  ]
+}

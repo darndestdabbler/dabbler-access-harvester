@@ -1,0 +1,51 @@
+{
+  "formName": "frmLabelsFromName",
+  "caption": "Phase B - Round 3: from non-generic Name",
+  "recordSource": "",
+  "hasHeader": false,
+  "hasFooter": false,
+  "width_twips": 10080,
+  "detailHeight_twips": 4320,
+  "controls": [
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "CustomerFirstName",
+      "left_twips": 1440,
+      "top_twips": 0,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "tag": "from_name_pascal_case"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "XMLPayload",
+      "left_twips": 1440,
+      "top_twips": 720,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "tag": "from_name_acronym_then_word"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "OrderTotal",
+      "left_twips": 1440,
+      "top_twips": 1440,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "tag": "from_name_simple_pascal"
+    },
+    {
+      "type": "textbox",
+      "section": "detail",
+      "name": "Text99",
+      "left_twips": 1440,
+      "top_twips": 2160,
+      "width_twips": 2880,
+      "height_twips": 360,
+      "tag": "from_name_generic_falls_through_to_unresolved"
+    }
+  ]
+}
