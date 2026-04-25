@@ -41,16 +41,21 @@ Claude Opus 4.7 @ effort=medium
 | 8 | reasoning | session-verification | gpt-5-4 | high | Per `task_type_overrides`; mandatory cross-provider gate. |
 
 **Actuals (filled after the session runs):**
-- Orchestrator used: TBD
-- Total routed cost: TBD
-- Deviations from recommendation: TBD
-- Notes for next-session calibration: TBD
+- Orchestrator used: Claude Opus 4.7 @ effort=high (1M context). Matches recommendation.
+- Total routed cost: $0.4421 (4 calls). By model: gpt-5-4 3 verification rounds $0.4395 ($0.1999 + $0.1824 + $0.0594 -- round 3 short-and-clean); gemini-pro 1 call $0.0026 (next-orchestrator recommendation).
+- Deviations from recommendation: none on orchestrator. Per the "orchestrator matches routing target" convention, the `planning` synthesis (which would route to Opus) was handled in-conversation rather than via `route()`. No `route(planning)` call appears in this session's metrics; the cost saved is the single largest item.
+- Notes for next-session calibration: Verification took 3 rounds; ALL findings (5 in round 1, 2 in round 2) were artifact-drift defects (table-vs-diagram, output-path inconsistency, count-vs-list mismatch, column-number reference) -- ZERO scope/coverage findings against the actual decomposition logic. Round 1: 3 Major + 2 Medium (fixture-gap ownership, case-08-overclaim, DAG vs table drift, column-number drift, jet-sql-parser-and-resolution should split). Round 2: 1 Major + 1 Medium (residual DAG drift, 3-vs-4 fixture instance count). Round 3: VERIFIED (clean). The dominant cost lever for document sessions on this generator set is **mechanical-correspondence between sections of the same document** (single source of truth; numbers; column references; diagram-vs-table edges). Session 3 generates 18 stub specs which all reference the tree by slug/edge/path -- this risk is amplified, not reduced, in Session 3.
+
+**Next session orchestrator recommendation (Session 3):**
+Claude Opus 4.7 @ effort=high
+
+**Rationale:** This session orchestrates 18 distinct but related planning calls, creating a high risk for the same class of artifact-drift defects that required three verification rounds in Session 2. A high-tier orchestrator is required to maintain context across the entire generation loop, ensuring consistency between the source tree and all 18 generated stubs to minimize expensive verification cycles.
 
 ## Session 3 of 4: Stub Specs
 
-**Recommended orchestrator:** Claude Sonnet 4.6 @ effort=medium
-**Rationale:** This session is a mechanical loop that orchestrates 6-12 independent, routed `planning` calls. A mid-tier model is the most cost-effective choice for managing this straightforward, repetitive workflow.
-**Estimated routed cost:** $2.00 - $4.00
+**Recommended orchestrator:** Claude Opus 4.7 @ effort=high *(updated from Session 2's actuals -- original recommendation was Sonnet 4.6 @ medium; see Session 2's "Next session orchestrator recommendation" block above. The escalation reflects that the verifier on this generator set has been strict on artifact-drift defects in both prior sessions, and Session 3 multiplies the drift surface area 18×.)*
+**Rationale:** This session orchestrates 18 routed `planning` calls (one per child session set named in `session-set-tree.md`). The actual planning task is repetitive but the orchestrator's job is non-trivial: each stub must reference the tree's slugs, edges, and output paths verbatim, and stubs must be internally consistent with each other (per Session 1 retrospective adopt-now `#2`/`#3`). Session 2 needed 3 verification rounds purely on artifact-drift -- Session 3 has 18× the surface area for that class of defect. Opus context fidelity is justified by the cost-of-defect, not by the per-call reasoning depth. Note: `planning` task_type pins to Opus, so per the "orchestrator matches routing target" convention, the per-stub work can be handled in-conversation rather than via 18 separate `route()` calls.
+**Estimated routed cost:** $1.50 - $3.00 (assuming most stub generation is in-conversation; ~$0.50 for verification, ~$1-2.50 if any stubs need re-routing)
 
 | Step | Type | route() task_type | Model | Effort/thinking | Rationale |
 |---|---|---|---|---|---|
