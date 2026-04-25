@@ -601,6 +601,101 @@
           "costUsd": 0.00169
         }
       ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 1,
+      "stepKey": "session-6/import-samples",
+      "dateTime": "2026-04-25T19:55:26.733710+00:00",
+      "description": "Imported HomeHealthCare/NorthwindDevEdition/ProjectBoard/FormAndReportDefaults/MasterDbPropertyExtractor .accdb plus samples/FormsAndReportsYaml/{FormAndReportDefaults,NorthwindDevEdition}.accdb.yaml per import-plan.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 2,
+      "stepKey": "session-6/import-tools",
+      "dateTime": "2026-04-25T19:55:26.734715+00:00",
+      "description": "Imported tools/validate_against_yaml.py as-is (generate_property_defaults.py landed in Session 4).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 3,
+      "stepKey": "session-6/route-readme",
+      "dateTime": "2026-04-25T19:55:26.736982+00:00",
+      "description": "Routed README.md draft via route(task_type='documentation'). Auto-verifier (gpt-5-4-mini) flagged two minor completeness issues (missing 'ribbons + tables' from overview; missing sample-input names in samples/ bullet); both addressed in the final README.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "documentation",
+          "inputTokens": 820,
+          "outputTokens": 712,
+          "costUsd": 0.008145
+        }
+      ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 4,
+      "stepKey": "session-6/build-test",
+      "dateTime": "2026-04-25T19:55:57.305068+00:00",
+      "description": "dotnet build: 0 errors, 224 CA1416 warnings (known imported, non-blocking). dotnet test: 95 passed / 0 failed / 0 skipped, 11s. Sequential.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 5,
+      "stepKey": "session-6/verify",
+      "dateTime": "2026-04-25T19:58:49.075088+00:00",
+      "description": "Cross-provider verification routed to gpt-5-4. Verdict in session-reviews/session-6.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3774,
+          "outputTokens": 6949,
+          "costUsd": 0.11367000000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 6,
+      "stepKey": "session-6/verify-round2",
+      "dateTime": "2026-04-25T20:01:54.308105+00:00",
+      "description": "Round-2 cross-provider verification routed to gpt-5-4 after fixing the validate_against_yaml.py stale-paths issue.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3595,
+          "outputTokens": 6624,
+          "costUsd": 0.10834749999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 7,
+      "stepKey": "session-6/route-changelog",
+      "dateTime": "2026-04-25T20:03:04.917176+00:00",
+      "description": "Generated change-log.md via route(task_type='summarization'). Model: gemini-flash.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1053,
+          "outputTokens": 1049,
+          "costUsd": 0.00078735
+        }
+      ]
     }
   ]
 }

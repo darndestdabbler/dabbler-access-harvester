@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "summary": "tools/validate_against_yaml.py retained stale sibling-repo paths/names (AccessExporter, sample-output, AccessExporter.Core).",
+    "category": "Correctness",
+    "severity": "Major",
+    "status": "fixed",
+    "round": 1,
+    "fix": "Renamed AccessExporter -> AccessHarvester in docstring/help/comments; argparse --defaults default updated to AccessHarvester.Core/Resources/property-defaults.json; --ir-root default updated to tmp/run-output/... (sample-output was out-of-scope per the import plan)."
+  }
+]
