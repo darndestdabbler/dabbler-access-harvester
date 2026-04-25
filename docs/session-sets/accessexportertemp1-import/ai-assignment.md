@@ -78,6 +78,15 @@ Claude Code Opus 4.7 @ effort=high
 | 8 | reasoning | session-verification | gpt-5-4 | high | Per `task_type_overrides`; mandatory cross-provider gate. |
 
 **Actuals (filled after the session runs):**
+- Orchestrator used: Claude Code Opus 4.7 @ effort=high (1M context)
+- Total routed cost: $0.2067 (1x session-verification + 1x next-orchestrator analysis)
+- Deviations from recommendation: Opus was used where Sonnet @ medium would have sufficed. No deviations from the import plan or the sibling Pipeline.Default() shape — files were copied as-is with namespace rewrite, csproj got the two embedded-resource lines, Pipeline.Default() was populated with the seven translators and fourteen enrichers exactly per the sibling. Pipeline phase logic and CLI subcommands were already in place from Session 3, so the spec's "wire CLI" step was a no-op.
+- Notes for next-session calibration: VERIFIED round 1, no issues. The session collapsed to mechanical work because Sessions 2 and 3 had front-loaded the pipeline and CLI scaffolding. Session 5 (test project + fixtures + Python builder import) is similarly mechanical and should run on Sonnet @ medium per the recommendation.
+
+**Next session orchestrator recommendation (Session 5):**
+Claude Code Sonnet 4.6 @ effort=medium
+
+**Rationale:** Session 5's scope is primarily mechanical file and project setup, which Session 4 proved does not require a high-tier model. The planned Sonnet orchestrator is a cost-effective choice well-suited to the task's complexity.
 
 ## Session 5 of 6: Tests + Synthetic DB Builder
 

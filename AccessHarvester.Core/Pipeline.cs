@@ -1,6 +1,8 @@
 using AccessHarvester.Core.Abstractions;
 using AccessHarvester.Core.Com;
+using AccessHarvester.Core.Enrichment;
 using AccessHarvester.Core.Extraction;
+using AccessHarvester.Core.Translation;
 
 namespace AccessHarvester.Core;
 
@@ -45,8 +47,7 @@ public sealed class Pipeline
         => _translators.Select(t => t.Category).ToArray();
 
     /// <summary>
-    /// Default pipeline. Translators and enrichers are populated in Session 4;
-    /// extract phase is fully operational from Session 3 onward.
+    /// Default pipeline covering all categories the harvester currently supports.
     /// </summary>
     public static Pipeline Default() => new(
         exporters: new IObjectExporter[]
@@ -59,8 +60,33 @@ public sealed class Pipeline
             TableExporter.Instance,
             RelationshipExporter.Instance,
         },
-        translators: Array.Empty<IObjectTranslator>(),
-        enrichers: Array.Empty<IObjectEnricher>());
+        translators: new IObjectTranslator[]
+        {
+            SaveAsTextTranslator.Forms,
+            SaveAsTextTranslator.Reports,
+            SaveAsTextTranslator.Macros,
+            SaveAsTextTranslator.Modules,
+            JsonPassthroughTranslator.Queries,
+            JsonPassthroughTranslator.Tables,
+            JsonPassthroughTranslator.Relationships,
+        },
+        enrichers: new IObjectEnricher[]
+        {
+            GeometryEnricher.Forms,
+            GeometryEnricher.Reports,
+            LabelResolver.Forms,
+            LabelResolver.Reports,
+            PropertyDecoder.Forms,
+            PropertyDecoder.Reports,
+            TextCapacityEnricher.Forms,
+            TextCapacityEnricher.Reports,
+            VbaSignatureEnricher.Forms,
+            VbaSignatureEnricher.Reports,
+            VbaSignatureEnricher.ModulesAndClasses,
+            MacroActionsEnricher.Macros,
+            MacroActionsEnricher.Forms,
+            MacroActionsEnricher.Reports,
+        });
 
     public static string BaseDir(string outputRoot, string dbName)
         => Path.Combine(outputRoot, "AccessMetaData", dbName);

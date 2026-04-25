@@ -1,0 +1,16 @@
+{
+  "_comment": "Approximate metrics for average character width and line height in em units. avgCharWidthEm is 'average width across mixed-content strings' — reasonable for proportional fonts where exact measurement requires the actual text + a renderer. lineHeightEm is the font's emHeight × lineGap multiplier. Numbers come from published font-metric tables for each face at typical body weights.",
+  "fonts": {
+    "Aptos":           { "avgCharWidthEm": 0.50, "lineHeightEm": 1.20 },
+    "Calibri":         { "avgCharWidthEm": 0.48, "lineHeightEm": 1.22 },
+    "Arial":           { "avgCharWidthEm": 0.52, "lineHeightEm": 1.15 },
+    "Segoe UI":        { "avgCharWidthEm": 0.50, "lineHeightEm": 1.33 },
+    "Tahoma":          { "avgCharWidthEm": 0.50, "lineHeightEm": 1.20 },
+    "Verdana":         { "avgCharWidthEm": 0.55, "lineHeightEm": 1.21 },
+    "Times New Roman": { "avgCharWidthEm": 0.45, "lineHeightEm": 1.15 },
+    "Cambria":         { "avgCharWidthEm": 0.48, "lineHeightEm": 1.26 },
+    "Courier New":     { "avgCharWidthEm": 0.60, "lineHeightEm": 1.20, "fixedWidth": true },
+    "Consolas":        { "avgCharWidthEm": 0.55, "lineHeightEm": 1.20, "fixedWidth": true }
+  },
+  "fallback": { "avgCharWidthEm": 0.50, "lineHeightEm": 1.20 }
+}

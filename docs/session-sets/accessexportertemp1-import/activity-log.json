@@ -344,6 +344,166 @@
           "costUsd": 0.0015912500000000002
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/import-translation",
+      "dateTime": "2026-04-25T19:30:02.095864+00:00",
+      "description": "Imported Translation/AccessTextParser.cs, Translation/SaveAsTextTranslator.cs, Translation/JsonPassthroughTranslator.cs from ../AccessExporterTemp1, with namespace rewrite AccessExporter.Core -> AccessHarvester.Core.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/import-enrichers",
+      "dateTime": "2026-04-25T19:30:02.097864+00:00",
+      "description": "Imported Enrichment/{GeometryEnricher,LabelResolver,PropertyDecoder,TextCapacityEnricher,VbaSignatureEnricher,MacroActionsEnricher}.cs plus Enrichment/Vba/{VbaSignatureParser,VbaModuleSplitter}.cs and Enrichment/Macros/MacroXmlParser.cs from sibling, with namespace rewrite. Also imported tools/generate_property_defaults.py per spec.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/import-resources",
+      "dateTime": "2026-04-25T19:30:02.098864+00:00",
+      "description": "Imported Resources/{property-defaults.json,font-metrics.json}; declared both as <EmbeddedResource> entries in AccessHarvester.Core.csproj.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/wire-pipeline",
+      "dateTime": "2026-04-25T19:30:02.100864+00:00",
+      "description": "Updated Pipeline.cs: added using directives for Translation and Enrichment namespaces; populated Pipeline.Default() with 7 translators (4 SaveAsText + 3 JsonPassthrough) and 14 enrichers (geometry, label, property-decoder, text-capacity, VBA-signature, macro-actions across applicable categories). Updated Default() doc comment to drop the 'Session 4' wording.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/wire-cli",
+      "dateTime": "2026-04-25T19:30:02.100864+00:00",
+      "description": "CLI translate + run subcommands were already wired in Session 3 (Program.cs RunTranslate / RunRun); no changes required this session. Build still cleanly resolves both via Pipeline.Default() now that translators and enrichers are populated.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/build",
+      "dateTime": "2026-04-25T19:30:02.101865+00:00",
+      "description": "dotnet build AccessHarvester.sln -> Build succeeded, 0 warnings, 0 errors.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/run-full",
+      "dateTime": "2026-04-25T19:30:02.102872+00:00",
+      "description": "AccessHarvester.exe run --db samples/MiniComplex.accdb --out tmp/run-output -> all 7 categories produced raw/, kb/, and ir/ outputs successfully (Forms 4ok, Reports 3ok, Macros 2ok, ModulesAndClasses 1ok, Queries 8ok, Tables 8ok, Relationships 6ok). Defaults.json artifact present in ir/.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/import-translation",
+      "dateTime": "2026-04-25T19:30:07.823812+00:00",
+      "description": "Imported Translation/AccessTextParser.cs, Translation/SaveAsTextTranslator.cs, Translation/JsonPassthroughTranslator.cs from ../AccessExporterTemp1, with namespace rewrite AccessExporter.Core -> AccessHarvester.Core.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/import-enrichers",
+      "dateTime": "2026-04-25T19:30:07.824819+00:00",
+      "description": "Imported Enrichment/{GeometryEnricher,LabelResolver,PropertyDecoder,TextCapacityEnricher,VbaSignatureEnricher,MacroActionsEnricher}.cs plus Enrichment/Vba/{VbaSignatureParser,VbaModuleSplitter}.cs and Enrichment/Macros/MacroXmlParser.cs from sibling, with namespace rewrite. Also imported tools/generate_property_defaults.py per spec.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/import-resources",
+      "dateTime": "2026-04-25T19:30:07.825812+00:00",
+      "description": "Imported Resources/{property-defaults.json,font-metrics.json}; declared both as <EmbeddedResource> entries in AccessHarvester.Core.csproj.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/wire-pipeline",
+      "dateTime": "2026-04-25T19:30:07.826812+00:00",
+      "description": "Updated Pipeline.cs: added using directives for Translation and Enrichment namespaces; populated Pipeline.Default() with 7 translators (4 SaveAsText + 3 JsonPassthrough) and 14 enrichers (geometry, label, property-decoder, text-capacity, VBA-signature, macro-actions across applicable categories). Updated Default() doc comment to drop the 'Session 4' wording.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/wire-cli",
+      "dateTime": "2026-04-25T19:30:07.827812+00:00",
+      "description": "CLI translate + run subcommands were already wired in Session 3 (Program.cs RunTranslate / RunRun); no changes required this session. Build still cleanly resolves both via Pipeline.Default() now that translators and enrichers are populated.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/build",
+      "dateTime": "2026-04-25T19:30:07.829009+00:00",
+      "description": "dotnet build AccessHarvester.sln -> Build succeeded, 0 warnings, 0 errors.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/run-full",
+      "dateTime": "2026-04-25T19:30:07.830023+00:00",
+      "description": "AccessHarvester.exe run --db samples/MiniComplex.accdb --out tmp/run-output -> all 7 categories produced raw/, kb/, and ir/ outputs successfully (Forms 4ok, Reports 3ok, Macros 2ok, ModulesAndClasses 1ok, Queries 8ok, Tables 8ok, Relationships 6ok). Defaults.json artifact present in ir/.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 8,
+      "stepKey": "session-4/verify",
+      "dateTime": "2026-04-25T19:33:03.056360+00:00",
+      "description": "Cross-provider session-verification via route(task_type='session-verification') => gpt-5-4. Tokens: 17139 in / 10764 out. Cost: $0.2043.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 17139,
+          "outputTokens": 10764,
+          "costUsd": 0.2043075
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 9,
+      "stepKey": "session-4/next-orchestrator-recommendation",
+      "dateTime": "2026-04-25T19:33:50.549596+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 5. Model: gemini-pro. Cost: $0.0024.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1227,
+          "outputTokens": 84,
+          "costUsd": 0.00237375
+        }
+      ]
     }
   ]
 }

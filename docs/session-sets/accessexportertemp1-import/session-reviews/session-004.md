@@ -1,0 +1,3 @@
+# Verification Round 1
+
+**VERIFIED** — I checked that `Pipeline.Default()` now wires the expected 7 translators and 14 enrichers across all supported categories, that `AccessHarvester.Core.csproj` embeds both required JSON resources, and that the reported `run` execution produces `raw/`, `kb/`, and `ir/` trees with successful counts for every category. The sample `kb` → `ir` diff is consistent with the imported enrichers actually running (`NotDefault` decoding plus geometry/text-capacity augmentation); non-blocking observation: the evidence provided is strongest for form/report enrichment and would benefit from Session 5 tests that explicitly exercise VBA-signature and macro-action IR outputs.

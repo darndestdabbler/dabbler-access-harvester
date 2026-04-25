@@ -1,9 +1,11 @@
-# Next-Session Orchestrator Recommendation — Session 3
+# Next-Session Orchestrator Recommendation — Session 5
 
-> Authored by route(task_type='analysis') after Session 2 commit.
-> Model: gemini-pro; cost: $0.0623.
+> Authored by route(task_type='analysis') after Session 4 commit.
+> Model: gemini-pro; cost: $0.0024.
 
-**Next session orchestrator recommendation (Session 3):**
+```markdown
+**Next session orchestrator recommendation (Session 5):**
 Claude Code Sonnet 4.6 @ effort=medium
 
-**Rationale:** Session 3's scope is primarily mechanical file imports and boilerplate CLI wiring, similar in nature to Session 2. The actuals from Session 2 confirmed that Opus was significant over-spend for this type of work, making the more cost-effective Sonnet 4.6 the appropriate choice.
+**Rationale:** Session 5's scope is primarily mechanical file and project setup, which Session 4 proved does not require a high-tier model. The planned Sonnet orchestrator is a cost-effective choice well-suited to the task's complexity.
+```

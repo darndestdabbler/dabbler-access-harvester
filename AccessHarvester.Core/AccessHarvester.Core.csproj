@@ -8,4 +8,9 @@
     <AssemblyName>AccessHarvester.Core</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\property-defaults.json" />
+    <EmbeddedResource Include="Resources\font-metrics.json" />
+  </ItemGroup>
+
 </Project>
