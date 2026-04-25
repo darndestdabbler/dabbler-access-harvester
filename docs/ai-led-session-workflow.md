@@ -42,6 +42,8 @@ Orchestrator (Claude / Codex / Gemini)
   |-- reads project-guidance.md and lessons-learned.md
   |-- reads spec.md in the active session set
   |-- reads activity-log.json for prior progress
+  |-- on first session of a set: authors ai-assignment.md
+  |   (route(task_type='analysis')); on later sessions: reads it
   |
   |  For each step in the session plan:
   |    |-- file work: creates/edits files directly
@@ -61,6 +63,9 @@ Orchestrator (Claude / Codex / Gemini)
   |
   |-- on last session: generates change-log.md (part of the same commit)
   |-- prints cost report
+  |-- on every session except the last: routes a next-orchestrator
+  |   recommendation (route(task_type='analysis')); appended to
+  |   ai-assignment.md and surfaced in the final printout + notify body
   |-- commits and pushes
   |-- sends session-complete notification (if configured)
   |-- on last session ONLY (after notify):
@@ -80,6 +85,7 @@ session set lives in `docs/session-sets/<name>/` and contains:
 | File | Purpose |
 |---|---|
 | `spec.md` | The full plan: goals, features, and per-session step lists |
+| `ai-assignment.md` | Per-session AI-assignment ledger: recommended orchestrator (engine + model + thinking/effort) and per-step routed-task model/effort, with rationale. Authored by Session 1 of the set via `route(task_type='analysis')`; appended-to at the end of each subsequent session with that session's actuals + the recommendation for the next |
 | `activity-log.json` | Machine-readable log of every step across all sessions |
 | `session-reviews/session-NNN.md` | Raw verifier output for each session (never edited) |
 | `session-reviews/issues-NNN.json` | Issue log if verification found problems |
@@ -368,7 +374,79 @@ Open `spec.md` and find the plan for the current session number.
 
 Confirm that files listed in prior sessions' "Creates" and "Touches" exist.
 
-### Step 4: Execute Each Step
+### Step 3.5: First Session Of A Set — Author `ai-assignment.md` (If Missing)
+
+**Skip this step on Session 2+ of a set.** If
+`docs/session-sets/<name>/ai-assignment.md` already exists, read it for
+context and proceed to Step 4.
+
+**On the first session of a new set, if the file does not yet exist,
+produce it before executing any steps.** This is the AI-assignment
+ledger: a per-session table of the cheapest AI capable of safely
+handling each piece of work, including the orchestrator itself.
+Authoring it via `route()` (rather than self-opining) keeps the
+calibration honest — the current orchestrator is the wrong judge of
+whether it could have been a smaller orchestrator.
+
+```python
+result = route(
+    content=ai_assignment_prompt,   # see schema below
+    task_type="analysis",
+    complexity_hint=55,             # mid-tier reasoning, cross-provider verifier kicks in
+    session_set=str(SESSION_SET),
+    session_number=N,
+)
+# write the result to docs/session-sets/<name>/ai-assignment.md
+log.log_step(N, step_num, "session-N/author-ai-assignment", ...)
+```
+
+**Calibration philosophy** the prompt should encode:
+
+- **Mechanical work** (file copy, namespace rewrite, csproj boilerplate,
+  git, build/test, dispatch + logging) → lowest-tier orchestrator that
+  can drive file/shell tools reliably. Sonnet 4.6 at low/medium effort
+  is usually sufficient. Opus 4.7 is over-spend on mechanical sessions.
+- **Routed reasoning** → use the `routing.task_type_overrides` and
+  `task_type_params` already in `router-config.yaml`. Override via
+  `complexity_hint` only when the spec describes work materially
+  larger or smaller than the task type's default.
+- **Synthesis** (architecture, parser-grammar, novel test-case
+  authoring, plan generation) → top tier; cheaper models burn budget
+  in re-routes and verifier ping-pong.
+
+**Schema** (the produced markdown):
+
+```markdown
+# AI Assignment Ledger — <session-set-name>
+
+> **Authored:** <date> by route(task_type='analysis').
+> **Updated after each session:** the orchestrator appends an "Actuals"
+> block under each session row once it completes, and updates the
+> *next* session's row if the actuals reveal a miscalibration.
+
+## Session N of M: <title>
+
+**Recommended orchestrator:** <engine> <model> @ effort=<low|medium|high>
+**Rationale:** <2-sentence justification grounded in the spec's step list>
+**Estimated routed cost:** $<X.XX>
+
+| Step | Type | route() task_type | Model | Effort/thinking | Rationale |
+|---|---|---|---|---|---|
+| 1 | mechanical | — | — | — | <e.g. verify prereqs> |
+| 2 | reasoning | analysis | gemini-pro | dynamic | <why this fit> |
+| ... | reasoning | session-verification | gpt-5-4 | high | Cross-provider gate |
+
+**Actuals (filled after the session runs):**
+- Orchestrator used: <engine + model + thinking>
+- Total routed cost: $<X.XX>
+- Deviations from recommendation: <any>
+- Notes for next-session calibration: <any>
+```
+
+A single `analysis` route() call — typically Gemini Pro per the
+default tier mapping — produces the whole ledger at once. The cost
+is small (~$0.10–0.30 for a 6-session set) and the savings on later
+sessions tend to be 5–20× that.
 
 For each step in the session plan:
 
@@ -540,7 +618,7 @@ record_adjudication(
 )
 ```
 
-### Step 8: Cost Report, Change Log (Last Session), Commit, Push, And Notify
+### Step 8: Cost Report, Next-Orchestrator Recommendation, Change Log (Last Session), Commit, Push, And Notify
 
 Print the cost report:
 
@@ -548,6 +626,49 @@ Print the cost report:
 from ai_router import print_cost_report
 print_cost_report(SESSION_SET)
 ```
+
+**Every session except the last — produce a next-session orchestrator
+recommendation.** This is the forward-looking complement to the
+backward-looking cost report. Inputs: the next session's spec excerpt,
+the next session's `ai-assignment.md` row, and this session's actuals
+(routed cost, escalations, verifier verdict, any orchestrator
+self-assessment of "harder/easier than expected"). Output: a
+recommended orchestrator (engine + model + thinking/effort) plus a
+two-sentence rationale. Routed via `route(task_type='analysis')` so
+the current orchestrator does not self-opine.
+
+```python
+result = route(
+    content=next_orchestrator_prompt,   # see schema below
+    task_type="analysis",
+    complexity_hint=40,                 # smaller than the ai-assignment authoring call
+    session_set=str(SESSION_SET),
+    session_number=N,
+)
+log.log_step(N, step_num, "session-N/next-orchestrator-recommendation",
+             description="Routed analysis recommending <engine+model+effort> for Session N+1",
+             status="complete",
+             api_calls=[{...}])
+```
+
+**Recommendation schema** (one short markdown block, also appended to
+the *Actuals* block of this session's row in `ai-assignment.md` AND
+to the *Recommended orchestrator* line of the next session's row if
+the recommendation differs from the original):
+
+```markdown
+**Next session orchestrator recommendation (Session N+1):**
+<engine> <model> @ effort=<low|medium|high>
+
+**Rationale:** <one to two sentences grounded in (a) the next
+session's actual scope and (b) what this session revealed about
+how the codebase is shaped>
+```
+
+The recommendation is **advisory** — the human chooses whether to
+honor it when they invoke the next session. Surface it in the final
+end-of-session printout AND include a one-line summary in the
+Pushover notification body so the human sees it on their phone.
 
 **Last session only — generate the change log before committing.** It must
 land in the same commit as the final session's code so the session set is
@@ -913,3 +1034,10 @@ This is the authoritative rules list. Instruction files (`CLAUDE.md`,
 12. **Run the Step 9 reorganization review on the last session of every
     set, after the notify.** Output "no changes recommended" if nothing
     qualifies — but do the review.
+13. **Author the AI-assignment ledger on Session 1 of every new set
+    (Step 3.5), and the next-session orchestrator recommendation at
+    the end of every session except the last (Step 8 sub-step).** Both
+    are routed `analysis` calls — never self-opine on which orchestrator
+    or which model would have been the cheapest safe choice. The current
+    orchestrator is the wrong judge of whether it could have been a
+    smaller orchestrator.

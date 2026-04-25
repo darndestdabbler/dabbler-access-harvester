@@ -204,6 +204,23 @@
           "costUsd": 0.07755
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/author-ai-assignment-retro",
+      "dateTime": "2026-04-25T16:22:57.955676+00:00",
+      "description": "Retroactive backfill prompted by workflow extension: human added Step 3.5 (ai-assignment.md authoring on Session 1 of every set) and Step 8 sub-step (next-orchestrator recommendation every session except last) to docs/ai-led-session-workflow.md. Single route(task_type='analysis') call to gemini-pro produced both ai-assignment.md (covers Sessions 1-6 with Sessions 1-2 actuals filled in) and Session 3 recommendation (Sonnet 4.6 @ effort=medium). Cross-provider relative to Claude Opus orchestrator.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 35151,
+          "outputTokens": 1833,
+          "costUsd": 0.062283
+        }
+      ]
     }
   ]
 }
