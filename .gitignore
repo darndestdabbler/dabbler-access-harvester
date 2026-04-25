@@ -20,3 +20,6 @@ ai-router/router-state.db
 # OS detritus
 Thumbs.db
 .DS_Store
+
+# Local scratch / one-shot orchestrator scripts — not committed
+tmp/

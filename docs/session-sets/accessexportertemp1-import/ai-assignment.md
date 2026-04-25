@@ -129,3 +129,7 @@ Session 6 contains a high-stakes reorganization review step where existing proje
 | 8-9 | mechanical | — | — | — | Commit, push, notify, conduct reorganization review. |
 
 **Actuals (filled after the session runs):**
+- Orchestrator used: Claude Code Opus 4.7 @ effort=high (1M context)
+- Total routed cost: ~$0.23 (1x documentation [auto-verified] + 2x session-verification + 1x summarization-flash for change-log)
+- Deviations from recommendation: None on orchestrator. One verification round 2 was needed: round 1 (gpt-5-4) flagged a Major Correctness issue — `tools/validate_against_yaml.py` retained sibling-repo paths/names (AccessExporter, sample-output, AccessExporter.Core). Fixed via minimal rename + argparse-default updates; round 2 VERIFIED. The summarization call for change-log.md hit Gemini Pro 400 on first attempt; pinned `max_tier=1` per the lessons-learned guidance and Gemini Flash succeeded.
+- Notes for next-session calibration: This was the last session. Sample-DB, dev-tool, and README import was straightforward mechanical work; the `documentation` auto-verifier on the README and the cross-provider verifier on the session both earned their cost — they each surfaced real fixes. The `tools/validate_against_yaml.py` finding is a useful lesson: import-as-is with stale paths is a verifier-magnet even when explicitly disclosed; for follow-on session sets, consider a "stale-path scrub" mechanical pass on imported dev tools rather than disclosing-and-deferring.
