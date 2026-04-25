@@ -1,0 +1,54 @@
+[
+  {
+    "id": "OQ2-FORMANDREPORTDEFAULTS",
+    "severity": "major",
+    "issue": "Plan made samples/FormAndReportDefaults.accdb contingent on OQ #2, but spec Feature 4 explicitly requires it as a Session 6 import.",
+    "status": "fixed",
+    "resolution": "Disposition row changed to import-as-is unconditionally for Session 6. Open question #2 narrowed to MasterDbPropertyExtractor.accdb + FormsAndReportsYaml/. Per-session table updated. Cross-reference section updated."
+  },
+  {
+    "id": "WINDOWS-COM-GATING-PLACEMENT",
+    "severity": "major",
+    "issue": "Wording inconsistency around [assembly: SupportedOSPlatform(\"windows\")]: plan said attribute 'travels with the project file' and implied retention on the Cli csproj, while also saying it lives in AccessComSession.cs.",
+    "status": "fixed",
+    "resolution": "Methodology footnote rewritten: attribute is in Com/AccessComSession.cs line 4; importing that file places the gate on Core (assembly-scoped). Cli csproj row updated to say the gate is inherited via project reference, no separate attribute needed. AccessComSession.cs disposition row also clarified."
+  },
+  {
+    "id": "BATON-DRIFT-TEST-COUNT",
+    "severity": "minor",
+    "issue": "Drift table said '9 test .cs files (one of which is a helper)' which is self-contradictory \u2014 a helper is not a test. Actual count is 10 .cs files = 9 tests + 1 helper.",
+    "status": "fixed",
+    "resolution": "Drift row corrected to '10 .cs files: 9 test files + UatChecklist.cs (a helper, not a test class).'"
+  },
+  {
+    "id": "OQ3-NOT-NECESSARY",
+    "severity": "major",
+    "issue": "OQ #3 (AccessTextParser bugs: fix-now-or-defer) was a blocking human gate, but lean-by-default + spec scope already favor deferral. Made Session 2 wait on a question that doesn't need asking.",
+    "status": "fixed",
+    "resolution": "OQ #3 removed entirely. Both bugs remain captured in 'Known issues imported as-is' (#1 and #2). Disposition row for AccessTextParser.cs is now an unconditional 'import-as-is'. OQ #4 (label-quality) renumbered to #3. Cross-reference section updated."
+  },
+  {
+    "id": "R2-WINDOWS-COM-GATING-PLACEMENT",
+    "round": 2,
+    "severity": "major",
+    "issue": "AccessExporter.Core/ section intro still said the assembly-level [SupportedOSPlatform] declaration 'travels with the project file' after Round 1's fix updated other locations.",
+    "status": "fixed",
+    "resolution": "Section intro updated to 'travels with Com/AccessComSession.cs'."
+  },
+  {
+    "id": "R2-DISPOSITION-BUCKET-COMPLETENESS",
+    "round": 2,
+    "severity": "major",
+    "issue": "Several rows used '**flag \u2014 see Open question #N**' as the disposition label, which is not one of the four spec-required disposition buckets (import-as-is, import-with-edits, rebuild, out-of-scope).",
+    "status": "fixed",
+    "resolution": "Eight rows updated to 'import-as-is *(pending OQ #N \u2014 drops to out-of-scope if human elects to drop)*'. The OQ remains intact; the disposition is now an explicit-bucket label as the spec requires."
+  },
+  {
+    "id": "R2-SESSION-4-ENRICHER-COUNT",
+    "round": 2,
+    "severity": "minor",
+    "issue": "Per-session table said '7 enricher files' but the inventory has 6 enricher entry-points plus 3 nested helper/parser files.",
+    "status": "fixed",
+    "resolution": "Wording changed to '6 enricher entry-point files plus 3 nested helper / parser files', with explicit names listed."
+  }
+]

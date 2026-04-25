@@ -1,0 +1,22 @@
+# Python virtual environment (created locally; never committed)
+.venv/
+
+# Python bytecode caches
+__pycache__/
+*.pyc
+*.pyo
+
+# AI router runtime state — local only
+ai-router/router-state.db
+
+# .NET build artifacts (will appear in later sessions)
+**/bin/
+**/obj/
+
+# IDE/editor metadata
+.vs/
+.vscode/
+
+# OS detritus
+Thumbs.db
+.DS_Store
