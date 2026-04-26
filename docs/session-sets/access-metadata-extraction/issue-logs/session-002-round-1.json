@@ -1,0 +1,54 @@
+{
+  "round": 1,
+  "verifier": "gpt-5-4",
+  "issues": [
+    {
+      "id": "session-2-round-1-major-1",
+      "severity": "Major",
+      "summary": "QueryMetadata missing OutputColumns slot",
+      "location": "AccessHarvester.Access/QueryMetadata.cs",
+      "resolution": "fixed",
+      "fix": "Added IReadOnlyList<QueryOutputColumn>? OutputColumns and the QueryOutputColumn record. Documented as a reserved slot under the current raw IR shape; populated when raw-exporter widening or a downstream JET SQL parser provides it."
+    },
+    {
+      "id": "session-2-round-1-major-2",
+      "severity": "Major",
+      "summary": "TableMetadata.ValidationRule/Text unreachable from current raw IR",
+      "location": "AccessHarvester.Access/TableMetadata.cs",
+      "resolution": "fixed",
+      "fix": "Documented as an explicit raw-IR coverage gap on both fields with a pointer to the planned raw-exporter widening. Typed slots remain so the schema does not need a contract change when widening lands."
+    },
+    {
+      "id": "session-2-round-1-minor-1",
+      "severity": "Minor",
+      "summary": "Connect/SourceTableName docs misleadingly say 'null for native'",
+      "location": "AccessHarvester.Access/QueryMetadata.cs (Connect); AccessHarvester.Access/TableMetadata.cs (Connect, SourceTableName)",
+      "resolution": "fixed",
+      "fix": "Rewrote remarks to state the raw IR preserves DAO's empty string for native objects; null specifically means the property could not be read. Pointed Connect-checking consumers at IsLinked / QueryType."
+    },
+    {
+      "id": "session-2-round-1-minor-2",
+      "severity": "Minor",
+      "summary": "Parameters discovery-order claim contradicts implementation",
+      "location": "AccessHarvester.Access/QueryMetadata.cs (Parameters remarks)",
+      "resolution": "fixed",
+      "fix": "Updated remarks to state declared first, then form-references in source order, then report-references in source order — matching the implementation."
+    },
+    {
+      "id": "session-2-round-1-minor-3",
+      "severity": "Minor",
+      "summary": "QueryParameter.Source documents 'unresolved' but extractor never emits it",
+      "location": "AccessHarvester.Access/QueryMetadata.cs (QueryParameter.Source)",
+      "resolution": "fixed",
+      "fix": "Removed 'unresolved' from the documented value set; clarified that not-found yields Parameters = null on the parent QueryMetadata. Lean by default — no synthesised unresolved records."
+    },
+    {
+      "id": "session-2-round-1-minor-4",
+      "severity": "Minor",
+      "summary": "RelationshipMetadataExtractor IsUnique/IsInherited not asserted by tests",
+      "location": "tests/AccessHarvester.Tests/RelationshipMetadataExtractorTests.cs",
+      "resolution": "fixed",
+      "fix": "Added Extract_UniqueAndInheritedFlagsDecodedFromAttributes covering Attributes = 0x05; asserts both flags plus interaction with the other bitmask flags."
+    }
+  ]
+}
