@@ -4,7 +4,7 @@
 > **Source fixtures:** `docs/test-cases/01-simple-validation.bas` through `docs/test-cases/12-switchboard-navigation.bas` (12 fixtures, mixed `.bas` / `.cls` / `.sql` / `.txt`).
 > **Spec source:** MS-VBAL section numbers as cataloged in `docs/spec-study/ms-vbal-summary.md` (Session 1 of this set). Where a hazard is Access-specific (extending MS-VBAL core), the entry says so explicitly.
 > **Produced:** Session 3 of `vba-spec-study` (2026-04-25), Opus orchestrator authoring in-conversation (see Deviation note).
-> **Session set:** `docs/session-sets/✅vba-spec-study/`
+> **Session set:** `docs/session-sets/vba-spec-study/`
 
 > **Deviation note.** The spec called for `route(task_type="architecture", complexity_hint=80)` synthesis. Batch A's first call succeeded (1909 input / 16788 output tokens, $1.29) but its content was lost to a Python `print()` Unicode error (`cp1252` codec) before the file write. The retry timed out at the provider boundary. Per the existing lessons-learned action item ("If a synthesis-document `route()` call to Opus times out and the orchestrator is Sonnet: escalate to Opus as the orchestrator for the next attempt") the human switched the orchestrator to Opus. Per `project-guidance.md` → Conventions → "When the orchestrator's model matches the routing target for a given task type, handle the task in-conversation rather than calling `route()`", this document was authored in-conversation rather than re-attempting `route()`. The non-negotiable session-verification cross-provider call (gpt-5-4) is unchanged.
 

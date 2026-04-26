@@ -731,18 +731,21 @@ Include this block in the `change-log.md` header AND in the Pushover notificatio
 If there is no `session-set-tree.md` (i.e., this session set was not produced by a
 generator set), omit this sub-step.
 
-**Last session only — prepend ✅ to the session-set directory name.**
-Once `change-log.md` lands on the last session of a set, rename the
-session-set directory to `✅<original-slug>` so the completed state
-is visible at a glance in `docs/session-sets/`. The conceptual slug
-itself does not change (it stays `<original-slug>` in
-`session-set-tree.md`, in cross-set references, and in any
-`Prerequisite:` lines); only the directory name carries the marker.
-Update path references in this commit so spec.md headers, change-log
-self-references, and any in-set scripts point at the renamed path.
-The `find_active_session_set()` helper keys off `change-log.md`
-presence, not directory name, so the marker has no functional effect
-on auto-detection.
+**Print the session-set status table.** After the cost report, call
+`print_session_set_status()` to print a single-screen status board: every
+set under `docs/session-sets/` grouped as `[~]` in-flight, `[ ]`
+not-started, `[x]` done, with per-set progress (`<completed>/<total>`)
+and last-touched date. State is derived from file presence
+(`change-log.md` -> done, `activity-log.json` without it -> in-flight,
+only `spec.md` -> not-started) — the same rules
+`find_active_session_set()` uses — so directories never need to be
+renamed at lifecycle transitions. Glyphs are ASCII (`[~]` / `[ ]` /
+`[x]`) so a Windows cp1252 console cannot crash mid-print.
+
+```python
+from ai_router import print_session_set_status
+print_session_set_status()
+```
 
 Commit and push:
 ```bash

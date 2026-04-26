@@ -3,7 +3,7 @@
 > **Purpose:** Extract form, report, query, and table metadata from `.accdb` files via DAO/ACE — and author the database-level fixtures Phase 4.1–4.3 requires (which the existing 12 module-level test cases do not provide). Runs in parallel with the entire `#3-#9` resolver branch since it depends only on `parser-foundations` (#1).
 > **Created:** 2026-04-25
 > **Session Set:** `docs/session-sets/access-metadata-extraction/`
-> **Prerequisite:** docs/session-sets/✅parser-foundations/
+> **Prerequisite:** docs/session-sets/parser-foundations/
 > **Workflow:** Orchestrator → AI Router → Cross-provider verification
 
 > **This spec is a stub.** The orchestrator executing Session 1 of this set must elaborate the step lists before running them.
@@ -12,7 +12,7 @@
 
 ## Canonical tree row
 
-> Copied verbatim from `docs/session-sets/✅vba-parser-session-set-generator/session-set-tree.md` row #10. This is the authoritative record; the prose below interprets these fields, never overrides them.
+> Copied verbatim from `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md` row #10. This is the authoritative record; the prose below interprets these fields, never overrides them.
 
 | Field | Value |
 |---|---|
@@ -35,7 +35,7 @@ The COM-based extractor requires Windows + Microsoft Access installed. Per `proj
 
 ## Authority
 
-Slug, plan-phase coverage, prerequisites, session count, and output paths are fixed by `docs/session-sets/✅vba-parser-session-set-generator/session-set-tree.md` row #10.
+Slug, plan-phase coverage, prerequisites, session count, and output paths are fixed by `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md` row #10.
 
 ---
 
