@@ -380,7 +380,7 @@ reference; if it proves out twice in *this* repo, propose promotion to
   merges happen explicitly when each set finishes rather than as
   ambient churn during execution.
 - **Action for future sessions:** When starting a new session set that
-  will run in parallel with another in-flight set:
+  will run in parallel with another in-progress set:
   1. Create a branch off main: `git checkout -b session-set/<slug>`.
   2. Create a worktree for it: `git worktree add ../<repo>-<slug> session-set/<slug>`.
   3. Run all sessions of that set in the worktree's directory.

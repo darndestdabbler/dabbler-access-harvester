@@ -1,7 +1,7 @@
 // Dabbler Session Sets — VS Code tree-view extension.
 //
 // Reads docs/session-sets/<slug>/{spec.md,activity-log.json,change-log.md}
-// and renders a three-group tree: In Flight, Not Started, Done. State is
+// and renders a three-group tree: In Progress, Not Started, Done. State is
 // derived from file presence, mirroring ai_router.find_active_session_set
 // and ai_router.print_session_set_status. The extension never writes —
 // it only watches and re-reads.
@@ -34,7 +34,7 @@ function readSessionSets(root) {
 
     let state;
     if (fs.existsSync(changeLogPath)) state = "done";
-    else if (fs.existsSync(activityPath)) state = "in-flight";
+    else if (fs.existsSync(activityPath)) state = "in-progress";
     else state = "not-started";
 
     let totalSessions = null;
@@ -119,13 +119,18 @@ class SessionSetsProvider {
 
     if (!element) {
       // Top level: three group nodes.
-      const inFlight = all.filter((s) => s.state === "in-flight");
+      const inProgress = all.filter((s) => s.state === "in-progress");
       const notStarted = all.filter((s) => s.state === "not-started");
       const done = all.filter((s) => s.state === "done");
 
       const groups = [];
       groups.push(
-        makeGroup("In Flight", "in-flight", inFlight.length, "loading~spin"),
+        makeGroup(
+          "In Progress",
+          "in-progress",
+          inProgress.length,
+          "circle-large-filled",
+        ),
       );
       groups.push(
         makeGroup(
@@ -141,7 +146,7 @@ class SessionSetsProvider {
 
     if (element.contextValue === "group") {
       let subset = all.filter((s) => s.state === element.groupKey);
-      if (element.groupKey === "in-flight" || element.groupKey === "done") {
+      if (element.groupKey === "in-progress" || element.groupKey === "done") {
         subset.sort((a, b) =>
           (b.lastTouched || "").localeCompare(a.lastTouched || ""),
         );
@@ -192,9 +197,9 @@ function makeSetItem(set) {
       "pass-filled",
       new vscode.ThemeColor("testing.iconPassed"),
     );
-  } else if (set.state === "in-flight") {
+  } else if (set.state === "in-progress") {
     item.iconPath = new vscode.ThemeIcon(
-      "loading~spin",
+      "circle-large-filled",
       new vscode.ThemeColor("testing.runAction"),
     );
   } else {
@@ -282,31 +287,19 @@ function activate(context) {
     vscode.window.setStatusBarMessage(`Copied: ${label}`, 4000);
   };
 
+  // The clipboard text intentionally stays terse. What each phrase
+  // actually means to the orchestrator is documented in
+  // docs/ai-led-session-workflow.md → Start-Session Trigger Phrases,
+  // including the optional `— maxout Claude` / `— maxout Codex` suffix
+  // the human can append when draining a token-window allotment.
   const startCommandPresets = {
-    "default": (slug) =>
-      `Please start the next session of \`${slug}\`.`,
-    "maxoutClaude": (slug) =>
-      `Please start the next session of \`${slug}\` — maxout Claude (use Opus 4.7 as orchestrator at effort=max, drop max_tier caps on routed calls, push complexity_hint up so eligible calls route to Opus/max).`,
-    "maxoutCodex": (slug) =>
-      `Please start the next session of \`${slug}\` — maxout Codex (use GPT-5.5 or GPT-5.4 as orchestrator at reasoning_effort=high, push routed calls to GPT-5.4/high).`,
-    "opusHigh": (slug) =>
-      `Please start the next session of \`${slug}\` with Claude Opus @ effort=high as the orchestrator.`,
-    "opusMedium": (slug) =>
-      `Please start the next session of \`${slug}\` with Claude Opus @ effort=medium as the orchestrator.`,
-    "sonnetMedium": (slug) =>
-      `Please start the next session of \`${slug}\` with Claude Sonnet @ effort=medium as the orchestrator.`,
-    "sonnetLow": (slug) =>
-      `Please start the next session of \`${slug}\` with Claude Sonnet @ effort=low as the orchestrator.`,
+    default: (slug) => `Start the next session of \`${slug}\`.`,
+    parallel: (slug) => `Start the next parallel session of \`${slug}\`.`,
   };
 
   const presetLabels = {
-    "default": "default start command",
-    "maxoutClaude": "maxout Claude",
-    "maxoutCodex": "maxout Codex",
-    "opusHigh": "Opus @ effort=high",
-    "opusMedium": "Opus @ effort=medium",
-    "sonnetMedium": "Sonnet @ effort=medium",
-    "sonnetLow": "Sonnet @ effort=low",
+    default: "start next session",
+    parallel: "start next parallel session",
   };
 
   for (const [key, builder] of Object.entries(startCommandPresets)) {

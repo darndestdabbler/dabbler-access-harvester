@@ -24,7 +24,7 @@
 The harvester arrived at a coherent AI-orchestration pattern incrementally
 across several session sets (`accessexportertemp1-import`,
 `parser-foundations`, `vba-parser-session-set-generator`,
-`vba-spec-study`, plus the in-flight metadata-extraction +
+`vba-spec-study`, plus the in-progress metadata-extraction +
 lexical-and-expression-grammar pair). Standing up that same pattern in a
 new project today means hand-copying a dozen files and editing each one
 for the new codebase — which is friction every time, and exactly the
