@@ -17,7 +17,7 @@ automated build/test plus mandatory cross-provider AI verification.
 - `AccessHarvester.Cli/` — Thin CLI exe. Subcommands: `extract`, `translate`, `run`.
 - `AccessHarvester.Core/` — Extractors, translators, enrichers, COM session, model.
 - `tests/AccessHarvester.Tests/` — xUnit hermetic unit tests + `[SkippableFact]` integration tests.
-- `tools/` — Python developer utilities (`generate_property_defaults.py`, `validate_against_yaml.py`).
+- `tools/` — Python developer utilities (`generate_property_defaults.py`, `validate_against_yaml.py`) plus the [`vscode-session-sets`](tools/vscode-session-sets/README.md) extension that surfaces session-set state in the Explorer panel.
 - `test-builder/` — Python synthetic-DB builder (pywin32 + Access COM).
 - `samples/` — Committed sample Access inputs: `HomeHealthCare.accdb`, `MiniComplex.accdb`, `NorthwindDevEdition.accdb`, `ProjectBoard.accdb`, `FormAndReportDefaults.accdb`, `MasterDbPropertyExtractor.accdb`. Plus `FormsAndReportsYaml/` ground-truth dumps consumed by the Python tools.
 - `docs/` — Workflow, planning, parser test cases, session sets.

@@ -1,0 +1,83 @@
+{
+  "name": "dabbler-session-sets",
+  "displayName": "Dabbler Session Sets",
+  "description": "Tree view of session-set state for the dabbler-access-harvester workflow.",
+  "version": "0.1.0",
+  "publisher": "darndestdabbler",
+  "private": true,
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": ["Other"],
+  "main": "./extension.js",
+  "activationEvents": [
+    "workspaceContains:docs/session-sets",
+    "onView:dabblerSessionSets"
+  ],
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "dabblerSessionSets",
+          "name": "Session Sets",
+          "icon": "$(checklist)",
+          "contextualTitle": "Session Sets"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "dabblerSessionSets.refresh",
+        "title": "Refresh Session Sets",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "dabblerSessionSets.openSpec",
+        "title": "Open Spec"
+      },
+      {
+        "command": "dabblerSessionSets.openActivityLog",
+        "title": "Open Activity Log"
+      },
+      {
+        "command": "dabblerSessionSets.openChangeLog",
+        "title": "Open Change Log"
+      },
+      {
+        "command": "dabblerSessionSets.openFolder",
+        "title": "Reveal Folder"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "dabblerSessionSets.refresh",
+          "when": "view == dabblerSessionSets",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "dabblerSessionSets.openSpec",
+          "when": "view == dabblerSessionSets && viewItem == sessionSet",
+          "group": "1_open@1"
+        },
+        {
+          "command": "dabblerSessionSets.openActivityLog",
+          "when": "view == dabblerSessionSets && viewItem == sessionSet",
+          "group": "1_open@2"
+        },
+        {
+          "command": "dabblerSessionSets.openChangeLog",
+          "when": "view == dabblerSessionSets && viewItem == sessionSet",
+          "group": "1_open@3"
+        },
+        {
+          "command": "dabblerSessionSets.openFolder",
+          "when": "view == dabblerSessionSets && viewItem == sessionSet",
+          "group": "2_navigate@1"
+        }
+      ]
+    }
+  }
+}
