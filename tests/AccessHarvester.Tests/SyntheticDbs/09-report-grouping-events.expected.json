@@ -1,0 +1,170 @@
+{
+  "Forms": [
+    {
+      "Name": "frmDistrictReport",
+      "Children": [
+        {
+          "Type": "Section",
+          "Name": "Detail",
+          "Children": [
+            {
+              "Type": "ComboBox",
+              "Name": "cboDistrict",
+              "Label": {
+                "Source": "attached",
+                "Text": "District"
+              },
+              "Properties": {
+                "RowSource": "SELECT DISTINCT DistrictID, DistrictID FROM tblCaseDetails ORDER BY DistrictID;",
+                "ColumnCount": 2,
+                "BoundColumn": 1
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtAsOfDate",
+              "Label": {
+                "Source": "attached",
+                "Text": "As Of Date"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Reports": [
+    {
+      "Name": "rptCaseLoadByDistrict",
+      "RecordSource": "qryCaseLoadDetails",
+      "GroupLevels": [
+        {
+          "Level": 0,
+          "GroupOn": "DistrictID",
+          "HasHeader": true,
+          "HasFooter": true
+        }
+      ],
+      "Children": [
+        {
+          "Type": "GroupLevel0Header",
+          "Name": "GroupLevel0Header",
+          "Children": [
+            {
+              "Type": "Label",
+              "Name": "lblEmailLabel",
+              "Properties": {
+                "Caption": "Email:"
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtCaseworkerEmail",
+              "Properties": {
+                "ControlSource": "CaseworkerEmail"
+              }
+            }
+          ]
+        },
+        {
+          "Type": "Section",
+          "Name": "Detail",
+          "Children": [
+            {
+              "Type": "TextBox",
+              "Name": "txtCaseValue",
+              "Properties": {
+                "ControlSource": "CaseValue"
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "DaysOpen",
+              "Properties": {
+                "ControlSource": "DaysOpen"
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtCaseNumber",
+              "Properties": {
+                "ControlSource": "CaseNumber"
+              }
+            }
+          ]
+        },
+        {
+          "Type": "GroupLevel0Footer",
+          "Name": "GroupLevel0Footer",
+          "Children": [
+            {
+              "Type": "TextBox",
+              "Name": "txtGroupTotal"
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtGroupCount"
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtGroupAvg"
+            }
+          ]
+        },
+        {
+          "Type": "ReportFooter",
+          "Name": "ReportFooter",
+          "Children": [
+            {
+              "Type": "TextBox",
+              "Name": "txtGrandTotal"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Queries": [
+    {
+      "Name": "qryCaseLoadDetails",
+      "QueryType": "Select",
+      "Sql": "SELECT DistrictID, CaseworkerEmail, CaseValue, DaysOpen, CaseNumber FROM tblCaseDetails;"
+    }
+  ],
+  "Tables": [
+    {
+      "Name": "tblCaseDetails",
+      "Fields": [
+        {
+          "Name": "CaseDetailID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "DistrictID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "CaseworkerEmail",
+          "DataType": "Text",
+          "Size": 255
+        },
+        {
+          "Name": "CaseValue",
+          "DataType": "Currency"
+        },
+        {
+          "Name": "DaysOpen",
+          "DataType": "Long"
+        },
+        {
+          "Name": "CaseNumber",
+          "DataType": "Text",
+          "Size": 50
+        }
+      ],
+      "PrimaryKey": [
+        "CaseDetailID"
+      ]
+    }
+  ]
+}

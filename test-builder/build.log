@@ -1,0 +1,30 @@
+
+=== Building 01-simple-validation ===
+    Database: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\01-simple-validation.accdb
+    Expected: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\01-simple-validation.expected.json
+
+=== Building 02-cascading-combo-subform ===
+    Database: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\02-cascading-combo-subform.accdb
+    Expected: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\02-cascading-combo-subform.expected.json
+
+=== Building 03-with-block-shadowing ===
+    Database: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\03-with-block-shadowing.accdb
+    Expected: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\03-with-block-shadowing.expected.json
+
+=== Building 09-report-grouping-events ===
+    Database: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\09-report-grouping-events.accdb
+    Expected: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\09-report-grouping-events.expected.json
+
+=== Building 10-class-with-events ===
+    Database: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\10-class-with-events.accdb
+    Expected: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\10-class-with-events.expected.json
+
+=== Building 11-autoexec-startup-chain ===
+    Database: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\11-autoexec-startup-chain.accdb
+    Expected: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\11-autoexec-startup-chain.expected.json
+
+=== Building 12-switchboard-navigation ===
+    Database: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\12-switchboard-navigation.accdb
+    Expected: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs\12-switchboard-navigation.expected.json
+
+=== Metadata fixture build complete. Output directory: C:\Users\denmi\source\repos\dabbler-access-harvester-access-metadata-extraction\tests\AccessHarvester.Tests\SyntheticDbs ===

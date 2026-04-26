@@ -1,0 +1,163 @@
+{
+  "Forms": [
+    {
+      "Name": "frmCaseManagement",
+      "Children": [
+        {
+          "Type": "Section",
+          "Name": "Detail",
+          "Children": [
+            {
+              "Type": "ComboBox",
+              "Name": "cboCaseworker",
+              "Label": {
+                "Source": "attached",
+                "Text": "Caseworker"
+              },
+              "Properties": {
+                "RowSource": "SELECT CaseworkerID, CaseworkerName, Email, Phone FROM tblCaseworkers ORDER BY CaseworkerName;",
+                "ColumnCount": 4,
+                "BoundColumn": 1
+              }
+            },
+            {
+              "Type": "ComboBox",
+              "Name": "cboClient",
+              "Label": {
+                "Source": "attached",
+                "Text": "Client"
+              },
+              "Properties": {
+                "RowSource": "SELECT ClientID, ClientName FROM tblClients ORDER BY ClientName;",
+                "ColumnCount": 2,
+                "BoundColumn": 1
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtCaseworkerEmail",
+              "Label": {
+                "Source": "attached",
+                "Text": "Email"
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtCaseworkerPhone",
+              "Label": {
+                "Source": "attached",
+                "Text": "Phone"
+              }
+            },
+            {
+              "Type": "Subform",
+              "Name": "sfrmOpenCases",
+              "Properties": {
+                "SourceObject": "sfrmOpenCases"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "sfrmOpenCases",
+      "RecordSource": "tblCases"
+    }
+  ],
+  "Tables": [
+    {
+      "Name": "tblCaseworkers",
+      "Fields": [
+        {
+          "Name": "CaseworkerID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "CaseworkerName",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "Email",
+          "DataType": "Text",
+          "Size": 255
+        },
+        {
+          "Name": "Phone",
+          "DataType": "Text",
+          "Size": 50
+        }
+      ],
+      "PrimaryKey": [
+        "CaseworkerID"
+      ]
+    },
+    {
+      "Name": "tblClients",
+      "Fields": [
+        {
+          "Name": "ClientID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "ClientName",
+          "DataType": "Text",
+          "Size": 150
+        },
+        {
+          "Name": "AssignedCaseworkerID",
+          "DataType": "Long"
+        }
+      ],
+      "PrimaryKey": [
+        "ClientID"
+      ]
+    },
+    {
+      "Name": "tblCases",
+      "Fields": [
+        {
+          "Name": "CaseID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "CaseworkerID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "CaseStatus",
+          "DataType": "Text",
+          "Size": 50
+        }
+      ],
+      "PrimaryKey": [
+        "CaseID"
+      ]
+    }
+  ],
+  "Relationships": [
+    {
+      "Name": "relCaseworkerClients",
+      "ParentTable": "tblCaseworkers",
+      "ChildTable": "tblClients",
+      "Fields": [
+        {
+          "ParentField": "CaseworkerID",
+          "ChildField": "AssignedCaseworkerID"
+        }
+      ]
+    },
+    {
+      "Name": "relCaseworkerCases",
+      "ParentTable": "tblCaseworkers",
+      "ChildTable": "tblCases",
+      "Fields": [
+        {
+          "ParentField": "CaseworkerID",
+          "ChildField": "CaseworkerID"
+        }
+      ]
+    }
+  ]
+}
