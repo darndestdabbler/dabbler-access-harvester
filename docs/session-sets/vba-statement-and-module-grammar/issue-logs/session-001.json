@@ -1,0 +1,50 @@
+[
+  {
+    "id": "R1-1",
+    "severity": "Minor",
+    "category": "test-coverage",
+    "summary": "Missing test for Global module declaration.",
+    "status": "fixed",
+    "resolution": "Added Global_ModuleDecl test case."
+  },
+  {
+    "id": "R1-2",
+    "severity": "Minor",
+    "category": "test-coverage",
+    "summary": "Missing test for Dim with array bounds (single + multi-dim).",
+    "status": "fixed",
+    "resolution": "Added Dim_WithArrayBounds and Dim_WithMultiDimArrayBounds."
+  },
+  {
+    "id": "R1-3",
+    "severity": "Minor",
+    "category": "test-coverage",
+    "summary": "Missing call-site named-argument coverage (H-D12).",
+    "status": "fixed",
+    "resolution": "Added Call_BareWithNamedArgs."
+  },
+  {
+    "id": "R2-1",
+    "severity": "Minor",
+    "category": "test-coverage",
+    "summary": "Missing test for Const without As clause (inferred type).",
+    "status": "fixed",
+    "resolution": "Added Const_InferredType."
+  },
+  {
+    "id": "R2-2",
+    "severity": "Minor",
+    "category": "test-coverage",
+    "summary": "Missing test for dynamic array Dim (empty parens).",
+    "status": "fixed",
+    "resolution": "Added Dim_DynamicArray."
+  },
+  {
+    "id": "R2-3",
+    "severity": "Minor",
+    "category": "test-coverage",
+    "summary": "Missing test for RaiseEvent with empty parentheses.",
+    "status": "fixed",
+    "resolution": "Added RaiseEvent_WithEmptyParens."
+  }
+]
