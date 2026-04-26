@@ -12,7 +12,7 @@
 
 ## Canonical tree row
 
-> Copied verbatim from `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md` row #18. This is the authoritative record; the prose below interprets these fields, never overrides them.
+> Copied verbatim from `docs/session-sets/✅vba-parser-session-set-generator/session-set-tree.md` row #18. This is the authoritative record; the prose below interprets these fields, never overrides them.
 
 | Field | Value |
 |---|---|
@@ -33,7 +33,7 @@ Implements **Phase 8.1–8.5** of `docs/VBA-Parser-Migration-Harvester-Plan.md`.
 
 ## Authority
 
-Slug, plan-phase coverage, prerequisites, session count, and output paths are fixed by `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md` row #18.
+Slug, plan-phase coverage, prerequisites, session count, and output paths are fixed by `docs/session-sets/✅vba-parser-session-set-generator/session-set-tree.md` row #18.
 
 ---
 
