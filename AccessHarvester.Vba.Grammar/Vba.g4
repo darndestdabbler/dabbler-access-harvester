@@ -455,7 +455,7 @@ statement
     | raiseEventStatement                                             # RaiseEventStmt
     | localDeclStatement                                              # LocalDeclStmt
     | redimStatement                                                  # RedimStmt
-    | constStatement                                                  # ConstStmt
+    | localConstStatement                                             # LocalConstStmt
     | setStatement                                                    # SetStmt
     | letStatement                                                    # LetStmt
     | callStatement                                                   # CallStmt
@@ -502,7 +502,7 @@ inlineStatement
     | raiseEventStatement
     | localDeclStatement
     | redimStatement
-    | constStatement
+    | localConstStatement
     ;
 
 // --- 2. For / For Each (§5.4.3, §5.4.4) ---------------------------
@@ -670,18 +670,18 @@ raiseEventStatement
 
 // --- 12. Local declarations (§4.4) --------------------------------
 //
-// `Dim`, `Static`, `Public`, `Private`, `Global` declaration forms
-// for variables. Procedure-body scope only emits `Dim` / `Static`;
-// module-level Public/Private/Global declarations share the same
-// right-hand syntax and are reused by Session 2 inside the module
-// rule. The declaration head set is intentionally permissive.
+// Procedure-body variable declarations are restricted to `Dim` / `Static`.
+// `Public`, `Private`, and `Global` are module-level modifiers only;
+// accepting them in procedure-body position is a grammar over-acceptance.
+// Module-level declarations use the separate `moduleVariableDecl` rule
+// (with `moduleVariableDeclHead : PUBLIC | PRIVATE | GLOBAL | DIM`).
 
 localDeclStatement
-    : declHead variableDecl (COMMA variableDecl)*
+    : localDeclHead variableDecl (COMMA variableDecl)*
     ;
 
-declHead
-    : DIM | STATIC | PUBLIC | PRIVATE | GLOBAL
+localDeclHead
+    : DIM | STATIC
     ;
 
 // One declared variable. Type-decl suffix on the identifier
@@ -693,7 +693,7 @@ declHead
 variableDecl
     : (IDENTIFIER | TYPED_IDENTIFIER)
       (LPAREN arrayBoundsList? RPAREN)?
-      (AS typeSpec)?
+      (AS variableTypeSpec)?
     ;
 
 arrayBoundsList
@@ -711,13 +711,20 @@ redimStatement
     ;
 
 redimDecl
-    : (IDENTIFIER | TYPED_IDENTIFIER) LPAREN arrayBoundsList RPAREN (AS typeSpec)?
+    : (IDENTIFIER | TYPED_IDENTIFIER) LPAREN arrayBoundsList RPAREN (AS variableTypeSpec)?
     ;
 
 // --- 14. Const (§4.4) ---------------------------------------------
 //
-// Module-level Const may carry a Public/Private modifier; procedure-
-// body Const omits the modifier. Both forms accepted.
+// Procedure-body Const (`localConstStatement`) has no access modifier —
+// `Public Const x = 1` inside a Sub body is a VBA error. Module-level
+// Const (`constStatement`, used by `moduleConstStatement`) may carry
+// an optional Public/Private modifier. The two rules are kept separate
+// so the procedure-body form does not over-accept module-only syntax.
+
+localConstStatement
+    : CONST constDecl (COMMA constDecl)*
+    ;
 
 constStatement
     : (PUBLIC | PRIVATE)? CONST constDecl (COMMA constDecl)*
@@ -742,13 +749,24 @@ constDecl
 // Session 2 will extend this to cover array-element types
 // (`Object()`) when ParamArray and array-typed parameters land.
 
-// `NEW?` accepts the auto-instantiation form `Dim x As New ClassName`
-// (§4.4 / §5.2.5) without needing a separate typeSpec variant. There
-// is no parsing conflict with `newExpr : NEW typeName` in expression
-// position because `typeSpec` only appears in declaration positions
-// (after AS), never inside `expression`.
+// `typeSpec` is the base type-specification rule used in parameter /
+// return-type / const / event-parameter / declare / type-member
+// positions where `As New T` is not valid.
+//
+// `variableTypeSpec` extends `typeSpec` with `NEW?` to accept the
+// auto-instantiation form `Dim x As New ClassName` (§4.4 / §5.2.5).
+// Only variable declarations (`variableDecl`, `redimDecl`, and
+// `moduleVariableDeclItem`'s RegularVarItem) use `variableTypeSpec`;
+// all other AS-type positions use `typeSpec`, structurally rejecting
+// `Sub S(x As New Foo)` and `Function F() As New Bar` at grammar
+// level (both are VBA errors per §4.5 / §4.6).
 typeSpec
-    : NEW? typeName (STAR expression)?
+    : typeName (STAR expression)?
+    ;
+
+variableTypeSpec
+    : NEW typeName
+    | typeSpec
     ;
 
 // --- 16. Set / Let / Call (§5.3.1, §5.3.2, §5.5) ------------------
@@ -948,7 +966,7 @@ moduleVariableDeclItem
     : WITHEVENTS (IDENTIFIER | TYPED_IDENTIFIER) AS typeName    # WithEventsVarItem
     | (IDENTIFIER | TYPED_IDENTIFIER)
       (LPAREN arrayBoundsList? RPAREN)?
-      (AS typeSpec)?                                            # RegularVarItem
+      (AS variableTypeSpec)?                                    # RegularVarItem
     ;
 
 // --- 4. Module-level Const ----------------------------------------

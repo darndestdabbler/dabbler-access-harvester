@@ -288,6 +288,101 @@
           "costUsd": 0.00175
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/register-and-prereq-check",
+      "dateTime": "2026-04-26T20:26:48.224965+00:00",
+      "description": "Registered session 4 (Sonnet 4.6, effort=unknown). Read guidance docs, spec, ai-assignment.md. Confirmed sessions 1-3 complete; no deferred verifier issues. Prereq (vba-lexical-and-expression-grammar change-log.md) confirmed present.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-26T20:26:48.225964+00:00",
+      "description": "dotnet build: 0 errors, 227 warnings (pre-existing CA1416 platform-annotation). dotnet test: 276 grammar + 127 harvester = 403 total, all passing.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/cross-provider-verification-round1",
+      "dateTime": "2026-04-26T20:26:48.226862+00:00",
+      "description": "R1 verification via gpt-5-4: ISSUES_FOUND (0 Critical, 4 issues). Issues 1+3 real over-acceptance; Issues 2+4 intentional design. Applied fixes: localDeclHead restricted to DIM|STATIC, localConstStatement split, typeSpec/variableTypeSpec split.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9586,
+          "outputTokens": 11083,
+          "costUsd": 0.19021
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/grammar-fixes",
+      "dateTime": "2026-04-26T20:26:48.226862+00:00",
+      "description": "Fixed R1 issues 1+3: (1) localDeclHead restricted to DIM|STATIC; localConstStatement introduced for procedure-body const (no access modifier); statement+inlineStatement updated to use localConstStatement. (2) typeSpec split into typeSpec (no NEW) and variableTypeSpec (NEW? prefix); variableDecl, redimDecl, RegularVarItem updated to use variableTypeSpec. Tests: converted 3 incorrect acceptance tests to Reject_* + added 3 new rejection tests + Dim_AsNew acceptance test. Build: 0 errors. Tests: 278 grammar / 127 harvester = 405 total, all passing.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/cross-provider-verification-round2",
+      "dateTime": "2026-04-26T20:26:48.228065+00:00",
+      "description": "R2 verification via gpt-5-4: VERIFIED. Fixes confirmed correct; intentional-design disclosures (Do dual-condition, Option permissive identifiers) accepted as sound documented scope boundaries.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1138,
+          "outputTokens": 4867,
+          "costUsd": 0.07585
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-26T20:27:26.133709+00:00",
+      "description": "Generated change-log.md via route(summarization, max_tier=1) -> gemini-flash. Gemini Pro 400 on >2KB prompt per convention; Gemini Flash succeeded.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 511,
+          "outputTokens": 412,
+          "costUsd": 0.00032385
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/next-session-set-recommendation",
+      "dateTime": "2026-04-26T20:27:59.656977+00:00",
+      "description": "Routed analysis recommending next session set (vba-grammar-validation) orchestrator via gemini-flash",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "analysis",
+          "inputTokens": 507,
+          "outputTokens": 136,
+          "costUsd": 0.00015764999999999998
+        }
+      ]
     }
   ]
 }

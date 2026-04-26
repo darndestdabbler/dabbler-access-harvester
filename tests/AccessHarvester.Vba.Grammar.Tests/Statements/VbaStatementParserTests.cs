@@ -100,6 +100,12 @@ public class VbaStatementParserTests
 
     private static void Accept(string src) => Parse(src);
 
+    private static void Reject(string src)
+    {
+        var ex = Record.Exception(() => Parse(src));
+        Assert.NotNull(ex);
+    }
+
     // ---------- Local declarations (§4.4) ----------
 
     [Fact]
@@ -128,16 +134,12 @@ public class VbaStatementParserTests
         => Accept("Static counter As Long\n");
 
     [Fact]
-    public void Public_ModuleDecl()
-        => Accept("Public g_CurrentUserID As Long\n");
+    public void Dim_AsNew()
+        => Accept("Dim oConn As New ADODB.Connection\n");
 
     [Fact]
-    public void Private_ModuleDecl()
-        => Accept("Private m_GroupTotal As Currency\n");
-
-    [Fact]
-    public void Global_ModuleDecl()
-        => Accept("Global g_ConnectionString As String\n");
+    public void Reject_LocalDecl_GlobalModifier()
+        => Reject("Global g_ConnectionString As String\n");
 
     [Fact]
     public void Dim_WithArrayBounds()
@@ -152,8 +154,20 @@ public class VbaStatementParserTests
         => Accept("Const MaxRows As Long = 100\n");
 
     [Fact]
-    public void Const_Public()
-        => Accept("Public Const APP_NAME As String = \"Switchboard\"\n");
+    public void Reject_LocalConst_PublicModifier()
+        => Reject("Public Const APP_NAME As String = \"Switchboard\"\n");
+
+    [Fact]
+    public void Reject_LocalConst_PrivateModifier()
+        => Reject("Private Const MAX As Long = 100\n");
+
+    [Fact]
+    public void Reject_LocalDecl_PublicModifier()
+        => Reject("Public x As Long\n");
+
+    [Fact]
+    public void Reject_LocalDecl_PrivateModifier()
+        => Reject("Private x As Long\n");
 
     [Fact]
     public void Const_InferredType()
