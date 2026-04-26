@@ -1,0 +1,43 @@
+{
+  "session_number": 1,
+  "round_number": 1,
+  "verifier_model": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": "R1-1",
+      "severity": "Critical",
+      "summary": "INTEGER_LITERAL absorbs `&` and `^` via INT_SUFFIX, mis-tokenizing `1&2` and `2^3`.",
+      "status": "fixed",
+      "fix": "Reduced INT_SUFFIX to `%` only; deferred bare-decimal-Long literal `100&` per coverage matrix (no corpus witness). Added regression tests `IntegerOperator_OnePlusTwo`, `IntegerOperator_TwoCaretThree`, `IntegerConcat_OneAmpString`."
+    },
+    {
+      "id": "R1-2",
+      "severity": "Major",
+      "summary": "DATE_LITERAL outruns preprocessor heads when the line contains another `#` (e.g., `#Const X = \"#\"`).",
+      "status": "fixed",
+      "fix": "Anchored DATE_LITERAL's first content character to `[0-9 \\t\\-]` so it cannot start with directive-head letters. Added regression test `PreprocessorDirective_HashConstWithStringContainingHash_IsHashConst`. Documented limitation: textual-month form `#January 1, 2024#` deferred until corpus witness."
+    },
+    {
+      "id": "R1-3",
+      "severity": "Major",
+      "summary": "Comments did not implement §3.3.3+§3.3.1 line-continuation-before-comment-recognition (`' comment _\\nfoo` should commented out next line).",
+      "status": "fixed",
+      "fix": "Added LINE_CONT_FRAGMENT and embedded it in LINE_COMMENT and REM_COMMENT bodies as the first alternative in the loop. Added regression test `Comment_TrailingUnderscoreContinuation_ExtendsAcrossPhysicalLines`."
+    },
+    {
+      "id": "R1-4",
+      "severity": "Major",
+      "summary": "REM_COMMENT required trailing whitespace, breaking bare REM at end-of-line or end-of-input.",
+      "status": "fixed",
+      "fix": "Made REM body optional. Added regression tests `RemKeyword_AtBareEol_IsHiddenComment`, `RemKeyword_AtEof_IsHiddenComment`, plus sanity test `Identifier_RemediatePrefixed_IsIdentifierNotComment` to confirm longest-match still favors IDENTIFIER."
+    },
+    {
+      "id": "R1-5",
+      "severity": "Major",
+      "summary": "Type-decl suffixes emitted as separate tokens diverged from Hazard H-A02 (suffix-as-part-of-identifier).",
+      "status": "fixed",
+      "fix": "Added TYPED_IDENTIFIER lexer rule capturing `[%&#@$]` suffixes (excluding `!` to preserve bang disambiguation). IDENTIFIER remains for bare names and bracketed `[Name]` forms. Updated tests: `TypeDeclSuffix_OnIdentifier_IsTypedIdentifierToken` (now expects TYPED_IDENTIFIER), `TypeDeclSuffix_AllUnambiguousSuffixes_AreTypedIdentifiers` (Theory covering `% & # @ $`), `Bang_AsBangOperator_NotSuffix` retained, `SingleSuffix_RateBang_TokenizesAsIdentifierThenBang` added, fixture-07 smoke test asserts TYPED_IDENTIFIER tokens for `sFilePath$`, `i&`, `sErr$`."
+    }
+  ]
+}
