@@ -299,6 +299,45 @@ the human before proceeding.
   "Persist Routed Output To Disk Before Any Display Or Logging Side
   Effects" for the failure case (`vba-spec-study` Session 3 lost a
   $1.29 Opus call to a `cp1252`-driven `print()` crash).
+- **Verifier-failure escalation ladder.** When the configured
+  cross-provider `session-verification` model fails (timeout, transient
+  HTTP error, garbled output), do not silently retry until budget
+  burns out. Climb the ladder in order, and only descend a step if the
+  previous one keeps failing:
+  1. **Try the same provider twice.** A single failure is often
+     transient; a second confirms a real problem.
+  2. **Switch to the other remaining cross-provider verifier.** If
+     `gpt-5-4` is the configured choice and fails twice from a Claude
+     orchestrator, fall back to `gemini-pro`; vice versa for a
+     gpt-5-4-orchestrator scenario. The constraint is "different
+     provider than the orchestrator" — `gemini-pro` and `gpt-5-4` both
+     satisfy it for a Claude orchestrator. Use `query("<model>",
+     task_type="session-verification", ...)` to bypass the
+     `task_type_overrides` mapping for the call.
+  3. **Decompose the verification into smaller chunks.** Split the
+     prompt by concern (e.g., grammar-rule review and test-coverage
+     review separately), each well under the timeout window. The same
+     provider can succeed on smaller prompts; or split across both
+     providers if needed.
+  4. **Verify against a description-of-work, not the implementation.**
+     Most verification failures aren't about whether the code is
+     correct — they're about whether the orchestrator's *understanding*
+     of the spec is correct. A description-only verification ("here's
+     what I did and why; flag any wrong assumptions") catches the
+     spec-misreading failure mode at a fraction of the prompt size.
+  5. **Log an issue and move on.** If steps 1–4 all fail, write an
+     issue entry into `session-sets/<slug>/issue-logs/session-NNN.json`
+     with severity `Major` (verifier-blocked, not orchestrator-error)
+     and proceed to commit. The next session can re-attempt
+     verification once provider conditions improve. Do not skip
+     commit just because verification is provider-broken — the work
+     itself is still preserved in git for human review.
+  Confirmed in `vba-statement-and-module-grammar` Session 1 (2026-04-26)
+  where `gpt-5-4` timed out twice, fallback to `gemini-pro` succeeded
+  cleanly. This convention complements the older "Notify The Human On
+  `route()` Timeout" lesson (now superseded for verification-step
+  timeouts — that lesson stays valid for non-verification routed
+  calls where switching the orchestrator IS the right move).
 - **Run each parallel session set in its own per-set git worktree.**
   When multiple session sets run in parallel, create a
   `session-set/<slug>` branch off main and a worktree at
