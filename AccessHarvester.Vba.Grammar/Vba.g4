@@ -272,6 +272,7 @@ primary
     | NOTHING                                                        # NothingExpr
     | NULL_KW                                                        # NullExpr
     | EMPTY_KW                                                       # EmptyExpr
+    | DEBUG                                                          # DebugObjectExpr
     | IDENTIFIER                                                     # IdentExpr
     | TYPED_IDENTIFIER                                               # TypedIdentExpr
     | LPAREN expression RPAREN                                       # ParenExpr
@@ -310,6 +311,476 @@ argument
 
 namedArgument
     : IDENTIFIER COLON_EQ expression
+    ;
+
+// ============================================================
+// Statement rules (Phase 1.4 statement section, session #4 part 1)
+//
+// Sources:
+//   - docs/spec-study/ms-vbal-summary.md  — Section §5.3, §5.4, §5.5
+//   - docs/spec-coverage/ms-vbal-coverage.csv §5.3.* / §5.4.* / §5.5
+//   - docs/spec-coverage/hazard-list.md   — Section D
+//   - docs/test-cases/01,05,07,09,11,12 (statement-rich fixtures)
+//
+// Module-level structure (procedure declarations, parameter lists,
+// Type / Enum / Implements / WithEvents / Event / Declare / Option
+// directives) lands in Session 2 of this set. Session 1 owns:
+//   - Control-flow statements (If, Select Case, For, For Each, Do,
+//     While/Wend, With)
+//   - Error handling (On Error / Resume)
+//   - Special / control transfer (GoTo, GoSub, Return, Exit, Stop, End)
+//   - RaiseEvent (statement form)
+//   - Local declarations (Dim, Static, Public, Private, Global,
+//     ReDim, Const)
+//   - Assignment (Set, Let — implicit and explicit) and call forms
+//
+// Hazards addressed here:
+//   H-A03  Numeric line-number labels — `100`, `200`. Recognized at
+//          statement-start position; the trailing `:` is optional for
+//          numeric labels per §3.3.2.
+//   H-A04  Compound statement separator `:` vs label `:` — labels
+//          appear only at statement-start position; separator-`:`
+//          appears between simple statements within a single line
+//          (single-line If body, Case body).
+//   H-D01  GoTo labels (alpha and numeric). Both forms accepted by
+//          `labelOrZero` / `statementLabel`.
+//   H-D02  GoSub / Return — modeled as distinct AST kinds
+//          (`GosubStmt`, `ReturnStmt`). The legacy fact that a
+//          `Return` outside an active GoSub is a runtime error is
+//          *not* enforced here; it is downstream control-flow work.
+//   H-D04  On Error variants — `On Error GoTo <label-or-0>`,
+//          `On Error Resume Next`. The literal `0` after `GoTo` here
+//          is the deactivation sentinel and is captured via
+//          `labelOrZero`.
+//   H-D05  Resume / Resume Next / Resume <label> / Resume 0 — all
+//          four forms parsed. `Resume 0` is parsed as `RESUME label`
+//          where the label is `0`; equivalence-to-bare-Resume is a
+//          downstream concern.
+//   H-D06  Single-line If with multiple statements via `:` —
+//          `inlineStatementList` collects colon-separated inline
+//          statements as the Then- and Else-bodies.
+//   H-D07  Select Case with single-line bodies via `:` — handled in
+//          `caseClause` by allowing a colon-separator after the case
+//          expression list, with the body running until end-of-line.
+//   H-D08  Empty positional arguments — call statement reuses the
+//          existing `argumentList` rule which already preserves
+//          missing positions via `argument? (COMMA argument?)*`.
+//   H-D09  `Call Sub(x)` vs `Sub x` vs `Sub(x)` parens-trap —
+//          `callStatement` has explicit `CALL`-prefixed and bare
+//          forms. The bare form's parens-vs-no-parens distinction is
+//          captured by whether the `lExpression` ends in an
+//          `IndexOrCall` postfix; downstream resolver applies the
+//          ByVal-coercion semantics.
+//   H-D10  Exit kind preserved (`SUB | FUNCTION | PROPERTY | FOR | DO`).
+//
+// `With ... End With` is parsed structurally; semantic flattening of
+// leading `.member`/`!key` against the With-target (H-C03/H-C04) is
+// resolver work in resolver-references-and-with-blocks (#8).
+//
+// Implements / WithEvents / Public Event / Class_Initialize /
+// Class_Terminate / Form-Report event signatures (Section F hazards)
+// are module-level constructs and land in Session 2.
+// ============================================================
+
+// Test entry point: a sequence of statements (separated by NEWLINE
+// or COLON) terminated by EOF. Used by Session 1 unit tests against
+// statement-level fixtures. The module-level entry point still
+// routes through `module` -> `moduleItem` (the placeholder rule),
+// which Session 2 of this set replaces with real declarations.
+statementListEof
+    : statementListBody EOF
+    ;
+
+statementListBody
+    : (NEWLINE | block)*
+    ;
+
+// One unit of work at statement-list position: an optional label
+// followed by a logical-line of colon-separated statements, OR a
+// bare label (label only, statement on a later line). The bare-label
+// form is necessary for fixture 07's `NextRow:` which sits on its
+// own line followed by `Next i` on the next line.
+block
+    : statementLabel singleLineStatementList?
+    | singleLineStatementList
+    ;
+
+// A label at statement-start position. Per §3.3.2 a numeric label
+// (line number) does not require a trailing colon, but accepts one;
+// an alphanumeric label always requires the colon.
+statementLabel
+    : IDENTIFIER COLON
+    | INTEGER_LITERAL COLON?
+    ;
+
+// A logical line of one-or-more colon-separated statements. Inline-
+// safe statements are valid in any position; block-form statements
+// (block If, For, Do, Select Case, With, While/Wend) consume their
+// own NEWLINEs and are valid as a stand-alone single-element line.
+// Mixing a block-form statement with later colon-separated entries
+// on the same logical line is rejected by the parser because the
+// block-form statement's right edge ends with its terminator
+// keyword (`End If`, `Next`, `Loop`, etc.), which cannot also be
+// followed by a `:` separator at the source level.
+singleLineStatementList
+    : statement (COLON statement)*
+    ;
+
+// Top-level statement choice. Block-opening forms come first so
+// ANTLR's adaptive prediction sees their leading-keyword tokens
+// before falling through to the call/assignment alternatives whose
+// first set is the open lExpression first set.
+statement
+    : ifBlockStatement                                                # IfBlockStmt
+    | ifSingleLineStatement                                           # IfSingleLineStmt
+    | forNextStatement                                                # ForNextStmt
+    | forEachStatement                                                # ForEachStmt
+    | doLoopStatement                                                 # DoLoopStmt
+    | whileWendStatement                                              # WhileWendStmt
+    | selectCaseStatement                                             # SelectCaseStmt
+    | withStatement                                                   # WithStmt
+    | onErrorStatement                                                # OnErrorStmt
+    | resumeStatement                                                 # ResumeStmt
+    | gotoStatement                                                   # GotoStmt
+    | gosubStatement                                                  # GosubStmt
+    | returnStatement                                                 # ReturnStmt
+    | exitStatement                                                   # ExitStmt
+    | stopStatement                                                   # StopStmt
+    | endStatement                                                    # EndStmt
+    | raiseEventStatement                                             # RaiseEventStmt
+    | localDeclStatement                                              # LocalDeclStmt
+    | redimStatement                                                  # RedimStmt
+    | constStatement                                                  # ConstStmt
+    | setStatement                                                    # SetStmt
+    | letStatement                                                    # LetStmt
+    | callStatement                                                   # CallStmt
+    ;
+
+// --- 1. If statements (§5.4.1) ------------------------------------
+//
+// Block form: NEWLINE immediately follows THEN. Single-line form:
+// at least one inline statement follows THEN on the same logical
+// line. ANTLR LL(*) selects between the two by lookahead at the
+// post-THEN token.
+
+ifBlockStatement
+    : IF expression THEN NEWLINE
+        statementListBody
+      (ELSEIF expression THEN NEWLINE statementListBody)*
+      (ELSE NEWLINE statementListBody)?
+      END IF
+    ;
+
+ifSingleLineStatement
+    : IF expression THEN inlineStatementList (ELSE inlineStatementList)?
+    ;
+
+inlineStatementList
+    : inlineStatement (COLON inlineStatement)*
+    ;
+
+// Inline-statement: anything that does not itself open a block. Used
+// inside single-line If's Then/Else bodies and as the after-colon
+// body of a single-line `Case <list>: <stmt>` (H-D06, H-D07).
+inlineStatement
+    : letStatement
+    | setStatement
+    | callStatement
+    | gotoStatement
+    | gosubStatement
+    | returnStatement
+    | exitStatement
+    | stopStatement
+    | endStatement
+    | onErrorStatement
+    | resumeStatement
+    | raiseEventStatement
+    | localDeclStatement
+    | redimStatement
+    | constStatement
+    ;
+
+// --- 2. For / For Each (§5.4.3, §5.4.4) ---------------------------
+
+forNextStatement
+    : FOR (IDENTIFIER | TYPED_IDENTIFIER) EQ expression TO expression
+          (STEP expression)? NEWLINE
+        statementListBody
+      NEXT (IDENTIFIER | TYPED_IDENTIFIER)?
+    ;
+
+forEachStatement
+    : FOR EACH (IDENTIFIER | TYPED_IDENTIFIER) IN expression NEWLINE
+        statementListBody
+      NEXT (IDENTIFIER | TYPED_IDENTIFIER)?
+    ;
+
+// --- 3. Do / Loop (§5.4.5) ----------------------------------------
+//
+// Four variants:
+//   Do                   ... Loop                                   (infinite)
+//   Do While e | Until e ... Loop                                   (pre-test)
+//   Do                   ... Loop While e | Until e                 (post-test)
+// The grammar accepts a condition at either or both ends; semantic
+// rejection of two-condition forms is downstream (no fixture witness).
+
+doLoopStatement
+    : DO doLoopCondition? NEWLINE
+        statementListBody
+      LOOP doLoopCondition?
+    ;
+
+doLoopCondition
+    : (WHILE | UNTIL) expression
+    ;
+
+// --- 4. While / Wend (§5.4.6) — legacy ----------------------------
+
+whileWendStatement
+    : WHILE expression NEWLINE
+        statementListBody
+      WEND
+    ;
+
+// --- 5. Select Case (§5.4.2) --------------------------------------
+//
+// `caseClause` accepts both the block form (NEWLINE introduces a
+// multi-line body) and the single-line form (COLON introduces an
+// inline statement chain on the same line — H-D07). `Case Else` is
+// a distinct alternative that always ends the case sequence.
+
+selectCaseStatement
+    : SELECT CASE expression NEWLINE
+        (NEWLINE)*
+        caseClause*
+        caseElseClause?
+      END SELECT
+    ;
+
+caseClause
+    : CASE caseExpressionList caseClauseBody
+    ;
+
+caseElseClause
+    : CASE ELSE caseClauseBody
+    ;
+
+caseClauseBody
+    : NEWLINE statementListBody
+    | COLON inlineStatementList NEWLINE statementListBody
+    ;
+
+caseExpressionList
+    : caseExpression (COMMA caseExpression)*
+    ;
+
+caseExpression
+    : expression TO expression                          # CaseRange
+    | IS comparisonOperator expression                  # CaseIsCompare
+    | expression                                        # CaseValue
+    ;
+
+comparisonOperator
+    : EQ | NEQ | LT | GT | LE | GE
+    ;
+
+// --- 6. With block (§5.4.7) ---------------------------------------
+
+withStatement
+    : WITH expression NEWLINE
+        statementListBody
+      END WITH
+    ;
+
+// --- 7. On Error / Resume (§5.4.11, §5.4.12) ----------------------
+
+onErrorStatement
+    : ON ERROR_KW GOTO labelOrZero                      # OnErrorGoto
+    | ON ERROR_KW RESUME NEXT                           # OnErrorResumeNext
+    ;
+
+resumeStatement
+    : RESUME (NEXT | labelOrZero)?
+    ;
+
+// `0` after `On Error GoTo` is the deactivation sentinel; after
+// `Resume` it means "retry the failing statement" (equivalent to
+// bare `Resume`). Both flavors share `labelOrZero` because at this
+// position the literal `0` is just an INTEGER_LITERAL — the AST
+// consumer interprets meaning from the surrounding statement kind.
+labelOrZero
+    : IDENTIFIER
+    | INTEGER_LITERAL
+    ;
+
+// --- 8. GoTo / GoSub / Return (§5.4.9, §5.4.10) -------------------
+
+gotoStatement
+    : GOTO labelOrZero
+    ;
+
+gosubStatement
+    : GOSUB labelOrZero
+    ;
+
+returnStatement
+    : RETURN
+    ;
+
+// --- 9. Exit (§5.4.8) ---------------------------------------------
+
+exitStatement
+    : EXIT exitKind
+    ;
+
+exitKind
+    : SUB | FUNCTION | PROPERTY | FOR | DO
+    ;
+
+// --- 10. Stop / End (§5.4 — terminate / breakpoint) ---------------
+//
+// `End` as a free-standing statement terminates the program; the
+// `End <kind>` terminators (End If, End With, End Sub, End Select,
+// End Type, End Enum, End Property, End Function) are all consumed
+// by their enclosing block rules and do not reach `endStatement`.
+
+stopStatement
+    : STOP
+    ;
+
+endStatement
+    : END
+    ;
+
+// --- 11. RaiseEvent (§6.1) ----------------------------------------
+//
+// Statement form: `RaiseEvent <eventName>[(<args>)]`. Optional
+// argument-list parens; empty arglist `()` is accepted. The Public
+// Event declaration (`Public Event Foo(...)`) is module-level and
+// lands in Session 2.
+
+raiseEventStatement
+    : RAISEEVENT IDENTIFIER (LPAREN argumentList RPAREN)?
+    ;
+
+// --- 12. Local declarations (§4.4) --------------------------------
+//
+// `Dim`, `Static`, `Public`, `Private`, `Global` declaration forms
+// for variables. Procedure-body scope only emits `Dim` / `Static`;
+// module-level Public/Private/Global declarations share the same
+// right-hand syntax and are reused by Session 2 inside the module
+// rule. The declaration head set is intentionally permissive.
+
+localDeclStatement
+    : declHead variableDecl (COMMA variableDecl)*
+    ;
+
+declHead
+    : DIM | STATIC | PUBLIC | PRIVATE | GLOBAL
+    ;
+
+// One declared variable. Type-decl suffix on the identifier
+// (`i&`, `sErr$`) is the TYPED_IDENTIFIER token from the lexical
+// section. An explicit `As <typeSpec>` may follow; if neither is
+// present the variable is Variant. Array bounds (`a(1 To 10)` or
+// `a(10)`) lex as a parenthesized list of arrayBound entries.
+
+variableDecl
+    : (IDENTIFIER | TYPED_IDENTIFIER)
+      (LPAREN arrayBoundsList? RPAREN)?
+      (AS typeSpec)?
+    ;
+
+arrayBoundsList
+    : arrayBound (COMMA arrayBound)*
+    ;
+
+arrayBound
+    : expression (TO expression)?
+    ;
+
+// --- 13. ReDim (§4.4) ---------------------------------------------
+
+redimStatement
+    : REDIM PRESERVE? redimDecl (COMMA redimDecl)*
+    ;
+
+redimDecl
+    : (IDENTIFIER | TYPED_IDENTIFIER) LPAREN arrayBoundsList RPAREN (AS typeSpec)?
+    ;
+
+// --- 14. Const (§4.4) ---------------------------------------------
+//
+// Module-level Const may carry a Public/Private modifier; procedure-
+// body Const omits the modifier. Both forms accepted.
+
+constStatement
+    : (PUBLIC | PRIVATE)? CONST constDecl (COMMA constDecl)*
+    ;
+
+constDecl
+    : (IDENTIFIER | TYPED_IDENTIFIER) (AS typeSpec)? EQ expression
+    ;
+
+// --- 15. Type specification (statement-level) ---------------------
+//
+// Lightweight type spec for variable / parameter / return-type
+// positions. Covers:
+//   - Simple type names: `String`, `Long`, `Variant`, `Object`,
+//     `Form`, etc. (every primitive type lexes as IDENTIFIER —
+//     the lexer does not emit reserved tokens for primitive type
+//     names per the spec study's recommendation).
+//   - Qualified types: `DAO.Recordset`, `Excel.Application`.
+//   - Fixed-length string: `String * <const-expression>` (rare;
+//     `should` priority in the coverage matrix, no corpus witness,
+//     accepted to avoid a parse error if the form arrives).
+// Session 2 will extend this to cover array-element types
+// (`Object()`) when ParamArray and array-typed parameters land.
+
+typeSpec
+    : typeName (STAR expression)?
+    ;
+
+// --- 16. Set / Let / Call (§5.3.1, §5.3.2, §5.5) ------------------
+//
+// `Set` is keyword-prefixed object-reference assignment. `Let` is
+// the value-assignment statement; the LET keyword is rare in modern
+// VBA but legal, so it is accepted as an optional prefix. The
+// implicit-Let form (no LET keyword) is dominant.
+//
+// `Call` statement has three witnessed forms (H-D09):
+//   (a) `Call <l-expression>` — the canonical Call-prefix form. Any
+//       parens around the argument list belong to the l-expression's
+//       trailing IndexOrCall postfix.
+//   (b) `<l-expression>` (no Call keyword, no bare args) — bare
+//       call. The l-expression's tail may itself be an IndexOrCall
+//       (`MySub(x)`), which is the H-D09 parens-trap form.
+//   (c) `<l-expression> <bare-arg-list>` (no Call keyword, no outer
+//       parens) — the canonical no-Call call statement. The bare
+//       arg list reuses `argumentList` so empty positionals are
+//       preserved (H-D08).
+
+setStatement
+    : SET lExpression EQ expression
+    ;
+
+letStatement
+    : LET? lExpression EQ expression
+    ;
+
+callStatement
+    : CALL lExpression                                  # ExplicitCallStmt
+    | lExpression bareCallArgumentList?                 # ImplicitCallStmt
+    ;
+
+// At-least-one-argument bare argument list. An interior or trailing
+// missing argument is preserved as a `Missing` placeholder in the
+// AST consumer (H-D08). A leading missing argument (`Foo , x`) has
+// no corpus witness and is not accepted here; if a witness arrives,
+// the rule expands to `argument? (COMMA argument?)+`.
+
+bareCallArgumentList
+    : argument (COMMA argument?)*
     ;
 
 // ============================================================
