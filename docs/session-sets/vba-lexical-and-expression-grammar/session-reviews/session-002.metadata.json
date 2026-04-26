@@ -1,0 +1,7 @@
+{
+  "model": "gpt-5-4",
+  "provider": "unknown",
+  "input_tokens": 20965,
+  "output_tokens": 18350,
+  "cost_usd": 0.3276625000000001
+}
