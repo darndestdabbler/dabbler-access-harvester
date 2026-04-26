@@ -3,7 +3,7 @@
 > **Purpose:** Author the lexical and expression sections of the ANTLR4 `Vba.g4` grammar — tokens, comments, line continuation, identifiers, literals, and expression precedence (primary → member access → call → unary → binary → assignment) — covering everything the 12 module-level fixtures exercise at the lexical and expression level.
 > **Created:** 2026-04-25
 > **Session Set:** `docs/session-sets/vba-lexical-and-expression-grammar/`
-> **Prerequisite:** docs/session-sets/✅parser-foundations/, docs/session-sets/✅vba-spec-study/
+> **Prerequisite:** docs/session-sets/parser-foundations/, docs/session-sets/vba-spec-study/
 > **Workflow:** Orchestrator → AI Router → Cross-provider verification
 
 > **This spec is a stub.** The orchestrator executing Session 1 of this set must elaborate the step lists before running them.
@@ -12,7 +12,7 @@
 
 ## Canonical tree row
 
-> Copied verbatim from `docs/session-sets/✅vba-parser-session-set-generator/session-set-tree.md` row #3. This is the authoritative record; the prose below interprets these fields, never overrides them.
+> Copied verbatim from `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md` row #3. This is the authoritative record; the prose below interprets these fields, never overrides them.
 
 | Field | Value |
 |---|---|
@@ -35,7 +35,7 @@ The grammar is clean-room from MS-VBAL. The `vba-spec-study` (#2) summary, cover
 
 ## Authority
 
-Slug, plan-phase coverage, prerequisites, session count, and output paths are fixed by `docs/session-sets/✅vba-parser-session-set-generator/session-set-tree.md` row #3.
+Slug, plan-phase coverage, prerequisites, session count, and output paths are fixed by `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md` row #3.
 
 ---
 

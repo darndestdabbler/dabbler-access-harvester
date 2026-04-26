@@ -4,6 +4,7 @@ AI Router — Lightweight model routing for Claude Code.
 Usage:
     from ai_router import (
         route, verify, query, get_costs, print_cost_report,
+        print_session_set_status,
         send_pushover_notification, send_session_complete_notification
     )
 
@@ -768,6 +769,114 @@ def print_cost_report(session_set_dir: str):
             print(f"  {model:20s}  {data['calls']:3d} calls"
                   f"  ${data['cost']:.4f}")
     print("=" * 60 + "\n")
+
+
+def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
+    """Print a status table of every session set under *base_dir*.
+
+    State is derived from file presence in each set's directory — see
+    :func:`find_active_session_set` for the same rules. Sets are grouped
+    in the table by state (in-flight first, then not-started, then done),
+    then sorted by most recently touched within each group.
+    """
+    if not os.path.isdir(base_dir):
+        print(f"(no session-sets directory at {base_dir})")
+        return
+
+    in_flight: list[dict] = []
+    not_started: list[dict] = []
+    done: list[dict] = []
+
+    for name in sorted(os.listdir(base_dir)):
+        path = os.path.join(base_dir, name)
+        if not os.path.isdir(path):
+            continue
+        spec_path = os.path.join(path, "spec.md")
+        if not os.path.isfile(spec_path):
+            continue
+
+        activity_path = os.path.join(path, "activity-log.json")
+        changelog_path = os.path.join(path, "change-log.md")
+
+        sessions_completed = 0
+        total_sessions: Optional[int] = None
+        last_touched: Optional[str] = None
+
+        if os.path.isfile(activity_path):
+            try:
+                with open(activity_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                total_sessions = data.get("totalSessions")
+                entries = data.get("entries", [])
+                if entries:
+                    last_touched = max(
+                        (e.get("dateTime", "") for e in entries),
+                        default=None,
+                    )
+                    sessions_completed = len({
+                        e["sessionNumber"] for e in entries
+                        if e.get("sessionNumber") is not None
+                    })
+            except Exception:
+                pass
+
+        record = {
+            "name": name,
+            "completed": sessions_completed,
+            "total": total_sessions,
+            "last_touched": last_touched or "",
+        }
+
+        if os.path.isfile(changelog_path):
+            done.append(record)
+        elif os.path.isfile(activity_path):
+            in_flight.append(record)
+        else:
+            not_started.append(record)
+
+    in_flight.sort(key=lambda r: r["last_touched"], reverse=True)
+    done.sort(key=lambda r: r["last_touched"], reverse=True)
+    not_started.sort(key=lambda r: r["name"])
+
+    # ASCII-only glyphs — Windows cp1252 consoles cannot print emoji and
+    # crash mid-line, losing the rest of the report (see lessons-learned
+    # "Persist Routed Output To Disk Before Any Display Or Logging Side
+    # Effects" for the original failure shape).
+    rows = (
+        [("[~]", r) for r in in_flight]
+        + [("[ ]", r) for r in not_started]
+        + [("[x]", r) for r in done]
+    )
+
+    if not rows:
+        print(f"(no session sets under {base_dir})")
+        return
+
+    name_width = max(len(r[1]["name"]) for r in rows)
+    name_width = max(name_width, len("Session Set"))
+
+    print()
+    print("=" * (name_width + 32))
+    print("SESSION-SET STATUS")
+    print("=" * (name_width + 32))
+    print(f"{'St':3}  {'Session Set':<{name_width}}  {'Progress':>10}  Touched")
+    print(f"{'-' * 3}  {'-' * name_width}  {'-' * 10}  {'-' * 10}")
+    for icon, r in rows:
+        if r["total"] not in (None, 0):
+            progress = f"{r['completed']}/{r['total']}"
+        elif r["completed"] > 0:
+            progress = f"{r['completed']} done"
+        else:
+            progress = "-"
+        touched = r["last_touched"][:10] if r["last_touched"] else "-"
+        print(f"{icon}  {r['name']:<{name_width}}  {progress:>10}  {touched}")
+    print("=" * (name_width + 32))
+    print(
+        f"  [~] in-flight: {len(in_flight)}    "
+        f"[ ] not-started: {len(not_started)}    "
+        f"[x] done: {len(done)}"
+    )
+    print("=" * (name_width + 32) + "\n")
 
 
 def _calculate_cost(input_tokens, output_tokens, model_cfg):
