@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "vba-statement-and-module-grammar",
-  "currentSession": 2,
+  "currentSession": 3,
   "totalSessions": 4,
   "status": "complete",
-  "startedAt": "2026-04-26T15:26:19.434885+00:00",
-  "completedAt": "2026-04-26T15:52:17.342103+00:00",
+  "startedAt": "2026-04-26T19:31:05.946887+00:00",
+  "completedAt": "2026-04-26T19:43:49.202212+00:00",
   "verificationVerdict": "VERIFIED",
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
+    "model": "claude-sonnet-4-6",
+    "effort": "medium"
   }
 }

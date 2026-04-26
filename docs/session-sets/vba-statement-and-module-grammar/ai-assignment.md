@@ -87,10 +87,19 @@
 | Final session verification | Routed | `session-verification` | `gpt-5-4` | n/a | Non-negotiable cross-provider check per repo constraints. |
 
 **Actuals (filled after the session runs):**
-*   Orchestrator used:
-*   Total routed cost:
+*   Orchestrator used: Claude Code Sonnet 4.6 @ effort=medium.
+*   Total routed cost: ~$0.18 session (R1 gpt-5-4 $0.097 + R2 gpt-5-4 $0.080 + next-orchestrator analysis ~$0.007). Cumulative set total: $0.72.
 *   Deviations from plan:
+    - **Schema-validation handled in-conversation** (per "orchestrator-matches-routing-target" convention: Sonnet is the routing target for schema-validation and this session IS Sonnet). No route() call.
+    - **Two grammar tightening changes applied** (both from the schema-validation + harness finding, not pre-planned):
+        (1) `preprocessorLine` added to `moduleItem` so `#If`/`#End If` at module level doesn't crash.
+        (2) `preprocessorLine` added to `statementListBody` so `#If`/`#End If` inside procedure bodies doesn't crash. This was the R1 Major finding; fixed in-session.
+    - **CLI encoding fix applied** (one line): `CodePagesEncodingProvider.Instance` registration in `Program.Main()` needed for harness to work on .NET Core.
+    - **Two verification rounds** (R1 gpt-5-4: 1 Major; R2 VERIFIED). Both completed; no deferred issues.
 *   Notes for next-session calibration:
+    - **Session 4's `sonnet-4.6` @ effort=`low` recommendation stands.** The grammar is clean; no deferred Major issues. Session 4 work: address minor coverage-broadening suggestions from Sessions 2+3 (if any), then generate the change-log via `route(task_type="summarization")` and merge into main.
+    - **Preprocessor handling scope.** The added `preprocessorLine` consumes directive lines structurally without evaluating the condition — both branches of `#If ... #End If` are parsed as ordinary grammar items. This is correct per the "tokenize but do not evaluate" scope for this session set. Full conditional compilation evaluation is deferred to parser-infrastructure (#6).
+    - **gpt-5-4 verifier performance.** All 5 gpt-5-4 calls in Session 3 completed in 77–190s without timeout. Reliability at ~18K-token R1 prompt is good; only the R2 prompt (1KB) returned in 86s. No escalations needed. The session-verification task_type_override pointing to gpt-5-4 remains correct for Session 4.
 
 ---
 

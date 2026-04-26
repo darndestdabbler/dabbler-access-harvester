@@ -213,6 +213,48 @@ public class VbaModuleParserTests
     public void ModuleConst_MultiDecl()
         => Accept("Const A As Long = 1, B As Long = 2\n");
 
+    // ---------- Preprocessor directives (§6 / should-priority) ----------
+    //
+    // The grammar tokenizes but does not evaluate conditional compilation
+    // (full evaluation deferred to parser-infrastructure #6). These tests
+    // confirm that #If/#Else/#End If guards do not crash the module parser
+    // when encountered at module level — the "must not crash" requirement
+    // from ms-vbal-coverage.csv §6 rows.
+
+    [Fact]
+    public void Preprocessor_IfVba7Guard_WithDeclarePtrSafe()
+        => Accept(
+            "Option Explicit\n" +
+            "#If VBA7 Then\n" +
+            "    Public Declare PtrSafe Sub Sleep Lib \"kernel32\" (ByVal ms As Long)\n" +
+            "#Else\n" +
+            "    Public Declare Sub Sleep Lib \"kernel32\" (ByVal ms As Long)\n" +
+            "#End If\n");
+
+    [Fact]
+    public void Preprocessor_HashConst()
+        => Accept("#Const DEBUG_MODE = True\n");
+
+    [Fact]
+    public void Preprocessor_IfElseIfElseEndIf()
+        => Accept(
+            "#If Win64 Then\n" +
+            "#ElseIf Win32 Then\n" +
+            "#Else\n" +
+            "#End If\n");
+
+    [Fact]
+    public void Preprocessor_InsideProcedureBody()
+        => Accept(
+            "Public Sub DoSetup()\n" +
+            "    #If VBA7 Then\n" +
+            "    Dim p As LongPtr\n" +
+            "    #Else\n" +
+            "    Dim p As Long\n" +
+            "    #End If\n" +
+            "    p = 0\n" +
+            "End Sub\n");
+
     // ---------- Type declaration (§4.4) ----------
 
     [Fact]

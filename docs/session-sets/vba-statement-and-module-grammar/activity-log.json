@@ -183,6 +183,111 @@
           "costUsd": 0.0021962500000000003
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/register-and-read-guidance",
+      "dateTime": "2026-04-26T19:36:52.258674+00:00",
+      "description": "Registered session 3 (Sonnet 4.6 medium). Read project-guidance.md, lessons-learned.md, spec Session 3 plan, ai-assignment.md, ai-workflow.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/verify-prereqs",
+      "dateTime": "2026-04-26T19:36:52.259723+00:00",
+      "description": "Confirmed Sessions 1+2 outputs: Vba.g4 statement section (Session 1), module section (Session 2), 272 tests passing (Session 2). CLI parse subcommand present in AccessHarvester.Cli/Program.cs.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/cli-encoding-fix",
+      "dateTime": "2026-04-26T19:36:52.259723+00:00",
+      "description": "Fixed CLI: added System.Text.Encoding.RegisterProvider(CodePagesEncodingProvider.Instance) to Main() so encoding 1252 works on .NET Core. Required for harness invocation of parse subcommand.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/harness-run",
+      "dateTime": "2026-04-26T19:36:52.260723+00:00",
+      "description": "Ran parser-foundations harness against 12 corpus fixtures. Results: 10 parsed, 2 failed. All 10 VBA fixtures (*.bas, *.cls) parsed with status=parsed, 0 error tokens. 2 non-VBA files (04 SQL, 06 Access expression) failed as expected.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/schema-validation",
+      "dateTime": "2026-04-26T19:36:52.261721+00:00",
+      "description": "In-conversation schema-validation (Sonnet orchestrator matches Sonnet routing target per convention). All must-priority coverage matrix rows for \u00a74.x and \u00a75.x are covered by the grammar. One should-priority gap identified: preprocessor directives (#If/#Else/#End If) not in moduleItem, causing crash on real-world modules with VBA7 guards. Fixed by adding preprocessorLine alternative to moduleItem.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/preprocessor-tightening",
+      "dateTime": "2026-04-26T19:36:52.261721+00:00",
+      "description": "Added preprocessorLine rule to moduleItem covering HASH_IF, HASH_ELSEIF, HASH_ELSE, HASH_END_IF, HASH_CONST. Added 3 preprocessor acceptance tests. dotnet build succeeded, 275/275 grammar tests, 402/402 total.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/cross-provider-verification",
+      "dateTime": "2026-04-26T19:39:21.297024+00:00",
+      "description": "Routed session-verification to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5095,
+          "outputTokens": 5598,
+          "costUsd": 0.09670749999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/cross-provider-verification-round2",
+      "dateTime": "2026-04-26T19:42:30.635498+00:00",
+      "description": "Round 2 verification via gpt-5-4 after R1 fix (preprocessorLine in statementListBody)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 360,
+          "outputTokens": 5268,
+          "costUsd": 0.07992
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T19:43:21.517586+00:00",
+      "description": "Routed analysis recommending Session 4 orchestrator (via gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 712,
+          "outputTokens": 86,
+          "costUsd": 0.00175
+        }
+      ]
     }
   ]
 }

@@ -392,8 +392,12 @@ statementListEof
     : statementListBody EOF
     ;
 
+// `preprocessorLine` is included here alongside `NEWLINE` and `block`
+// so that `#If ... #End If` guards inside procedure bodies do not crash
+// the parser (same "must not crash" rationale as the module-level
+// `moduleItem` alternative — see §6 schema-validation finding).
 statementListBody
-    : (NEWLINE | block)*
+    : (NEWLINE | preprocessorLine | block)*
     ;
 
 // One unit of work at statement-list position: an optional label
@@ -868,7 +872,20 @@ moduleItem
     | procedureDeclaration                                           # ProcedureItem
     | moduleConstStatement                                           # ConstItem
     | moduleVariableDecl                                             # VariableItem
+    | preprocessorLine                                               # PreprocessorItem
     | NEWLINE                                                        # BlankLineItem
+    ;
+
+// Conditional-compilation directive line (§6). The preprocessor tokens
+// (HASH_IF, HASH_ELSEIF, HASH_ELSE, HASH_END_IF, HASH_CONST) are already
+// lexed correctly; this rule consumes the entire directive line so the
+// parser does not error on modules containing `#If VBA7 Then` guards.
+// Full evaluation of conditional compilation is deferred to
+// parser-infrastructure (#6) per spec-coverage row §6. The `~NEWLINE*`
+// tail absorbs the condition expression and any continuation tokens on
+// the same logical line without needing a separate expression sub-rule.
+preprocessorLine
+    : (HASH_IF | HASH_ELSEIF | HASH_ELSE | HASH_END_IF | HASH_CONST) ~NEWLINE*
     ;
 
 // --- 1. Option directives (§4.1) ----------------------------------
