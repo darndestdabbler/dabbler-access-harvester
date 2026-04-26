@@ -91,7 +91,7 @@ Claude Sonnet 4.6 @ effort=medium
 | 8 | reasoning | session-verification | gpt-5-4 | high | Per `task_type_overrides`; mandatory cross-provider gate. |
 
 **Actuals (filled after the session runs):**
-- Orchestrator used: TBD
-- Total routed cost: TBD
-- Deviations from recommendation: TBD
-- Notes for next-session calibration: TBD
+- Orchestrator used: Claude Sonnet 4.6 @ effort=medium. Matches recommendation.
+- Total routed cost: ~$0.54 (Session 4 calls: Opus/planning $0.3654; gpt-5-4 verification rounds 1+2+3 = $0.1717 + $0.1249 + $0.0378 = $0.3344; gemini-flash summarization $0.0004. Total = $0.70 for Session 4 only). Session-set total across all 4 sessions: $2.33 (19 routed calls).
+- Deviations from recommendation: Orchestrator tier matched. Route(architecture) timed out twice at Opus/max effort + adaptive thinking (600s timeout on 3.8K input tokens). Route(planning) produced a meta-plan not the playbook. Playbook authored in-conversation by Sonnet 4.6 (deviation from spec). Route(summarization) hit Gemini 400 on first attempt (Gemini Pro); max_tier=1 fallback to Gemini Flash succeeded (per retrospective #9 convention). Fixed bugs in router-config.yaml: effort:xhigh->max for Opus/architecture; timeout 300->600s.
+- Notes for next-session calibration: This was the last session of the set. New content: next-session-set recommendation protocol (routing-playbook.md §3.15 and §8). Verification took 3 rounds (at retry cap): round 1 found 4 Major + 2 Minor; round 2 found 2 residuals; round 3 returned ISSUES_FOUND with minimal/unclear content. All explicit findings from rounds 1-2 were resolved. Primary lesson: Opus/max + adaptive thinking on the architecture task type exceeds the 600s timeout for synthesis-document prompts in this repo — future orchestrators should either: (a) use in-conversation synthesis when orchestrator is Opus, or (b) break the prompt into sections for multiple focused calls.
