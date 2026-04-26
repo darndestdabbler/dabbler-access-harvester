@@ -353,3 +353,52 @@ reference; if it proves out twice in *this* repo, propose promotion to
   synthesis-dispatcher templates should encode this as the default, not
   a per-script choice. When in doubt, write to a temp path first; if
   the print fails, the content is still recoverable from disk.
+
+### Run Parallel Session Sets In Per-Set Git Worktrees, Not On A Shared Working Tree
+
+- **Context:** First hit on 2026-04-26 running
+  `vba-lexical-and-expression-grammar` and `access-metadata-extraction` in
+  parallel per the `project-guidance.md` -> Token-Window Budget Overrides
+  endorsement of parallel session sets. Both orchestrators (initially
+  one Codex + one Claude, later two Claudes) checked out the same git
+  branch in the same working directory.
+- **Failure or friction:** The two sessions did not conflict
+  semantically — they touched different code (grammar vs. metadata
+  schema). They collided on **disk**: a `dotnet build` of the full
+  solution from Session 1 of `access-metadata-extraction` failed at the
+  grammar project because `Vba.g4` was mid-edit by the parallel session
+  and its regenerated `VbaLexer.cs` did not compile. Concurrent edits
+  to `AccessHarvester.sln`, `ai-router/router-metrics.jsonl`, and
+  shared `tmp/` artifacts produced confusing partial states. Codex's
+  partial synthesis output landed as orphan files inside the metadata-
+  schema session-set folder rather than in the canonical
+  `session-reviews/` / `issue-logs/` locations.
+- **Lesson:** Parallel session sets need **isolated working
+  directories** even when their logical scope is independent. Git
+  worktrees are the right primitive: one worktree per session set, each
+  on its own `session-set/<slug>` branch. Disk state stays separate;
+  merges happen explicitly when each set finishes rather than as
+  ambient churn during execution.
+- **Action for future sessions:** When starting a new session set that
+  will run in parallel with another in-flight set:
+  1. Create a branch off main: `git checkout -b session-set/<slug>`.
+  2. Create a worktree for it: `git worktree add ../<repo>-<slug> session-set/<slug>`.
+  3. Run all sessions of that set in the worktree's directory.
+  4. On the **last session of the set**, after `change-log.md` is
+     generated and the final session commit is pushed, the orchestrator
+     also runs `git fetch origin main && git merge --no-ff origin/main`
+     into the session-set branch (resolving any conflicts), then
+     `git checkout main && git merge --no-ff session-set/<slug> &&
+     git push`. The merge commit's subject ("Merge session set
+     <slug>") preserves traceability. Delete or tag the branch
+     after merge.
+  5. Do **not** introduce a separate "merge session set" — the merge
+     belongs in Step 8 of the last regular session.
+  Two collateral cleanups discovered alongside this lesson: `samples/
+  NorthwindDevEdition.accdb` (Access mutates timestamps on open) and
+  `ai-router/router-metrics.jsonl` (every router call appends) should
+  be treated as merge-noise — gitignore them or expect tiny
+  reconciliation commits forever.
+  If a second session set hits this same failure mode, propose
+  promoting the worktree-per-set rule to a Convention in
+  `project-guidance.md`.
