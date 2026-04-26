@@ -1,0 +1,37 @@
+{
+  "sessionNumber": 2,
+  "verificationRound1": {
+    "verdict": "ISSUES_FOUND",
+    "issues": [
+      {
+        "id": "R1-1",
+        "severity": "Major",
+        "summary": "Over-broad reuse of lExpression makes TypeOf and AddressOf accept invalid operands (literals, calls under AddressOf, bang access under AddressOf, implicit-With under AddressOf).",
+        "location": "AccessHarvester.Vba.Grammar/Vba.g4 - rules typeOfExpr, addressOfExpr",
+        "status": "fixed",
+        "resolution": "Introduced two new rules: procedureReference (used by addressOfExpr) restricts AddressOf operands to dotted (IDENTIFIER|TYPED_IDENTIFIER|ME).memberName chains - no calls, bang, implicit-With, or literals. referenceExpression (used by typeOfExpr) is an l-expression-shaped rule that excludes literal/special-constant primaries. Updated existing AddressOf tests to access addressOfExpr.procedureReference() instead of .lExpression()."
+      },
+      {
+        "id": "R1-2",
+        "severity": "Minor",
+        "summary": "No negative tests cover invalid TypeOf/AddressOf forms.",
+        "location": "tests/AccessHarvester.Vba.Grammar.Tests/Expressions/VbaExpressionParserTests.cs",
+        "status": "fixed",
+        "resolution": "Added TypeOf_LiteralOperand_FailsToParse (3 cases: literal int, string, date) and AddressOf_NonProcedureReference_FailsToParse (4 cases: call, bang, implicit-With, literal). Each asserts InvalidOperationException via the ThrowingErrorListener."
+      }
+    ]
+  },
+  "verificationRound2": {
+    "verdict": "ISSUES_FOUND",
+    "issues": [
+      {
+        "id": "R2-1",
+        "severity": "Minor",
+        "summary": "procedureReference accepted bare `AddressOf Me`. Me is the class instance, not a procedure pointer, so the form is a spec violation.",
+        "location": "AccessHarvester.Vba.Grammar/Vba.g4 - procedureReference",
+        "status": "fixed",
+        "resolution": "Split procedureReference into two alternatives: `(IDENTIFIER|TYPED_IDENTIFIER) (DOT memberName)*` (covers all non-Me forms, optionally qualified) and `ME (DOT memberName)+` (Me must be followed by at least one member). Bare `Me` no longer parses as a procedure reference. Inlined procedureRefHead into procedureReference. Added `AddressOf Me` to the AddressOf_NonProcedureReference_FailsToParse theory."
+      }
+    ]
+  }
+}
