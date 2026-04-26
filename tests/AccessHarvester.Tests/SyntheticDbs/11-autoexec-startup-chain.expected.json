@@ -1,0 +1,106 @@
+{
+  "Forms": [
+    {
+      "Name": "frmAdminSwitchboard"
+    },
+    {
+      "Name": "frmCaseworkerHome"
+    },
+    {
+      "Name": "frmSupervisorDashboard"
+    },
+    {
+      "Name": "frmReadOnlyView"
+    },
+    {
+      "Name": "frmMainSwitchboard"
+    }
+  ],
+  "Tables": [
+    {
+      "Name": "tblRoles",
+      "Fields": [
+        {
+          "Name": "RoleID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "RoleName",
+          "DataType": "Text",
+          "Size": 100
+        }
+      ],
+      "PrimaryKey": [
+        "RoleID"
+      ]
+    },
+    {
+      "Name": "tblUsers",
+      "Fields": [
+        {
+          "Name": "UserID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "UserName",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "RoleID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "WinLogon",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "Active",
+          "DataType": "Boolean"
+        }
+      ],
+      "PrimaryKey": [
+        "UserID"
+      ]
+    },
+    {
+      "Name": "tblSessionLog",
+      "Fields": [
+        {
+          "Name": "LogID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "UserID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "StartTime",
+          "DataType": "DateTime"
+        },
+        {
+          "Name": "AppVersion",
+          "DataType": "Text",
+          "Size": 50
+        }
+      ],
+      "PrimaryKey": [
+        "LogID"
+      ]
+    }
+  ],
+  "Relationships": [
+    {
+      "Name": "relRolesUsers",
+      "ParentTable": "tblRoles",
+      "ChildTable": "tblUsers",
+      "Fields": [
+        {
+          "ParentField": "RoleID",
+          "ChildField": "RoleID"
+        }
+      ]
+    }
+  ]
+}

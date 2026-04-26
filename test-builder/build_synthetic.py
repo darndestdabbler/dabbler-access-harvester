@@ -1,7 +1,7 @@
 """
 Top-level entry: iterate `test-builder/specs/*.json` and build one .accdb per spec.
 
-Output goes to `tests/AccessExporter.Tests/SyntheticDbs/<specName>.accdb` where
+Output goes to `tests/AccessHarvester.Tests/SyntheticDbs/<specName>.accdb` where
 <specName> is the spec file's stem (e.g., geometry_basic.json → geometry_basic.accdb).
 
 Each .accdb contains exactly the form described by the spec — nothing else. This
@@ -27,7 +27,7 @@ from create_from_spec import create_form_from_spec
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
 _SPECS_DIR = os.path.join(_HERE, "specs")
-_OUT_DIR = os.path.abspath(os.path.join(_HERE, "..", "tests", "AccessExporter.Tests", "SyntheticDbs"))
+_OUT_DIR = os.path.abspath(os.path.join(_HERE, "..", "tests", "AccessHarvester.Tests", "SyntheticDbs"))
 
 
 def _load_spec(path):

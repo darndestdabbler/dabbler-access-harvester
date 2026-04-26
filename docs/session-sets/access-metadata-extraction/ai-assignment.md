@@ -9,7 +9,7 @@
 |         | **Actuals:**                                                 |                                     |                                                |
 | 3 of 6  | Author ≥7 `.accdb` fixtures + `expected.json` via test-builder | `test-generation`, `code-generation`  | `AI Router -> gemini-flash`                    |
 |         | **Actuals:**                                                 |                                     |                                                |
-| 4 of 6  | Wire form/report extractor against fixtures                  | `schema-validation`, `code-generation`| `AI Router -> gemini-flash`                    |
+| 4 of 6  | Wire form/report extractor against fixtures                  | `schema-validation`, `code-generation`| `google gemini-flash @ effort=low`             |
 |         | **Actuals:**                                                 |                                     |                                                |
 | 5 of 6  | Wire query/table extractor and land integration tests        | `schema-validation`, `code-generation`| `AI Router -> gemini-flash`                    |
 |         | **Actuals:**                                                 |                                     |                                                |
@@ -103,3 +103,40 @@ and driving an existing `test-builder/` tool, which does not require a
 high-tier synthesis orchestrator like Opus. Codex at low effort is
 cost-effective and well-suited for reliable, multi-step tool-use and
 code generation tasks like authoring test fixtures.
+
+---
+
+## Session 3 actuals (appended by Codex orchestrator)
+
+**Orchestrator used:** Codex (GPT-5 family) @ default coding effort.
+
+**Total routed cost — Session 3:**
+- Fixture-manifest routing: $0.027 (gemini-pro)
+- Round-1 cross-provider verification: $1.330 (opus)
+- Next-orchestrator recommendation: $0.002 (gemini-pro)
+- **Total:** $1.359
+
+**Verifier verdict:** VERIFIED on round 1. Session 3 commits with no
+unresolved Major / Critical issues.
+
+**Deviations from recommendation:** The original Session 3 row pointed at
+`AI Router -> gemini-flash`, but the session ran successfully as a Codex-led
+mechanical implementation pass. The only routed reasoning work was the small
+fixture-manifest mapping and the required cross-provider verification.
+
+**Notes for Session 4 calibration:** Session 3 fixed the imported
+`test-builder/` output path drift (`AccessExporter.Tests` ->
+`AccessHarvester.Tests`), added minimal report/subform helpers, and committed
+seven paired `.accdb` + `expected.json` contracts for cases
+`01/02/03/09/10/11/12`. That materially reduces ambiguity for Session 4:
+the remaining work is extractor wiring against concrete fixtures rather than
+schema or fixture design.
+
+**Next session orchestrator recommendation (Session 4):**
+google gemini-flash @ effort=low
+
+**Rationale:** The session's scope is mechanical C# wiring against
+pre-defined fixtures and contracts, a task well-suited for a fast,
+cost-effective model. Session 3's success with a less-advanced model on
+similar plumbing work demonstrates that a high-end orchestrator is
+unnecessary, making this a low-cost, low-risk assignment.

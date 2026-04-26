@@ -39,12 +39,23 @@ FORM_VIEW_DATASHEET = 2
 
 # acObjectType
 acForm = 2
+acReport = 3
 
 # acCloseSave
 acSaveYes = 1
 
 # Twips per inch
 TPI = 1440
+
+# Report sections
+REPORT_SECTION_DETAIL = 0
+REPORT_SECTION_HEADER = 1
+REPORT_SECTION_FOOTER = 2
+REPORT_SECTION_GROUP_LEVEL_1_HEADER = 5
+REPORT_SECTION_GROUP_LEVEL_1_FOOTER = 6
+
+# Report/view commands
+acCmdReportHdrFtr = 37
 
 
 # ======================================================================
@@ -180,6 +191,23 @@ def _add_checkbox(form, section, left, top, width, height, control_source="", na
     return ctl
 
 
+def _add_subform(form, section, left, top, width, height, source_object, name=None,
+                 link_master_fields=None, link_child_fields=None, tag=None):
+    ctl = form.Application.CreateControl(
+        form.Name, acSubForm, section, "", "", left, top, width, height
+    )
+    if name:
+        _p(ctl, "Name", name)
+    _p(ctl, "SourceObject", source_object)
+    if link_master_fields:
+        _p(ctl, "LinkMasterFields", link_master_fields)
+    if link_child_fields:
+        _p(ctl, "LinkChildFields", link_child_fields)
+    if tag:
+        _p(ctl, "Tag", tag)
+    return ctl
+
+
 # ======================================================================
 # Form lifecycle helpers
 # ======================================================================
@@ -231,6 +259,105 @@ def _close_form(access_app, form, temp_name, desired_name):
     """Save and close the form, renaming to desired_name."""
     access_app.DoCmd.Close(acForm, temp_name, acSaveYes)
     access_app.DoCmd.Rename(desired_name, acForm, temp_name)
+
+
+def _create_report(access_app, caption=None, record_source="",
+                   has_report_header=False, has_report_footer=False,
+                   width=None, detail_height=None):
+    """Create a report in design view; returns (report, temp_name)."""
+    report = access_app.CreateReport()
+    temp_name = report.Name
+
+    report.RecordSource = record_source
+    report.Caption = caption or temp_name
+
+    if has_report_header or has_report_footer:
+        access_app.DoCmd.RunCommand(acCmdReportHdrFtr)
+
+    if detail_height:
+        report.Section(REPORT_SECTION_DETAIL).Height = detail_height
+    if width:
+        report.Width = width
+
+    return report, temp_name
+
+
+def _close_report(access_app, report, temp_name, desired_name):
+    """Save and close the report, renaming to desired_name."""
+    access_app.DoCmd.Close(acReport, temp_name, acSaveYes)
+    access_app.DoCmd.Rename(desired_name, acReport, temp_name)
+
+
+def _report_create_control(report, control_type, section, parent_name, control_source,
+                           left, top, width, height):
+    return report.Application.CreateReportControl(
+        report.Name,
+        control_type,
+        section,
+        parent_name,
+        control_source,
+        left,
+        top,
+        width,
+        height,
+    )
+
+
+def _create_attached_report_label(report, section, parent_ctl, parent_left, parent_top,
+                                  parent_height, caption):
+    label_w = 1440
+    label_left = max(0, parent_left - label_w - 60)
+    label = _report_create_control(
+        report, acLabel, section, parent_ctl.Name, "",
+        label_left, parent_top, label_w, parent_height
+    )
+    _set_props(label, Caption=caption)
+    return label
+
+
+def _add_report_label(report, section, left, top, width, height, caption, name=None,
+                      font_size=8, font_bold=False, fore_color=0, tag=None):
+    ctl = _report_create_control(report, acLabel, section, "", "", left, top, width, height)
+    _set_props(ctl, Caption=caption, FontSize=font_size, FontBold=font_bold,
+               ForeColor=fore_color)
+    if name:
+        _p(ctl, "Name", name)
+    if tag:
+        _p(ctl, "Tag", tag)
+    return ctl
+
+
+def _add_report_textbox(report, section, left, top, width, height, control_source="", name=None,
+                        label_text=None, locked=False, enabled=True,
+                        format_prop=None, input_mask=None, tag=None,
+                        font_size=None, font_bold=None):
+    ctl = _report_create_control(
+        report, acTextBox, section, "", control_source, left, top, width, height
+    )
+    if name:
+        _p(ctl, "Name", name)
+    if label_text is not None:
+        _create_attached_report_label(
+            report, section, ctl, left, top, height, label_text
+        )
+    _set_props(ctl, Format=format_prop, InputMask=input_mask,
+               FontSize=font_size, FontBold=font_bold)
+    if tag:
+        _p(ctl, "Tag", tag)
+    return ctl
+
+
+def _add_report_subreport(report, section, left, top, width, height, source_object,
+                          name=None, tag=None):
+    ctl = _report_create_control(
+        report, acSubForm, section, "", "", left, top, width, height
+    )
+    if name:
+        _p(ctl, "Name", name)
+    _p(ctl, "SourceObject", source_object)
+    if tag:
+        _p(ctl, "Tag", tag)
+    return ctl
 
 
 # ======================================================================
