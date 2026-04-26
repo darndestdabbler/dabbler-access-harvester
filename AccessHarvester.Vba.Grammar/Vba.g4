@@ -427,8 +427,14 @@ statementLabel
 // block-form statement's right edge ends with its terminator
 // keyword (`End If`, `Next`, `Loop`, etc.), which cannot also be
 // followed by a `:` separator at the source level.
+//
+// The trailing `COLON?` accepts `stmt : REM comment` — when the REM
+// (or apostrophe) comment follows a colon separator, the lexer hides
+// the comment token and the parser sees `stmt COLON NEWLINE`. Without
+// the trailing optional colon the parser errors expecting a statement
+// after the separator. H-A07 edge fixture witness.
 singleLineStatementList
-    : statement (COLON statement)*
+    : statement (COLON statement)* COLON?
     ;
 
 // Top-level statement choice. Block-opening forms come first so

@@ -79,3 +79,17 @@ claude-code opus-4.7 @ effort=medium
 
 **Rationale:**
 Session 2 is a synthesis-heavy session requiring non-trivial ANTLR4 grammar fixes, which aligns with the original high-capability model recommendation. Session 1 actuals confirmed that a weaker orchestrator produced multiple major defects even on a simpler authoring task, making a high-capability model like Opus necessary to correctly resolve complex parse failures and avoid verification churn.
+
+## Session 2 Actuals (added post-completion)
+
+**Orchestrator used:** claude-code claude-sonnet-4-6 @ effort=unknown (Opus was recommended; Sonnet was used)
+**Verification verdict:** VERIFIED (2 rounds: round-1 found 3 minor/advisory findings; round-2 confirmed all fixed)
+**Total routed cost:** ~$0.11 (verification $0.08 + re-verify $0.03 + next-orch $0.00)
+**Deviations from recommendation:** Used Sonnet instead of Opus. Session was simpler than expected: only 1 grammar failure (trailing COLON before hidden REM comment in `singleLineStatementList`) — a trivially mechanical 1-line grammar fix. No `architecture` route call was needed. Created `VbaCorpusParserTests.cs` (15 VBA-module fixture harness). All 15 fixtures parse to 100%.
+**Notes for Session 3:** Parse-failure log authoring + schema-validation cross-cut. Administrative documentation; no synthesis required.
+
+**Next session orchestrator recommendation (Session 3):**
+claude-code sonnet-4.6 @ effort=low
+
+**Rationale:**
+Session 3 specification correctly identifies the work as administrative documentation and mechanical validation, tasks well within Sonnet's capabilities. Session 2 actuals further support this — Sonnet successfully completed a task originally scoped for Opus, proving its sufficiency for low-complexity work.

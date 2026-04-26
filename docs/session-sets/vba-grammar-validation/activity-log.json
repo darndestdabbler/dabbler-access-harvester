@@ -181,6 +181,76 @@
           "costUsd": 0.0020912500000000002
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/build-harness",
+      "dateTime": "2026-04-26T22:12:35.407469+00:00",
+      "description": "Created VbaCorpusParserTests.cs - grammar harness reading all 17 .bas/.cls fixtures (12 module-level + 5 edge) through ANTLR module rule",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/grammar-fix-trailing-colon",
+      "dateTime": "2026-04-26T22:12:35.408449+00:00",
+      "description": "Fixed Vba.g4 singleLineStatementList: added trailing COLON? to accept stmt : REM comment pattern (H-A07 witness). 1 failure -> 0 failures on 17-fixture corpus.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-26T22:12:35.409450+00:00",
+      "description": "dotnet build (0 errors, 274 warnings) and dotnet test (293 grammar + 328 main passed, 2 skipped). All 15 corpus tests pass, no regressions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/harness-hardening",
+      "dateTime": "2026-04-26T22:16:02.312044+00:00",
+      "description": "Fixed verifier findings: added BailErrorStrategy (no error recovery), sorted file enumeration for determinism, clarified corpus comment (15 VBA modules, not 17 total)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/reverification-round2",
+      "dateTime": "2026-04-26T22:16:25.048958+00:00",
+      "description": "Round-2 verification after harness hardening. Model: gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1369,
+          "outputTokens": 1548,
+          "costUsd": 0.0266425
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T22:17:08.855706+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 3. Model: gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 601,
+          "outputTokens": 88,
+          "costUsd": 0.0016312499999999999
+        }
+      ]
     }
   ]
 }
