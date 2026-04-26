@@ -93,3 +93,17 @@ claude-code sonnet-4.6 @ effort=low
 
 **Rationale:**
 Session 3 specification correctly identifies the work as administrative documentation and mechanical validation, tasks well within Sonnet's capabilities. Session 2 actuals further support this — Sonnet successfully completed a task originally scoped for Opus, proving its sufficiency for low-complexity work.
+
+## Session 3 Actuals (added post-completion)
+
+**Orchestrator used:** claude-code claude-sonnet-4-6 @ effort=unknown
+**Verification verdict:** VERIFIED (3 rounds gpt-5-4 + gemini-pro fallback for garbled r3)
+**Total routed cost:** ~$0.26 (schema-validation $0.06 + verification r1 $0.09 + r2 $0.07 + r3 $0.04 + r3-retry $0.01 + change-log $0.00 + next-set-rec $0.00)
+**Deviations from recommendation:** None material. Sonnet was correct choice for this administrative session.
+**Notes:** Verification required 3 rounds due to: (1) schema-validation found 2 Major issues in the parse-failure-log (missing commit refs, stale placeholder — fixed mechanically); (2) cross-provider verifier raised a context-gap false positive about module EOF rule (grammar already has EOF); (3) gpt-5-4 round-3 response was garbled — fell back to gemini-pro for final VERIFIED confirm.
+
+**Next session-set recommendation (after vba-grammar-validation):**
+claude-code opus-4.7 @ effort=high
+
+**Rationale:**
+parser-infrastructure (#6) has 2 synthesis sessions (error recovery strategy, AST shape) — architecture-level design work that warrants Opus. This set's Sonnet-handled sessions confirmed Sonnet is sufficient for mechanical work but the upcoming synthesis sessions are a materially different problem class.

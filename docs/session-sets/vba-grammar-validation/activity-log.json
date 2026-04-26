@@ -251,6 +251,143 @@
           "costUsd": 0.0016312499999999999
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/schema-validation-cross-cut",
+      "dateTime": "2026-04-26T22:25:22.505199+00:00",
+      "description": "Routed code-review (schema-validation) to verify parse-failure-log fixed entries map to real commits. ISSUES_FOUND -> fixed 2 Major, 3 Minor, 1 Info -> VERIFIED",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0607
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/parse-failure-log-authoring",
+      "dateTime": "2026-04-26T22:25:22.506198+00:00",
+      "description": "Authored parse-failure-log.md additions: vba-statement-and-module-grammar (#4) section + vba-grammar-validation (#5) harness run section (GF-001)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-26T22:26:01.010390+00:00",
+      "description": "dotnet build (0 errors, 277 warnings) and dotnet test (293 grammar + 328 main passed, 2 skipped). No regressions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/session-verification",
+      "dateTime": "2026-04-26T22:27:35.339281+00:00",
+      "description": "Cross-provider session verification via route(session-verification). Model: gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4592,
+          "outputTokens": 5139,
+          "costUsd": 0.088565
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/reverification-round2",
+      "dateTime": "2026-04-26T22:29:59.130784+00:00",
+      "description": "Round-2 verification after fixing 2 Major + 1 Minor findings (context gap + prose fixes). Model: gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4343,
+          "outputTokens": 3648,
+          "costUsd": 0.06557750000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/reverification-round3",
+      "dateTime": "2026-04-26T22:31:13.035531+00:00",
+      "description": "Round-3 verification (2 minor prose fixes). Model: gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4075,
+          "outputTokens": 1848,
+          "costUsd": 0.0379075
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/reverification-round3-retry",
+      "dateTime": "2026-04-26T22:31:47.642314+00:00",
+      "description": "Round-3 retry verification (garbled gpt-5-4 -> gemini-pro). Checking 2 minor fixes. Model: gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 4541,
+          "outputTokens": 13,
+          "costUsd": 0.00580625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/change-log-generation",
+      "dateTime": "2026-04-26T22:32:43.421549+00:00",
+      "description": "Generated change-log.md via route(summarization, max_tier=1). Model: gemini-flash",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 412,
+          "outputTokens": 401,
+          "costUsd": 0.0003024
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/next-session-set-recommendation",
+      "dateTime": "2026-04-26T22:33:13.617954+00:00",
+      "description": "Routed analysis for next-session-set recommendation (parser-infrastructure). Model: gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 516,
+          "outputTokens": 110,
+          "costUsd": 0.001745
+        }
+      ]
     }
   ]
 }
