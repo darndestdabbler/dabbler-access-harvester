@@ -207,6 +207,75 @@
       "description": "dotnet build AccessHarvester.Access -> 0 errors, 0 warnings. dotnet test tests/AccessHarvester.Tests -> 127 passed, 0 failed, 0 skipped. (95 prior + 32 new for the three Extractor classes.) Build and test run sequentially per project-guidance.md. Full-solution build deferred \u2014 Vba.Grammar parallel-session state may still be in flight per Session 1's note; this session's deliverables build clean in isolation.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/derive-fixture-manifests",
+      "dateTime": "2026-04-26T10:47:57.895282+00:00",
+      "description": "Routed test-generation manifest mapping for cases 01/02/03/09/10/11/12 via gemini-pro to pin the minimal Access objects each Session 3 fixture needed.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 5825,
+          "outputTokens": 1967,
+          "costUsd": 0.02695125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/author-metadata-fixtures",
+      "dateTime": "2026-04-26T10:47:57.895282+00:00",
+      "description": "Extended test-builder with report/subform support, corrected stale SyntheticDbs output paths, added the Session 3 metadata fixture builder + manifests, and generated seven .accdb fixtures with paired expected.json contracts.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-04-26T10:47:57.896282+00:00",
+      "description": "Ran python -m compileall test-builder, then dotnet build and dotnet test sequentially. Build succeeded with existing warnings; tests passed (42 grammar + 127 harvester).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/cross-provider-verification",
+      "dateTime": "2026-04-26T10:52:29.151081+00:00",
+      "description": "Cross-provider session verification via opus returned VERIFIED on round 1 for the fixture-builder changes and seven expected.json contracts.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 42624,
+          "outputTokens": 9214,
+          "costUsd": 1.33041
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T10:52:29.151081+00:00",
+      "description": "Routed analysis recommending google gemini-flash @ effort=low for Session 4 via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 430,
+          "outputTokens": 98,
+          "costUsd": 0.0015175
+        }
+      ]
     }
   ]
 }

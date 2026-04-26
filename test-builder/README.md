@@ -4,7 +4,7 @@ Builds small, purpose-built Access `.accdb` files from JSON specs. Each spec
 describes one form and a handful of controls that exercise a specific
 enrichment case (twips→inches geometry, label resolution rounds, font-size
 deviation, etc.). The resulting `.accdb` is committed to
-`tests/AccessExporter.Tests/SyntheticDbs/` and drives integration tests for the
+`tests/AccessHarvester.Tests/SyntheticDbs/` and drives integration tests for the
 enrichment pipeline.
 
 ## Prerequisites
@@ -23,7 +23,23 @@ python build_synthetic.py                  # build every spec in specs/
 python build_synthetic.py geometry_basic   # build one spec by name (no .json)
 ```
 
-Output goes to `../tests/AccessExporter.Tests/SyntheticDbs/<spec>.accdb`.
+Output goes to `../tests/AccessHarvester.Tests/SyntheticDbs/<spec>.accdb`.
+
+## Session 3 metadata fixtures
+
+Session 3 of `docs/session-sets/access-metadata-extraction/` adds a
+dedicated builder for the seven database-level metadata fixtures that back
+Phase 4.1-4.3:
+
+```
+cd test-builder
+python build_metadata_fixtures.py
+python build_metadata_fixtures.py 01-simple-validation 09-report-grouping-events
+```
+
+This script writes both the `.accdb` fixture and a paired
+`<name>.expected.json` contract file into
+`../tests/AccessHarvester.Tests/SyntheticDbs/`.
 
 ## Adding a new spec
 

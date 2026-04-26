@@ -1,0 +1,195 @@
+{
+  "Forms": [
+    {
+      "Name": "frmMainSwitchboard",
+      "Children": [
+        {
+          "Type": "Section",
+          "Name": "Detail",
+          "Children": [
+            {
+              "Type": "Label",
+              "Name": "lblHeader",
+              "Properties": {
+                "Caption": "Welcome"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnAdminTools",
+              "Properties": {
+                "Caption": "Admin Tools"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnUserManagement",
+              "Properties": {
+                "Caption": "User Management"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnReports",
+              "Properties": {
+                "Caption": "Reports"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnNewCase",
+              "Properties": {
+                "Caption": "New Case"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnSearchCases",
+              "Properties": {
+                "Caption": "Search Cases"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnMyOpenCases",
+              "Properties": {
+                "Caption": "My Open Cases"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnQuickCaseload",
+              "Properties": {
+                "Caption": "Quick Caseload"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnAuditLog",
+              "Properties": {
+                "Caption": "Audit Log"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnRefresh",
+              "Properties": {
+                "Caption": "Refresh"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnExit",
+              "Properties": {
+                "Caption": "Exit"
+              }
+            },
+            {
+              "Type": "CommandButton",
+              "Name": "btnHelp",
+              "Properties": {
+                "Caption": "Help"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "frmCaseDetail"
+    },
+    {
+      "Name": "frmCaseSearch"
+    },
+    {
+      "Name": "frmCaseList"
+    },
+    {
+      "Name": "frmReportMenu"
+    },
+    {
+      "Name": "frmUserAdmin"
+    },
+    {
+      "Name": "frmAdminTools"
+    },
+    {
+      "Name": "frmAuditLogViewer"
+    },
+    {
+      "Name": "frmDistrictReport",
+      "Children": [
+        {
+          "Type": "Section",
+          "Name": "Detail",
+          "Children": [
+            {
+              "Type": "ComboBox",
+              "Name": "cboDistrict",
+              "Label": {
+                "Source": "attached",
+                "Text": "District"
+              },
+              "Properties": {
+                "RowSource": "SELECT DistrictID, DistrictID FROM tblUsers ORDER BY DistrictID;",
+                "ColumnCount": 2,
+                "BoundColumn": 1
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtAsOfDate",
+              "Label": {
+                "Source": "attached",
+                "Text": "As Of Date"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Reports": [
+    {
+      "Name": "rptCaseLoadByDistrict"
+    }
+  ],
+  "Tables": [
+    {
+      "Name": "tblUsers",
+      "Fields": [
+        {
+          "Name": "UserID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "DistrictID",
+          "DataType": "Long"
+        }
+      ],
+      "PrimaryKey": [
+        "UserID"
+      ]
+    },
+    {
+      "Name": "tblSessionLog",
+      "Fields": [
+        {
+          "Name": "LogID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "UserID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "EndTime",
+          "DataType": "DateTime"
+        }
+      ],
+      "PrimaryKey": [
+        "LogID"
+      ]
+    }
+  ]
+}
