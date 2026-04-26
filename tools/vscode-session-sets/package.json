@@ -1,8 +1,8 @@
 {
   "name": "dabbler-session-sets",
-  "displayName": "Dabbler Session Sets",
-  "description": "Tree view of session-set state for the dabbler-access-harvester workflow.",
-  "version": "0.1.0",
+  "displayName": "Session Set Explorer",
+  "description": "Activity-bar tree view of session-set state for the dabbler-access-harvester workflow.",
+  "version": "0.2.0",
   "publisher": "darndestdabbler",
   "private": true,
   "engines": {
@@ -15,20 +15,28 @@
     "onView:dabblerSessionSets"
   ],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "dabblerSessionSetsContainer",
+          "title": "Session Set Explorer",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "dabblerSessionSetsContainer": [
         {
           "id": "dabblerSessionSets",
           "name": "Session Sets",
-          "icon": "$(checklist)",
-          "contextualTitle": "Session Sets"
+          "contextualTitle": "Session Set Explorer"
         }
       ]
     },
     "commands": [
       {
         "command": "dabblerSessionSets.refresh",
-        "title": "Refresh Session Sets",
+        "title": "Refresh Session Set Explorer",
         "icon": "$(refresh)"
       },
       {

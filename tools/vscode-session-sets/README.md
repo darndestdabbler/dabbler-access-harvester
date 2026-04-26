@@ -1,10 +1,12 @@
-# Dabbler Session Sets — VS Code extension
+# Session Set Explorer — VS Code extension
 
-A small workspace VS Code extension that surfaces every session set under
-`docs/session-sets/` as a tree view in the Explorer panel, grouped by state
-(In Flight / Not Started / Done) with progress and last-touched date. State
-is derived from file presence the same way `ai_router.find_active_session_set`
-and `ai_router.print_session_set_status` do — `change-log.md` → done,
+A small workspace VS Code extension that adds a "Session Set Explorer" view
+to its own Activity Bar container — the leftmost icon strip in VS Code; look
+for the checklist icon. Surfaces every session set under
+`docs/session-sets/` grouped by state (In Flight / Not Started / Done) with
+progress and last-touched date. State is derived from file presence the same
+way `ai_router.find_active_session_set` and
+`ai_router.print_session_set_status` do — `change-log.md` → done,
 `activity-log.json` without it → in-flight, only `spec.md` → not-started.
 
 The extension never writes. It only watches `docs/session-sets/**/{spec.md,

@@ -30,3 +30,7 @@ Thumbs.db
 # Local scratch / one-shot orchestrator scripts — not committed
 tmp/
 session*.py
+
+# VS Code extension build artifacts — rebuild via `vsce package` per
+# tools/vscode-session-sets/README.md
+*.vsix
