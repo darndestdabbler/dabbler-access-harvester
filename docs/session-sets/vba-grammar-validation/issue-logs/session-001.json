@@ -1,0 +1,42 @@
+[
+  {
+    "id": "VGV-1-001",
+    "severity": "Major",
+    "finding": "H-D05 fixture included Resume 0 which verifier challenged as conflating with On Error GoTo 0 sentinel; not clearly listed in title (3 forms listed, not 4).",
+    "location": "docs/test-cases/edge/01-h-d05-resume-forms.bas",
+    "resolution": "fixed",
+    "fix": "Removed Resume 0 from the fixture, keeping 3 confirmed unique forms: Resume, Resume Next, Resume <label>."
+  },
+  {
+    "id": "VGV-1-002",
+    "severity": "Major",
+    "finding": "H-D12 fixture included positional arguments after named arguments, which is invalid VBA syntax. Also mixed in ParamArray dependency.",
+    "location": "docs/test-cases/edge/02-h-d12-named-arguments.bas",
+    "resolution": "fixed",
+    "fix": "Simplified fixture to one TestNamedArgCalls procedure using DoCmd.OpenForm and MsgBox as well-known external callees. Removed the helper ProcedureWithNamedArgs definition. No positional-after-named calls."
+  },
+  {
+    "id": "VGV-1-003",
+    "severity": "Major",
+    "finding": "H-D12 and H-E07 expected JSON had source.kind='procedure' but covered multiple procedures or the whole module, creating source-span mismatch with the single-procedure fixture convention.",
+    "location": "docs/test-cases/edge/02-h-d12-named-arguments.expected.json, 03-h-e07-param-array.expected.json",
+    "resolution": "fixed",
+    "fix": "Restructured both fixtures to single-procedure; updated source location to span exactly that procedure. H-E07 now uses LogMessage as the sole procedure with self-calls in the body."
+  },
+  {
+    "id": "VGV-1-004",
+    "severity": "Minor",
+    "finding": "H-D04 fixture was not minimal: included On Error GoTo <label> and On Error Resume Next (already in corpus), and the division-by-zero made On Error GoTo 0 unreachable at runtime.",
+    "location": "docs/test-cases/edge/05-h-d04-on-error-goto-zero.bas",
+    "resolution": "fixed",
+    "fix": "Simplified procedure body: activate handler, run non-erroring code (Debug.Print), deactivate with On Error GoTo 0, then run code outside scope. Removed On Error Resume Next. On Error GoTo 0 is now reachable."
+  },
+  {
+    "id": "VGV-1-005",
+    "severity": "Info",
+    "finding": "Edge fixtures not covered by automated grammar parse assertions; schema validation only.",
+    "location": "Edge-fixture test integration",
+    "resolution": "deferred",
+    "fix": "Deferred to Session 2 (Grammar Fix Loop) which will run the grammar harness against all fixtures and surface parse failures explicitly."
+  }
+]

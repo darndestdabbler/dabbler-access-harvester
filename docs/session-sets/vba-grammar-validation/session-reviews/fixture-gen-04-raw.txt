@@ -1,0 +1,89 @@
+```vba
+Attribute VB_Name = "Module_RemCommentHazard"
+REM
+REM H-A07: REM-form comments
+REM This module demonstrates the use of REM-style comments.
+REM
+
+Option Explicit
+
+Public Sub RemCommentExamples()
+    REM This is a comment at a statement position.
+    Dim x As Integer
+    Dim s As String
+
+    REM Another comment line.
+    x = 1 : REM This is a comment after a colon separator.
+
+    s = "The word REM is not a comment inside a string literal."
+End Sub
+```
+
+```json
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "04-h-a07-rem-comments.bas",
+      "module": "Module_RemCommentHazard",
+      "startLine": 9,
+      "startColumn": 1,
+      "endLine": 18,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Public Sub RemCommentExamples()\n    REM This is a comment at a statement position.\n    Dim x As Integer\n    Dim s As String\n\n    REM Another comment line.\n    x = 1 : REM This is a comment after a colon separator.\n\n    s = \"The word REM is not a comment inside a string literal.\"\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "RemCommentExamples",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": []
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "impure",
+        "complexity": 1,
+        "linesOfCode": 5,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "assignment",
+            "location": {
+              "startLine": 15,
+              "startColumn": 5,
+              "endLine": 15,
+              "endColumn": 9
+            },
+            "summary": "Assignment statement followed by a REM comment on the same line after a colon."
+          },
+          {
+            "kind": "assignment",
+            "location": {
+              "startLine": 17,
+              "startColumn": 5,
+              "endLine": 17,
+              "endColumn": 69
+            },
+            "summary": "Assignment of a string literal containing 'REM', confirming it is not a comment trigger."
+          }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}
+```

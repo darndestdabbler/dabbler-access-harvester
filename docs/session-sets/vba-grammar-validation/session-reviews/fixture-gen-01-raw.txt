@@ -1,0 +1,132 @@
+```vba
+'--------------------------------------------------------------------------------
+' H-D05: Resume / Resume Next / Resume <label>
+'
+' Hazard: Tests all four Resume forms per MS-VBAL §5.4.12.
+' 1. Resume (retry the failing statement)
+' 2. Resume 0 (equivalent to Resume)
+' 3. Resume Next (continue at statement after the failing statement)
+' 4. Resume <label> (jump to a named label, also clears Err object)
+' The disambiguation between 'Resume 0' and 'GoTo 0' is the key test.
+'--------------------------------------------------------------------------------
+Option Explicit
+
+Public Sub ResumeForms(resumeType As Integer)
+    On Error GoTo ErrorHandler
+
+    ' A statement that will error
+    Debug.Print 1 / 0
+
+ResumeTarget:
+    Exit Sub
+
+ErrorHandler:
+    Select Case resumeType
+        Case 1
+            Resume
+        Case 2
+            Resume 0
+        Case 3
+            Resume Next
+        Case 4
+            Resume ResumeTarget
+    End Select
+End Sub
+```
+
+```json
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "01-h-d05-resume-forms.bas",
+      "module": "Module_ResumeHazard",
+      "startLine": 12,
+      "startColumn": 1,
+      "endLine": 32,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Public Sub ResumeForms(resumeType As Integer)\r\n    On Error GoTo ErrorHandler\r\n\r\n    ' A statement that will error\r\n    Debug.Print 1 / 0\r\n\r\nResumeTarget:\r\n    Exit Sub\r\n\r\nErrorHandler:\r\n    Select Case resumeType\r\n        Case 1\r\n            Resume\r\n        Case 2\r\n            Resume 0\r\n        Case 3\r\n            Resume Next\r\n        Case 4\r\n            Resume ResumeTarget\r\n    End Select\r\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "ResumeForms",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          {
+            "name": "resumeType",
+            "type": "Integer",
+            "byRef": true,
+            "isOptional": false,
+            "paramKind": "required"
+          }
+        ]
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "unknown",
+        "complexity": 1,
+        "linesOfCode": 15,
+        "translatability": "challenging"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "resumeStmt",
+            "location": {
+              "startLine": 24,
+              "startColumn": 13,
+              "endLine": 24,
+              "endColumn": 19
+            },
+            "summary": "Resume (retry the failing statement)."
+          },
+          {
+            "kind": "resumeStmt",
+            "location": {
+              "startLine": 26,
+              "startColumn": 13,
+              "endLine": 26,
+              "endColumn": 21
+            },
+            "summary": "Resume 0 (equivalent to Resume)."
+          },
+          {
+            "kind": "resumeStmt",
+            "location": {
+              "startLine": 28,
+              "startColumn": 13,
+              "endLine": 28,
+              "endColumn": 24
+            },
+            "summary": "Resume Next (continue at statement after the failing statement)."
+          },
+          {
+            "kind": "resumeStmt",
+            "location": {
+              "startLine": 30,
+              "startColumn": 13,
+              "endLine": 30,
+              "endColumn": 32
+            },
+            "summary": "Resume <label> (jump to a named label)."
+          }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}
+```

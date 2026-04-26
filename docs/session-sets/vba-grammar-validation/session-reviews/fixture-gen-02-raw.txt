@@ -1,0 +1,218 @@
+```vba
+' H-D12: Named arguments at call sites (:=)
+'
+' This module tests the parsing of named arguments in procedure calls.
+' It includes:
+' - A procedure with Optional parameters and a ParamArray.
+' - A call site using only named arguments.
+' - A call site mixing positional and named arguments.
+' - A call to an external library (DoCmd) using named arguments.
+
+Option Explicit
+
+' Define constant used in DoCmd call for self-containment
+Public Const acFormAdd As Long = 2
+
+Public Sub ProcedureWithNamedArgs(Positional1 As String, Optional Opt1 As Long = 1, Optional Opt2 As String = "B", ParamArray OtherArgs() As Variant)
+    ' This procedure exists to be a valid call target.
+End Sub
+
+Public Sub TestNamedArgCalls()
+    ' 1. Pure named argument call, skipping an optional parameter.
+    ProcedureWithNamedArgs Opt2:="Skipped Opt1", Positional1:="Value1"
+
+    ' 2. Mixed positional and named arguments.
+    ProcedureWithNamedArgs "Value2", Opt2:="Skipped Opt1 again"
+
+    ' 3. Mixed positional, named, and ParamArray arguments.
+    ProcedureWithNamedArgs "Value3", Opt2:="C", 100, 200, "end"
+
+    ' 4. Call to external library member with named arguments.
+    DoCmd.OpenForm FormName:="frmX", DataMode:=acFormAdd
+End Sub
+```
+
+```json
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "02-h-d12-named-arguments.bas",
+      "module": "Module_NamedArgHazard",
+      "startLine": 1,
+      "startColumn": 1,
+      "endLine": 30,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "' H-D12: Named arguments at call sites (:=)\n'\n' This module tests the parsing of named arguments in procedure calls.\n' It includes:\n' - A procedure with Optional parameters and a ParamArray.\n' - A call site using only named arguments.\n' - A call site mixing positional and named arguments.\n' - A call to an external library (DoCmd) using named arguments.\n\nOption Explicit\n\n' Define constant used in DoCmd call for self-containment\nPublic Const acFormAdd As Long = 2\n\nPublic Sub ProcedureWithNamedArgs(Positional1 As String, Optional Opt1 As Long = 1, Optional Opt2 As String = \"B\", ParamArray OtherArgs() As Variant)\n    ' This procedure exists to be a valid call target.\nEnd Sub\n\nPublic Sub TestNamedArgCalls()\n    ' 1. Pure named argument call, skipping an optional parameter.\n    ProcedureWithNamedArgs Opt2:=\"Skipped Opt1\", Positional1:=\"Value1\"\n\n    ' 2. Mixed positional and named arguments.\n    ProcedureWithNamedArgs \"Value2\", Opt2:=\"Skipped Opt1 again\"\n\n    ' 3. Mixed positional, named, and ParamArray arguments.\n    ProcedureWithNamedArgs \"Value3\", Opt2:=\"C\", 100, 200, \"end\"\n\n    ' 4. Call to external library member with named arguments.\n    DoCmd.OpenForm FormName:=\"frmX\", DataMode:=acFormAdd\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "ProcedureWithNamedArgs",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          {
+            "name": "Positional1",
+            "type": "String",
+            "byRef": false,
+            "isOptional": false,
+            "paramKind": "required"
+          },
+          {
+            "name": "Opt1",
+            "type": "Long",
+            "byRef": false,
+            "isOptional": true,
+            "paramKind": "optional"
+          },
+          {
+            "name": "Opt2",
+            "type": "String",
+            "byRef": false,
+            "isOptional": true,
+            "paramKind": "optional"
+          },
+          {
+            "name": "OtherArgs",
+            "type": "Variant()",
+            "byRef": false,
+            "isOptional": true,
+            "paramKind": "paramArray"
+          }
+        ]
+      },
+      "classification": {},
+      "body": {
+        "statements": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "TestNamedArgCalls",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": []
+      },
+      "classification": {},
+      "body": {
+        "statements": [
+          {
+            "kind": "call",
+            "location": {
+              "startLine": 20,
+              "startColumn": 5,
+              "endLine": 20,
+              "endColumn": 65
+            },
+            "summary": "Call with only named arguments in non-declaration order.",
+            "callee": "ProcedureWithNamedArgs",
+            "arguments": [
+              {
+                "kind": "named",
+                "parameterName": "Opt2",
+                "expression": "\"Skipped Opt1\""
+              },
+              {
+                "kind": "named",
+                "parameterName": "Positional1",
+                "expression": "\"Value1\""
+              }
+            ]
+          },
+          {
+            "kind": "call",
+            "location": {
+              "startLine": 23,
+              "startColumn": 5,
+              "endLine": 23,
+              "endColumn": 62
+            },
+            "summary": "Call with mixed positional and named arguments.",
+            "callee": "ProcedureWithNamedArgs",
+            "arguments": [
+              {
+                "kind": "positional",
+                "expression": "\"Value2\""
+              },
+              {
+                "kind": "named",
+                "parameterName": "Opt2",
+                "expression": "\"Skipped Opt1 again\""
+              }
+            ]
+          },
+          {
+            "kind": "call",
+            "location": {
+              "startLine": 26,
+              "startColumn": 5,
+              "endLine": 26,
+              "endColumn": 64
+            },
+            "summary": "Call with mixed positional, named, and ParamArray arguments.",
+            "callee": "ProcedureWithNamedArgs",
+            "arguments": [
+              {
+                "kind": "positional",
+                "expression": "\"Value3\""
+              },
+              {
+                "kind": "named",
+                "parameterName": "Opt2",
+                "expression": "\"C\""
+              },
+              {
+                "kind": "positional",
+                "expression": "100"
+              },
+              {
+                "kind": "positional",
+                "expression": "200"
+              },
+              {
+                "kind": "positional",
+                "expression": "\"end\""
+              }
+            ]
+          },
+          {
+            "kind": "call",
+            "location": {
+              "startLine": 29,
+              "startColumn": 5,
+              "endLine": 29,
+              "endColumn": 59
+            },
+            "summary": "Call to external library member with named arguments.",
+            "callee": "DoCmd.OpenForm",
+            "arguments": [
+              {
+                "kind": "named",
+                "parameterName": "FormName",
+                "expression": "\"frmX\""
+              },
+              {
+                "kind": "named",
+                "parameterName": "DataMode",
+                "expression": "acFormAdd"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}
+```

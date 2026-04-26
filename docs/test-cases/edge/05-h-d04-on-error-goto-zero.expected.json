@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "05-h-d04-on-error-goto-zero.bas",
+      "module": "Module_OnErrorHazard",
+      "startLine": 12,
+      "startColumn": 1,
+      "endLine": 28,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Public Sub DemonstrateOnErrorGoToZero()\n    ' 1. Activate an error handler\n    On Error GoTo ErrHandler\n\n    ' 2. Normal code that runs without error\n    Debug.Print \"Inside guarded region\"\n\n    ' 3. Deactivate the handler -- key grammar test: GoTo 0 as sentinel\n    On Error GoTo 0\n\n    ' 4. Code outside error-handling scope (no active handler)\n    Debug.Print \"Outside guarded region\"\n    Exit Sub\n\nErrHandler:\n    Resume Next\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "DemonstrateOnErrorGoToZero",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": { "parameters": [] },
+      "classification": {
+        "purposeTags": [],
+        "purity": "unknown",
+        "complexity": 2,
+        "linesOfCode": 10,
+        "translatability": "structured"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "errorHandler",
+            "location": { "startLine": 14, "startColumn": 5, "endLine": 14, "endColumn": 27 },
+            "summary": "On Error GoTo ErrHandler -- activates error handler"
+          },
+          {
+            "kind": "errorHandler",
+            "location": { "startLine": 20, "startColumn": 5, "endLine": 20, "endColumn": 20 },
+            "summary": "On Error GoTo 0 -- deactivates error handler via sentinel 0"
+          },
+          {
+            "kind": "labelled",
+            "location": { "startLine": 26, "startColumn": 1, "endLine": 26, "endColumn": 11 },
+            "summary": "ErrHandler: -- error handler label"
+          },
+          {
+            "kind": "raw",
+            "location": { "startLine": 27, "startColumn": 5, "endLine": 27, "endColumn": 16 },
+            "summary": "Resume Next -- return from handler to next statement"
+          }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}

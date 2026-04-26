@@ -1,0 +1,230 @@
+```vba
+Attribute VB_Name = "Module_ParamArrayHazard"
+' H-E07: ParamArray parameter
+'
+' Key parsing requirements:
+' 1. ParamArray args() As Variant -- must be last parameter, As Variant, no Optional/ByRef/ByVal.
+' 2. The parser must reject: ParamArray args() As String (non-Variant type).
+' 3. At call sites, the caller can pass a variable number of arguments beyond the fixed params.
+' 4. ParamArray and Optional are mutually exclusive.
+
+Option Explicit
+
+Public Sub Log(prefix As String, ParamArray args() As Variant)
+    ' Body is not relevant for parsing the signature and call sites.
+End Sub
+
+Public Function Join(separator As String, ParamArray parts() As Variant) As String
+    ' Body is not relevant.
+End Function
+
+Public Sub TestCalls()
+    Dim s As String
+
+    ' Calls to Log with 0, 1, and N ParamArray arguments
+    Log "INFO:"
+    Log "WARN:", "Something happened"
+    Log "DEBUG:", 1, "foo", Now
+
+    ' Calls to Join with 0, 1, and N ParamArray arguments
+    s = Join("-")
+    s = Join("|", "single")
+    s = Join(" ", "a", "b", "c")
+End Sub
+```
+
+```json
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "03-h-e07-param-array.bas",
+      "module": "Module_ParamArrayHazard",
+      "startLine": 1,
+      "startColumn": 1,
+      "endLine": 31,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Attribute VB_Name = \"Module_ParamArrayHazard\"\n' H-E07: ParamArray parameter\n'\n' Key parsing requirements:\n' 1. ParamArray args() As Variant -- must be last parameter, As Variant, no Optional/ByRef/ByVal.\n' 2. The parser must reject: ParamArray args() As String (non-Variant type).\n' 3. At call sites, the caller can pass a variable number of arguments beyond the fixed params.\n' 4. ParamArray and Optional are mutually exclusive.\n\nOption Explicit\n\nPublic Sub Log(prefix As String, ParamArray args() As Variant)\n    ' Body is not relevant for parsing the signature and call sites.\nEnd Sub\n\nPublic Function Join(separator As String, ParamArray parts() As Variant) As String\n    ' Body is not relevant.\nEnd Function\n\nPublic Sub TestCalls()\n    Dim s As String\n\n    ' Calls to Log with 0, 1, and N ParamArray arguments\n    Log \"INFO:\"\n    Log \"WARN:\", \"Something happened\"\n    Log \"DEBUG:\", 1, \"foo\", Now\n\n    ' Calls to Join with 0, 1, and N ParamArray arguments\n    s = Join(\"-\")\n    s = Join(\"|\", \"single\")\n    s = Join(\" \", \"a\", \"b\", \"c\")\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "Log",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          {
+            "name": "prefix",
+            "type": "String",
+            "byRef": false,
+            "isOptional": false,
+            "paramKind": "standard"
+          },
+          {
+            "name": "args",
+            "type": "Variant()",
+            "byRef": false,
+            "isOptional": false,
+            "paramKind": "paramArray"
+          }
+        ]
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "pure",
+        "complexity": 1,
+        "linesOfCode": 2,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "Join",
+      "procedureKind": "Function",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "returnType": "String",
+        "parameters": [
+          {
+            "name": "separator",
+            "type": "String",
+            "byRef": false,
+            "isOptional": false,
+            "paramKind": "standard"
+          },
+          {
+            "name": "parts",
+            "type": "Variant()",
+            "byRef": false,
+            "isOptional": false,
+            "paramKind": "paramArray"
+          }
+        ]
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "pure",
+        "complexity": 1,
+        "linesOfCode": 2,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    },
+    {
+      "itemKind": "procedure",
+      "name": "TestCalls",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": []
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "pure",
+        "complexity": 1,
+        "linesOfCode": 8,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "variableDeclaration",
+            "location": {
+              "startLine": 20,
+              "startColumn": 5,
+              "endLine": 20,
+              "endColumn": 18
+            },
+            "summary": "Declare local variable s"
+          },
+          {
+            "kind": "call",
+            "location": {
+              "startLine": 23,
+              "startColumn": 5,
+              "endLine": 23,
+              "endColumn": 16
+            },
+            "summary": "Call Log with 0 ParamArray arguments"
+          },
+          {
+            "kind": "call",
+            "location": {
+              "startLine": 24,
+              "startColumn": 5,
+              "endLine": 24,
+              "endColumn": 34
+            },
+            "summary": "Call Log with 1 ParamArray argument"
+          },
+          {
+            "kind": "call",
+            "location": {
+              "startLine": 25,
+              "startColumn": 5,
+              "endLine": 25,
+              "endColumn": 29
+            },
+            "summary": "Call Log with 3 ParamArray arguments"
+          },
+          {
+            "kind": "assignment",
+            "location": {
+              "startLine": 28,
+              "startColumn": 5,
+              "endLine": 28,
+              "endColumn": 16
+            },
+            "summary": "Call Join with 0 ParamArray arguments"
+          },
+          {
+            "kind": "assignment",
+            "location": {
+              "startLine": 29,
+              "startColumn": 5,
+              "endLine": 29,
+              "endColumn": 27
+            },
+            "summary": "Call Join with 1 ParamArray argument"
+          },
+          {
+            "kind": "assignment",
+            "location": {
+              "startLine": 30,
+              "startColumn": 5,
+              "endLine": 30,
+              "endColumn": 30
+            },
+            "summary": "Call Join with N ParamArray arguments"
+          }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}
+```
