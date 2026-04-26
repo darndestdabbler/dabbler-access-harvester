@@ -287,6 +287,58 @@
           "costUsd": 0.00670375
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/no-deferred-fixes",
+      "dateTime": "2026-04-26T02:01:04.060174+00:00",
+      "description": "No deferred verifier findings required action. All sessions verified. Session 4 completing with change-log and next-set recommendation only.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/no-deferred-fixes",
+      "dateTime": "2026-04-26T02:01:23.878483+00:00",
+      "description": "No deferred verifier findings required action. All sessions verified. Session 4 completing with change-log and next-set recommendation only.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-26T02:01:26.240889+00:00",
+      "description": "Generated change-log.md via route(summarization). Model: gemini-flash. Cost: $0.0004.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 753,
+          "outputTokens": 404,
+          "costUsd": 0.00035535
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/next-session-set-recommendation",
+      "dateTime": "2026-04-26T02:01:38.969985+00:00",
+      "description": "Routed analysis for next-session-set recommendation. Model: gemini-pro. Cost: $0.0026.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 563,
+          "outputTokens": 192,
+          "costUsd": 0.00262375
+        }
+      ]
     }
   ]
 }
