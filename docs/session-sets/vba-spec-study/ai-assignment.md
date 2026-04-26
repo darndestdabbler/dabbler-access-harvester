@@ -65,11 +65,21 @@ Claude Code Sonnet 4.6 @ effort=high
 | Verify session output | Verification | `session-verification` | gpt-5-4 | N/A | Task type is pinned to gpt-5-4 for final verification. |
 | Recommend next session-set | Analysis | `analysis` | Claude 3.5 Sonnet | N/A | Strategic planning requires a capable model; Sonnet is a good balance of cost and capability. |
 
-**Actuals (filled after the session runs):**
-- Orchestrator used: TBD
-- Total routed cost: TBD
-- Deviations from recommendation: TBD
-- Notes for next-session calibration: TBD
+**Actuals (Session 3 — 2026-04-25):**
+- Orchestrator used: started as Claude Code Sonnet 4.6; swapped mid-session to Claude Code Opus 4.7 after Batch-A `route(architecture)` retry timed out (Batch-A first call succeeded — 1909/16788 tokens / $1.29 — but content lost to Python `print()` Unicode error before file persistence).
+- Total routed cost: ~$2.99 (orphan Opus architecture call $1.29 + 3 rounds gpt-5-4 verification $0.69 + change-log $0.0006 + next-set rec $0.0024). Over the $0.95 estimate by ~$2.04, primarily due to (a) the orphan architecture call paid for content that was lost, and (b) 3-round verification overhead with detailed Major/Minor findings.
+- Deviations from recommendation:
+  - Orchestrator swapped from Sonnet → Opus mid-session per `lessons-learned.md` Opus-timeout fallback action.
+  - `route(architecture)` synthesis call was *not* re-attempted after the timeout; deliverable authored in-conversation by the Opus orchestrator per `project-guidance.md` Conventions ("When the orchestrator's model matches the routing target ... handle in-conversation"). Disclosed in `hazard-list.md` Deviation note and in the verification prompt.
+  - Three-round verification used 2 retries (the workflow max). Round-3 returned 2 Major + 2 Minor findings; Majors were mechanically fixed in-place without re-verification per the verifier's explicit "fix Majors then commit; Minors deferrable" guidance. Minors also addressed.
+  - Change-log generation hit Gemini-Pro 400 (matches `lessons-learned.md` summarization-template entry); fell back to `max_tier=1` (Gemini Flash) successfully.
+- Notes for next-session calibration: (1) The lesson "first-call-succeeds-then-second-call-times-out" is new — the orchestrator should always persist routed output to disk before any other processing. (2) The `route(architecture, complexity_hint=80)` cost band still skews high in this repo (~$0.60-$1.30/call). (3) For follow-up child sets that require synthesis-document output: budget for either Opus orchestrator (in-conversation) OR multiple split route() calls under 1500 input tokens each.
+
+**Next session-set recommendation (after `vba-spec-study`):**
+`parser-foundations` (continuation — Session 1 of 4 already committed earlier 2026-04-25; Sessions 2-4 remain)
+
+**Recommended orchestrator for `parser-foundations`:** Claude Code Opus 4.7 @ effort=medium
+**Rationale:** Routed analysis recommendation (gemini-pro). The `parser-foundations` set has a single critical synthesis step (verification-harness design) requiring a robust architectural plan; this session's `route(architecture)` timeout under a Sonnet orchestrator confirms that using a top-tier orchestrator for foundational synthesis is the more efficient choice.
 
 ## Session 4 of 3 (optional buffer): Verifier-Surfaced Cleanup
 

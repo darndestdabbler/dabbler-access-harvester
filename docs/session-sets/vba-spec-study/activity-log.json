@@ -320,6 +320,162 @@
           "costUsd": 0.00749
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/prerequisites-check",
+      "dateTime": "2026-04-26T02:46:05.744567+00:00",
+      "description": "Prerequisites verified: ms-vbal-summary.md (1260 lines) + ms-vbal-coverage.csv (110 rows) exist; 12 fixtures present in docs/test-cases/",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/synthesis-call-a-attempt1-print-error",
+      "dateTime": "2026-04-26T02:46:05.745560+00:00",
+      "description": "route(architecture) Batch A succeeded but content was lost to Python print() Unicode error (cp1252 codec). Tokens billed; content unrecoverable.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "architecture",
+          "inputTokens": 1909,
+          "outputTokens": 16788,
+          "costUsd": 1.2877
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/synthesis-call-a-attempt2-timeout",
+      "dateTime": "2026-04-26T02:46:05.746560+00:00",
+      "description": "route(architecture) Batch A retry timed out at provider boundary after 3 attempts. Matches lessons-learned 'Opus effort:max + Adaptive Thinking Timeouts' pattern. Content not produced.",
+      "status": "failed-then-deviated",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/orchestrator-swap-and-deviation",
+      "dateTime": "2026-04-26T02:46:05.746560+00:00",
+      "description": "Human swapped orchestrator from Sonnet to Opus per lessons-learned action item. Per project-guidance Conventions ('When the orchestrator's model matches the routing target ... handle in-conversation'), authored hazard-list.md in-conversation rather than re-attempting route().",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/land-hazard-list",
+      "dateTime": "2026-04-26T02:46:05.747560+00:00",
+      "description": "Authored docs/spec-coverage/hazard-list.md in-conversation: 60 hazards across 8 sections (A-H), every fixture cross-referenced, MS-VBAL section citations grounded in Session 1 summary.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/build",
+      "dateTime": "2026-04-26T02:46:05.748534+00:00",
+      "description": "dotnet build: 224 warnings (pre-existing CA1416 platform warnings on COM tests, no new issues), 0 errors.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/test",
+      "dateTime": "2026-04-26T02:46:05.749549+00:00",
+      "description": "dotnet test: 95 + 1 = 96 passed, 0 failed, 0 skipped (one additional test from AccessHarvester.Vba.Grammar.Tests added by parser-foundations Session 1).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/session-verification",
+      "dateTime": "2026-04-26T02:50:14.612430+00:00",
+      "description": "Cross-provider session verification; model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20157,
+          "outputTokens": 11914,
+          "costUsd": 0.2291025
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/session-verification-round2",
+      "dateTime": "2026-04-26T03:01:10.289864+00:00",
+      "description": "Round-2 verification after fixing all Major+Minor+Nit findings; model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20668,
+          "outputTokens": 11696,
+          "costUsd": 0.22710999999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-3/session-verification-round3",
+      "dateTime": "2026-04-26T03:07:48.341130+00:00",
+      "description": "Round-3 verification (final retry); model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20855,
+          "outputTokens": 11922,
+          "costUsd": 0.23096750000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 11,
+      "stepKey": "session-3/change-log",
+      "dateTime": "2026-04-26T03:12:24.218494+00:00",
+      "description": "Change-log generated via route(summarization); model=gemini-flash",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1273,
+          "outputTokens": 648,
+          "costUsd": 0.00057975
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 12,
+      "stepKey": "session-3/next-session-set-recommendation",
+      "dateTime": "2026-04-26T03:12:32.872972+00:00",
+      "description": "Routed analysis recommending next session set; model=gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1049,
+          "outputTokens": 106,
+          "costUsd": 0.00237125
+        }
+      ]
     }
   ]
 }
