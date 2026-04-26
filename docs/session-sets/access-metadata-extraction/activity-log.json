@@ -1,0 +1,126 @@
+{
+  "sessionSetName": "access-metadata-extraction",
+  "createdDate": "2026-04-26T03:31:58.818890+00:00",
+  "totalSessions": 6,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-26T03:32:15.171351+00:00",
+      "description": "Authored ai-assignment.md via route(task_type='analysis') using gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 6141,
+          "outputTokens": 441,
+          "costUsd": 0.01208625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/form-report-schema-architecture",
+      "dateTime": "2026-04-26T03:51:29.991830+00:00",
+      "description": "Routed architecture synthesis for FormMetadata/ReportMetadata via opus.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "architecture",
+          "inputTokens": 24974,
+          "outputTokens": 19904,
+          "costUsd": 1.86741
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "verification",
+          "inputTokens": 26061,
+          "outputTokens": 7976,
+          "costUsd": 0.18479250000000003
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/cross-provider-verification",
+      "dateTime": "2026-04-26T03:58:02.544673+00:00",
+      "description": "Cross-provider verification via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 22780,
+          "outputTokens": 14695,
+          "costUsd": 0.277375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/cross-provider-verification-round-2",
+      "dateTime": "2026-04-26T04:04:14.821623+00:00",
+      "description": "Round-2 cross-provider verification via gpt-5-4 after applying round-1 fixes.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7795,
+          "outputTokens": 8598,
+          "costUsd": 0.1484575
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/orchestrator-handoff-to-claude",
+      "dateTime": "2026-04-26T04:13:11.821331+00:00",
+      "description": "Orchestrator handed off mid-session from Codex to Claude Opus 4.7 per the 'maxout Claude' convention (project-guidance.md -> Token-Window Budget Overrides) after Codex's prior route(architecture) synthesis produced design-doc orphans (session-1-form-report-schema-architecture.md / .verification.md) that did not convert into .cs files. Claude authored the schema in-conversation per the 'Opus orchestrator handles synthesis in-conversation' Convention; no additional API call was made for the synthesis itself.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/author-schema-types",
+      "dateTime": "2026-04-26T04:13:11.821331+00:00",
+      "description": "Authored AccessHarvester.Access/{AccessObjectCommon,FormMetadata,ReportMetadata}.cs in-conversation. Created AccessHarvester.Access.csproj and added the project to AccessHarvester.sln.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-04-26T04:13:11.822329+00:00",
+      "description": "dotnet build AccessHarvester.Access/ -> 0 errors, 0 warnings. dotnet test tests/AccessHarvester.Tests/ -> 95 passed, 0 failed, 0 skipped. Full-solution build fails in AccessHarvester.Vba.Grammar due to a parallel session set's in-progress edits to Vba.g4; out of scope for this Session 1.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T04:13:24.473052+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 2 via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3241,
+          "outputTokens": 79,
+          "costUsd": 0.00484125
+        }
+      ]
+    }
+  ]
+}
