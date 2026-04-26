@@ -1,0 +1,170 @@
+{
+  "sessionSetName": "vba-spec-study",
+  "createdDate": "2026-04-26T00:33:27.794459+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-26T00:35:28.369456+00:00",
+      "description": "Authored ai-assignment.md via route(analysis, complexity_hint=55)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1265,
+          "outputTokens": 1380,
+          "costUsd": 0.015381249999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/synthesis-call-a-lexical",
+      "dateTime": "2026-04-26T00:50:52.488183+00:00",
+      "description": "Architecture route: MS-VBAL lexical structure + preprocessing",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "architecture",
+          "inputTokens": 853,
+          "outputTokens": 7831,
+          "costUsd": 0.60012
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/synthesis-call-b-modules",
+      "dateTime": "2026-04-26T00:57:44.687360+00:00",
+      "description": "Architecture route: MS-VBAL modules, procedures, type system",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "architecture",
+          "inputTokens": 1095,
+          "outputTokens": 8132,
+          "costUsd": 0.626325
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/synthesis-call-c-statements",
+      "dateTime": "2026-04-26T01:05:11.398964+00:00",
+      "description": "Architecture route: MS-VBAL statements, expressions, object model",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "architecture",
+          "inputTokens": 1575,
+          "outputTokens": 7354,
+          "costUsd": 0.575175
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/assemble-summary",
+      "dateTime": "2026-04-26T01:05:52.339553+00:00",
+      "description": "Assembled ms-vbal-summary.md from three Opus synthesis sections",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/build",
+      "dateTime": "2026-04-26T01:06:37.034378+00:00",
+      "description": "dotnet build: 224 warnings, 0 errors (pre-existing CA1416 platform warnings on COM tests, no new issues)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/test",
+      "dateTime": "2026-04-26T01:06:37.035384+00:00",
+      "description": "dotnet test: 95 passed, 0 failed, 0 skipped",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/session-verification",
+      "dateTime": "2026-04-26T01:09:56.030481+00:00",
+      "description": "Session verification via route(session-verification); model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 10885,
+          "outputTokens": 7435,
+          "costUsd": 0.1387375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/session-verification-round2",
+      "dateTime": "2026-04-26T01:12:39.595857+00:00",
+      "description": "Round-2 session verification with full document; model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 17280,
+          "outputTokens": 4069,
+          "costUsd": 0.104235
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/session-verification-round3",
+      "dateTime": "2026-04-26T01:14:31.235768+00:00",
+      "description": "Round-3 session verification with full Section C; model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7263,
+          "outputTokens": 1294,
+          "costUsd": 0.037567500000000004
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T01:15:25.036557+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 2; model=gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 766,
+          "outputTokens": 90,
+          "costUsd": 0.0018575000000000002
+        }
+      ]
+    }
+  ]
+}
