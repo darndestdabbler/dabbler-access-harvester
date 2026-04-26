@@ -3,11 +3,11 @@
 A small workspace VS Code extension that adds a "Session Set Explorer" view
 to its own Activity Bar container — the leftmost icon strip in VS Code; look
 for the checklist icon. Surfaces every session set under
-`docs/session-sets/` grouped by state (In Flight / Not Started / Done) with
+`docs/session-sets/` grouped by state (In Progress / Not Started / Done) with
 progress and last-touched date. State is derived from file presence the same
 way `ai_router.find_active_session_set` and
 `ai_router.print_session_set_status` do — `change-log.md` → done,
-`activity-log.json` without it → in-flight, only `spec.md` → not-started.
+`activity-log.json` without it → in-progress, only `spec.md` → not-started.
 
 The extension never writes. It only watches `docs/session-sets/**/{spec.md,
 activity-log.json,change-log.md}` and re-reads when those change, so the tree
@@ -17,20 +17,22 @@ auto-refreshes whenever a session is logged or completed.
 
 - **Click a session set** → opens its `spec.md`.
 - **Right-click → Open Activity Log** / **Open Change Log** / **Reveal Folder**.
-- **Right-click → Copy: Start next session …** — places a templated
-  start prompt on the clipboard. Seven presets, covering the common
-  orchestrator / effort combinations:
-  - default (defers to `ai-assignment.md`)
-  - maxout Claude (Opus 4.7 @ effort=max)
-  - maxout Codex (GPT-5.4 @ effort=high)
-  - Opus @ effort=high
-  - Opus @ effort=medium
-  - Sonnet @ effort=medium
-  - Sonnet @ effort=low
+- **Right-click → Copy: Start next session** — places
+  ``Start the next session of `<slug>`.`` on the clipboard. Paste into
+  Claude Code / Codex / Gemini chat to kick off the next session on the
+  current working tree.
+- **Right-click → Copy: Start next parallel session** — places
+  ``Start the next parallel session of `<slug>`.`` on the clipboard.
+  Use when another session set is already in progress on the same
+  worktree; the orchestrator then runs the session inside an isolated
+  git worktree.
 
-  Paste the result into Claude Code (or Codex / Gemini) chat to kick
-  off the session. Only shown for in-flight and not-started sets — done
-  sets do not have a "next session". The status-bar shows a brief
+  Both presets are only shown for in-progress and not-started sets —
+  done sets do not have a "next session". What each phrase means to an
+  orchestrator (and the optional `— maxout Claude` / `— maxout Codex`
+  suffix the human can append manually) is documented in
+  [`docs/ai-led-session-workflow.md`](../../docs/ai-led-session-workflow.md)
+  → Start-Session Trigger Phrases. The status-bar shows a brief
   confirmation (`Copied: <preset>`) when a copy succeeds.
 - **Right-click → Copy: Slug only** — places just the bare slug on the
   clipboard, for ad-hoc references.
@@ -47,7 +49,8 @@ The fastest path. No `npm install`, no packaging.
    window.
 2. Press **F5**. VS Code launches a second window — the
    "Extension Development Host" — with the repo root opened and this
-   extension loaded. The "Session Sets" view appears under Explorer.
+   extension loaded. The "Session Set Explorer" icon appears in the
+   Activity Bar; click it to open the tree view.
 3. Edits to `extension.js` take effect after **Cmd/Ctrl+R** in the dev
    host window (or pressing F5 again from the source window).
 
@@ -65,8 +68,8 @@ npm install -g @vscode/vsce
 
 # From this folder:
 cd tools/vscode-session-sets
-vsce package           # produces dabbler-session-sets-0.1.0.vsix
-code --install-extension dabbler-session-sets-0.1.0.vsix
+vsce package           # produces dabbler-session-sets-0.4.0.vsix
+code --install-extension dabbler-session-sets-0.4.0.vsix
 ```
 
 To uninstall: `code --uninstall-extension darndestdabbler.dabbler-session-sets`.
@@ -87,7 +90,7 @@ not committed to the repo — rebuild it after pulling extension updates.
 `SessionSetsProvider` implements `vscode.TreeDataProvider`. On
 `getChildren(undefined)` it returns three group nodes; on
 `getChildren(<group>)` it returns the matching session-set rows sorted by
-last-touched (in-flight, done) or by name (not-started). A
+last-touched (in-progress, done) or by name (not-started). A
 `vscode.workspace.createFileSystemWatcher` invalidates the cache and fires
 `_onDidChangeTreeData` whenever a state-relevant file is created, deleted,
 or modified.

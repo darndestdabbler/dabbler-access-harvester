@@ -75,6 +75,71 @@ Orchestrator (Claude / Codex / Gemini)
   +-- STOPS (one session per conversation)
 ```
 
+## Start-Session Trigger Phrases
+
+When the human kicks off a session, they use one of two short trigger
+phrases (the `tools/vscode-session-sets/` extension's "Copy: Start next
+session" / "Copy: Start next parallel session" context menu items
+produce these strings on the clipboard, but the human can also type
+them directly). The orchestrator reads the phrase and selects the
+matching workflow:
+
+- **`Start the next session of <slug>`** — execute the next session of
+  `<slug>` on the **current working tree**. Run the full Step 0 → Step 10
+  procedure unmodified. Use when no other session set is in progress on
+  this tree.
+
+- **`Start the next parallel session of <slug>`** — execute the next
+  session of `<slug>` in an **isolated git worktree** per
+  `docs/planning/lessons-learned.md` → "Run Parallel Session Sets In
+  Per-Set Git Worktrees". Specifically: if the orchestrator is not
+  already in a `session-set/<slug>` worktree, it creates the
+  `session-set/<slug>` branch off `main` and runs `git worktree add
+  ../<repo>-<slug> session-set/<slug>` before any other session work.
+  All session commits land on the session-set branch inside the
+  worktree. On the **last session of the set**, the orchestrator
+  performs a sub-step of Step 8: `git fetch origin main && git merge
+  --no-ff origin/main` into the session-set branch (resolving any
+  conflicts), then `git checkout main && git merge --no-ff
+  session-set/<slug> && git push`. The merge commit's subject ("Merge
+  session set <slug>") preserves traceability.
+
+Both phrases trigger the same Step 0–10 procedure; only the working-
+tree isolation level differs. See the lessons-learned entry above for
+the rationale and the gotchas that motivated worktree isolation.
+
+### Optional Token-Window Override Suffix
+
+Either phrase can have a token-window override suffix appended:
+
+- `Start the next session of <slug> — maxout Claude`
+- `Start the next parallel session of <slug> — maxout Codex`
+
+When a suffix is present, the orchestrator follows
+`docs/planning/project-guidance.md` → Token-Window Budget Overrides:
+**skip the router for routed reasoning calls** (architecture, analysis,
+code-review, summarization, refactoring, test-generation, etc.) and
+handle them in-conversation. Rationale: under maxout, the human is
+specifically choosing to drain the orchestrator's allotment; routing a
+call into the orchestrator's own model just pays the API cost for
+another instance of the same judgment the human is already paying to
+keep running.
+
+The **single non-negotiable exception is `session-verification`** — that
+step MUST still go through the router regardless, because the whole
+point is a *cross-provider* second opinion; skipping it would defeat
+the only quality gate in the repo. Other end-of-session routed steps
+(cost report, next-orchestrator recommendation, change-log
+generation) are likewise inlined under maxout.
+
+Without a suffix, the workflow runs as documented: routing decisions
+follow `ai-assignment.md` and `router-config.yaml`. The suffix is
+expected to be rare — used specifically when an allotment window is
+closing and the human wants to drain the current provider's budget
+before it resets. See `project-guidance.md` for the full Token-Window
+Budget Overrides section, including which model + effort each
+"maxout" phrase corresponds to.
+
 ## Key Concepts
 
 ### Session Set
@@ -733,10 +798,10 @@ generator set), omit this sub-step.
 
 **Print the session-set status table.** After the cost report, call
 `print_session_set_status()` to print a single-screen status board: every
-set under `docs/session-sets/` grouped as `[~]` in-flight, `[ ]`
+set under `docs/session-sets/` grouped as `[~]` in-progress, `[ ]`
 not-started, `[x]` done, with per-set progress (`<completed>/<total>`)
 and last-touched date. State is derived from file presence
-(`change-log.md` -> done, `activity-log.json` without it -> in-flight,
+(`change-log.md` -> done, `activity-log.json` without it -> in-progress,
 only `spec.md` -> not-started) — the same rules
 `find_active_session_set()` uses — so directories never need to be
 renamed at lifecycle transitions. Glyphs are ASCII (`[~]` / `[ ]` /

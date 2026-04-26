@@ -776,14 +776,14 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
 
     State is derived from file presence in each set's directory — see
     :func:`find_active_session_set` for the same rules. Sets are grouped
-    in the table by state (in-flight first, then not-started, then done),
+    in the table by state (in-progress first, then not-started, then done),
     then sorted by most recently touched within each group.
     """
     if not os.path.isdir(base_dir):
         print(f"(no session-sets directory at {base_dir})")
         return
 
-    in_flight: list[dict] = []
+    in_progress: list[dict] = []
     not_started: list[dict] = []
     done: list[dict] = []
 
@@ -830,11 +830,11 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
         if os.path.isfile(changelog_path):
             done.append(record)
         elif os.path.isfile(activity_path):
-            in_flight.append(record)
+            in_progress.append(record)
         else:
             not_started.append(record)
 
-    in_flight.sort(key=lambda r: r["last_touched"], reverse=True)
+    in_progress.sort(key=lambda r: r["last_touched"], reverse=True)
     done.sort(key=lambda r: r["last_touched"], reverse=True)
     not_started.sort(key=lambda r: r["name"])
 
@@ -843,7 +843,7 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
     # "Persist Routed Output To Disk Before Any Display Or Logging Side
     # Effects" for the original failure shape).
     rows = (
-        [("[~]", r) for r in in_flight]
+        [("[~]", r) for r in in_progress]
         + [("[ ]", r) for r in not_started]
         + [("[x]", r) for r in done]
     )
@@ -872,7 +872,7 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
         print(f"{icon}  {r['name']:<{name_width}}  {progress:>10}  {touched}")
     print("=" * (name_width + 32))
     print(
-        f"  [~] in-flight: {len(in_flight)}    "
+        f"  [~] in-progress: {len(in_progress)}    "
         f"[ ] not-started: {len(not_started)}    "
         f"[x] done: {len(done)}"
     )
