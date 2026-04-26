@@ -58,3 +58,38 @@
 
 **Notes for Session 2 calibration:** Session 2 is mostly mechanical (build/test, verification, change-log, branch merge, next-set recommendation). The cross-provider verification is forced through gpt-5-4 by router-config regardless of orchestrator. Sonnet (or any tier-2 model) at low effort is sufficient as the Session 2 orchestrator — no synthesis content remains. The registry surface is curation-stable from Session 1; Session 2 should resist scope creep into adding more registered types unless the verifier surfaces a coverage gap against the actual fixture data.
 
+
+
+## Session 2 Actuals (appended by Claude Opus 4.7 orchestrator)
+
+**Orchestrator used:** Claude Code claude-opus-4-7 (effort=unknown — model self-introspection unavailable; human can override).
+
+**Total routed cost — Session 2:** ~$0.69
+- Session-verification round 1 (gpt-5-4): ~$0.173
+- Session-verification round 2 (gpt-5-4): ~$0.173
+- Session-verification round 3 (gpt-5-4): ~$0.171
+- Change-log generation (summarization, max_tier=1): see metrics file
+- Next-session-set recommendation (analysis): see metrics file
+
+**Verifier verdict:** VERIFIED — across three rounds the verifier flagged
+2 Major + 1 Minor (round 1), 1 Major + 1 Minor (round 2), 1 Major + 1 Minor
+(round 3). All findings, including the round-3 Major (IsDefault storage
+consistency) and Minor (stale comments), were applied (round 3 was the
+final retry per workflow Step 7's max-2-retries cap; the orchestrator
+used the post-round-3 fix window per the precedent set by Session 1).
+
+**Deviations from recommendation:** Recommendation called for Opus orchestrator
+to manage routing; that held. The "schema-validation" task type wasn't routed
+— the cross-provider session-verification covered schema/contract
+correspondence as it had in Session 1.
+
+**Notes for future #11b orchestrator (when #9 lands):** The
+ITypeLibraryRegistry contract this set ships is consumed in #11b. Key
+behaviors the resolver-side integration must honor: (a) graceful
+degradation — `TryGet*` never throws; (b) public registry exposes only
+real type-library identifiers (no fabricated curation types — see the
+DataBoundControl flatten saga in this Session 2's verification rounds);
+(c) IsDefault metadata is consistent between TypeInfo.Members direct
+read and TryGetMember/TryGetDefaultMember lookup (a ValidateRegistry-
+AtConstruction invariant enforces this, so adding a new default
+member is a fail-fast at startup if the curator forgets the flag).

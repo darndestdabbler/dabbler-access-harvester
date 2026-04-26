@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace AccessHarvester.Access;
@@ -21,11 +22,16 @@ namespace AccessHarvester.Access;
 /// <b>Inheritance is modeled via <see cref="TypeInfo.BaseTypeName"/>.</b>
 /// Common Access control subtypes (<c>Access.TextBox</c>,
 /// <c>Access.ComboBox</c>, <c>Access.ListBox</c>, <c>Access.CommandButton</c>,
-/// <c>Access.Label</c>) are registered with their distinguishing members and
-/// default members; the universal control surface lives on
-/// <c>Access.Control</c>. <see cref="TryGetMember"/> walks the
-/// <see cref="TypeInfo.BaseTypeName"/> chain, so a lookup for
-/// <c>Access.TextBox.Name</c> resolves via <c>Access.Control.Name</c>.
+/// <c>Access.Label</c>) are registered and inherit directly from
+/// <c>Access.Control</c>. The data-bound surface (<c>ControlSource</c>,
+/// <c>Value</c>, <c>BeforeUpdate</c>, etc.) is shared across the data-bound
+/// subtypes (<c>TextBox</c>/<c>ComboBox</c>/<c>ListBox</c>) via the private
+/// <see cref="DataBoundControlMembers"/> helper rather than via a fabricated
+/// intermediate type — the public registry only exposes types that exist in
+/// the underlying type library.
+/// <see cref="TryGetMember"/> walks the <see cref="TypeInfo.BaseTypeName"/>
+/// chain, so a lookup for <c>Access.TextBox.Name</c> resolves via
+/// <c>Access.Control.Name</c>.
 /// </para>
 /// <para>
 /// All lookups are case-insensitive. The registry is immutable after
@@ -82,13 +88,13 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
         Register(types, BuildAccessForm());
         Register(types, BuildAccessReport());
         Register(types, BuildAccessControl());
-        // Intermediate base for data-bound controls (TextBox, ComboBox, ListBox).
-        // Keeps the data-bound surface (ControlSource, Value, BeforeUpdate, etc.)
-        // off of non-data-bound subtypes (Label, CommandButton).
-        Register(types, BuildAccessDataBoundControl());
         // Common control subtypes — register AFTER their bases so the
         // BaseTypeName references resolve. Construction-time validation
-        // below catches any oversight.
+        // below catches any oversight. The data-bound surface
+        // (ControlSource, Value, BeforeUpdate, etc.) is shared across
+        // TextBox/ComboBox/ListBox via the DataBoundControlMembers helper;
+        // CommandButton/Label inherit from Access.Control only and do not
+        // pick up the data-bound surface.
         Register(types, BuildAccessTextBox());
         Register(types, BuildAccessComboBox());
         Register(types, BuildAccessListBox());
@@ -99,7 +105,11 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
         Register(types, BuildAccessDoCmd());
         Register(types, BuildAccessApplication());
 
-        _types = types;
+        // Wrap the dictionary in a ReadOnlyDictionary so a caller that
+        // downcasts the IReadOnlyDictionary<string, TypeInfo> exposed via
+        // _types cannot mutate the backing store. The same pattern applies
+        // per-type to TypeInfo.Members via Members(...) below.
+        _types = new ReadOnlyDictionary<string, TypeInfo>(types);
 
         ValidateRegistryAtConstruction();
     }
@@ -138,6 +148,13 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
             }
 
             // Validate DefaultMemberName resolves (directly or via inheritance).
+            // Additionally, when the named member is declared directly on this
+            // type, its IsDefault flag must be true so callers reading the
+            // public TypeInfo.Members surface see consistent metadata. (When
+            // the default member is inherited, the lookup-time projection in
+            // TryGetMember/TryGetDefaultMember handles the IsDefault flag —
+            // direct members get the stricter rule because they are
+            // observable through Members directly.)
             if (t.DefaultMemberName is not null)
             {
                 var cursor = name;
@@ -157,6 +174,13 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
                 {
                     throw new InvalidOperationException(
                         $"TypeLibraryRegistry: type '{name}' declares DefaultMemberName='{t.DefaultMemberName}' but no member with that name is reachable via the BaseTypeName chain.");
+                }
+                if (t.Members.TryGetValue(t.DefaultMemberName, out var direct) && !direct.IsDefault)
+                {
+                    throw new InvalidOperationException(
+                        $"TypeLibraryRegistry: type '{name}' declares DefaultMemberName='{t.DefaultMemberName}' " +
+                        $"and the named member is direct on this type, but its IsDefault flag is false. " +
+                        $"Mark the direct member with IsDefault=true so callers reading TypeInfo.Members see consistent metadata.");
                 }
             }
         }
@@ -313,7 +337,11 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
                     "(prefer the property — event-handler recognition is name-pattern-based, not registry-based).");
             }
         }
-        return dict;
+        // ReadOnlyDictionary wraps the backing Dictionary so that callers who
+        // downcast the IReadOnlyDictionary<string, MemberInfo> exposed via
+        // TypeInfo.Members cannot mutate the backing store and break the
+        // registry's "immutable after construction" contract.
+        return new ReadOnlyDictionary<string, MemberInfo>(dict);
     }
 
     private static MemberInfo Prop(string name, string? returnType = null, bool isDefault = false) =>
@@ -421,8 +449,18 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
         DefaultMemberName = null,
         Members = Members(
             Prop("Name"), Prop("Connect"),
-            Prop("Containers"), Prop("QueryDefs"),
-            Prop("Recordsets"), Prop("Relations"), Prop("TableDefs"),
+            // Collection-valued members. The collection types (DAO.QueryDefs,
+            // DAO.Recordsets, DAO.TableDefs, DAO.Relations, DAO.Containers)
+            // are not all registered in this v1 seed; the resolver-side
+            // consumer that walks chained member access will treat any
+            // unregistered identifier as `external-unknown`, but emitting
+            // the identifier here is strictly more useful than null because
+            // the consumer at least knows the *named* collection type.
+            Prop("Containers", "DAO.Containers"),
+            Prop("QueryDefs", "DAO.QueryDefs"),
+            Prop("Recordsets", "DAO.Recordsets"),
+            Prop("Relations", "DAO.Relations"),
+            Prop("TableDefs", "DAO.TableDefs"),
             Prop("Updatable", "Boolean"), Prop("Version"),
             Prop("RecordsAffected", "Long"),
             Prop("CollatingOrder", "Long"),
@@ -449,7 +487,7 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
         DefaultMemberName = null,
         Members = Members(
             Prop("Name"), Prop("SQL"),
-            Prop("Parameters"), Prop("Type", "Long"),
+            Prop("Parameters", "DAO.Parameters"), Prop("Type", "Long"),
             Prop("RecordsAffected", "Long"),
             Prop("ReturnsRecords", "Boolean"),
             Prop("Connect"), Prop("MaxRecords", "Long"),
@@ -473,7 +511,7 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
         DefaultMemberName = null,
         Members = Members(
             Prop("Name"), Prop("Fields", "DAO.Fields"),
-            Prop("Indexes"), Prop("RecordCount", "Long"),
+            Prop("Indexes", "DAO.Indexes"), Prop("RecordCount", "Long"),
             Prop("ValidationRule"), Prop("ValidationText"),
             Prop("Connect"), Prop("SourceTableName"),
             Prop("Updatable", "Boolean"), Prop("Attributes", "Long"),
@@ -595,7 +633,7 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
         Members = Members(
             Prop("ActiveConnection"), Prop("CommandText"),
             Prop("CommandType", "Long"), Prop("CommandTimeout", "Long"),
-            Prop("Parameters"), Prop("Prepared", "Boolean"),
+            Prop("Parameters", "ADO.Parameters"), Prop("Prepared", "Boolean"),
             Prop("Name"), Prop("State", "Long"),
             Method("Execute", "ADO.Recordset"),
             Method("CreateParameter", "ADO.Parameter"),
@@ -661,8 +699,10 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
         Members = Members(
             Prop("AllowMultiSelect", "Boolean"), Prop("ButtonName"),
             Prop("DialogType", "Long"), Prop("FilterIndex", "Long"),
-            Prop("Filters"), Prop("InitialFileName"),
-            Prop("InitialView", "Long"), Prop("SelectedItems"),
+            Prop("Filters", "Office.FileDialogFilters"),
+            Prop("InitialFileName"),
+            Prop("InitialView", "Long"),
+            Prop("SelectedItems", "Office.FileDialogSelectedItems"),
             Prop("Title"), Prop("Item"),
             Method("Show", "Long"), Method("Execute")
         ),
@@ -673,10 +713,17 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
     // ========================================================================
     // Source: Microsoft Access Object Model Reference (MSDN /
     // learn.microsoft.com/en-us/office/vba/api/overview/access/object-model).
-    // The Access object surface is intentionally split: Access.Form +
-    // Access.Report + Access.Control + Access.Module + Access.DoCmd +
-    // Access.Application. Control subtypes (TextBox, ComboBox, ...) are
-    // NOT registered separately in v1; callers fall back to Access.Control.
+    // The Access object surface is split across Access.Form, Access.Report,
+    // Access.Control, Access.Module, Access.DoCmd, and Access.Application.
+    // Common control subtypes (TextBox, ComboBox, ListBox, CommandButton,
+    // Label) are registered separately and inherit Access.Control directly
+    // via BaseTypeName. The shared data-bound surface (Value, ControlSource,
+    // BeforeUpdate, etc.) is composed only into TextBox/ComboBox/ListBox at
+    // registration time via the private DataBoundControlMembers() helper —
+    // there is no fabricated intermediate "data-bound control" type
+    // exposed in the public registry, because no such COM type-library
+    // identifier exists. CommandButton and Label inherit from
+    // Access.Control directly with none of the data-bound members.
     // ========================================================================
 
     /// <summary>
@@ -781,8 +828,11 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
     /// object. The truly universal control surface — members and events that
     /// apply to every control type, including non-data-bound controls like
     /// Label and CommandButton. Data-bound members (ControlSource, Value,
-    /// BeforeUpdate, etc.) live on <c>Access.DataBoundControl</c> below.
-    /// Subtype-specific members live on the corresponding subtype.
+    /// BeforeUpdate, etc.) are composed into <c>Access.TextBox</c>,
+    /// <c>Access.ComboBox</c>, and <c>Access.ListBox</c> at registration via
+    /// the private <see cref="DataBoundControlMembers"/> helper rather than
+    /// living on a separate intermediate type. Subtype-specific members
+    /// live on the corresponding subtype.
     /// </summary>
     private static TypeInfo BuildAccessControl() => new()
     {
@@ -818,79 +868,82 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
     };
 
     /// <summary>
-    /// Access.DataBoundControl — intermediate base for data-bound controls
-    /// (TextBox, ComboBox, ListBox). Carries the value / control-source
-    /// surface plus the focus / typing / dirty event chain that applies to
-    /// editable / data-bound controls but NOT to Label / CommandButton.
-    /// This type is a curation construct — there is no single COM type
-    /// with this exact name in the Access object model. Source: MSDN
-    /// Access Control object reference, restricted to the data-bound
-    /// member subset.
+    /// Shared data-bound control surface (ControlSource, Value,
+    /// BeforeUpdate, etc.) used by <c>Access.TextBox</c>,
+    /// <c>Access.ComboBox</c>, and <c>Access.ListBox</c>. Authored as a
+    /// private helper rather than as a registered intermediate type
+    /// because no real Access COM type called <c>Access.DataBoundControl</c>
+    /// exists; the registry's public lookup surface only exposes
+    /// type-library identifiers a VBA program could legitimately reference.
+    /// CommandButton and Label inherit from <c>Access.Control</c> only and
+    /// must not pick up these members. Each call site passes
+    /// <paramref name="valueIsDefault"/> = <c>true</c> if the calling
+    /// subtype declares <c>DefaultMemberName="Value"</c>, so the stored
+    /// <c>Value</c> member's <see cref="MemberInfo.IsDefault"/> flag is
+    /// consistent with <see cref="TypeInfo.DefaultMemberName"/> and
+    /// callers reading <see cref="TypeInfo.Members"/> directly see the
+    /// correct default-member metadata. Source: MSDN Access Control
+    /// object reference, restricted to the data-bound subset shared
+    /// across the editable input controls.
     /// </summary>
-    private static TypeInfo BuildAccessDataBoundControl() => new()
+    private static MemberInfo[] DataBoundControlMembers(bool valueIsDefault) => new[]
     {
-        Name = "Access.DataBoundControl",
-        TypeLibrary = "Access",
-        BaseTypeName = "Access.Control",
-        DefaultMemberName = null,
-        Members = Members(
-            // Data-bound surface
-            Prop("ControlSource"),
-            Prop("Value"),
-            Prop("DefaultValue"),
-            Prop("Format"), Prop("InputMask"),
-            Prop("ValidationRule"), Prop("ValidationText"),
-            Prop("Locked", "Boolean"),
-            // Methods specific to data-bound / requeryable controls
-            Method("Requery"),
-            // Focus / typing / value-change event chain
-            Event("BeforeUpdate"), Event("AfterUpdate"),
-            Event("Change"), Event("Updated"),
-            Event("Enter"), Event("Exit"),
-            Event("GotFocus"), Event("LostFocus"),
-            Event("KeyDown"), Event("KeyPress"), Event("KeyUp")
-        ),
+        // Data-bound surface
+        Prop("ControlSource"),
+        Prop("Value", isDefault: valueIsDefault),
+        Prop("DefaultValue"),
+        Prop("Format"), Prop("InputMask"),
+        Prop("ValidationRule"), Prop("ValidationText"),
+        Prop("Locked", "Boolean"),
+        // Methods specific to data-bound / requeryable controls
+        Method("Requery"),
+        // Focus / typing / value-change event chain
+        Event("BeforeUpdate"), Event("AfterUpdate"),
+        Event("Change"), Event("Updated"),
+        Event("Enter"), Event("Exit"),
+        Event("GotFocus"), Event("LostFocus"),
+        Event("KeyDown"), Event("KeyPress"), Event("KeyUp"),
     };
 
     /// <summary>
     /// Access.TextBox — Source: MSDN Access TextBox control reference.
-    /// Inherits the data-bound surface (ControlSource, Value, BeforeUpdate,
-    /// etc.) from <c>Access.DataBoundControl</c>, which itself inherits the
-    /// universal surface from <c>Access.Control</c>. The subtype-specific
-    /// surface here adds Text (the formatted-display alternative to Value),
-    /// the selection range, and the typing/dirty event chain. Default member
-    /// is Value (so <c>txtFirstName = "Bob"</c> writes the value); the Value
-    /// property record lives on <c>Access.DataBoundControl</c> and the
-    /// inheritance walk resolves it.
+    /// Inherits the universal surface from <c>Access.Control</c> directly.
+    /// The data-bound surface (ControlSource, Value, BeforeUpdate, etc.) is
+    /// composed in via <see cref="DataBoundControlMembers"/>; the
+    /// subtype-specific additions are Text (the formatted-display alternative
+    /// to Value), the selection range, and the typing/Dirty/Undo events.
+    /// Default member is Value (so <c>txtFirstName = "Bob"</c> writes the
+    /// value).
     /// </summary>
     private static TypeInfo BuildAccessTextBox() => new()
     {
         Name = "Access.TextBox",
         TypeLibrary = "Access",
-        BaseTypeName = "Access.DataBoundControl",
+        BaseTypeName = "Access.Control",
         DefaultMemberName = "Value",
-        Members = Members(
+        Members = Members([..DataBoundControlMembers(valueIsDefault: true),
             Prop("Text"),
             Prop("SelStart", "Integer"), Prop("SelLength", "Integer"),
             Prop("SelText"),
-            Event("Dirty"), Event("Undo")
-        ),
+            Event("Dirty"), Event("Undo"),
+        ]),
     };
 
     /// <summary>
     /// Access.ComboBox — Source: MSDN Access ComboBox control reference.
-    /// Inherits the data-bound surface from <c>Access.DataBoundControl</c>;
-    /// the subtype-specific surface here adds the row-source / column /
-    /// list-position members and the NotInList event. Default member is Value
-    /// (record inherited from <c>Access.DataBoundControl</c>).
+    /// Inherits <c>Access.Control</c> directly; the data-bound surface is
+    /// composed in via <see cref="DataBoundControlMembers"/>. The
+    /// subtype-specific additions are the row-source/column/list-position
+    /// members, the Dropdown method, and the NotInList event. Default
+    /// member is Value (composed in from the data-bound surface).
     /// </summary>
     private static TypeInfo BuildAccessComboBox() => new()
     {
         Name = "Access.ComboBox",
         TypeLibrary = "Access",
-        BaseTypeName = "Access.DataBoundControl",
+        BaseTypeName = "Access.Control",
         DefaultMemberName = "Value",
-        Members = Members(
+        Members = Members([..DataBoundControlMembers(valueIsDefault: true),
             Prop("Text"),
             Prop("RowSource"), Prop("RowSourceType"),
             Prop("BoundColumn", "Integer"),
@@ -904,23 +957,24 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
             Prop("LimitToList", "Boolean"),
             Method("Dropdown"),
             Event("NotInList"),
-            Event("Dirty"), Event("Undo")
-        ),
+            Event("Dirty"), Event("Undo"),
+        ]),
     };
 
     /// <summary>
     /// Access.ListBox — Source: MSDN Access ListBox control reference.
-    /// Inherits the data-bound surface from <c>Access.DataBoundControl</c>.
-    /// Adds row-source / column / multi-select members. Default member is
-    /// Value (record inherited from <c>Access.DataBoundControl</c>).
+    /// Inherits <c>Access.Control</c> directly; the data-bound surface is
+    /// composed in via <see cref="DataBoundControlMembers"/>. Adds
+    /// row-source / column / multi-select members. Default member is Value
+    /// (composed in from the data-bound surface).
     /// </summary>
     private static TypeInfo BuildAccessListBox() => new()
     {
         Name = "Access.ListBox",
         TypeLibrary = "Access",
-        BaseTypeName = "Access.DataBoundControl",
+        BaseTypeName = "Access.Control",
         DefaultMemberName = "Value",
-        Members = Members(
+        Members = Members([..DataBoundControlMembers(valueIsDefault: true),
             Prop("RowSource"), Prop("RowSourceType"),
             Prop("BoundColumn", "Integer"),
             Prop("ColumnCount", "Integer"),
@@ -931,8 +985,8 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
             Prop("Column"),
             Prop("ItemData"),
             Prop("ItemsSelected"),
-            Prop("MultiSelect", "Integer")
-        ),
+            Prop("MultiSelect", "Integer"),
+        ]),
     };
 
     /// <summary>
@@ -1063,12 +1117,15 @@ public sealed class TypeLibraryRegistry : ITypeLibraryRegistry
         Members = Members(
             Prop("Name"), Prop("Version"), Prop("BuildVersion"),
             Prop("UserName"), Prop("Path"),
-            Prop("CurrentProject"), Prop("CurrentData"),
-            Prop("Forms"), Prop("Reports"),
-            Prop("Modules"), Prop("Macros"),
-            Prop("Screen"),
+            Prop("CurrentProject", "Access.CurrentProject"),
+            Prop("CurrentData", "Access.CurrentData"),
+            Prop("Forms", "Access.Forms"),
+            Prop("Reports", "Access.Reports"),
+            Prop("Modules", "Access.Modules"),
+            Prop("Macros", "Access.AllMacros"),
+            Prop("Screen", "Access.Screen"),
             Prop("DoCmd", "Access.DoCmd"),
-            Prop("References"),
+            Prop("References", "Access.References"),
             Prop("FileDialog", "Office.FileDialog"),
             Prop("IsCompiled", "Boolean"),
             Prop("MenuBar"), Prop("ShortcutMenuBar"),
