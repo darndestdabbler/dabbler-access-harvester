@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="16mm"
+   height="16mm"
+   viewBox="0 0 16 16"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   sodipodi:docname="done.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#c5c5c5"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="2.836475866815946"
+     inkscape:cx="-25.55988607136787"
+     inkscape:cy="17.98005778813464"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="1912"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <circle
+       style="fill:#008000;stroke:none;stroke-width:1.48043;stroke-linecap:round;stroke-linejoin:round"
+       id="circle1"
+       cx="7.999998092651367"
+       cy="7.999998092651367"
+       r="7.259783267974854" />
+    <circle
+       style="fill:none;stroke:#ffffff;stroke-width:1.48043;stroke-linecap:round;stroke-linejoin:round"
+       id="path1"
+       cx="7.999998092651367"
+       cy="7.999998092651367"
+       r="7.259783267974854" />
+    <path
+       style="fill:#008000;stroke:#ffffff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       d="M 4.419195305508061,8.244767358981658 L 7.156458069594271,11.11394640040063 L 10.6852184965982,5.672399943753934"
+       id="path2"
+       sodipodi:nodetypes="ccc" />
+  </g>
+</svg>

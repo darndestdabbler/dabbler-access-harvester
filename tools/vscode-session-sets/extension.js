@@ -92,8 +92,23 @@ function touchedDate(set) {
   return set.lastTouched.slice(0, 10);
 }
 
+// Custom SVG icons live under media/. Same icon is used for the group
+// header AND each row in that group, so the visual mapping is one-to-one.
+const ICON_FILES = {
+  "done": "done.svg",
+  "in-progress": "in-progress.svg",
+  "not-started": "not-started.svg",
+};
+
+function iconUriFor(extensionUri, state) {
+  const file = ICON_FILES[state];
+  if (!file) return undefined;
+  return vscode.Uri.joinPath(extensionUri, "media", file);
+}
+
 class SessionSetsProvider {
-  constructor() {
+  constructor(extensionUri) {
+    this.extensionUri = extensionUri;
     this._onDidChangeTreeData = new vscode.EventEmitter();
     this.onDidChangeTreeData = this._onDidChangeTreeData.event;
     this._cache = null;
@@ -125,22 +140,14 @@ class SessionSetsProvider {
 
       const groups = [];
       groups.push(
-        makeGroup(
-          "In Progress",
-          "in-progress",
-          inProgress.length,
-          "circle-large-filled",
-        ),
+        makeGroup(this.extensionUri, "In Progress", "in-progress", inProgress.length),
       );
       groups.push(
-        makeGroup(
-          "Not Started",
-          "not-started",
-          notStarted.length,
-          "circle-large-outline",
-        ),
+        makeGroup(this.extensionUri, "Not Started", "not-started", notStarted.length),
       );
-      groups.push(makeGroup("Done", "done", done.length, "pass-filled"));
+      groups.push(
+        makeGroup(this.extensionUri, "Done", "done", done.length),
+      );
       return groups;
     }
 
@@ -153,27 +160,29 @@ class SessionSetsProvider {
       } else {
         subset.sort((a, b) => a.name.localeCompare(b.name));
       }
-      return subset.map(makeSetItem);
+      return subset.map((s) => makeSetItem(this.extensionUri, s));
     }
 
     return [];
   }
 }
 
-function makeGroup(label, groupKey, count, icon) {
+function makeGroup(extensionUri, label, groupKey, count) {
   const item = new vscode.TreeItem(
     `${label}  (${count})`,
     count > 0
       ? vscode.TreeItemCollapsibleState.Expanded
       : vscode.TreeItemCollapsibleState.Collapsed,
   );
-  item.iconPath = new vscode.ThemeIcon(icon);
+  // Group header reuses the per-state custom SVG so the header visually
+  // matches the rows it contains.
+  item.iconPath = iconUriFor(extensionUri, groupKey);
   item.contextValue = "group";
   item.groupKey = groupKey;
   return item;
 }
 
-function makeSetItem(set) {
+function makeSetItem(extensionUri, set) {
   const item = new vscode.TreeItem(
     set.name,
     vscode.TreeItemCollapsibleState.None,
@@ -192,19 +201,8 @@ function makeSetItem(set) {
   );
   item.contextValue = `sessionSet:${set.state}`;
   item.set = set;
-  if (set.state === "done") {
-    item.iconPath = new vscode.ThemeIcon(
-      "pass-filled",
-      new vscode.ThemeColor("testing.iconPassed"),
-    );
-  } else if (set.state === "in-progress") {
-    item.iconPath = new vscode.ThemeIcon(
-      "circle-large-filled",
-      new vscode.ThemeColor("testing.runAction"),
-    );
-  } else {
-    item.iconPath = new vscode.ThemeIcon("circle-large-outline");
-  }
+  // Per-state custom SVGs from media/. Same icon as the group header.
+  item.iconPath = iconUriFor(extensionUri, set.state);
   // Default click → open spec.md.
   item.command = {
     command: "dabblerSessionSets.openSpec",
@@ -220,7 +218,7 @@ function activate(context) {
     return;
   }
 
-  const provider = new SessionSetsProvider();
+  const provider = new SessionSetsProvider(context.extensionUri);
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider("dabblerSessionSets", provider),
   );
