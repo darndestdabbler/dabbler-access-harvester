@@ -510,6 +510,136 @@
           "costUsd": 0.00279875
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 25,
+      "stepKey": "session-3/commit-push-notify",
+      "dateTime": "2026-04-25T23:11:42.314750+00:00",
+      "description": "Session 3 committed (a9c5c1c) and pushed. Pushover notification sent.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/read-retrospective",
+      "dateTime": "2026-04-25T23:15:47.480205+00:00",
+      "description": "Verified 18 child stubs exist in docs/session-sets/. Extracted Session 4 adopt-now rows #7-#16 from harvester-import-retrospective.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/reread-plan",
+      "dateTime": "2026-04-25T23:15:47.481197+00:00",
+      "description": "Re-read VBA-Parser-Migration-Harvester-Plan.md (893 lines) with focus on kinds of work: grammar authoring (Phases 1.4, 5.1), AST/declaration model design (Phases 2.3, 3.1-3.2), resolver algorithm design (Phases 3.3-3.7), JET SQL dynamic analysis (Phases 5.3-5.4), enrichment pipeline (Phases 6.1-6.8), mechanical schema/regression checks (Phases 7-8), test-fixture authoring (recurring), change logs (18 instances).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/route-playbook",
+      "dateTime": "2026-04-26T00:09:06.634732+00:00",
+      "description": "Routed planning (complexity 80, architecture task_type timed out at Opus/max) -> opus; playbook draft produced. Auto-verification: n/a by n/a.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "planning",
+          "inputTokens": 3813,
+          "outputTokens": 4110,
+          "costUsd": 0.36544499999999996
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/write-playbook",
+      "dateTime": "2026-04-26T00:14:18.232181+00:00",
+      "description": "Wrote docs/session-sets/vba-parser-session-set-generator/routing-playbook.md in-conversation (Sonnet 4.6 orchestrator). Route(architecture) timed out twice at Opus/max effort; route(planning) produced a meta-plan not the document. Deviation disclosed. Playbook covers all 10 adopt-now rows #7-#16 plus new next-session-set recommendation protocol.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/write-playbook",
+      "dateTime": "2026-04-26T00:14:59.680294+00:00",
+      "description": "Wrote docs/session-sets/vba-parser-session-set-generator/routing-playbook.md in-conversation (Sonnet 4.6 orchestrator). Route(architecture) timed out twice at Opus/max effort; route(planning) produced a meta-plan not the document. Deviation disclosed. Playbook covers all 10 adopt-now rows #7-#16 plus new next-session-set recommendation protocol.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/route-changelog",
+      "dateTime": "2026-04-26T00:15:01.973003+00:00",
+      "description": "Routed summarization (complexity 20) -> gemini-flash; wrote change-log.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1121,
+          "outputTokens": 389,
+          "costUsd": 0.00040155
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/verify",
+      "dateTime": "2026-04-26T00:18:51.962378+00:00",
+      "description": "End-of-session cross-provider verification round 1 via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11187,
+          "outputTokens": 9580,
+          "costUsd": 0.1716675
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/verify-round-2",
+      "dateTime": "2026-04-26T00:22:57.628421+00:00",
+      "description": "Round-2 cross-provider verification via gpt-5-4 after fixing 4 Major + 2 Minor round-1 findings.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 10674,
+          "outputTokens": 6547,
+          "costUsd": 0.12489
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 8,
+      "stepKey": "session-4/verify-round-3",
+      "dateTime": "2026-04-26T00:24:19.685788+00:00",
+      "description": "Round-3 (final) cross-provider verification via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1697,
+          "outputTokens": 2234,
+          "costUsd": 0.037752499999999994
+        }
+      ]
     }
   ]
 }

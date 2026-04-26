@@ -1,0 +1,9 @@
+[
+  {
+    "round": 3,
+    "finding": "Round 3 returned ISSUES_FOUND with minimal content (terse response on compressed prompt). Specific finding unclear. All 6 round-1 findings and 2 round-2 findings were addressed. Round-3 finding deferred given retry-cap reached.",
+    "severity": "unknown",
+    "status": "deferred",
+    "rationale": "Retry cap reached (3 rounds). All explicit round-1 and round-2 findings confirmed fixed. Round-3 terse ISSUES_FOUND with no actionable details."
+  }
+]

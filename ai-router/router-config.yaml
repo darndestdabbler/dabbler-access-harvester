@@ -29,7 +29,7 @@ providers:
     rate_limit:
       requests_per_minute: 50
       tokens_per_minute: 80000
-    timeout_seconds: 300
+    timeout_seconds: 600
     retry:
       max_retries: 2
       backoff_base_seconds: 2  # exponential: 2s, 4s
@@ -311,7 +311,7 @@ task_type_params:
     gemini-pro: { thinking_budget: -1 }
     gpt-5-4:    { reasoning_effort: high }
   architecture:
-    opus:       { effort: xhigh, thinking: { enabled: true, type: adaptive } }
+    opus:       { effort: max, thinking: { enabled: true, type: adaptive } }
     gemini-pro: { thinking_budget: -1 }
     gpt-5-4:    { reasoning_effort: xhigh }
   planning:
