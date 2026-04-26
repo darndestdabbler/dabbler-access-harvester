@@ -1,0 +1,149 @@
+{
+  "Forms": [
+    {
+      "Name": "frmSomeAuditedForm",
+      "RecordSource": "tblSomeData",
+      "Children": [
+        {
+          "Type": "Section",
+          "Name": "Detail",
+          "Children": [
+            {
+              "Type": "TextBox",
+              "Name": "txtFieldA",
+              "Label": {
+                "Source": "attached",
+                "Text": "Field A"
+              },
+              "Properties": {
+                "ControlSource": "FieldA"
+              }
+            },
+            {
+              "Type": "ComboBox",
+              "Name": "cboFieldB",
+              "Label": {
+                "Source": "attached",
+                "Text": "Field B"
+              },
+              "Properties": {
+                "ControlSource": "FieldB"
+              }
+            },
+            {
+              "Type": "CheckBox",
+              "Name": "chkFieldC",
+              "Label": {
+                "Source": "attached",
+                "Text": "Field C"
+              },
+              "Properties": {
+                "ControlSource": "FieldC"
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "ModifiedBy",
+              "Label": {
+                "Source": "attached",
+                "Text": "Modified By"
+              },
+              "Properties": {
+                "ControlSource": "ModifiedBy"
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "ModifiedDate",
+              "Label": {
+                "Source": "attached",
+                "Text": "Modified Date"
+              },
+              "Properties": {
+                "ControlSource": "ModifiedDate"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Tables": [
+    {
+      "Name": "tblSomeData",
+      "Fields": [
+        {
+          "Name": "ID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "FieldA",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "FieldB",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "FieldC",
+          "DataType": "Boolean"
+        },
+        {
+          "Name": "ModifiedBy",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "ModifiedDate",
+          "DataType": "DateTime"
+        }
+      ],
+      "PrimaryKey": [
+        "ID"
+      ]
+    },
+    {
+      "Name": "tblAuditLog",
+      "Fields": [
+        {
+          "Name": "LogID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "EntityName",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "FieldName",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "OldValue",
+          "DataType": "Text",
+          "Size": 255
+        },
+        {
+          "Name": "NewValue",
+          "DataType": "Text",
+          "Size": 255
+        },
+        {
+          "Name": "ChangedBy",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "ChangedDate",
+          "DataType": "DateTime"
+        }
+      ],
+      "PrimaryKey": [
+        "LogID"
+      ]
+    }
+  ]
+}
