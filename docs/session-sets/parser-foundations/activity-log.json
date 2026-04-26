@@ -1,0 +1,120 @@
+{
+  "sessionSetName": "parser-foundations",
+  "createdDate": "2026-04-26T00:34:49.406174+00:00",
+  "totalSessions": 4,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 0,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-26T00:35:11.911219+00:00",
+      "description": "Authored ai-assignment.md via route(task_type='analysis', complexity_hint=55)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1283,
+          "outputTokens": 1205,
+          "costUsd": 0.01365375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/read-inputs",
+      "dateTime": "2026-04-26T01:06:59.355710+00:00",
+      "description": "Read Phase 0.2, Phase 0.4, test-cases/README.md, routing-playbook.md Section 2-3, session-set-tree.md row #1",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/route-architecture-harness-design",
+      "dateTime": "2026-04-26T01:06:59.356714+00:00",
+      "description": "route(task_type='architecture', complexity_hint=70) \u2192 Opus/max timed out after 3 attempts (same pattern as vba-parser-session-set-generator Session 4). Harness design authored in-conversation by Sonnet orchestrator per lessons-learned.md deviation procedure. Deviation disclosed in session-verification prompt.",
+      "status": "deviation-timed-out-authored-in-conversation",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/create-harness",
+      "dateTime": "2026-04-26T01:11:05.272130+00:00",
+      "description": "Created tools/parser-harness/harness.py (run/diff/perf subcommands) and tools/parser-harness/harness-output.schema.json. Architecture deviation: Sonnet in-conversation design (Opus route timed out).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/smoke-test",
+      "dateTime": "2026-04-26T01:11:05.272130+00:00",
+      "description": "Smoke test passed: harness.py run --corpus docs/test-cases \u2192 12 files discovered, 0/12 parse attempts (no_parser), exit 0. JSON output valid.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-04-26T01:11:05.273137+00:00",
+      "description": "dotnet build: SUCCEEDED 0 errors. dotnet test: PASSED 95/95.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verify",
+      "dateTime": "2026-04-26T01:13:19.130829+00:00",
+      "description": "session-verification round 1 via route(session-verification, gpt-5-4). Model: gpt-5-4. Cost: $0.1292.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5199,
+          "outputTokens": 7748,
+          "costUsd": 0.12921749999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/verify-round2",
+      "dateTime": "2026-04-26T01:16:05.473122+00:00",
+      "description": "session-verification round 2 after fixing 4 issues and deferring 2. Model: gpt-5-4. Cost: $0.0289.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5294,
+          "outputTokens": 1042,
+          "costUsd": 0.028865
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T01:17:13.935247+00:00",
+      "description": "Routed analysis for next-session orchestrator recommendation. Model: gemini-pro. Cost: $0.0017.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 672,
+          "outputTokens": 87,
+          "costUsd": 0.00171
+        }
+      ]
+    }
+  ]
+}
