@@ -115,6 +115,137 @@
           "costUsd": 0.131
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/read-inputs",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Read coverage matrix expression rows, hazard-list Sections B/C, fixtures 02/03/06.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/synthesize-expression-grammar",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Authored expression-grammar section of Vba.g4 in-conversation per Convention (Opus 4.7 orchestrator matches route(architecture) target). Added expressionEof, expression (left-recursive precedence), lExpression, primary, literal, typeName, argumentList, argument, namedArgument, typeOfExpr, newExpr, addressOfExpr, memberName, reservedKeywordName.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/author-expression-tests",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Authored 30+ test methods (66 instances after Theory expansion) under tests/AccessHarvester.Vba.Grammar.Tests/Expressions/VbaExpressionParserTests.cs covering primaries, member chains, calls, operator precedence, TypeOf, New, AddressOf, implicit-With, and corpus-witness expressions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-and-test-r1",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "dotnet build + dotnet test sequentially. Build succeeded (0 errors). 107/108 grammar tests passed; 1 failure on `Forms!frm!ctl.Property` because PROPERTY is a reserved keyword lexer token. Fixed by adding reservedKeywordName rule to memberName.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/cross-provider-verification-r1",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Round-1 session-verification via route(task_type='session-verification', complexity_hint=70). Verdict: ISSUES_FOUND (1 Major, 1 Minor). Major: lExpression too broad for TypeOf/AddressOf operands. Minor: no negative tests.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20965,
+          "outputTokens": 18350,
+          "costUsd": 0.3277
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/r1-fix-procedureRef-and-referenceExpr",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Applied R1 fixes: added procedureReference rule (used by addressOfExpr) and referenceExpression rule (used by typeOfExpr). Updated AddressOf tests to access .procedureReference() instead of .lExpression(). Added 7 negative test instances for invalid TypeOf/AddressOf operands.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/cross-provider-verification-r2",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Round-2 verification (complexity_hint=85). Verdict: ISSUES_FOUND (1 Minor). Minor: bare `AddressOf Me` still parsed (Me alone is the instance, not a procedure pointer).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14249,
+          "outputTokens": 8331,
+          "costUsd": 0.1606
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/r2-fix-Me-requires-member",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Applied R2 fix: split procedureReference into two alternatives - `(IDENTIFIER|TYPED_IDENTIFIER) (DOT memberName)*` and `ME (DOT memberName)+` - requiring at least one member after Me. Inlined procedureRefHead. Added `AddressOf Me` to the negative-test theory.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/cross-provider-verification-r3",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Round-3 verification (final retry, complexity_hint=70). Verdict: VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 13149,
+          "outputTokens": 1925,
+          "costUsd": 0.0617
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/build-and-test-final",
+      "dateTime": "2026-04-26T11:00:17.242770+00:00",
+      "description": "Final build + test sequentially. 0 build errors. AccessHarvester.Vba.Grammar.Tests: 117/117 passed. AccessHarvester.Tests: 127/127 passed. Total: 244/244 passed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 11,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T11:00:35.479213+00:00",
+      "description": "Routed analysis recommending Session 3 orchestrator. Saved to next-orchestrator-recommendation-session-3.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 651,
+          "outputTokens": 86,
+          "costUsd": 0.00167375
+        }
+      ]
     }
   ]
 }

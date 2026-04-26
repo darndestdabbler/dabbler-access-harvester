@@ -53,10 +53,15 @@
 | Final session verification | Routed | `session-verification` | `gpt-5-4` | n/a | Non-negotiable cross-provider check per repo constraints. |
 
 **Actuals (filled after the session runs):**
-*   Orchestrator used:
-*   Total routed cost:
+*   Orchestrator used: Claude Code Opus 4.7 (1M context). Expression-grammar synthesis authored in-conversation per the "When the orchestrator's model matches the routing target..." Convention.
+*   Total routed cost: ~$0.57 (3 cross-provider verification rounds with gpt-5-4 totalling $0.55 + next-orchestrator analysis $0.02).
 *   Deviations from plan:
+    - Worktree-per-set setup (`session-set/vba-lexical-and-expression-grammar` branch + `../dabbler-access-harvester-vba-lexical-and-expression-grammar` worktree) per the 2026-04-26 lessons-learned entry. Session 1 ran on main pre-lesson; Session 2 onward runs in the worktree, which will be merged back on Session 4.
+    - Round-1 verifier flagged a Major issue (`lExpression` too broad for `TypeOf` and `AddressOf` operands) that drove a real fix: introduced `procedureReference` and `referenceExpression` rules to enforce MS-VBAL §5.2.6 / §5.6.4 syntactic constraints. Round 2 surfaced a follow-on Minor (`AddressOf Me` parsed; `Me` alone is the instance, not a procedure pointer) — fixed by requiring `Me (DOT memberName)+`. Round 3 = VERIFIED.
 *   Notes for next-session calibration:
+    - Session 3's `sonnet-4.6` @ effort=`medium` recommendation is confirmed by the next-orchestrator analysis. Mechanical tightening (run harness, classify failures, fix grammar bugs) is a good Sonnet fit. The schema-validation route() call is already pinned to Sonnet per `task_type_overrides`.
+    - The `procedureReference` and `referenceExpression` rule split is a useful pattern for #4 (statement-and-module grammar) — `Set` requires an l-value (l-expression form), `AddressOf` requires a procedure-pointer reference. Surface to #4 when assignment-statement parsing lands.
+    - Cross-provider verifier is calibrated correctly for this kind of work — caught two real spec-fidelity issues that an in-conversation review would have missed. Do not relax `complexity_hint` for Session 3's verification; mechanical-tightening still benefits from the cross-provider check on the resulting grammar shape.
 
 ---
 

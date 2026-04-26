@@ -48,6 +48,271 @@ moduleItem
     ;
 
 // ============================================================
+// Expression rules (Phase 1.4 expression section)
+//
+// Sources:
+//   - docs/spec-study/ms-vbal-summary.md  — Section B (Expressions)
+//   - docs/spec-coverage/ms-vbal-coverage.csv §5.* rows
+//   - docs/spec-coverage/hazard-list.md   — Sections B, C
+//   - docs/test-cases/02-cascading-combo-subform.bas (bang chains, calls)
+//   - docs/test-cases/03-with-block-shadowing.bas (implicit-With . and !)
+//   - docs/test-cases/06-calculated-expressions.txt (operator mix)
+//
+// Operator precedence follows MS-VBAL §5.6.9 (highest -> lowest):
+//   ^                                     (right-associative)
+//   unary -, unary +
+//   *  /
+//   \                                     (integer division)
+//   Mod
+//   +  -                                  (binary additive)
+//   &                                     (string concat)
+//   = <> < > <= >= Like Is                (comparisons)
+//   Not                                   (logical/bitwise unary)
+//   And  /  Or  /  Xor  /  Eqv  /  Imp
+//
+// ANTLR4 left-recursion handles precedence by alternative order
+// (top alternative = highest precedence). Direct binary alternatives
+// (`expression OP expression`) become precedence-climbed operators;
+// prefix forms (`OP expression`) become unary prefixes; alternatives
+// that do not begin with `expression` reference (typeOfExpr, newExpr,
+// addressOfExpr, lExpression) act as primary cases at the deepest
+// recursion level.
+//
+// Hazards addressed here:
+//   H-B01  bang `!` binds at least as tight as dot `.` in chains.
+//          Both are postfix in lExpression with single-IDENTIFIER
+//          right operand, so left-to-right associativity yields
+//          `((Forms!frm)!ctl).Property` regardless of alt order.
+//   H-B02  bang access preserved as distinct AST node (BangAccess)
+//          from dot access (MemberAccess) — downstream resolver
+//          inserts the default-collection lookup.
+//   H-B05  `expr(args)` parses as a single IndexOrCall production;
+//          array-index vs. call vs. default-member access cannot be
+//          distinguished without type information.
+//   H-B06  TypeOf...Is is a separate construct; the literal `Is`
+//          keyword and a `typeName` (not arbitrary expression) are
+//          required.
+//   H-B07  `Not rs Is Nothing` parses as `Not (rs Is Nothing)` —
+//          `Is` is a comparison-tier operator (group 8) and `Not`
+//          is one tier lower (group 9). Confirmed by alternative
+//          order: comparison alternative precedes `NOT expression`.
+//   H-C01  `.member` at primary-expression start = implicit-With
+//          target member (handled in lExpression as a non-recursive
+//          alternative `DOT memberName`).
+//   H-C02  `!key` at primary-expression start = implicit-With
+//          default-collection access (alternative `BANG memberName`).
+//   H-D08  empty positional arguments (`f(a, , b)`) preserved as
+//          missing argument slots in argumentList.
+//   H-D12  named arguments (`f(name := value)`) tokenize via the
+//          existing COLON_EQ lexer token and are kept distinct from
+//          positional arguments in the AST.
+//
+// Expression-leading `=` (H-A06, fixture 06 ControlSource form) is
+// the Access expression-language extension, NOT VBA. Parsing the
+// `=...` form belongs to the Access-expression dispatcher landing
+// in parser-infrastructure (#6) and the JET-SQL grammar in
+// jet-sql-grammar-and-parser (#12). The rule below parses a VBA
+// expression only.
+//
+// `Between ... And ...` (fixture 06 ValidationRule form) is also
+// Access expression-language, deferred to #12.
+//
+// `As <type>` clauses inside parameter / variable declarations and
+// the array-element-type form (`Object()`, `String*N`) are statement-
+// level; the lightweight `typeName` rule here covers only the forms
+// needed by `New T`, `TypeOf x Is T`, and qualified library types
+// like `DAO.Recordset` that appear inside `New`. Fuller type
+// expressions land in vba-statement-and-module-grammar (#4).
+// ============================================================
+
+// Test entry point: a single VBA expression terminated by EOF.
+// Statement-level rules (#4) wire `expression` into broader productions.
+expressionEof
+    : expression EOF
+    ;
+
+expression
+    : <assoc=right> expression CARET expression                       # PowerExpr
+    | op=(PLUS | MINUS) expression                                    # UnarySignExpr
+    | expression op=(STAR | SLASH) expression                         # MulDivExpr
+    | expression BACKSLASH expression                                 # IntDivExpr
+    | expression MOD expression                                       # ModExpr
+    | expression op=(PLUS | MINUS) expression                         # AddSubExpr
+    | expression AMP expression                                       # ConcatExpr
+    | expression op=(EQ | NEQ | LT | GT | LE | GE | LIKE | IS) expression  # CompareExpr
+    | NOT expression                                                  # NotExpr
+    | expression AND expression                                       # AndExpr
+    | expression OR expression                                        # OrExpr
+    | expression XOR expression                                       # XorExpr
+    | expression EQV expression                                       # EqvExpr
+    | expression IMP expression                                       # ImpExpr
+    | typeOfExpr                                                      # TypeOfPrimary
+    | newExpr                                                         # NewPrimary
+    | addressOfExpr                                                   # AddressOfPrimary
+    | lExpression                                                     # LExprPrimary
+    ;
+
+// `TypeOf reference-expression Is typeName` — Boolean-valued construct
+// per MS-VBAL §5.2.6 (H-B06). The operand is an *object-reference*,
+// not an arbitrary expression, so `TypeOf x = 3 Is T` is a syntax
+// error (the user must write `(x = 3) And TypeOf y Is T`). Restricting
+// to `referenceExpression` (instead of the broader `lExpression`) also
+// rejects `TypeOf 1 Is T` and `TypeOf "x" Is T` syntactically — those
+// are not object expressions per §5.2.6 even though `lExpression` would
+// accept them through the literal primary.
+typeOfExpr
+    : TYPEOF referenceExpression IS typeName
+    ;
+
+// Reference expression — a value-position l-expression restricted to
+// forms that can yield an object reference. Excludes the literal /
+// special-constant primaries (True, False, Null, Empty, integer/string/
+// date literals) that would syntactically pass through `lExpression`
+// but cannot semantically be object references. Used by `TypeOf`.
+//
+// Calls and indexing are still allowed (`obj.col(1)` returns whatever
+// `col(1)` evaluates to, which may be an object); bang access is
+// allowed; implicit-With leading-./! is allowed.
+referenceExpression
+    : referenceExpression DOT memberName
+    | referenceExpression BANG memberName
+    | referenceExpression LPAREN argumentList RPAREN
+    | DOT memberName
+    | BANG memberName
+    | LPAREN referenceExpression RPAREN
+    | ME
+    | IDENTIFIER
+    | TYPED_IDENTIFIER
+    ;
+
+// `New ClassName` — object-creation expression per §5.2.5.
+newExpr
+    : NEW typeName
+    ;
+
+// `AddressOf <procedure-reference>` — function-pointer expression
+// per MS-VBAL §5.6.4. The operand is a procedure name, optionally
+// qualified by a module/class name. Calls (`AddressOf F()`), bang
+// access (`AddressOf Forms!frm`), implicit-With (`AddressOf .X`), and
+// literal operands are all spec violations and rejected here at the
+// syntactic level — see `procedureReference`.
+addressOfExpr
+    : ADDRESSOF procedureReference
+    ;
+
+// Procedure-pointer reference per MS-VBAL §5.6.4. A simple identifier
+// or a qualified `module.member` chain. `Me.MyMethod` is allowed (Me
+// can start a member-access chain to a method-of-Me) but `Me` alone
+// is not — `Me` is the class instance, not a procedure pointer, so
+// `AddressOf Me` is rejected. Reserved keywords are allowed as the
+// right-hand member name per §3.3.5.
+procedureReference
+    : (IDENTIFIER | TYPED_IDENTIFIER) (DOT memberName)*
+    | ME (DOT memberName)+
+    ;
+
+// L-expression — left-side / location expression per MS-VBAL §5.6.5.
+// Postfix-style left-recursion encodes member-access chains, indexing
+// or calling, and the implicit-With leading-./! forms. The right-hand
+// operand of `.` and `!` is a single member name (not an lExpression),
+// so left-to-right binding yields the canonical chain shape per H-B01.
+lExpression
+    : lExpression DOT memberName                                     # MemberAccess
+    | lExpression BANG memberName                                    # BangAccess
+    | lExpression LPAREN argumentList RPAREN                         # IndexOrCall
+    | DOT memberName                                                 # ImplicitWithMember     // H-C01
+    | BANG memberName                                                # ImplicitWithBang       // H-C02
+    | primary                                                        # PrimaryExpr
+    ;
+
+// Member name on the right side of `.` or `!`. Bracketed identifiers
+// are already absorbed by the IDENTIFIER lexer rule (Hazard H-A08),
+// so `Forms![Order Form].Field` matches `IDENTIFIER BANG IDENTIFIER
+// DOT IDENTIFIER` at the token level.
+//
+// Per MS-VBAL §3.3.5, reserved keywords are allowed as member names
+// after `.` or `!` because the syntactic position is unambiguous.
+// `Forms!frm!ctl.Property`, `obj.End`, `obj.Type`, `obj.Name`, etc.
+// must all parse cleanly. The `reservedKeywordName` alternative folds
+// every reserved-keyword lexer token back into the member-name slot.
+// Without this rule the lexer's keyword tokenization (necessary for
+// statement-level parsing in #4) prevents valid Access expressions
+// like control names that happen to equal reserved words.
+memberName
+    : IDENTIFIER
+    | TYPED_IDENTIFIER
+    | reservedKeywordName
+    ;
+
+// All reserved keyword tokens that may appear as a member name in
+// l-expression chains. Listed exhaustively so the rule survives
+// future lexer additions (the grammar fails fast — by mismatched
+// input — on any keyword the lexer adds without updating this list).
+reservedKeywordName
+    : PUBLIC | PRIVATE | FRIEND | STATIC | DIM | CONST | GLOBAL
+    | DECLARE | PTRSAFE | LIB | ALIAS | WITHEVENTS | IMPLEMENTS
+    | SUB | FUNCTION | PROPERTY | GET | LET | SET | END | EXIT
+    | BYVAL | BYREF | OPTIONAL | PARAMARRAY
+    | AS | NEW | TYPE | ENUM | EVENT | RAISEEVENT | OPTION | EXPLICIT
+    | COMPARE | PRESERVE
+    | IF | THEN | ELSEIF | ELSE | SELECT | CASE | DO | LOOP | WHILE
+    | UNTIL | WEND | FOR | EACH | IN | TO | STEP | NEXT | WITH
+    | GOTO | GOSUB | RETURN | ON | ERROR_KW | RESUME | CALL | STOP
+    | AND | OR | NOT | XOR | EQV | IMP | MOD | LIKE | IS
+    | ADDRESSOF | TYPEOF
+    | TRUE_KW | FALSE_KW | NOTHING | NULL_KW | EMPTY_KW | ME
+    | REDIM | ERASE | DEBUG | PRINT
+    ;
+
+primary
+    : literal                                                        # LiteralPrimary
+    | ME                                                             # MeExpr
+    | TRUE_KW                                                        # TrueExpr
+    | FALSE_KW                                                       # FalseExpr
+    | NOTHING                                                        # NothingExpr
+    | NULL_KW                                                        # NullExpr
+    | EMPTY_KW                                                       # EmptyExpr
+    | IDENTIFIER                                                     # IdentExpr
+    | TYPED_IDENTIFIER                                               # TypedIdentExpr
+    | LPAREN expression RPAREN                                       # ParenExpr
+    ;
+
+literal
+    : INTEGER_LITERAL
+    | FLOAT_LITERAL
+    | HEX_LITERAL
+    | OCTAL_LITERAL
+    | STRING_LITERAL
+    | DATE_LITERAL
+    ;
+
+typeName
+    : IDENTIFIER (DOT IDENTIFIER)*
+    ;
+
+// Argument list per §5.6.13. Empty positional arguments (H-D08) are
+// preserved as missing positions; named arguments (H-D12) use `:=`
+// (the COLON_EQ token, lexed in the lexical section).
+//
+// The form `argument? (COMMA argument?)*` matches empty (the bare
+// `()` call), a single argument, multiple comma-separated arguments,
+// and any combination of leading / trailing / embedded missing
+// positions. The AST consumer treats every missing position as the
+// `Missing` Variant per §5.5.
+argumentList
+    : argument? (COMMA argument?)*
+    ;
+
+argument
+    : namedArgument
+    | expression
+    ;
+
+namedArgument
+    : IDENTIFIER COLON_EQ expression
+    ;
+
+// ============================================================
 // Lexical rules
 // ============================================================
 
