@@ -1,0 +1,67 @@
+{
+  "sessionNumber": 3,
+  "verificationRound1": {
+    "verdict": "ISSUES_FOUND",
+    "issues": [
+      {
+        "id": "R1-1",
+        "severity": "Minor",
+        "summary": "Bare-file mode heuristic (dot/separator check) is brittle — misclassifies multi-arg unknown commands or fails for extensionless files.",
+        "location": "AccessHarvester.Cli/Program.cs Dispatch()",
+        "status": "fixed",
+        "resolution": "Replaced dot/separator heuristic with known-command exclusion: bare-file mode triggers only when args.Length==1 and the token is not a help flag, not a known subcommand, and does not start with '--'."
+      },
+      {
+        "id": "R1-2",
+        "severity": "Minor",
+        "summary": "Source file decoded as strict UTF-8 only; Windows-1252 VBA exports would produce false ERROR_TOKEN counts.",
+        "location": "AccessHarvester.Cli/Program.cs RunParse()",
+        "status": "fixed",
+        "resolution": "Added BOM-aware decoding: detect UTF-8 BOM (EF BB BF) and UTF-16 LE BOM (FF FE); try strict UTF-8; fall back to Encoding.Default (Windows-1252 on typical Windows VBA dev machine). R2 narrowed further: GetEncoding(1252) instead of Encoding.Default (deterministic across all locales). R3 (retry cap reached): simplified to BOM-first / Windows-1252-default with no try/catch, eliminating the silent-misdecode-on-valid-UTF-8-bytes concern entirely."
+      },
+      {
+        "id": "R1-3",
+        "severity": "Minor",
+        "summary": "Schema-validation table in parse-failure-log.md missing rows for AddressOf, implicit-With .member / !key, named args, and empty positional args.",
+        "location": "docs/spec-coverage/parse-failure-log.md",
+        "status": "fixed",
+        "resolution": "Added rows for §5.6.4 AddressOf, §5.4.7 implicit-With leading .member and !key (H-C01/H-C02), §5.5 named args (H-D12), and §5.5 empty positional args (H-D08)."
+      },
+      {
+        "id": "R1-4",
+        "severity": "Minor",
+        "summary": "PrintUsage() did not document the parse subcommand or bare-file mode.",
+        "location": "AccessHarvester.Cli/Program.cs PrintUsage()",
+        "status": "fixed",
+        "resolution": "Added parse usage lines, bare-file mode explanation, JSON output shape, and exit codes for parse to the usage text."
+      }
+    ]
+  },
+  "verificationRound2": {
+    "verdict": "ISSUES_FOUND",
+    "issues": [
+      {
+        "id": "R2-1",
+        "severity": "Minor",
+        "summary": "Encoding fallback still uses Encoding.Default which is locale-dependent.",
+        "location": "AccessHarvester.Cli/Program.cs RunParse()",
+        "status": "fixed",
+        "resolution": "Replaced Encoding.Default with Encoding.GetEncoding(1252). Further improved in R3 by removing the try/catch approach entirely."
+      }
+    ]
+  },
+  "verificationRound3": {
+    "verdict": "ISSUES_FOUND",
+    "note": "Retry cap reached. R3 finding: UTF-8-first-then-fallback still silently misclassifies some Windows-1252 files. Fixed in-place at retry cap: simplified to BOM-first / Windows-1252-default (no try/catch). This eliminates the silent-misdecode concern without adding --encoding option. 244/244 tests pass.",
+    "issues": [
+      {
+        "id": "R3-1",
+        "severity": "Minor",
+        "summary": "No-BOM path still tried UTF-8 first — Windows-1252 bytes forming valid UTF-8 would be silently misclassified.",
+        "location": "AccessHarvester.Cli/Program.cs RunParse()",
+        "status": "fixed-at-retry-cap",
+        "resolution": "Removed try/catch approach. New logic: BOM present → honour BOM; no BOM → Windows-1252 directly (GetEncoding(1252)). This is simpler and correct for Access VBA exports."
+      }
+    ]
+  }
+}
