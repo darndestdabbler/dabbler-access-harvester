@@ -119,7 +119,14 @@
 | Final session verification | Routed | `session-verification` | `gpt-5-4` | n/a | Non-negotiable cross-provider check per repo constraints. |
 
 **Actuals (filled after the session runs):**
-*   Orchestrator used:
-*   Total routed cost:
+*   Orchestrator used: Claude Code Sonnet 4.6 @ effort=unknown.
+*   Total routed cost: ~$0.27 (R1 gpt-5-4 $0.19 + R2 gpt-5-4 $0.076 + summarization gemini-flash $0.0003 + next-set analysis gemini-flash $0.0002). Set total: ~$0.99.
 *   Deviations from plan:
+    - **Two real over-acceptance issues fixed** beyond the spec's "resolve deferred findings" scope (no deferred findings existed; the issues emerged in the R1 verification pass). This is the intended behavior of Session 4.
+    - **R1 ISSUES_FOUND on two real issues** (localDeclHead over-accepted PUBLIC/PRIVATE/GLOBAL; typeSpec accepted As New in non-variable contexts). Both fixed before R2.
+    - **R1 disclosures accepted as intentional design** for two verifier findings (Do dual-condition permissive, Option directives permissive-keyword). R2 VERIFIED.
+    - **Gemini Pro 400** on summarization prompt >2KB; fell back to Gemini Flash per convention (max_tier=1).
+    - Summarization routed (per convention) rather than in-conversation because Sonnet is not a summarization target in the router config.
 *   Notes for next-session calibration:
+    - **Next set: vba-grammar-validation.** One synthesis session (edge-case fixture design). Opus 4.7 @ effort=medium recommended for the synthesis session; Sonnet for mechanical harness runs.
+    - **gpt-5-4 reliability**: R1 returned in 173s, R2 in 78s — both stable. No timeouts at these prompt sizes.
