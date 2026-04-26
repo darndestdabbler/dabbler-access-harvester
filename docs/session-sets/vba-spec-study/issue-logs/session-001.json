@@ -1,0 +1,12 @@
+[
+  {
+    "id": "F1",
+    "severity": "Minor",
+    "category": "completeness",
+    "description": "Field-label normalization: some entries in ms-vbal-summary.md (Identifiers \u00a73.3.5, Operators \u00a73.3) are missing explicit **Interactions:** and/or **Semantic subtlety:** labels. Content is present; labels are inconsistent.",
+    "location": "docs/spec-study/ms-vbal-summary.md \u2014 Section A entries 4 and 6; several Section C entries",
+    "round_detected": 1,
+    "status": "deferred",
+    "deferred_to": "Session 4 (optional buffer) \u2014 acknowledged in round-3 verification verdict"
+  }
+]
