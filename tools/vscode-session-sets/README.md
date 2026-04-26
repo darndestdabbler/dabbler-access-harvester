@@ -7,11 +7,22 @@ for the checklist icon. Surfaces every session set under
 progress and last-touched date. State is derived from file presence the same
 way `ai_router.find_active_session_set` and
 `ai_router.print_session_set_status` do — `change-log.md` → done,
-`activity-log.json` without it → in-progress, only `spec.md` → not-started.
+`session-state.json` OR `activity-log.json` without it → in-progress, only
+`spec.md` → not-started.
+
+`session-state.json` is the earliest in-progress signal: it is written at
+the start of each session by the orchestrator (Step 0 of
+`docs/ai-led-session-workflow.md`), before any activity-log entry exists.
+This means a freshly-started session set flips to In Progress as soon as
+the orchestrator finishes its bootstrap — no longer waiting for the first
+session's commit. The tooltip on each in-progress set surfaces the
+current session number, the orchestrator (engine + model + effort), and
+the latest verification verdict when present.
 
 The extension never writes. It only watches `docs/session-sets/**/{spec.md,
-activity-log.json,change-log.md}` and re-reads when those change, so the tree
-auto-refreshes whenever a session is logged or completed.
+session-state.json,activity-log.json,change-log.md}` and re-reads when those
+change, so the tree auto-refreshes whenever a session is registered, logged,
+or completed.
 
 ## Tree-item interactions
 
@@ -68,8 +79,8 @@ npm install -g @vscode/vsce
 
 # From this folder:
 cd tools/vscode-session-sets
-vsce package           # produces dabbler-session-sets-0.4.0.vsix
-code --install-extension dabbler-session-sets-0.4.0.vsix
+vsce package           # produces dabbler-session-sets-0.5.0.vsix
+code --install-extension dabbler-session-sets-0.5.0.vsix
 ```
 
 To uninstall: `code --uninstall-extension darndestdabbler.dabbler-session-sets`.

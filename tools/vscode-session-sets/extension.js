@@ -1,10 +1,14 @@
 // Dabbler Session Sets — VS Code tree-view extension.
 //
-// Reads docs/session-sets/<slug>/{spec.md,activity-log.json,change-log.md}
-// and renders a three-group tree: In Progress, Not Started, Done. State is
-// derived from file presence, mirroring ai_router.find_active_session_set
-// and ai_router.print_session_set_status. The extension never writes —
-// it only watches and re-reads.
+// Reads docs/session-sets/<slug>/{spec.md, session-state.json,
+// activity-log.json, change-log.md} and renders a three-group tree: In
+// Progress, Not Started, Done. State is derived from file presence,
+// mirroring ai_router.find_active_session_set and
+// ai_router.print_session_set_status. session-state.json is the earliest
+// in-progress signal — it is written at the start of session 1 (before any
+// activity-log entry exists), so a freshly-started set shows as in-progress
+// without waiting for the first commit. The extension never writes — it
+// only watches and re-reads.
 
 const vscode = require("vscode");
 const fs = require("fs");
@@ -31,15 +35,17 @@ function readSessionSets(root) {
 
     const activityPath = path.join(dir, "activity-log.json");
     const changeLogPath = path.join(dir, "change-log.md");
+    const statePath = path.join(dir, "session-state.json");
 
     let state;
     if (fs.existsSync(changeLogPath)) state = "done";
-    else if (fs.existsSync(activityPath)) state = "in-progress";
+    else if (fs.existsSync(activityPath) || fs.existsSync(statePath)) state = "in-progress";
     else state = "not-started";
 
     let totalSessions = null;
     let sessionsCompleted = 0;
     let lastTouched = null;
+    let liveSession = null;  // populated from session-state.json when present
 
     if (fs.existsSync(activityPath)) {
       try {
@@ -62,16 +68,41 @@ function readSessionSets(root) {
       }
     }
 
+    if (fs.existsSync(statePath)) {
+      try {
+        const sd = JSON.parse(fs.readFileSync(statePath, "utf8"));
+        if (totalSessions === null && typeof sd.totalSessions === "number") {
+          totalSessions = sd.totalSessions;
+        }
+        const stateTouched = sd.completedAt || sd.startedAt;
+        if (stateTouched && (!lastTouched || stateTouched > lastTouched)) {
+          lastTouched = stateTouched;
+        }
+        liveSession = {
+          currentSession: sd.currentSession,
+          status: sd.status,
+          orchestrator: sd.orchestrator || null,
+          startedAt: sd.startedAt || null,
+          completedAt: sd.completedAt || null,
+          verificationVerdict: sd.verificationVerdict || null,
+        };
+      } catch (err) {
+        // ignore — show what we have
+      }
+    }
+
     sets.push({
       name: entry.name,
       dir,
       specPath,
       activityPath,
       changeLogPath,
+      statePath,
       state,
       totalSessions,
       sessionsCompleted,
       lastTouched,
+      liveSession,
     });
   }
   return sets;
@@ -182,6 +213,27 @@ function makeGroup(extensionUri, label, groupKey, count) {
   return item;
 }
 
+function liveSessionTooltipLines(set) {
+  if (!set.liveSession) return [];
+  const ls = set.liveSession;
+  const lines = [];
+  if (typeof ls.currentSession === "number") {
+    const total = set.totalSessions ? `/${set.totalSessions}` : "";
+    const status = ls.status ? ` (${ls.status})` : "";
+    lines.push(`Session: ${ls.currentSession}${total}${status}`);
+  }
+  if (ls.orchestrator) {
+    const o = ls.orchestrator;
+    const parts = [o.engine, o.model].filter(Boolean).join(" · ");
+    const effort = o.effort && o.effort !== "unknown" ? ` @ effort=${o.effort}` : "";
+    if (parts) lines.push(`Orchestrator: ${parts}${effort}`);
+  }
+  if (ls.verificationVerdict) {
+    lines.push(`Verifier: ${ls.verificationVerdict}`);
+  }
+  return lines;
+}
+
 function makeSetItem(extensionUri, set) {
   const item = new vscode.TreeItem(
     set.name,
@@ -194,6 +246,7 @@ function makeSetItem(extensionUri, set) {
       `**${set.name}**`,
       `State: ${set.state}`,
       bits.length ? `Progress: ${bits.join(" · ")}` : null,
+      ...liveSessionTooltipLines(set),
       `Folder: \`${path.relative(workspaceRoot(), set.dir)}\``,
     ]
       .filter(Boolean)
@@ -228,7 +281,7 @@ function activate(context) {
   if (fs.existsSync(sessionSetsAbs)) {
     const pattern = new vscode.RelativePattern(
       sessionSetsAbs,
-      "**/{spec.md,activity-log.json,change-log.md}",
+      "**/{spec.md,session-state.json,activity-log.json,change-log.md}",
     );
     const watcher = vscode.workspace.createFileSystemWatcher(pattern);
     const refresh = () => provider.refresh();

@@ -54,6 +54,12 @@ from .models import estimate_complexity, pick_model
 from .providers import call_model
 from .prompting import build_prompt
 from .session_log import SessionLog
+from .session_state import (
+    SESSION_STATE_FILENAME,
+    register_session_start,
+    mark_session_complete,
+    read_session_state,
+)
 from .utils import (
     RateLimiter,
     should_escalate,
@@ -797,6 +803,7 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
 
         activity_path = os.path.join(path, "activity-log.json")
         changelog_path = os.path.join(path, "change-log.md")
+        state_path = os.path.join(path, SESSION_STATE_FILENAME)
 
         sessions_completed = 0
         total_sessions: Optional[int] = None
@@ -820,6 +827,21 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
             except Exception:
                 pass
 
+        # Session-state.json is the earlier signal — it is written at the
+        # start of session 1 before any activity-log entry exists, so a
+        # newly-started set still shows up as in-progress here.
+        if os.path.isfile(state_path):
+            try:
+                with open(state_path, "r", encoding="utf-8") as f:
+                    state_data = json.load(f)
+                if total_sessions is None:
+                    total_sessions = state_data.get("totalSessions")
+                state_touched = state_data.get("completedAt") or state_data.get("startedAt")
+                if state_touched and (not last_touched or state_touched > last_touched):
+                    last_touched = state_touched
+            except Exception:
+                pass
+
         record = {
             "name": name,
             "completed": sessions_completed,
@@ -829,7 +851,7 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
 
         if os.path.isfile(changelog_path):
             done.append(record)
-        elif os.path.isfile(activity_path):
+        elif os.path.isfile(activity_path) or os.path.isfile(state_path):
             in_progress.append(record)
         else:
             not_started.append(record)
