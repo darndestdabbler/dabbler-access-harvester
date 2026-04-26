@@ -685,6 +685,52 @@ result = route(content=change_log_prompt, task_type="summarization")
 > "document this code" frame that misfits free-form prose and produces
 > Gemini 400s on prompts above ~2KB.
 
+**Last session only — produce a next-session-set recommendation.**
+This is the cross-set complement to the per-session next-orchestrator recommendation.
+It tells the human which child session set (or sets, if the DAG permits parallel
+starts) to execute next, and with what orchestrator. Routed via
+`route(task_type='analysis', complexity_hint=40)`.
+
+Prompt inputs: the completed set's row from `session-set-tree.md` (shows which
+sets it unblocks), this session's actuals, and the `ai-assignment.md` rows for the
+unblocked candidate next sets.
+
+```python
+result = route(
+    content=next_set_prompt,
+    task_type="analysis",
+    complexity_hint=40,
+    session_set=str(SESSION_SET),
+    session_number=N,
+)
+log.log_step(N, step_num, "session-N/next-session-set-recommendation", ...)
+```
+
+**Output schema (single next set):**
+```markdown
+**Next session-set recommendation (after <slug>):**
+`<next-slug>`
+
+**Recommended orchestrator for `<next-slug>`:** <engine> <model> @ effort=<low|medium|high>
+**Rationale:** <2 sentences grounded in (a) next set's synthesis count from session-set-tree.md and (b) what this session revealed>
+```
+
+**Output schema (parallel next sets — when DAG permits):**
+```markdown
+**Next session-set recommendation (after <slug>):**
+`<slug-a>` and `<slug-b>` (run in parallel — both are DAG roots)
+
+**Recommended orchestrator for `<slug-a>`:** <engine> <model> @ effort=<low|medium|high>
+**Rationale:** <2 sentences>
+
+**Recommended orchestrator for `<slug-b>`:** <engine> <model> @ effort=<low|medium|high>
+**Rationale:** <2 sentences>
+```
+
+Include this block in the `change-log.md` header AND in the Pushover notification body.
+If there is no `session-set-tree.md` (i.e., this session set was not produced by a
+generator set), omit this sub-step.
+
 Commit and push:
 ```bash
 git add -A
@@ -1035,9 +1081,11 @@ This is the authoritative rules list. Instruction files (`CLAUDE.md`,
     set, after the notify.** Output "no changes recommended" if nothing
     qualifies — but do the review.
 13. **Author the AI-assignment ledger on Session 1 of every new set
-    (Step 3.5), and the next-session orchestrator recommendation at
-    the end of every session except the last (Step 8 sub-step).** Both
-    are routed `analysis` calls — never self-opine on which orchestrator
+    (Step 3.5), the next-session orchestrator recommendation at
+    the end of every session except the last (Step 8 sub-step), and the
+    next-session-set recommendation on the last session of every set
+    (Step 8 sub-step, when a `session-set-tree.md` exists).** All are
+    routed `analysis` calls — never self-opine on which orchestrator
     or which model would have been the cheapest safe choice. The current
     orchestrator is the wrong judge of whether it could have been a
     smaller orchestrator.
