@@ -165,6 +165,161 @@
           "costUsd": 0.0018575000000000002
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/prerequisites-check",
+      "dateTime": "2026-04-26T01:26:12.312279+00:00",
+      "description": "Prerequisites verified: ms-vbal-summary.md exists (1260 lines), 12 fixtures present",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/build-coverage-matrix",
+      "dateTime": "2026-04-26T01:26:12.316856+00:00",
+      "description": "Built docs/spec-coverage/ms-vbal-coverage.csv: 110 rows (78 must / 25 should / 7 can-defer), cross-referenced against 12 fixtures and Appendix A",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/schema-validation",
+      "dateTime": "2026-04-26T01:27:21.543088+00:00",
+      "description": "Mechanical correspondence check: summary constructs vs CSV rows; model=sonnet; task_type=code-review (stand-in for schema-validation)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 5926,
+          "outputTokens": 3430,
+          "costUsd": 0.069228
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/schema-validation-round2",
+      "dateTime": "2026-04-26T01:29:45.355633+00:00",
+      "description": "Schema-validation round 2 after fixing 2 priority errors; model=sonnet",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 6150,
+          "outputTokens": 5798,
+          "costUsd": 0.10542000000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/schema-validation-round3",
+      "dateTime": "2026-04-26T01:31:41.943784+00:00",
+      "description": "Schema-validation round 3 after dedup fix + heading correction; result: see content",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 6030,
+          "outputTokens": 4102,
+          "costUsd": 0.07962
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/build",
+      "dateTime": "2026-04-26T01:33:02.087542+00:00",
+      "description": "dotnet build: 0 warnings, 0 errors",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/test",
+      "dateTime": "2026-04-26T01:33:02.088584+00:00",
+      "description": "dotnet test: 95 passed, 0 failed, 0 skipped",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/session-verification",
+      "dateTime": "2026-04-26T01:34:10.415616+00:00",
+      "description": "Session verification; model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5612,
+          "outputTokens": 4439,
+          "costUsd": 0.080615
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/session-verification-round2",
+      "dateTime": "2026-04-26T01:36:39.720154+00:00",
+      "description": "Round-2 session verification after corpus notation + event fixes; model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5333,
+          "outputTokens": 5280,
+          "costUsd": 0.09253249999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/session-verification-round3",
+      "dateTime": "2026-04-26T01:37:21.630051+00:00",
+      "description": "Round-3 session verification after README disclosure fix; model=gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 701,
+          "outputTokens": 215,
+          "costUsd": 0.0049775
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 11,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T01:38:02.973708+00:00",
+      "description": "Next-orchestrator recommendation for Session 3; model=gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 560,
+          "outputTokens": 679,
+          "costUsd": 0.00749
+        }
+      ]
     }
   ]
 }

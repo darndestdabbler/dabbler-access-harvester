@@ -40,11 +40,16 @@ Claude Code Sonnet 4.6 @ effort=low
 | Land CSV & commit | Orchestration | N/A (local) | Claude Code Sonnet 4.6 | low | Mechanical file I/O and git operations. |
 | Verify session output | Verification | `session-verification` | gpt-5-4 | N/A | Task type is pinned to gpt-5-4 for final session verification. |
 
-**Actuals (filled after the session runs):**
-- Orchestrator used: TBD
-- Total routed cost: TBD
-- Deviations from recommendation: TBD
-- Notes for next-session calibration: TBD
+**Actuals (Session 2 — 2026-04-25):**
+- Orchestrator used: Claude Code Sonnet 4.6 (this conversation, same as Session 1)
+- Total routed cost: ~$0.43 (schema-validation 3 rounds via sonnet $0.25; session-verification 3 rounds via gpt-5-4 $0.18; next-orchestrator $0.008 via gemini-pro)
+- Deviations from recommendation: effort=low was correct (lighter than medium). schema-validation used code-review (Sonnet-pinned) as stand-in per spec note that task type is pending routing-playbook set.
+- Notes for next-session calibration: 3 schema-validation rounds due to data quality iteration (priority fixes, dedup, notation normalization). 3 verification rounds due to issue fixing — not content gaps. Total was close to the $0.15 estimate if Northwind COM inspection is excluded.
+
+**Next session orchestrator recommendation (Session 3):**
+Claude Code Sonnet 4.6 @ effort=high
+
+**Rationale:** Session 3 has a synthesis call (hazard list via Opus architecture). Apply the 3x split-call approach from Session 1: 3 focused Opus calls covering batches of 4 fixtures each, then consolidate. Sonnet orchestrates; effort=high justified by increased coordination complexity.
 
 ## Session 3 of 3: Hazard List Synthesis
 

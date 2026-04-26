@@ -7,7 +7,7 @@
 
 > **Deviation note:** The spec called for 1 architecture synthesis call per session. Due to the Opus timeout lesson (Opus at effort:max + adaptive thinking times out above ~3K input tokens; see `docs/planning/lessons-learned.md`), this was split into 3 focused calls covering: (A) Lexical + Preprocessing, (B) Modules + Procedures + Type System, (C) Statements + Expressions + Object Model. All three used Opus as generator. Content is equivalent to a single synthesis call broken by section.
 
-## 14 Critical Constructs (Quick Reference)
+## 15 Critical Constructs (Quick Reference)
 
 The following constructs receive extended treatment in the sections below. Each is flagged **CRITICAL** at its main entry.
 
