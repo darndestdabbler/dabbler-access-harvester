@@ -7,11 +7,54 @@ for the checklist icon. Surfaces every session set under
 progress and last-touched date. State is derived from file presence the same
 way `ai_router.find_active_session_set` and
 `ai_router.print_session_set_status` do — `change-log.md` → done,
-`activity-log.json` without it → in-progress, only `spec.md` → not-started.
+`session-state.json` OR `activity-log.json` without it → in-progress, only
+`spec.md` → not-started.
+
+`session-state.json` is the earliest in-progress signal: it is written at
+the start of each session by the orchestrator (Step 0 of
+`docs/ai-led-session-workflow.md`), before any activity-log entry exists.
+This means a freshly-started session set flips to In Progress as soon as
+the orchestrator finishes its bootstrap — no longer waiting for the first
+session's commit. The tooltip on each in-progress set surfaces the
+current session number, the orchestrator (engine + model + effort), and
+the latest verification verdict when present.
 
 The extension never writes. It only watches `docs/session-sets/**/{spec.md,
-activity-log.json,change-log.md}` and re-reads when those change, so the tree
-auto-refreshes whenever a session is logged or completed.
+session-state.json,activity-log.json,change-log.md}` and re-reads when those
+change, so the tree auto-refreshes whenever a session is registered, logged,
+or completed.
+
+## Per-set worktrees (auto-discovered)
+
+When you run a session set in an isolated git worktree — the per-set
+worktree convention in
+[`docs/planning/project-guidance.md`](../../docs/planning/project-guidance.md)
+→ Conventions → Workflow Expectations — the extension finds it for you
+automatically. For every workspace folder it runs
+`git worktree list --porcelain` and scans `docs/session-sets/` in every
+sibling worktree git knows about. No need to add the worktree to the
+workspace, and no need to remove it after the merge.
+
+New worktrees show up via three triggers:
+
+- **Workspace-folder change** (e.g. opening a different repo) → instant.
+- **Title-bar refresh button** → instant.
+- **30-second background poll** — picks up `git worktree add` runs
+  that happened while VS Code was already open.
+
+When the same slug exists in multiple discovered roots (e.g., the main
+repo carries the spec while a worktree carries the live activity log),
+the higher-state entry wins (done > in-progress > not-started); ties
+break on most-recent `lastTouched`. The tooltip's `Folder:` line shows
+the worktree directory name when more than one root is in play, so you
+can tell at a glance whether a row reflects the main repo or a sibling
+worktree.
+
+If `git` is not on `PATH`, or a workspace folder is not a git repo,
+auto-discovery silently falls back to scanning that folder alone — the
+extension stays useful in non-worktree setups too. You can also still
+add a worktree manually via **File → Add Folder to Workspace…** and the
+multi-root scan picks it up the same way.
 
 ## Tree-item interactions
 
@@ -68,8 +111,8 @@ npm install -g @vscode/vsce
 
 # From this folder:
 cd tools/vscode-session-sets
-vsce package           # produces dabbler-session-sets-0.4.0.vsix
-code --install-extension dabbler-session-sets-0.4.0.vsix
+vsce package           # produces dabbler-session-sets-0.7.0.vsix
+code --install-extension dabbler-session-sets-0.7.0.vsix
 ```
 
 To uninstall: `code --uninstall-extension darndestdabbler.dabbler-session-sets`.

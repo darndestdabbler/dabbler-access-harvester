@@ -1,0 +1,31 @@
+{
+  "Forms": [
+    {
+      "Name": "frmCustomers",
+      "Children": [
+        {
+          "Type": "Section",
+          "Name": "Detail",
+          "Children": [
+            {
+              "Type": "TextBox",
+              "Name": "txtCustomerName",
+              "Label": {
+                "Source": "attached",
+                "Text": "Customer Name"
+              }
+            },
+            {
+              "Type": "TextBox",
+              "Name": "txtPhone",
+              "Label": {
+                "Source": "attached",
+                "Text": "Phone Number"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

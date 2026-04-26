@@ -12,11 +12,14 @@ def find_active_session_set(base_dir: str = "docs/session-sets") -> str:
 
     Detection rules (in priority order):
 
-    1. **In-progress** — has ``spec.md`` + ``activity-log.json`` but **no** ``change-log.md``.
-       If exactly one exists, return it.
+    1. **In-progress** — has ``spec.md`` + (``activity-log.json`` OR
+       ``session-state.json``) but **no** ``change-log.md``. If exactly one
+       exists, return it. ``session-state.json`` is the earlier signal — it is
+       written at the start of session 1 before any activity-log entry exists.
 
-    2. **Not-started** — has ``spec.md`` but **no** ``activity-log.json`` and **no** ``change-log.md``.
-       If exactly one in-progress candidate was found (rule 1), ignore not-started ones.
+    2. **Not-started** — has ``spec.md`` but neither ``activity-log.json``,
+       ``session-state.json``, nor ``change-log.md``. If exactly one
+       in-progress candidate was found (rule 1), ignore not-started ones.
        If zero in-progress, and exactly one not-started, return it.
 
     Raises ``SystemExit`` with a descriptive message if the result is ambiguous
@@ -46,6 +49,7 @@ def find_active_session_set(base_dir: str = "docs/session-sets") -> str:
 
         has_spec      = os.path.isfile(os.path.join(path, "spec.md"))
         has_activity  = os.path.isfile(os.path.join(path, "activity-log.json"))
+        has_state     = os.path.isfile(os.path.join(path, "session-state.json"))
         has_changelog = os.path.isfile(os.path.join(path, "change-log.md"))
 
         if not has_spec:
@@ -54,7 +58,7 @@ def find_active_session_set(base_dir: str = "docs/session-sets") -> str:
         if has_changelog:
             continue  # complete — skip
 
-        if has_activity:
+        if has_activity or has_state:
             in_progress.append(path)
         else:
             not_started.append(path)

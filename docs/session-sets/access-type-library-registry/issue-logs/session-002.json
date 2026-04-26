@@ -1,0 +1,18 @@
+[
+  {
+    "id": "M-isdefault-storage-inconsistency",
+    "severity": "Major",
+    "round": 3,
+    "summary": "Stored Members[Value].IsDefault = false on Access.TextBox/ComboBox/ListBox even though those types declare DefaultMemberName=Value; callers reading TypeInfo.Members directly see inconsistent default-member metadata.",
+    "status": "fixed-in-place",
+    "resolution": "Parameterized DataBoundControlMembers(bool valueIsDefault) so the three data-bound subtypes pass valueIsDefault: true at compose time, marking the stored Value with IsDefault=true. Tightened ValidateRegistryAtConstruction with an invariant: when DefaultMemberName names a member declared directly on the same type, the direct member's IsDefault flag must be true. Updated the test catalog's TextBox/ComboBox/ListBox Value entries from false to true. Applied in-place after the workflow's max-2-retries verification cap."
+  },
+  {
+    "id": "m-stale-databoundcontrol-comments",
+    "severity": "Minor",
+    "round": 3,
+    "summary": "Comments and XML docs still described the removed Access.DataBoundControl intermediate type.",
+    "status": "fixed-in-place",
+    "resolution": "Rewrote the Access section banner comment in TypeLibraryRegistry.cs to describe the composition model. Updated the Access.Control summary to say data-bound members are composed into TextBox/ComboBox/ListBox via the private helper. Updated the ITypeLibraryRegistry.cs DefaultMemberName example to reference DAO.Recordset.Fields and to document the new direct-member IsDefault invariant. Applied in-place after the workflow's max-2-retries verification cap."
+  }
+]

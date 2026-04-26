@@ -407,3 +407,91 @@ reference; if it proves out twice in *this* repo, propose promotion to
   If a second session set hits this same failure mode, propose
   promoting the worktree-per-set rule to a Convention in
   `project-guidance.md`.
+
+### Verify DAG Prereqs Against Actual Completion State Before Registering Session Start, Not Against The Previous Set's Handoff Recommendation
+
+- **Context:** Starting `access-symbol-table-and-types` Session 1 on
+  2026-04-26. The previous set (`access-metadata-extraction`) had
+  authored a cross-set handoff recommendation in its `change-log.md`
+  pointing at `access-symbol-table-and-types` as the next set to start,
+  with Opus 4.7 @ effort=high as the recommended orchestrator.
+- **Failure or friction:** The orchestrator (Opus, this session)
+  followed the handoff recommendation and ran Step 0 to completion —
+  worktree created, branch cut, `session-state.json` written — before
+  reading the spec's prerequisite list against actual completion
+  state. The spec's `Prerequisite:` line listed
+  `resolver-default-members-and-inference/` (#9) and
+  `access-metadata-extraction/` (#10). Only #10 was done; #7 → #8 → #9
+  had not even been started, so `AccessHarvester.Vba.Resolver/` did
+  not exist in the repo. Session 1's deliverable (resolver extensions)
+  had nothing to extend. The cross-set handoff recommendation was
+  authored from the previous set's perspective without DAG-wide
+  prereq awareness — it picked the *next downstream slug*, not the
+  *next unblocked slug*.
+- **Lesson:** Cross-set handoff recommendations in
+  `change-log.md` are advisory and authored by a single set's
+  end-of-run analysis call. They do not guarantee that the named next
+  set's full prereq list is satisfied. The authority for "what is
+  startable now" is `session-set-tree.md` (the DAG) cross-referenced
+  against per-set `change-log.md` presence (the completion gate). Do
+  the DAG check **before** registering session start in Step 0, not
+  after.
+- **Action for future sessions:** Add a sub-step to the workflow's
+  Step 0 (between "identify the active session set" and "register
+  this session in `session-state.json`"): for the chosen slug, look
+  up its row in `session-set-tree.md`, parse the `Prereqs` column,
+  and for each prereq verify a `change-log.md` exists in the
+  corresponding `docs/session-sets/<prereq-slug>/` folder. If any
+  prereq is missing, stop and surface to the human with the list of
+  missing prereqs and a recommendation for the next *actually*
+  unblocked slug. Until this is encoded in code, treat it as an
+  orchestrator checklist item. If a second session set hits this
+  same failure mode, promote it to a Convention in
+  `project-guidance.md` and add a `verify_dag_prereqs()` helper to
+  `ai-router/session_log.py` so the check is mechanical rather than
+  manual.
+
+### Split Session Sets Whose Features Span Independent Prereq Chains
+
+- **Context:** Same incident as the entry above
+  (`access-symbol-table-and-types`, 2026-04-26). After surfacing the
+  blocker, inspection of the spec showed it bundled two features
+  with materially different prereq depths:
+  - **Feature 1 — Synthetic Declaration Injection** required #9
+    (resolver) and #10 (metadata extractor).
+  - **Feature 2 — Type Library Registry** was a hand-curated lookup
+    of DAO/ADO/Office/Access type members; its only real dependency
+    was #10's project being in the repo, and its consumers
+    (the resolver-side integration) were downstream.
+- **Failure or friction:** The combined spec implicitly forced the
+  whole set to wait on the slowest prereq (#9), even though half the
+  work (Feature 2) could have run in parallel as soon as #10 landed.
+  This wasted ~5 sessions of potential parallelism in the schedule.
+  The split into `access-type-library-registry` (#11a, prereqs `[#10]`)
+  and `access-resolver-symbol-table-integration` (#11b, prereqs
+  `[#9, #10, #11a]`) recovered that parallelism — #11a became
+  startable immediately and #11b's prereq list grew by exactly one
+  soft-coupling link (the registry contract).
+- **Lesson:** When authoring a session-set spec, list each feature's
+  *actual* prereqs in column form, not the union of prereqs across
+  the set. If two features have materially different prereq depths
+  and there's a clean interface seam between them (e.g., one
+  produces a contract the other consumes), split them into separate
+  sets. The cost of splitting is one extra change-log + verification
+  step; the benefit is unblocking parallel execution and avoiding
+  long-blocked-set scheduling churn. The same logic applies in
+  reverse: if two unblocked slugs share a prereq frontier and the
+  combined session count is small, consider merging — but merging is
+  rarely the bug; over-bundling is.
+- **Action for future sessions:** When the
+  `vba-parser-session-set-generator`-style planner authors a
+  multi-feature session set, the planner prompt should require an
+  explicit per-feature prereq table (not just a per-set union) and
+  flag any spec where features have non-identical prereqs as a
+  split candidate. Until the planner prompt is updated, the
+  orchestrator authoring `ai-assignment.md` for a multi-feature set
+  should perform this check manually as part of Step 3.5 — and
+  surface a split recommendation to the human if the features
+  diverge. If a second multi-feature set hits this pattern,
+  promote both this lesson and the per-feature prereq table to
+  Conventions in `project-guidance.md`.
