@@ -185,7 +185,7 @@ function makeSetItem(set) {
       .filter(Boolean)
       .join("\n\n"),
   );
-  item.contextValue = "sessionSet";
+  item.contextValue = `sessionSet:${set.state}`;
   item.set = set;
   if (set.state === "done") {
     item.iconPath = new vscode.ThemeIcon(
@@ -273,6 +273,59 @@ function activate(context) {
         );
       },
     ),
+  );
+
+  // --- Clipboard helpers for "start next session" prompts ---
+
+  const copy = async (text, label) => {
+    await vscode.env.clipboard.writeText(text);
+    vscode.window.setStatusBarMessage(`Copied: ${label}`, 4000);
+  };
+
+  const startCommandPresets = {
+    "default": (slug) =>
+      `Please start the next session of \`${slug}\`.`,
+    "maxoutClaude": (slug) =>
+      `Please start the next session of \`${slug}\` — maxout Claude (use Opus 4.7 as orchestrator at effort=max, drop max_tier caps on routed calls, push complexity_hint up so eligible calls route to Opus/max).`,
+    "maxoutCodex": (slug) =>
+      `Please start the next session of \`${slug}\` — maxout Codex (use GPT-5.5 or GPT-5.4 as orchestrator at reasoning_effort=high, push routed calls to GPT-5.4/high).`,
+    "opusHigh": (slug) =>
+      `Please start the next session of \`${slug}\` with Claude Opus @ effort=high as the orchestrator.`,
+    "opusMedium": (slug) =>
+      `Please start the next session of \`${slug}\` with Claude Opus @ effort=medium as the orchestrator.`,
+    "sonnetMedium": (slug) =>
+      `Please start the next session of \`${slug}\` with Claude Sonnet @ effort=medium as the orchestrator.`,
+    "sonnetLow": (slug) =>
+      `Please start the next session of \`${slug}\` with Claude Sonnet @ effort=low as the orchestrator.`,
+  };
+
+  const presetLabels = {
+    "default": "default start command",
+    "maxoutClaude": "maxout Claude",
+    "maxoutCodex": "maxout Codex",
+    "opusHigh": "Opus @ effort=high",
+    "opusMedium": "Opus @ effort=medium",
+    "sonnetMedium": "Sonnet @ effort=medium",
+    "sonnetLow": "Sonnet @ effort=low",
+  };
+
+  for (const [key, builder] of Object.entries(startCommandPresets)) {
+    context.subscriptions.push(
+      vscode.commands.registerCommand(
+        `dabblerSessionSets.copyStartCommand.${key}`,
+        async (item) => {
+          if (!item || !item.set) return;
+          await copy(builder(item.set.name), presetLabels[key]);
+        },
+      ),
+    );
+  }
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("dabblerSessionSets.copySlug", async (item) => {
+      if (!item || !item.set) return;
+      await copy(item.set.name, "slug");
+    }),
   );
 }
 

@@ -17,6 +17,23 @@ auto-refreshes whenever a session is logged or completed.
 
 - **Click a session set** → opens its `spec.md`.
 - **Right-click → Open Activity Log** / **Open Change Log** / **Reveal Folder**.
+- **Right-click → Copy: Start next session …** — places a templated
+  start prompt on the clipboard. Seven presets, covering the common
+  orchestrator / effort combinations:
+  - default (defers to `ai-assignment.md`)
+  - maxout Claude (Opus 4.7 @ effort=max)
+  - maxout Codex (GPT-5.4 @ effort=high)
+  - Opus @ effort=high
+  - Opus @ effort=medium
+  - Sonnet @ effort=medium
+  - Sonnet @ effort=low
+
+  Paste the result into Claude Code (or Codex / Gemini) chat to kick
+  off the session. Only shown for in-flight and not-started sets — done
+  sets do not have a "next session". The status-bar shows a brief
+  confirmation (`Copied: <preset>`) when a copy succeeds.
+- **Right-click → Copy: Slug only** — places just the bare slug on the
+  clipboard, for ad-hoc references.
 - **Title-bar refresh button** → manual re-scan (useful if you suspect a
   filesystem watcher missed an update).
 
