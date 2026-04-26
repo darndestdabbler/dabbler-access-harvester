@@ -299,6 +299,20 @@ the human before proceeding.
   "Persist Routed Output To Disk Before Any Display Or Logging Side
   Effects" for the failure case (`vba-spec-study` Session 3 lost a
   $1.29 Opus call to a `cp1252`-driven `print()` crash).
+- **Run each parallel session set in its own per-set git worktree.**
+  When multiple session sets run in parallel, create a
+  `session-set/<slug>` branch off main and a worktree at
+  `../<repo>-<slug>` for each set. All sessions of that set work
+  inside the worktree; the last session merges `origin/main` into the
+  session-set branch (resolving conflicts), then merges the
+  session-set branch into main and pushes. `router-metrics.jsonl` and
+  `samples/NorthwindDevEdition.accdb` are the predictable merge-noise
+  files — expect one reconciliation commit per completed set. Confirmed
+  in two contexts: initial `vba-lexical-and-expression-grammar` +
+  `access-metadata-extraction` parallel run (first hit), and
+  `vba-lexical-and-expression-grammar` Session 4 merge (second
+  confirmation). Full action sequence in `lessons-learned.md` →
+  "Run Parallel Session Sets In Per-Set Git Worktrees".
 
 ### Token-Window Budget Overrides
 
