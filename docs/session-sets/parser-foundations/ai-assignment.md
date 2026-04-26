@@ -52,7 +52,16 @@ This session is primarily a mechanical comparison and documentation task. The si
 | 5 | Generate change log for session commits | `route(task_type="summarization", max_tier=1)` |
 
 ### Actuals
-*(to be filled)*
+
+- Orchestrator used: Claude Sonnet 4.6 @ effort=medium (in-conversation).
+- Routed cost: ~$0.25 (3 verification rounds at gpt-5-4 + next-orc rec).
+- Deviations: (1) `schema-validation` task type not yet in router-config.yaml (scheduled for vba-parser-session-set-generator child set #4); (2) Sonnet orchestrator = Sonnet routing target → in-conversation convention per project-guidance.md applied. Schema reconciliation done in-conversation. (3) Verification required 3 rounds: round 1 found 3 real issues (DeclareFunction/DeclareSub gap, provenance shape description, root-level mapping missing). Round 2 fixed D19 summary row. Round 3 returned bare 'ISSUES_FOUND' with no issues listed (ambiguous/malformed response at max retry; logged as deferred).
+- Notes for next-session calibration: Session 3 is purely mechanical (csproj, sln, .g4 placeholder). Router recommends Claude Haiku 4.5 @ effort=low as the cheapest capable orchestrator.
+
+**Next session orchestrator recommendation (Session 3):**
+Claude Haiku 4.5 @ effort=low
+
+**Rationale:** Session 3's scope is limited to mechanical file system and project file manipulations, which do not require the advanced reasoning of a mid-tier model. A low-cost, high-speed model is sufficient and the most cost-effective choice for these well-defined, command-line driven tasks.
 
 ---
 

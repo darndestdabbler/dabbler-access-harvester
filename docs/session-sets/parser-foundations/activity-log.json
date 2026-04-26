@@ -115,6 +115,110 @@
           "costUsd": 0.00171
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/read-inputs",
+      "dateTime": "2026-04-26T01:30:39.043819+00:00",
+      "description": "Read v0 parser schema (harvester-schema.v0.json) and all three tier output schemas from tmp/run-output/AccessMetaData/MiniComplex/{raw,kb,ir}/. Reviewed samples: Queries, Tables, Forms, Modules.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/schema-reconciliation",
+      "dateTime": "2026-04-26T01:30:39.043819+00:00",
+      "description": "Schema reconciliation performed in-conversation by Sonnet orchestrator. Deviation: schema-validation task type not yet defined in router-config.yaml (scheduled for vba-parser-session-set-generator child set #4); Sonnet orchestrator = Sonnet routing target (in-conversation convention per project-guidance.md). 20 named differences enumerated; 1 outright gap fixed (v0-G1: missing isArray on parameter).",
+      "status": "deviation-in-conversation",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/land-delta-doc",
+      "dateTime": "2026-04-26T01:30:39.044819+00:00",
+      "description": "Created docs/schema/v0-vs-tiers.md with 20 delta entries and summary table. Applied v0-G1 fix: added isArray boolean to $defs/parameter in harvester-schema.v0.json.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-26T01:30:39.045522+00:00",
+      "description": "dotnet build: SUCCEEDED 0 errors. dotnet test: PASSED 95/95.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/verify",
+      "dateTime": "2026-04-26T01:32:52.251879+00:00",
+      "description": "session-verification round 1 via route(session-verification, gpt-5-4). Model: gpt-5-4. Cost: $0.1189.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11463,
+          "outputTokens": 6015,
+          "costUsd": 0.1188825
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/verify-round2",
+      "dateTime": "2026-04-26T01:35:44.755872+00:00",
+      "description": "session-verification round 2 after fixing 3 issues. Model: gpt-5-4. Cost: $0.0753.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 10480,
+          "outputTokens": 3274,
+          "costUsd": 0.07531
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify-round3",
+      "dateTime": "2026-04-26T01:36:40.920772+00:00",
+      "description": "session-verification round 3 after fixing D19 summary row (provenance shape). Model: gpt-5-4. Cost: $0.0570.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 10340,
+          "outputTokens": 2079,
+          "costUsd": 0.057035
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T01:38:01.491581+00:00",
+      "description": "Routed analysis for next-session orchestrator recommendation. Model: gemini-pro. Cost: $0.0015.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 518,
+          "outputTokens": 90,
+          "costUsd": 0.0015475000000000003
+        }
+      ]
     }
   ]
 }
