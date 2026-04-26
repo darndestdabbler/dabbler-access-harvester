@@ -356,6 +356,11 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Run Parallel Session Sets In Per-Set Git Worktrees, Not On A Shared Working Tree
 
+- **Promoted to `project-guidance.md` → Conventions → Workflow
+  Expectations** on 2026-04-26 (after `vba-lexical-and-expression-grammar`
+  Session 4 merge, second-context confirmation). Retained here as the
+  action-detail reference for the full step sequence; the rule itself is
+  now a Convention.
 - **Context:** First hit on 2026-04-26 running
   `vba-lexical-and-expression-grammar` and `access-metadata-extraction` in
   parallel per the `project-guidance.md` -> Token-Window Budget Overrides
