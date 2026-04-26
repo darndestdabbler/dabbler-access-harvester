@@ -1,0 +1,19 @@
+## Session `access-type-library-registry` (Phase 4.5, Tree Row #11a) Complete
+
+The `access-type-library-registry` session set, comprising two phases of synthesis, hardening, and verification, is now complete. This work establishes the `ITypeLibraryRegistry` contract and its `TypeLibraryRegistry` curated implementation, providing a canonical source for Access, DAO, and Office COM type metadata critical for subsequent parser and resolver operations. The registry defines 24 COM types with 521 direct members and a composed data-bound surface, extensively validated through hermetic unit tests and multiple rounds of cross-provider verification against gpt-5-4.
+
+### Outcomes
+
+The initial synthesis (Session 1, commit `93d2aa8`) delivered the core contract and implementation, passing three rounds of `gpt-5-4` verification with all Critical/Major issues resolved in-place. Session 2 focused on tightening and further verification. It introduced an exhaustive `ExpectedDirectMembers` test catalog to assert per-type and per-member `Name`, `Kind`, `ReturnType`, and `IsDefault` properties. Return type identifiers were populated for collection-valued members across DAO and Office, and a stale Access banner comment was refreshed. Subsequent rounds eliminated the fabricated `Access.DataBoundControl` type, flattening its members into a private helper composed into `TextBox`, `ComboBox`, and `ListBox`. The registry's internal `Members` and `_types` collections were wrapped in `ReadOnlyDictionary` to prevent external mutation. The final round refined `DataBoundControlMembers` to correctly set `IsDefault=true` for the `Value` member on data-bound subtypes, tightened `ValidateRegistryAtConstruction` with a same-type-direct-default invariant, and purged stale `Access.DataBoundControl` references from comments and XML documentation. The final build yielded 0 errors, with 275 pre-existing CA1416 warnings (unrelated to this set) and `dotnet test` showing 445 passed, 2 skipped, and 0 failed.
+
+### Verification
+
+Verification was performed primarily via `gpt-5-4` through three cross-provider rounds in Session 1 and an additional three rounds in Session 2. Session 1 addressed Critical/Major findings in-place. Session 2's verification focused on detail refinement: Round 1 identified and fixed missing `ExpectedDirectMembers` catalog entries, unpopulated return-type identifiers on collection-valued members, and a stale Access banner. Round 2 addressed the erroneous `Access.DataBoundControl` fabrication and the mutable dictionary exposure. Round 3, applied in-place after retry limits, corrected `IsDefault` storage for data-bound `Value` members, hardened construction invariants, and cleaned up residual `Access.DataBoundControl` references. All verification findings were resolved, leading to a robust and accurate type library registry.
+
+### Routing actuals
+
+Session 2 incurred approximately $0.52 in `gpt-5-4` routing costs for three verification calls. These calls specifically covered the discovery and resolution of issues related to the `ExpectedDirectMembers` catalog, collection-valued member return types, the `Access.DataBoundControl` fabrication, mutable internal state, `IsDefault` storage for data-bound types, and comment/documentation cleanup. No separate analysis, summarization, or architectural calls were made during Session 2.
+
+## Status
+
+This set is complete. Its completion unblocks the conceptual `access-resolver-symbol-table-integration` (#11b). However, #11b also requires `resolver-default-members-and-inference` (#9), which has not started, so no new work in the DAG is directly unblocked by this completion alone. The currently startable child sets are `vba-statement-and-module-grammar` (#4) and `access-resolver-symbol-table-integration` once #9 is complete.

@@ -148,12 +148,17 @@ public sealed record TypeInfo
     /// Canonical-case name of the default member, or <c>null</c> if the
     /// type has no default member declared at this level. The named
     /// member may live in <see cref="Members"/> directly OR be inherited
-    /// from a base type via <see cref="BaseTypeName"/> — for example
-    /// <c>Access.TextBox</c> declares <c>DefaultMemberName="Value"</c>
-    /// while the actual <c>Value</c> property record lives on
-    /// <c>Access.DataBoundControl</c>. The registry validates at
-    /// construction time that every declared default-member name is
-    /// reachable in the inheritance chain.
+    /// from a base type via <see cref="BaseTypeName"/>. For example,
+    /// <c>DAO.Recordset</c> declares <c>DefaultMemberName="Fields"</c>
+    /// and the <c>Fields</c> property record lives on the same type;
+    /// inheritance-based defaults are also supported. When the named
+    /// member is declared directly on the same type, the registry
+    /// requires its <see cref="MemberInfo.IsDefault"/> flag to be
+    /// <c>true</c> so callers reading <see cref="Members"/> directly see
+    /// consistent default-member metadata. The registry validates this
+    /// invariant plus default-member-name reachability at construction
+    /// time and throws <see cref="InvalidOperationException"/> on
+    /// violations.
     /// </summary>
     public string? DefaultMemberName { get; init; }
 
