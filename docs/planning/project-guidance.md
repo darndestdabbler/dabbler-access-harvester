@@ -269,6 +269,46 @@ the human before proceeding.
   parser-grammar design, novel test-case authoring, plan
   generation) earn Opus.
 
+### Token-Window Budget Overrides
+
+The human has recurring token allotments across three orchestrator providers with
+different billing models. When approaching the end of a window, the human can say
+**"maxout Claude"**, **"maxout Codex"**, or similar to override the `ai-assignment.md`
+recommendations for that session.
+
+**Billing model summary (informs what "maxout" means per provider):**
+- **Anthropic (Claude Max):** Orchestrator use and routed API calls share the same
+  allotment. Burning one burns the other.
+- **GitHub Copilot (Codex):** Orchestrator use and routed API calls share the same
+  allotment (same pattern as Anthropic).
+- **Gemini:** API calls are per-call billed and separate from the Gemini Pro daily
+  allotment. Daily allotment visibility is unavailable. No "maxout Gemini" phrase
+  is defined — aggressive routing to Gemini drives up per-call cost without burning
+  a free bucket.
+
+**Phrase definitions:**
+
+- **"maxout Claude"** — Use Opus 4.7 as orchestrator at effort=max. Drop `max_tier`
+  caps on routed calls; push `complexity_hint` up so everything eligible routes to
+  Opus/max. Cross-provider `session-verification` still goes to GPT-5.4 (mandatory,
+  non-negotiable) and will draw from the Copilot allotment — a useful side effect
+  when both windows need burning simultaneously.
+
+- **"maxout Codex"** — Use GPT-5.5 or GPT-5.4 as orchestrator at
+  reasoning_effort=high. Push routed calls to GPT-5.4/high. Cross-provider
+  `session-verification` goes to Opus and draws from the Anthropic allotment.
+
+**Hard constraint that survives any maxout:** `session-verification` is always
+cross-provider. "Maxout" upgrades the tier and removes cost-saving caps; it never
+eliminates the cross-provider verification step or routes verification back to the
+orchestrator's own provider.
+
+**Parallel-session window burning:** Running Claude Code and Codex in parallel on
+independent branches (e.g., `vba-lexical-and-expression-grammar` + `access-metadata-extraction`)
+naturally consumes both allotments simultaneously. "maxout Claude" on one branch and
+"maxout Codex" on the other is the most efficient way to drain both windows when
+both are running low.
+
 ### Cross-Repo Coordination
 
 - This repo borrows code from `../AccessExporterTemp1`. That sibling
