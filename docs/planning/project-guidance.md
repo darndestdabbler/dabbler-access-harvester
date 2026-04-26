@@ -268,6 +268,37 @@ the human before proceeding.
   false-VERIFIED risk is mitigated. Synthesis tasks (architecture,
   parser-grammar design, novel test-case authoring, plan
   generation) earn Opus.
+- **Use Opus as the orchestrator (and author in-conversation) for
+  synthesis-document work above ~3K input tokens.**
+  `route(task_type="architecture", complexity_hint=80)` to Opus at
+  `effort:max` with adaptive thinking is unreliable above ~3K input
+  tokens — the call routinely times out at the provider's 600s
+  boundary. Two reliable alternatives, in order of preference:
+  (a) use Opus as the orchestrator and handle the synthesis
+  in-conversation per the "When the orchestrator's model matches the
+  routing target..." Convention above; (b) split the synthesis into
+  focused subsections across multiple shorter `route()` calls under
+  ~1500 input tokens each. Do **not** use `task_type="planning"` as a
+  workaround — its prompt template frames the task as "plan how to do
+  X" and produces meta-plans, not documents. Confirmed in two contexts
+  on 2026-04-25: `vba-parser-session-set-generator` Session 4 and
+  `vba-spec-study` Session 3. The companion guidance "**notify the
+  human on `route()` timeout**" (see `lessons-learned.md` for action
+  details) handles in-flight escalation: first timeout retries once,
+  second timeout stops and notifies. Action-detail reference for
+  this convention is preserved in `lessons-learned.md` →
+  "Opus At `effort:max` + Adaptive Thinking Timeouts...".
+- **Persist routed output to disk before any display or logging side
+  effects.** `route()` returns `result.content` strings that may
+  contain Unicode characters Windows `cp1252` cannot encode. Calling
+  `print(result.content)` before writing the content to disk can crash
+  the script and lose paid output. The required pattern is to write
+  the content to a file first
+  (`open(path, "w", encoding="utf-8")`) and only then print or log.
+  See `lessons-learned.md` →
+  "Persist Routed Output To Disk Before Any Display Or Logging Side
+  Effects" for the failure case (`vba-spec-study` Session 3 lost a
+  $1.29 Opus call to a `cp1252`-driven `print()` crash).
 
 ### Token-Window Budget Overrides
 
