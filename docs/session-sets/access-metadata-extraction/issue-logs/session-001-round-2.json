@@ -1,0 +1,29 @@
+[
+  {
+    "id": "session-1-round-2-major-1",
+    "severity": "Major",
+    "summary": "AccessControl.Properties docstring claimed raw fidelity that the schema's own promotion + decoding rules contradict",
+    "location": "AccessHarvester.Access/AccessObjectCommon.cs (AccessControl.Properties)",
+    "verifier_finding": "Name is now lifted out and PropertyDecoder rewrites NotDefault values in place; saying Properties is 'exactly as Access wrote it' and round-trips faithfully is no longer true.",
+    "status": "fixed",
+    "fix": "Rewrote AccessControl.Properties documentation to enumerate the two sanctioned mutations: (1) promoted exact-value keys (Name on AccessControl; RecordSource/Filter/OrderBy on form/report roots) are removed when non-null; (2) PropertyDecoder rewrites NotDefault values in place and surfaces the affected keys in NonDefaultProperties. Decoded-lift fields (DefaultView) are explicitly noted as keeping their raw numeric code in Properties."
+  },
+  {
+    "id": "session-1-round-2-minor-1",
+    "severity": "Minor",
+    "summary": "AccessControl.VbaCode was redundant given the acyclic-by-reference contract",
+    "location": "AccessHarvester.Access/AccessObjectCommon.cs (AccessControl.VbaCode)",
+    "verifier_finding": "FormMetadata and ReportMetadata already carry top-level VbaCode. The acyclic-by-reference contract forbids inlining a form/report root as a Children node, so AccessControl.VbaCode has no valid population point in this schema.",
+    "status": "fixed",
+    "fix": "Removed VbaCode from AccessControl. VbaCode now lives only on the form/report root types. Aligns with the acyclic-by-reference contract — no schema path produces an AccessControl node that would carry VBA."
+  },
+  {
+    "id": "session-1-round-2-nitpick-1",
+    "severity": "Nitpick",
+    "summary": "GeometryInches remarks misstated where the unit is encoded",
+    "location": "AccessHarvester.Access/AccessObjectCommon.cs (GeometryInches type-level remarks)",
+    "verifier_finding": "The remarks said 'unit is in the field name', but the unit is in the containing record/field name (GeometryIn / GeometryInches), not in the X/Y/W/H field names themselves.",
+    "status": "fixed",
+    "fix": "Reworded the remarks: the unit is encoded in the containing record/field name (GeometryIn / GeometryInches), and the coordinate fields stay short."
+  }
+]

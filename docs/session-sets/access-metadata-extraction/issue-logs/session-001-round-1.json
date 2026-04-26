@@ -1,0 +1,29 @@
+[
+  {
+    "id": "session-1-round-1-major-1",
+    "severity": "Major",
+    "summary": "AccessControl missing typed Name field",
+    "location": "AccessHarvester.Access/AccessObjectCommon.cs (AccessControl)",
+    "verifier_finding": "Phase 4.1/4.2 explicitly calls for every control with type, name, properties. AccessControl exposes Type and Properties, but not a typed Name, so control identity is buried in the raw bag.",
+    "status": "fixed",
+    "fix": "Added `string? Name { get; init; }` to AccessControl with documentation noting nullability for anonymous Begin wrappers and the extractor double-emit rule. Updated remarks to acknowledge Name in the nullability statement."
+  },
+  {
+    "id": "session-1-round-1-major-2",
+    "severity": "Major",
+    "summary": "DefaultView raw-vs-decoded contract was contradictory",
+    "location": "AccessHarvester.Access/FormMetadata.cs and ReportMetadata.cs (remarks + DefaultView field doc)",
+    "verifier_finding": "Remarks said promoted keys should be removed from Properties, but the DefaultView doc said consumers can still read Properties[\"DefaultView\"]. DefaultView is a decoded label, not the raw value, so stripping the raw numeric code would reduce round-trip fidelity.",
+    "status": "fixed",
+    "fix": "Split the promotion rule into two cases: exact-value lifts (RecordSource, Filter, OrderBy) ARE removed from Properties; decoded lifts (DefaultView) are NOT removed — the raw numeric code is preserved alongside the decoded label. Documented in the type-level remarks of FormMetadata; ReportMetadata cross-references the same rule. Removed the contradictory consumer-facing sentence from the DefaultView field docs."
+  },
+  {
+    "id": "session-1-round-1-minor-1",
+    "severity": "Minor",
+    "summary": "Subform/subreport nesting docs were inconsistent across files",
+    "location": "AccessHarvester.Access/AccessObjectCommon.cs (Children) + FormMetadata.cs + ReportMetadata.cs",
+    "verifier_finding": "AccessControl.Children docs said children can include 'a subform/subreport's contained design tree', but FormMetadata/ReportMetadata said subforms/subreports are extracted separately and not nested inline.",
+    "status": "fixed",
+    "fix": "Made AccessControl.Children the single source of truth: contained form/report tree is NOT inlined; subform/subreport nodes reference their target by SourceObject and Children should be null/empty on those nodes. FormMetadata.Children and ReportMetadata.Children docs now cross-reference this single-source contract instead of restating their own contradictory version."
+  }
+]
