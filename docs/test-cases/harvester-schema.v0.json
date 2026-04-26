@@ -251,6 +251,7 @@
         "byRef": { "type": "boolean" },
         "optional": { "type": "boolean" },
         "paramArray": { "type": "boolean" },
+        "isArray": { "type": "boolean", "description": "True when the parameter is declared as an array type (e.g., `myArr() As String`). Distinct from paramArray (which is the ParamArray keyword)." },
         "defaultValue": { "type": "string" },
         "derivedFrom": {
           "type": "string",

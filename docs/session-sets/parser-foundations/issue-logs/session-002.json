@@ -1,0 +1,37 @@
+[
+  {
+    "round": 1,
+    "description": "Missing DeclareFunction/DeclareSub procedure-kind delta in s2.2 and summary table",
+    "severity": "Major",
+    "status": "fixed",
+    "fix": "Added DeclareFunction/DeclareSub to s2.2 enum table, gap table as v0-G5, and summary D3"
+  },
+  {
+    "round": 1,
+    "description": "s9 mis-described v0 provenance shape as tagged-object; v0 actually uses resolvedTarget: object|null with resolutionStatus carrying unresolved signal",
+    "severity": "Minor",
+    "status": "fixed",
+    "fix": "Rewrote s9 to correctly describe v0 shape; scoped tagged-object convention to ir enricher only"
+  },
+  {
+    "round": 1,
+    "description": "Root-level entity field mapping missing - no explicit mapping of tier root fields to v0 envelope fields",
+    "severity": "Minor",
+    "status": "fixed",
+    "fix": "Added s10 with mapping tables for Module/Class, Form/Report, and Query; added D21 to summary"
+  },
+  {
+    "round": 2,
+    "description": "D19 summary row still stated v0 column as tagged-object shape contradicting corrected s9",
+    "severity": "Minor",
+    "status": "fixed",
+    "fix": "Updated D19 summary row to reflect actual v0 shape (resolvedTarget: object|null)"
+  },
+  {
+    "round": 3,
+    "description": "Round 3 verifier returned bare 'ISSUES_FOUND' verdict with no issues listed (ambiguous/malformed response). Max retries reached.",
+    "severity": "Minor",
+    "status": "deferred",
+    "fix": "No actionable issue identified; bare verdict with no listed findings treated as no new issues at max retry"
+  }
+]
