@@ -1,0 +1,145 @@
+{
+  "Forms": [
+    {
+      "Name": "frmPermitApplication",
+      "RecordSource": "tblPermits",
+      "Children": [
+        {
+          "Type": "Section",
+          "Name": "Detail",
+          "Children": [
+            {
+              "Type": "TextBox",
+              "Name": "txtPermitID",
+              "Label": {
+                "Source": "attached",
+                "Text": "Permit ID"
+              },
+              "Properties": {
+                "ControlSource": "PermitID"
+              }
+            },
+            {
+              "Type": "Label",
+              "Name": "lblStatus",
+              "Properties": {
+                "Caption": "Status:"
+              }
+            },
+            {
+              "Type": "Subform",
+              "Name": "sfrmInspections",
+              "Properties": {
+                "SourceObject": "sfrmInspections"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "Name": "sfrmInspections",
+      "RecordSource": "tblInspections"
+    }
+  ],
+  "Queries": [
+    {
+      "Name": "qryApplicantBalances",
+      "QueryType": "Select",
+      "Sql": "SELECT ApplicantID, OutstandingBalance FROM tblApplicants;"
+    }
+  ],
+  "Tables": [
+    {
+      "Name": "tblApplicants",
+      "Fields": [
+        {
+          "Name": "ApplicantID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "OutstandingBalance",
+          "DataType": "Currency"
+        }
+      ],
+      "PrimaryKey": [
+        "ApplicantID"
+      ]
+    },
+    {
+      "Name": "tblPermits",
+      "Fields": [
+        {
+          "Name": "PermitID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "ApplicantID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "LastReviewedBy",
+          "DataType": "Text",
+          "Size": 100
+        },
+        {
+          "Name": "LastReviewedDate",
+          "DataType": "DateTime"
+        },
+        {
+          "Name": "Status",
+          "DataType": "Text",
+          "Size": 100
+        }
+      ],
+      "PrimaryKey": [
+        "PermitID"
+      ]
+    },
+    {
+      "Name": "tblInspections",
+      "Fields": [
+        {
+          "Name": "InspectionID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "PermitID",
+          "DataType": "Long"
+        },
+        {
+          "Name": "Result",
+          "DataType": "Text",
+          "Size": 50
+        }
+      ],
+      "PrimaryKey": [
+        "InspectionID"
+      ]
+    }
+  ],
+  "Relationships": [
+    {
+      "Name": "relApplicantPermits",
+      "ParentTable": "tblApplicants",
+      "ChildTable": "tblPermits",
+      "Fields": [
+        {
+          "ParentField": "ApplicantID",
+          "ChildField": "ApplicantID"
+        }
+      ]
+    },
+    {
+      "Name": "relPermitInspections",
+      "ParentTable": "tblPermits",
+      "ChildTable": "tblInspections",
+      "Fields": [
+        {
+          "ParentField": "PermitID",
+          "ChildField": "PermitID"
+        }
+      ]
+    }
+  ]
+}

@@ -1,13 +1,13 @@
 {
   "sessionSetName": "access-metadata-extraction",
-  "createdDate": "2026-04-26T03:31:58.818890+00:00",
+  "createdDate": "2026-04-25T23:31:58.81889-04:00",
   "totalSessions": 6,
   "entries": [
     {
       "sessionNumber": 1,
       "stepNumber": 1,
       "stepKey": "session-1/author-ai-assignment",
-      "dateTime": "2026-04-26T03:32:15.171351+00:00",
+      "dateTime": "2026-04-25T23:32:15.171351-04:00",
       "description": "Authored ai-assignment.md via route(task_type='analysis') using gemini-pro.",
       "status": "complete",
       "routedApiCalls": [
@@ -24,7 +24,7 @@
       "sessionNumber": 1,
       "stepNumber": 2,
       "stepKey": "session-1/form-report-schema-architecture",
-      "dateTime": "2026-04-26T03:51:29.991830+00:00",
+      "dateTime": "2026-04-25T23:51:29.99183-04:00",
       "description": "Routed architecture synthesis for FormMetadata/ReportMetadata via opus.",
       "status": "complete",
       "routedApiCalls": [
@@ -48,7 +48,7 @@
       "sessionNumber": 1,
       "stepNumber": 4,
       "stepKey": "session-1/cross-provider-verification",
-      "dateTime": "2026-04-26T03:58:02.544673+00:00",
+      "dateTime": "2026-04-25T23:58:02.544673-04:00",
       "description": "Cross-provider verification via gpt-5-4.",
       "status": "complete",
       "routedApiCalls": [
@@ -65,7 +65,7 @@
       "sessionNumber": 1,
       "stepNumber": 5,
       "stepKey": "session-1/cross-provider-verification-round-2",
-      "dateTime": "2026-04-26T04:04:14.821623+00:00",
+      "dateTime": "2026-04-26T00:04:14.821623-04:00",
       "description": "Round-2 cross-provider verification via gpt-5-4 after applying round-1 fixes.",
       "status": "complete",
       "routedApiCalls": [
@@ -82,7 +82,7 @@
       "sessionNumber": 1,
       "stepNumber": 2,
       "stepKey": "session-1/orchestrator-handoff-to-claude",
-      "dateTime": "2026-04-26T04:13:11.821331+00:00",
+      "dateTime": "2026-04-26T00:13:11.821331-04:00",
       "description": "Orchestrator handed off mid-session from Codex to Claude Opus 4.7 per the 'maxout Claude' convention (project-guidance.md -> Token-Window Budget Overrides) after Codex's prior route(architecture) synthesis produced design-doc orphans (session-1-form-report-schema-architecture.md / .verification.md) that did not convert into .cs files. Claude authored the schema in-conversation per the 'Opus orchestrator handles synthesis in-conversation' Convention; no additional API call was made for the synthesis itself.",
       "status": "complete",
       "routedApiCalls": []
@@ -91,7 +91,7 @@
       "sessionNumber": 1,
       "stepNumber": 3,
       "stepKey": "session-1/author-schema-types",
-      "dateTime": "2026-04-26T04:13:11.821331+00:00",
+      "dateTime": "2026-04-26T00:13:11.821331-04:00",
       "description": "Authored AccessHarvester.Access/{AccessObjectCommon,FormMetadata,ReportMetadata}.cs in-conversation. Created AccessHarvester.Access.csproj and added the project to AccessHarvester.sln.",
       "status": "complete",
       "routedApiCalls": []
@@ -100,7 +100,7 @@
       "sessionNumber": 1,
       "stepNumber": 3,
       "stepKey": "session-1/build-and-test",
-      "dateTime": "2026-04-26T04:13:11.822329+00:00",
+      "dateTime": "2026-04-26T00:13:11.822329-04:00",
       "description": "dotnet build AccessHarvester.Access/ -> 0 errors, 0 warnings. dotnet test tests/AccessHarvester.Tests/ -> 95 passed, 0 failed, 0 skipped. Full-solution build fails in AccessHarvester.Vba.Grammar due to a parallel session set's in-progress edits to Vba.g4; out of scope for this Session 1.",
       "status": "complete",
       "routedApiCalls": []
@@ -109,7 +109,7 @@
       "sessionNumber": 1,
       "stepNumber": 7,
       "stepKey": "session-1/next-orchestrator-recommendation",
-      "dateTime": "2026-04-26T04:13:24.473052+00:00",
+      "dateTime": "2026-04-26T00:13:24.473052-04:00",
       "description": "Routed analysis recommending orchestrator for Session 2 via gemini-pro.",
       "status": "complete",
       "routedApiCalls": [
@@ -126,7 +126,7 @@
       "sessionNumber": 2,
       "stepNumber": 1,
       "stepKey": "session-2/cross-provider-verification",
-      "dateTime": "2026-04-26T09:29:18.658647+00:00",
+      "dateTime": "2026-04-26T05:29:18.658647-04:00",
       "description": "Cross-provider verification via gpt-5-4.",
       "status": "complete",
       "routedApiCalls": [
@@ -143,7 +143,7 @@
       "sessionNumber": 2,
       "stepNumber": 2,
       "stepKey": "session-2/cross-provider-verification-round-2",
-      "dateTime": "2026-04-26T09:33:29.447475+00:00",
+      "dateTime": "2026-04-26T05:33:29.447475-04:00",
       "description": "Round-2 cross-provider verification via gpt-5-4 after applying round-1 fixes.",
       "status": "complete",
       "routedApiCalls": [
@@ -160,7 +160,7 @@
       "sessionNumber": 2,
       "stepNumber": 3,
       "stepKey": "session-2/cross-provider-verification-round-3",
-      "dateTime": "2026-04-26T09:35:09.949064+00:00",
+      "dateTime": "2026-04-26T05:35:09.949064-04:00",
       "description": "Round-3 cross-provider verification via gpt-5-4 after type-level doc tightening.",
       "status": "complete",
       "routedApiCalls": [
@@ -177,7 +177,7 @@
       "sessionNumber": 2,
       "stepNumber": 4,
       "stepKey": "session-2/next-orchestrator-recommendation",
-      "dateTime": "2026-04-26T09:36:29.214841+00:00",
+      "dateTime": "2026-04-26T05:36:29.214841-04:00",
       "description": "Routed analysis recommending orchestrator for Session 3 via gemini-pro.",
       "status": "complete",
       "routedApiCalls": [
@@ -194,7 +194,7 @@
       "sessionNumber": 2,
       "stepNumber": 0,
       "stepKey": "session-2/author-schema-and-extractors",
-      "dateTime": "2026-04-26T09:37:22.510467+00:00",
+      "dateTime": "2026-04-26T05:37:22.510467-04:00",
       "description": "Authored AccessHarvester.Access/{QueryMetadata,TableMetadata,RelationshipMetadata,QueryMetadataExtractor,TableMetadataExtractor,RelationshipMetadataExtractor}.cs in-conversation per the 'Opus orchestrator handles synthesis in-conversation' Convention. Added 31 hermetic xUnit tests (later 32 after the round-1 IsUnique/IsInherited test). Wired AccessHarvester.Access project reference into AccessHarvester.Tests.csproj.",
       "status": "complete",
       "routedApiCalls": []
@@ -203,10 +203,284 @@
       "sessionNumber": 2,
       "stepNumber": 0,
       "stepKey": "session-2/build-and-test",
-      "dateTime": "2026-04-26T09:37:22.510467+00:00",
-      "description": "dotnet build AccessHarvester.Access -> 0 errors, 0 warnings. dotnet test tests/AccessHarvester.Tests -> 127 passed, 0 failed, 0 skipped. (95 prior + 32 new for the three Extractor classes.) Build and test run sequentially per project-guidance.md. Full-solution build deferred \u2014 Vba.Grammar parallel-session state may still be in flight per Session 1's note; this session's deliverables build clean in isolation.",
+      "dateTime": "2026-04-26T05:37:22.510467-04:00",
+      "description": "dotnet build AccessHarvester.Access -> 0 errors, 0 warnings. dotnet test tests/AccessHarvester.Tests -> 127 passed, 0 failed, 0 skipped. (95 prior + 32 new for the three Extractor classes.) Build and test run sequentially per project-guidance.md. Full-solution build deferred - Vba.Grammar parallel-session state may still be in flight per Session 1's note; this session's deliverables build clean in isolation.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/derive-fixture-manifests",
+      "dateTime": "2026-04-26T06:47:57.895282-04:00",
+      "description": "Routed test-generation manifest mapping for cases 01/02/03/09/10/11/12 via gemini-pro to pin the minimal Access objects each Session 3 fixture needed.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 5825,
+          "outputTokens": 1967,
+          "costUsd": 0.02695125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/author-metadata-fixtures",
+      "dateTime": "2026-04-26T06:47:57.895282-04:00",
+      "description": "Extended test-builder with report/subform support, corrected stale SyntheticDbs output paths, added the Session 3 metadata fixture builder + manifests, and generated seven .accdb fixtures with paired expected.json contracts.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-04-26T06:47:57.896282-04:00",
+      "description": "Ran python -m compileall test-builder, then dotnet build and dotnet test sequentially. Build succeeded with existing warnings; tests passed (42 grammar + 127 harvester).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/cross-provider-verification",
+      "dateTime": "2026-04-26T06:52:29.151081-04:00",
+      "description": "Cross-provider session verification via opus returned VERIFIED on round 1 for the fixture-builder changes and seven expected.json contracts.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 42624,
+          "outputTokens": 9214,
+          "costUsd": 1.33041
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T06:52:29.151081-04:00",
+      "description": "Routed analysis recommending google gemini-flash @ effort=low for Session 4 via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 430,
+          "outputTokens": 98,
+          "costUsd": 0.0015175
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/schema-validation-guidance",
+      "dateTime": "2026-04-26T11:30:23.348704+00:00",
+      "description": "Routed schema-validation guidance for the new snapshot harness via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "schema-validation",
+          "inputTokens": 285,
+          "outputTokens": 411,
+          "costUsd": 0.004466
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/author-snapshot-test",
+      "dateTime": "2026-04-26T11:31:20.000000+00:00",
+      "description": "Added SyntheticFixtureSnapshotTests.cs to validate all committed expected.json fixture pairs against their .accdb siblings with category-by-category snapshot comparison.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/build-and-test",
+      "dateTime": "2026-04-26T11:32:20.000000+00:00",
+      "description": "dotnet build and dotnet test passed for AccessHarvester.Tests; 127 tests passed, 0 failed, 0 skipped.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/cross-provider-verification",
+      "dateTime": "2026-04-26T11:32:37.846083+00:00",
+      "description": "Cross-provider session verification via opus completed with no blocking issues; verifier noted the existing ResolveProjectRoot/AppContext.BaseDirectory coupling as a reminder, not a blocker.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 1801,
+          "outputTokens": 693,
+          "costUsd": 0.07899
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T11:33:17.570744+00:00",
+      "description": "Routed analysis recommending Opus for Session 5 via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 214,
+          "outputTokens": 140,
+          "costUsd": 0.001667
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 1,
+      "stepKey": "session-5/schema-validation-guidance",
+      "dateTime": "2026-04-26T11:49:39.604141+00:00",
+      "description": "Routed schema-validation guidance for query/table/relationship typed fixture wiring via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "schema-validation",
+          "inputTokens": 331,
+          "outputTokens": 1299,
+          "costUsd": 0.01340375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 2,
+      "stepKey": "session-5/author-metadata-extractor-integration-test",
+      "dateTime": "2026-04-26T11:49:39.605141+00:00",
+      "description": "Added SyntheticMetadataExtractorIntegrationTests.cs to run the real pipeline for committed synthetic fixture Q/T/R categories, feed IR JSON through typed metadata extractors, and compare the typed subset against expected.json contracts.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 3,
+      "stepKey": "session-5/build-and-test",
+      "dateTime": "2026-04-26T11:49:39.605724+00:00",
+      "description": "Ran targeted integration-test discovery, then dotnet build and dotnet test --no-build sequentially. Build succeeded with existing warnings; grammar tests passed 42/42; harvester tests passed 127 with 2 Access-COM integration skips.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 4,
+      "stepKey": "session-5/cross-provider-verification",
+      "dateTime": "2026-04-26T11:49:39.606446+00:00",
+      "description": "Cross-provider session verification via opus returned VERIFIED with one non-blocking vacuous-pass observation.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 13825,
+          "outputTokens": 3812,
+          "costUsd": 0.493275
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 5,
+      "stepKey": "session-5/cross-provider-verification-round-2",
+      "dateTime": "2026-04-26T11:49:39.606446+00:00",
+      "description": "Round-2 cross-provider verification via opus returned VERIFIED after adding the validatedFixtureCount guard.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 3853,
+          "outputTokens": 725,
+          "costUsd": 0.11217
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 6,
+      "stepKey": "session-5/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T11:49:39.606446+00:00",
+      "description": "Routed analysis recommending a low-cost anthropic claude-3-haiku final buffer session if Session 6 is started.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 358,
+          "outputTokens": 148,
+          "costUsd": 0.0019275
+        }
+      ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 1,
+      "stepKey": "session-6/build-and-test",
+      "dateTime": "2026-04-26T12:11:32.595106+00:00",
+      "description": "dotnet build -> 0 errors. dotnet test -> 127 passed, 2 skipped, 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 2,
+      "stepKey": "session-6/change-log-generation",
+      "dateTime": "2026-04-26T12:11:32.595543+00:00",
+      "description": "Generated change-log.md and next-set recommendation for access-symbol-table-and-types via route(summarization/analysis).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0001
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0019
+        }
+      ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 3,
+      "stepKey": "session-6/cross-provider-verification",
+      "dateTime": "2026-04-26T12:11:32.596536+00:00",
+      "description": "Cross-provider verification via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 547,
+          "outputTokens": 161,
+          "costUsd": 0.0037825
+        }
+      ]
     }
   ]
 }
