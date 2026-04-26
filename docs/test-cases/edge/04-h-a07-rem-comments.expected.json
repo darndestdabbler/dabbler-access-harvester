@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "04-h-a07-rem-comments.bas",
+      "module": "Module_RemCommentHazard",
+      "startLine": 8,
+      "startColumn": 1,
+      "endLine": 17,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Public Sub RemCommentExamples()\n    REM This is a comment at a statement position.\n    Dim x As Integer\n    Dim s As String\n\n    REM Another comment line.\n    x = 1 : REM This is a comment after a colon separator.\n\n    s = \"The word REM is not a comment inside a string literal.\"\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "RemCommentExamples",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": []
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "unknown",
+        "complexity": 1,
+        "linesOfCode": 5,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "assignment",
+            "location": {
+              "startLine": 14,
+              "startColumn": 5,
+              "endLine": 14,
+              "endColumn": 9
+            },
+            "summary": "Assignment statement followed by a REM comment on the same line after a colon."
+          },
+          {
+            "kind": "assignment",
+            "location": {
+              "startLine": 16,
+              "startColumn": 5,
+              "endLine": 16,
+              "endColumn": 69
+            },
+            "summary": "Assignment of a string literal containing 'REM', confirming it is not a comment trigger."
+          }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}

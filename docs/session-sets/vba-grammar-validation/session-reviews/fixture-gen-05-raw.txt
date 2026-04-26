@@ -1,0 +1,136 @@
+```vba
+'--------------------------------------------------------------------------------
+' Module: Module_OnErrorHazard
+' Source: 05-h-d04-on-error-goto-zero.bas
+' Hazard: H-D04 (On Error GoTo 0)
+'
+' Purpose:
+' Demonstrates the 'On Error GoTo 0' statement which deactivates the
+' current error handler. Also includes the other 'On Error' variants
+' for completeness.
+'--------------------------------------------------------------------------------
+Option Explicit
+
+Public Sub DemonstrateOnErrorVariants()
+    ' 1. Activate a handler
+    On Error GoTo ErrHandler
+    
+    ' 2. Error-prone code (for context)
+    Dim x As Integer
+    x = 1 / 0
+    
+    ' 3. Deactivate the handler
+    On Error GoTo 0
+    
+    ' 4. Code outside error-handling scope
+    x = 1
+    
+    ' Also show the third variant
+    On Error Resume Next
+    
+Exit Sub ' Prevent fall-through into handler
+
+ErrHandler:
+    ' 5. The handler label with a Resume statement
+    Resume Next
+End Sub
+```
+
+```json
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "05-h-d04-on-error-goto-zero.bas",
+      "module": "Module_OnErrorHazard",
+      "startLine": 13,
+      "startColumn": 1,
+      "endLine": 35,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Public Sub DemonstrateOnErrorVariants()\n    ' 1. Activate a handler\n    On Error GoTo ErrHandler\n    \n    ' 2. Error-prone code (for context)\n    Dim x As Integer\n    x = 1 / 0\n    \n    ' 3. Deactivate the handler\n    On Error GoTo 0\n    \n    ' 4. Code outside error-handling scope\n    x = 1\n    \n    ' Also show the third variant\n    On Error Resume Next\n    \nExit Sub ' Prevent fall-through into handler\n\nErrHandler:\n    ' 5. The handler label with a Resume statement\n    Resume Next\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "DemonstrateOnErrorVariants",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": []
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "pure",
+        "complexity": 1,
+        "linesOfCode": 10,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "errorHandler",
+            "location": {
+              "startLine": 15,
+              "startColumn": 5,
+              "endLine": 15,
+              "endColumn": 27
+            },
+            "summary": "Activates a labeled error handler"
+          },
+          {
+            "kind": "errorHandler",
+            "location": {
+              "startLine": 22,
+              "startColumn": 5,
+              "endLine": 22,
+              "endColumn": 20
+            },
+            "summary": "Deactivates the error handler using the '0' sentinel"
+          },
+          {
+            "kind": "errorHandler",
+            "location": {
+              "startLine": 28,
+              "startColumn": 5,
+              "endLine": 28,
+              "endColumn": 24
+            },
+            "summary": "Activates inline 'resume next' error handling"
+          },
+          {
+            "kind": "label",
+            "location": {
+              "startLine": 32,
+              "startColumn": 1,
+              "endLine": 32,
+              "endColumn": 11
+            },
+            "summary": "The error handler label"
+          },
+          {
+            "kind": "resumeStmt",
+            "location": {
+              "startLine": 34,
+              "startColumn": 5,
+              "endLine": 34,
+              "endColumn": 15
+            },
+            "summary": "The resume statement within the handler"
+          }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}
+```

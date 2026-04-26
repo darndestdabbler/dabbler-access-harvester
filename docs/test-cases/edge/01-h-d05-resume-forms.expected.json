@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "01-h-d05-resume-forms.bas",
+      "module": "Module_ResumeHazard",
+      "startLine": 12,
+      "startColumn": 1,
+      "endLine": 30,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Public Sub ResumeForms(resumeType As Integer)\n    On Error GoTo ErrorHandler\n\n    ' A statement that may raise an error\n    Debug.Print 1 / resumeType\n\nResumeTarget:\n    Exit Sub\n\nErrorHandler:\n    Select Case resumeType\n        Case 1\n            Resume\n        Case 2\n            Resume Next\n        Case 3\n            Resume ResumeTarget\n    End Select\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "ResumeForms",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          { "name": "resumeType", "type": "Integer", "byRef": true }
+        ]
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "unknown",
+        "complexity": 4,
+        "linesOfCode": 14,
+        "translatability": "manualReview"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "errorHandler",
+            "location": { "startLine": 13, "startColumn": 5, "endLine": 13, "endColumn": 30 },
+            "summary": "Activate On Error GoTo ErrorHandler"
+          },
+          {
+            "kind": "labelled",
+            "location": { "startLine": 18, "startColumn": 1, "endLine": 18, "endColumn": 13 },
+            "summary": "Label ResumeTarget: -- jump target for Resume <label>"
+          },
+          {
+            "kind": "labelled",
+            "location": { "startLine": 21, "startColumn": 1, "endLine": 21, "endColumn": 13 },
+            "summary": "Label ErrorHandler: -- error handler entry point"
+          },
+          {
+            "kind": "select",
+            "location": { "startLine": 22, "startColumn": 5, "endLine": 29, "endColumn": 15 },
+            "summary": "Select Case dispatching three Resume forms",
+            "details": {
+              "cases": [
+                { "value": "1", "body": "Resume" },
+                { "value": "2", "body": "Resume Next" },
+                { "value": "3", "body": "Resume ResumeTarget" }
+              ]
+            }
+          }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}

@@ -1,0 +1,186 @@
+{
+  "sessionSetName": "vba-grammar-validation",
+  "createdDate": "2026-04-26T21:14:00.028558+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-26T21:16:36.029766+00:00",
+      "description": "Authored ai-assignment.md via route(task_type='analysis')",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1819,
+          "outputTokens": 1795,
+          "costUsd": 0.020223750000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/fixture-h-d05",
+      "dateTime": "2026-04-26T21:19:34.977912+00:00",
+      "description": "Routed test-generation for h-d05: authored docs/test-cases/edge/01-h-d05-resume-forms.bas + docs/test-cases/edge/01-h-d05-resume-forms.expected.json",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 1304,
+          "outputTokens": 1089,
+          "costUsd": 0.012519999999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/fixture-h-d12",
+      "dateTime": "2026-04-26T21:20:20.309956+00:00",
+      "description": "Routed test-generation for h-d12: authored docs/test-cases/edge/02-h-d12-named-arguments.bas + docs/test-cases/edge/02-h-d12-named-arguments.expected.json",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 1303,
+          "outputTokens": 1961,
+          "costUsd": 0.02123875
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/fixture-h-e07",
+      "dateTime": "2026-04-26T21:21:12.994127+00:00",
+      "description": "Routed test-generation for h-e07: authored docs/test-cases/edge/03-h-e07-param-array.bas + docs/test-cases/edge/03-h-e07-param-array.expected.json",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 1285,
+          "outputTokens": 1988,
+          "costUsd": 0.021486250000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/fixture-h-a07-rem",
+      "dateTime": "2026-04-26T21:21:40.329980+00:00",
+      "description": "Routed test-generation for h-a07-rem: authored docs/test-cases/edge/04-h-a07-rem-comments.bas + docs/test-cases/edge/04-h-a07-rem-comments.expected.json",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 1344,
+          "outputTokens": 693,
+          "costUsd": 0.00861
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/fixture-h-d04-zero",
+      "dateTime": "2026-04-26T21:22:20.736461+00:00",
+      "description": "Routed test-generation for h-d04-zero: authored docs/test-cases/edge/05-h-d04-on-error-goto-zero.bas + docs/test-cases/edge/05-h-d04-on-error-goto-zero.expected.json",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 1397,
+          "outputTokens": 1133,
+          "costUsd": 0.01307625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-04-26T21:26:40.768190+00:00",
+      "description": "dotnet build (0 errors, 275 warnings) and dotnet test (278+328 passed, 2 skipped)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/session-verification",
+      "dateTime": "2026-04-26T21:29:59.632497+00:00",
+      "description": "Cross-provider session verification via route(session-verification). Model: gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3154,
+          "outputTokens": 9128,
+          "costUsd": 0.14480500000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/reverification-round2",
+      "dateTime": "2026-04-26T21:36:35.625174+00:00",
+      "description": "Round-2 verification after fixing 4 verifier findings. Model: gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3016,
+          "outputTokens": 7132,
+          "costUsd": 0.11452000000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/reverification-round3",
+      "dateTime": "2026-04-26T21:38:56.305894+00:00",
+      "description": "Round-3 verification (line-number fixes). Model: gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2085,
+          "outputTokens": 1522,
+          "costUsd": 0.028042499999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T21:40:09.192048+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 2. Model: gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 833,
+          "outputTokens": 105,
+          "costUsd": 0.0020912500000000002
+        }
+      ]
+    }
+  ]
+}

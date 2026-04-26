@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "03-h-e07-param-array.bas",
+      "module": "Module_ParamArrayHazard",
+      "startLine": 11,
+      "startColumn": 1,
+      "endLine": 17,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Public Sub LogMessage(prefix As String, ParamArray args() As Variant)\n    ' Grammar test: parse the ParamArray parameter in the procedure signature.\n    ' Call sites with 0, 1, and multiple ParamArray arguments:\n    LogMessage \"INFO:\"\n    LogMessage \"WARN:\", \"Something happened\"\n    LogMessage \"DEBUG:\", 1, \"foo\", Now\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "LogMessage",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          { "name": "prefix", "type": "String", "byRef": true },
+          { "name": "args", "type": "Variant", "paramArray": true, "isArray": true }
+        ]
+      },
+      "classification": {
+        "purposeTags": [],
+        "purity": "unknown",
+        "complexity": 1,
+        "linesOfCode": 5,
+        "translatability": "structured"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "call",
+            "location": { "startLine": 14, "startColumn": 5, "endLine": 14, "endColumn": 22 },
+            "summary": "Self-call with 0 ParamArray arguments (prefix only)"
+          },
+          {
+            "kind": "call",
+            "location": { "startLine": 15, "startColumn": 5, "endLine": 15, "endColumn": 41 },
+            "summary": "Self-call with 1 ParamArray argument"
+          },
+          {
+            "kind": "call",
+            "location": { "startLine": 16, "startColumn": 5, "endLine": 16, "endColumn": 33 },
+            "summary": "Self-call with 3 ParamArray arguments (variadic)"
+          }
+        ],
+        "references": [],
+        "calls": [],
+        "sqlStrings": []
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": []
+}
