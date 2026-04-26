@@ -222,6 +222,13 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Opus At `effort:max` + Adaptive Thinking Timeouts On Large Synthesis-Document Prompts
 
+- **Promoted to `project-guidance.md` → Conventions → Workflow Expectations**
+  on 2026-04-25 (after `vba-spec-study` Session 3, second-context
+  confirmation). Retained here as the action-detail reference; the rule
+  itself is now a Convention. Second context: `vba-spec-study` Session 3
+  hit the same timeout pattern on a Sonnet-orchestrated
+  `route(architecture)` call, the orchestrator was swapped to Opus, and
+  the deliverable was authored in-conversation per the convention.
 - **Context:** Session 4 of `vba-parser-session-set-generator`. Two attempts to
   `route(task_type="architecture", complexity_hint=80)` from a Sonnet orchestrator
   both timed out at 600 seconds (raised from 300 after the first timeout).
@@ -297,3 +304,52 @@ reference; if it proves out twice in *this* repo, propose promotion to
   session-verification under the wrong orchestrator; fall back to
   `query("<cross-provider-model>", task_type="session-verification")`
   as Sessions 1 and 2 did.
+
+### Notify The Human On `route()` Timeout — Consider Switching Orchestrator Rather Than Continuing To Fail
+
+- **Context:** Mid-session `route()` failures (timeout, transient API
+  errors) where the orchestrator's first instinct is to retry with the
+  same configuration. First hit in Session 3 of `vba-spec-study`
+  (2026-04-25).
+- **Failure or friction:** Session 3 hit an Opus `route(architecture)`
+  timeout on the second call (the first having succeeded but content
+  been lost to a print-side bug — see "Persist Routed Output To Disk
+  Before Any Display Or Logging Side Effects" below). The Sonnet
+  orchestrator silently retried instead of notifying the human; only
+  after the second timeout did the human intervene to swap the
+  orchestrator. Two paid Opus calls were burned before the swap.
+- **Lesson:** When a `route()` call to a tier-3 model times out
+  (especially `architecture` / `session-verification`), the orchestrator
+  should notify the human and propose either (a) swap to a higher-tier
+  orchestrator that can author in-conversation, or (b) split the prompt
+  into smaller chunks. Silent retries waste budget. The notification
+  should include the failing task type, the prompt size, and the
+  `lessons-learned.md` entry it matches.
+- **Action for future sessions:** First timeout → log it, retry once.
+  Second timeout → stop, notify the human via
+  `send_session_complete_notification` (or equivalent) with subject
+  "route() timeout — orchestrator change recommended", and wait for
+  instruction. Do not retry a third time.
+
+### Persist Routed Output To Disk Before Any Display Or Logging Side Effects
+
+- **Context:** Any orchestrator script that calls `route()` and produces
+  synthesis content downstream needs. First hit in Session 3 of
+  `vba-spec-study` (2026-04-25).
+- **Failure or friction:** Session 3 Batch A's first
+  `route(architecture)` call succeeded with 16788 output tokens at
+  $1.29. The script then did `print(result.content)` for visibility
+  before writing to file. The print failed on Windows `cp1252` codec (a
+  directional-arrow character `↵` in the response was unencodable), the
+  script crashed, and the entire $1.29 of content was lost. The retry
+  timed out (see Opus-timeout convention in `project-guidance.md`).
+- **Lesson:** `print()` to a Windows console is fragile against Unicode.
+  Orchestrator scripts must save routed output to disk *before* any
+  print/log/parse side effects. The pattern is
+  `with open(path, "w", encoding="utf-8") as f: f.write(result.content)`
+  first, then `print()` second.
+- **Action for future sessions:** All `route()`-using scripts must
+  follow the persist-then-display pattern. The change-log generator and
+  synthesis-dispatcher templates should encode this as the default, not
+  a per-script choice. When in doubt, write to a temp path first; if
+  the print fails, the content is still recoverable from disk.
