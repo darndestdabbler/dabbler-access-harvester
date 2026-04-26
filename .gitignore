@@ -17,6 +17,12 @@ ai-router/router-state.db
 .vs/
 .vscode/
 
+# Exception: the VS Code session-sets extension ships a launch.json so the
+# F5 dev-mode workflow works out of the box. This .vscode is source code,
+# not user-personal IDE state.
+!tools/vscode-session-sets/.vscode/
+!tools/vscode-session-sets/.vscode/**
+
 # OS detritus
 Thumbs.db
 .DS_Store
