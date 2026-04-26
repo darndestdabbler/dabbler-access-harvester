@@ -5,32 +5,37 @@
     <RootNamespace>AccessHarvester.Vba.Grammar</RootNamespace>
     <AssemblyName>AccessHarvester.Vba.Grammar</AssemblyName>
     <Nullable>enable</Nullable>
-    <AntlrOutputPath>$(MSBuildProjectDirectory)\obj\Antlr</AntlrOutputPath>
-    <CompileDependsOn>$(CompileDependsOn);GenerateAntlrCode</CompileDependsOn>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
+    <!--
+      Code generation:
+        Antlr4BuildTasks downloads a self-contained ANTLR jar (requires
+        Java on PATH at build time) and generates C# lexer/parser code
+        from .g4 files marked with <Antlr4 …>. Output lands in
+        $(IntermediateOutputPath)/AntlrGenerated and is auto-included
+        in compilation. Replaces the placeholder GenerateAntlrCode
+        target landed by parser-foundations Session 3.
+
+      Runtime:
+        Antlr4.Runtime.Standard is the official ANTLR-organization C#
+        runtime — version-aligned with the jar Antlr4BuildTasks pulls.
+        The 4.6.6 Antlr4.Runtime package previously declared here was
+        Sam Harwell's port and is unmaintained for modern .NET SDKs;
+        the switch is the wiring item parser-foundations deferred to
+        this set.
+    -->
+    <PackageReference Include="Antlr4BuildTasks" Version="12.8.0" PrivateAssets="all" />
+    <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
   </ItemGroup>
 
   <ItemGroup>
-    <AntlrGrammar Include="Vba.g4" />
+    <Antlr4 Include="Vba.g4">
+      <Package>AccessHarvester.Vba.Grammar.Generated</Package>
+      <Listener>true</Listener>
+      <Visitor>true</Visitor>
+    </Antlr4>
   </ItemGroup>
-
-  <!-- ANTLR Build Wiring: Configure parser generation from grammar on build -->
-  <Target Name="GenerateAntlrCode" BeforeTargets="CoreCompile">
-    <PropertyGroup>
-      <AntlrGeneratedPath>$(AntlrOutputPath)</AntlrGeneratedPath>
-    </PropertyGroup>
-
-    <Message Text="ANTLR4: Generating parser from Vba.g4..." Importance="high" />
-
-    <MakeDir Directories="$(AntlrGeneratedPath)" />
-
-    <!-- This target demonstrates ANTLR4 build wiring. Actual code generation will be -->
-    <!-- implemented in the vba-lexical-and-expression-grammar child session set (#3). -->
-    <Exec Command="echo ANTLR4 build target executed for Vba.g4"
-          ContinueOnError="true" />
-  </Target>
 
 </Project>

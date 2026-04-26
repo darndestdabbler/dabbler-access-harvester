@@ -1,0 +1,6 @@
+ISSUES_FOUND
+
+1. **Severity:** Major  
+   **Location:** `AccessHarvester.Vba.Grammar/Vba.g4:86-91`; `tests/AccessHarvester.Vba.Grammar.Tests/Lexical/VbaLexerTests.cs:67-87`  
+   **Description:** Round-1 finding #4’s original bare-`REM` EOL/EOF cases are fixed, but the new `REM_COMMENT` rule over-broadened comment recognition. Because the body is optional, ANTLR can match `REM_COMMENT` as just `REM` before any following non-whitespace character, and that equal-length tie beats `IDENTIFIER` by rule order. Inputs such as `REM:`, `REM.`, and `REM(` are now tokenized starting with hidden `REM_COMMENT`, even though the intended rule is “comment only when followed by whitespace, newline, or EOF.” This is a new regression introduced by the fix.  
+   **Suggested fix:** Split `REM_COMMENT` into boundary-safe alternatives, e.g. one alternative for `REM` followed by whitespace/body, and a separate bare-`REM` alternative guarded by a semantic predicate that requires the next character to be `CR`, `LF`, or `EOF`. Add negative lexer tests for `REM:` and `REM.` asserting that `REM_COMMENT` is **not** emitted in those cases.
