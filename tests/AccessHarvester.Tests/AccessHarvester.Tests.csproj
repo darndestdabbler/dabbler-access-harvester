@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\AccessHarvester.Core\AccessHarvester.Core.csproj" />
+    <ProjectReference Include="..\..\AccessHarvester.Access\AccessHarvester.Access.csproj" />
   </ItemGroup>
 
   <ItemGroup>
