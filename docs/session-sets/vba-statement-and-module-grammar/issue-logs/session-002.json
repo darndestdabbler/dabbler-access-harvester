@@ -1,0 +1,66 @@
+[
+  {
+    "id": "R1-1",
+    "severity": "Major",
+    "category": "Correctness",
+    "finding": "propertyDeclaration accepts invalid Property Let/Set forms with AS clause or zero params",
+    "status": "fixed",
+    "resolution": "Split into propertyGetDeclaration / propertyLetDeclaration / propertySetDeclaration. Get keeps optional params + AS; Let/Set require parameterList and have no AS."
+  },
+  {
+    "id": "R1-2",
+    "severity": "Major",
+    "category": "Correctness",
+    "finding": "parameterList over-permissive on ParamArray and default-value combinations",
+    "status": "fixed",
+    "resolution": "Split parameter into requiredParameter / optionalParameter / paramArrayParameter. Default value moved to optionalParameter only. paramArrayParameter requires LPAREN RPAREN and rejects modifier combinations. ParamArray restricted to trailing position."
+  },
+  {
+    "id": "R1-3",
+    "severity": "Major",
+    "category": "Correctness",
+    "finding": "WithEvents declarations could parse As New T per H-F01 violation",
+    "status": "fixed",
+    "resolution": "moduleVariableDeclItem split into WithEventsVarItem (uses typeName, requires AS, no NEW, no array, no STAR) and RegularVarItem (full typeSpec)."
+  },
+  {
+    "id": "R1-4",
+    "severity": "Major",
+    "category": "Correctness",
+    "finding": "publicEventDeclaration accepted Private modifier; not valid VBA syntax",
+    "status": "fixed",
+    "resolution": "Modifier reduced to PUBLIC?. Test Event_PrivateModifier removed; replaced by Reject_PrivateEvent negative test."
+  },
+  {
+    "id": "R1-5",
+    "severity": "Minor",
+    "category": "Coverage",
+    "finding": "Module test suite was acceptance-only; no negative tests for over-acceptance bugs",
+    "status": "fixed",
+    "resolution": "Added 11 negative tests under the Reject_* prefix covering all R1-1..R1-4 fixes plus default-without-Optional and ParamArray-not-last positional."
+  },
+  {
+    "id": "R2-1",
+    "severity": "Major",
+    "category": "Correctness",
+    "finding": "parameterList still accepted required parameter after Optional",
+    "status": "fixed",
+    "resolution": "Replaced parameterEntry mixed list with positionalParameters: required* then optional*, OR optional+. Added Reject_RequiredAfterOptional negative test."
+  },
+  {
+    "id": "R2-2",
+    "severity": "Major",
+    "category": "Correctness",
+    "finding": "publicEventDeclaration reused parameterList which accepts Optional/ParamArray, illegal on event params",
+    "status": "fixed",
+    "resolution": "Introduced eventParameterList / eventParameter restricted to required-only (no Optional, no ParamArray, no default). Added Reject_EventOptionalParameter and Reject_EventParamArrayParameter negative tests."
+  },
+  {
+    "id": "R2-broader",
+    "severity": "Minor",
+    "category": "Coverage",
+    "finding": "Negative test suite did not exercise adjacent shapes (PropertySet no-params, ByRef ParamArray, ParamArray default, WithEvents array, WithEvents fixed-length-string, Friend Event)",
+    "status": "fixed",
+    "resolution": "Added Reject_PropertySet_NoParams, Reject_ByRefParamArrayCombination, Reject_ParamArray_DefaultValue, Reject_WithEvents_ArrayDeclarator, Reject_WithEvents_FixedLengthString, Reject_FriendEvent."
+  }
+]
