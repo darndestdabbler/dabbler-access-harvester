@@ -81,16 +81,23 @@
 | Final session verification | Routed | `session-verification` | `gpt-5-4` | n/a | Non-negotiable cross-provider check per repo constraints. |
 
 **Actuals (filled after the session runs):**
-*   Orchestrator used:
-*   Total routed cost:
+*   Orchestrator used: Claude Sonnet 4.6 @ effort=medium (per ai-assignment.md recommendation).
+*   Total routed cost: ~$0.31 (3 cross-provider verification rounds with gpt-5-4 totalling $0.31 + next-orchestrator analysis $0.01).
 *   Deviations from plan:
+    - The spec's "harness against 01/02/03/06/07 → classify failures → fix bugs" loop found ZERO failures: 12/12 parsed, 0 errors, 0 ERROR_TOKEN characters. No grammar bugs to fix.
+    - schema-validation handled in-conversation per Convention (Sonnet orchestrator = routing target). No route() call needed.
+    - The main work was adding the `parse` CLI subcommand (new, not foreseen in the spec as a step) because the harness requires a parser executable and none existed. This was a prerequisite for the harness run.
+    - Verification caught 4 Minor issues across R1/R2/R3: bare-file heuristic, encoding, schema-table completeness, usage text. All resolved.
 *   Notes for next-session calibration:
+    - Session 4 recommendation: sonnet-4.6 @ effort=low (confirmed by next-orchestrator analysis). The work is resolving specific documented findings + generating a change-log — no synthesis needed.
+    - The `parse` CLI subcommand is now the harness driver for all subsequent grammar sessions. Session 4 and vba-statement-and-module-grammar (#4) both inherit it.
+    - The parse-failure-log.md baseline entry will be the "from" state for #4's tightening session. Make sure #4 references it.
 
 ---
 
 ## Session 4 of 4: Verifier-Surfaced Cleanup + Cross-Set Handoff
 
-**Recommended orchestrator:** `sonnet-4.6` @ effort=`medium`
+**Recommended orchestrator:** `sonnet-4.6` @ effort=`low` (updated from medium by next-orchestrator analysis after Session 3)
 
 **Rationale:** This session involves addressing specific, documented issues and generating a brief change-log. These are mechanical edits and a standard summarization task, making the cost-effective Sonnet a safe choice for orchestration.
 
