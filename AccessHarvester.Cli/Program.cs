@@ -21,6 +21,8 @@ public static class Program
 
     public static int Main(string[] args)
     {
+        // Required for Encoding.GetEncoding(1252) on .NET Core / .NET 5+.
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
         try
         {
             return Dispatch(args);

@@ -1,0 +1,4 @@
+**Next session orchestrator recommendation (Session 2):**
+`opus-4.7` @ effort=`high`
+
+**Rationale:** The session spec identifies Session 2 as the second of two primary grammar synthesis tasks, a high-complexity activity. Session 1's actuals confirmed that using `opus-4.7` for in-conversation synthesis was highly effective, producing a quality grammar with only minor test-coverage gaps identified by the verifier. The calibration notes from Session 1 explicitly state that the recommendation for Session 2 stands, as the scope is directly comparable. The verifier timeouts encountered in Session 1 are a routing concern for the verification step, not a reflection on the orchestrator's performance.

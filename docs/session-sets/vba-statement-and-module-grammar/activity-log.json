@@ -1,0 +1,388 @@
+{
+  "sessionSetName": "vba-statement-and-module-grammar",
+  "createdDate": "2026-04-26T12:09:56.714103+00:00",
+  "totalSessions": 4,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-26T12:10:26.342605+00:00",
+      "description": "Routed analysis call authored ai-assignment.md ledger for the set",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 5820,
+          "outputTokens": 1548,
+          "costUsd": 0.022754999999999997
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/cross-provider-verification",
+      "dateTime": "2026-04-26T13:05:49.122797+00:00",
+      "description": "Routed session-verification to gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 28615,
+          "outputTokens": 620,
+          "costUsd": 0.04196875
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/cross-provider-verification-round2",
+      "dateTime": "2026-04-26T13:07:39.452243+00:00",
+      "description": "Round 2 verification via gemini-pro after fixing 3 Minor R1 issues",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 17661,
+          "outputTokens": 601,
+          "costUsd": 0.02808625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T13:10:12.108013+00:00",
+      "description": "Routed analysis recommending Session 2 orchestrator (via gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 4382,
+          "outputTokens": 149,
+          "costUsd": 0.0069675
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/elaborate-step-list",
+      "dateTime": "2026-04-26T15:35:53.264149+00:00",
+      "description": "Read spec, prereqs, hazard list E/F, fixture 10, ms-vbal-summary \u00a74.x; mapped step list",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/synthesize-module-grammar",
+      "dateTime": "2026-04-26T15:35:53.264871+00:00",
+      "description": "Authored module grammar in-conversation (Opus 4.7 orchestrator-matches-target convention): module/moduleItem dispatcher, optionStatement, implementsStatement, moduleVariableDecl with WithEvents, moduleConstStatement, typeDeclaration, enumDeclaration, declareStatement, publicEventDeclaration, procedureDeclaration triplet (sub/function/property), parameter rule with Optional/ByVal/ByRef/ParamArray. Extended typeSpec to accept New T prefix.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/author-module-tests",
+      "dateTime": "2026-04-26T15:35:53.264871+00:00",
+      "description": "Wrote tests/AccessHarvester.Vba.Grammar.Tests/Modules/VbaModuleParserTests.cs with 60 tests covering options, Implements, module vars (incl. WithEvents), const, Type/Enum, Declare/PtrSafe, Public Event, Sub/Function/Property triplet, parameter modes, event handler shapes, Class_Initialize/Terminate, plus end-to-end fixture-10 parse",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build",
+      "dateTime": "2026-04-26T15:35:53.264871+00:00",
+      "description": "dotnet build AccessHarvester.sln succeeded (227 unrelated warnings, 0 errors)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/test",
+      "dateTime": "2026-04-26T15:35:53.266019+00:00",
+      "description": "dotnet test passed: 253/253 grammar tests, 127/127 harvester core tests",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-04-26T15:40:39.167815+00:00",
+      "description": "Routed session-verification to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16091,
+          "outputTokens": 11305,
+          "costUsd": 0.2098025
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/cross-provider-verification-round2",
+      "dateTime": "2026-04-26T15:47:16.248647+00:00",
+      "description": "Round 2 verification via gpt-5-4 after R1 fixes (5 issues addressed)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2597,
+          "outputTokens": 10622,
+          "costUsd": 0.1658225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/cross-provider-verification-round3",
+      "dateTime": "2026-04-26T15:50:31.978159+00:00",
+      "description": "Round 3 (final retry) verification via gpt-5-4 after R2 fixes (required-after-optional + event-param-list)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1400,
+          "outputTokens": 4301,
+          "costUsd": 0.068015
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T15:51:30.160514+00:00",
+      "description": "Routed analysis recommending Session 3 orchestrator (via gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1021,
+          "outputTokens": 92,
+          "costUsd": 0.0021962500000000003
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/register-and-read-guidance",
+      "dateTime": "2026-04-26T19:36:52.258674+00:00",
+      "description": "Registered session 3 (Sonnet 4.6 medium). Read project-guidance.md, lessons-learned.md, spec Session 3 plan, ai-assignment.md, ai-workflow.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/verify-prereqs",
+      "dateTime": "2026-04-26T19:36:52.259723+00:00",
+      "description": "Confirmed Sessions 1+2 outputs: Vba.g4 statement section (Session 1), module section (Session 2), 272 tests passing (Session 2). CLI parse subcommand present in AccessHarvester.Cli/Program.cs.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/cli-encoding-fix",
+      "dateTime": "2026-04-26T19:36:52.259723+00:00",
+      "description": "Fixed CLI: added System.Text.Encoding.RegisterProvider(CodePagesEncodingProvider.Instance) to Main() so encoding 1252 works on .NET Core. Required for harness invocation of parse subcommand.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/harness-run",
+      "dateTime": "2026-04-26T19:36:52.260723+00:00",
+      "description": "Ran parser-foundations harness against 12 corpus fixtures. Results: 10 parsed, 2 failed. All 10 VBA fixtures (*.bas, *.cls) parsed with status=parsed, 0 error tokens. 2 non-VBA files (04 SQL, 06 Access expression) failed as expected.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/schema-validation",
+      "dateTime": "2026-04-26T19:36:52.261721+00:00",
+      "description": "In-conversation schema-validation (Sonnet orchestrator matches Sonnet routing target per convention). All must-priority coverage matrix rows for \u00a74.x and \u00a75.x are covered by the grammar. One should-priority gap identified: preprocessor directives (#If/#Else/#End If) not in moduleItem, causing crash on real-world modules with VBA7 guards. Fixed by adding preprocessorLine alternative to moduleItem.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/preprocessor-tightening",
+      "dateTime": "2026-04-26T19:36:52.261721+00:00",
+      "description": "Added preprocessorLine rule to moduleItem covering HASH_IF, HASH_ELSEIF, HASH_ELSE, HASH_END_IF, HASH_CONST. Added 3 preprocessor acceptance tests. dotnet build succeeded, 275/275 grammar tests, 402/402 total.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/cross-provider-verification",
+      "dateTime": "2026-04-26T19:39:21.297024+00:00",
+      "description": "Routed session-verification to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5095,
+          "outputTokens": 5598,
+          "costUsd": 0.09670749999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/cross-provider-verification-round2",
+      "dateTime": "2026-04-26T19:42:30.635498+00:00",
+      "description": "Round 2 verification via gpt-5-4 after R1 fix (preprocessorLine in statementListBody)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 360,
+          "outputTokens": 5268,
+          "costUsd": 0.07992
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T19:43:21.517586+00:00",
+      "description": "Routed analysis recommending Session 4 orchestrator (via gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 712,
+          "outputTokens": 86,
+          "costUsd": 0.00175
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/register-and-prereq-check",
+      "dateTime": "2026-04-26T20:26:48.224965+00:00",
+      "description": "Registered session 4 (Sonnet 4.6, effort=unknown). Read guidance docs, spec, ai-assignment.md. Confirmed sessions 1-3 complete; no deferred verifier issues. Prereq (vba-lexical-and-expression-grammar change-log.md) confirmed present.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-26T20:26:48.225964+00:00",
+      "description": "dotnet build: 0 errors, 227 warnings (pre-existing CA1416 platform-annotation). dotnet test: 276 grammar + 127 harvester = 403 total, all passing.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/cross-provider-verification-round1",
+      "dateTime": "2026-04-26T20:26:48.226862+00:00",
+      "description": "R1 verification via gpt-5-4: ISSUES_FOUND (0 Critical, 4 issues). Issues 1+3 real over-acceptance; Issues 2+4 intentional design. Applied fixes: localDeclHead restricted to DIM|STATIC, localConstStatement split, typeSpec/variableTypeSpec split.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9586,
+          "outputTokens": 11083,
+          "costUsd": 0.19021
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/grammar-fixes",
+      "dateTime": "2026-04-26T20:26:48.226862+00:00",
+      "description": "Fixed R1 issues 1+3: (1) localDeclHead restricted to DIM|STATIC; localConstStatement introduced for procedure-body const (no access modifier); statement+inlineStatement updated to use localConstStatement. (2) typeSpec split into typeSpec (no NEW) and variableTypeSpec (NEW? prefix); variableDecl, redimDecl, RegularVarItem updated to use variableTypeSpec. Tests: converted 3 incorrect acceptance tests to Reject_* + added 3 new rejection tests + Dim_AsNew acceptance test. Build: 0 errors. Tests: 278 grammar / 127 harvester = 405 total, all passing.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/cross-provider-verification-round2",
+      "dateTime": "2026-04-26T20:26:48.228065+00:00",
+      "description": "R2 verification via gpt-5-4: VERIFIED. Fixes confirmed correct; intentional-design disclosures (Do dual-condition, Option permissive identifiers) accepted as sound documented scope boundaries.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1138,
+          "outputTokens": 4867,
+          "costUsd": 0.07585
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-26T20:27:26.133709+00:00",
+      "description": "Generated change-log.md via route(summarization, max_tier=1) -> gemini-flash. Gemini Pro 400 on >2KB prompt per convention; Gemini Flash succeeded.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 511,
+          "outputTokens": 412,
+          "costUsd": 0.00032385
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/next-session-set-recommendation",
+      "dateTime": "2026-04-26T20:27:59.656977+00:00",
+      "description": "Routed analysis recommending next session set (vba-grammar-validation) orchestrator via gemini-flash",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "analysis",
+          "inputTokens": 507,
+          "outputTokens": 136,
+          "costUsd": 0.00015764999999999998
+        }
+      ]
+    }
+  ]
+}

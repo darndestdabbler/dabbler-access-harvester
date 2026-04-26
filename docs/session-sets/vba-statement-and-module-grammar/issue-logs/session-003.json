@@ -1,0 +1,10 @@
+[
+  {
+    "id": "R1-1",
+    "severity": "Major",
+    "category": "Correctness",
+    "finding": "preprocessorLine only added to moduleItem; not in statementListBody. #If inside a procedure body crashes the parser.",
+    "status": "fixed",
+    "resolution": "Added preprocessorLine to statementListBody: (NEWLINE | preprocessorLine | block)*. Added Preprocessor_InsideProcedureBody test."
+  }
+]
