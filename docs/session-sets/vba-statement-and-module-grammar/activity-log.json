@@ -1,7 +1,7 @@
 {
   "sessionSetName": "vba-statement-and-module-grammar",
   "createdDate": "2026-04-26T12:09:56.714103+00:00",
-  "totalSessions": 0,
+  "totalSessions": 4,
   "entries": [
     {
       "sessionNumber": 1,
@@ -68,6 +68,119 @@
           "inputTokens": 4382,
           "outputTokens": 149,
           "costUsd": 0.0069675
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/elaborate-step-list",
+      "dateTime": "2026-04-26T15:35:53.264149+00:00",
+      "description": "Read spec, prereqs, hazard list E/F, fixture 10, ms-vbal-summary \u00a74.x; mapped step list",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/synthesize-module-grammar",
+      "dateTime": "2026-04-26T15:35:53.264871+00:00",
+      "description": "Authored module grammar in-conversation (Opus 4.7 orchestrator-matches-target convention): module/moduleItem dispatcher, optionStatement, implementsStatement, moduleVariableDecl with WithEvents, moduleConstStatement, typeDeclaration, enumDeclaration, declareStatement, publicEventDeclaration, procedureDeclaration triplet (sub/function/property), parameter rule with Optional/ByVal/ByRef/ParamArray. Extended typeSpec to accept New T prefix.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/author-module-tests",
+      "dateTime": "2026-04-26T15:35:53.264871+00:00",
+      "description": "Wrote tests/AccessHarvester.Vba.Grammar.Tests/Modules/VbaModuleParserTests.cs with 60 tests covering options, Implements, module vars (incl. WithEvents), const, Type/Enum, Declare/PtrSafe, Public Event, Sub/Function/Property triplet, parameter modes, event handler shapes, Class_Initialize/Terminate, plus end-to-end fixture-10 parse",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build",
+      "dateTime": "2026-04-26T15:35:53.264871+00:00",
+      "description": "dotnet build AccessHarvester.sln succeeded (227 unrelated warnings, 0 errors)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/test",
+      "dateTime": "2026-04-26T15:35:53.266019+00:00",
+      "description": "dotnet test passed: 253/253 grammar tests, 127/127 harvester core tests",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-04-26T15:40:39.167815+00:00",
+      "description": "Routed session-verification to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16091,
+          "outputTokens": 11305,
+          "costUsd": 0.2098025
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/cross-provider-verification-round2",
+      "dateTime": "2026-04-26T15:47:16.248647+00:00",
+      "description": "Round 2 verification via gpt-5-4 after R1 fixes (5 issues addressed)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2597,
+          "outputTokens": 10622,
+          "costUsd": 0.1658225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/cross-provider-verification-round3",
+      "dateTime": "2026-04-26T15:50:31.978159+00:00",
+      "description": "Round 3 (final retry) verification via gpt-5-4 after R2 fixes (required-after-optional + event-param-list)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1400,
+          "outputTokens": 4301,
+          "costUsd": 0.068015
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T15:51:30.160514+00:00",
+      "description": "Routed analysis recommending Session 3 orchestrator (via gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1021,
+          "outputTokens": 92,
+          "costUsd": 0.0021962500000000003
         }
       ]
     }

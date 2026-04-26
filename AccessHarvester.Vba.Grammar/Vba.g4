@@ -33,18 +33,19 @@ grammar Vba;
 // ============================================================
 
 // ------------------------------------------------------------
-// Placeholder parser rules (filled in by sibling sessions)
+// Top-level module rule (start rule for full-module parsing)
 // ------------------------------------------------------------
+//
+// `module` is the entry point for parsing a complete .bas, .cls, or
+// form/report module. The detailed module-grammar productions
+// (option directives, declarations, procedures) live in the
+// dedicated module section further down in this file. NEWLINEs
+// between items are collected as bare moduleItem alternatives so
+// blank lines and post-construct line terminators do not need
+// explicit handling in each construct rule.
 
-module : moduleItem* EOF ;
-
-// `moduleItem` is a stub that swallows tokens until end-of-line so the
-// generated parser stays syntactically usable for token-stream tests
-// in this session. vba-statement-and-module-grammar (#4) replaces it
-// with real declarations and procedures.
-moduleItem
-    : NEWLINE
-    | ~NEWLINE+ NEWLINE?
+module
+    : NEWLINE* moduleItem* EOF
     ;
 
 // ============================================================
@@ -737,8 +738,13 @@ constDecl
 // Session 2 will extend this to cover array-element types
 // (`Object()`) when ParamArray and array-typed parameters land.
 
+// `NEW?` accepts the auto-instantiation form `Dim x As New ClassName`
+// (§4.4 / §5.2.5) without needing a separate typeSpec variant. There
+// is no parsing conflict with `newExpr : NEW typeName` in expression
+// position because `typeSpec` only appears in declaration positions
+// (after AS), never inside `expression`.
 typeSpec
-    : typeName (STAR expression)?
+    : NEW? typeName (STAR expression)?
     ;
 
 // --- 16. Set / Let / Call (§5.3.1, §5.3.2, §5.5) ------------------
@@ -781,6 +787,380 @@ callStatement
 
 bareCallArgumentList
     : argument (COMMA argument?)*
+    ;
+
+// ============================================================
+// Module rules (Phase 1.4 module section, session #4 part 2)
+//
+// Sources:
+//   - docs/spec-study/ms-vbal-summary.md  — §4.1, §4.3, §4.3.1, §4.4,
+//     §4.5, §4.6
+//   - docs/spec-coverage/ms-vbal-coverage.csv §4.* rows
+//   - docs/spec-coverage/hazard-list.md   — Sections E, F
+//   - docs/test-cases/10-class-with-events.cls (canonical class
+//     module with Implements, WithEvents, Property triplet,
+//     Class_Initialize/Terminate, event sinks)
+//
+// Hazards addressed here:
+//   H-E01  Optional parameter with default value — `parameter`
+//          accepts `OPTIONAL?` plus an `(EQ expression)?` default tail.
+//   H-E02  ByVal vs implicit ByRef — `parameter` preserves the
+//          explicit `BYVAL`/`BYREF` modifier; absence implies ByRef
+//          per §4.6 (the AST consumer records the implicit form).
+//   H-E03  Property Get/Let/Set triplets — three independent
+//          `propertyDeclaration` invocations sharing a name; pairing
+//          logic is resolver work in resolver-declarations-and-scopes
+//          (#7), not grammar work.
+//   H-E04  Public/Private/Friend procedure scope — `procedureModifier`
+//          accepts the optional access modifier on every procedure
+//          form.
+//   H-E07  ParamArray parameter — `parameter` accepts the PARAMARRAY
+//          modifier with array-decl `()` tail. The last-parameter
+//          and "must-be-Variant" constraints are downstream concerns.
+//   H-F01  WithEvents declaration — `moduleVariableDeclItem` accepts
+//          the WITHEVENTS prefix on a per-variable basis (one
+//          variable per declaration head is the only fixture-witnessed
+//          form, but the per-item rule covers the multi-decl case).
+//          Excluding WithEvents from procedure-local declarations is
+//          handled by `localDeclStatement` simply not having the
+//          modifier — a `Static WithEvents x As Form` inside a Sub
+//          body parse-errors at the WITHEVENTS token.
+//   H-F02-F06  Event handler / Class_Initialize / Class_Terminate /
+//          form-report event signatures — these are syntactically
+//          ordinary `subDeclaration` forms; resolution by name pattern
+//          (Class_Initialize, varname_eventname,
+//          Form_BeforeUpdate(Cancel As Integer), etc.) is downstream
+//          work in the resolver session sets.
+//   H-F07  Module-level vs procedure-level declaration position —
+//          the parser distinguishes by rule context (`moduleItem`
+//          inside `module` vs `localDeclStatement` inside
+//          `statementListBody`); a stray module-level declaration
+//          after the first procedure body is **not** rejected
+//          syntactically — declaration ordering enforcement is a
+//          downstream linter concern, consistent with the spec study's
+//          permissive-parser recommendation.
+//
+// Public Event declaration (`Public Event <name>(<params>)`) and
+// Declare statement (`Declare PtrSafe Sub <name> Lib "..." ...`) are
+// in scope; no fixture in the 12-fixture corpus exercises them, but
+// the coverage matrix marks both as `must` priority. Synthetic
+// fixtures land in vba-grammar-validation (#5) once a witness arrives.
+//
+// Module-statement ordering (header → declarations → procedures per
+// §4.1) is **not** enforced syntactically. Real-world modules
+// occasionally interleave; the spec study acknowledges this and
+// recommends permissive parsing with downstream validation.
+// ============================================================
+
+// One unit at module-statement position. Order matters for ANTLR
+// adaptive prediction: rules whose first sets share a prefix (e.g.,
+// `(PUBLIC | PRIVATE)?` shared by Type / Enum / Declare / Event /
+// procedure / Const / variable) are disambiguated by the next-keyword
+// token via ALL(*) lookahead.
+
+moduleItem
+    : optionStatement                                                # OptionItem
+    | implementsStatement                                            # ImplementsItem
+    | typeDeclaration                                                # TypeItem
+    | enumDeclaration                                                # EnumItem
+    | declareStatement                                               # DeclareItem
+    | publicEventDeclaration                                         # EventItem
+    | procedureDeclaration                                           # ProcedureItem
+    | moduleConstStatement                                           # ConstItem
+    | moduleVariableDecl                                             # VariableItem
+    | NEWLINE                                                        # BlankLineItem
+    ;
+
+// --- 1. Option directives (§4.1) ----------------------------------
+//
+// `Option Explicit` / `Option Compare <kind>` / `Option Base 0|1` /
+// `Option Private Module`. The contextual words `Base`, `Module`,
+// `Binary`, `Text`, and `Database` are NOT reserved — they lex as
+// IDENTIFIER per the spec study's recommendation to keep the keyword
+// set minimal and let parser context disambiguate.
+
+optionStatement
+    : OPTION EXPLICIT                                                # OptionExplicitStmt
+    | OPTION COMPARE IDENTIFIER                                      # OptionCompareStmt
+    | OPTION IDENTIFIER INTEGER_LITERAL                              # OptionBaseStmt
+    | OPTION PRIVATE IDENTIFIER                                      # OptionPrivateModuleStmt
+    ;
+
+// --- 2. Implements (§4.3) -----------------------------------------
+//
+// `Implements <InterfaceTypeName>` at module level. The interface
+// type may be qualified (`Implements Project.IFoo`). A single class
+// may declare `Implements` for multiple interfaces; each statement
+// lands as its own `moduleItem`.
+
+implementsStatement
+    : IMPLEMENTS typeName
+    ;
+
+// --- 3. Module variable declaration (§4.4) ------------------------
+//
+// `Public | Private | Dim | Global <varlist>`. Each variable carries
+// an optional WITHEVENTS prefix (H-F01). `Static` is procedure-local
+// only and is therefore not a valid module-decl head — see
+// `localDeclStatement` for the procedure-level form.
+//
+// Multiple variables in one declaration share the head modifier
+// (Public/Private/etc.) but each carries its own WITHEVENTS marker,
+// type, and array-bounds clause per §4.4. The non-WithEvents shape
+// mirrors `variableDecl` (used inside `localDeclStatement`); the two
+// rules are kept separate so the WithEvents extension does not leak
+// into procedure-body declarations where the modifier would be illegal.
+
+moduleVariableDecl
+    : moduleVariableDeclHead moduleVariableDeclItem (COMMA moduleVariableDeclItem)*
+    ;
+
+moduleVariableDeclHead
+    : PUBLIC | PRIVATE | GLOBAL | DIM
+    ;
+
+// Two alternatives: a `WithEvents`-prefixed item is restricted to a
+// non-array, non-fixed-string, non-New class type per H-F01 ("the
+// type must be a specific class; WithEvents cannot combine with New").
+// The AS clause is required because a WithEvents variable's type
+// determines the available event surface; a typeless WithEvents
+// declaration is grammatically invalid. The non-WithEvents alternative
+// retains the full `typeSpec` (including `NEW?` and `STAR <expr>`
+// fixed-length-string forms) and array bounds.
+moduleVariableDeclItem
+    : WITHEVENTS (IDENTIFIER | TYPED_IDENTIFIER) AS typeName    # WithEventsVarItem
+    | (IDENTIFIER | TYPED_IDENTIFIER)
+      (LPAREN arrayBoundsList? RPAREN)?
+      (AS typeSpec)?                                            # RegularVarItem
+    ;
+
+// --- 4. Module-level Const ----------------------------------------
+//
+// `[Public | Private] Const <name> [As <type>] = <const-expr>` —
+// reuses the existing `constStatement` rule which already accepts
+// the optional access-modifier prefix.
+
+moduleConstStatement
+    : constStatement
+    ;
+
+// --- 5. Type / Enum declarations (§4.4) ---------------------------
+//
+// `[Public | Private] Type <name> ... End Type` — UDT declaration.
+// Members are per-line `<name>[(<bounds>)] [As <type>]`. Fixed-length
+// strings (`element As String * <const>`) are handled by `typeSpec`
+// which already includes the `STAR expression` tail.
+//
+// `[Public | Private] Enum <name> ... End Enum` — enumeration.
+// Members are `<name> [= <expr>]`. Auto-increment from previous +1
+// is downstream resolver work; the parser only records the
+// explicit-value flag.
+
+typeDeclaration
+    : (PUBLIC | PRIVATE)? TYPE IDENTIFIER NEWLINE
+        typeMember*
+      END TYPE
+    ;
+
+typeMember
+    : (IDENTIFIER | TYPED_IDENTIFIER)
+      (LPAREN arrayBoundsList? RPAREN)?
+      (AS typeSpec)? NEWLINE
+    | NEWLINE
+    ;
+
+enumDeclaration
+    : (PUBLIC | PRIVATE)? ENUM IDENTIFIER NEWLINE
+        enumMember*
+      END ENUM
+    ;
+
+enumMember
+    : IDENTIFIER (EQ expression)? NEWLINE
+    | NEWLINE
+    ;
+
+// --- 6. Declare statement (§4.4 — external API import) ------------
+//
+// `[Public | Private] Declare [PtrSafe] (Sub | Function) <name>
+//     Lib "<dll>" [Alias "<alias>"] [(<params>)] [As <type>]`
+//
+// `PtrSafe` is required in 64-bit VBA / VBA7. The `(<params>)` clause
+// is optional (a parameter-less Declare is legal). The `As <type>`
+// clause is reserved to Function declarations — semantic rejection
+// of `Declare Sub ... As Long` is a downstream check; the parser
+// accepts both forms to keep the grammar small.
+
+declareStatement
+    : (PUBLIC | PRIVATE)? DECLARE PTRSAFE? (SUB | FUNCTION) IDENTIFIER
+        LIB STRING_LITERAL (ALIAS STRING_LITERAL)?
+        (LPAREN parameterList? RPAREN)?
+        (AS typeSpec)?
+    ;
+
+// --- 7. Public Event declaration (§4.4 — class-module surface) ----
+//
+// `[Public] Event <name>([<params>])` — declares an event a class
+// may `RaiseEvent`. Per MS-VBAL §4.4 and the spec study, only
+// `Public` is valid as the access modifier on `Event` declarations —
+// `Private Event` is not part of the syntax. Per spec, event
+// parameters cannot be `Optional` or `ParamArray` and have no default
+// values. A dedicated `eventParameter` rule (instead of reusing the
+// general `parameterList`) enforces these exclusions at the grammar
+// layer rather than deferring them to downstream validation.
+
+publicEventDeclaration
+    : PUBLIC? EVENT IDENTIFIER LPAREN eventParameterList? RPAREN
+    ;
+
+eventParameterList
+    : eventParameter (COMMA eventParameter)*
+    ;
+
+eventParameter
+    : (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER)
+      (LPAREN RPAREN)? (AS typeSpec)?
+    ;
+
+// --- 8. Procedure declarations (§4.5) -----------------------------
+//
+// Three forms — Sub, Function, Property Get/Let/Set — share the
+// modifier head (Public/Private/Friend, optional Static). Each ends
+// with its own END <kind> terminator.
+//
+// `Property` covers all three accessor kinds via the GET | LET | SET
+// alternative; pairing into triplets (H-E03) is resolver work — the
+// grammar emits each accessor as its own declaration.
+//
+// `STATIC?` after the access modifier propagates static lifetime to
+// every local in the procedure body (§4.5.1, semantic concern; the
+// grammar only records the modifier).
+//
+// Form/Report/class-module event handler procedures (Form_BeforeUpdate
+// etc., H-F02 / H-F05) are syntactically just `subDeclaration` forms
+// with a procedure name containing one or more underscores — the
+// grammar makes no special case for them; the resolver matches by
+// name pattern against the form's design-time event surface
+// (resolver-references-and-with-blocks #8 + later sets).
+
+procedureDeclaration
+    : subDeclaration                                                 # SubDecl
+    | functionDeclaration                                            # FunctionDecl
+    | propertyGetDeclaration                                         # PropertyGetDecl
+    | propertyLetDeclaration                                         # PropertyLetDecl
+    | propertySetDeclaration                                         # PropertySetDecl
+    ;
+
+procedureModifier
+    : PUBLIC | PRIVATE | FRIEND
+    ;
+
+subDeclaration
+    : procedureModifier? STATIC? SUB IDENTIFIER
+        LPAREN parameterList? RPAREN NEWLINE
+        statementListBody
+      END SUB
+    ;
+
+functionDeclaration
+    : procedureModifier? STATIC? FUNCTION IDENTIFIER
+        LPAREN parameterList? RPAREN (AS typeSpec)? NEWLINE
+        statementListBody
+      END FUNCTION
+    ;
+
+// Property accessors are split into three productions because their
+// allowed shapes differ:
+//   Get — parameter list optional (a no-arg property has zero params),
+//         optional `As <type>` return clause.
+//   Let — parameter list **required** (must receive at least the
+//         value-being-assigned parameter), no `As <type>` (the value
+//         type is on the trailing parameter, not the procedure).
+//   Set — same as Let, but the trailing parameter is an object
+//         reference rather than a value.
+// Triplet pairing (matching Get/Let/Set with the same name and
+// validating parameter alignment per H-E03) is resolver work, not
+// grammar work. Splitting the accessor forms catches over-acceptance
+// at the grammar layer (e.g., a stray `Property Let X() As Long` is
+// rejected here rather than living through to a resolver error).
+
+propertyGetDeclaration
+    : procedureModifier? STATIC? PROPERTY GET IDENTIFIER
+        LPAREN parameterList? RPAREN (AS typeSpec)? NEWLINE
+        statementListBody
+      END PROPERTY
+    ;
+
+propertyLetDeclaration
+    : procedureModifier? STATIC? PROPERTY LET IDENTIFIER
+        LPAREN parameterList RPAREN NEWLINE
+        statementListBody
+      END PROPERTY
+    ;
+
+propertySetDeclaration
+    : procedureModifier? STATIC? PROPERTY SET IDENTIFIER
+        LPAREN parameterList RPAREN NEWLINE
+        statementListBody
+      END PROPERTY
+    ;
+
+// --- 9. Parameter list (§4.6) -------------------------------------
+//
+// Parameters split into three syntactic kinds because their allowed
+// shapes differ:
+//
+//   requiredParameter  — `[ByVal|ByRef] <name>[()] [As <type>]`. No
+//                        `Optional`, no `ParamArray`, no default
+//                        value (a default value implies Optional).
+//
+//   optionalParameter  — `Optional [ByVal|ByRef] <name>[()] [As <type>]
+//                        [= <default>]`. Default values are only
+//                        permitted on Optional parameters per §4.6.
+//
+//   paramArrayParameter — `ParamArray <name>() [As <type>]`. The `()`
+//                        is required (ParamArray is always an array).
+//                        Cannot combine with Optional, ByVal, or ByRef
+//                        per H-E07; the per-kind rule structurally
+//                        enforces this.
+//
+// `parameterList` enforces three positional invariants per §4.6:
+//   (a) ParamArray must be the LAST parameter, if present.
+//   (b) Default values are only on Optional parameters.
+//   (c) Once a parameter is Optional, all subsequent positional
+//       parameters must also be Optional ("required-after-optional"
+//       is rejected).
+//
+// The grammar models this via the `positionalParameters` choice:
+// either zero-or-more required parameters followed by zero-or-more
+// optional parameters (all-required, all-optional, and required-then-
+// optional are all covered), or one-or-more optional parameters
+// (the no-required case). A trailing ParamArray attaches to either,
+// or stands alone as the only parameter.
+
+parameterList
+    : positionalParameters (COMMA paramArrayParameter)?
+    | paramArrayParameter
+    ;
+
+positionalParameters
+    : requiredParameter (COMMA requiredParameter)* (COMMA optionalParameter)*
+    | optionalParameter (COMMA optionalParameter)*
+    ;
+
+requiredParameter
+    : (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER)
+      (LPAREN RPAREN)? (AS typeSpec)?
+    ;
+
+optionalParameter
+    : OPTIONAL (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER)
+      (LPAREN RPAREN)? (AS typeSpec)? (EQ expression)?
+    ;
+
+paramArrayParameter
+    : PARAMARRAY (IDENTIFIER | TYPED_IDENTIFIER) LPAREN RPAREN
+      (AS typeSpec)?
     ;
 
 // ============================================================
