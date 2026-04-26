@@ -2,7 +2,7 @@
   "name": "dabbler-session-sets",
   "displayName": "Session Set Explorer",
   "description": "Activity-bar tree view of session-set state for the dabbler-access-harvester workflow.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "publisher": "darndestdabbler",
   "private": true,
   "engines": {

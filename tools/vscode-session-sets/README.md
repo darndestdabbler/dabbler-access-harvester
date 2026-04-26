@@ -24,6 +24,27 @@ session-state.json,activity-log.json,change-log.md}` and re-reads when those
 change, so the tree auto-refreshes whenever a session is registered, logged,
 or completed.
 
+## Multi-root workspaces (per-set worktrees)
+
+The extension scans `docs/session-sets/` under **every** workspace folder,
+not just the first. When you run a session set in an isolated git
+worktree (the per-set worktree convention in
+[`docs/planning/project-guidance.md`](../../docs/planning/project-guidance.md)),
+add the worktree to the workspace via **File → Add Folder to Workspace…**
+and the extension picks up its in-progress signals in real time —
+`session-state.json` and `activity-log.json` updates land while the
+session is still running, before the worktree merges back to main.
+
+When the same slug exists in multiple roots (e.g., the main repo holds
+the spec while a worktree carries the live activity log), the
+higher-state entry wins (done > in-progress > not-started); ties break
+on most-recent `lastTouched`. The tooltip's `Folder:` line shows which
+workspace folder owns the displayed entry, so you can tell at a glance
+whether a row reflects the main repo or a sibling worktree.
+
+The watchers and the cache rebuild automatically when workspace folders
+are added or removed, so adding the worktree mid-session is enough.
+
 ## Tree-item interactions
 
 - **Click a session set** → opens its `spec.md`.
@@ -79,8 +100,8 @@ npm install -g @vscode/vsce
 
 # From this folder:
 cd tools/vscode-session-sets
-vsce package           # produces dabbler-session-sets-0.5.0.vsix
-code --install-extension dabbler-session-sets-0.5.0.vsix
+vsce package           # produces dabbler-session-sets-0.6.0.vsix
+code --install-extension dabbler-session-sets-0.6.0.vsix
 ```
 
 To uninstall: `code --uninstall-extension darndestdabbler.dabbler-session-sets`.
