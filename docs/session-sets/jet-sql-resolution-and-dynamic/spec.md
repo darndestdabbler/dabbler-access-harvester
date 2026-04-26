@@ -3,7 +3,7 @@
 > **Purpose:** Detect form-control references inside SQL ASTs (`[Forms]![X]![Y]` and friends) and link them to resolved control declarations from the Access symbol table; perform intra-procedural data-flow analysis on VBA-constructed SQL strings to enumerate candidate query templates.
 > **Created:** 2026-04-25
 > **Session Set:** `docs/session-sets/jet-sql-resolution-and-dynamic/`
-> **Prerequisite:** docs/session-sets/access-symbol-table-and-types/, docs/session-sets/jet-sql-grammar-and-parser/
+> **Prerequisite:** docs/session-sets/access-resolver-symbol-table-integration/, docs/session-sets/jet-sql-grammar-and-parser/
 > **Workflow:** Orchestrator → AI Router → Cross-provider verification
 
 > **This spec is a stub.** The orchestrator executing Session 1 of this set must elaborate the step lists before running them.
@@ -18,7 +18,7 @@
 |---|---|
 | **Slug (column 2)** | `jet-sql-resolution-and-dynamic` |
 | **Plan-phase coverage (column 3)** | Phase 5.3-5.4 (form-reference detection in SQL + dynamic SQL analysis) |
-| **Prereqs (column 4)** | #11, #12 |
+| **Prereqs (column 4)** | #11b, #12 |
 | **Sessions (rough) (column 5)** | 3-4 |
 | **Synthesis count (column 6)** | 2 (form-reference detection design, dynamic SQL data-flow analyzer) |
 | **Outputs (column 7)** | `AccessHarvester.Sql.Parser/FormReferences/`, `AccessHarvester.Sql.Parser/DynamicSql/` data-flow analyzer |
@@ -29,7 +29,7 @@ Slug, phase coverage, prereqs, session count, and output paths above are the str
 
 ## Project Overview
 
-Implements **Phase 5.3–5.4** of `docs/VBA-Parser-Migration-Harvester-Plan.md`. Bridges the VBA resolver (from #11) and the SQL parser (from #12). Two distinct deliverables share infrastructure: form-reference detection (#5.3, structural — find `[Forms]![X]![Y]` patterns and annotate AST nodes with resolved control declarations) and dynamic SQL analysis (#5.4, data-flow — walk backward through VBA procedures tracking string-typed variables, resolving constants and form-control references in concatenations, marking unknowns as wildcards).
+Implements **Phase 5.3–5.4** of `docs/VBA-Parser-Migration-Harvester-Plan.md`. Bridges the VBA resolver (from #11b) and the SQL parser (from #12). Two distinct deliverables share infrastructure: form-reference detection (#5.3, structural — find `[Forms]![X]![Y]` patterns and annotate AST nodes with resolved control declarations) and dynamic SQL analysis (#5.4, data-flow — walk backward through VBA procedures tracking string-typed variables, resolving constants and form-control references in concatenations, marking unknowns as wildcards).
 
 Test-case anchors per the parent tree's coverage table: `04` (form-reference patterns), `05` (canonical dynamic SQL — 32 possible forms enumerated as 5 templates).
 
@@ -43,7 +43,7 @@ Slug, plan-phase coverage, prerequisites, session count, and output paths are fi
 
 ### Scope
 
-Identify `[Forms]![X]![Y]` and similar (`[Reports]!`, `[Forms]![X].Form.<Property>`) patterns inside SQL ASTs from #12, and link them to resolved control declarations via the Access metadata symbol table from #11.
+Identify `[Forms]![X]![Y]` and similar (`[Reports]!`, `[Forms]![X].Form.<Property>`) patterns inside SQL ASTs from #12, and link them to resolved control declarations via the Access metadata symbol table from #11b.
 
 Output: `AccessHarvester.Sql.Parser/FormReferences/` — a visitor over SQL ASTs that emits annotated AST nodes carrying the resolved declaration (or marking unresolved with provenance per the project guidance).
 
@@ -71,7 +71,7 @@ Output: `AccessHarvester.Sql.Parser/DynamicSql/` — the data-flow analyzer + th
 
 ### Session 1 of 3-4: Form-Reference Detection (Synthesis)
 
-- Read Phase 5.3 + #11's symbol table + #12's SQL AST + fixture `04`.
+- Read Phase 5.3 + #11b's symbol table + #12's SQL AST + fixture `04`.
 - Route an `architecture` synthesis call producing the form-reference visitor (1 of 2 synthesis sessions).
 - Land detection under `AccessHarvester.Sql.Parser/FormReferences/`.
 
