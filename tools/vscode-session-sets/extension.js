@@ -10,14 +10,21 @@
 // without waiting for the first commit. The extension never writes — it
 // only watches and re-reads.
 //
-// Multi-root: scans `docs/session-sets/` under every workspace folder, so
-// per-set git worktrees added via "Add Folder to Workspace…" surface
-// in-progress state immediately. When the same slug exists in multiple
-// roots (e.g., main repo has the spec while a worktree carries
-// activity-log.json mid-session), the higher-state entry wins (done >
+// Worktree auto-discovery: for every workspace folder that is a git repo,
+// the extension also scans the `docs/session-sets/` tree of every other
+// worktree of that repo (discovered via `git worktree list --porcelain`).
+// This surfaces in-progress sessions running in sibling worktrees without
+// requiring the user to add each worktree as a workspace folder. New
+// worktrees are picked up on (a) workspace-folder changes, (b) the
+// title-bar refresh button, or (c) a 30-second background poll.
+//
+// Multi-root precedence: when the same slug exists in multiple discovered
+// roots (e.g., the main repo carries the spec while a worktree carries
+// the live activity-log.json), the higher-state entry wins (done >
 // in-progress > not-started); ties break on most-recent `lastTouched`.
 
 const vscode = require("vscode");
+const cp = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
@@ -30,6 +37,60 @@ function workspaceFolders() {
 function primaryRoot() {
   const folders = workspaceFolders();
   return folders.length ? folders[0].uri.fsPath : null;
+}
+
+// Run `git worktree list --porcelain` in `cwd` and return the absolute
+// paths of every worktree git knows about. Silent fallback to [] when
+// git is missing, the directory is not a repo, or the command errors —
+// the extension is still useful with workspace folders alone.
+function listGitWorktrees(cwd) {
+  let out;
+  try {
+    out = cp.execFileSync("git", ["worktree", "list", "--porcelain"], {
+      cwd,
+      encoding: "utf8",
+      // Suppress shell windows on Windows; cap output to keep a runaway
+      // git invocation from blocking the UI thread.
+      windowsHide: true,
+      maxBuffer: 1024 * 1024,
+      timeout: 5000,
+    });
+  } catch (_) {
+    return [];
+  }
+  const paths = [];
+  for (const line of out.split(/\r?\n/)) {
+    if (line.startsWith("worktree ")) {
+      const wt = line.slice("worktree ".length).trim();
+      if (wt) paths.push(path.resolve(wt));
+    }
+  }
+  return paths;
+}
+
+// Workspace folders + every worktree git knows about for any of them,
+// deduped by case-insensitive absolute path (Windows-friendly).
+function discoverRoots() {
+  const seen = new Map();   // lower-cased path -> canonical path
+  const order = [];
+  const add = (p) => {
+    if (!p) return;
+    const canonical = path.resolve(p);
+    const key = canonical.toLowerCase();
+    if (seen.has(key)) return;
+    if (!fs.existsSync(canonical)) return;
+    seen.set(key, canonical);
+    order.push(canonical);
+  };
+  for (const folder of workspaceFolders()) {
+    add(folder.uri.fsPath);
+  }
+  for (const folder of workspaceFolders()) {
+    for (const wt of listGitWorktrees(folder.uri.fsPath)) {
+      add(wt);
+    }
+  }
+  return order;
 }
 
 function readSessionSets(root) {
@@ -127,8 +188,7 @@ const STATE_RANK = { "done": 2, "in-progress": 1, "not-started": 0 };
 
 function readAllSessionSets() {
   const merged = new Map();
-  for (const folder of workspaceFolders()) {
-    const root = folder.uri.fsPath;
+  for (const root of discoverRoots()) {
     for (const set of readSessionSets(root)) {
       const prior = merged.get(set.name);
       if (!prior) {
@@ -274,16 +334,14 @@ function liveSessionTooltipLines(set) {
 }
 
 function folderTooltip(set) {
-  // When a worktree is in the workspace alongside the main repo, the
-  // tooltip benefits from naming both the workspace folder (e.g.
-  // `dabbler-access-harvester-vba-statement-and-module-grammar`) and the
-  // path within it. With a single workspace folder this collapses to the
-  // familiar `docs/session-sets/<slug>` form.
-  const folders = workspaceFolders();
-  const owner = folders.find((f) => f.uri.fsPath === set.root);
+  // For sets discovered via `git worktree list`, name the worktree
+  // directory so the user can tell at a glance whether a row is from
+  // the main repo or a sibling worktree. With a single discovered root
+  // this collapses to the familiar `docs/session-sets/<slug>` form.
+  const roots = discoverRoots();
   const rel = path.relative(set.root, set.dir);
-  if (folders.length > 1 && owner) {
-    return `${owner.name} / ${rel}`;
+  if (roots.length > 1) {
+    return `${path.basename(set.root)} / ${rel}`;
   }
   return rel;
 }
@@ -329,44 +387,62 @@ function activate(context) {
     vscode.window.registerTreeDataProvider("dabblerSessionSets", provider),
   );
 
-  // Per-root file watchers — one per workspace folder so worktrees added
-  // to the workspace get the same in-progress signal as the main repo.
-  // Disposed and rebuilt on workspace-folder changes.
+  // Per-root file watchers — one per discovered root (workspace folders +
+  // sibling worktrees). Rebound on workspace-folder changes, on the
+  // 30-second background poll, and on every manual refresh, so newly-
+  // created worktrees pick up watchers without a VS Code restart.
   let watcherSubs = [];
-  const refresh = () => provider.refresh();
+  let boundRoots = new Set();
 
   function bindWatchers() {
+    const roots = discoverRoots();
+    const want = new Set(roots.map((r) => r.toLowerCase()));
+    if (
+      want.size === boundRoots.size &&
+      [...want].every((r) => boundRoots.has(r))
+    ) {
+      return;  // no change — keep existing watchers
+    }
     for (const sub of watcherSubs) sub.dispose();
     watcherSubs = [];
-    for (const folder of workspaceFolders()) {
-      const sessionSetsAbs = path.join(folder.uri.fsPath, SESSION_SETS_REL);
+    boundRoots = want;
+    for (const root of roots) {
+      const sessionSetsAbs = path.join(root, SESSION_SETS_REL);
       if (!fs.existsSync(sessionSetsAbs)) continue;
       const pattern = new vscode.RelativePattern(
         sessionSetsAbs,
         "**/{spec.md,session-state.json,activity-log.json,change-log.md}",
       );
       const watcher = vscode.workspace.createFileSystemWatcher(pattern);
-      watcher.onDidCreate(refresh);
-      watcher.onDidDelete(refresh);
-      watcher.onDidChange(refresh);
+      const onEvent = () => provider.refresh();
+      watcher.onDidCreate(onEvent);
+      watcher.onDidDelete(onEvent);
+      watcher.onDidChange(onEvent);
       watcherSubs.push(watcher);
       context.subscriptions.push(watcher);
     }
   }
 
+  const refreshAll = () => {
+    bindWatchers();
+    provider.refresh();
+  };
+
   bindWatchers();
 
   context.subscriptions.push(
-    vscode.workspace.onDidChangeWorkspaceFolders(() => {
-      bindWatchers();
-      refresh();
-    }),
+    vscode.workspace.onDidChangeWorkspaceFolders(refreshAll),
   );
 
+  // Background poll picks up worktrees created mid-session (`git
+  // worktree add ../<repo>-<slug>`) without requiring the user to hit
+  // refresh. 30s is well under typical session length and the cost is
+  // one `git worktree list` per workspace folder.
+  const pollHandle = setInterval(refreshAll, 30000);
+  context.subscriptions.push({ dispose: () => clearInterval(pollHandle) });
+
   context.subscriptions.push(
-    vscode.commands.registerCommand("dabblerSessionSets.refresh", () =>
-      provider.refresh(),
-    ),
+    vscode.commands.registerCommand("dabblerSessionSets.refresh", refreshAll),
   );
 
   const openIfExists = (p) => {

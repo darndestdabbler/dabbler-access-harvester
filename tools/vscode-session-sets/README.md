@@ -24,26 +24,37 @@ session-state.json,activity-log.json,change-log.md}` and re-reads when those
 change, so the tree auto-refreshes whenever a session is registered, logged,
 or completed.
 
-## Multi-root workspaces (per-set worktrees)
+## Per-set worktrees (auto-discovered)
 
-The extension scans `docs/session-sets/` under **every** workspace folder,
-not just the first. When you run a session set in an isolated git
-worktree (the per-set worktree convention in
-[`docs/planning/project-guidance.md`](../../docs/planning/project-guidance.md)),
-add the worktree to the workspace via **File → Add Folder to Workspace…**
-and the extension picks up its in-progress signals in real time —
-`session-state.json` and `activity-log.json` updates land while the
-session is still running, before the worktree merges back to main.
+When you run a session set in an isolated git worktree — the per-set
+worktree convention in
+[`docs/planning/project-guidance.md`](../../docs/planning/project-guidance.md)
+→ Conventions → Workflow Expectations — the extension finds it for you
+automatically. For every workspace folder it runs
+`git worktree list --porcelain` and scans `docs/session-sets/` in every
+sibling worktree git knows about. No need to add the worktree to the
+workspace, and no need to remove it after the merge.
 
-When the same slug exists in multiple roots (e.g., the main repo holds
-the spec while a worktree carries the live activity log), the
-higher-state entry wins (done > in-progress > not-started); ties break
-on most-recent `lastTouched`. The tooltip's `Folder:` line shows which
-workspace folder owns the displayed entry, so you can tell at a glance
-whether a row reflects the main repo or a sibling worktree.
+New worktrees show up via three triggers:
 
-The watchers and the cache rebuild automatically when workspace folders
-are added or removed, so adding the worktree mid-session is enough.
+- **Workspace-folder change** (e.g. opening a different repo) → instant.
+- **Title-bar refresh button** → instant.
+- **30-second background poll** — picks up `git worktree add` runs
+  that happened while VS Code was already open.
+
+When the same slug exists in multiple discovered roots (e.g., the main
+repo carries the spec while a worktree carries the live activity log),
+the higher-state entry wins (done > in-progress > not-started); ties
+break on most-recent `lastTouched`. The tooltip's `Folder:` line shows
+the worktree directory name when more than one root is in play, so you
+can tell at a glance whether a row reflects the main repo or a sibling
+worktree.
+
+If `git` is not on `PATH`, or a workspace folder is not a git repo,
+auto-discovery silently falls back to scanning that folder alone — the
+extension stays useful in non-worktree setups too. You can also still
+add a worktree manually via **File → Add Folder to Workspace…** and the
+multi-root scan picks it up the same way.
 
 ## Tree-item interactions
 
@@ -100,8 +111,8 @@ npm install -g @vscode/vsce
 
 # From this folder:
 cd tools/vscode-session-sets
-vsce package           # produces dabbler-session-sets-0.6.0.vsix
-code --install-extension dabbler-session-sets-0.6.0.vsix
+vsce package           # produces dabbler-session-sets-0.7.0.vsix
+code --install-extension dabbler-session-sets-0.7.0.vsix
 ```
 
 To uninstall: `code --uninstall-extension darndestdabbler.dabbler-session-sets`.
