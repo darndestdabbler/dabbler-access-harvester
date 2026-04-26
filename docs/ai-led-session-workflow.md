@@ -152,6 +152,7 @@ session set lives in `docs/session-sets/<name>/` and contains:
 | `spec.md` | The full plan: goals, features, and per-session step lists |
 | `ai-assignment.md` | Per-session AI-assignment ledger: recommended orchestrator (engine + model + thinking/effort) and per-step routed-task model/effort, with rationale. Authored by Session 1 of the set via `route(task_type='analysis')`; appended-to at the end of each subsequent session with that session's actuals + the recommendation for the next |
 | `activity-log.json` | Machine-readable log of every step across all sessions |
+| `session-state.json` | Live state of the most-recently-started session: session number, orchestrator (engine + model + effort), `in-progress` / `complete`. Written at the start of each session by `register_session_start` (Step 0) and flipped to `complete` at the end of Step 8 by `mark_session_complete`. Lets external tools (e.g., the Session Set Explorer VS Code extension) show in-progress before any activity-log entry has landed |
 | `session-reviews/session-NNN.md` | Raw verifier output for each session (never edited) |
 | `session-reviews/issues-NNN.json` | Issue log if verification found problems |
 | `change-log.md` | Generated after the final session; marks the set as complete |
@@ -406,30 +407,113 @@ the Responses API via plain HTTP.
 When the human says **"Start the next session"**, the orchestrator follows
 this exact procedure.
 
-### Step 0: Verify API Keys And Read Guidance
+### Step 0: Verify API Keys, Identify Active Session Set, Register, Read Guidance
 
-Before doing anything else:
+Before doing anything else, in this exact order:
 
-1. Read `docs/planning/project-guidance.md`
-2. Read `docs/planning/lessons-learned.md`
-3. Then load keys from the environment and confirm they are present
+1. **Load API keys** from the environment and confirm they are present. If
+   keys are missing, stop and tell the human.
 
-If keys are missing, stop and tell the human.
+2. **Read `docs/planning/project-guidance.md`** so durable conventions and
+   principles are in scope before any session-set decisions.
+
+3. **Identify the active session set** with `find_active_session_set()`. The
+   detection rules (used here AND by the Session Set Explorer extension):
+   - Folder with `spec.md` + (`activity-log.json` OR `session-state.json`)
+     but no `change-log.md` = in-progress
+   - Folder with `spec.md` only = not-started (use if no in-progress exists)
+   - Folder with `change-log.md` = complete (skip)
+
+   ```python
+   from ai_router.session_log import find_active_session_set, SessionLog
+
+   SESSION_SET = find_active_session_set("docs/session-sets")
+   log = SessionLog(SESSION_SET)
+   next_session = log.get_next_session_number()
+   ```
+
+4. **Register this session in `session-state.json`** — see
+   [Session-State Registration](#session-state-registration) below for the
+   schema, helper call, and self-identification rules. This is the earliest
+   moment external tools (notably the Session Set Explorer VS Code
+   extension) can detect that the set has moved into the in-progress state,
+   so do it BEFORE reading lessons-learned and before any session work.
+
+5. **Read `docs/planning/lessons-learned.md`** for repo-specific failure
+   patterns relevant to this session.
+
+#### Session-State Registration
+
+`session-state.json` lives at the root of each session-set folder and
+records, for the most-recently-started session: which session number is
+running, who the orchestrator is (engine + model + effort), and whether
+the session is currently in-progress or complete. The file is overwritten
+at the start of every session and updated to `complete` at the end of
+Step 8 just before commit. It is committed alongside the rest of the
+session output, so the audit trail of "which orchestrator ran which
+session" is preserved in git history.
+
+Schema (written by `register_session_start`):
+
+```json
+{
+  "schemaVersion": 1,
+  "sessionSetName": "<slug>",
+  "currentSession": 3,
+  "totalSessions": 6,
+  "status": "in-progress",
+  "startedAt": "2026-04-26T14:23:00+00:00",
+  "completedAt": null,
+  "verificationVerdict": null,
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "unknown"
+  }
+}
+```
+
+Helper call (Step 0 sub-step 4):
+
+```python
+from ai_router import register_session_start
+
+register_session_start(
+    session_set=SESSION_SET,
+    session_number=next_session,
+    total_sessions=log.total_sessions,
+    orchestrator_engine="claude-code",     # or "codex", "gemini-cli"
+    orchestrator_provider="anthropic",     # or "openai", "google"
+    orchestrator_model="claude-opus-4-7",  # best-effort self-report from system prompt
+    orchestrator_effort="unknown",         # see self-identification rules below
+)
+```
+
+**Self-identification rules.** The orchestrator fills in these fields
+itself, with the following constraints:
+
+- `engine` is always known — Claude Code uses `"claude-code"`, Codex uses
+  `"codex"`, Gemini CLI uses `"gemini-cli"`.
+- `provider` is derivable from engine — `"anthropic"`, `"openai"`,
+  `"google"` respectively.
+- `model` is the model ID from the orchestrator's own system prompt
+  (e.g., `"claude-opus-4-7"`, `"gpt-5.4"`, `"gemini-2.5-pro"`). If the
+  orchestrator cannot read its own model ID, pass `"unknown"`.
+- `effort` is the reasoning-effort knob if the orchestrator can introspect
+  it (`"low"` / `"medium"` / `"high"` / `"fast"` / `"normal"`).
+  **Most orchestrators cannot introspect this from inside the conversation
+  — pass `"unknown"` rather than guessing.** The human can override
+  this manually after the fact if accuracy matters.
+
+Step 8 flips `status` to `complete` and fills `completedAt` and
+`verificationVerdict`; do not edit the file directly between Step 0 and
+Step 8.
 
 ### Step 1: Identify the Active Session Set
 
-The `find_active_session_set()` function auto-detects:
-- Folder with `spec.md` + `activity-log.json` but no `change-log.md` = in-progress
-- Folder with `spec.md` only = not-started (use if no in-progress exists)
-- Folder with `change-log.md` = complete (skip)
-
-```python
-from ai_router.session_log import find_active_session_set, SessionLog
-
-SESSION_SET = find_active_session_set("docs/session-sets")
-log = SessionLog(SESSION_SET)
-next_session = log.get_next_session_number()
-```
+(This step is satisfied by Step 0 sub-step 3 — the `SESSION_SET`, `log`,
+and `next_session` variables are already set. Continue to Step 2.)
 
 ### Step 2: Read the Spec
 
@@ -810,6 +894,21 @@ renamed at lifecycle transitions. Glyphs are ASCII (`[~]` / `[ ]` /
 ```python
 from ai_router import print_session_set_status
 print_session_set_status()
+```
+
+**Flip `session-state.json` to `complete` before staging.** This is the
+mirror of the Step 0 registration: it captures the verification verdict
+and `completedAt` timestamp in the same commit as the session's code, so
+the file's git history is the authoritative orchestrator-per-session
+audit trail.
+
+```python
+from ai_router import mark_session_complete
+
+mark_session_complete(
+    session_set=SESSION_SET,
+    verification_verdict="VERIFIED",   # or "ISSUES_FOUND" if Step 7 deferred any
+)
 ```
 
 Commit and push:
