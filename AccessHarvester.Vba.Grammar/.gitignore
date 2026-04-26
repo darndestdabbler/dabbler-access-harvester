@@ -1,0 +1,13 @@
+# ANTLR4 Generated Files
+VbaLexer.cs
+VbaParser.cs
+VbaLexer.tokens
+Vba.tokens
+VbaBaseListener.cs
+VbaBaseVisitor.cs
+VbaListener.cs
+VbaVisitor.cs
+
+# Build artifacts
+bin/
+obj/
