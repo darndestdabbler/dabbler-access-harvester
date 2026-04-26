@@ -246,6 +246,146 @@
           "costUsd": 0.00167375
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/verify-prereqs-and-harness",
+      "dateTime": "2026-04-26T11:32:39.437979+00:00",
+      "description": "Read Session 3 spec; verified parser-foundations harness exists at tools/parser-harness/harness.py. Confirmed Session 2 commit at HEAD. API keys OK.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/add-parse-cli-subcommand",
+      "dateTime": "2026-04-26T11:32:39.438979+00:00",
+      "description": "Added 'parse' subcommand to AccessHarvester.Cli/Program.cs with harness-contract JSON output (status/errors/tree_stats). Added bare-file fallback mode for harness compatibility. Added ProjectReference to AccessHarvester.Vba.Grammar in CLI csproj. Added BOM-aware + Windows-1252 source decoding. Updated PrintUsage().",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/run-harness-baseline",
+      "dateTime": "2026-04-26T11:32:39.438979+00:00",
+      "description": "Published CLI to tmp/parser-exe/. Ran parser-foundations harness against all 12 corpus fixtures. Result: 12/12 parsed, 0 errors, 0 ERROR_TOKEN characters across all fixtures. Baseline saved to tmp/harness-session3-baseline.json.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/schema-validation",
+      "dateTime": "2026-04-26T11:32:39.439979+00:00",
+      "description": "In-conversation schema-validation (Sonnet orchestrator matches routing target per Convention). Compared coverage-matrix expression rows (\u00a75.1-5.2, \u00a75.6) and lexical rows (\u00a73.3-3.4) against grammar. PASSED: all in-scope 'must' rows covered. Statement-tier (\u00a75.3-5.5) correctly deferred to #4.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/write-parse-failure-log",
+      "dateTime": "2026-04-26T11:32:39.440973+00:00",
+      "description": "Authored docs/spec-coverage/parse-failure-log.md with Session 3 baseline entry: harness results table, analysis, schema-validation correspondence table, open items for #4.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-04-26T11:32:39.440973+00:00",
+      "description": "dotnet build + dotnet test sequentially. 0 errors. 117/117 grammar + 127/127 legacy = 244/244 pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/cross-provider-verification-r1",
+      "dateTime": "2026-04-26T11:32:39.441980+00:00",
+      "description": "Round-1 session-verification via route(task_type='session-verification', complexity_hint=70). Verdict: ISSUES_FOUND (4 Minor).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7350,
+          "outputTokens": 9833,
+          "costUsd": 0.1659
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/r1-fixes",
+      "dateTime": "2026-04-26T11:32:39.442980+00:00",
+      "description": "Fixed all 4 R1 Minor issues: (1) bare-file heuristic \u2192 known-command exclusion; (2) UTF-8-only decoding \u2192 BOM-aware + CP-1252 fallback; (3) schema table missing AddressOf/implicit-With/named-args/empty-args rows; (4) PrintUsage() missing parse documentation.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/cross-provider-verification-r2",
+      "dateTime": "2026-04-26T11:32:39.443894+00:00",
+      "description": "Round-2 verification (complexity_hint=70). Verdict: ISSUES_FOUND (1 Minor). Encoding.Default is locale-dependent; pinned to GetEncoding(1252).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7607,
+          "outputTokens": 6261,
+          "costUsd": 0.1129
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-3/cross-provider-verification-r3",
+      "dateTime": "2026-04-26T11:32:39.443894+00:00",
+      "description": "Round-3 verification (retry cap reached). Verdict: ISSUES_FOUND (1 Minor persistent encoding). Fixed in-place: replaced BOM+try/catch approach with BOM-first / Windows-1252-default (no try/catch). Simpler and fully deterministic.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1277,
+          "outputTokens": 2074,
+          "costUsd": 0.0343
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 11,
+      "stepKey": "session-3/build-and-test-final",
+      "dateTime": "2026-04-26T11:32:39.443894+00:00",
+      "description": "Final build + test after R3 fix. 0 errors. 244/244 pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 12,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T11:32:51.148519+00:00",
+      "description": "Routed analysis recommending Session 4 orchestrator. Saved to next-orchestrator-recommendation-session-4.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 550,
+          "outputTokens": 75,
+          "costUsd": 0.0014375
+        }
+      ]
     }
   ]
 }
