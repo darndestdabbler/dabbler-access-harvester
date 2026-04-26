@@ -1,0 +1,93 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "summary": "Access control coverage too coarse \u2014 subtypes not registered",
+    "status": "fixed",
+    "fix": "Added Access.TextBox/ComboBox/ListBox/CommandButton/Label with BaseTypeName chain"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "summary": "Access.Application.CurrentDb mis-typed Property; DAO.Recordset.OpenRecordset not a real member",
+    "status": "fixed",
+    "fix": "CurrentDb -> Method; OpenRecordset removed from DAO.Recordset"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "summary": "ADO.Recordset.Fields points at unregistered ADO.Fields",
+    "status": "fixed",
+    "fix": "Added BuildAdoFields()"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "summary": "Tests sample-based, not exhaustive",
+    "status": "fixed",
+    "fix": "Added catalog sentinel + frozen count freeze + expanded kind/return-type sample to 53 entries; v1 pragmatic interpretation acknowledged in spec"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "summary": "TryGet* throws on null input",
+    "status": "fixed",
+    "fix": "Null-guard via string.IsNullOrEmpty + tests"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "summary": "No source-of-truth comment per registered type",
+    "status": "fixed",
+    "fix": "Per-type XML doc with MSDN citation"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "summary": "Members() silently overwrites duplicates",
+    "status": "fixed",
+    "fix": "TryAdd + InvalidOperationException with curator guidance"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "summary": "Inherited default not projected as IsDefault=true via TryGetMember",
+    "status": "fixed",
+    "fix": "ResolveEffectiveDefaultMemberName + projection in TryGetMember"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "summary": "Access.Control too broad \u2014 Label/CommandButton inherit data-bound members",
+    "status": "fixed",
+    "fix": "Added Access.DataBoundControl intermediate base; data-bound members moved there; negative tests"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "summary": "Test coverage finding still not fully fixed",
+    "status": "fixed",
+    "fix": "Catalog sentinel + frozen counts + expanded kind+return-type sample (53 entries) + negative tests for non-data-bound types"
+  },
+  {
+    "round": 2,
+    "severity": "Minor",
+    "summary": "32-hop guard masks bad curation",
+    "status": "fixed",
+    "fix": "ValidateRegistryAtConstruction throws on cycles, missing bases, unresolved DefaultMemberName"
+  },
+  {
+    "round": 3,
+    "severity": "Minor",
+    "summary": "TryGetMember projects IsDefault one-way (false->true) but not the reverse",
+    "status": "fixed",
+    "fix": "Two-way projection: IsDefault returned matches isEffectiveDefault regardless of underlying record's flag"
+  },
+  {
+    "round": 3,
+    "severity": "Minor",
+    "summary": "Stale comments in ITypeLibraryRegistry.cs and TypeLibraryRegistry.cs reference pre-refactor invariants",
+    "status": "fixed",
+    "fix": "Updated TypeInfo XML docs (BaseTypeName cycle detection, DefaultMemberName inheritance) and TextBox/ComboBox/ListBox build-method comments to reference Access.DataBoundControl"
+  }
+]

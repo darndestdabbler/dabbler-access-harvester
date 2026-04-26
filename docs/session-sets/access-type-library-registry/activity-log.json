@@ -1,0 +1,92 @@
+{
+  "sessionSetName": "access-type-library-registry",
+  "createdDate": "2026-04-26T14:03:02.302340+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-26T14:05:11.451062+00:00",
+      "description": "Routed analysis authoring ai-assignment.md (gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3145,
+          "outputTokens": 757,
+          "costUsd": 0.01150125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/cross-provider-verification",
+      "dateTime": "2026-04-26T14:15:35.637101+00:00",
+      "description": "Routed session-verification (gpt-5-4) - round 1",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 12052,
+          "outputTokens": 8526,
+          "costUsd": 0.15802
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/cross-provider-verification-round2",
+      "dateTime": "2026-04-26T14:27:50.346619+00:00",
+      "description": "Routed session-verification (gpt-5-4) - round 2",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16910,
+          "outputTokens": 8885,
+          "costUsd": 0.17555
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 12,
+      "stepKey": "session-1/cross-provider-verification-round3",
+      "dateTime": "2026-04-26T14:36:26.011047+00:00",
+      "description": "Routed session-verification (gpt-5-4) - round 3 (final retry)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20027,
+          "outputTokens": 9366,
+          "costUsd": 0.1905575
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 20,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T14:39:13.814038+00:00",
+      "description": "Routed analysis recommending Session 2 orchestrator (gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 457,
+          "outputTokens": 79,
+          "costUsd": 0.00136125
+        }
+      ]
+    }
+  ]
+}
