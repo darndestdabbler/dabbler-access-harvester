@@ -9,8 +9,8 @@
 > **Session Set:** `docs/session-sets/remaining-work-planner/`
 > **Prerequisite (HARD GATE):** This session set must NOT begin until
 > both of the following session sets have committed `change-log.md`:
->   - `docs/session-sets/accessexportertemp1-import/change-log.md`
->   - `docs/session-sets/vba-parser-session-set-generator/change-log.md`
+>   - `docs/session-sets/✅accessexportertemp1-import/change-log.md`
+>   - `docs/session-sets/✅vba-parser-session-set-generator/change-log.md`
 > An orchestrator picking this set up via `find_active_session_set()`
 > must check both prerequisites in Session 1, Step 1, and stop and
 > notify the human if either is missing.
@@ -58,10 +58,10 @@ unless they are needed to characterize a discovered gap.
 
 Read every artifact produced by the two prerequisite session sets:
 
-- `docs/session-sets/accessexportertemp1-import/import-plan.md`
-- `docs/session-sets/accessexportertemp1-import/change-log.md`
-- `docs/session-sets/vba-parser-session-set-generator/session-set-tree.md`
-- `docs/session-sets/vba-parser-session-set-generator/routing-playbook.md`
+- `docs/session-sets/✅accessexportertemp1-import/import-plan.md`
+- `docs/session-sets/✅accessexportertemp1-import/change-log.md`
+- `docs/session-sets/✅vba-parser-session-set-generator/session-set-tree.md`
+- `docs/session-sets/✅vba-parser-session-set-generator/routing-playbook.md`
 - All stub `spec.md` files under `docs/session-sets/<vba-child>/`
   that the generator created.
 - The current state of the C# solution (top-level `*.csproj` files,
@@ -238,7 +238,7 @@ ambiguous items before Session 2 starts.
    `route(task_type="architecture", complexity_hint=80, content=<the
    new categories + existing routing-playbook.md content>)`.
 5. Save extensions as appended sections in
-   `docs/session-sets/vba-parser-session-set-generator/routing-playbook.md`
+   `docs/session-sets/✅vba-parser-session-set-generator/routing-playbook.md`
    under a clearly-labeled "Extensions from remaining-work-planner"
    header, OR as
    `docs/session-sets/remaining-work-planner/routing-playbook-delta.md`
@@ -259,7 +259,7 @@ ambiguous items before Session 2 starts.
   any amendments)
 
 **Touches:**
-- Possibly `docs/session-sets/vba-parser-session-set-generator/routing-playbook.md`
+- Possibly `docs/session-sets/✅vba-parser-session-set-generator/routing-playbook.md`
 
 **Ends with:** every gap-audit "in scope and unplanned" item has a
 stub spec; tree committed.

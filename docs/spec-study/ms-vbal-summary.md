@@ -3,7 +3,7 @@
 > **Purpose:** Topic-organized prose summary of MS-VBAL (Microsoft Visual Basic for Applications Language Specification) for the `vba-spec-study` session set. Each entry cites the MS-VBAL section, notes syntactic complexity, semantic subtlety, and frequency in Access codebases. Drives coverage matrix (`ms-vbal-coverage.csv`) and hazard list (`hazard-list.md`).
 > **Source:** MS-VBAL specification (Microsoft Open Specifications, VBA Language Specification v5.3). Clean-room — no derivation from Rubberduck or other GPL sources.
 > **Produced:** Session 1 of `vba-spec-study` (2026-04-25), Sonnet orchestrator + Opus synthesis (3 focused route(architecture) calls).
-> **Session set:** `docs/session-sets/vba-spec-study/`
+> **Session set:** `docs/session-sets/✅vba-spec-study/`
 
 > **Deviation note:** The spec called for 1 architecture synthesis call per session. Due to the Opus timeout lesson (Opus at effort:max + adaptive thinking times out above ~3K input tokens; see `docs/planning/lessons-learned.md`), this was split into 3 focused calls covering: (A) Lexical + Preprocessing, (B) Modules + Procedures + Type System, (C) Statements + Expressions + Object Model. All three used Opus as generator. Content is equivalent to a single synthesis call broken by section.
 
