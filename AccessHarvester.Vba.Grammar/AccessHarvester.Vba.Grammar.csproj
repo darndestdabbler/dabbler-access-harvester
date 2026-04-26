@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AccessHarvester.Vba.Grammar</RootNamespace>
+    <AssemblyName>AccessHarvester.Vba.Grammar</AssemblyName>
+    <Nullable>enable</Nullable>
+    <AntlrOutputPath>$(MSBuildProjectDirectory)\obj\Antlr</AntlrOutputPath>
+    <CompileDependsOn>$(CompileDependsOn);GenerateAntlrCode</CompileDependsOn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AntlrGrammar Include="Vba.g4" />
+  </ItemGroup>
+
+  <!-- ANTLR Build Wiring: Configure parser generation from grammar on build -->
+  <Target Name="GenerateAntlrCode" BeforeTargets="CoreCompile">
+    <PropertyGroup>
+      <AntlrGeneratedPath>$(AntlrOutputPath)</AntlrGeneratedPath>
+    </PropertyGroup>
+
+    <Message Text="ANTLR4: Generating parser from Vba.g4..." Importance="high" />
+
+    <MakeDir Directories="$(AntlrGeneratedPath)" />
+
+    <!-- This target demonstrates ANTLR4 build wiring. Actual code generation will be -->
+    <!-- implemented in the vba-lexical-and-expression-grammar child session set (#3). -->
+    <Exec Command="echo ANTLR4 build target executed for Vba.g4"
+          ContinueOnError="true" />
+  </Target>
+
+</Project>

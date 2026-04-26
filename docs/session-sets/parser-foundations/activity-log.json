@@ -219,6 +219,74 @@
           "costUsd": 0.0015475000000000003
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/verify",
+      "dateTime": "2026-04-26T01:44:09.682627+00:00",
+      "description": "session-verification round 1 via route(session-verification, gpt-5-4)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1046,
+          "outputTokens": 3156,
+          "costUsd": 0.049955
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/verify-round2",
+      "dateTime": "2026-04-26T01:46:16.516003+00:00",
+      "description": "session-verification round 2 after fixing GUID and ANTLR wiring issues. Model: gpt-5-4. Cost: $0.0364.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 665,
+          "outputTokens": 2316,
+          "costUsd": 0.0364025
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/verify-round2",
+      "dateTime": "2026-04-26T01:46:36.489206+00:00",
+      "description": "session-verification round 2 after fixing GUIDs and ANTLR wiring. Model: gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 304,
+          "outputTokens": 688,
+          "costUsd": 0.011080000000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T01:47:12.169739+00:00",
+      "description": "Routed analysis for Session 4 orchestrator recommendation.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 275,
+          "outputTokens": 636,
+          "costUsd": 0.00670375
+        }
+      ]
     }
   ]
 }
