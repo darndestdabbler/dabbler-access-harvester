@@ -220,6 +220,48 @@ reference; if it proves out twice in *this* repo, propose promotion to
   behavioral edit. Only escalate to the human if the scrub reveals a
   real semantic change.
 
+### Opus At `effort:max` + Adaptive Thinking Timeouts On Large Synthesis-Document Prompts
+
+- **Context:** Session 4 of `vba-parser-session-set-generator`. Two attempts to
+  `route(task_type="architecture", complexity_hint=80)` from a Sonnet orchestrator
+  both timed out at 600 seconds (raised from 300 after the first timeout).
+- **Failure or friction:** Opus at `effort:max` + adaptive thinking on a ~3.8K
+  input-token synthesis-document prompt consistently exceeded the provider timeout.
+  A fallback to `route(task_type="planning")` produced a meta-plan (how to write
+  the document) rather than the document itself, because the `planning` prompt
+  template frames the task as "plan how to do X". The playbook was ultimately
+  authored in-conversation by the Sonnet orchestrator — a deivation from the spec.
+- **Lesson:** For large synthesis-document generation from a Sonnet orchestrator,
+  route(architecture) to Opus/max is unreliable above ~3K input tokens due to the
+  timeout. Two reliable alternatives: (a) use Opus as the orchestrator and handle
+  in-conversation (the in-conversation convention), or (b) break the synthesis into
+  focused subsections across multiple shorter route() calls. Do not use
+  `task_type="planning"` as a workaround for document generation — it produces
+  plans, not documents.
+- **Action for future sessions:** If a synthesis-document route() call to Opus times
+  out and the orchestrator is Sonnet: escalate to Opus as the orchestrator for the
+  next attempt. If that is not possible, author in-conversation and disclose the
+  deviation in the verification prompt.
+
+### `effort:xhigh` Is Not A Valid Anthropic API Effort Level
+
+- **Context:** Session 4 of `vba-parser-session-set-generator`. Initial route()
+  calls to Opus failed with HTTP 400 Bad Request before the timeout issue was
+  discovered.
+- **Failure or friction:** `router-config.yaml` had `effort: xhigh` for Opus under
+  `task_type_params.architecture`. The Anthropic API rejected this with "This model
+  does not support effort level 'xhigh'." Anthropic's supported effort levels for
+  `claude-opus-4-6` and `claude-sonnet-4-6` are `low`, `medium`, `high`, and `max`.
+  OpenAI's `gpt-5-4` supports `reasoning_effort: xhigh` — the two APIs use
+  different enums.
+- **Lesson:** When adding or editing `task_type_params` in `router-config.yaml`,
+  check the supported effort levels per provider: Anthropic → `low|medium|high|max`;
+  OpenAI → `none|minimal|low|medium|high|xhigh`. Do not copy Anthropic values from
+  OpenAI entries or vice versa.
+- **Action for future sessions:** The router-config.yaml was fixed (effort: xhigh →
+  effort: max for Opus). If a route() call returns HTTP 400 immediately (not a
+  timeout), check the effort/reasoning_effort value for that model first.
+
 ### `session-verification` Needs A `task_type_overrides` Entry, Or `route()` Will Pick The Orchestrator's Own Provider
 
 - **Context:** End-of-session Step 6 cross-provider verification.
