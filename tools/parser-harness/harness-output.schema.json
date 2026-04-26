@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/darndestdabbler/dabbler-access-harvester/blob/main/tools/parser-harness/harness-output.schema.json",
+  "title": "ParserHarnessOutput",
+  "description": "Machine-readable output from a parser harness 'run' command.",
+  "type": "object",
+  "required": ["meta", "summary", "files"],
+  "additionalProperties": false,
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["harness_version", "timestamp", "corpus_path", "parser"],
+      "additionalProperties": false,
+      "properties": {
+        "harness_version": {
+          "type": "string",
+          "description": "Version of the harness tool, e.g. '1.0.0'."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 UTC timestamp of when the run started."
+        },
+        "corpus_path": {
+          "type": "string",
+          "description": "Absolute or relative path to the corpus directory."
+        },
+        "parser": {
+          "type": ["string", "null"],
+          "description": "Path or label of the parser under test. null when no parser is wired."
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "required": ["total", "parsed", "failed", "skipped", "no_parser", "pass_rate"],
+      "additionalProperties": false,
+      "properties": {
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total source files discovered in the corpus."
+        },
+        "parsed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Files that parsed without errors."
+        },
+        "failed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Files that the parser attempted but produced errors."
+        },
+        "skipped": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Files skipped due to unsupported extension or explicit exclude."
+        },
+        "no_parser": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Files not attempted because no parser was configured."
+        },
+        "pass_rate": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "parsed / (parsed + failed). null when no parser was configured."
+        }
+      }
+    },
+    "files": {
+      "type": "array",
+      "description": "One entry per source file discovered.",
+      "items": {
+        "type": "object",
+        "required": ["name", "path", "status", "parse_time_ms", "errors", "tree_stats"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Basename of the source file."
+          },
+          "path": {
+            "type": "string",
+            "description": "Path relative to the corpus root."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["parsed", "failed", "skipped", "no_parser"],
+            "description": "Outcome for this file."
+          },
+          "parse_time_ms": {
+            "type": ["number", "null"],
+            "minimum": 0,
+            "description": "Wall-clock parse time in milliseconds. null when not attempted."
+          },
+          "errors": {
+            "type": "array",
+            "description": "Parse errors reported by the parser. Empty when status=parsed.",
+            "items": {
+              "type": "object",
+              "required": ["message"],
+              "additionalProperties": false,
+              "properties": {
+                "line": {"type": ["integer", "null"], "minimum": 1},
+                "column": {"type": ["integer", "null"], "minimum": 0},
+                "message": {"type": "string"}
+              }
+            }
+          },
+          "tree_stats": {
+            "description": "Parse-tree statistics. null when not parsed.",
+            "oneOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "required": ["node_count", "max_depth"],
+                "additionalProperties": false,
+                "properties": {
+                  "node_count": {"type": "integer", "minimum": 0},
+                  "max_depth": {"type": "integer", "minimum": 0},
+                  "rule_counts": {
+                    "type": "object",
+                    "description": "Map of grammar rule name to invocation count.",
+                    "additionalProperties": {"type": "integer", "minimum": 0}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
