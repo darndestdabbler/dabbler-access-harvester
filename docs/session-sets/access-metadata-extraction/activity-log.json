@@ -204,7 +204,7 @@
       "stepNumber": 0,
       "stepKey": "session-2/build-and-test",
       "dateTime": "2026-04-26T05:37:22.510467-04:00",
-      "description": "dotnet build AccessHarvester.Access -> 0 errors, 0 warnings. dotnet test tests/AccessHarvester.Tests -> 127 passed, 0 failed, 0 skipped. (95 prior + 32 new for the three Extractor classes.) Build and test run sequentially per project-guidance.md. Full-solution build deferred — Vba.Grammar parallel-session state may still be in flight per Session 1's note; this session's deliverables build clean in isolation.",
+      "description": "dotnet build AccessHarvester.Access -> 0 errors, 0 warnings. dotnet test tests/AccessHarvester.Tests -> 127 passed, 0 failed, 0 skipped. (95 prior + 32 new for the three Extractor classes.) Build and test run sequentially per project-guidance.md. Full-solution build deferred - Vba.Grammar parallel-session state may still be in flight per Session 1's note; this session's deliverables build clean in isolation.",
       "status": "complete",
       "routedApiCalls": []
     },
@@ -343,6 +343,92 @@
           "inputTokens": 214,
           "outputTokens": 140,
           "costUsd": 0.001667
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 1,
+      "stepKey": "session-5/schema-validation-guidance",
+      "dateTime": "2026-04-26T11:49:39.604141+00:00",
+      "description": "Routed schema-validation guidance for query/table/relationship typed fixture wiring via gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "schema-validation",
+          "inputTokens": 331,
+          "outputTokens": 1299,
+          "costUsd": 0.01340375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 2,
+      "stepKey": "session-5/author-metadata-extractor-integration-test",
+      "dateTime": "2026-04-26T11:49:39.605141+00:00",
+      "description": "Added SyntheticMetadataExtractorIntegrationTests.cs to run the real pipeline for committed synthetic fixture Q/T/R categories, feed IR JSON through typed metadata extractors, and compare the typed subset against expected.json contracts.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 3,
+      "stepKey": "session-5/build-and-test",
+      "dateTime": "2026-04-26T11:49:39.605724+00:00",
+      "description": "Ran targeted integration-test discovery, then dotnet build and dotnet test --no-build sequentially. Build succeeded with existing warnings; grammar tests passed 42/42; harvester tests passed 127 with 2 Access-COM integration skips.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 4,
+      "stepKey": "session-5/cross-provider-verification",
+      "dateTime": "2026-04-26T11:49:39.606446+00:00",
+      "description": "Cross-provider session verification via opus returned VERIFIED with one non-blocking vacuous-pass observation.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 13825,
+          "outputTokens": 3812,
+          "costUsd": 0.493275
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 5,
+      "stepKey": "session-5/cross-provider-verification-round-2",
+      "dateTime": "2026-04-26T11:49:39.606446+00:00",
+      "description": "Round-2 cross-provider verification via opus returned VERIFIED after adding the validatedFixtureCount guard.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 3853,
+          "outputTokens": 725,
+          "costUsd": 0.11217
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 6,
+      "stepKey": "session-5/next-orchestrator-recommendation",
+      "dateTime": "2026-04-26T11:49:39.606446+00:00",
+      "description": "Routed analysis recommending a low-cost anthropic claude-3-haiku final buffer session if Session 6 is started.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 358,
+          "outputTokens": 148,
+          "costUsd": 0.0019275
         }
       ]
     }
