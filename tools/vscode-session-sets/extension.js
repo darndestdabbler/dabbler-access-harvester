@@ -9,6 +9,13 @@
 // activity-log entry exists), so a freshly-started set shows as in-progress
 // without waiting for the first commit. The extension never writes — it
 // only watches and re-reads.
+//
+// Multi-root: scans `docs/session-sets/` under every workspace folder, so
+// per-set git worktrees added via "Add Folder to Workspace…" surface
+// in-progress state immediately. When the same slug exists in multiple
+// roots (e.g., main repo has the spec while a worktree carries
+// activity-log.json mid-session), the higher-state entry wins (done >
+// in-progress > not-started); ties break on most-recent `lastTouched`.
 
 const vscode = require("vscode");
 const fs = require("fs");
@@ -16,10 +23,13 @@ const path = require("path");
 
 const SESSION_SETS_REL = path.join("docs", "session-sets");
 
-function workspaceRoot() {
-  const folders = vscode.workspace.workspaceFolders;
-  if (!folders || folders.length === 0) return null;
-  return folders[0].uri.fsPath;
+function workspaceFolders() {
+  return vscode.workspace.workspaceFolders || [];
+}
+
+function primaryRoot() {
+  const folders = workspaceFolders();
+  return folders.length ? folders[0].uri.fsPath : null;
 }
 
 function readSessionSets(root) {
@@ -103,9 +113,39 @@ function readSessionSets(root) {
       sessionsCompleted,
       lastTouched,
       liveSession,
+      root,
     });
   }
   return sets;
+}
+
+// Scan every workspace folder's docs/session-sets/ tree and merge the
+// results, keeping one entry per slug. State precedence (done >
+// in-progress > not-started) decides which root wins when the same slug
+// exists in multiple folders; ties break on most-recent `lastTouched`.
+const STATE_RANK = { "done": 2, "in-progress": 1, "not-started": 0 };
+
+function readAllSessionSets() {
+  const merged = new Map();
+  for (const folder of workspaceFolders()) {
+    const root = folder.uri.fsPath;
+    for (const set of readSessionSets(root)) {
+      const prior = merged.get(set.name);
+      if (!prior) {
+        merged.set(set.name, set);
+        continue;
+      }
+      const newRank = STATE_RANK[set.state] ?? -1;
+      const priorRank = STATE_RANK[prior.state] ?? -1;
+      if (newRank > priorRank) {
+        merged.set(set.name, set);
+      } else if (newRank === priorRank) {
+        const newer = (set.lastTouched || "") > (prior.lastTouched || "");
+        if (newer) merged.set(set.name, set);
+      }
+    }
+  }
+  return Array.from(merged.values());
 }
 
 function progressText(set) {
@@ -155,11 +195,10 @@ class SessionSetsProvider {
   }
 
   getChildren(element) {
-    const root = workspaceRoot();
-    if (!root) return [];
+    if (workspaceFolders().length === 0) return [];
 
     if (!this._cache) {
-      this._cache = readSessionSets(root);
+      this._cache = readAllSessionSets();
     }
     const all = this._cache;
 
@@ -234,6 +273,21 @@ function liveSessionTooltipLines(set) {
   return lines;
 }
 
+function folderTooltip(set) {
+  // When a worktree is in the workspace alongside the main repo, the
+  // tooltip benefits from naming both the workspace folder (e.g.
+  // `dabbler-access-harvester-vba-statement-and-module-grammar`) and the
+  // path within it. With a single workspace folder this collapses to the
+  // familiar `docs/session-sets/<slug>` form.
+  const folders = workspaceFolders();
+  const owner = folders.find((f) => f.uri.fsPath === set.root);
+  const rel = path.relative(set.root, set.dir);
+  if (folders.length > 1 && owner) {
+    return `${owner.name} / ${rel}`;
+  }
+  return rel;
+}
+
 function makeSetItem(extensionUri, set) {
   const item = new vscode.TreeItem(
     set.name,
@@ -247,7 +301,7 @@ function makeSetItem(extensionUri, set) {
       `State: ${set.state}`,
       bits.length ? `Progress: ${bits.join(" · ")}` : null,
       ...liveSessionTooltipLines(set),
-      `Folder: \`${path.relative(workspaceRoot(), set.dir)}\``,
+      `Folder: \`${folderTooltip(set)}\``,
     ]
       .filter(Boolean)
       .join("\n\n"),
@@ -266,8 +320,7 @@ function makeSetItem(extensionUri, set) {
 }
 
 function activate(context) {
-  const root = workspaceRoot();
-  if (!root) {
+  if (workspaceFolders().length === 0) {
     return;
   }
 
@@ -276,20 +329,39 @@ function activate(context) {
     vscode.window.registerTreeDataProvider("dabblerSessionSets", provider),
   );
 
-  // Watch the session-sets tree for any state-relevant change.
-  const sessionSetsAbs = path.join(root, SESSION_SETS_REL);
-  if (fs.existsSync(sessionSetsAbs)) {
-    const pattern = new vscode.RelativePattern(
-      sessionSetsAbs,
-      "**/{spec.md,session-state.json,activity-log.json,change-log.md}",
-    );
-    const watcher = vscode.workspace.createFileSystemWatcher(pattern);
-    const refresh = () => provider.refresh();
-    watcher.onDidCreate(refresh);
-    watcher.onDidDelete(refresh);
-    watcher.onDidChange(refresh);
-    context.subscriptions.push(watcher);
+  // Per-root file watchers — one per workspace folder so worktrees added
+  // to the workspace get the same in-progress signal as the main repo.
+  // Disposed and rebuilt on workspace-folder changes.
+  let watcherSubs = [];
+  const refresh = () => provider.refresh();
+
+  function bindWatchers() {
+    for (const sub of watcherSubs) sub.dispose();
+    watcherSubs = [];
+    for (const folder of workspaceFolders()) {
+      const sessionSetsAbs = path.join(folder.uri.fsPath, SESSION_SETS_REL);
+      if (!fs.existsSync(sessionSetsAbs)) continue;
+      const pattern = new vscode.RelativePattern(
+        sessionSetsAbs,
+        "**/{spec.md,session-state.json,activity-log.json,change-log.md}",
+      );
+      const watcher = vscode.workspace.createFileSystemWatcher(pattern);
+      watcher.onDidCreate(refresh);
+      watcher.onDidDelete(refresh);
+      watcher.onDidChange(refresh);
+      watcherSubs.push(watcher);
+      context.subscriptions.push(watcher);
+    }
   }
+
+  bindWatchers();
+
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeWorkspaceFolders(() => {
+      bindWatchers();
+      refresh();
+    }),
+  );
 
   context.subscriptions.push(
     vscode.commands.registerCommand("dabblerSessionSets.refresh", () =>
