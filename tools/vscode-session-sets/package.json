@@ -2,7 +2,7 @@
   "name": "dabbler-session-sets",
   "displayName": "Session Set Explorer",
   "description": "Activity-bar tree view of session-set state for the dabbler-access-harvester workflow.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "publisher": "darndestdabbler",
   "private": true,
   "engines": {
@@ -54,6 +54,38 @@
       {
         "command": "dabblerSessionSets.openFolder",
         "title": "Reveal Folder"
+      },
+      {
+        "command": "dabblerSessionSets.copyStartCommand.default",
+        "title": "Copy: Start next session"
+      },
+      {
+        "command": "dabblerSessionSets.copyStartCommand.maxoutClaude",
+        "title": "Copy: Start next session — maxout Claude (Opus 4.7 @ effort=max)"
+      },
+      {
+        "command": "dabblerSessionSets.copyStartCommand.maxoutCodex",
+        "title": "Copy: Start next session — maxout Codex (GPT-5.4 @ effort=high)"
+      },
+      {
+        "command": "dabblerSessionSets.copyStartCommand.opusHigh",
+        "title": "Copy: Start next session — Opus @ effort=high"
+      },
+      {
+        "command": "dabblerSessionSets.copyStartCommand.opusMedium",
+        "title": "Copy: Start next session — Opus @ effort=medium"
+      },
+      {
+        "command": "dabblerSessionSets.copyStartCommand.sonnetMedium",
+        "title": "Copy: Start next session — Sonnet @ effort=medium"
+      },
+      {
+        "command": "dabblerSessionSets.copyStartCommand.sonnetLow",
+        "title": "Copy: Start next session — Sonnet @ effort=low"
+      },
+      {
+        "command": "dabblerSessionSets.copySlug",
+        "title": "Copy: Slug only"
       }
     ],
     "menus": {
@@ -67,23 +99,63 @@
       "view/item/context": [
         {
           "command": "dabblerSessionSets.openSpec",
-          "when": "view == dabblerSessionSets && viewItem == sessionSet",
+          "when": "view == dabblerSessionSets && viewItem =~ /^sessionSet:/",
           "group": "1_open@1"
         },
         {
           "command": "dabblerSessionSets.openActivityLog",
-          "when": "view == dabblerSessionSets && viewItem == sessionSet",
+          "when": "view == dabblerSessionSets && viewItem =~ /^sessionSet:/",
           "group": "1_open@2"
         },
         {
           "command": "dabblerSessionSets.openChangeLog",
-          "when": "view == dabblerSessionSets && viewItem == sessionSet",
+          "when": "view == dabblerSessionSets && viewItem =~ /^sessionSet:/",
           "group": "1_open@3"
         },
         {
           "command": "dabblerSessionSets.openFolder",
-          "when": "view == dabblerSessionSets && viewItem == sessionSet",
+          "when": "view == dabblerSessionSets && viewItem =~ /^sessionSet:/",
           "group": "2_navigate@1"
+        },
+        {
+          "command": "dabblerSessionSets.copyStartCommand.default",
+          "when": "view == dabblerSessionSets && (viewItem == sessionSet:in-flight || viewItem == sessionSet:not-started)",
+          "group": "3_copy@1"
+        },
+        {
+          "command": "dabblerSessionSets.copyStartCommand.maxoutClaude",
+          "when": "view == dabblerSessionSets && (viewItem == sessionSet:in-flight || viewItem == sessionSet:not-started)",
+          "group": "3_copy@2"
+        },
+        {
+          "command": "dabblerSessionSets.copyStartCommand.maxoutCodex",
+          "when": "view == dabblerSessionSets && (viewItem == sessionSet:in-flight || viewItem == sessionSet:not-started)",
+          "group": "3_copy@3"
+        },
+        {
+          "command": "dabblerSessionSets.copyStartCommand.opusHigh",
+          "when": "view == dabblerSessionSets && (viewItem == sessionSet:in-flight || viewItem == sessionSet:not-started)",
+          "group": "3_copy@4"
+        },
+        {
+          "command": "dabblerSessionSets.copyStartCommand.opusMedium",
+          "when": "view == dabblerSessionSets && (viewItem == sessionSet:in-flight || viewItem == sessionSet:not-started)",
+          "group": "3_copy@5"
+        },
+        {
+          "command": "dabblerSessionSets.copyStartCommand.sonnetMedium",
+          "when": "view == dabblerSessionSets && (viewItem == sessionSet:in-flight || viewItem == sessionSet:not-started)",
+          "group": "3_copy@6"
+        },
+        {
+          "command": "dabblerSessionSets.copyStartCommand.sonnetLow",
+          "when": "view == dabblerSessionSets && (viewItem == sessionSet:in-flight || viewItem == sessionSet:not-started)",
+          "group": "3_copy@7"
+        },
+        {
+          "command": "dabblerSessionSets.copySlug",
+          "when": "view == dabblerSessionSets && viewItem =~ /^sessionSet:/",
+          "group": "4_copy_meta@1"
         }
       ]
     }
