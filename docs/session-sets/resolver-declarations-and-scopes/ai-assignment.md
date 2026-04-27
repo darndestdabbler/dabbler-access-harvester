@@ -67,10 +67,15 @@ claude-sonnet claude-sonnet-4.6 @ effort=medium
 | 4    | reasoning  | `session-verification`   | `gemini-2.5-pro`    | `dynamic`         | Cross-provider verification of the test logic and validation coverage.           |
 
 **Actuals (filled after the session runs):**
-*   **Orchestrator Used:**
-*   **Total Routed Cost:**
-*   **Deviations from Plan:**
-*   **Calibration Notes:**
+*   **Orchestrator Used:** claude-code claude-sonnet-4-6 (effort: unknown self-report)
+*   **Total Routed Cost:** $0.84 (1 code-review $0.11 + 6 session-verification rounds ~$0.71 + 1 next-orch analysis $0.005)
+*   **Deviations from Plan:** Verification required 6 rounds instead of 1 — verifier (gpt-5-4) kept surfacing Minor assertion-completeness findings across rounds 1-5; all fixed and VERIFIED on round 6. Schema-validation was handled as a code-review route call (Sonnet). Test count grew from 37 new tests to 49 as fixes were applied. The test file also revealed a previously-unknown Module-level variable count in fixture 09 (3 vars, not 0).
+*   **Calibration Notes:** Estimated routed cost $0.60 vs actuals $0.84 — within 40% of estimate. The main overrun was the multi-round verification cycle; each round costs ~$0.09-$0.14. Future sessions with this verifier should set `complexity_hint=85` upfront for session-verification to signal the verifier should not truncate findings.
+
+**Next session orchestrator recommendation (Session 4):**
+claude-code claude-sonnet-4-6 @ effort=medium
+
+**Rationale:** Session 4 is an optional buffer for cleanup — no synthesis work; Sonnet at medium effort is sufficient. If fundamental issues are found, escalate to Opus.
 
 ---
 
