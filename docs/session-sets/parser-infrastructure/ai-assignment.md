@@ -57,6 +57,36 @@ claude-code Opus 4.7 @ effort=max
 | 4 | reasoning | session-verification | gpt-5-4 | high | Non-negotiable cross-provider gate for session integrity. |
 
 **Actuals (filled after the session runs):**
+- Orchestrator used: claude-code Opus 4.7 (effort: unknown — cannot self-introspect).
+- Total routed cost: ~$0.0791
+  - session-verification round 1 (gemini-pro fallback after gpt-5-4 timed out 3x): $0.0588
+  - session-verification round 2 (gemini-pro): $0.0188
+  - next-orchestrator recommendation (gemini-pro): $0.0015
+- Verifier verdicts: round-1 ISSUES_FOUND (1 Major MAJ-2.1 + 1 Minor MIN-2.1 + 1 Nit);
+  round-2 VERIFIED.
+- Deviations from recommendation:
+  - Architecture synthesis authored in-conversation per the convention "When the
+    orchestrator's model matches the routing target..." — same pattern as Session 1.
+  - **Verifier failover:** gpt-5-4 timed out 3x in a row on the ~43K-token
+    verification prompt; per `project-guidance.md` Verifier-failure escalation
+    ladder Step 2, fell back to `gemini-pro` (still cross-provider). Worked
+    cleanly. Same failover as `vba-statement-and-module-grammar` Session 1
+    (2026-04-26) — second confirmed context.
+- Notes for next-session calibration: Session 3's scope is largely mechanical
+  (SourceLocation/SourceRange threading + preprocessor parsing rule) with one
+  routed test-generation call. Sonnet 4.6 @ effort=medium is appropriate.
+- Round-2 verifier output was unusually terse (gemini-pro returned just
+  "VERIFIED" with 2 output tokens). Acceptable per the prompt's
+  "Conclude with one of:" framing, but worth noting for calibration if
+  the same pattern repeats.
+
+**Next session orchestrator recommendation (Session 3):**
+claude-code Sonnet 4.6 @ effort=medium
+
+**Rationale:** The session's dominant task is a large-scale, mechanical
+refactoring suitable for a mid-tier model, making Sonnet the most cost-
+effective choice. The remaining feature work is well-scoped and does not
+require a flagship model like Opus.
 
 ## Session 3 of 4: Position Tracking + Preprocessor Pass-Through
 

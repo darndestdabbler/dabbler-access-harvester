@@ -114,6 +114,84 @@
           "costUsd": 0.00203125
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/ast-shape-synthesis",
+      "dateTime": "2026-04-27T00:24:42.492960+00:00",
+      "description": "Authored docs/session-sets/parser-infrastructure/ast-shape.md in-conversation (Opus orchestrator + architecture pins to Opus per project-guidance Convention).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/implement-ast-types-and-visitor",
+      "dateTime": "2026-04-27T00:24:42.493953+00:00",
+      "description": "Created AccessHarvester.Vba.Parser/Ast/ folder with Provenance, VbaSyntaxNode, Module/ModuleItem hierarchy, ProcedureDeclaration + Sub/Function/Property variants, Parameter, TypeReference, Argument, Statement (22 variants + UnknownStatement + sub-structures), Expression (~25 variants + UnknownExpression), VbaSyntaxWalker, VbaSyntaxVisitor<T>, AstChildren, AstBuilder (parse-tree -> AST), ParseResultAstExtensions. Generic VbaSyntaxRewriter deferred to first resolver session per lean-by-default.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-04-27T00:24:42.493953+00:00",
+      "description": "dotnet build (0 errors); dotnet test (665 passed: 293 grammar + 328 core + 44 parser including 35 new AST tests; 2 skipped synthetic fixtures).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-04-27T00:44:11.378612+00:00",
+      "description": "Routed session-verification (model=gemini-pro, cost=$0.0588); fallback to gemini-pro after gpt-5-4 timed out 3x per project-guidance verifier-failure ladder Step 2.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 40388,
+          "outputTokens": 835,
+          "costUsd": 0.058835
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/cross-provider-verification-round2",
+      "dateTime": "2026-04-27T00:47:53.097497+00:00",
+      "description": "Round-2 verification after MAJ-2.1 + MIN-2.1 fixes (model=gemini-pro, cost=$0.0188); fallback to gemini-pro per Step 2 of escalation ladder (gpt-5-4 timed out R1).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 15060,
+          "outputTokens": 2,
+          "costUsd": 0.018845
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T00:48:24.018566+00:00",
+      "description": "Routed analysis recommending Session 3 orchestrator (model=gemini-pro, cost=$0.0015).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 529,
+          "outputTokens": 83,
+          "costUsd": 0.00149125
+        }
+      ]
     }
   ]
 }
