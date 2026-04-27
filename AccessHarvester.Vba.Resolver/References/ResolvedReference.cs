@@ -10,7 +10,11 @@ namespace AccessHarvester.Vba.Resolver.References;
 //
 // Stability: the four-property shape is a public contract per
 // session-1-resolution-algorithm.md §10. Session 3's ResolvedModule
-// wraps a list of these without reshaping them.
+// wraps a list of these without reshaping them. Session 2 added the
+// ResolvedViaWithFlattening outcome variant — implicit-with sites
+// (`.Foo` / `!Foo` inside a With block) are emitted with their original
+// AST node as `Expression` and a flattening-wrapper as `Outcome` whose
+// SynthesizedTarget records the prepended-target full reference.
 public sealed record ResolvedReference(
     // The AST node naming this reference site.
     // Matches one of: IdentifierExpression, MeExpression,

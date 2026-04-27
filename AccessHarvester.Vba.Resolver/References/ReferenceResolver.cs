@@ -20,10 +20,10 @@ namespace AccessHarvester.Vba.Resolver.References;
 //
 // Algorithm shape, scope, and explicit non-goals are documented in
 // docs/session-sets/resolver-references-and-with-blocks/synthesis/
-// session-1-resolution-algorithm.md. Future sessions extend the
-// algorithm by replacing specific Unresolved branches:
-//   Session 2 → Unresolved("with-block-flattening-deferred") replaced
-//               by WithBlockScope flattening
+// session-1-resolution-algorithm.md. Session 2 extended the resolver
+// with a With-block flattening pass — see
+// session-2-with-block-flattening.md for the algorithm. Future
+// sessions extend further:
 //   Session 3 → ResolvedModule wrapper around the returned list
 //   #9 / Phase 3.5 → Unresolved("default-member-not-yet-resolved")
 //                    replaced by default-member resolver
@@ -197,12 +197,79 @@ public sealed class ReferenceResolver
         }
 
         public override void VisitImplicitWithMemberExpression(ImplicitWithMemberExpression n)
-            => Emit(n, new ResolutionOutcome.Unresolved(
-                UnresolvedReasons.WithBlockFlatteningDeferred), CurrentScope);
+            => EmitImplicitWithFlattening(n, n.MemberName, isBang: false);
 
         public override void VisitImplicitWithBangExpression(ImplicitWithBangExpression n)
-            => Emit(n, new ResolutionOutcome.Unresolved(
-                UnresolvedReasons.WithBlockFlatteningDeferred), CurrentScope);
+            => EmitImplicitWithFlattening(n, n.MemberName, isBang: true);
+
+        // Phase 3.4 With-block flattening. Synthesises the full
+        // reference (`withTarget.member` or `withTarget!member`),
+        // resolves it against the With target's recorded outcome, and
+        // emits the original implicit-with node with a
+        // ResolvedViaWithFlattening outcome carrying both the
+        // synthesised AST and the inner outcome. Algorithm details:
+        // session-2-with-block-flattening.md §4.
+        private void EmitImplicitWithFlattening(
+            Expression site, string memberName, bool isBang)
+        {
+            var withScope = FindEnclosingWith(CurrentScope);
+            if (withScope is null)
+            {
+                // Defensive: parser does not produce ImplicitWith*
+                // outside a With body. Falling back to Session 1's
+                // deferred reason keeps the closed reason set populated
+                // for any future grammar/scope-construction defect.
+                Emit(site, new ResolutionOutcome.Unresolved(
+                    UnresolvedReasons.WithBlockFlatteningDeferred), CurrentScope);
+                return;
+            }
+
+            Expression withTarget = withScope.Target;
+
+            // When the With target is itself an implicit-with member
+            // (e.g., `With .Foo` inside an outer `With`), its recorded
+            // outcome is already ResolvedViaWithFlattening. The
+            // SynthesizedTarget on the outcome is the fully-expanded
+            // reference; substitute it so the synthesised target we
+            // build below does not still contain an implicit node.
+            // Round-1 verifier finding (Major).
+            //
+            // For outcome dispatch we still pass the ORIGINAL withTarget
+            // — DecideMemberOutcome's peek-through reads the recorded
+            // outcome for the original AST node and unwraps the
+            // ResolvedViaWithFlattening to its inner outcome.
+            Expression effectiveTarget = ExpandFlattenedTarget(withTarget);
+            Expression synthesized = isBang
+                ? new BangAccessExpression(site.Provenance, effectiveTarget, memberName)
+                : new MemberAccessExpression(site.Provenance, effectiveTarget, memberName);
+
+            var innerOutcome = DecideMemberOutcome(withTarget, memberName, isBang);
+            Emit(site,
+                new ResolutionOutcome.ResolvedViaWithFlattening(synthesized, innerOutcome),
+                CurrentScope);
+        }
+
+        private Expression ExpandFlattenedTarget(Expression target)
+        {
+            var unwrapped = UnwrapTransparent(target);
+            if (_outcomesByExpression.TryGetValue(unwrapped, out var outcome)
+                && outcome is ResolutionOutcome.ResolvedViaWithFlattening f)
+            {
+                // Recursive in case f.SynthesizedTarget itself wraps
+                // another flattenable node. By the source-order pass's
+                // construction, f.SynthesizedTarget was fully expanded
+                // when f was first emitted — the recursion is defensive.
+                return ExpandFlattenedTarget(f.SynthesizedTarget);
+            }
+            return unwrapped;
+        }
+
+        private static WithBlockScope? FindEnclosingWith(Scope from)
+        {
+            for (Scope? s = from; s is not null; s = s.Parent)
+                if (s is WithBlockScope w) return w;
+            return null;
+        }
 
         // Index-or-call: walk target and arguments. Not a reference
         // site itself — the target's emission covers the callable name.
@@ -261,6 +328,15 @@ public sealed class ReferenceResolver
             ResolutionOutcome? targetOutcome = null;
             if (_outcomesByExpression.TryGetValue(logicalTarget, out var recorded))
                 targetOutcome = recorded;
+
+            // Peek through Session 2's With-flattening wrapper so a
+            // chained `.Foo.Bar` whose target is itself an implicit-with
+            // member dispatches on the inner outcome. The peek is
+            // structurally bounded: ResolvedViaWithFlattening.InnerOutcome
+            // is never another ResolvedViaWithFlattening (session-2
+            // synthesis §3 invariant), so the loop runs at most once.
+            while (targetOutcome is ResolutionOutcome.ResolvedViaWithFlattening flattened)
+                targetOutcome = flattened.InnerOutcome;
 
             switch (targetOutcome)
             {
@@ -328,6 +404,15 @@ public sealed class ReferenceResolver
             // ResolvedToObjectModel, populate the declaration's
             // reverse-lookup. ResolvedToMe and ResolvedToBuiltIn
             // have no Declaration to attach to. Unresolved likewise.
+            // For ResolvedViaWithFlattening, peek through to the inner
+            // outcome and back-populate from it — flattened sites
+            // contribute to the declaration's References list just like
+            // ordinary resolved sites do.
+            BackPopulate(outcome, location);
+        }
+
+        private static void BackPopulate(ResolutionOutcome outcome, SourceRange location)
+        {
             switch (outcome)
             {
                 case ResolutionOutcome.Resolved r:
@@ -337,6 +422,9 @@ public sealed class ReferenceResolver
                 case ResolutionOutcome.ResolvedToObjectModel r:
                     r.Declaration.AddReference(new DeclarationReference(
                         Location: location, IsImplicit: false));
+                    break;
+                case ResolutionOutcome.ResolvedViaWithFlattening f:
+                    BackPopulate(f.InnerOutcome, location);
                     break;
             }
         }

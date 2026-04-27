@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "resolver-references-and-with-blocks",
-  "currentSession": 1,
+  "currentSession": 2,
   "totalSessions": 4,
   "status": "complete",
-  "startedAt": "2026-04-27T06:38:47.836813-04:00",
-  "completedAt": "2026-04-27T07:15:22.430740-04:00",
+  "startedAt": "2026-04-27T07:18:12.918682-04:00",
+  "completedAt": "2026-04-27T07:36:56.115641-04:00",
   "verificationVerdict": "VERIFIED",
   "orchestrator": {
     "engine": "claude-code",

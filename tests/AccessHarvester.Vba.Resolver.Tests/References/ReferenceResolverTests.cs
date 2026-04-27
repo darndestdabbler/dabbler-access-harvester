@@ -479,10 +479,10 @@ End Sub";
         Assert.Equal(UnresolvedReasons.MemberAccessOnUnresolvedTarget, u.Reason);
     }
 
-    // ── Implicit-with members ─────────────────────────────────────────
+    // ── Implicit-with members (Session 2 flattening) ──────────────────
 
     [Fact]
-    public void ImplicitWithMember_EmitsWithBlockFlatteningDeferred()
+    public void ImplicitWithMember_FlattensToMemberAccessOnWithTarget()
     {
         const string src = @"
 Private Sub Demo()
@@ -497,12 +497,21 @@ End Sub";
         var implicitWith = refs.FirstOrDefault(r =>
             r.Expression is ImplicitWithMemberExpression);
         Assert.NotNull(implicitWith);
-        var u = Assert.IsType<ResolutionOutcome.Unresolved>(implicitWith!.Outcome);
-        Assert.Equal(UnresolvedReasons.WithBlockFlatteningDeferred, u.Reason);
+        var flattened = Assert.IsType<ResolutionOutcome.ResolvedViaWithFlattening>(
+            implicitWith!.Outcome);
+        var synth = Assert.IsType<MemberAccessExpression>(flattened.SynthesizedTarget);
+        Assert.Equal("Foo", synth.MemberName);
+        var rsId = Assert.IsType<IdentifierExpression>(synth.Target);
+        Assert.Equal("rs", rsId.Name);
+        // rs resolves to a local Variant; sub-child lookup yields null
+        // until #11 wires the registry, so the inner outcome is
+        // default-member-not-yet-resolved per the §4.3 decision table.
+        var inner = Assert.IsType<ResolutionOutcome.Unresolved>(flattened.InnerOutcome);
+        Assert.Equal(UnresolvedReasons.DefaultMemberNotYetResolved, inner.Reason);
     }
 
     [Fact]
-    public void ImplicitWithBang_EmitsWithBlockFlatteningDeferred()
+    public void ImplicitWithBang_FlattensToBangAccessOnWithTarget()
     {
         const string src = @"
 Private Sub Demo()
@@ -517,8 +526,274 @@ End Sub";
         var implicitWithBang = refs.FirstOrDefault(r =>
             r.Expression is ImplicitWithBangExpression);
         Assert.NotNull(implicitWithBang);
-        var u = Assert.IsType<ResolutionOutcome.Unresolved>(implicitWithBang!.Outcome);
-        Assert.Equal(UnresolvedReasons.WithBlockFlatteningDeferred, u.Reason);
+        var flattened = Assert.IsType<ResolutionOutcome.ResolvedViaWithFlattening>(
+            implicitWithBang!.Outcome);
+        var synth = Assert.IsType<BangAccessExpression>(flattened.SynthesizedTarget);
+        Assert.Equal("Field1", synth.MemberName);
+        var rsId = Assert.IsType<IdentifierExpression>(synth.Target);
+        Assert.Equal("rs", rsId.Name);
+    }
+
+    [Fact]
+    public void ImplicitWithMember_OnFormMe_RoutesThroughControlRegistry()
+    {
+        const string src = @"
+Private Sub Form_Load()
+    With Me
+        .cboCity = ""Boston""
+    End With
+End Sub";
+        var owning = new ClassDeclaration(
+            "frmCustomers",
+            new SourceDeclarationProvenance(
+                new SourceRange(new SourceLocation("", 0, 0), new SourceLocation("", 0, 1))),
+            ClassDeclarationKind.FormModule,
+            Array.Empty<TypeReference>());
+        var fakeControl = new VariableDeclaration(
+            name: "cboCity",
+            provenance: new SourceDeclarationProvenance(
+                new SourceRange(new SourceLocation("", 0, 0), new SourceLocation("", 0, 1))),
+            declarationScope: VariableScope.Module,
+            access: AccessLevel.Public,
+            isDefaultedAccess: false,
+            isStatic: false,
+            isWithEvents: false,
+            isAutoInstantiated: false,
+            type: null,
+            typeSuffix: null,
+            isArray: false,
+            arrayBounds: Array.Empty<ArrayBound>());
+        var registry = new StubRegistry(controlsByForm: new()
+        {
+            ["frmCustomers"] = new() { ["cboCity"] = fakeControl }
+        });
+
+        var (ast, scope) = BuildFromSource(src, "frmCustomers", ModuleKind.Form, owning);
+        var refs = Resolve(ast, scope, registry);
+
+        var implicitWith = refs.FirstOrDefault(r =>
+            r.Expression is ImplicitWithMemberExpression);
+        Assert.NotNull(implicitWith);
+        var flattened = Assert.IsType<ResolutionOutcome.ResolvedViaWithFlattening>(
+            implicitWith!.Outcome);
+        var resolved = Assert.IsType<ResolutionOutcome.ResolvedToObjectModel>(
+            flattened.InnerOutcome);
+        Assert.Same(fakeControl, resolved.Declaration);
+    }
+
+    [Fact]
+    public void ImplicitWithMember_NestedWith_UsesInnermostTarget()
+    {
+        // Inner With shadows outer With for `.Foo` per Phase 3.4
+        // ("the innermost one wins for `.` references").
+        const string src = @"
+Private Sub Demo()
+    Dim outerRs As Object
+    Dim innerRs As Object
+    With outerRs
+        With innerRs
+            .Foo = 1
+        End With
+    End With
+End Sub";
+        var (ast, scope) = BuildFromSource(src, "modDemo");
+        var refs = Resolve(ast, scope);
+
+        var implicitWith = refs.FirstOrDefault(r =>
+            r.Expression is ImplicitWithMemberExpression);
+        Assert.NotNull(implicitWith);
+        var flattened = Assert.IsType<ResolutionOutcome.ResolvedViaWithFlattening>(
+            implicitWith!.Outcome);
+        var synth = Assert.IsType<MemberAccessExpression>(flattened.SynthesizedTarget);
+        var innerId = Assert.IsType<IdentifierExpression>(synth.Target);
+        Assert.Equal("innerRs", innerId.Name);
+    }
+
+    [Fact]
+    public void DeferredReason_RemainsInClosedReasonSet()
+    {
+        // Session 2 wired flattening, so ordinary implicit-with sites
+        // now produce ResolvedViaWithFlattening. The deferred reason
+        // is preserved in the closed set as a defensive fallback for
+        // a structurally unreachable case (ImplicitWithMember outside
+        // any With body — which the grammar does not produce).
+        // Assert the constant value has not been renamed/repurposed
+        // per session-1 §10 stability commitments.
+        Assert.Equal("with-block-flattening-deferred",
+            UnresolvedReasons.WithBlockFlatteningDeferred);
+    }
+
+    [Fact]
+    public void ChainedImplicitWithMember_DispatchesThroughFlattening()
+    {
+        // `.cboCity.Column(2)` inside `With Me` — outer
+        // MemberAccessExpression's target is the inner
+        // ImplicitWithMemberExpression. The outer dispatch must peek
+        // through the inner ResolvedViaWithFlattening to read the
+        // ResolvedToObjectModel inner outcome, then fall through to
+        // SubChildLookup (which returns null) → outer outcome is
+        // default-member-not-yet-resolved.
+        const string src = @"
+Private Sub Form_Load()
+    With Me
+        s = .cboCity.Column
+    End With
+End Sub";
+        var owning = new ClassDeclaration(
+            "frmCustomers",
+            new SourceDeclarationProvenance(
+                new SourceRange(new SourceLocation("", 0, 0), new SourceLocation("", 0, 1))),
+            ClassDeclarationKind.FormModule,
+            Array.Empty<TypeReference>());
+        var fakeControl = new VariableDeclaration(
+            name: "cboCity",
+            provenance: new SourceDeclarationProvenance(
+                new SourceRange(new SourceLocation("", 0, 0), new SourceLocation("", 0, 1))),
+            declarationScope: VariableScope.Module,
+            access: AccessLevel.Public,
+            isDefaultedAccess: false,
+            isStatic: false,
+            isWithEvents: false,
+            isAutoInstantiated: false,
+            type: null,
+            typeSuffix: null,
+            isArray: false,
+            arrayBounds: Array.Empty<ArrayBound>());
+        var registry = new StubRegistry(controlsByForm: new()
+        {
+            ["frmCustomers"] = new() { ["cboCity"] = fakeControl }
+        });
+
+        var (ast, scope) = BuildFromSource(src, "frmCustomers", ModuleKind.Form, owning);
+        var refs = Resolve(ast, scope, registry);
+
+        // Inner implicit-with site: resolves to control via flattening.
+        var implicitWith = refs.FirstOrDefault(r =>
+            r.Expression is ImplicitWithMemberExpression);
+        Assert.NotNull(implicitWith);
+        var flattened = Assert.IsType<ResolutionOutcome.ResolvedViaWithFlattening>(
+            implicitWith!.Outcome);
+        Assert.IsType<ResolutionOutcome.ResolvedToObjectModel>(flattened.InnerOutcome);
+
+        // Outer .Column member access: inner target is the implicit-with;
+        // the dispatch peeks through the flattening, sees
+        // ResolvedToObjectModel, falls through SubChildLookup (null
+        // stub), and lands at default-member-not-yet-resolved.
+        var outer = refs.FirstOrDefault(r =>
+            r.Expression is MemberAccessExpression mae && mae.MemberName == "Column");
+        Assert.NotNull(outer);
+        var outerUnresolved = Assert.IsType<ResolutionOutcome.Unresolved>(outer!.Outcome);
+        Assert.Equal(UnresolvedReasons.DefaultMemberNotYetResolved, outerUnresolved.Reason);
+    }
+
+    [Fact]
+    public void NestedWith_TargetIsImplicitWithMember_FullyExpandsSynthesizedTarget()
+    {
+        // `With .Foo ... .Bar` inside an outer `With outerRs` —
+        // the inner With's target is an ImplicitWithMember whose
+        // recorded outcome is ResolvedViaWithFlattening. The .Bar
+        // inside the inner With must synthesise against the
+        // FULLY-EXPANDED target (outerRs.Foo), not against the
+        // unexpanded `.Foo` AST node. Round-1 verifier finding (Major).
+        const string src = @"
+Private Sub Demo()
+    Dim outerRs As Object
+    With outerRs
+        With .Foo
+            .Bar = 1
+        End With
+    End With
+End Sub";
+        var (ast, scope) = BuildFromSource(src, "modDemo");
+        var refs = Resolve(ast, scope);
+
+        // The .Bar implicit-with site is the second
+        // ImplicitWithMemberExpression in source order; the first is
+        // .Foo (the inner With's target).
+        var implicitWithMembers = refs.Where(r =>
+            r.Expression is ImplicitWithMemberExpression).ToList();
+        Assert.Equal(2, implicitWithMembers.Count);
+
+        var barSite = implicitWithMembers[1];
+        var barFlat = Assert.IsType<ResolutionOutcome.ResolvedViaWithFlattening>(
+            barSite.Outcome);
+        var barSynth = Assert.IsType<MemberAccessExpression>(barFlat.SynthesizedTarget);
+        Assert.Equal("Bar", barSynth.MemberName);
+
+        // The synthesised .Bar's target must be the EXPANDED form
+        // `outerRs.Foo` — a MemberAccessExpression whose target is
+        // `outerRs` (NOT the .Foo ImplicitWith node).
+        var expandedFoo = Assert.IsType<MemberAccessExpression>(barSynth.Target);
+        Assert.Equal("Foo", expandedFoo.MemberName);
+        var outerRsId = Assert.IsType<IdentifierExpression>(expandedFoo.Target);
+        Assert.Equal("outerRs", outerRsId.Name);
+    }
+
+    [Fact]
+    public void Flattening_BackPopulatesDeclarationReferences()
+    {
+        // When a flattened implicit-with site resolves through the
+        // registry to a Declaration, that Declaration's References
+        // list must gain an entry — flattened sites contribute to
+        // cross-reference like ordinary Resolved sites do.
+        const string src = @"
+Private Sub Form_Load()
+    With Me
+        .cboCity = ""Boston""
+    End With
+End Sub";
+        var owning = new ClassDeclaration(
+            "frmCustomers",
+            new SourceDeclarationProvenance(
+                new SourceRange(new SourceLocation("", 0, 0), new SourceLocation("", 0, 1))),
+            ClassDeclarationKind.FormModule,
+            Array.Empty<TypeReference>());
+        var fakeControl = new VariableDeclaration(
+            name: "cboCity",
+            provenance: new SourceDeclarationProvenance(
+                new SourceRange(new SourceLocation("", 0, 0), new SourceLocation("", 0, 1))),
+            declarationScope: VariableScope.Module,
+            access: AccessLevel.Public,
+            isDefaultedAccess: false,
+            isStatic: false,
+            isWithEvents: false,
+            isAutoInstantiated: false,
+            type: null,
+            typeSuffix: null,
+            isArray: false,
+            arrayBounds: Array.Empty<ArrayBound>());
+        var registry = new StubRegistry(controlsByForm: new()
+        {
+            ["frmCustomers"] = new() { ["cboCity"] = fakeControl }
+        });
+
+        var (ast, scope) = BuildFromSource(src, "frmCustomers", ModuleKind.Form, owning);
+        Resolve(ast, scope, registry);
+
+        Assert.NotEmpty(fakeControl.References);
+    }
+
+    [Fact]
+    public void Flattening_SynthesizedTargetSharesImplicitWithSiteProvenance()
+    {
+        // The synthesized expression's Provenance must equal the
+        // implicit-with site's Provenance so downstream "where in
+        // source" queries return the user-visible site, not the
+        // With-header line.
+        const string src = @"
+Private Sub Demo()
+    Dim rs As Object
+    With rs
+        .Foo = 1
+    End With
+End Sub";
+        var (ast, scope) = BuildFromSource(src, "modDemo");
+        var refs = Resolve(ast, scope);
+
+        var implicitWith = refs.First(r => r.Expression is ImplicitWithMemberExpression);
+        var flattened = (ResolutionOutcome.ResolvedViaWithFlattening)implicitWith.Outcome;
+        Assert.Equal(implicitWith.Expression.Provenance,
+            flattened.SynthesizedTarget.Provenance);
     }
 
     // ── Fixture-driven smoke tests ────────────────────────────────────
@@ -567,21 +842,32 @@ End Sub";
 
         Assert.NotEmpty(refs);
         foreach (var r in refs)
+            AssertOutcomeRecognised(r.Outcome);
+    }
+
+    // Recursively validate that an outcome variant is recognised and
+    // that any embedded Unresolved.Reason is a closed-set value.
+    // Unwraps ResolvedViaWithFlattening so a flattened site whose
+    // InnerOutcome is an Unresolved with an unknown reason still fails.
+    // Round-1 verifier finding (Minor).
+    private static void AssertOutcomeRecognised(ResolutionOutcome outcome)
+    {
+        switch (outcome)
         {
-            switch (r.Outcome)
-            {
-                case ResolutionOutcome.Resolved:
-                case ResolutionOutcome.ResolvedToObjectModel:
-                case ResolutionOutcome.ResolvedToBuiltIn:
-                case ResolutionOutcome.ResolvedToMe:
-                    break;
-                case ResolutionOutcome.Unresolved u:
-                    Assert.Contains(u.Reason, AllowedReasons);
-                    break;
-                default:
-                    Assert.Fail($"Unexpected ResolutionOutcome variant: {r.Outcome.GetType().Name}");
-                    break;
-            }
+            case ResolutionOutcome.Resolved:
+            case ResolutionOutcome.ResolvedToObjectModel:
+            case ResolutionOutcome.ResolvedToBuiltIn:
+            case ResolutionOutcome.ResolvedToMe:
+                break;
+            case ResolutionOutcome.ResolvedViaWithFlattening f:
+                AssertOutcomeRecognised(f.InnerOutcome);
+                break;
+            case ResolutionOutcome.Unresolved u:
+                Assert.Contains(u.Reason, AllowedReasons);
+                break;
+            default:
+                Assert.Fail($"Unexpected ResolutionOutcome variant: {outcome.GetType().Name}");
+                break;
         }
     }
 

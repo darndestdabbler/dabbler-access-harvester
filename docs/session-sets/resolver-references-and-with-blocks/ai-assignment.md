@@ -42,11 +42,18 @@ claude-code Opus 4.7 @ effort=high
 | 3 | mechanical | — | — | — | Land file changes, build, and run initial tests. |
 | 4 | reasoning | session-verification | gpt-5-4 | high | Mandatory cross-provider gate to ensure correctness. |
 
-**Actuals (filled after the session runs):**
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+**Actuals (session 2 — completed 2026-04-27):**
+- Orchestrator used: claude-code Opus 4.7 (1M context).
+- Total routed cost: $0.3282 across 3 calls.
+  - 2 × `session-verification` @ gpt-5-4: Round 1 $0.1436 (ISSUES_FOUND, 1 Major + 1 Minor); Round 2 $0.1827 (VERIFIED).
+  - 1 × `analysis` @ gemini-pro (next-orchestrator recommendation): $0.0019.
+- Deviations from recommendation: synthesis was authored in-conversation per the "When the orchestrator's model matches the routing target..." Convention rather than via `route(architecture)`. Verification took 2 rounds; both Round-1 findings (target-expansion bug in `EmitImplicitWithFlattening`; non-recursive InnerOutcome variant check in fixture test) were real and fixed.
+- Notes for next-session calibration: synthesis-doc-first kept the implementation tight (~80 lines + tests), but Round-1 still surfaced two real defects the doc had not pre-empted — verifier-driven QA remains worth its cost. Resolver suite landed at 151 passing tests (Session 1 left it at 144; Session 2 net +7 including 1 Round-1 regression test).
+
+**Next session orchestrator recommendation (Session 3):**
+claude-3 Opus 4.7 @ effort=medium
+
+**Rationale:** This session defines a core architectural data structure (`ResolvedModule`), a task well-suited to a top-tier model. Session 2's actuals revealed that even small integrations in this codebase can contain subtle defects, justifying retaining Opus to manage the design nuance and reduce implementation risk.
 
 ## Session 3 of 4-5: ResolvedModule Annotations + Provenance
 
