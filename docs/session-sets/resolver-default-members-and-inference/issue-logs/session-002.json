@@ -1,0 +1,50 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "TypeInferencePass.cs",
+    "summary": "TypeOfBoundDeclaration ignored TypeSuffix on suffix-typed bound declarations",
+    "fix": "TypeFromSuffix fallback added; ConcreteName helper unifies the path; defensive \u2014 parser currently retains suffix in name on parameter / module-level forms; local-Dim case exercised.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "TypeInferencePass.cs",
+    "summary": "EvaluateCall did not unwrap ResolvedViaWithFlattening",
+    "fix": "EvaluateCall and the unified EvaluateReferenceOutcome both peek through the wrapper; round-3 added a class-module test that genuinely exercises the path via .cboName under With Me.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "ConfidenceVote.cs",
+    "summary": "InferredType.Evidence backed by the caller's mutable list",
+    "fix": "Defensive ReadOnlyCollection copy in ConfidenceVote.Compute; immutability + independence-from-input tests added.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "location": "TypeInferencePass.cs",
+    "summary": "Variant return-types entered the evidence vote and diluted inference of Variant candidates",
+    "fix": "ConcreteName helper filters Variant out of TypeOfBoundDeclaration, ReturnTypeOf, DefaultMemberReturnFor, and the built-in/default-member arms of EvaluateCall + EvaluateReferenceOutcome. Two regression tests confirm Variant sources gather no evidence.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "location": "TypeInferencePass.cs",
+    "summary": "Bare zero-arg function references (x = SomeFunc, no parens) were treated as variable reads not call returns",
+    "fix": "EvaluateNameReference now routes through EvaluateReferenceOutcome -> EvaluateDeclarationOutcome which checks ReturnTypeOf before TypeOfBoundDeclaration. Test: Run_VariantWithBareFunctionReference_InfersReturnHigh.",
+    "status": "fixed"
+  },
+  {
+    "round": 3,
+    "severity": "Minor",
+    "location": "TypeInferencePassTests.cs",
+    "summary": "Round-1 With-flattening test for calls did not actually exercise the wrapper (Format is unqualified, not .Format)",
+    "fix": "Added Run_VariantWithImplicitWithFlattenedReference_UnwrapsAndInfersHigh in a Form-module + StubRegistry context that genuinely produces ResolvedViaWithFlattening on .cboName; the existing built-in-call test renamed to clarify it is a sanity check, not a flattening test.",
+    "status": "fixed"
+  }
+]
