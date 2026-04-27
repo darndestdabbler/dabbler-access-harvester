@@ -1,0 +1,6 @@
+ISSUES_FOUND
+
+- **Major**  
+  **Issue** → `module.Declarations` ownership is still not enforced for the richer fixtures, so procedure-local declarations can leak into the module declaration set without failing these tests; `AllFixtures_TryFindLocal_FindsAllModuleLevelDeclarations` can even validate that bad state if `TryFindLocal` sees the leaked entries.  
+  **Location** → `Fixture09_AllProceduresHaveDeclarations`, `Fixture10_ModuleLevelVariables_AreRegistered`, `Fixture10_PropertyDeclarations_AreInModuleDeclarations`, `Fixture11_SixPublicModuleVariables_AreRegistered`, `Fixture12_*` (no module declaration inventory assertion), and `AllFixtures_TryFindLocal_FindsAllModuleLevelDeclarations`.  
+  **Fix** → Add an explicit invariant that every declaration stored in `module.Declarations` is actually module-level: no `ParameterDeclaration`, and no `VariableDeclaration` with `DeclarationScope != VariableScope.Module`. Preferably also assert exact total declaration inventory per fixture (`procedures + properties + module vars`) so extra leaked locals cannot pass silently.

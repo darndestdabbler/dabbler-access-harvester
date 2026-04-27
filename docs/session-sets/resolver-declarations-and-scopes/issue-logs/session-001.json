@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "severity": "Major",
+    "title": "Const modeled outside VariableDeclaration",
+    "status": "fixed",
+    "resolution": "ConstantDeclaration now derives from VariableDeclaration so the spec taxonomy holds and consumers can match on `is VariableDeclaration` for both kinds."
+  },
+  {
+    "id": 2,
+    "severity": "Major",
+    "title": "ImplicitDeclaration lacks Type signature",
+    "status": "fixed",
+    "resolution": "Added internal-set Type and TypeSuffix fields on ImplicitDeclaration. null = Variant per the parser-AST convention; #9 inference can write through."
+  },
+  {
+    "id": 3,
+    "severity": "Minor",
+    "title": "Case-insensitive comparison only documented",
+    "status": "fixed",
+    "resolution": "Added Declaration.NameComparer = StringComparer.OrdinalIgnoreCase so scope-construction (#7-S2) and reference-resolution (#8) have a single canonical comparer."
+  },
+  {
+    "id": 4,
+    "severity": "Minor",
+    "title": "SyntheticDeclarationProvenance is speculative",
+    "status": "fixed",
+    "resolution": "Removed. Lean-by-default; later sessions can re-introduce when first needed."
+  }
+]
