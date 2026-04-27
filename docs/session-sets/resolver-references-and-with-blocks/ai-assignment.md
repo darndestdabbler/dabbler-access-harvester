@@ -94,11 +94,19 @@ claude-3.5 Sonnet 4.6 @ effort=low
 | 3 | mechanical | — | — | — | Land tightening commits based on validation results. |
 | 4 | reasoning | session-verification | gpt-5-4 | high | Mandatory cross-provider gate. |
 
-**Actuals (filled after the session runs):**
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+**Actuals (Session 4 — completed 2026-04-27):**
+- Orchestrator used: claude-code Sonnet 4.6 (this session).
+- Total routed cost: $0.4758 across 6 calls.
+  - 1 x code-review (schema-validation) @ sonnet: $0.1744
+  - 2 x session-verification @ gpt-5-4: R1 $0.1083 (ISSUES_FOUND 1 Major+1 Minor); R2 $0.0872 (VERIFIED).
+  - 1 x summarization @ gemini-flash (change-log): $0.0040 (approx)
+  - 1 x analysis @ gemini-pro (next-set recommendation): $0.0019
+- Deviations from recommendation: Orchestrator was Sonnet not the recommended Sonnet 4.6 effort=low; no synthesis was needed so the recommendation was appropriate.
+- Notes for next-session calibration: Schema-validation via code-review worked well; 2 rounds were enough. The schema-validation + fix workflow (add tests, route code-review, fix, re-verify) is the right pattern for mechanical tightening sessions. Session buffer (S5) was not needed.
+
+**Next session-set recommendation:**
+claude-code Opus 4.7 @ effort=high for resolver-default-members-and-inference.
+Rationale: #9 has 2 synthesis tasks (default-member registry, type inference) that warrant top-tier orchestration.
 
 ## Session 5 of 4-5 (optional buffer): Verifier-Surfaced Cleanup
 

@@ -388,6 +388,197 @@
           "costUsd": 0.0017
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/read-guidance",
+      "dateTime": "2026-04-27T08:21:09.760146-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, spec S4, ai-assignment.md, S1-S3 activity log",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/register-session",
+      "dateTime": "2026-04-27T08:21:09.761139-04:00",
+      "description": "Registered session-state.json (claude-code Sonnet 4.6) per Step 0 sub-step 4",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/verify-prereqs",
+      "dateTime": "2026-04-27T08:21:09.761139-04:00",
+      "description": "Verified S1-S3 outputs exist: References/ (8 files), Scopes/WithBlockScope.cs, References/ResolvedModule.cs",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/fixture-tests",
+      "dateTime": "2026-04-27T08:21:09.762637-04:00",
+      "description": "Added ResolverFixtureAnnotationTests.cs (12 new tests) covering fixture 08 unresolved provenance, 03 With-block flattening, 02 Me/bang, 09 module-var resolution. All 187 resolver tests pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/build-and-test-round1",
+      "dateTime": "2026-04-27T08:21:09.763640-04:00",
+      "description": "dotnet build (0 errors, warnings only) + dotnet test (935 passed, 2 skipped; resolver suite 187)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/schema-validation",
+      "dateTime": "2026-04-27T08:23:05.950529-04:00",
+      "description": "Routed code-review (schema-validation) of fixture annotation correspondence to sonnet",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 656,
+          "outputTokens": 3405,
+          "costUsd": 0.053043
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/schema-validation",
+      "dateTime": "2026-04-27T08:26:33.210463-04:00",
+      "description": "Routed code-review (schema-validation) to sonnet; result at schema-validation-session-4.md",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 8739,
+          "outputTokens": 9881,
+          "costUsd": 0.17443199999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/fix-schema-validation-findings",
+      "dateTime": "2026-04-27T08:28:59.701920-04:00",
+      "description": "Applied all schema-validation fixes: renamed test, added InnerOutcome invariant assertion, added Fixture03_dbOpenDynaset_IsUnresolved_NotInScope, replaced vacuous Fixture02 test, added BuiltInFunctionRegistryTests theory. Resolver tests now 195.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 8,
+      "stepKey": "session-4/build-and-test-final",
+      "dateTime": "2026-04-27T08:28:59.703136-04:00",
+      "description": "dotnet build (0 errors) + dotnet test (943 passed, 2 skipped; resolver suite 195)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 9,
+      "stepKey": "session-4/verification-round-1",
+      "dateTime": "2026-04-27T08:32:26.754801-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4) round 1; result at session-reviews/session-004.md",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 324,
+          "outputTokens": 406,
+          "costUsd": 0.0069
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 9,
+      "stepKey": "session-4/verification-round-1",
+      "dateTime": "2026-04-27T08:34:36.349809-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4) round 1",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7605,
+          "outputTokens": 5954,
+          "costUsd": 0.1083225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 10,
+      "stepKey": "session-4/fix-round-1-issues",
+      "dateTime": "2026-04-27T08:35:58.710512-04:00",
+      "description": "Applied Round-1 fixes (Major: added ResolvedToBuiltIn assertion removed from test comment; renamed test; Minor: strengthened Fixture08_LocalVariables_AreResolved to assert ALL hits Resolved). All 195 resolver tests still pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 11,
+      "stepKey": "session-4/verification-round-2",
+      "dateTime": "2026-04-27T08:37:42.131672-04:00",
+      "description": "Cross-provider session-verification round 2 (gpt-5-4)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6766,
+          "outputTokens": 4686,
+          "costUsd": 0.087205
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 12,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-27T08:39:13.805037-04:00",
+      "description": "Generated change-log.md via summarization max_tier=1 -> gemini-flash",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 435,
+          "outputTokens": 225,
+          "costUsd": 0.00020025000000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 13,
+      "stepKey": "session-4/next-session-set-recommendation",
+      "dateTime": "2026-04-27T08:39:25.928601-04:00",
+      "description": "Next-set recommendation via analysis -> gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1011,
+          "outputTokens": 90,
+          "costUsd": 0.00216375
+        }
+      ]
     }
   ]
 }
