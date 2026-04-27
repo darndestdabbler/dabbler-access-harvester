@@ -11,11 +11,13 @@ namespace AccessHarvester.Vba.Resolver.Scopes;
 // still belongs to the enclosing ProcedureScope.
 //
 // Declares and Events have parameters but no body. They produce no
-// ProcedureScope; their parameters are declared on the owning
-// ModuleScope's Declarations list (and the parameters' Scope back-
-// pointer points at the ModuleScope). This keeps "scope owns a body"
-// invariant — there is nowhere inside a Declare or Event for a
-// reference to resolve to.
+// ProcedureScope; their parameters are exposed only via
+// DeclareDeclaration.Parameters / EventDeclaration.Parameters and are
+// NOT added to any scope's Declarations list. Their Scope back-pointer
+// remains null. This preserves the bidirectional invariant (Scope.AddDeclaration
+// is the sole path that sets both pointers) and keeps "scope owns a body"
+// semantics — there is nowhere inside a Declare or Event for a reference
+// to resolve to.
 public sealed class ProcedureScope : Scope
 {
     // The semantic procedure declaration this scope hosts. Matches one

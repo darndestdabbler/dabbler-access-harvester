@@ -295,4 +295,38 @@ public sealed class DeclarationModelTests
 
         Assert.Null(sub.Scope);
     }
+
+    [Fact]
+    public void ParameterDeclaration_ByRef_PreservesPassModeAndModifier()
+    {
+        var p = new ParameterDeclaration(
+            name: "data",
+            provenance: SourceAt(),
+            passMode: ParameterPassMode.ByRef,
+            modifier: ParameterModifier.Required,
+            type: null,
+            typeSuffix: null,
+            isArray: false,
+            defaultValue: null);
+
+        Assert.Equal(ParameterPassMode.ByRef, p.PassMode);
+        Assert.Equal(ParameterModifier.Required, p.Modifier);
+    }
+
+    [Fact]
+    public void ParameterDeclaration_ParamArray_PreservesModifier()
+    {
+        var p = new ParameterDeclaration(
+            name: "args",
+            provenance: SourceAt(),
+            passMode: ParameterPassMode.ByRef,
+            modifier: ParameterModifier.ParamArray,
+            type: null,
+            typeSuffix: null,
+            isArray: true,
+            defaultValue: null);
+
+        Assert.Equal(ParameterModifier.ParamArray, p.Modifier);
+        Assert.True(p.IsArray);
+    }
 }

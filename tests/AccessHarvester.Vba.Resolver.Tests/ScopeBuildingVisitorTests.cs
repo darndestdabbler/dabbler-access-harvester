@@ -344,6 +344,34 @@ public sealed class ScopeBuildingVisitorTests
     // ── Procedures ───────────────────────────────────────────────────
 
     [Fact]
+    public void SubProcedure_ByRefAndParamArrayParameters_PreservePassModeAndModifier()
+    {
+        var project = BuildSingleModule(EmptyModule(new ModuleItem[]
+        {
+            new SubProcedure(Prov(), "Fill",
+                Access: AccessModifier.Public,
+                IsStatic: false,
+                Parameters: new[]
+                {
+                    Param("arr",  passMode: ParameterPassMode.ByRef,  modifier: ParameterModifier.Required),
+                    Param("vals", passMode: ParameterPassMode.ByRef,  modifier: ParameterModifier.ParamArray),
+                },
+                Body: Array.Empty<Statement>()),
+        }));
+        var module = SingleModuleScope(project);
+        var procScope = Assert.IsType<ProcedureScope>(Assert.Single(module.Children));
+        Assert.Equal(2, procScope.Declarations.Count);
+
+        var byRef = Assert.IsType<ParameterDeclaration>(procScope.Declarations[0]);
+        Assert.Equal(ParameterPassMode.ByRef, byRef.PassMode);
+        Assert.Equal(ParameterModifier.Required, byRef.Modifier);
+
+        var paramArray = Assert.IsType<ParameterDeclaration>(procScope.Declarations[1]);
+        Assert.Equal(ParameterPassMode.ByRef, paramArray.PassMode);
+        Assert.Equal(ParameterModifier.ParamArray, paramArray.Modifier);
+    }
+
+    [Fact]
     public void SubProcedure_ProducesProcedureScopeUnderModule()
     {
         var project = BuildSingleModule(EmptyModule(new ModuleItem[]
