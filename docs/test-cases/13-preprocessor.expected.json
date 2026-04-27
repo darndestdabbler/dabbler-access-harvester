@@ -32,8 +32,8 @@
         ]
       },
       "classification": {
-        "purposeTags": ["logging", "debugging"],
-        "purity": "impure",
+        "purposeTags": ["sideEffect", "utility"],
+        "purity": "mixed",
         "complexity": 4,
         "linesOfCode": 8,
         "translatability": "mechanical"
@@ -41,20 +41,19 @@
       "body": {
         "statements": [
           {
-            "kind": "variableDeclaration",
+            "kind": "declaration",
             "location": { "startLine": 22, "startColumn": 5, "endLine": 22, "endColumn": 24 },
-            "declarations": [{ "name": "startTime", "type": "Long" }]
+            "details": { "declarations": [{ "name": "startTime", "type": "Long" }] }
           },
           {
-            "kind": "let",
+            "kind": "assignment",
             "location": { "startLine": 24, "startColumn": 5, "endLine": 24, "endColumn": 29 },
             "summary": "Assigns result of GetTickCount() to startTime"
           },
           {
             "kind": "preprocessorStatement",
-            "preprocessorKind": "If",
-            "body": "DEBUG_MODE = 1 Then",
-            "location": { "startLine": 27, "startColumn": 5, "endLine": 27, "endColumn": 28 }
+            "location": { "startLine": 27, "startColumn": 5, "endLine": 27, "endColumn": 28 },
+            "details": { "preprocessorKind": "If", "body": "DEBUG_MODE = 1 Then" }
           },
           {
             "kind": "call",
@@ -63,9 +62,8 @@
           },
           {
             "kind": "preprocessorStatement",
-            "preprocessorKind": "Else",
-            "body": "",
-            "location": { "startLine": 29, "startColumn": 5, "endLine": 29, "endColumn": 10 }
+            "location": { "startLine": 29, "startColumn": 5, "endLine": 29, "endColumn": 10 },
+            "details": { "preprocessorKind": "Else", "body": "" }
           },
           {
             "kind": "call",
@@ -74,9 +72,8 @@
           },
           {
             "kind": "preprocessorStatement",
-            "preprocessorKind": "EndIf",
-            "body": "",
-            "location": { "startLine": 31, "startColumn": 5, "endLine": 31, "endColumn": 13 }
+            "location": { "startLine": 31, "startColumn": 5, "endLine": 31, "endColumn": 13 },
+            "details": { "preprocessorKind": "EndIf", "body": "" }
           },
           {
             "kind": "call",
@@ -91,19 +88,19 @@
             "location": { "startLine": 24, "startColumn": 16, "endLine": 24, "endColumn": 28 },
             "resolvedCallee": {
               "originalText": "GetTickCount",
-              "resolutionStatus": "conditional",
-              "referenceKind": "externalDeclare",
-              "notes": "Resolved to conditionally-compiled Declare: GetTickCount (32-bit) or GetTickCount64 (64-bit VBA7)",
+              "location": { "startLine": 24, "startColumn": 16, "endLine": 24, "endColumn": 28 },
+              "resolutionStatus": "unresolved",
+              "referenceKind": "external",
+              "notes": "Declared conditionally at module level: GetTickCount (32-bit) or GetTickCount64 (VBA7). Cannot be resolved without evaluating preprocessor conditions.",
               "confidence": 0.9
             }
           }
         ],
         "sqlStrings": [
           {
-            "kind": "runSql",
+            "originalText": "\"INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('\" & processName & \"', \" & startTime & \")\"",
             "location": { "startLine": 30, "startColumn": 9, "endLine": 30, "endColumn": 110 },
-            "sqlTemplate": "INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('<processName>', <startTime>)",
-            "parameters": ["processName", "startTime"],
+            "constructionMode": "concatenated",
             "notes": "Inside #Else branch of preprocessor guard; reachable only when DEBUG_MODE != 1"
           }
         ]

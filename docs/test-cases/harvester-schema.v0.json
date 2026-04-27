@@ -267,7 +267,7 @@
           "enum": [
             "assignment", "set", "call", "if", "select", "for", "forEach", "doLoop", "while",
             "with", "exit", "return", "errorHandler", "raiseError", "declaration", "comment",
-            "directive", "labelled", "gosub", "goto", "stop", "end", "raw"
+            "directive", "preprocessorStatement", "labelled", "gosub", "goto", "stop", "end", "raw"
           ]
         },
         "location": { "$ref": "#/$defs/sourceLocation" },

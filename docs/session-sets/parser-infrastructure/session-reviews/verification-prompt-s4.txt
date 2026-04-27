@@ -1,0 +1,211 @@
+# Session Verification: parser-infrastructure Session 4 of 4
+
+## Session scope
+
+This is the final session of the parser-infrastructure set. Prior sessions 1-3 landed:
+- Error recovery strategy + parser pipeline (AccessHarvester.Vba.Parser/)
+- AST node hierarchy + visitor infrastructure (AccessHarvester.Vba.Parser/Ast/)
+- SourceLocation/SourceRange types, PreprocessorStatement AST node, preprocessor fixture pair
+
+Session 4 work (all this session):
+1. Ran full test suite: 676 passed (54 parser, 294 grammar, 328 core), 0 failed, 2 skipped.
+2. Ran schema validation: fixtures 01-12 passed, fixture 13 FAILED.
+3. Fixed fixture 13 and schema. All 13 now PASS.
+4. Re-ran tests: still 676/0/2.
+
+## Schema change (harvester-schema.v0.json)
+
+Added "preprocessorStatement" to the statement.kind enum.
+Before: ["assignment","set","call","if","select","for","forEach","doLoop","while",
+         "with","exit","return","errorHandler","raiseError","declaration","comment",
+         "directive","labelled","gosub","goto","stop","end","raw"]
+After: same list with "preprocessorStatement" inserted before "labelled".
+
+## 13-preprocessor.bas (source fixture, produced Session 3, unchanged this session)
+
+```
+Option Compare Database
+Option Explicit
+
+' Module-level preprocessor constant
+#Const DEBUG_MODE = 1
+
+' Module-level conditional compilation for API declares
+#If VBA7 Then
+    Private Declare PtrSafe Function GetTickCount64 Lib "kernel32" () As LongLong
+#Else
+    Private Declare Function GetTickCount Lib "kernel32" () As Long
+#End If
+
+Public Sub LogProcess(ByVal processName As String)
+    Dim startTime As Long
+    startTime = GetTickCount()
+
+    #If DEBUG_MODE = 1 Then
+        Debug.Print "DEBUG: Starting process '" & processName & "' at " & startTime
+    #Else
+        DoCmd.RunSQL "INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('" & processName & "', " & startTime & ")"
+    #End If
+
+    Debug.Print "Process logging complete."
+End Sub
+```
+
+## 13-preprocessor.expected.json (fixed this session)
+
+Changes made to fix schema violations:
+- statement kind "variableDeclaration" -> "declaration"
+- statement kind "let" -> "assignment"
+- classification.purposeTags ["logging","debugging"] -> ["sideEffect","utility"]
+- classification.purity "impure" -> "mixed"
+- resolvedCallee.resolutionStatus "conditional" -> "unresolved"
+- resolvedCallee.referenceKind "externalDeclare" -> "external"
+- Added missing required resolvedCallee.location field
+- Fixed sqlStrings: added required originalText and constructionMode fields
+
+Current fixture content:
+```json
+{
+  "schemaVersion": "0.1",
+  "source": {
+    "kind": "procedure",
+    "location": {
+      "file": "13-preprocessor.bas",
+      "module": "Module1",
+      "startLine": 21,
+      "startColumn": 1,
+      "endLine": 34,
+      "endColumn": 8
+    },
+    "hostContext": {
+      "hostKind": "standard"
+    },
+    "originalSource": "Public Sub LogProcess(ByVal processName As String)\n    Dim startTime As Long\n    ' Note: GetTickCount is declared conditionally at the module level\n    startTime = GetTickCount()\n\n    ' Procedure-level conditional compilation\n    #If DEBUG_MODE = 1 Then\n        Debug.Print \"DEBUG: Starting process '\" & processName & \"' at \" & startTime\n    #Else\n        DoCmd.RunSQL \"INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('\" & processName & \"', \" & startTime & \")\"\n    #End If\n\n    Debug.Print \"Process logging complete.\"\nEnd Sub"
+  },
+  "items": [
+    {
+      "itemKind": "procedure",
+      "name": "LogProcess",
+      "procedureKind": "Sub",
+      "visibility": "Public",
+      "isStatic": false,
+      "signature": {
+        "parameters": [
+          {
+            "name": "processName",
+            "type": "String",
+            "byRef": false
+          }
+        ]
+      },
+      "classification": {
+        "purposeTags": ["sideEffect", "utility"],
+        "purity": "mixed",
+        "complexity": 4,
+        "linesOfCode": 8,
+        "translatability": "mechanical"
+      },
+      "body": {
+        "statements": [
+          {
+            "kind": "declaration",
+            "location": { "startLine": 22, "startColumn": 5, "endLine": 22, "endColumn": 24 },
+            "details": { "declarations": [{ "name": "startTime", "type": "Long" }] }
+          },
+          {
+            "kind": "assignment",
+            "location": { "startLine": 24, "startColumn": 5, "endLine": 24, "endColumn": 29 },
+            "summary": "Assigns result of GetTickCount() to startTime"
+          },
+          {
+            "kind": "preprocessorStatement",
+            "location": { "startLine": 27, "startColumn": 5, "endLine": 27, "endColumn": 28 },
+            "details": { "preprocessorKind": "If", "body": "DEBUG_MODE = 1 Then" }
+          },
+          {
+            "kind": "call",
+            "summary": "Prints a debug message with the process name and start time.",
+            "location": { "startLine": 28, "startColumn": 9, "endLine": 28, "endColumn": 86 }
+          },
+          {
+            "kind": "preprocessorStatement",
+            "location": { "startLine": 29, "startColumn": 5, "endLine": 29, "endColumn": 10 },
+            "details": { "preprocessorKind": "Else", "body": "" }
+          },
+          {
+            "kind": "call",
+            "summary": "Inserts a log entry into tbl_Log.",
+            "location": { "startLine": 30, "startColumn": 9, "endLine": 30, "endColumn": 110 }
+          },
+          {
+            "kind": "preprocessorStatement",
+            "location": { "startLine": 31, "startColumn": 5, "endLine": 31, "endColumn": 13 },
+            "details": { "preprocessorKind": "EndIf", "body": "" }
+          },
+          {
+            "kind": "call",
+            "summary": "Prints a completion message.",
+            "location": { "startLine": 33, "startColumn": 5, "endLine": 33, "endColumn": 40 }
+          }
+        ],
+        "references": [],
+        "calls": [
+          {
+            "calleeText": "GetTickCount",
+            "location": { "startLine": 24, "startColumn": 16, "endLine": 24, "endColumn": 28 },
+            "resolvedCallee": {
+              "originalText": "GetTickCount",
+              "location": { "startLine": 24, "startColumn": 16, "endLine": 24, "endColumn": 28 },
+              "resolutionStatus": "unresolved",
+              "referenceKind": "external",
+              "notes": "Declared conditionally at module level: GetTickCount (32-bit) or GetTickCount64 (VBA7). Cannot be resolved without evaluating preprocessor conditions.",
+              "confidence": 0.9
+            }
+          }
+        ],
+        "sqlStrings": [
+          {
+            "originalText": "\"INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('\" & processName & \"', \" & startTime & \")\"",
+            "location": { "startLine": 30, "startColumn": 9, "endLine": 30, "endColumn": 110 },
+            "constructionMode": "concatenated",
+            "notes": "Inside #Else branch of preprocessor guard; reachable only when DEBUG_MODE != 1"
+          }
+        ]
+      }
+    }
+  ],
+  "unresolvedItems": [],
+  "diagnostics": [
+    {
+      "severity": "info",
+      "code": "HAR-PP-001",
+      "message": "Module contains preprocessor directives (#If, #Const). Static analysis does not evaluate conditional compilation paths; all branches are represented in the AST as PreprocessorDirective / PreprocessorStatement nodes.",
+      "location": { "file": "13-preprocessor.bas", "startLine": 12, "startColumn": 1 }
+    }
+  ]
+}
+
+```
+
+## Files not in scope this session (present in repo)
+
+- AccessHarvester.Vba.Parser/Ast/Statement.cs -- PreprocessorStatement record added Session 3
+- AccessHarvester.Vba.Parser/Ast/SourceLocation.cs -- added Session 3
+- AccessHarvester.Vba.Parser/Ast/SourceRange.cs -- added Session 3
+- AccessHarvester.Vba.Parser/Ast/Provenance.cs -- updated Session 3 (Range added)
+- All other parser/AST/visitor/walker files -- Sessions 1-2, unchanged this session
+
+## Verification questions
+
+1. Schema: Is "preprocessorStatement" the right enum value to add? The schema already has "directive" -- is a distinct value appropriate, or should preprocessor lines use "directive" with kind-specific detail in the "details" field?
+
+2. Fixture statement kinds: Are "declaration", "assignment", and "preprocessorStatement" correct for the three VBA constructs (Dim statement, assignment, preprocessor line)?
+
+3. PreprocessorStatement shape: The fixture uses "kind": "preprocessorStatement" with "details": {"preprocessorKind": "If|Else|EndIf", "body": "..."} where body is the raw text after the directive keyword. Is this shape appropriate given the schema's open-ended "details" field?
+
+4. resolutionStatus: Changed "conditional" (not in enum) to "unresolved". GetTickCount is declared conditionally under #If VBA7 -- is "unresolved" more accurate than "partiallyResolved" or "ambiguous"?
+
+5. Provenance refactor deferred: Session 3 left a comment that Session 4 MAY promote SourceRange to primary and remove redundant Line/Column scalars. This was NOT done (lean-by-default; would require touching all Provenance call sites with no correctness benefit at this tier). Is this deferral acceptable?
+
+Conclude with exactly one of: VERIFIED / ISSUES_FOUND
+If ISSUES_FOUND, list each as: [Severity: Critical|Major|Minor|Nit] Description
