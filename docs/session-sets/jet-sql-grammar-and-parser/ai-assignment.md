@@ -57,8 +57,12 @@
 | 3 | Validation | `schema-validation` | `claude-code` (Sonnet) | `low` | Pin-pointed task per spec to mechanically verify the captured AST JSON against the expected structure and node conventions from S2. Rename `actual.json` to `expected.json` on success. |
 | 4 | Verification | `session-verification` | `codex` (gpt-5.4) | `medium` | Verify that the tests provide meaningful coverage for the core SQL features present in the fixtures. |
 
-### Actuals
-*TBD by orchestrator*
+### Actuals (Session 3)
+- **Orchestrator used:** claude-code Sonnet 4.6 @ effort=unknown
+- **Total routed cost:** ~$0.29 (schema-validation $0.21, session-verification $0.055, next-orch recommendation $0.002)
+- **Deviations:** `code-review` used for schema-validation step (Sonnet, not Gemini Pro per assignment). One vacuous union test fixed (AllFlags[0]→AllFlags[1]). Added compound WHERE fixture-05 test after schema-validation finding.
+- **Verification:** VERIFIED by GPT-5-4 on first round.
+- **Next session orchestrator recommendation (Session 4):** `claude-code Sonnet 4.6` @ effort=`medium` — Session 4 is analysis + targeted test-generation (surgical grammar-gap identification); Sonnet proved sufficient for similar scope in Session 3 and the synthesis count is 0.
 
 ---
 ### Session 4 of 4: Cross-Cut + Edge-Case Fixtures

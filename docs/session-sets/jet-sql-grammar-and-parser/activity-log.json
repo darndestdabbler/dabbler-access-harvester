@@ -209,6 +209,84 @@
           "costUsd": 0.0019950000000000002
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/parse-fragment-api",
+      "dateTime": "2026-04-27T08:38:16.650397+00:00",
+      "description": "Added ParseFragment() to SqlParserPipeline; changed ParseResult.ParseTree to SqlStatementContext; updated AstBuilder.Build() to accept SqlStatementContext",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/test-project",
+      "dateTime": "2026-04-27T08:38:16.651396+00:00",
+      "description": "Created tests/AccessHarvester.Sql.Grammar.Tests/ with JetSqlParserPipelineTests.cs (13 tests) and Ast/SqlAstBuilderShapeTests.cs (31 tests); wired into solution",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-27T08:38:16.651396+00:00",
+      "description": "Full-solution build green; 44 new SQL tests pass; 54+294+328 existing pass (2 COM-gated skipped)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/schema-validation",
+      "dateTime": "2026-04-27T08:41:57.659738+00:00",
+      "description": "Routed code-review for AST correspondence check via sonnet",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 11160,
+          "outputTokens": 11976,
+          "costUsd": 0.21312000000000003
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/cross-provider-verification",
+      "dateTime": "2026-04-27T08:44:42.126427+00:00",
+      "description": "Cross-provider verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9170,
+          "outputTokens": 2108,
+          "costUsd": 0.054544999999999996
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T08:45:50.913959+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 4 via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 384,
+          "outputTokens": 122,
+          "costUsd": 0.0017
+        }
+      ]
     }
   ]
 }

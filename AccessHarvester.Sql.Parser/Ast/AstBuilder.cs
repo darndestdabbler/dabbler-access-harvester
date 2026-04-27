@@ -22,11 +22,8 @@ internal sealed class AstBuilder
         _sourceFile = sourceFile;
     }
 
-    public SqlStatement Build(JetSqlParser.ParseContext ctx)
-    {
-        var stmt = BuildSqlStatement(ctx.sqlStatement());
-        return stmt;
-    }
+    public SqlStatement Build(JetSqlParser.SqlStatementContext ctx)
+        => BuildSqlStatement(ctx);
 
     // ── Statement ────────────────────────────────────────────────────
 
