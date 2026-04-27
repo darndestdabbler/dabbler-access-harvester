@@ -666,7 +666,35 @@ dispatches to a different AI provider for independent review.
 2. Build a verification prompt with: spec excerpt + file contents + build
    results + (if applicable) a sample of the produced JSON output and the
    schema it should satisfy.
-3. Execute:
+3. **Append the required JSON response schema to the prompt.** This prevents
+   the verifier from returning a bare one-line verdict with no actionable
+   findings (confirmed failure mode in `resolver-declarations-and-scopes`
+   Session 3 where gpt-5-4 returned only `ISSUES_FOUND` on two rounds).
+   Add this block verbatim at the end of every verification prompt:
+
+   ```
+   After your analysis, output a JSON block in this exact format:
+   ```json
+   {
+     "verdict": "VERIFIED" | "ISSUES_FOUND",
+     "issues": [
+       {
+         "severity": "Critical" | "Major" | "Minor",
+         "location": "<file or test name>",
+         "summary": "<one-sentence description>",
+         "fix": "<recommended fix>"
+       }
+     ]
+   }
+   ```
+   If verdict is VERIFIED, `issues` must be an empty array [].
+   Do not omit this block.
+   ```
+
+   If the JSON block is absent from `result.content`, treat the response
+   as malformed and retry once with an explicit reminder to include it.
+
+4. Execute:
    ```python
    result = route(
        content=verification_prompt,
