@@ -1,0 +1,103 @@
+{
+  "sessionSetName": "jet-sql-resolution-and-dynamic",
+  "createdDate": "2026-04-27T13:42:43.453844-04:00",
+  "totalSessions": 4,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/register-and-read-context",
+      "dateTime": "2026-04-27T13:47:13.119993-04:00",
+      "description": "Registered session start; read planning + spec; verified prereqs #11b/#12 change-logs present.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-04-27T13:47:13.119993-04:00",
+      "description": "Routed analysis to draft ai-assignment.md; mechanically corrected stale Claude model IDs (Opus 4.7/Sonnet 4.6) and rewrote table to match the actual session step structure.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1159,
+          "outputTokens": 1393,
+          "costUsd": 0.0154
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/synthesis-design",
+      "dateTime": "2026-04-27T13:51:16.121449-04:00",
+      "description": "Designed FormReferences module in-conversation (Opus orchestrator matches architecture target; avoids documented Opus/architecture timeout pattern). Algorithm: walk SQL AST, gather FormReference nodes, resolve each segment chain through IAccessObjectModelRegistry starting at Forms/Reports collection. Reason codes for unresolved cases stable per spec.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/land-formreferences",
+      "dateTime": "2026-04-27T13:51:16.128976-04:00",
+      "description": "Landed AccessHarvester.Sql.Parser/FormReferences/: FormReferenceTargetKind, UnresolvedReason, FormReferenceAnnotation (+ Resolved/Unresolved subtypes), FormReferenceCollector (walker), FormReferenceResolver. Added ProjectReference Sql.Parser -> Vba.Resolver to consume IAccessObjectModelRegistry and Synthetic*Declaration types.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-04-27T13:57:27.991981-04:00",
+      "description": "dotnet build sequentially: 0 errors, 283 pre-existing warnings. dotnet test --no-build sequentially: Sql.Grammar 72/72, Vba.Parser 54/54, Vba.Grammar 294/294, Vba.Resolver 400/400, Tests 328/330 pass + 2 Windows-only [SkippableFact] skips.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verify-round-1",
+      "dateTime": "2026-04-27T13:57:27.991981-04:00",
+      "description": "Cross-provider session-verification routed to gpt-5-4. Verdict ISSUES_FOUND with one Major: Bang vs Dot operator semantics ignored.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6504,
+          "outputTokens": 5846,
+          "costUsd": 0.1039
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/apply-verifier-fix",
+      "dateTime": "2026-04-27T13:57:27.992981-04:00",
+      "description": "Accepted verifier finding (option (a) in disagreement procedure). Fix: operator-aware ResolveSegment (Bang on Form/Report -> strict Controls dictionary) and ChooseUnresolvedReason(op-aware) so Dot-at-segment-1 failures emit member-not-found-at-segment-1 rather than control-not-on-form.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/verify-round-2",
+      "dateTime": "2026-04-27T13:59:45.287867-04:00",
+      "description": "Re-verified after fix. Verdict VERIFIED, issues=[].",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2574,
+          "outputTokens": 3132,
+          "costUsd": 0.0534
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "AccessHarvester.Sql.Parser/FormReferences/FormReferenceResolver.cs",
+    "summary": "Resolver ignored Bang vs Dot operator semantics; ! control references could be misresolved as type-library members and Dot-failures at segment 1 were mis-coded as control-not-on-form.",
+    "fix": "Added ResolveSegment that does strict Controls dictionary lookup for Bang on SyntheticForm/ReportDeclaration parents (preserving JET ! default-member semantics) and made ChooseUnresolvedReason operator-aware so segment-1 Dot failures emit member-not-found-at-segment-1.",
+    "status": "fixed"
+  }
+]

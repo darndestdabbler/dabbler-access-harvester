@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AccessHarvester.Sql.Grammar\AccessHarvester.Sql.Grammar.csproj" />
+    <ProjectReference Include="..\AccessHarvester.Vba.Resolver\AccessHarvester.Vba.Resolver.csproj" />
   </ItemGroup>
 
 </Project>
