@@ -100,7 +100,9 @@ low
 | 4.1 | Triage verifier-surfaced issues and address them with targeted routing. | `orchestrator-local` |
 
 ### Actuals (filled after the session)
-- **Actual orchestrator:**
-- **Actual cost:**
-- **Session commits:**
-- **Verification route:** `route(task_type="session-verification", complexity_hint=70)` to `gpt-5-4`
+- **Actual orchestrator:** Claude Code with `claude-sonnet-4-6` at `effort=low`. Matched the next-session recommendation.
+- **Actual cost:** ~$0.018 routed total. Round-1 verification (gpt-5-4 HTTP 429 → gemini-pro): $0.0118. Round-2 verification (gemini-pro, reshaped context): $0.0030. Change-log (gemini-flash, max_tier=1): $0.0003. Next-set recommendation (gemini-pro, analysis): $0.0055. Aggregate set-level routed total now ~$0.187 across 13 calls (Sessions 1-4 combined).
+- **Session commits:** one commit landing: `QueryAbstractionBuilder.cs` — added `CollectImplicitFormReferences` + `WalkDmlForFormRefs` + `WalkSelectForFormRefs` + `WalkTableSourceForFormRefs` + `CollectFormRefsFromExpr` (recursive expression walker for implicit FormReference detection); `QueryAbstractionBuilderTests.cs` — 3 new tests (implicit-only, deduplication, mixed declared+implicit); session-4 verifier files, issue log, change-log.md, next-session-set-recommendation.md, ai-assignment.md actuals.
+- **Verification route:** `route(task_type="session-verification")` → gpt-5-4 HTTP 429 → fell back to `query("gemini-pro", ...)` (same pattern as Sessions 1-3). Round 1: ISSUES_FOUND (1 false-positive Major context gap + 1 real Major). Round 2: VERIFIED after fix. Build: green; 1233 passed, 2 skipped, 0 failed.
+- **Deviations from recommendation:** none on orchestrator.
+- **Notes for calibration:** gpt-5-4 verifier 429 has now hit every session in this set (4/4). Either the OpenAI quota is persistently low for this project window or gpt-5-4 is rate-limited at the API tier used here. Future sets should default directly to `query("gemini-pro", task_type="session-verification")` instead of waiting for gpt-5-4 to 429 three times.

@@ -41,6 +41,13 @@ public static class QueryAbstractionBuilder
         ArgumentNullException.ThrowIfNull(statement);
 
         var declaredParameters = ExtractDeclaredParameters(statement.Parameters);
+        var implicitParameters = CollectImplicitFormReferences(statement.Body, declaredParameters);
+        IReadOnlyList<QueryParameterAbstraction>? allParameters =
+            declaredParameters is null && implicitParameters is null ? null :
+            implicitParameters is null ? declaredParameters :
+            declaredParameters is null ? implicitParameters :
+            [.. declaredParameters, .. implicitParameters];
+
         var (shape, primaryFrom, joins, where, groupBy, having, orderBy, returnShape, aggregation) =
             DescribeBody(statement.Body);
 
@@ -49,7 +56,7 @@ public static class QueryAbstractionBuilder
             SourceQueryName = sourceQueryName,
             Shape = shape,
             SuggestedMethodName = SuggestMethodName(sourceQueryName, shape),
-            Parameters = declaredParameters,
+            Parameters = allParameters,
             ReturnShape = returnShape,
             PrimaryFrom = primaryFrom,
             Joins = joins,
@@ -219,6 +226,156 @@ public static class QueryAbstractionBuilder
             sb.Append('[').Append(fr.Segments[i].Name).Append(']');
         }
         return sb.ToString();
+    }
+
+    // ── Implicit form-reference parameter collection ───────────────────
+
+    private static IReadOnlyList<QueryParameterAbstraction>? CollectImplicitFormReferences(
+        DmlStatement body,
+        IReadOnlyList<QueryParameterAbstraction>? declared)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (declared is not null)
+            foreach (var p in declared) seen.Add(p.SourceName);
+
+        var result = new List<QueryParameterAbstraction>();
+        WalkDmlForFormRefs(body, seen, result);
+        return result.Count == 0 ? null : result;
+    }
+
+    private static void WalkDmlForFormRefs(
+        DmlStatement body, HashSet<string> seen, List<QueryParameterAbstraction> result)
+    {
+        switch (body)
+        {
+            case SelectCore sc: WalkSelectForFormRefs(sc, seen, result); break;
+            case UnionStatement u:
+                foreach (var s in u.Selects)
+                {
+                    if (s is SelectCore sc2) WalkSelectForFormRefs(sc2, seen, result);
+                    else if (s is ParenthesizedSelect ps) WalkDmlForFormRefs(ps.Inner, seen, result);
+                }
+                break;
+            case ParenthesizedSelect ps: WalkDmlForFormRefs(ps.Inner, seen, result); break;
+            case UpdateStatement up:
+                WalkTableSourceForFormRefs(up.Target, seen, result);
+                foreach (var a in up.Assignments) CollectFormRefsFromExpr(a.Value, seen, result);
+                if (up.Where is not null) CollectFormRefsFromExpr(up.Where, seen, result);
+                break;
+            case DeleteStatement del:
+                WalkFromClauseForFormRefs(del.From, seen, result);
+                if (del.Where is not null) CollectFormRefsFromExpr(del.Where, seen, result);
+                break;
+        }
+    }
+
+    private static void WalkSelectForFormRefs(
+        SelectCore sc, HashSet<string> seen, List<QueryParameterAbstraction> result)
+    {
+        if (sc.SelectList is ColumnSelectList cl)
+            foreach (var item in cl.Items)
+                if (item is ExpressionSelectItem ei) CollectFormRefsFromExpr(ei.Value, seen, result);
+        WalkFromClauseForFormRefs(sc.From, seen, result);
+        if (sc.Where is not null) CollectFormRefsFromExpr(sc.Where, seen, result);
+        if (sc.Having is not null) CollectFormRefsFromExpr(sc.Having, seen, result);
+        if (sc.GroupBy is not null)
+            foreach (var g in sc.GroupBy) CollectFormRefsFromExpr(g, seen, result);
+        if (sc.OrderBy is not null)
+            foreach (var o in sc.OrderBy) CollectFormRefsFromExpr(o.Expression, seen, result);
+    }
+
+    private static void WalkFromClauseForFormRefs(
+        FromClause? from, HashSet<string> seen, List<QueryParameterAbstraction> result)
+    {
+        if (from is null) return;
+        foreach (var src in from.Sources) WalkTableSourceForFormRefs(src, seen, result);
+    }
+
+    private static void WalkTableSourceForFormRefs(
+        TableSource source, HashSet<string> seen, List<QueryParameterAbstraction> result)
+    {
+        IReadOnlyList<JoinClause> joins = source switch
+        {
+            SimpleTableSource s => s.Joins,
+            SubqueryTableSource sq => sq.Joins,
+            ParenthesizedTableSource p => p.Joins,
+            _ => Array.Empty<JoinClause>(),
+        };
+        foreach (var j in joins)
+        {
+            if (source is ParenthesizedTableSource pt) WalkTableSourceForFormRefs(pt.Inner, seen, result);
+            CollectFormRefsFromExpr(j.On, seen, result);
+        }
+        if (source is ParenthesizedTableSource pSrc && joins.Count == 0)
+            WalkTableSourceForFormRefs(pSrc.Inner, seen, result);
+    }
+
+    private static void CollectFormRefsFromExpr(
+        Expression e, HashSet<string> seen, List<QueryParameterAbstraction> result)
+    {
+        switch (e)
+        {
+            case FormReference fr:
+                var path = ReconstructFormReference(fr);
+                if (seen.Add(path))
+                {
+                    var origin = fr.Root is ReportsRoot ? ParameterOrigin.ReportReference : ParameterOrigin.FormReference;
+                    result.Add(new QueryParameterAbstraction
+                    {
+                        Name = ToCamelCase(LeafSegment(path)),
+                        SourceName = path,
+                        Origin = origin,
+                        DerivedFrom = $"{path} (implicit inline reference)",
+                    });
+                }
+                break;
+            case ParenthesizedExpression pe: CollectFormRefsFromExpr(pe.Inner, seen, result); break;
+            case UnaryExpression u: CollectFormRefsFromExpr(u.Operand, seen, result); break;
+            case BinaryExpression be:
+                CollectFormRefsFromExpr(be.Left, seen, result);
+                CollectFormRefsFromExpr(be.Right, seen, result);
+                break;
+            case BetweenExpression bx:
+                CollectFormRefsFromExpr(bx.Operand, seen, result);
+                CollectFormRefsFromExpr(bx.Low, seen, result);
+                CollectFormRefsFromExpr(bx.High, seen, result);
+                break;
+            case NotBetweenExpression bxn:
+                CollectFormRefsFromExpr(bxn.Operand, seen, result);
+                CollectFormRefsFromExpr(bxn.Low, seen, result);
+                CollectFormRefsFromExpr(bxn.High, seen, result);
+                break;
+            case IsNullExpression isn: CollectFormRefsFromExpr(isn.Operand, seen, result); break;
+            case IsNotNullExpression isnn: CollectFormRefsFromExpr(isnn.Operand, seen, result); break;
+            case InListExpression il:
+                CollectFormRefsFromExpr(il.Operand, seen, result);
+                foreach (var v in il.Values) CollectFormRefsFromExpr(v, seen, result);
+                break;
+            case FunctionCallExpression fc:
+                foreach (var a in fc.Arguments) CollectFormRefsFromExpr(a, seen, result);
+                break;
+            case IIfExpression ii:
+                CollectFormRefsFromExpr(ii.Condition, seen, result);
+                CollectFormRefsFromExpr(ii.ThenExpr, seen, result);
+                CollectFormRefsFromExpr(ii.ElseExpr, seen, result);
+                break;
+            case SwitchExpression sw:
+                foreach (var p in sw.Pairs)
+                {
+                    CollectFormRefsFromExpr(p.Condition, seen, result);
+                    CollectFormRefsFromExpr(p.Value, seen, result);
+                }
+                break;
+            case ChooseExpression ch:
+                CollectFormRefsFromExpr(ch.Index, seen, result);
+                foreach (var c in ch.Choices) CollectFormRefsFromExpr(c, seen, result);
+                break;
+            case DomainFunctionExpression dfn:
+                CollectFormRefsFromExpr(dfn.FieldExpr, seen, result);
+                CollectFormRefsFromExpr(dfn.DomainExpr, seen, result);
+                if (dfn.CriteriaExpr is not null) CollectFormRefsFromExpr(dfn.CriteriaExpr, seen, result);
+                break;
+        }
     }
 
     // ── Body decomposition ─────────────────────────────────────────────

@@ -393,4 +393,73 @@ public class QueryAbstractionBuilderTests
         // QueryAbstractionRef deferred — not present on QueryAbstraction itself
         // (that field lives on FormDataSourceBinding / ControlBinding, wired in Session 3+)
     }
+
+    [Fact]
+    public void Build_OnImplicitFormRefsWithNoParametersClause_LiftsThemAsParameters()
+    {
+        // SQL with no PARAMETERS clause — form references appear inline in WHERE only.
+        const string sql = """
+            SELECT CaseID, CaseNumber FROM tblCases
+            WHERE DistrictID = [Forms]![frmFilter]![cboDistrict]
+              AND CaseStatus = [Forms]![frmFilter]![txtStatus]
+            """;
+        var qa = Build("qryImplicitRefs", sql);
+        Assert.NotNull(qa.Parameters);
+        Assert.Equal(2, qa.Parameters!.Count);
+
+        var p0 = qa.Parameters[0];
+        Assert.Equal("cboDistrict", p0.Name);
+        Assert.Equal(ParameterOrigin.FormReference, p0.Origin);
+        Assert.Null(p0.Type);
+        Assert.Contains("[Forms]", p0.SourceName);
+        Assert.Contains("frmFilter", p0.SourceName);
+        Assert.Contains("cboDistrict", p0.SourceName);
+        Assert.Contains("implicit", p0.DerivedFrom);
+
+        var p1 = qa.Parameters[1];
+        Assert.Equal("txtStatus", p1.Name);
+        Assert.Equal(ParameterOrigin.FormReference, p1.Origin);
+        Assert.Null(p1.Type);
+    }
+
+    [Fact]
+    public void Build_OnImplicitFormRefsDedupedAcrossMultipleOccurrences()
+    {
+        // Same form reference appears twice in the WHERE — should appear once in Parameters.
+        const string sql = """
+            SELECT CaseID FROM tblCases
+            WHERE OpenedDate <= [Forms]![frmFilter]![dtPicker]
+              AND ClosedDate > [Forms]![frmFilter]![dtPicker]
+            """;
+        var qa = Build("qryDuped", sql);
+        Assert.NotNull(qa.Parameters);
+        var single = Assert.Single(qa.Parameters!);
+        Assert.Equal("dtPicker", single.Name);
+    }
+
+    [Fact]
+    public void Build_OnDeclaredAndImplicitMixed_DeclaredFirstNoImplicitDuplication()
+    {
+        // PARAMETERS clause declares one form ref; a different form ref
+        // appears implicitly in WHERE. Result: 2 parameters, declared first.
+        const string sql = """
+            PARAMETERS [Forms]![frmMain]![cboStatus] Text;
+            SELECT CaseID FROM tblCases
+            WHERE CaseStatus = [Forms]![frmMain]![cboStatus]
+              AND DistrictID = [Forms]![frmMain]![cboDistrict]
+            """;
+        var qa = Build("qryMixed", sql);
+        Assert.NotNull(qa.Parameters);
+        Assert.Equal(2, qa.Parameters!.Count);
+
+        // Declared parameter is first; its Type is populated from the clause
+        Assert.Equal("cboStatus", qa.Parameters[0].Name);
+        Assert.Equal(ParameterOrigin.FormReference, qa.Parameters[0].Origin);
+        Assert.Equal("string", qa.Parameters[0].Type);
+
+        // Implicit parameter appended second; Type is null (no symbol table)
+        Assert.Equal("cboDistrict", qa.Parameters[1].Name);
+        Assert.Equal(ParameterOrigin.FormReference, qa.Parameters[1].Origin);
+        Assert.Null(qa.Parameters[1].Type);
+    }
 }
