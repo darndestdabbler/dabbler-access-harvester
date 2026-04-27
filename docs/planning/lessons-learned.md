@@ -538,3 +538,53 @@ reference; if it proves out twice in *this* repo, propose promotion to
   and pass it directly to `log.save_issue_log()` rather than
   interpreting free-form prose. If the JSON block is absent, treat
   the response as malformed and retry once with an explicit reminder.
+
+### Routed Output Truncation — `stop_reason="end_turn"` Is Not Proof Of Completeness
+
+- **Context:** Any high-volume routed call (test-generation, refactoring,
+  doc generation). First hit in `jet-sql-grammar-and-parser` Session 4
+  (2026-04-27).
+- **Failure or friction:** A `route(task_type="test-generation")` call
+  asked gemini-pro for 24 xUnit test methods in one shot. The model
+  returned ~11 tests at 2,547 output tokens and stopped mid-string
+  (last line `var sql = "SELECT Reports`). The provider reported
+  `stop_reason: "end_turn"` — not `"max_tokens"` — so the existing
+  router escalation path did not fire. The orchestrator only
+  discovered the truncation by visual inspection of the saved file,
+  after `log.log_step` had already recorded the call as complete.
+- **Lesson:** Three takeaways, in order of leverage.
+  1. **`stop_reason == "max_tokens"` is one truncation signal but not
+     sufficient.** Providers (gemini-pro empirically) can return
+     `end_turn` on a cut-off response. Truncation detection must also
+     include a syntactic-completeness check (unclosed code fence,
+     unbalanced braces).
+  2. **Item count is the wrong control variable for batch sizing.**
+     Total output tokens drives truncation; tests vary in length
+     (a single-assertion test is ~80 tokens; a multi-assertion test
+     with multi-line SQL is ~250 tokens). Target ~1,200 output
+     tokens per call as the budget; let item count fall out of that.
+     A fixed item-count threshold (e.g., "≤8 tests per call") gives
+     false confidence — 8 complex tests can still exceed the limit.
+  3. **On detected truncation: halve the batch and retry, or fall
+     back to in-conversation authoring.** Retrying at the same batch
+     size with the same prompt is wasted spend; the model will hit
+     the same point again. Geometric halving converges regardless
+     of where the actual ceiling sits.
+- **Action for future sessions:**
+  - The router exposes `RouteResult.truncated` (added 2026-04-27 via
+    `ai_router.utils.detect_truncation`). It is True when
+    `stop_reason == "max_tokens"` OR an unclosed triple-backtick
+    fence is detected OR `{` count exceeds `}` count. Callers should
+    check this flag immediately after a route call and *before*
+    logging success.
+  - On `truncated == True`: halve the batch and retry, or author the
+    remainder in-conversation when AST types / patterns are already
+    in context. Do not retry at the same size.
+  - The descriptor-based two-stage tactic (route compact descriptors,
+    assemble boilerplate locally) is project-specific to code-
+    generation tasks and is **not** recorded as a convention here. If
+    a second session set independently arrives at the same factoring
+    on a different task type, propose promotion at that point.
+  - If a third session set hits the same truncation pattern, propose
+    promoting the dynamic-budget heuristic to a Convention in
+    `project-guidance.md`.
