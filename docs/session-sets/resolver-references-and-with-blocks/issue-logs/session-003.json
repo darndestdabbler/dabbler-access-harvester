@@ -1,0 +1,30 @@
+{
+  "sessionNumber": 3,
+  "rounds": [
+    {
+      "round": 1,
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "AccessHarvester.Vba.Resolver/References/ResolvedModule.cs",
+          "summary": "ResolvedModule exposed mutable collection instances and aliased the caller-supplied references list, allowing drift between the public surfaces and the lookup map.",
+          "fix": "Defensive-copied references into a frozen array at construction; wrapped References, UnresolvedReferences, and Diagnostics in ReadOnlyCollection<T>.",
+          "status": "fixed"
+        },
+        {
+          "severity": "Major",
+          "location": "tests/AccessHarvester.Vba.Resolver.Tests/References/ResolvedModuleTests.cs",
+          "summary": "Tests did not cover ResolvedToObjectModel, ResolvedViaWithFlattening peek-through, real non-emitted AST node lookup miss, severity mapping for WithBlockFlatteningDeferred and MemberAccessOnUnresolvedTarget, or exact per-entry equivalence of Resolve vs ResolveModule.",
+          "fix": "Added: Resolve_References_EquivalentToFlatResolveModule_ExactPerEntry, ExposedCollections_AreImmutableViews, DefensiveCopy_MutatingInputListAfterConstruction_DoesNotAffectModule, TryGetReference_ReturnsNull_ForRealNonEmittingAstNode, TryGetDeclaration_ReturnsBoundDeclaration_OnResolvedToObjectModel, TryGetDeclaration_PeeksThroughResolvedViaWithFlattening_ToInnerBinding, Diagnostics_MemberAccessOnUnresolvedTarget_IsInfo, Diagnostics_WithBlockFlatteningDeferred_IsInfo_WhenSynthesised.",
+          "status": "fixed"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verdict": "VERIFIED",
+      "issues": []
+    }
+  ]
+}
