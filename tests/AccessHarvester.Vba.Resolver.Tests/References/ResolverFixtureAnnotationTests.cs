@@ -291,6 +291,85 @@ public sealed class ResolverFixtureAnnotationTests
         Assert.Equal(rm.UnresolvedReferences.Count, rm.Diagnostics.Count);
     }
 
+    // ── Fixture 11: AutoExec startup chain ───────────────────────────
+    //
+    // Session 4 cross-cut: standard module with 6 public module-level
+    // vars, 2 functions (Initialize, GetAppVersion), bang access on
+    // DAO.Recordset (`rs!UserID` etc.), and dbOpenSnapshot (unresolved).
+
+    [Fact]
+    public void Fixture11_GlobalVars_AreResolved()
+    {
+        var rm = ResolveFixture("11-autoexec-startup-chain.bas", "modStartup");
+
+        foreach (var varName in new[]
+            { "g_CurrentUserID", "g_CurrentUserName", "g_UserRole",
+              "g_FiscalYear", "g_AppStartTime", "g_DebugMode" })
+        {
+            var uses = rm.References
+                .Where(r => r.Expression is IdentifierExpression id
+                            && string.Equals(id.Name, varName,
+                                System.StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            Assert.True(uses.Count > 0,
+                $"Expected at least one reference to '{varName}'.");
+            Assert.All(uses, r => Assert.IsType<ResolutionOutcome.Resolved>(r.Outcome));
+        }
+    }
+
+    [Fact]
+    public void Fixture11_BangAccessOnRs_IsDefaultMemberNotYetResolved()
+    {
+        var rm = ResolveFixture("11-autoexec-startup-chain.bas", "modStartup");
+
+        var bangs = rm.References
+            .Where(r => r.Expression is BangAccessExpression b
+                        && string.Equals(b.Target is IdentifierExpression id ? id.Name : "",
+                            "rs", System.StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        Assert.True(bangs.Count > 0,
+            "Expected at least one bang-access reference on rs (rs!UserID etc.).");
+        Assert.All(bangs, r => Assert.Equal(
+            UnresolvedReasons.DefaultMemberNotYetResolved,
+            Assert.IsType<ResolutionOutcome.Unresolved>(r.Outcome).Reason));
+    }
+
+    [Fact]
+    public void Fixture11_dbOpenSnapshot_IsUnresolved_NotInScope()
+    {
+        var rm = ResolveFixture("11-autoexec-startup-chain.bas", "modStartup");
+
+        var hits = rm.References
+            .Where(r => r.Expression is IdentifierExpression id
+                        && string.Equals(id.Name, "dbOpenSnapshot",
+                            System.StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        Assert.True(hits.Count > 0, "Expected at least one reference to dbOpenSnapshot.");
+        Assert.All(hits, r => Assert.Equal(
+            UnresolvedReasons.NotInScope,
+            Assert.IsType<ResolutionOutcome.Unresolved>(r.Outcome).Reason));
+    }
+
+    [Fact]
+    public void Fixture11_BuiltIns_AreResolvedToBuiltIn()
+    {
+        var rm = ResolveFixture("11-autoexec-startup-chain.bas", "modStartup");
+
+        foreach (var builtInName in new[]
+            { "CurrentDb", "MsgBox", "Application", "Now", "IIf",
+              "InStr", "UCase", "Month", "Year" })
+        {
+            var hits = rm.References
+                .Where(r => r.Expression is IdentifierExpression id
+                            && string.Equals(id.Name, builtInName,
+                                System.StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            Assert.True(hits.Count > 0,
+                $"Expected at least one reference to '{builtInName}'.");
+            Assert.All(hits, r => Assert.IsType<ResolutionOutcome.ResolvedToBuiltIn>(r.Outcome));
+        }
+    }
+
     // ── Helper ───────────────────────────────────────────────────────
 
     private static ClassDeclaration MakeFormClassDecl(string formName)
