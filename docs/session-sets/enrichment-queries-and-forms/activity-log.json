@@ -194,6 +194,77 @@
       "description": "dotnet build: 0 errors, 283 preexisting warnings. dotnet test: 1176 passed (69 Pipeline + 294 Grammar + 400 Resolver + 85 Sql + 328 Core), 2 skipped (Windows-only Access COM), 0 failed.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-27T19:41:05.736136-04:00",
+      "description": "dotnet build (0 errors, 283 preexisting warnings). dotnet test --no-build: 1230 passed (69 Pipeline + 54 Vba.Parser + 294 Vba.Grammar + 400 Resolver + 85 Sql + 328 Core), 2 skipped (Windows-only Access COM), 0 failed. No new failures; all session-4 prerequisites green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/cross-provider-verification-round-1",
+      "dateTime": "2026-04-27T19:48:36.151515-04:00",
+      "description": "Cross-provider verification round 1 (gpt-5-4 HTTP 429; fell back to gemini-pro). ISSUES_FOUND: 2 Major. Major 1: false positive (context gap, verifier only saw first 50 lines of FormComponentSpecBuilder \u2014 null guards already at lines 82-86). Major 2: implicit form-reference parameters not extracted by QueryAbstractionBuilder (real gap vs. documented contract).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0,
+          "note": "HTTP 429 after 3 retries"
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 6958,
+          "outputTokens": 313,
+          "costUsd": 0.0118,
+          "note": "ISSUES_FOUND: 2 Major"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/fix-implicit-form-ref-params",
+      "dateTime": "2026-04-27T19:48:36.151515-04:00",
+      "description": "Fixed Finding 2: added CollectImplicitFormReferences + WalkDmlForFormRefs + WalkSelectForFormRefs + WalkTableSourceForFormRefs + CollectFormRefsFromExpr to QueryAbstractionBuilder.cs. Implicit FormReference nodes in SQL body (WHERE, SELECT list, JOIN ON, GROUP BY, ORDER BY, UPDATE SET/WHERE, DELETE WHERE) are now collected in source order after declared parameters, deduplicated by path. Type left null (requires symbol table). Added 3 new unit tests: implicit-only refs, deduplication, mixed declared+implicit. Build: 0 errors. Tests: 1233 passed, 2 skipped, 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/cross-provider-verification-round-2",
+      "dateTime": "2026-04-27T19:48:36.152963-04:00",
+      "description": "Cross-provider verification round 2 (gemini-pro, reshaped context with full FormComponentSpecBuilder.cs and QueryAbstractionBuilder.cs fix). VERIFIED, issues: [].",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 2225,
+          "outputTokens": 24,
+          "costUsd": 0.003,
+          "note": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/build-test-final",
+      "dateTime": "2026-04-27T19:48:36.152963-04:00",
+      "description": "Final dotnet build: 0 errors. dotnet test: 1233 passed (72 Pipeline + 54 Vba.Parser + 294 Vba.Grammar + 400 Resolver + 85 Sql + 328 Core), 2 skipped (Windows-only Access COM), 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
