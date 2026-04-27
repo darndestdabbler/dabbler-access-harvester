@@ -212,6 +212,13 @@ function progressText(set) {
   if (set.totalSessions && set.totalSessions > 0) {
     return `${set.sessionsCompleted}/${set.totalSessions}`;
   }
+  // Done sets: completed == total by definition. Render as N/N even when
+  // totalSessions is missing/zero in the activity-log (some historical
+  // logs never had it populated). This keeps the Done subtree visually
+  // consistent rather than mixing "N/N" and "N done" rows.
+  if (set.state === "done" && set.sessionsCompleted > 0) {
+    return `${set.sessionsCompleted}/${set.sessionsCompleted}`;
+  }
   if (set.sessionsCompleted > 0) {
     return `${set.sessionsCompleted} done`;
   }
