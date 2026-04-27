@@ -498,6 +498,11 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Require A Trailing JSON Block In Session-Verification Prompts To Prevent Terse Verdicts
 
+- **Promoted to `project-guidance.md` → Conventions → Workflow
+  Expectations** on 2026-04-27 (after `resolver-default-members-and-inference`
+  Sessions 1-4, second+ context confirmation across 8 verification rounds).
+  Retained here as the action-detail reference; the rule itself is now a
+  Convention.
 - **Context:** End-of-session cross-provider verification (Step 6).
   First hit in `resolver-declarations-and-scopes` Session 3
   (2026-04-27): gpt-5-4 returned only the bare string `ISSUES_FOUND`

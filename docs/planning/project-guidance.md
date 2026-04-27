@@ -316,6 +316,39 @@ the human before proceeding.
   "Persist Routed Output To Disk Before Any Display Or Logging Side
   Effects" for the failure case (`vba-spec-study` Session 3 lost a
   $1.29 Opus call to a `cp1252`-driven `print()` crash).
+- **Always include a required JSON response block in session-verification
+  prompts.** Append the structured JSON schema (defined in
+  `ai-router/prompt-templates/verification.md`) to every
+  `route(task_type="session-verification")` call so the verifier is
+  forced to populate verdict and issues rather than returning a bare
+  paragraph or single-line verdict. Format:
+  ```
+  After your analysis, output a JSON block in this exact format:
+  ```json
+  {
+    "verdict": "VERIFIED" | "ISSUES_FOUND",
+    "issues": [
+      {
+        "severity": "Critical" | "Major" | "Minor",
+        "location": "<file or test name>",
+        "summary": "<one-sentence description>",
+        "fix": "<recommended fix>"
+      }
+    ]
+  }
+  ```
+  If verdict is VERIFIED, `issues` must be an empty array `[]`.
+  Do not omit this block.
+  ```
+  If the JSON block is absent from the response, treat it as malformed
+  and retry once with an explicit reminder. Confirmed in two contexts:
+  `resolver-declarations-and-scopes` Session 3 (first hit — bare
+  `ISSUES_FOUND` string with no issue details required reprompting);
+  `resolver-default-members-and-inference` Sessions 1-4 (applied
+  consistently across 8 verification rounds without terse-verdict
+  recurrence). The action-detail reference is preserved in
+  `lessons-learned.md` → "Require A Trailing JSON Block In
+  Session-Verification Prompts To Prevent Terse Verdicts".
 - **Verifier-failure escalation ladder.** When the configured
   cross-provider `session-verification` model fails (timeout, transient
   HTTP error, garbled output), do not silently retry until budget
