@@ -1,0 +1,18 @@
+[
+  {
+    "id": 5,
+    "round": 2,
+    "severity": "Major",
+    "summary": "formRefRoot accepted any bracketed identifier \u2014 would absorb [Order Details].[Quantity] into formReference",
+    "status": "fixed",
+    "fix": "Added gated semantic predicate IsBracketedFormsOrReports() restricting bracketed root to [Forms]/[Reports] only."
+  },
+  {
+    "id": 6,
+    "round": 2,
+    "severity": "Major",
+    "summary": "STAR was accepted as the sole argument of any function (Nz(*), Sum(*) all parsed)",
+    "status": "fixed",
+    "fix": "functionCall now has a dedicated COUNT LPAREN STAR RPAREN alternative; generic functionCall reverts to expressionList only."
+  }
+]

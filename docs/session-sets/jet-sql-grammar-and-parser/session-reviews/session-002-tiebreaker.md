@@ -1,0 +1,3 @@
+**ACCEPT_DISMISSAL**
+
+The SQL code matches the VBA pipeline’s established contract: “lossy” is currently a result classification and warning, not a distinct second parse pass. `ParseLossy` already delegates to `ParseRecovering`, so invoking it from `ParseRecovering` would be recursive or force an unnecessary double-parse with no behavioral change. The warning text could be clarified if desired, but this is not a real functional bug.

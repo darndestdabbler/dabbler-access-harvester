@@ -1,0 +1,378 @@
+{
+  "sessionSetName": "jet-sql-grammar-and-parser",
+  "createdDate": "2026-04-27T07:25:17.011321+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-27T07:27:10.341928+00:00",
+      "description": "Authored ai-assignment.md via route(analysis)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2466,
+          "outputTokens": 1478,
+          "costUsd": 0.0178625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/grammar-build",
+      "dateTime": "2026-04-27T07:30:55.181468+00:00",
+      "description": "Built AccessHarvester.Sql.Grammar; ANTLR generated lexer/parser cleanly",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/full-solution-build",
+      "dateTime": "2026-04-27T07:30:55.182468+00:00",
+      "description": "Full-solution build green (279 warnings preexisting)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/test-suite",
+      "dateTime": "2026-04-27T07:30:55.182468+00:00",
+      "description": "All tests pass: 54 + 294 + 328 (+2 skipped on Windows-COM gates)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/cross-provider-verification",
+      "dateTime": "2026-04-27T07:33:02.420200+00:00",
+      "description": "Cross-provider verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9425,
+          "outputTokens": 8072,
+          "costUsd": 0.1446425
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/cross-provider-verification-r2",
+      "dateTime": "2026-04-27T07:35:45.948669+00:00",
+      "description": "Round 2 verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6416,
+          "outputTokens": 4466,
+          "costUsd": 0.08303
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/cross-provider-verification-r3",
+      "dateTime": "2026-04-27T07:39:08.785247+00:00",
+      "description": "Round 3 verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6085,
+          "outputTokens": 4535,
+          "costUsd": 0.0832375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T07:40:13.435757+00:00",
+      "description": "Routed analysis recommending next orchestrator via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1672,
+          "outputTokens": 118,
+          "costUsd": 0.0032700000000000003
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/sql-parser-infrastructure",
+      "dateTime": "2026-04-27T07:53:56.616295+00:00",
+      "description": "Authored AccessHarvester.Sql.Parser: project, diagnostic infrastructure, AST nodes, visitor, walker, AstBuilder, SqlParserPipeline. In-conversation synthesis (Sonnet orchestrator = routing target).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/full-solution-build",
+      "dateTime": "2026-04-27T07:53:56.617295+00:00",
+      "description": "Full-solution build green: 0 errors, 279 warnings (all pre-existing)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/test-suite",
+      "dateTime": "2026-04-27T07:53:56.617295+00:00",
+      "description": "All tests pass: 54 + 294 + 328 = 676 passed, 2 skipped (COM-gated)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-04-27T07:56:42.405856+00:00",
+      "description": "Cross-provider verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6213,
+          "outputTokens": 7029,
+          "costUsd": 0.1209675
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/cross-provider-verification-r2",
+      "dateTime": "2026-04-27T07:59:37.090724+00:00",
+      "description": "Round 2 cross-provider verification via gpt-5-4 after removing ParseFragment",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5888,
+          "outputTokens": 5404,
+          "costUsd": 0.09577999999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/tiebreaker-opinion",
+      "dateTime": "2026-04-27T08:24:04.682449+00:00",
+      "description": "Second-opinion tiebreaker via gpt-5-4 on ParseRecovering Lossy-label finding",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2573,
+          "outputTokens": 565,
+          "costUsd": 0.0149075
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T08:24:58.040789+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 3",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 876,
+          "outputTokens": 90,
+          "costUsd": 0.0019950000000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/parse-fragment-api",
+      "dateTime": "2026-04-27T08:38:16.650397+00:00",
+      "description": "Added ParseFragment() to SqlParserPipeline; changed ParseResult.ParseTree to SqlStatementContext; updated AstBuilder.Build() to accept SqlStatementContext",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/test-project",
+      "dateTime": "2026-04-27T08:38:16.651396+00:00",
+      "description": "Created tests/AccessHarvester.Sql.Grammar.Tests/ with JetSqlParserPipelineTests.cs (13 tests) and Ast/SqlAstBuilderShapeTests.cs (31 tests); wired into solution",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-27T08:38:16.651396+00:00",
+      "description": "Full-solution build green; 44 new SQL tests pass; 54+294+328 existing pass (2 COM-gated skipped)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/schema-validation",
+      "dateTime": "2026-04-27T08:41:57.659738+00:00",
+      "description": "Routed code-review for AST correspondence check via sonnet",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 11160,
+          "outputTokens": 11976,
+          "costUsd": 0.21312000000000003
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/cross-provider-verification",
+      "dateTime": "2026-04-27T08:44:42.126427+00:00",
+      "description": "Cross-provider verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9170,
+          "outputTokens": 2108,
+          "costUsd": 0.054544999999999996
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T08:45:50.913959+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 4 via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 384,
+          "outputTokens": 122,
+          "costUsd": 0.0017
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/test-generation",
+      "dateTime": "2026-04-27T08:56:00.256247+00:00",
+      "description": "Routed test-generation for 24 uncovered grammar rules via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 1856,
+          "outputTokens": 2547,
+          "costUsd": 0.02779
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/integrate-tests",
+      "dateTime": "2026-04-27T08:59:53.366600+00:00",
+      "description": "Added 24 edge-case tests to SqlAstBuilderShapeTests.cs (GROUP BY/HAVING, DISTINCT, TOP, Switch, Choose, EXISTS, NOT IN/BETWEEN/LIKE, Reports!, DSum/DCount, RIGHT JOIN, INSERT-SELECT, TRANSFORM PIVOT IN, NULL/TRUE literals, OR, 3-way UNION, SUM agg, parameter placeholder, subquery table source). Grammar fix: PIVOT concatExpression instead of PIVOT expression to prevent IN-clause ambiguity.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-27T08:59:53.367803+00:00",
+      "description": "Full solution build: 0 errors, 279 warnings (all pre-existing). Tests: 69+54+294+328=745 passed, 2 COM-gated skipped.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/cross-provider-verification-r1",
+      "dateTime": "2026-04-27T09:03:09.641187+00:00",
+      "description": "Cross-provider verification R1 via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 25539,
+          "outputTokens": 8838,
+          "costUsd": 0.1964175
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-27T09:04:52.326069+00:00",
+      "description": "Generated change-log via gemini-flash (summarization, max_tier=1)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1401,
+          "outputTokens": 1666,
+          "costUsd": 0.0012097499999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/next-session-set-recommendation",
+      "dateTime": "2026-04-27T09:05:31.312246+00:00",
+      "description": "Routed next-session-set recommendation via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 622,
+          "outputTokens": 158,
+          "costUsd": 0.0023575
+        }
+      ]
+    }
+  ]
+}
