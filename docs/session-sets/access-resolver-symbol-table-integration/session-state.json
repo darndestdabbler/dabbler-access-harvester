@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "access-resolver-symbol-table-integration",
-  "currentSession": 1,
+  "currentSession": 2,
   "totalSessions": 3,
   "status": "complete",
-  "startedAt": "2026-04-27T12:34:34.176728-04:00",
-  "completedAt": "2026-04-27T13:03:03.831168-04:00",
+  "startedAt": "2026-04-27T13:17:06.661001-04:00",
+  "completedAt": "2026-04-27T13:28:31.269539-04:00",
   "verificationVerdict": "VERIFIED",
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "max"
+    "model": "claude-sonnet-4-6",
+    "effort": "high"
   }
 }
