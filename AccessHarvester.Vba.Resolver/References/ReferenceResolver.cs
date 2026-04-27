@@ -47,6 +47,17 @@ public sealed class ReferenceResolver
         return collector;
     }
 
+    // Session 3 wrapper. Returns a ResolvedModule bundling the AST,
+    // scope, references, unresolved subset, diagnostics, and lookup
+    // helpers. Internally calls ResolveModule and then constructs the
+    // wrapper — the walker is unchanged. See
+    // session-3-resolved-module.md §5.
+    public ResolvedModule Resolve(ModuleScope moduleScope, Module module)
+    {
+        var references = ResolveModule(moduleScope, module);
+        return new ResolvedModule(module, moduleScope, references);
+    }
+
     // The walker is a private nested class so the public surface stays
     // tiny (one method) and consumers cannot reach its mutable state.
     private sealed class ResolutionWalker : VbaSyntaxWalker

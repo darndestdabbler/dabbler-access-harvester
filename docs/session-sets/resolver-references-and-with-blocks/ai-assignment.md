@@ -68,15 +68,22 @@ claude-3 Opus 4.7 @ effort=medium
 | 3 | mechanical | — | — | — | Land files, build, and test. |
 | 4 | reasoning | session-verification | gpt-5-4 | high | Mandatory cross-provider gate. |
 
-**Actuals (filled after the session runs):**
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+**Actuals (session 3 — completed 2026-04-27):**
+- Orchestrator used: claude-code Opus 4.7 (1M context).
+- Total routed cost: $0.2278 across 3 calls.
+  - 2 × `session-verification` @ gpt-5-4: Round 1 $0.1239 (ISSUES_FOUND, 2 Major); Round 2 $0.1022 (VERIFIED).
+  - 1 × `analysis` @ gemini-pro (next-orchestrator recommendation): $0.0017.
+- Deviations from recommendation: synthesis was authored in-conversation per the "When the orchestrator's model matches the routing target..." Convention rather than via `route(architecture)`. Verification took 2 rounds; both Round-1 findings (collection-immutability gap; test coverage gaps for `ResolvedToObjectModel`/`ResolvedViaWithFlattening` peek-through, real non-emitted AST nodes, and the full closed-set severity mapping) were real and fixed. Estimated cost was $0.25; actual $0.23 — close to estimate.
+- Notes for next-session calibration: synthesis-doc-first kept the design tight (one pure wrapper class + one diagnostic record), but Round-1 still surfaced a real immutability defect the doc didn't pre-empt. Resolver suite landed at 175 passing tests (Session 2 left it at 151; +24 from this session — 16 initial + 7 fix-round + 1 fixture variant net). Pattern: when the synthesis doc names "immutable views", consider adding an explicit immutability-test row to the §9 test plan up-front.
+
+**Next session orchestrator recommendation (Session 4):**
+claude-3.5 Sonnet 4.6 @ effort=low
+
+**Rationale:** Session 4's tasks are purely mechanical (running existing code against fixtures, schema validation), a scope which is well-suited for a cost-effective model. Session 3's work stabilized the resolver into a wrapper with a clear public surface, confirming that no new complex synthesis is required for this follow-on validation work.
 
 ## Session 4 of 4-5: Cross-Cut + Mechanical Tightening
 
-**Recommended orchestrator:** claude-3.5 Sonnet 4.6 @ effort=medium
+**Recommended orchestrator:** claude-3.5 Sonnet 4.6 @ effort=low (revised from session-3 next-orchestrator analysis; original recommendation was effort=medium)
 **Rationale:** This session is purely mechanical, involving running existing code against fixtures and performing schema validation. A mid-tier model is sufficient and cost-effective.
 **Estimated routed cost:** $0.15
 
