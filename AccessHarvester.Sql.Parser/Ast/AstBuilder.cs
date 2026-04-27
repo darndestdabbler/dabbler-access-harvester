@@ -257,10 +257,10 @@ internal sealed class AstBuilder
     private TransformStatement BuildTransformStatement(JetSqlParser.TransformStatementContext ctx)
     {
         var prov = MakeProvenance(ctx);
-        var aggExpr = BuildExpression(ctx.expression(0));
+        var aggExpr = BuildExpression(ctx.expression());
         string? aggAlias = ctx.columnAlias() is { } ca ? ResolveColumnAlias(ca) : null;
         var selectBody = BuildUnionStatement(ctx.unionStatement());
-        var pivotExpr = BuildExpression(ctx.expression(1));
+        var pivotExpr = BuildConcatExpression(ctx.concatExpression());
         List<Expression>? pivotIn = ctx.expressionList() is { } el
             ? el.expression().Select(BuildExpression).ToList()
             : null;

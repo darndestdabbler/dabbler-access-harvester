@@ -287,6 +287,92 @@
           "costUsd": 0.0017
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/test-generation",
+      "dateTime": "2026-04-27T08:56:00.256247+00:00",
+      "description": "Routed test-generation for 24 uncovered grammar rules via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 1856,
+          "outputTokens": 2547,
+          "costUsd": 0.02779
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/integrate-tests",
+      "dateTime": "2026-04-27T08:59:53.366600+00:00",
+      "description": "Added 24 edge-case tests to SqlAstBuilderShapeTests.cs (GROUP BY/HAVING, DISTINCT, TOP, Switch, Choose, EXISTS, NOT IN/BETWEEN/LIKE, Reports!, DSum/DCount, RIGHT JOIN, INSERT-SELECT, TRANSFORM PIVOT IN, NULL/TRUE literals, OR, 3-way UNION, SUM agg, parameter placeholder, subquery table source). Grammar fix: PIVOT concatExpression instead of PIVOT expression to prevent IN-clause ambiguity.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-27T08:59:53.367803+00:00",
+      "description": "Full solution build: 0 errors, 279 warnings (all pre-existing). Tests: 69+54+294+328=745 passed, 2 COM-gated skipped.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/cross-provider-verification-r1",
+      "dateTime": "2026-04-27T09:03:09.641187+00:00",
+      "description": "Cross-provider verification R1 via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 25539,
+          "outputTokens": 8838,
+          "costUsd": 0.1964175
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-27T09:04:52.326069+00:00",
+      "description": "Generated change-log via gemini-flash (summarization, max_tier=1)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1401,
+          "outputTokens": 1666,
+          "costUsd": 0.0012097499999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/next-session-set-recommendation",
+      "dateTime": "2026-04-27T09:05:31.312246+00:00",
+      "description": "Routed next-session-set recommendation via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 622,
+          "outputTokens": 158,
+          "costUsd": 0.0023575
+        }
+      ]
     }
   ]
 }
