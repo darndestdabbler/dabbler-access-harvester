@@ -220,7 +220,7 @@ function progressText(set) {
 
 function touchedDate(set) {
   if (!set.lastTouched) return "";
-  return set.lastTouched.slice(0, 10);
+  return new Date(set.lastTouched).toLocaleDateString("en-CA");
 }
 
 // Custom SVG icons live under media/. Same icon is used for the group
