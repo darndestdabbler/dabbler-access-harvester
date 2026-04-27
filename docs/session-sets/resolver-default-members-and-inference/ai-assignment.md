@@ -81,11 +81,18 @@ This session set implements the default-member resolver, type inference, and a c
 | 3.7 | Execute session prompt. | `claude-opus-4-7` |
 
 **Actuals (filled after the session)**:
-*   Actual orchestrator:
-*   Actual cost:
-*   Session outcome:
+*   Actual orchestrator: `claude-opus-4-7` @ effort=medium (Claude Code), 2026-04-27.
+*   Actual routed cost: ~$0.146
+    - Round 1 session-verification (gpt-5-4): $0.1267
+    - Round 2 session-verification (gpt-5-4): $0.0171
+    - Next-orchestrator recommendation (gemini-pro, analysis): $0.0018
+    - Implementation itself: $0 (in-conversation per the matching-orchestrator convention)
+*   Deviations from recommendation: none — handled in-conversation as expected; routed verification + next-orc went out as planned.
+*   Session outcome: VERIFIED with one minor doc-fix round. Round 1 raised 1 Medium issue (Build_WithFlattening_IndexesUnderInnerDeclaration test did not actually exercise ResolvedViaWithFlattening because the source-driven flattening produces an Unresolved inner outcome rather than Resolved); fixed by hand-building a synthetic ResolvedReference whose Outcome wraps a real Resolved(targetDecl). Round 2 (gpt-5-4) confirmed Resolved. Resolver tests 305 passed (was 295); full suite 999 passed, 2 skipped, 0 failed.
+*   Notes for next-session calibration: Round 1 cost dropped from session 2's $0.17 to $0.13 thanks to tighter scope (one new file plus tests). Source-driven flattening tests against Variant targets land at DefaultMemberNotYetResolved, not Resolved — when a future session needs to test the unwrap path, prefer hand-built outcomes over parsing a `With rs / .Foo` source whose inner outcome is unresolved by design.
 
-**Next-session orchestrator recommendation (Session 4)**: `claude-3-sonnet-20240229`
+**Next-session orchestrator recommendation (Session 4)**: `claude-sonnet-4-6` @ effort=low
+**Rationale (routed via gemini-pro analysis):** The tasks are mechanical verification and routing, aligning with the project's explicit "Sonnet-pinned" convention for schema-validation. This session requires less novel synthesis than Session 3, making a more cost-effective model at a lower effort setting appropriate.
 
 ---
 
