@@ -11,13 +11,17 @@
 | 3 | Mechanical | `refactoring` | `claude-code` (Sonnet) | `medium` | Generate and wire up the `AccessHarvester.Sql.Grammar.csproj` file with `ANTLR4.Build.Tasks`, a mechanical task following an established pattern from `parser-foundations` (#1). |
 | 4 | Verification | `session-verification` | `codex` (gpt-5.4) | `high` | Mandatory cross-provider verification of the generated grammar and build wiring against the spec. |
 
-### Actuals
-*TBD by orchestrator*
+### Actuals (Session 1)
+- **Orchestrator used:** claude-code Opus 4.7 @ effort=unknown
+- **Total routed cost:** ~$0.33 (analysis $0.018 + verification R1 $0.145 + R2 $0.083 + R3 $0.083)
+- **Deviations:** Synthesis authored in-conversation per Sonnet=routing-target Convention. Routed cost dropped from estimated $2.30 to $0.33.
+- **Notes:** 3 verification rounds needed. Session 2 should plan for 2-3 rounds.
+- **Next session orchestrator recommendation (Session 2):** `claude-code Sonnet 4.6` @ effort=`medium` — Session 2 applies an existing pattern rather than novel design; Sonnet is sufficient.
 
 ---
 ### Session 2 of 4: SQL Parser Infrastructure (Synthesis)
 
-**Recommended orchestrator engine:** `claude-code (Opus 4.7)`
+**Recommended orchestrator engine:** `claude-code (Opus 4.7)` *(updated: see below)*
 **Rationale:** The session's core is the synthesis of the AST and error recovery infrastructure. This is a complex design task (`architecture`) that benefits from Opus's planning and code generation capabilities, especially when mirroring conventions from a prerequisite (`#6`).
 **Estimated routed cost:** $2.20
 
@@ -32,9 +36,17 @@
 *TBD by orchestrator*
 
 ---
+### Actuals (Session 2)
+- **Orchestrator used:** claude-code Sonnet 4.6 @ effort=unknown
+- **Total routed cost:** ~$0.56 (R1 verification $0.12, R2 $0.10, tiebreaker $0.01, next-orch recommendation $0.002)
+- **Deviations:** Architecture synthesis done in-conversation (Sonnet = routing target). ParseFragment API removed from scope per Lean-By-Default (deferred to Session 3 when fixture 05 is exercised).
+- **Verification:** R1 ISSUES_FOUND (2 real issues fixed), R2 ISSUES_FOUND (1 context-gap false positive), tiebreaker GPT-5-4 → ACCEPT_DISMISSAL. Net: VERIFIED.
+- **Next session orchestrator recommendation (Session 3):** `claude-code Sonnet 4.6` @ effort=`medium` — Session 3 is mechanical test harness authoring + schema validation; Sonnet proved sufficient in Session 2 for more complex work.
+
+---
 ### Session 3 of 4: Test Coverage + Mechanical Tightening
 
-**Recommended orchestrator engine:** `claude-code (Sonnet 4.6)`
+**Recommended orchestrator engine:** `claude-code (Sonnet 4.6)` *(confirmed by Session 2 actuals)*
 **Rationale:** This session is primarily mechanical: generating a test harness, running the parser, and validating output. Sonnet is cost-effective and sufficient for orchestrating these `test-generation` and `schema-validation` tasks.
 **Estimated routed cost:** $0.65
 

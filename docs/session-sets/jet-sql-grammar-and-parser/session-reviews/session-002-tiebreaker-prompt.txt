@@ -1,0 +1,313 @@
+# Tiebreaker — Second Opinion on a Specific Verifier Finding
+
+## Context
+A cross-provider verifier (GPT-5-4) flagged a potential issue in `AccessHarvester.Sql.Parser/SqlParserPipeline.cs`. The orchestrator disagrees. You are the tiebreaker.
+
+## The Specific Finding
+> "Recovering mode reports a lossy fallback without actually invoking the lossy parse path.
+> Fix: Replace the direct `new ParseResult(tree, diagnostics, ParseMode.Lossy)` return with an actual call to `ParseLossy(source, options)` (merging diagnostics if needed), or keep `ModeUsed = ParseMode.Recovering` and change the warning text if no reparse is intended."
+
+## Orchestrator's Dismissal
+The SQL parser's `ParseRecovering` method mirrors the VBA parser's established pattern exactly. `ParseLossy` itself calls `ParseRecovering` — so calling `ParseLossy` from inside `ParseRecovering` when the threshold is exceeded would either cause a double-parse or recursion. The correct behavior is to label the result `ParseMode.Lossy` and return it — which is what the VBA parser does.
+
+## Evidence: VBA parser (the established pattern being mirrored)
+```csharp
+using System;
+using System.Collections.Generic;
+using AccessHarvester.Vba.Grammar.Generated;
+using Antlr4.Runtime;
+
+namespace AccessHarvester.Vba.Parser;
+
+// Single entry point for parsing a VBA module source string. Mode
+// selection (Strict / Recovering / Lossy) follows the contract in
+// docs/session-sets/parser-infrastructure/error-recovery-strategy.md §2.
+public static class VbaParserPipeline
+{
+    public static ParseResult Parse(string source, ParseOptions? options = null)
+    {
+        options ??= new ParseOptions();
+
+        // ANTLR's grammar threads NEWLINE between every block; sources
+        // that don't end with one cause a spurious EOF mismatch. Match
+        // the convention the existing harness uses.
+        if (!source.EndsWith("\n"))
+            source += "\n";
+
+        return options.RequestedMode switch
+        {
+            ParseMode.Strict => ParseStrict(source, options),
+            ParseMode.Lossy => ParseLossy(source, options),
+            _ => ParseRecovering(source, options),
+        };
+    }
+
+    private static ParseResult ParseStrict(string source, ParseOptions options)
+    {
+        var listener = new ThrowingErrorListener(options.SourcePath);
+        var (lexer, parser, _) = BuildPipeline(source);
+        lexer.AddErrorListener(listener);
+        parser.AddErrorListener(listener);
+        parser.ErrorHandler = new BailErrorStrategy();
+
+        // BailErrorStrategy bypasses parser error listeners — its
+        // ParseCancellationException is the path real failures take.
+        // Wrap to surface SourcePath in the exception message when set.
+        // The ThrowingErrorListener still fires for lexer errors, where
+        // it owns its own SourcePath formatting.
+        try
+        {
+            var tree = parser.module();
+            return new ParseResult(tree, System.Array.Empty<ParseDiagnostic>(), ParseMode.Strict);
+        }
+        catch (Antlr4.Runtime.Misc.ParseCanceledException ex) when (options.SourcePath is not null)
+        {
+            throw new InvalidOperationException(
+                $"[{options.SourcePath}] {ex.InnerException?.Message ?? ex.Message}",
+                ex);
+        }
+    }
+
+    private static ParseResult ParseRecovering(string source, ParseOptions options)
+    {
+        var diagnostics = new List<ParseDiagnostic>();
+        var listener = new DiagnosticCollectingErrorListener(diagnostics, options.SourcePath);
+
+        var (lexer, parser, tokens) = BuildPipeline(source);
+        lexer.AddErrorListener(listener);
+        parser.AddErrorListener(listener);
+        parser.ErrorHandler = new StatementBoundaryErrorStrategy();
+
+        // Force lexing so we can scan for ERROR_TOKEN occurrences (the
+        // grammar's catch-all rule) before the parser runs. Without this
+        // pre-scan VBA0001 is unreachable because the lexer succeeds at
+        // tokenizing every input — the lexer SyntaxError callback only
+        // fires when lexer rule matching fails outright.
+        tokens.Fill();
+        ScanForLexerErrors(tokens, diagnostics, options.SourcePath);
+
+        var tree = parser.module();
+
+        if (diagnostics.Count > options.LossyFallbackErrorThreshold)
+        {
+            diagnostics.Add(new ParseDiagnostic(
+                Severity: DiagnosticSeverity.Warning,
+                Code: "VBA0050",
+                Message: WithSource(
+                    $"Lossy fallback engaged: {diagnostics.Count} diagnostics exceed threshold {options.LossyFallbackErrorThreshold}.",
+                    options.SourcePath),
+                Line: 1,
+                Column: 0,
+                StartIndex: -1,
+                StopIndex: -1));
+            return new ParseResult(tree, diagnostics, ParseMode.Lossy);
+        }
+
+        return new ParseResult(tree, diagnostics, ParseMode.Recovering);
+    }
+
+    private static ParseResult ParseLossy(string source, ParseOptions options)
+    {
+        // Lossy currently shares the recovering pipeline and labels the
+        // result accordingly. The procedure-header salvage scan is a
+        // planned extension point per error-recovery-strategy.md §6 —
+        // landed when corpus evidence shows ANTLR's default recovery
+        // alone is insufficient.
+        var result = ParseRecovering(source, options);
+        if (result.ModeUsed == ParseMode.Lossy) return result;
+
+        var diagnostics = new List<ParseDiagnostic>(result.Diagnostics)
+        {
+            new ParseDiagnostic(
+                Severity: DiagnosticSeverity.Warning,
+                Code: "VBA0050",
+                Message: WithSource("Lossy mode requested explicitly.", options.SourcePath),
+                Line: 1,
+                Column: 0,
+                StartIndex: -1,
+                StopIndex: -1),
+        };
+        return new ParseResult(result.ParseTree, diagnostics, ParseMode.Lossy);
+    }
+
+    private static (VbaLexer Lexer, VbaParser Parser, CommonTokenStream Tokens) BuildPipeline(string source)
+    {
+        var stream = new AntlrInputStream(source);
+        var lexer = new VbaLexer(stream);
+        lexer.RemoveErrorListeners();
+
+        var tokens = new CommonTokenStream(lexer);
+        var parser = new VbaParser(tokens);
+        parser.RemoveErrorListeners();
+
+        return (lexer, parser, tokens);
+    }
+
+    private static void ScanForLexerErrors(
+        CommonTokenStream tokens,
+        List<ParseDiagnostic> diagnostics,
+        string? sourcePath)
+    {
+        foreach (IToken token in tokens.GetTokens())
+        {
+            if (token.Type == VbaLexer.ERROR_TOKEN)
+            {
+                diagnostics.Add(new ParseDiagnostic(
+                    Severity: DiagnosticSeverity.Error,
+                    Code: "VBA0001",
+                    Message: WithSource(
+                        $"Unrecognized character '{token.Text}'.",
+                        sourcePath),
+                    Line: token.Line,
+                    Column: token.Column,
+                    StartIndex: token.StartIndex,
+                    StopIndex: token.StopIndex,
+                    OffendingTokenText: token.Text));
+            }
+        }
+    }
+
+    private static string WithSource(string msg, string? sourcePath) =>
+        sourcePath is null ? msg : $"[{sourcePath}] {msg}";
+}
+
+```
+
+## The SQL parser (under review)
+```csharp
+using System;
+using System.Collections.Generic;
+using AccessHarvester.Sql.Grammar.Generated;
+using AccessHarvester.Sql.Parser.Ast;
+using Antlr4.Runtime;
+
+namespace AccessHarvester.Sql.Parser;
+
+// Single entry point for parsing a JET SQL source string. Mode
+// selection (Strict / Recovering / Lossy) follows the same contract as
+// VbaParserPipeline. Entry rule is `parse` (full statements).
+// Fragment-mode parsing against the grammar's `sqlFragment` entry is
+// deferred to Session 3 when fixture 05 is exercised.
+public static class SqlParserPipeline
+{
+    public static ParseResult Parse(string source, ParseOptions? options = null)
+    {
+        options ??= new ParseOptions();
+        return options.RequestedMode switch
+        {
+            ParseMode.Strict => ParseStrict(source, options),
+            ParseMode.Lossy => ParseLossy(source, options),
+            _ => ParseRecovering(source, options),
+        };
+    }
+
+
+    private static ParseResult ParseStrict(string source, ParseOptions options)
+    {
+        var listener = new ThrowingErrorListener(options.SourcePath);
+        var (lexer, parser) = BuildPipeline(source);
+        lexer.AddErrorListener(listener);
+        parser.AddErrorListener(listener);
+        parser.ErrorHandler = new BailErrorStrategy();
+
+        try
+        {
+            var tree = parser.parse();
+            return new ParseResult(tree, System.Array.Empty<ParseDiagnostic>(), ParseMode.Strict);
+        }
+        catch (Antlr4.Runtime.Misc.ParseCanceledException ex) when (options.SourcePath is not null)
+        {
+            throw new InvalidOperationException(
+                $"[{options.SourcePath}] {ex.InnerException?.Message ?? ex.Message}",
+                ex);
+        }
+    }
+
+    private static ParseResult ParseRecovering(string source, ParseOptions options)
+    {
+        var diagnostics = new List<ParseDiagnostic>();
+        var listener = new DiagnosticCollectingErrorListener(diagnostics, options.SourcePath);
+
+        var (lexer, parser) = BuildPipeline(source);
+        lexer.AddErrorListener(listener);
+        parser.AddErrorListener(listener);
+        parser.ErrorHandler = new StatementBoundaryErrorStrategy();
+
+        var tree = parser.parse();
+
+        if (diagnostics.Count > options.LossyFallbackErrorThreshold)
+        {
+            diagnostics.Add(new ParseDiagnostic(
+                Severity: DiagnosticSeverity.Warning,
+                Code: "SQL0050",
+                Message: WithSource(
+                    $"Lossy fallback engaged: {diagnostics.Count} diagnostics exceed threshold {options.LossyFallbackErrorThreshold}.",
+                    options.SourcePath),
+                Line: 1,
+                Column: 0,
+                StartIndex: -1,
+                StopIndex: -1));
+            return new ParseResult(tree, diagnostics, ParseMode.Lossy);
+        }
+
+        return new ParseResult(tree, diagnostics, ParseMode.Recovering);
+    }
+
+    private static ParseResult ParseLossy(string source, ParseOptions options)
+    {
+        var result = ParseRecovering(source, options);
+        if (result.ModeUsed == ParseMode.Lossy) return result;
+
+        var diagnostics = new List<ParseDiagnostic>(result.Diagnostics)
+        {
+            new ParseDiagnostic(
+                Severity: DiagnosticSeverity.Warning,
+                Code: "SQL0050",
+                Message: WithSource("Lossy mode requested explicitly.", options.SourcePath),
+                Line: 1,
+                Column: 0,
+                StartIndex: -1,
+                StopIndex: -1),
+        };
+        return new ParseResult(result.ParseTree, diagnostics, ParseMode.Lossy);
+    }
+
+
+    private static (JetSqlLexer Lexer, JetSqlParser Parser) BuildPipeline(string source)
+    {
+        var stream = new AntlrInputStream(source);
+        var lexer = new JetSqlLexer(stream);
+        lexer.RemoveErrorListeners();
+
+        var tokens = new CommonTokenStream(lexer);
+        var parser = new JetSqlParser(tokens);
+        parser.RemoveErrorListeners();
+
+        return (lexer, parser);
+    }
+
+
+    private static string WithSource(string msg, string? sourcePath) =>
+        sourcePath is null ? msg : $"[{sourcePath}] {msg}";
+}
+
+// Extension: build an AST from a ParseResult.
+public static class ParseResultExtensions
+{
+    public static SqlStatement BuildAst(this ParseResult result, string sourceFile = "")
+    {
+        var builder = new AstBuilder(result.Diagnostics, sourceFile);
+        return builder.Build(result.ParseTree);
+    }
+}
+
+```
+
+## Question
+Is the SQL `ParseRecovering` method's Lossy fallback behavior correct as written — consistent with the VBA pattern — or does the verifier's finding point to a real bug that should be fixed?
+
+Please answer with one of:
+- ACCEPT_DISMISSAL — the orchestrator is correct; the verifier's finding is a false positive
+- ACCEPT_FINDING — the verifier is correct; the code has a real bug
+
+Then provide 2-3 sentences of reasoning.
