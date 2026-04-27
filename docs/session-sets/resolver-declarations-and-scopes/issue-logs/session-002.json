@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "severity": "Major",
+    "summary": "Non-root scopes could be created with Range == null when AST Provenance.Range is null.",
+    "location": "AccessHarvester.Vba.Resolver/Scopes/ScopeBuildingVisitor.cs (BuildModuleScope, EnterProcedure, VisitWithStatement, VisitForEachStatement)",
+    "status": "fixed",
+    "fix": "Added ToSourceRange(Provenance) helper that synthesises a degenerate single-character SourceRange from Line+Column when p.Range is null. Used at all four non-root scope construction sites. Added NonRootScopes_HaveNonNullRangeEvenWhenAstProvenanceRangeIsNull test."
+  },
+  {
+    "id": 2,
+    "severity": "Major",
+    "summary": "Declare/Event parameters had Scope=ModuleScope set without being registered in ModuleScope.Declarations, breaking the bidirectional ownership invariant.",
+    "location": "AccessHarvester.Vba.Resolver/Scopes/ScopeBuildingVisitor.cs (VisitDeclareStatement, VisitEventDeclaration)",
+    "status": "fixed",
+    "fix": "Removed the manual `p.Scope = _currentModule;` loops. Declare/Event parameters now keep Scope=null. They are accessed via decl.Parameters at call sites, not via lexical scope chain. Adding them to ModuleScope.Declarations would let module-level TryFindLocal incorrectly resolve a use-site to a Declare param. Updated DeclareStatement_/EventDeclaration_ tests to assert Assert.Null(param.Scope) and Assert.DoesNotContain(param, module.Declarations)."
+  }
+]
