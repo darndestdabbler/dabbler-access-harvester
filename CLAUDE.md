@@ -28,6 +28,8 @@ verification — there is no human-UAT layer.
 - `docs/planning/project-guidance.md` — durable principles + conventions
 - `docs/planning/lessons-learned.md` — repo-specific failure patterns
   and tactics learned from prior sessions
+- `docs/planning/session-set-authoring-guide.md` — how to author or update a
+  session-set spec (slug naming, sizing, Session Set Configuration block)
 - `docs/ai-led-session-workflow.md` — the authoritative session-set
   workflow. Single source of truth for the step-by-step procedure, the
   AI router usage, cross-provider verification, **the Step 7
@@ -37,6 +39,11 @@ verification — there is no human-UAT layer.
   signal), **the Delegation Discipline rules (when to route vs. handle
   directly)**, and the mandatory rules list. Do not duplicate that
   content here.
+
+The human starts a session with one of the trigger phrases listed in
+`docs/ai-led-session-workflow.md` → **Trigger Phrases** (sequential,
+named-set, parallel-worktree, optional `— maxout <engine>` suffix).
+That section is the canonical list; do not re-list trigger phrases here.
 
 When the human says **"Start the next session"**, follow the workflow
 in `docs/ai-led-session-workflow.md` exactly. What follows below is

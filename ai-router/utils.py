@@ -83,14 +83,12 @@ def get_escalation_model(
 #
 # `stop_reason == "max_tokens"` is the authoritative provider signal but
 # is NOT sufficient: gemini-pro has been observed to return
-# `stop_reason: "end_turn"` on responses that visibly cut off mid-string
-# (jet-sql-grammar-and-parser Session 4, 2026-04-27 — 11/24 tests
-# generated, response ended with `var sql = "SELECT Reports`). The
-# heuristic below catches that case via syntactic-completeness checks.
-#
-# The orchestrator should consult `RouteResult.truncated` before logging
-# a routed call as successful. On truncation, halve the batch and retry
-# or fall back in-conversation rather than retrying at the same size.
+# `stop_reason: "end_turn"` on responses that visibly cut off mid-string.
+# The heuristic below catches that case via syntactic-completeness
+# checks. The orchestrator (or callers of route()) can consult
+# detect_truncation() before logging a routed call as successful;
+# on truncation, halve the batch and retry or fall back in-conversation
+# rather than retrying at the same size.
 # ----------------------------------------------------------------------
 
 def detect_truncation(content: str, stop_reason: str) -> bool:
@@ -111,7 +109,8 @@ def detect_truncation(content: str, stop_reason: str) -> bool:
     The heuristic is conservative: a clean prose response with no code
     blocks and balanced braces will not flag, even if it lacks a
     sentence-ending period (the bare-verdict case — separately solved
-    by the structured-response-format lesson).
+    by the structured-response-format requirement in
+    `prompt-templates/verification.md`).
     """
     if stop_reason == "max_tokens":
         return True

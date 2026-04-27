@@ -223,6 +223,8 @@ routing:
     # UAT checklist generation and its coverage audit are high-stakes
     # governance gates; route them straight to Tier 3 rather than relying
     # on heuristic scoring to land there indirectly.
+    # NOTE: only invoked when a session-set spec declares requiresUAT: true.
+    # No-UI repos never reach these calls — leaving them defined is zero-cost.
     uat-plan-generation: opus
     uat-coverage-review: opus
     # End-of-session cross-provider verification. Pinned to gpt-5-4
@@ -485,6 +487,8 @@ verification:
     - code-review
     - security-review
     - architecture
+    # uat-plan-generation and uat-coverage-review only run when a session-
+    # set spec declares requiresUAT: true; no-UI repos never reach them.
     - uat-plan-generation
     - uat-coverage-review
     - documentation           # Sonnet verifies Gemini's doc output (uses weekly Sonnet credits)

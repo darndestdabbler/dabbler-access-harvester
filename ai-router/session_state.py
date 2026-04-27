@@ -45,8 +45,9 @@ def register_session_start(
     Returns the absolute path to the written file.
 
     ``orchestrator_effort`` accepts ``"low"``, ``"medium"``, ``"high"``,
-    ``"fast"``, ``"normal"``, or ``"unknown"`` — orchestrators that cannot
-    introspect their own effort level pass ``"unknown"`` rather than guess.
+    ``"max"``, ``"fast"``, ``"normal"``, or ``"unknown"`` — orchestrators that
+    cannot introspect their own effort level pass ``"unknown"`` rather than
+    guess.
     """
     state = {
         "schemaVersion": SCHEMA_VERSION,

@@ -24,17 +24,35 @@ Evaluate the response against these criteria:
 
 ### Response Format
 
-Start with one of these verdicts:
+**Required:** Begin your reply with a fenced JSON block matching the
+schema below, then optionally provide a human-readable narrative
+underneath. The orchestrator parses the JSON block first; bare-paragraph
+verdicts have caused parser failures and ISSUES_FOUND-misclassified-as-
+VERIFIED regressions, so the structured block is non-negotiable.
 
-- **VERIFIED** — The response is correct and complete. No significant issues found.
-- **ISSUES FOUND** — The response has problems that should be addressed.
+```json
+{
+  "verdict": "VERIFIED" | "ISSUES_FOUND",
+  "confidence": "low" | "medium" | "high",
+  "summary": "<one or two sentences explaining the verdict>",
+  "issues": [
+    {
+      "category": "Correctness" | "Completeness" | "False Positive",
+      "severity": "Critical" | "Major" | "Minor",
+      "title": "<short title>",
+      "details": "<what's wrong and what the correct answer should be>"
+    }
+  ]
+}
+```
 
-If VERIFIED, briefly state why you're confident (1–2 sentences).
+If `verdict` is `VERIFIED`, `issues` MUST be an empty array `[]`. If
+`verdict` is `ISSUES_FOUND`, `issues` MUST contain at least one entry.
 
-If ISSUES FOUND, list each issue:
-- **Issue N:** [description]
-  - **Category:** Correctness / Completeness / False Positive
-  - **Severity:** Critical / Major / Minor
-  - **Details:** What's wrong and what the correct answer should be
+After the JSON block, you may optionally include a narrative section
+with additional context, code excerpts, or recommended next steps —
+the orchestrator preserves the full response in
+`session-reviews/session-NNN.md` and only uses the JSON for routing
+decisions.
 
 Do NOT re-do the entire task. Only evaluate what was already produced.
