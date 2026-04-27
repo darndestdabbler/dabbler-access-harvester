@@ -495,3 +495,46 @@ reference; if it proves out twice in *this* repo, propose promotion to
   diverge. If a second multi-feature set hits this pattern,
   promote both this lesson and the per-feature prereq table to
   Conventions in `project-guidance.md`.
+
+### Require A Trailing JSON Block In Session-Verification Prompts To Prevent Terse Verdicts
+
+- **Context:** End-of-session cross-provider verification (Step 6).
+  First hit in `resolver-declarations-and-scopes` Session 3
+  (2026-04-27): gpt-5-4 returned only the bare string `ISSUES_FOUND`
+  with no issue details on two separate rounds, requiring reprompting
+  to get actionable findings.
+- **Failure or friction:** Free-form verifier responses can legally
+  truncate at the verdict line, leaving the orchestrator with no
+  actionable findings. The round costs $0.09-$0.14; a terse response
+  wastes the call and triggers an extra round.
+- **Lesson:** Append a required structured JSON block to every
+  `session-verification` prompt. Structuring the response forces the
+  verifier to populate required fields and makes it harder to produce
+  a one-line answer. The JSON block should follow the verifier's prose
+  analysis (so reasoning still happens first), not replace it.
+- **Action for future sessions:** End every `session-verification`
+  prompt with the following required-response schema:
+
+  ```
+  After your analysis, output a JSON block in this exact format:
+  ```json
+  {
+    "verdict": "VERIFIED" | "ISSUES_FOUND",
+    "issues": [
+      {
+        "severity": "Critical" | "Major" | "Minor",
+        "location": "<file or test name>",
+        "summary": "<one-sentence description>",
+        "fix": "<recommended fix>"
+      }
+    ]
+  }
+  ```
+  If verdict is VERIFIED, `issues` must be an empty array `[]`.
+  Do not omit this block.
+  ```
+
+  The orchestrator can then parse `result.content` for the JSON block
+  and pass it directly to `log.save_issue_log()` rather than
+  interpreting free-form prose. If the JSON block is absent, treat
+  the response as malformed and retry once with an explicit reminder.
