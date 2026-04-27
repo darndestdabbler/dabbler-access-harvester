@@ -1,0 +1,18 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "AccessHarvester.Vba.Resolver/References/ReferenceResolver.cs",
+    "summary": "EmitImplicitWithFlattening built SynthesizedTarget against the unexpanded With target, so `With .Foo ... .Bar` produced a synthesized node still containing an implicit-with leaf.",
+    "fix": "Added ExpandFlattenedTarget; substitutes the recorded ResolvedViaWithFlattening.SynthesizedTarget for the With target before synthesising the new MemberAccess/BangAccess. Added regression test NestedWith_TargetIsImplicitWithMember_FullyExpandsSynthesizedTarget.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "tests/AccessHarvester.Vba.Resolver.Tests/References/ReferenceResolverTests.cs",
+    "summary": "Fixture_RunsToCompletionWithKnownReasonCodes accepted ResolvedViaWithFlattening but did not recurse into InnerOutcome, so an unrecognised Unresolved reason inside a flattening would not be caught.",
+    "fix": "Refactored the variant check into AssertOutcomeRecognised which recurses through ResolvedViaWithFlattening.InnerOutcome.",
+    "status": "fixed"
+  }
+]
