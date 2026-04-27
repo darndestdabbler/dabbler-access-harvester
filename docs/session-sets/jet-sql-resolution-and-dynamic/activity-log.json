@@ -98,6 +98,120 @@
           "costUsd": 0.0534
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/register-and-context",
+      "dateTime": "2026-04-27T14:17:16.448894-04:00",
+      "description": "Registered session start (claude-opus-4-7 @ effort=high). Read planning + spec + Session-1 ai-assignment + verifier output. Confirmed prereqs: Sql.Parser/FormReferences from S1 + Vba.Parser AST + Vba.Resolver IAccessObjectModelRegistry.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/synthesis-design",
+      "dateTime": "2026-04-27T14:17:16.449921-04:00",
+      "description": "Designed DynamicSqlAnalyzer in-conversation (Opus orchestrator matches architecture target; sidesteps documented Opus/architecture timeout pattern per project-guidance convention). Algorithm: forward symbolic-state evaluation. ADT = SqlLiteral|SqlConcat|SqlBranches|SqlFormControlHole|SqlUnknownHole|SqlUnboundVariable. Walk procedure body in source order; If/SelectCase clone Env per branch and merge divergent vars to SqlBranches; recognize OpenRecordset/OpenQueryDef/Execute/RunSQL leaf names as SQL exec sites; flatten symbolic value (cross-product across SqlConcat parts; union across SqlBranches alts) to representative samples capped at MaxFullEnumeration=32 with MaxRepresentativeSamples=5 fallback.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/land-dynamicsql",
+      "dateTime": "2026-04-27T14:17:16.449921-04:00",
+      "description": "Landed AccessHarvester.Sql.Parser/DynamicSql/: SymbolicSqlValue (ADT), CandidateTemplate, ParameterBinding, UnanalyzableReason, DynamicSqlAnalysisResult (incl. ExecutionSite + Options), DynamicSqlAnalyzer (entry + walker + flatten + render). Operator-aware form-control-chain recognition mirrors FormReferenceResolver Session-1 fix (Bang on Form/Report goes through strict Controls dict).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-04-27T14:17:16.451225-04:00",
+      "description": "dotnet build sequentially: 0 errors, 283 pre-existing warnings (NU1903 + CA1416 + xUnit2013, all pre-existing). dotnet test --no-build sequentially: Sql.Grammar 72/72, Vba.Parser 54/54, Vba.Grammar 294/294, Vba.Resolver 400/400, Tests 328/330 pass + 2 Windows-only [SkippableFact] skips. Same totals as Session 1 baseline.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/verify-round-1",
+      "dateTime": "2026-04-27T14:34:26.860130-04:00",
+      "description": "Cross-provider session-verification routed to gpt-5-4. Verdict ISSUES_FOUND with 3 Major findings: (1) string params seeded as unbound-variable instead of unknown hole, (2) combinatorial-blowup cap runs only after full Flatten materializes the cross-product, (3) loop bodies mutate shared env as if executed once.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 17701,
+          "outputTokens": 10931,
+          "costUsd": 0.2082
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/apply-major-fixes",
+      "dateTime": "2026-04-27T14:34:26.861440-04:00",
+      "description": "Accepted all 3 Major findings (option (a) in disagreement procedure). Fixes: (1) made SqlUnknownHole.OriginalExpression nullable + Analyze() seeds env[paramName] = SqlUnknownHole(null, paramName) for each String parameter; (2) added CardinalityCapped(value, cap) precheck + FlattenWithLimit lazy enumerator that bounds intermediate accumulator to <= MaxRepresentativeSamples; (3) added WalkLoopBody helper that snapshots env before walking and post-loop replaces any tracked-variable whose value changed with SqlUnknownHole(null, \"<loop-mutation:varName>\").",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify-round-2",
+      "dateTime": "2026-04-27T14:34:26.862441-04:00",
+      "description": "Re-verified after Major fixes. Verdict ISSUES_FOUND with one Minor: record auto-Equals does reference-equality on the IReadOnlyList fields inside SqlConcat/SqlBranches and the AST Expression field inside hole records, so semantically identical SymbolicSqlValues are over-flagged as divergent in WalkLoopBody and AllAlternativesEqual.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11128,
+          "outputTokens": 9805,
+          "costUsd": 0.1749
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/apply-minor-fix",
+      "dateTime": "2026-04-27T14:34:26.862441-04:00",
+      "description": "Applied Minor fix pre-emptively (Minors do not block commit per workflow Step 7, but the fix is small and improves correctness). Added SymbolicSqlValueEquality.DeepEquals \u2014 structural recursion across Parts/Alternatives, semantic-field comparison on hole records (OriginalText, UnresolvedReason, ResolvedTarget by reference), case-insensitive Name comparison on SqlUnboundVariable. Routed to from WalkLoopBody and AllAlternativesEqual; skipped round-3 reverification since the Minor was non-blocking and the fix is purely a structural-equality refinement.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/build-and-test-final",
+      "dateTime": "2026-04-27T14:34:26.863862-04:00",
+      "description": "dotnet build sequentially: 0 errors, 4 NU1903 warnings (pre-existing). dotnet test --no-build sequentially: Sql.Grammar 72/72, Vba.Parser 54/54, Vba.Grammar 294/294, Vba.Resolver 400/400, Tests 328/330 pass + 2 Windows-only [SkippableFact] skips. Same totals as Session 1 baseline; no regressions from any of the 4 fix rounds.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T14:34:26.863862-04:00",
+      "description": "Routed analysis to gemini-pro for Session 3 orchestrator recommendation. Returned claude-sonnet-3-5 / effort=low (model-id was hallucinated; normalized to claude-sonnet-4-6 \u2014 the deployed Sonnet). Updated ai-assignment.md Session 2 Actuals + Session 3 next-orch recommendation. Refines Session-1-authored Sonnet/medium to Sonnet/low because schema-validation against expected.json is pure mechanical correspondence.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 732,
+          "outputTokens": 116,
+          "costUsd": 0.0021
+        }
+      ]
     }
   ]
 }
