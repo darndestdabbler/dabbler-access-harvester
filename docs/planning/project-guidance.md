@@ -252,12 +252,12 @@ the human before proceeding.
   Reserve `route(task_type="documentation")` for code-doc generation
   — its prompt template wraps content in a "document this code"
   frame that mis-fits free-form prose and produces Gemini 400s.
-  Confirmed in two contexts now (Session 6 change-log generation in
-  `accessexportertemp1-import` hit it again): if a `summarization`
-  call returns Gemini 400 on a prompt above ~2KB, pin `max_tier=1`
-  (forces Gemini Flash, which is more forgiving on long prose). The
-  `max_tier=1` fallback is the operational half of this convention,
-  not optional.
+  For change-log, session-summary, and release-note prompts — which
+  predictably exceed ~2KB — **always pass `max_tier=1` proactively**
+  rather than waiting for a Gemini 400. Confirmed in three contexts:
+  `accessexportertemp1-import` Session 6, `parser-infrastructure`
+  Session 4 change-log. The 400 adds wasted latency and a retry round;
+  setting `max_tier=1` upfront avoids it entirely.
 - **Pin mechanical-correspondence task types to Sonnet rather than
   Opus** in `routing.task_type_overrides`. Mechanical-correspondence
   tasks (schema validation, AST-vs-source diffing, parse-tree shape
