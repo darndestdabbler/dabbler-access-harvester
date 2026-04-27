@@ -1,0 +1,111 @@
+{
+  "sessionSetName": "resolver-default-members-and-inference",
+  "createdDate": "2026-04-27T09:07:17.132285-04:00",
+  "totalSessions": 4,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-04-27T09:11:16.650513-04:00",
+      "description": "Authored ai-assignment.md via routed analysis (gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 832,
+          "outputTokens": 1114,
+          "costUsd": 0.01218
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/synthesis",
+      "dateTime": "2026-04-27T09:19:09.205556-04:00",
+      "description": "Authored synthesis doc in-conversation (Opus orchestrator); landed DefaultMembers/ data model + curated registry + PropertyGroup/Builder",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-04-27T09:19:09.206564-04:00",
+      "description": "dotnet build green; full test suite: 991 passed, 2 skipped (Windows-only). Resolver tests: 243 passed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/verify-round-1",
+      "dateTime": "2026-04-27T09:29:48.357540-04:00",
+      "description": "Round 1 cross-provider verification: ISSUES_FOUND (5 findings: Collection/Dictionary kind, Control row, mutable backing dict, ReturnType contract, test coverage). Verifier gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11822,
+          "outputTokens": 9355,
+          "costUsd": 0.16988
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/fix-round-1-issues",
+      "dateTime": "2026-04-27T09:29:48.358537-04:00",
+      "description": "Applied all 5 fixes: Collection/Dictionary -> Property; removed Control row; ReadOnlyDictionary wrap; tightened ReturnType comment; added 4 tests; removed unused AddMethod helper. Build+tests green (247 passed).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verify-round-2",
+      "dateTime": "2026-04-27T09:29:48.359185-04:00",
+      "description": "Round 2 cross-provider verification: pass with 2 minor doc/comment mismatches. Verifier gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7408,
+          "outputTokens": 5061,
+          "costUsd": 0.094435
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/fix-round-2-minor",
+      "dateTime": "2026-04-27T09:29:48.359496-04:00",
+      "description": "Applied 2 minor doc fixes: DefaultMemberKind.cs comment now reflects Property-only seed; All_EnumeratesEverySeed comment removed brittle row-count reference. Build+tests green (247 passed; full suite 995 passed, 2 skipped).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/next-orc-recommendation",
+      "dateTime": "2026-04-27T09:30:56.940981-04:00",
+      "description": "Routed analysis (gemini-pro): Session 2 -> claude-opus-4-7 @ effort=high. Same complexity profile as Session 1.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 523,
+          "outputTokens": 86,
+          "costUsd": 0.0015137500000000001
+        }
+      ]
+    }
+  ]
+}

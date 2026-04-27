@@ -1,0 +1,51 @@
+[
+  {
+    "severity": "Major",
+    "category": "Correctness",
+    "title": "Collection.Item / Dictionary.Item modeled as Method instead of Property",
+    "status": "fixed",
+    "round": 1
+  },
+  {
+    "severity": "Major",
+    "category": "Correctness",
+    "title": "Control -> Value seed over-broad (heterogeneous base)",
+    "status": "fixed",
+    "round": 1
+  },
+  {
+    "severity": "Minor",
+    "category": "Correctness",
+    "title": "All exposes mutable backing Dictionary",
+    "status": "fixed",
+    "round": 1
+  },
+  {
+    "severity": "Minor",
+    "category": "Correctness",
+    "title": "ReturnType null vs Variant ambiguity in comment",
+    "status": "fixed",
+    "round": 1
+  },
+  {
+    "severity": "Minor",
+    "category": "Completeness",
+    "title": "Missing null-arg tests; locked-in incorrect Collection kind",
+    "status": "fixed",
+    "round": 1
+  },
+  {
+    "severity": "Minor",
+    "category": "Documentation",
+    "title": "DefaultMemberKind enum comment stale (mentioned Method for Item)",
+    "status": "fixed",
+    "round": 2
+  },
+  {
+    "severity": "Minor",
+    "category": "Documentation",
+    "title": "All_EnumeratesEverySeed comment had stale row count",
+    "status": "fixed",
+    "round": 2
+  }
+]
