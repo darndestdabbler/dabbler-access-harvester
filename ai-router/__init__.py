@@ -891,10 +891,13 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
     print(f"{'St':3}  {'Session Set':<{name_width}}  {'Progress':>10}  Touched")
     print(f"{'-' * 3}  {'-' * name_width}  {'-' * 10}  {'-' * 10}")
     for icon, r in rows:
-        if r["total"] not in (None, 0):
+        if r["state"] == "done":
+            # Done sets show actual sessions run as both sides of the fraction.
+            # total_sessions is a planning estimate; it may exceed completed
+            # when optional buffer sessions are not needed.
+            progress = f"{r['completed']}/{r['completed']}" if r["completed"] > 0 else "-"
+        elif r["total"] not in (None, 0):
             progress = f"{r['completed']}/{r['total']}"
-        elif r["state"] == "done" and r["completed"] > 0:
-            progress = f"{r['completed']}/{r['completed']}"
         elif r["completed"] > 0:
             progress = f"{r['completed']} done"
         else:
