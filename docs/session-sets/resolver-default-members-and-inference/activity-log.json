@@ -219,6 +219,93 @@
           "costUsd": 0.0020275
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/read-spec",
+      "dateTime": "2026-04-27T10:53:40.079245-04:00",
+      "description": "Read spec, prior session reviews, and existing References/ResolvedModule structure",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/implement-cross-reference-index",
+      "dateTime": "2026-04-27T10:53:40.079245-04:00",
+      "description": "Implemented CrossReferenceIndex under AccessHarvester.Vba.Resolver/CrossReference/ \u2014 single-pass invert of reference\u2192declaration map; GetReferencesTo(Declaration) -> IReadOnlyList<ResolvedReference>; peeks through ResolvedViaWithFlattening; skips Me/BuiltIn/Unresolved (matching ResolvedModule.TryGetDeclaration semantics). In-conversation per the matching-orchestrator convention.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/add-tests",
+      "dateTime": "2026-04-27T10:53:40.080244-04:00",
+      "description": "Added 10 hermetic unit tests under tests/AccessHarvester.Vba.Resolver.Tests/CrossReference/ covering single-module grouping, multi-module identity preservation, empty-list semantics, outcome-variant filtering, with-flattening peek-through, immutability, null-arg validation, and re-build idempotence.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-27T10:53:40.081244-04:00",
+      "description": "dotnet build + dotnet test sequential. Resolver: 305 passed (was 295). Full suite: 999 passed, 2 skipped, 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/verify-r1",
+      "dateTime": "2026-04-27T10:56:21.301000-04:00",
+      "description": "Round 1 cross-provider verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9089,
+          "outputTokens": 6930,
+          "costUsd": 0.1266725
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/verify-r2",
+      "dateTime": "2026-04-27T10:58:11.120015-04:00",
+      "description": "Round 2 verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2634,
+          "outputTokens": 702,
+          "costUsd": 0.017115000000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/next-orc-rec",
+      "dateTime": "2026-04-27T10:59:06.874037-04:00",
+      "description": "Routed via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 546,
+          "outputTokens": 109,
+          "costUsd": 0.0017725000000000002
+        }
+      ]
     }
   ]
 }

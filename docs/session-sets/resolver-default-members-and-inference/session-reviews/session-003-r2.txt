@@ -1,0 +1,8 @@
+- **Issue** → Round-1 finding: `Build_WithFlattening_IndexesUnderInnerDeclaration` did not actually produce a `ResolvedViaWithFlattening` outcome.  
+  **Location** → `CrossReferenceIndexTests.Build_WithFlattening_IndexesUnderInnerDeclaration`  
+  **Fix** → **Resolved.** The test now explicitly constructs a `ResolvedReference` with `Outcome = new ResolutionOutcome.ResolvedViaWithFlattening(..., InnerOutcome = new ResolutionOutcome.Resolved(targetDecl))`, builds a `ResolvedModule` from that synthetic reference, and asserts:
+  - `CrossReferenceIndex.Build(rm)` indexes the reference under `targetDecl`
+  - the exact synthetic reference instance is returned
+  - the returned reference still has the outer `ResolvedViaWithFlattening` outcome variant
+
+This directly exercises the unwrap/indexing path that the prior version failed to cover.

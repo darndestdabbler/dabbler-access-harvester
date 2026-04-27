@@ -1,0 +1,12 @@
+[
+  {
+    "round": 1,
+    "verifier": "gpt-5-4",
+    "severity": "Medium",
+    "category": "Test correctness",
+    "title": "With-flattening test did not exercise ResolvedViaWithFlattening",
+    "details": "Build_WithFlattening_IndexesUnderInnerDeclaration used a parser-driven `With target / Debug.Print target` source whose references resolve as Resolved (not ResolvedViaWithFlattening), so the unwrap branch was not actually verified.",
+    "status": "fixed",
+    "fix": "Replaced the test with a hand-built ResolvedReference whose Outcome is ResolutionOutcome.ResolvedViaWithFlattening wrapping a real Resolved(targetDecl). Asserts the index finds the reference under targetDecl and confirms the outcome variant."
+  }
+]
