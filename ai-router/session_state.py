@@ -14,7 +14,7 @@ it again.
 
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 
 
@@ -23,7 +23,7 @@ SCHEMA_VERSION = 1
 
 
 def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now().astimezone().isoformat()
 
 
 def _state_path(session_set_dir: str) -> str:
