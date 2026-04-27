@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "jet-sql-grammar-and-parser",
-  "currentSession": 1,
-  "totalSessions": 4,
+  "currentSession": 2,
+  "totalSessions": 0,
   "status": "complete",
-  "startedAt": "2026-04-27T07:25:27.316119+00:00",
-  "completedAt": "2026-04-27T07:40:13.436847+00:00",
+  "startedAt": "2026-04-27T07:43:14.432440+00:00",
+  "completedAt": "2026-04-27T08:24:20.549731+00:00",
   "verificationVerdict": "VERIFIED",
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-opus-4-7",
+    "model": "claude-sonnet-4-6",
     "effort": "unknown"
   }
 }

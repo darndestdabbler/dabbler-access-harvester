@@ -114,6 +114,101 @@
           "costUsd": 0.0032700000000000003
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/sql-parser-infrastructure",
+      "dateTime": "2026-04-27T07:53:56.616295+00:00",
+      "description": "Authored AccessHarvester.Sql.Parser: project, diagnostic infrastructure, AST nodes, visitor, walker, AstBuilder, SqlParserPipeline. In-conversation synthesis (Sonnet orchestrator = routing target).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/full-solution-build",
+      "dateTime": "2026-04-27T07:53:56.617295+00:00",
+      "description": "Full-solution build green: 0 errors, 279 warnings (all pre-existing)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/test-suite",
+      "dateTime": "2026-04-27T07:53:56.617295+00:00",
+      "description": "All tests pass: 54 + 294 + 328 = 676 passed, 2 skipped (COM-gated)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-04-27T07:56:42.405856+00:00",
+      "description": "Cross-provider verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6213,
+          "outputTokens": 7029,
+          "costUsd": 0.1209675
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/cross-provider-verification-r2",
+      "dateTime": "2026-04-27T07:59:37.090724+00:00",
+      "description": "Round 2 cross-provider verification via gpt-5-4 after removing ParseFragment",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5888,
+          "outputTokens": 5404,
+          "costUsd": 0.09577999999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/tiebreaker-opinion",
+      "dateTime": "2026-04-27T08:24:04.682449+00:00",
+      "description": "Second-opinion tiebreaker via gpt-5-4 on ParseRecovering Lossy-label finding",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2573,
+          "outputTokens": 565,
+          "costUsd": 0.0149075
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T08:24:58.040789+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 3",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 876,
+          "outputTokens": 90,
+          "costUsd": 0.0019950000000000002
+        }
+      ]
     }
   ]
 }

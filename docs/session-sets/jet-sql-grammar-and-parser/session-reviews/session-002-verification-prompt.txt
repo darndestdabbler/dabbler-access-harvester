@@ -1,0 +1,822 @@
+# Session Verification: jet-sql-grammar-and-parser Session 2 of 4
+
+## Session Scope
+Session 2 authored `AccessHarvester.Sql.Parser/` — the SQL parser infrastructure for the JET/ACE SQL dialect, mirroring the VBA parser infrastructure from `parser-infrastructure` (#6) in shape, conventions, and quality.
+
+## Spec (Session 2 requirements)
+```
+Session 2 of 4-5: SQL Parser Infrastructure (Synthesis)
+
+- Read Phase 5.2 + #6's VBA parser infrastructure for shape reuse.
+- Route an `architecture` synthesis call producing AST + error recovery (2 of 2 synthesis sessions).
+- Land parser under `AccessHarvester.Sql.Parser/`.
+
+###
+```
+
+## Build Result
+- Full solution build: 0 errors, 279 warnings (all pre-existing, none new)
+- Test suite: 676 tests passed, 2 skipped (COM-gated integration tests)
+
+## Files Created This Session
+All files below are new (none existed before this session):
+
+### AccessHarvester.Sql.Parser\DiagnosticCollectingErrorListener.cs
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Antlr4.Runtime;
+
+namespace AccessHarvester.Sql.Parser;
+
+internal sealed class DiagnosticCollectingErrorListener
+    : BaseErrorListener, IAntlrErrorListener<int>
+{
+    private readonly List<ParseDiagnostic> _diagnostics;
+    private readonly string? _sourcePath;
+
+    public DiagnosticCollectingErrorListener(List<ParseDiagnostic> sink, string? sourcePath)
+    {
+        _diagnostics = sink;
+        _sourcePath = sourcePath;
+    }
+
+    public override void SyntaxError(
+        TextWriter output,
+        IRecognizer recognizer,
+        IToken offendingSymbol,
+        int line,
+        int charPositionInLine,
+        string msg,
+        RecognitionException e)
+    {
+        string code = ClassifyParserError(msg, e);
+
+        IReadOnlyList<string>? expected = null;
+        if (e is not null && recognizer is Antlr4.Runtime.Parser parser)
+        {
+            try
+            {
+                var expectedSet = e.GetExpectedTokens();
+                if (expectedSet is not null)
+                {
+                    var vocabulary = parser.Vocabulary;
+                    expected = expectedSet
+                        .ToIntegerList()
+                        .Select(t => vocabulary.GetSymbolicName(t)
+                                     ?? vocabulary.GetDisplayName(t)
+                                     ?? t.ToString())
+                        .ToList();
+                }
+            }
+            catch
+            {
+                expected = null;
+            }
+        }
+
+        int startIndex = offendingSymbol?.StartIndex ?? -1;
+        int stopIndex = offendingSymbol?.StopIndex ?? -1;
+
+        _diagnostics.Add(new ParseDiagnostic(
+            Severity: DiagnosticSeverity.Error,
+            Code: code,
+            Message: WithSource(msg),
+            Line: line,
+            Column: charPositionInLine,
+            StartIndex: startIndex,
+            StopIndex: stopIndex,
+            OffendingTokenText: offendingSymbol?.Text,
+            ExpectedTokens: expected));
+    }
+
+    public void SyntaxError(
+        TextWriter output,
+        IRecognizer recognizer,
+        int offendingSymbol,
+        int line,
+        int charPositionInLine,
+        string msg,
+        RecognitionException e)
+    {
+        _diagnostics.Add(new ParseDiagnostic(
+            Severity: DiagnosticSeverity.Error,
+            Code: "SQL0001",
+            Message: WithSource(msg),
+            Line: line,
+            Column: charPositionInLine,
+            StartIndex: -1,
+            StopIndex: -1,
+            OffendingTokenText: null,
+            ExpectedTokens: null));
+    }
+
+    private string WithSource(string msg) =>
+        _sourcePath is null ? msg : $"[{_sourcePath}] {msg}";
+
+    private static string ClassifyParserError(string msg, RecognitionException? e)
+    {
+        if (e is NoViableAltException) return "SQL0004";
+        if (msg is null) return "SQL0002";
+        if (msg.StartsWith...
+```
+### AccessHarvester.Sql.Parser\DiagnosticSeverity.cs
+```csharp
+namespace AccessHarvester.Sql.Parser;
+
+public enum DiagnosticSeverity { Error, Warning, Info }
+
+```
+### AccessHarvester.Sql.Parser\ParseDiagnostic.cs
+```csharp
+using System.Collections.Generic;
+
+namespace AccessHarvester.Sql.Parser;
+
+public sealed record ParseDiagnostic(
+    DiagnosticSeverity Severity,
+    string Code,
+    string Message,
+    int Line,
+    int Column,
+    int StartIndex,
+    int StopIndex,
+    string? OffendingTokenText = null,
+    IReadOnlyList<string>? ExpectedTokens = null);
+
+```
+### AccessHarvester.Sql.Parser\ParseMode.cs
+```csharp
+namespace AccessHarvester.Sql.Parser;
+
+public enum ParseMode { Strict, Recovering, Lossy }
+
+```
+### AccessHarvester.Sql.Parser\ParseOptions.cs
+```csharp
+namespace AccessHarvester.Sql.Parser;
+
+public sealed record ParseOptions(
+    ParseMode RequestedMode = ParseMode.Recovering,
+    int LossyFallbackErrorThreshold = 25,
+    string? SourcePath = null);
+
+```
+### AccessHarvester.Sql.Parser\ParseResult.cs
+```csharp
+using System.Collections.Generic;
+using AccessHarvester.Sql.Grammar.Generated;
+
+namespace AccessHarvester.Sql.Parser;
+
+public sealed record ParseResult(
+    JetSqlParser.ParseContext ParseTree,
+    IReadOnlyList<ParseDiagnostic> Diagnostics,
+    ParseMode ModeUsed);
+
+```
+### AccessHarvester.Sql.Parser\SqlParserPipeline.cs
+```csharp
+using System;
+using System.Collections.Generic;
+using AccessHarvester.Sql.Grammar.Generated;
+using AccessHarvester.Sql.Parser.Ast;
+using Antlr4.Runtime;
+
+namespace AccessHarvester.Sql.Parser;
+
+// Single entry point for parsing a JET SQL source string. Mode
+// selection (Strict / Recovering / Lossy) follows the same contract as
+// VbaParserPipeline. Entry rule is `parse` for full statements and
+// `sqlFragment` for dynamic-SQL fragments reconstructed from VBA.
+public static class SqlParserPipeline
+{
+    public static ParseResult Parse(string source, ParseOptions? options = null)
+    {
+        options ??= new ParseOptions();
+        return options.RequestedMode switch
+        {
+            ParseMode.Strict => ParseStrict(source, options),
+            ParseMode.Lossy => ParseLossy(source, options),
+            _ => ParseRecovering(source, options),
+        };
+    }
+
+    // Fragment mode: use when the caller knows the string is a partial
+    // SQL expression extracted from VBA (e.g., a dynamic SQL concatenation
+    // residue). The grammar's sqlFragment rule is more lenient at EOF.
+    public static ParseResult ParseFragment(string source, ParseOptions? options = null)
+    {
+        options ??= new ParseOptions();
+        return options.RequestedMode switch
+        {
+            ParseMode.Strict => ParseFragmentStrict(source, options),
+            _ => ParseFragmentRecovering(source, options),
+        };
+    }
+
+    private static ParseResult ParseStrict(string source, ParseOptions options)
+    {
+        var listener = new ThrowingErrorListener(options.SourcePath);
+        var (lexer, parser) = BuildPipeline(source);
+        lexer.AddErrorListener(listener);
+        parser.AddErrorListener(listener);
+        parser.ErrorHandler = new BailErrorStrategy();
+
+        try
+        {
+            var tree = parser.parse();
+            return new ParseResult(tree, System.Array.Empty<ParseDiagnostic>(), ParseMode.Strict);
+        }
+        catch (Antlr4.Runtime.Misc.ParseCanceledException ex) when (options.SourcePath is not null)
+        {
+            throw new InvalidOperationException(
+                $"[{options.SourcePath}] {ex.InnerException?.Message ?? ex.Message}",
+                ex);
+        }
+    }
+
+    private static ParseResult ParseRecovering(string source, ParseOptions options)
+    {
+        var diagnostics = new List<ParseDiagnostic>();
+        var listener = new DiagnosticCollectingErrorListener(diagnostics, options.SourcePath);
+
+        var (lexer, parser) = BuildPipeline(source);
+        lexer.AddErrorListener(listener);
+        parser.AddErrorListener(listener);
+        parser.ErrorHandler = new StatementBoundaryErrorStrategy();
+
+        var tree = parser.parse();
+
+        if (diagnostics.Count > options.LossyFallbackErrorThreshold)
+        {
+            diagnostics.Add(new ParseDiagnostic(
+                Severity: DiagnosticSeverity.Warning,
+                Code: "SQL0050",
+                Message: WithSource(
+                    $"Lossy f...
+```
+### AccessHarvester.Sql.Parser\StatementBoundaryErrorStrategy.cs
+```csharp
+using AccessHarvester.Sql.Grammar.Generated;
+using Antlr4.Runtime;
+using Antlr4.Runtime.Misc;
+
+namespace AccessHarvester.Sql.Parser;
+
+// Augments ANTLR's DefaultErrorStrategy by widening the recovery set
+// with JET SQL's natural sync points: statement-starting keywords
+// (SELECT, UPDATE, INSERT, DELETE, TRANSFORM, PARAMETERS) and the
+// statement terminator (SEMI). This anchors recovery on boundaries the
+// SQL author intended rather than letting ANTLR skip past a keyword
+// when the broken construct is mid-expression.
+internal sealed class StatementBoundaryErrorStrategy : DefaultErrorStrategy
+{
+    private static readonly IntervalSet SyncTokens = BuildSyncTokens();
+
+    private static IntervalSet BuildSyncTokens()
+    {
+        var set = new IntervalSet(
+            JetSqlLexer.SELECT,
+            JetSqlLexer.UPDATE,
+            JetSqlLexer.INSERT,
+            JetSqlLexer.DELETE,
+            JetSqlLexer.TRANSFORM,
+            JetSqlLexer.PARAMETERS,
+            JetSqlLexer.UNION,
+            JetSqlLexer.SEMI);
+        return set;
+    }
+
+    protected override IntervalSet GetErrorRecoverySet(Antlr4.Runtime.Parser recognizer)
+    {
+        var baseSet = base.GetErrorRecoverySet(recognizer);
+        var union = new IntervalSet();
+        union.AddAll(baseSet);
+        union.AddAll(SyncTokens);
+        return union;
+    }
+}
+
+```
+### AccessHarvester.Sql.Parser\ThrowingErrorListener.cs
+```csharp
+using System;
+using System.IO;
+using Antlr4.Runtime;
+
+namespace AccessHarvester.Sql.Parser;
+
+internal sealed class ThrowingErrorListener
+    : BaseErrorListener, IAntlrErrorListener<int>
+{
+    private readonly string? _sourcePath;
+
+    public ThrowingErrorListener(string? sourcePath)
+    {
+        _sourcePath = sourcePath;
+    }
+
+    public override void SyntaxError(
+        TextWriter output,
+        IRecognizer recognizer,
+        IToken offendingSymbol,
+        int line,
+        int charPositionInLine,
+        string msg,
+        RecognitionException e)
+    {
+        throw new InvalidOperationException(
+            $"{Prefix()}Parser syntax error at line {line}:{charPositionInLine}: {msg}");
+    }
+
+    public void SyntaxError(
+        TextWriter output,
+        IRecognizer recognizer,
+        int offendingSymbol,
+        int line,
+        int charPositionInLine,
+        string msg,
+        RecognitionException e)
+    {
+        throw new InvalidOperationException(
+            $"{Prefix()}Lexer syntax error at line {line}:{charPositionInLine}: {msg}");
+    }
+
+    private string Prefix() => _sourcePath is null ? string.Empty : $"[{_sourcePath}] ";
+}
+
+```
+### AccessHarvester.Sql.Parser\Ast\AstBuilder.cs
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using AccessHarvester.Sql.Grammar.Generated;
+using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
+
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// Walks an ANTLR JetSql parse tree and produces a SqlStatement AST.
+// Same conventions as VBA AstBuilder:
+//   - Deterministic: same parse tree → same AST.
+//   - Recovery: any subtree containing an IErrorNode gets RecoveredProvenance.
+internal sealed class AstBuilder
+{
+    private readonly IReadOnlyList<ParseDiagnostic> _diagnostics;
+    private readonly string _sourceFile;
+
+    public AstBuilder(IReadOnlyList<ParseDiagnostic> diagnostics, string sourceFile = "")
+    {
+        _diagnostics = diagnostics;
+        _sourceFile = sourceFile;
+    }
+
+    public SqlStatement Build(JetSqlParser.ParseContext ctx)
+    {
+        var stmt = BuildSqlStatement(ctx.sqlStatement());
+        return stmt;
+    }
+
+    // ── Statement ────────────────────────────────────────────────────
+
+    private SqlStatement BuildSqlStatement(JetSqlParser.SqlStatementContext ctx)
+    {
+        var prov = MakeProvenance(ctx);
+        ParametersDeclaration? parameters = null;
+        if (ctx.parametersDecl() is { } pd)
+            parameters = BuildParametersDeclaration(pd);
+
+        DmlStatement body;
+        if (ctx.selectLikeStatement() is { } sel)
+            body = BuildSelectLike(sel);
+        else if (ctx.updateStatement() is { } upd)
+            body = BuildUpdateStatement(upd);
+        else if (ctx.insertStatement() is { } ins)
+            body = BuildInsertStatement(ins);
+        else
+            body = BuildDeleteStatement(ctx.deleteStatement()!);
+
+        return new SqlStatement(prov, parameters, body);
+    }
+
+    // ── PARAMETERS ───────────────────────────────────────────────────
+
+    private ParametersDeclaration BuildParametersDeclaration(JetSqlParser.ParametersDeclContext ctx)
+    {
+        var prov = MakeProvenance(ctx);
+        var decls = ctx.parameterDecl().Select(BuildParameterDeclaration).ToList();
+        return new ParametersDeclaration(prov, decls);
+    }
+
+    private ParameterDeclaration BuildParameterDeclaration(JetSqlParser.ParameterDeclContext ctx)
+    {
+        var prov = MakeProvenance(ctx);
+        var name = BuildParameterName(ctx.parameterName());
+        var type = BuildSqlTypeName(ctx.sqlType());
+        return new ParameterDeclaration(prov, name, type);
+    }
+
+    private ParameterName BuildParameterName(JetSqlParser.ParameterNameContext ctx)
+    {
+        var prov = MakeProvenance(ctx);
+        if (ctx.formReference() is { } fr)
+            return new FormReferenceParameterName(prov, BuildFormReference(fr));
+        if (ctx.bracketedIdentifier() is { } bi)
+            return new BracketedParameterName(prov, StripBrackets(bi.BRACKETED_IDENTIFIER().GetText()));
+        return new SimpleParameterName(prov, ResolveIdentifier(ctx.identifier()!));
+    }
+
+    private SqlTypeName BuildSqlTypeName(JetSqlParser.SqlTypeContext ctx)
+    {
+        var ...
+```
+### AccessHarvester.Sql.Parser\Ast\Provenance.cs
+```csharp
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// Discriminated union recording how an AST node was produced. Mirrors
+// VbaSyntaxNode Provenance conventions: SourceProvenance for normally
+// parsed nodes, RecoveredProvenance for nodes that were reconstructed
+// during error recovery.
+public abstract record Provenance(int Line, int Column, SourceRange? Range = null);
+
+public sealed record SourceProvenance(int Line, int Column, SourceRange? Range = null)
+    : Provenance(Line, Column, Range);
+
+public sealed record RecoveredProvenance(string Reason, int Line, int Column, SourceRange? Range = null)
+    : Provenance(Line, Column, Range);
+
+```
+### AccessHarvester.Sql.Parser\Ast\SourceLocation.cs
+```csharp
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// File + line + column triple. Column is 0-based (ANTLR convention).
+// File is empty-string when no source path was supplied to the parser.
+public sealed record SourceLocation(string File, int Line, int Column);
+
+```
+### AccessHarvester.Sql.Parser\Ast\SourceRange.cs
+```csharp
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// Span from the first token's start to the last token's stop, both
+// as character offsets into the source string (ANTLR's StartIndex /
+// StopIndex convention, 0-based, inclusive).
+public sealed record SourceRange(int StartIndex, int StopIndex);
+
+```
+### AccessHarvester.Sql.Parser\Ast\SqlExpression.cs
+```csharp
+using System.Collections.Generic;
+
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// ── Expression hierarchy ──────────────────────────────────────────────
+//
+// Expression precedence (low → high) mirrors the grammar:
+//   OR/EQV/IMP/XOR → AND → NOT → comparison → concat(&) →
+//   additive(+,-) → multiplicative(*,/,\,MOD) → exponent(^) → unary
+
+public abstract record Expression(Provenance Provenance) : SqlSyntaxNode(Provenance);
+
+// ── Binary and unary operators ────────────────────────────────────────
+
+public sealed record BinaryExpression(
+    Provenance Provenance,
+    Expression Left,
+    BinaryOperator Operator,
+    Expression Right)
+    : Expression(Provenance);
+
+public enum BinaryOperator
+{
+    Or, Eqv, Imp, Xor,
+    And,
+    Equal, NotEqual, LessThan, LessOrEqual, GreaterThan, GreaterOrEqual,
+    Like, NotLike,
+    In, NotIn,
+    Concat,
+    Add, Subtract,
+    Multiply, Divide, IntDivide, Modulo,
+    Exponent,
+}
+
+public sealed record UnaryExpression(
+    Provenance Provenance,
+    UnaryOperator Operator,
+    Expression Operand)
+    : Expression(Provenance);
+
+public enum UnaryOperator { Not, Plus, Minus }
+
+// ── Comparison expressions with complex right-hand sides ──────────────
+
+public sealed record BetweenExpression(
+    Provenance Provenance,
+    Expression Operand,
+    Expression Low,
+    Expression High)
+    : Expression(Provenance);
+
+public sealed record NotBetweenExpression(
+    Provenance Provenance,
+    Expression Operand,
+    Expression Low,
+    Expression High)
+    : Expression(Provenance);
+
+public sealed record IsNullExpression(
+    Provenance Provenance,
+    Expression Operand)
+    : Expression(Provenance);
+
+public sealed record IsNotNullExpression(
+    Provenance Provenance,
+    Expression Operand)
+    : Expression(Provenance);
+
+// IN (...) with an expression list
+public sealed record InListExpression(
+    Provenance Provenance,
+    Expression Operand,
+    bool Negated,
+    IReadOnlyList<Expression> Values)
+    : Expression(Provenance);
+
+// IN (SELECT ...) with a subquery
+public sealed record InSubqueryExpression(
+    Provenance Provenance,
+    Expression Operand,
+    bool Negated,
+    UnionStatement Subquery)
+    : Expression(Provenance);
+
+public sealed record ExistsExpression(
+    Provenance Provenance,
+    UnionStatement Subquery)
+    : Expression(Provenance);
+
+public sealed record SubqueryExpression(
+    Provenance Provenance,
+    UnionStatement Subquery)
+    : Expression(Provenance);
+
+public sealed record ParenthesizedExpression(
+    Provenance Provenance,
+    Expression Inner)
+    : Expression(Provenance);
+
+// ── Literals ──────────────────────────────────────────────────────────
+
+public sealed record IntegerLiteralExpression(
+    Provenance Provenance,
+    string RawText)
+    : Expression(Provenance);
+
+public sealed record DecimalLiteralExpression(
+    Provenance Provenance,
+    string RawText)
+    : Expression(Provenance);
+
+public sealed record StringLiteralExpression(
+    Provenance Provenance,
+    string RawText)
+    : ...
+```
+### AccessHarvester.Sql.Parser\Ast\SqlStatement.cs
+```csharp
+using System.Collections.Generic;
+
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// Top-level statement node. A JET SQL source may have an optional
+// PARAMETERS declaration followed by one DML statement.
+public sealed record SqlStatement(
+    Provenance Provenance,
+    ParametersDeclaration? Parameters,
+    DmlStatement Body)
+    : SqlSyntaxNode(Provenance);
+
+// ── PARAMETERS declaration ────────────────────────────────────────────
+
+public sealed record ParametersDeclaration(
+    Provenance Provenance,
+    IReadOnlyList<ParameterDeclaration> Parameters)
+    : SqlSyntaxNode(Provenance);
+
+public sealed record ParameterDeclaration(
+    Provenance Provenance,
+    ParameterName Name,
+    SqlTypeName TypeName)
+    : SqlSyntaxNode(Provenance);
+
+// Parameter name: one of three forms — a form reference path
+// ([Forms]![frmX]![ctlY]), a bracketed identifier ([Enter ID]), or a
+// bare identifier.
+public abstract record ParameterName(Provenance Provenance) : SqlSyntaxNode(Provenance);
+
+public sealed record FormReferenceParameterName(
+    Provenance Provenance,
+    FormReference Reference)
+    : ParameterName(Provenance);
+
+public sealed record BracketedParameterName(
+    Provenance Provenance,
+    string Name)
+    : ParameterName(Provenance);
+
+public sealed record SimpleParameterName(
+    Provenance Provenance,
+    string Name)
+    : ParameterName(Provenance);
+
+// SQL data type name as it appears after a parameter or column declaration.
+public sealed record SqlTypeName(
+    Provenance Provenance,
+    string TypeKeyword,
+    int? Precision,
+    int? Scale)
+    : SqlSyntaxNode(Provenance);
+
+// ── DML base ─────────────────────────────────────────────────────────
+
+public abstract record DmlStatement(Provenance Provenance) : SqlSyntaxNode(Provenance);
+
+// ── SELECT / UNION ────────────────────────────────────────────────────
+
+public sealed record UnionStatement(
+    Provenance Provenance,
+    IReadOnlyList<SelectStatement> Selects,
+    IReadOnlyList<bool> AllFlags)              // AllFlags[i] = true means UNION ALL before Selects[i+1]
+    : DmlStatement(Provenance);
+
+// Parenthesized union counts as a SelectStatement for the grammar.
+public abstract record SelectStatement(Provenance Provenance) : DmlStatement(Provenance);
+
+public sealed record ParenthesizedSelect(
+    Provenance Provenance,
+    UnionStatement Inner)
+    : SelectStatement(Provenance);
+
+public sealed record SelectCore(
+    Provenance Provenance,
+    SelectQuantifier Quantifier,
+    TopClause? Top,
+    SelectList SelectList,
+    FromClause? From,
+    Expression? Where,
+    IReadOnlyList<Expression>? GroupBy,
+    Expression? Having,
+    IReadOnlyList<OrderItem>? OrderBy)
+    : SelectStatement(Provenance);
+
+public enum SelectQuantifier { None, All, Distinct, DistinctRow }
+
+public sealed record TopClause(
+    Provenance Provenance,
+    int N,
+    bool Percent)
+    : SqlSyntaxNode(Provenance);
+
+// ── SELECT list ───────────────────────────────────────────────────────
+
+public abstract record SelectList(Pr...
+```
+### AccessHarvester.Sql.Parser\Ast\SqlSyntaxNode.cs
+```csharp
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// Root of the SQL AST hierarchy. Every node carries a Provenance that
+// distinguishes source-derived nodes from recovery-reconstructed ones.
+// All concrete node types are sealed records; transformations produce
+// new trees via `with`.
+public abstract record SqlSyntaxNode(Provenance Provenance);
+
+```
+### AccessHarvester.Sql.Parser\Ast\SqlSyntaxVisitor.cs
+```csharp
+using System;
+
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// Generic-return visitor. Default implementations return default(T) and
+// do NOT recurse into children. Per the VBA AST convention, a missing
+// arm in the Visit dispatch throws InvalidOperationException rather
+// than silently dropping the node.
+public abstract class SqlSyntaxVisitor<TResult>
+{
+    public virtual TResult? Visit(SqlSyntaxNode? node)
+    {
+        if (node is null) return default;
+
+        return node switch
+        {
+            // Statements
+            SqlStatement n                          => VisitSqlStatement(n),
+            ParametersDeclaration n                 => VisitParametersDeclaration(n),
+            ParameterDeclaration n                  => VisitParameterDeclaration(n),
+            FormReferenceParameterName n             => VisitFormReferenceParameterName(n),
+            BracketedParameterName n                => VisitBracketedParameterName(n),
+            SimpleParameterName n                   => VisitSimpleParameterName(n),
+            SqlTypeName n                           => VisitSqlTypeName(n),
+            UnionStatement n                        => VisitUnionStatement(n),
+            ParenthesizedSelect n                   => VisitParenthesizedSelect(n),
+            SelectCore n                            => VisitSelectCore(n),
+            TopClause n                             => VisitTopClause(n),
+            StarSelectList n                        => VisitStarSelectList(n),
+            ColumnSelectList n                      => VisitColumnSelectList(n),
+            QualifiedStarSelectItem n               => VisitQualifiedStarSelectItem(n),
+            ExpressionSelectItem n                  => VisitExpressionSelectItem(n),
+            FromClause n                            => VisitFromClause(n),
+            SimpleTableSource n                     => VisitSimpleTableSource(n),
+            SubqueryTableSource n                   => VisitSubqueryTableSource(n),
+            ParenthesizedTableSource n              => VisitParenthesizedTableSource(n),
+            JoinClause n                            => VisitJoinClause(n),
+            OrderItem n                             => VisitOrderItem(n),
+            TransformStatement n                    => VisitTransformStatement(n),
+            UpdateStatement n                       => VisitUpdateStatement(n),
+            Assignment n                            => VisitAssignment(n),
+            InsertStatement n                       => VisitInsertStatement(n),
+            ValuesSource n                          => VisitValuesSource(n),
+            SelectSource n                          => VisitSelectSource(n),
+            DeleteStatement n                       => VisitDeleteStatement(n),
+
+            // Expressions
+            BinaryExpression n                      => VisitBinaryExpression(n),
+            UnaryExpression n                       => VisitUnaryExpression(n),
+            BetweenExpre...
+```
+### AccessHarvester.Sql.Parser\Ast\SqlSyntaxWalker.cs
+```csharp
+using System;
+using System.Collections.Generic;
+
+namespace AccessHarvester.Sql.Parser.Ast;
+
+// Void-returning visitor with default child-recursion. Subclasses
+// override only the VisitX methods they care about. Call base.VisitX(n)
+// to continue recursion into children.
+public abstract class SqlSyntaxWalker
+{
+    public virtual void Visit(SqlSyntaxNode? node)
+    {
+        if (node is null) return;
+
+        switch (node)
+        {
+            case SqlStatement n:                        VisitSqlStatement(n); break;
+            case ParametersDeclaration n:               VisitParametersDeclaration(n); break;
+            case ParameterDeclaration n:                VisitParameterDeclaration(n); break;
+            case FormReferenceParameterName n:          VisitFormReferenceParameterName(n); break;
+            case BracketedParameterName n:              VisitBracketedParameterName(n); break;
+            case SimpleParameterName n:                 VisitSimpleParameterName(n); break;
+            case SqlTypeName n:                         VisitSqlTypeName(n); break;
+            case UnionStatement n:                      VisitUnionStatement(n); break;
+            case ParenthesizedSelect n:                 VisitParenthesizedSelect(n); break;
+            case SelectCore n:                          VisitSelectCore(n); break;
+            case TopClause n:                           VisitTopClause(n); break;
+            case StarSelectList n:                      VisitStarSelectList(n); break;
+            case ColumnSelectList n:                    VisitColumnSelectList(n); break;
+            case QualifiedStarSelectItem n:             VisitQualifiedStarSelectItem(n); break;
+            case ExpressionSelectItem n:                VisitExpressionSelectItem(n); break;
+            case FromClause n:                          VisitFromClause(n); break;
+            case SimpleTableSource n:                   VisitSimpleTableSource(n); break;
+            case SubqueryTableSource n:                 VisitSubqueryTableSource(n); break;
+            case ParenthesizedTableSource n:            VisitParenthesizedTableSource(n); break;
+            case JoinClause n:                          VisitJoinClause(n); break;
+            case OrderItem n:                           VisitOrderItem(n); break;
+            case TransformStatement n:                  VisitTransformStatement(n); break;
+            case UpdateStatement n:                     VisitUpdateStatement(n); break;
+            case Assignment n:                          VisitAssignment(n); break;
+            case InsertStatement n:                     VisitInsertStatement(n); break;
+            case ValuesSource n:                        VisitValuesSource(n); break;
+            case SelectSource n:                        VisitSelectSource(n); break;
+            case DeleteStatement n:                     VisitDeleteStatement(n); break;
+            case BinaryExpression n:                    VisitBinaryExpression(...
+```
+
+## Grammar Reference (not modified this session)
+`AccessHarvester.Sql.Grammar/JetSql.g4` is the ANTLR grammar from Session 1. The parser infrastructure references the generated lexer/parser classes from this grammar.
+
+## Out-of-scope files (exist in repo, not changed this session)
+- `AccessHarvester.Vba.Parser/` — reference implementation whose conventions this session mirrors
+- All tests — no test project for the SQL parser was added this session (that is Session 3's scope)
+- `AccessHarvester.Sql.Grammar/JetSql.g4` — authored in Session 1, unchanged
+
+## Verification Criteria
+1. Does `AccessHarvester.Sql.Parser.csproj` correctly reference the grammar project?
+2. Do the diagnostic infrastructure files (DiagnosticSeverity, ParseDiagnostic, ParseMode, ParseOptions, ParseResult) mirror the VBA conventions with SQL-appropriate codes (SQL0001-SQL0004)?
+3. Does `StatementBoundaryErrorStrategy` use appropriate JET SQL sync tokens?
+4. Do the AST nodes in `SqlStatement.cs` and `SqlExpression.cs` cover the grammar's full structural surface (SELECT/UNION/TRANSFORM/UPDATE/INSERT/DELETE, PARAMETERS, all expression types including IIf/Switch/Choose/DomainFunctions/FormReference/ColumnReference)?
+5. Are the AST nodes immutable sealed records consistent with VBA AST conventions?
+6. Does `AstBuilder` correctly map each grammar context type to its AST node? Pay attention to the comparison expression logic (IS NULL, BETWEEN, IN, two-operand comparisons).
+7. Do `SqlSyntaxVisitor` and `SqlSyntaxWalker` have complete dispatch arms for all concrete node types? Does the walker's default recursion cover all children?
+8. Does `SqlParserPipeline` follow the Strict/Recovering/Lossy mode pattern from VBA?
+9. Are there any structural gaps between the grammar rules and the AST/builder coverage?
+
+Please provide VERIFIED or ISSUES_FOUND with specifics.
