@@ -64,6 +64,7 @@ from .utils import (
     RateLimiter,
     should_escalate,
     get_escalation_model,
+    detect_truncation,
     kill_conhost_processes,
 )
 from .metrics import (
@@ -142,6 +143,14 @@ class RouteResult:
     escalated: bool
     escalation_history: list   # [(model, reason), ...]
     elapsed_seconds: float
+    # True when the response appears cut off mid-content. Set when the
+    # provider reports `stop_reason="max_tokens"` OR when a syntactic-
+    # completeness heuristic fires (unclosed code fence, brace imbalance).
+    # The heuristic exists because gemini-pro has been observed to return
+    # `stop_reason="end_turn"` on visibly truncated responses; the
+    # provider signal alone is not sufficient. Callers should check
+    # this flag before logging a routed call as successful.
+    truncated: bool = False
     verification: Optional[VerificationResult] = None  # populated if verified
 
 
@@ -281,6 +290,7 @@ def route(
         escalated=len(escalation_history) > 0,
         escalation_history=escalation_history,
         elapsed_seconds=elapsed,
+        truncated=detect_truncation(result.content, result.stop_reason),
         verification=None
     )
 
@@ -438,6 +448,7 @@ def query(
         escalated=False,
         escalation_history=[],
         elapsed_seconds=elapsed,
+        truncated=detect_truncation(result.content, result.stop_reason),
         verification=None
     )
 

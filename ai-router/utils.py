@@ -78,6 +78,57 @@ def get_escalation_model(
     return None
 
 
+# ----------------------------------------------------------------------
+# Truncation detection
+#
+# `stop_reason == "max_tokens"` is the authoritative provider signal but
+# is NOT sufficient: gemini-pro has been observed to return
+# `stop_reason: "end_turn"` on responses that visibly cut off mid-string
+# (jet-sql-grammar-and-parser Session 4, 2026-04-27 — 11/24 tests
+# generated, response ended with `var sql = "SELECT Reports`). The
+# heuristic below catches that case via syntactic-completeness checks.
+#
+# The orchestrator should consult `RouteResult.truncated` before logging
+# a routed call as successful. On truncation, halve the batch and retry
+# or fall back in-conversation rather than retrying at the same size.
+# ----------------------------------------------------------------------
+
+def detect_truncation(content: str, stop_reason: str) -> bool:
+    """Return True if *content* appears truncated.
+
+    Two complementary signals:
+
+    1. ``stop_reason == "max_tokens"`` — provider reports the output cap
+       was hit. Authoritative.
+    2. Syntactic-incompleteness heuristic — fires on any of:
+         - odd count of triple-backtick fences (one is unclosed)
+         - more ``{`` than ``}`` (open brace not closed)
+         - more ``(`` than ``)`` is intentionally NOT checked, because
+           prose containing parentheses produces too many false
+           positives. Code-output truncation is reliably caught by the
+           brace and fence checks.
+
+    The heuristic is conservative: a clean prose response with no code
+    blocks and balanced braces will not flag, even if it lacks a
+    sentence-ending period (the bare-verdict case — separately solved
+    by the structured-response-format lesson).
+    """
+    if stop_reason == "max_tokens":
+        return True
+
+    stripped = content.rstrip()
+    if not stripped:
+        return False  # empty response is a different failure mode
+
+    if stripped.count("```") % 2 == 1:
+        return True
+
+    if stripped.count("{") > stripped.count("}"):
+        return True
+
+    return False
+
+
 # ======================================================================
 # 2. Rate limiting
 # ----------------------------------------------------------------------
