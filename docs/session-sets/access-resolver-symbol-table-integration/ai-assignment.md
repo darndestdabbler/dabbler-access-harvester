@@ -64,3 +64,50 @@ mechanical-correspondence task types to Sonnet rather than Opus." The
 synthesis-grade reasoning load Session 1 carried is gone; Session 2 is
 "compare two structured outputs, fix mismatches" — Sonnet handles that
 at a fraction of Opus's per-token cost.
+
+---
+
+## Session 2: Cross-Cut + Mechanical Tightening
+
+### Recommended orchestrator
+claude sonnet-4-6 @ effort=high
+
+### Rationale
+Mechanical-correspondence session: schema-validation, cross-cut test authoring,
+fixture correspondence. Sonnet at high effort is the mechanical-gate target per
+project-guidance Convention "Pin mechanical-correspondence task types to Sonnet
+rather than Opus." No synthesis-grade reasoning required.
+
+### Estimated routed cost
+Low
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1 | Register session start, verify prereqs | in-conversation |
+| 2 | Verify Session 1 outputs exist | in-conversation |
+| 3 | Write FixtureCrossCutTests.cs (12 hermetic tests) | in-conversation (Sonnet = mechanical-gate target per project-guidance Convention) |
+| 4 | Schema-validation against expected.json | in-conversation (Sonnet = mechanical-gate target) |
+| 5 | Build + test | in-conversation |
+| 6 | Cross-provider session verification | route(task_type="session-verification") → gpt-5-4 |
+
+### Actuals (Session 2)
+- **Orchestrator used:** claude-sonnet-4-6 @ effort=high
+- **Total routed cost:** ~$0.23 (2× gpt-5-4 verification: $0.14 round 1, $0.09 round 2; plus $0.003 next-orc analysis = ~$0.23)
+- **Deviations from recommendation:** None.
+- **Verification rounds:**
+  - Round 1: ISSUES_FOUND — 1 Major (missing `Fixture02_MeDotTxtCaseworkerPhone_ResolvesToSyntheticTextBoxControl` test), 1 Minor (embedded VBA vs. file loading — deferred by design per "lean by default"). Fixed Major in-session.
+  - Round 2: VERIFIED.
+- **Test footprint:** 1148 passed (400 resolver tests, 12 new in FixtureCrossCutTests.cs), 0 failed, 2 Windows-only skips.
+- **Notes for Session 3 calibration:** Session 3 is the optional buffer session (verifier-surfaced cleanup). Session 2 VERIFIED cleanly after one round of fixes. Session 3 scope is very light — a gemini-flash or low-effort Sonnet pass is sufficient.
+
+---
+
+**Next-session orchestrator recommendation (Session 3):** gemini-flash
+@ effort=low (or sonnet @ effort=low if mechanical cleanup is needed).
+**Rationale:** Session 3 is an explicit optional buffer for verifier-surfaced
+cleanup. Session 2 VERIFIED after a single Major fix, leaving no major work for
+Session 3. The cheapest available model (gemini-flash, tier 1) is appropriate
+for any minor cleanup, documentation touches, or a minimal close-out commit.
+If the orchestrator finds non-trivial work (e.g., a verifier-surfaced architecture
+question), escalate to Sonnet. Routed analysis recommends Haiku-class effort,
+which maps to gemini-flash in the router's configured tier 1.

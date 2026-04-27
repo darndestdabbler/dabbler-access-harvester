@@ -151,6 +151,94 @@
           "costUsd": 0.051165
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/register-start",
+      "dateTime": "2026-04-27T13:20:48.808484-04:00",
+      "description": "Registered session 2 start, verified API keys",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/read-spec-prereqs",
+      "dateTime": "2026-04-27T13:20:48.808484-04:00",
+      "description": "Read spec config (requiresUAT:false requiresE2E:false), verified Session 1 outputs: AccessIntegration/ and 4 test classes all present",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/cross-cut-tests",
+      "dateTime": "2026-04-27T13:20:48.809603-04:00",
+      "description": "Authored FixtureCrossCutTests.cs: 11 hermetic tests across fixtures 01/02/03. Confirms Me.control, Me!control, Me.subform.Form all resolve via AccessObjectModelRegistry. Regression guard confirms null-registry baseline was Unresolved.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/schema-validation",
+      "dateTime": "2026-04-27T13:20:48.809603-04:00",
+      "description": "In-conversation schema-validation (Sonnet orchestrator = mechanical-gate target, per project-guidance Convention). Verified: every referenced control/form in fixtures 01-03 now produces ResolvedToObjectModel, mapping to resolutionStatus:resolved in the expected.json schema. No gaps found.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-04-27T13:20:58.721354-04:00",
+      "description": "dotnet build (0 errors, 283 warnings) + dotnet test: 1147 passed (399 resolver, 328 access, 294 grammar, 72 SQL, 54 parser), 0 failed, 2 Windows-only skipped. 11 new tests added by FixtureCrossCutTests.cs.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/session-verification",
+      "dateTime": "2026-04-27T13:23:51.219698-04:00",
+      "description": "Cross-provider verification routed to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 15460,
+          "outputTokens": 6891,
+          "costUsd": 0.142015
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/session-verification-round-2",
+      "dateTime": "2026-04-27T13:26:44.359065-04:00",
+      "description": "Round-2 verification: Major fixed (txtCaseworkerPhone test added); re-verified.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5124,
+          "outputTokens": 5007,
+          "costUsd": 0.08791500000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/ai-assignment-update",
+      "dateTime": "2026-04-27T13:28:31.268995-04:00",
+      "description": "Appended Session 2 actuals and Session 3 next-orchestrator recommendation to ai-assignment.md. Recommendation: gemini-flash @ effort=low for optional buffer session.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }

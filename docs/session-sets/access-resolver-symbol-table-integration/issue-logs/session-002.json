@@ -1,0 +1,9 @@
+[
+  {
+    "severity": "Minor",
+    "location": "tests/AccessHarvester.Vba.Resolver.Tests/AccessIntegration/FixtureCrossCutTests.cs",
+    "summary": "VBA test case source embedded as string constants rather than loaded from docs/test-cases/*.bas files.",
+    "fix": "Load fixture VBA from docs/test-cases/ files at runtime. Deferred by design: 20-30 line VBA strings; adding file-loading infrastructure not proportionate. If fixtures grow in complexity, revisit in Session 3.",
+    "status": "deferred"
+  }
+]
