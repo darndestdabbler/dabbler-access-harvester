@@ -206,14 +206,31 @@ the human before proceeding.
 
 ### Workflow Expectations
 
-- Before every session, read this file and
-  `docs/planning/lessons-learned.md`.
+- Before every session, read this file, `docs/planning/lessons-learned.md`,
+  and `docs/planning/session-set-authoring-guide.md`. The authoring guide
+  is the source of truth for *spec* authoring (slug naming, sizing, the
+  Session Set Configuration block); `docs/ai-led-session-workflow.md`
+  remains the source of truth for *execution* mechanics.
 - Save verifier output raw and never edit session-review files after
   they are written.
 - Log every AI-led session step in the active session set.
 - AI instruction documents (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`)
   reference this file and `docs/ai-led-session-workflow.md` so future
   agent runs inherit the same durable expectations.
+- **Session-state.json is the single source of truth for in-progress
+  detection.** Call `register_session_start()` at Step 1 before the first
+  `log_step()`, and `mark_session_complete()` at Step 8. External tooling
+  (VS Code Session Set Explorer) flips state from this file; do not infer
+  in-progress from activity-log presence.
+- **Author `ai-assignment.md` and the next-orchestrator /
+  next-session-set recommendations via routed analysis — never
+  self-opine.** The orchestrator's own opinion of which model could have
+  been cheaper is the precise thing the routed analysis is designed to
+  displace.
+- **Obey the spec's Session Set Configuration block at runtime.** Rules
+  are conditional on the spec's `requiresUAT` and `requiresE2E` flags.
+  Do not re-litigate those flags during a session — if a flag is wrong,
+  surface it at the Step 9 reorganization review.
 - When the human gives a session instruction or decision that appears
   durable enough to guide future sessions or future projects, ask
   whether it should be incorporated into this document.

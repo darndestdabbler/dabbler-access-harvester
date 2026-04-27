@@ -588,3 +588,114 @@ reference; if it proves out twice in *this* repo, propose promotion to
   - If a third session set hits the same truncation pattern, propose
     promoting the dynamic-budget heuristic to a Convention in
     `project-guidance.md`.
+
+---
+
+## Cost Guard On Verification: Skip When Verifier Cost Greatly Exceeds Generator
+
+- **Context:** Any auto-verified task type (`code-review`,
+  `security-review`) where the generator is a cheap tier-1 or
+  tier-2 model and the rule-based verifier picks an expensive
+  tier-3 model from a different provider.
+- **Failure or friction:** A cheap Gemini Flash call routed at
+  $0.0003 can pull a $0.15 GPT-5.4 verification call — a 500x
+  cost ratio that destroys the savings the cheap generation was
+  supposed to deliver. Without a guard, batch jobs that loop over
+  many small routed calls accumulate verifier costs that dwarf
+  the actual work.
+- **Lesson:** The router's verification block in
+  `router-config.yaml` carries `verification.max_cost_multiplier`
+  (default 3.0). When the estimated verifier cost exceeds
+  `max_cost_multiplier × generator cost`, the verification is
+  skipped and the metrics record `verification_skipped:
+  cost_guard`. The session-verification step is exempt from the
+  guard — that one is non-negotiable cross-provider review.
+- **Action for future sessions:** Trust the guard for
+  auto-verification of cheap routed work. If a specific task type
+  must always be verified regardless of cost ratio, raise
+  `max_cost_multiplier` in the YAML or pin the generator to a
+  more expensive model so the ratio drops naturally.
+
+## ASCII-Only Glyphs In Cross-Platform Terminal Output
+
+- **Context:** Any helper that prints a status table, summary, or
+  progress indicator to the terminal. Examples:
+  `print_session_set_status()`, `print_metrics_report()`, custom
+  status helpers a session set adds.
+- **Failure or friction:** Emoji glyphs (✅, 🟡, ⏳, etc.) crash
+  Windows `cp1252` consoles mid-line, losing the rest of the
+  report. Some terminal emulators silently drop the unprintable
+  characters; PowerShell and cmd.exe in default Windows
+  configurations raise `UnicodeEncodeError` and abort the script.
+- **Lesson:** Use ASCII-only glyphs in any output that prints to
+  the terminal: `[~]` for in-progress, `[ ]` for not-started,
+  `[x]` for done, `*` for bullets, `-` for dashes. Reserve rich
+  Unicode for files written to disk (`encoding="utf-8"`) where
+  consumers control their own decoding.
+- **Action for future sessions:** When porting or authoring a
+  status helper, follow `print_session_set_status()`'s pattern in
+  `ai-router/__init__.py`. If a richer rendering is desired, write
+  it to a file and tell the user the path; do not assume the
+  terminal will render it.
+
+## Session-State.json Is The Single Source Of Truth For In-Progress Detection
+
+- **Context:** Any external tool that needs to detect which
+  session set is currently being worked on — VS Code Session Set
+  Explorer, manager dashboards, parallel-session coordination.
+- **Failure or friction:** `find_active_session_set()` historically
+  inferred state from `activity-log.json` presence — but the
+  activity log is only created on the first `log_step()` call,
+  which can be 5–10 minutes after a session actually started.
+  External tools showed sets as "not started" while a session was
+  visibly underway.
+- **Lesson:** Call `register_session_start()` at Step 1, before
+  the first `log_step()`. The function writes `session-state.json`
+  with `status: "in-progress"`, the orchestrator metadata, and the
+  start timestamp. External tools watch this file and flip to In
+  Progress immediately. At Step 8, `mark_session_complete()` flips
+  status to `complete` and records the verification verdict.
+- **Action for future sessions:** Always call
+  `register_session_start()` at Step 1 and
+  `mark_session_complete()` at Step 8. Do not rely on activity-log
+  presence as the in-progress signal.
+
+## Always Route `ai-assignment.md` And Next-Orchestrator / Next-Set Recommendations
+
+- **Context:** Authoring `ai-assignment.md` (Step 3.5) or the
+  next-orchestrator / next-session-set recommendations (Step 8).
+- **Failure or friction:** When the orchestrator drafts these
+  documents from its own opinion, the recommendations are
+  systematically biased toward whichever model the orchestrator
+  is. A Claude orchestrator predictably recommends Claude for the
+  next session even when Gemini Flash or Sonnet would have handled
+  it cheaper.
+- **Lesson:** Always produce these via
+  `route(task_type="analysis")`. The router's task-type defaults
+  pick a cheaper model than the orchestrator's own, and the
+  recommendation reflects routing economics rather than the
+  orchestrator's self-image.
+- **Action for future sessions:** Never self-opine on which model
+  could have been cheaper. Rule #17 in the workflow doc makes this
+  explicit.
+
+## Per-Session-Set E2E/UAT Configuration Is Spec-Declared, Not Inferred
+
+- **Context:** Authoring a new session-set spec, or onboarding a
+  set into an upgraded workflow.
+- **Failure or friction:** Earlier workflow versions inferred UAT
+  applicability at runtime. The orchestrator made the call
+  session-by-session, leading to inconsistency: one session in a
+  set would author a checklist, the next would not.
+- **Lesson:** UAT and E2E gates are declared once per session set
+  in a YAML configuration block at the top of the spec
+  (`requiresUAT`, `requiresE2E`, `uatScope`). The orchestrator
+  reads the block at Step 2 and obeys it for the rest of the
+  workflow. Authoring-time heuristics live in
+  `docs/planning/session-set-authoring-guide.md`; runtime
+  mechanics live in `docs/ai-led-session-workflow.md`. Crossing
+  those wires (asking the orchestrator to second-guess the spec)
+  is the failure pattern.
+- **Action for future sessions:** When authoring a spec, read the
+  authoring guide first and pick the flags deliberately. When
+  executing a session, trust the spec.

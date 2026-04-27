@@ -4,7 +4,6 @@ AI Router — Lightweight model routing for Claude Code.
 Usage:
     from ai_router import (
         route, verify, query, get_costs, print_cost_report,
-        print_session_set_status,
         send_pushover_notification, send_session_complete_notification
     )
 
@@ -54,18 +53,18 @@ from .models import estimate_complexity, pick_model
 from .providers import call_model
 from .prompting import build_prompt
 from .session_log import SessionLog
-from .session_state import (
-    SESSION_STATE_FILENAME,
-    register_session_start,
-    mark_session_complete,
-    read_session_state,
-)
 from .utils import (
     RateLimiter,
     should_escalate,
     get_escalation_model,
     detect_truncation,
     kill_conhost_processes,
+)
+from .session_state import (
+    SESSION_STATE_FILENAME,
+    register_session_start,
+    mark_session_complete,
+    read_session_state,
 )
 from .metrics import (
     record_call, record_adjudication, load_metrics, print_metrics_report,
@@ -143,14 +142,6 @@ class RouteResult:
     escalated: bool
     escalation_history: list   # [(model, reason), ...]
     elapsed_seconds: float
-    # True when the response appears cut off mid-content. Set when the
-    # provider reports `stop_reason="max_tokens"` OR when a syntactic-
-    # completeness heuristic fires (unclosed code fence, brace imbalance).
-    # The heuristic exists because gemini-pro has been observed to return
-    # `stop_reason="end_turn"` on visibly truncated responses; the
-    # provider signal alone is not sufficient. Callers should check
-    # this flag before logging a routed call as successful.
-    truncated: bool = False
     verification: Optional[VerificationResult] = None  # populated if verified
 
 
@@ -290,7 +281,6 @@ def route(
         escalated=len(escalation_history) > 0,
         escalation_history=escalation_history,
         elapsed_seconds=elapsed,
-        truncated=detect_truncation(result.content, result.stop_reason),
         verification=None
     )
 
@@ -448,7 +438,6 @@ def query(
         escalated=False,
         escalation_history=[],
         elapsed_seconds=elapsed,
-        truncated=detect_truncation(result.content, result.stop_reason),
         verification=None
     )
 
@@ -791,18 +780,21 @@ def print_cost_report(session_set_dir: str):
 def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
     """Print a status table of every session set under *base_dir*.
 
-    State is derived from file presence in each set's directory — see
-    :func:`find_active_session_set` for the same rules. Sets are grouped
-    in the table by state (in-progress first, then not-started, then done),
-    then sorted by most recently touched within each group.
+    State is derived from file presence in each set's directory — same
+    rules as :func:`SessionLog.find_active_session_set`. Sets are
+    grouped in the table by state (in-progress first, then not-started,
+    then done), then sorted by most recently touched within each group.
+
+    Uses ASCII-only glyphs (`[~]`, `[ ]`, `[x]`) so Windows cp1252
+    consoles do not crash mid-line on emoji output.
     """
     if not os.path.isdir(base_dir):
         print(f"(no session-sets directory at {base_dir})")
         return
 
-    in_progress: list[dict] = []
-    not_started: list[dict] = []
-    done: list[dict] = []
+    in_progress: list = []
+    not_started: list = []
+    done: list = []
 
     for name in sorted(os.listdir(base_dir)):
         path = os.path.join(base_dir, name)
@@ -817,8 +809,8 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
         state_path = os.path.join(path, SESSION_STATE_FILENAME)
 
         sessions_completed = 0
-        total_sessions: Optional[int] = None
-        last_touched: Optional[str] = None
+        total_sessions = None
+        last_touched = None
 
         if os.path.isfile(activity_path):
             try:
@@ -838,9 +830,9 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
             except Exception:
                 pass
 
-        # Session-state.json is the earlier signal — it is written at the
-        # start of session 1 before any activity-log entry exists, so a
-        # newly-started set still shows up as in-progress here.
+        # session-state.json is the earlier signal — written at Step 1
+        # before any activity-log entry exists, so a freshly-started set
+        # still shows up as in-progress here.
         if os.path.isfile(state_path):
             try:
                 with open(state_path, "r", encoding="utf-8") as f:
@@ -879,10 +871,6 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
     done.sort(key=lambda r: r["last_touched"], reverse=True)
     not_started.sort(key=lambda r: r["name"])
 
-    # ASCII-only glyphs — Windows cp1252 consoles cannot print emoji and
-    # crash mid-line, losing the rest of the report (see lessons-learned
-    # "Persist Routed Output To Disk Before Any Display Or Logging Side
-    # Effects" for the original failure shape).
     rows = (
         [("[~]", r) for r in in_progress]
         + [("[ ]", r) for r in not_started]
@@ -906,10 +894,6 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
         if r["total"] not in (None, 0):
             progress = f"{r['completed']}/{r['total']}"
         elif r["state"] == "done" and r["completed"] > 0:
-            # Done sets: completed == total by definition. Render as N/N even
-            # when totalSessions is missing in the activity-log (some historical
-            # logs never had it populated). Mirrors the same fix in
-            # tools/vscode-session-sets/extension.js progressText().
             progress = f"{r['completed']}/{r['completed']}"
         elif r["completed"] > 0:
             progress = f"{r['completed']} done"
