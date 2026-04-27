@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AccessHarvester.Vba.Parser\AccessHarvester.Vba.Parser.csproj" />
+    <ProjectReference Include="..\AccessHarvester.Access\AccessHarvester.Access.csproj" />
   </ItemGroup>
 
 </Project>

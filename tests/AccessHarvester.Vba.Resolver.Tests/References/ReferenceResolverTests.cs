@@ -896,5 +896,8 @@ End Sub";
 
         public Declaration? TryResolveControlOnReport(string reportName, string controlName)
             => null;
+
+        public Declaration? TryResolveMemberOf(Declaration parent, string memberName)
+            => null;
     }
 }

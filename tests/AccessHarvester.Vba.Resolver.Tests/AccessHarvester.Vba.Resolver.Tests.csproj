@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\AccessHarvester.Vba.Resolver\AccessHarvester.Vba.Resolver.csproj" />
     <ProjectReference Include="..\..\AccessHarvester.Vba.Parser\AccessHarvester.Vba.Parser.csproj" />
+    <ProjectReference Include="..\..\AccessHarvester.Access\AccessHarvester.Access.csproj" />
   </ItemGroup>
 
 </Project>

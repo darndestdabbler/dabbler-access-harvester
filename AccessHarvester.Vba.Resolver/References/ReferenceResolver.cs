@@ -306,17 +306,37 @@ public sealed class ReferenceResolver
                     return new ResolutionOutcome.Resolved(hit);
             }
 
-            // Step 2: Access object model registry top-level.
+            // Step 2: form / report class-context lookup. VBA allows
+            // bare control name access from a form / report module's
+            // code-behind (e.g. `txtFirstName = ""` rather than the
+            // explicit `Me.txtFirstName = ""`). The control resolution
+            // is the same one MeRegistryLookup performs in
+            // DecideMemberOutcome — but reached through the bare-name
+            // path rather than `Me.<name>`. Locals and module-level
+            // declarations (Step 1) shadow controls per VBA rules.
+            if (_module.OwningClass is { } owningClass)
+            {
+                Declaration? ctlHit = _module.Kind switch
+                {
+                    ModuleKind.Form   => _registry.TryResolveControlOnForm(owningClass.Name, name),
+                    ModuleKind.Report => _registry.TryResolveControlOnReport(owningClass.Name, name),
+                    _ => null,
+                };
+                if (ctlHit is not null)
+                    return new ResolutionOutcome.ResolvedToObjectModel(ctlHit);
+            }
+
+            // Step 3: Access object model registry top-level.
             var topLevel = _registry.TryResolveTopLevelMember(name);
             if (topLevel is not null)
                 return new ResolutionOutcome.ResolvedToObjectModel(topLevel);
 
-            // Step 3: built-in functions.
+            // Step 4: built-in functions.
             var builtIn = BuiltInFunctionRegistry.TryGet(name);
             if (builtIn is not null)
                 return new ResolutionOutcome.ResolvedToBuiltIn(builtIn);
 
-            // Step 4: explicit unresolved.
+            // Step 5: explicit unresolved.
             return new ResolutionOutcome.Unresolved(UnresolvedReasons.NotInScope);
         }
 
@@ -392,15 +412,17 @@ public sealed class ReferenceResolver
 
             Declaration? SubChildLookup(Declaration parentDecl, string member)
             {
-                // Subform/subreport navigation. When the resolved
-                // target is a control declaration and the member is
-                // ".Form" / ".Report", the registry should expose a
-                // synthetic declaration for the contained form. The
-                // exact protocol is #11's responsibility; Session 1
-                // wires the call, the registry stub returns null.
-                _ = parentDecl;
-                _ = member;
-                return null;
+                // Member resolution for synthetic declarations
+                // (controls, forms, reports, host collections, type-
+                // library members) and for subform / subreport
+                // navigation. Source-defined parents fall through to
+                // null and the existing default-member-not-yet-resolved
+                // path. The Access-backed implementation lives in
+                // AccessIntegration.AccessObjectModelRegistry; the
+                // NullAccessObjectModelRegistry default returns null,
+                // preserving the original Session-1 semantics for
+                // resolver runs that do not supply Access metadata.
+                return _registry.TryResolveMemberOf(parentDecl, member);
             }
         }
 

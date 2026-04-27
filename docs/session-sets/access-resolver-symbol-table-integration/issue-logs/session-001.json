@@ -1,0 +1,23 @@
+[
+  {
+    "severity": "Major",
+    "location": "AccessHarvester.Vba.Resolver/References/ReferenceResolver.cs",
+    "summary": "Bare control identifiers inside form/report modules did not resolve.",
+    "fix": "Added Step 2 in ResolveIdentifier that consults TryResolveControlOnForm/Report when _module.OwningClass is non-null.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "tests/.../ReferenceResolverAccessIntegrationTests.cs",
+    "summary": "NullRegistry test exercised wrong path (unresolved target) for SubChildLookup change.",
+    "fix": "Renamed the existing test to be a non-regression check and added NullRegistry_ResolvedTargetMember_FallsToDefaultMemberNotYetResolved which exercises the actual TryResolveMemberOf null path.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "AccessIntegration/SyntheticDeclarations.cs + AccessObjectModelRegistry.cs",
+    "summary": "OwnerTypeName xmldoc claimed declaring-type-after-inheritance-walk; implementation passes lookup-time type name.",
+    "fix": "Rewrote the xmldoc to reflect lookup-time semantics; left the registry contract narrow per Phase 4.5 design intent.",
+    "status": "fixed"
+  }
+]

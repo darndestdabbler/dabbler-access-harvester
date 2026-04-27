@@ -1,0 +1,156 @@
+{
+  "sessionSetName": "access-resolver-symbol-table-integration",
+  "createdDate": "2026-04-27T11:35:51.795543-04:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-04-27T11:39:25.320686-04:00",
+      "description": "Authored ai-assignment.md via routed analysis",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2026,
+          "outputTokens": 409,
+          "costUsd": 0.0066225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/read-prereqs",
+      "dateTime": "2026-04-27T12:48:31.827657-04:00",
+      "description": "Read #9 resolver, #10 metadata, #11a registry, fixtures 01/02/03",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/synthesis-design-doc",
+      "dateTime": "2026-04-27T12:48:31.828690-04:00",
+      "description": "Authored synthesis design doc in-conversation (Opus orchestrator per project-guidance Convention)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/implement-synthetic-declarations",
+      "dateTime": "2026-04-27T12:48:31.828690-04:00",
+      "description": "Implemented synthetic Declaration types and provenance under AccessIntegration/",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/implement-builder-and-registry",
+      "dateTime": "2026-04-27T12:48:31.829696-04:00",
+      "description": "Implemented AccessControlClassMap, AccessSymbolTableBuilder, AccessObjectModelRegistry",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/extend-registry-interface",
+      "dateTime": "2026-04-27T12:48:31.829696-04:00",
+      "description": "Extended IAccessObjectModelRegistry with TryResolveMemberOf; rewired ReferenceResolver.SubChildLookup; updated NullAccessObjectModelRegistry and three test stubs",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/add-project-references",
+      "dateTime": "2026-04-27T12:48:31.831079-04:00",
+      "description": "Added AccessHarvester.Access project ref to resolver and resolver-tests projects",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/hermetic-tests",
+      "dateTime": "2026-04-27T12:48:31.831079-04:00",
+      "description": "Authored 4 hermetic unit-test classes for AccessIntegration: ClassMap, SymbolTableBuilder, ObjectModelRegistry, ReferenceResolver-end-to-end",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-04-27T12:48:31.831079-04:00",
+      "description": "dotnet build (success, 0 errors) + dotnet test (1130 passed, 0 failed, 2 skipped Windows-only) \u2014 ran sequentially per project-guidance Convention",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/session-verification",
+      "dateTime": "2026-04-27T12:53:01.982087-04:00",
+      "description": "Cross-provider session verification routed to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 36330,
+          "outputTokens": 7903,
+          "costUsd": 0.20937
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/round-1-fixes",
+      "dateTime": "2026-04-27T12:56:04.524022-04:00",
+      "description": "Round-1 verifier findings addressed: (Major) added form/report-context bare-control lookup in ResolveIdentifier; (Minor) corrected SyntheticTypeLibraryMemberDeclaration.OwnerTypeName xmldoc to reflect lookup-time semantics; (Minor) replaced/supplemented null-registry test with one exercising the actual SubChildLookup path. Added 3 new tests. Build clean; 1133 tests pass (up from 1130) with 0 failures.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 12,
+      "stepKey": "session-1/session-verification-round-2",
+      "dateTime": "2026-04-27T12:59:19.285508-04:00",
+      "description": "Round-2 verification routed to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16984,
+          "outputTokens": 8424,
+          "costUsd": 0.16882
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 13,
+      "stepKey": "session-1/session-verification-round-3",
+      "dateTime": "2026-04-27T13:01:17.870452-04:00",
+      "description": "Round-3 verification routed to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 8958,
+          "outputTokens": 1918,
+          "costUsd": 0.051165
+        }
+      ]
+    }
+  ]
+}
