@@ -305,6 +305,92 @@
           "costUsd": 0.0047
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/build-and-test",
+      "dateTime": "2026-04-27T09:09:18.939079+00:00",
+      "description": "dotnet build (0 errors, 281 warnings) + dotnet test sequential: Resolver 109/109, Parser 54/54, Grammar 294/294, Harvester 328/330 + 2 skipped (Windows-COM). No deferred issues from prior sessions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/session-verification-round-1",
+      "dateTime": "2026-04-27T09:14:44.001534+00:00",
+      "description": "Cross-provider verification (gpt-5-4) - see session-reviews/session-004.md",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 26517,
+          "outputTokens": 11518,
+          "costUsd": 0.2390625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/issue-fixes",
+      "dateTime": "2026-04-27T09:18:28.936892+00:00",
+      "description": "3 findings fixed: (1) Option Compare case-insensitive (Major); (2) ByRef+ParamArray tests added (Minor, +3 tests, 109->112); (3) Declare/Event param comment corrected in ProcedureScope.cs + ScopeBuildingVisitor.cs (Minor).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/session-verification-round-2",
+      "dateTime": "2026-04-27T09:18:28.937896+00:00",
+      "description": "Round-2 re-verification (gpt-5-4) after fixes",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14520,
+          "outputTokens": 3398,
+          "costUsd": 0.08727
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/change-log-generated",
+      "dateTime": "2026-04-27T09:19:19.904042+00:00",
+      "description": "Change log authored via route(summarization, max_tier=1) using gemini-flash",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1084,
+          "outputTokens": 385,
+          "costUsd": 0.0003935999999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/next-session-set-recommendation",
+      "dateTime": "2026-04-27T09:20:22.970255+00:00",
+      "description": "Routed analysis for next-set recommendation via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 614,
+          "outputTokens": 200,
+          "costUsd": 0.0027675
+        }
+      ]
     }
   ]
 }

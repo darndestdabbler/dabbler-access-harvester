@@ -21,8 +21,9 @@ namespace AccessHarvester.Vba.Resolver.Scopes;
 //     still belongs to the surrounding ProcedureScope.
 //   * Parameters — added to the owning ProcedureScope's Declarations
 //     list. Declares and Events have no body, so their parameters
-//     attach directly to the ModuleScope (Scope back-pointer points at
-//     the ModuleScope; no inner scope is created).
+//     are NOT added to any scope — they are accessible only via
+//     DeclareDeclaration.Parameters / EventDeclaration.Parameters and
+//     their Scope back-pointer remains null.
 //
 // Reference-driven concerns intentionally NOT handled here, deferred
 // to #8 (resolver-references-and-with-blocks):
@@ -140,10 +141,10 @@ public sealed class ScopeBuildingVisitor : VbaSyntaxWalker
                         optionBase = b;
                     break;
                 case OptionKind.Compare:
-                    optionCompare = od.Argument switch
+                    optionCompare = od.Argument?.ToUpperInvariant() switch
                     {
-                        "Text"     => OptionCompare.Text,
-                        "Database" => OptionCompare.Database,
+                        "TEXT"     => OptionCompare.Text,
+                        "DATABASE" => OptionCompare.Database,
                         _          => OptionCompare.Binary,
                     };
                     break;
