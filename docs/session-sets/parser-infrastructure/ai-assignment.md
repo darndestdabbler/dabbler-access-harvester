@@ -134,6 +134,16 @@ claude-code Sonnet 4.6 @ effort=low
 | 5 | reasoning | summarization | gemini-flash | low | Generate change log summary as final step. |
 
 **Actuals (filled after the session runs):**
+- Orchestrator used: claude-code Sonnet 4.6 (effort: unknown — cannot self-introspect).
+- Total routed cost: ~$0.0843
+  - session-verification R1 (gpt-5-4): $0.0773
+  - change-log (gemini-flash, max_tier=1): $0.0005
+  - next-session-set recommendation (gemini-pro): $0.0060
+  - schema-validation: in-conversation (Sonnet matches code-review routing target per project-guidance Convention — no route() call)
+- Verifier verdicts: R1 VERIFIED on first round.
+- Issues resolved: harvester-schema.v0.json statement.kind enum + 13-preprocessor.expected.json (6 schema violations fixed).
+- Deviations from recommendation: (1) schema-validation handled in-conversation per "orchestrator model matches routing target" Convention; (2) summarization used max_tier=1 per project-guidance (Gemini Pro 400 on prose prompts).
+- Notes for next-session calibration: N/A — this is the last session. Next sets are #7 and #12 (parallel).
 
 ## Session 5 (optional buffer): Verifier-Surfaced Cleanup
 

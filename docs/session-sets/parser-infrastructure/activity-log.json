@@ -304,6 +304,75 @@
           "costUsd": 0.0014524999999999998
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/build-and-test",
+      "dateTime": "2026-04-27T07:09:04.482212+00:00",
+      "description": "dotnet build (0 errors, pre-existing CA1416 warnings). dotnet test: 54 parser + 294 grammar + 328 core (2 skipped). 676 passed, 0 failed. All 13 corpus fixtures including 13-preprocessor parse without error.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/schema-validation-in-conversation",
+      "dateTime": "2026-04-27T07:09:04.483212+00:00",
+      "description": "Schema-validation check performed in-conversation (Sonnet 4.6 orchestrator matches code-review routing target per project-guidance Convention). Found: 13-preprocessor.expected.json failed schema on statement.kind (preprocessorStatement not in enum), variableDeclaration/let not in enum, classification.purposeTags logging/debugging invalid, purity impure invalid, resolvedCallee missing location field, sqlStrings missing required fields. Fixes: (1) added preprocessorStatement to harvester-schema.v0.json statement.kind enum; (2) corrected fixture statement kinds; (3) corrected classification values; (4) added missing required fields. All 13 fixtures now PASS.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/cross-provider-verification",
+      "dateTime": "2026-04-27T07:12:16.600675+00:00",
+      "description": "Routed session-verification round 1 (model=gpt-5-4, cost=$0.0773)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2431,
+          "outputTokens": 4745,
+          "costUsd": 0.0772525
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/change-log-generation",
+      "dateTime": "2026-04-27T07:14:03.820498+00:00",
+      "description": "Generated change-log.md via summarization (model=gemini-flash, cost=$0.0005)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1134,
+          "outputTokens": 506,
+          "costUsd": 0.00047369999999999997
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/next-session-set-recommendation",
+      "dateTime": "2026-04-27T07:14:19.945112+00:00",
+      "description": "Routed analysis for next-session-set recommendation (model=gemini-pro, cost=$0.0060)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 582,
+          "outputTokens": 526,
+          "costUsd": 0.0059875
+        }
+      ]
     }
   ]
 }
