@@ -81,12 +81,14 @@ Low-to-Medium — adds `schema-validation` (Sonnet) and `summarization` (gemini-
 | 7 | Cost report, ai-assignment actuals, next-orchestrator + next-set recommendations. | `route(task_type="analysis")` → gemini-pro |
 
 ### Actuals (filled after the session)
-- Orchestrator used:
-- Total routed cost:
-- Deviations from recommendation:
-- Notes for next-session calibration:
+- Orchestrator used: claude-code / claude-sonnet-4-6 @ effort=medium
+- Total routed cost: $0.1355 (gemini-pro schema-validation $0.0160, gpt-5-4 session-verification $0.1155, gemini-flash change-log $0.0002, gemini-pro next-set recommendation $0.0038 — schema-validation and next-set are incremental to Sessions 1+2 spend)
+- Deviations from recommendation: none. Schema-validation used gemini-pro (within tier-2 per convention). Session verification went to gpt-5-4 (cross-provider, per established override). Change-log used gemini-flash (max_tier=1, per convention for summarization). Sonnet as orchestrator was correct for mechanical tightening session.
+- Notes for next-session calibration: Verifier (gpt-5-4) returned VERIFIED with no issues on round-1 — this session's work was relatively straightforward tightening. Schema-validation by gemini-pro caught 2 real gaps (weak count assertion, missing conditional-fragment test) that Sonnet-at-orchestrator-level could have caught too. Consider whether schema-validation could be handled in-conversation on future Sessions 3 type tightening sessions.
 
 **Next-session orchestrator recommendation (Session 4 — optional buffer):** claude-code / claude-sonnet-4-6 @ effort=medium. If session 4 fires, it addresses verifier-surfaced findings — mechanical code fixes that Sonnet handles at a fraction of Opus cost.
+
+**Next-session-set recommendation:** `vba-semantic-resolution-and-typing` (#14). Per routed analysis (gemini-pro, $0.0038): with #13 complete, the critical path unblocks core VBA semantic analysis — symbol table construction, scope resolution, type inference. Requires Opus 4.7+ orchestrator (high synthesis depth).
 
 ---
 
