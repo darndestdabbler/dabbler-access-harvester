@@ -2,7 +2,7 @@
 
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Optional
 
 
@@ -114,7 +114,7 @@ class SessionLog:
             name = os.path.basename(session_set_dir)
             self._data = {
                 "sessionSetName": name,
-                "createdDate": datetime.now(timezone.utc).isoformat(),
+                "createdDate": datetime.now().astimezone().isoformat(),
                 "totalSessions": total_sessions,
                 "entries": []
             }
@@ -163,7 +163,7 @@ class SessionLog:
             "sessionNumber": session_number,
             "stepNumber": step_number,
             "stepKey": step_key,
-            "dateTime": datetime.now(timezone.utc).isoformat(),
+            "dateTime": datetime.now().astimezone().isoformat(),
             "description": description,
             "status": status,
             "routedApiCalls": api_calls or []
