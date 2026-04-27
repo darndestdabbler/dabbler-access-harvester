@@ -192,6 +192,118 @@
           "costUsd": 0.00149125
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/preprocessor-fixture-generation",
+      "dateTime": "2026-04-27T03:52:26.740479+00:00",
+      "description": "Routed test-generation for 13-preprocessor fixture pair (model=gemini-pro, cost=$0.0204)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "task_type": "test-generation",
+          "input_tokens": 3019,
+          "output_tokens": 1666,
+          "cost_usd": 0.02043375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/source-location-range-and-preprocessor-statement",
+      "dateTime": "2026-04-27T03:54:16.331797+00:00",
+      "description": "Created SourceLocation.cs, SourceRange.cs. Added SourceRange? Range=null to Provenance (additive). Updated AstBuilder.MakeProvenance to populate Range from ANTLR token start/stop. Added PreprocessorStatement:Statement for procedure-body preprocessor lines. Updated VbaSyntaxWalker/Visitor switch + virtual methods + AstChildren. Updated ParseResultAstExtensions.BuildAst to accept sourceFile string. Added 7 new tests in AstBuilderShapeTests.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/preprocessor-fixture-files",
+      "dateTime": "2026-04-27T03:54:16.333086+00:00",
+      "description": "Authored docs/test-cases/13-preprocessor.bas and 13-preprocessor.expected.json from test-generation output.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-04-27T03:55:26.546749+00:00",
+      "description": "dotnet build (0 errors, pre-existing CA1416 warnings). dotnet test: 52 passed (parser, +8 new); 294 passed (grammar, +1 corpus fixture); 328 passed + 2 skipped (core). 0 failures.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/cross-provider-verification",
+      "dateTime": "2026-04-27T03:59:11.874714+00:00",
+      "description": "Routed session-verification round 1 (model=gpt-5-4, cost=$0.1150)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4659,
+          "outputTokens": 6888,
+          "costUsd": 0.1149675
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/cross-provider-verification-round2",
+      "dateTime": "2026-04-27T04:02:46.979686+00:00",
+      "description": "Round-2 verification after MAJ-1 + MAJ-2 + MIN-1 fixes (model=gpt-5-4, cost=$0.0819)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2381,
+          "outputTokens": 5065,
+          "costUsd": 0.0819275
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/cross-provider-verification-round3",
+      "dateTime": "2026-04-27T04:04:03.696539+00:00",
+      "description": "Round-3 verification after endLine fix (model=gpt-5-4, cost=$0.0129)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1624,
+          "outputTokens": 588,
+          "costUsd": 0.012879999999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T04:04:58.664010+00:00",
+      "description": "Routed analysis recommending Session 4 orchestrator (model=gemini-pro, cost=$0.0015)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 578,
+          "outputTokens": 73,
+          "costUsd": 0.0014524999999999998
+        }
+      ]
     }
   ]
 }

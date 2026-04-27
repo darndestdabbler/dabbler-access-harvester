@@ -21,10 +21,12 @@ namespace AccessHarvester.Vba.Parser.Ast;
 internal sealed class AstBuilder
 {
     private readonly IReadOnlyList<ParseDiagnostic> _diagnostics;
+    private readonly string _sourceFile;
 
-    public AstBuilder(IReadOnlyList<ParseDiagnostic> diagnostics)
+    public AstBuilder(IReadOnlyList<ParseDiagnostic> diagnostics, string sourceFile = "")
     {
         _diagnostics = diagnostics;
+        _sourceFile = sourceFile;
     }
 
     public Module BuildModule(VbaParser.ModuleContext ctx)
@@ -218,6 +220,25 @@ internal sealed class AstBuilder
         return new ConstantDeclarator(MakeProvenance(ctx), name, suffix, type, value);
     }
 
+    private PreprocessorStatement BuildPreprocessorStatement(VbaParser.PreprocessorLineContext ctx)
+    {
+        var kind = ctx.HASH_IF() is not null ? PreprocessorKind.If
+                 : ctx.HASH_ELSEIF() is not null ? PreprocessorKind.ElseIf
+                 : ctx.HASH_ELSE() is not null ? PreprocessorKind.Else
+                 : ctx.HASH_END_IF() is not null ? PreprocessorKind.EndIf
+                 : PreprocessorKind.Const;
+
+        string body = "";
+        if (ctx.Start is not null && ctx.Stop is not null && ctx.Start.InputStream is { } stream)
+        {
+            int headStop = ctx.Start.StopIndex;
+            int tailStop = ctx.Stop.StopIndex;
+            if (tailStop > headStop)
+                body = stream.GetText(new Antlr4.Runtime.Misc.Interval(headStop + 1, tailStop)).TrimStart();
+        }
+        return new PreprocessorStatement(MakeProvenance(ctx), kind, body);
+    }
+
     private PreprocessorDirective BuildPreprocessor(VbaParser.PreprocessorLineContext ctx)
     {
         var kind = ctx.HASH_IF() is not null ? PreprocessorKind.If
@@ -377,11 +398,7 @@ internal sealed class AstBuilder
                     AppendBlock(bc, result);
                     break;
                 case VbaParser.PreprocessorLineContext pp:
-                    // Preprocessor lines inside procedure bodies — model as
-                    // a label-like passthrough using the module-level
-                    // PreprocessorDirective is awkward (it is a ModuleItem,
-                    // not a Statement). For now we drop them at statement
-                    // position; Session 3 extends this.
+                    result.Add(BuildPreprocessorStatement(pp));
                     break;
                 // NEWLINEs are skipped silently.
             }
@@ -1079,14 +1096,27 @@ internal sealed class AstBuilder
     {
         var line = ctx.Start?.Line ?? 0;
         var col = ctx.Start?.Column ?? 0;
+        var range = MakeRange(ctx);
         if (recoveredOverride || HasErrorNode(ctx))
-            return new RecoveredProvenance(NearestDiagnosticReason(line, col), line, col);
-        return new SourceProvenance(line, col);
+            return new RecoveredProvenance(NearestDiagnosticReason(line, col), line, col, range);
+        return new SourceProvenance(line, col, range);
     }
 
     private Provenance MakeProvenance(IToken token)
     {
-        return new SourceProvenance(token.Line, token.Column);
+        var loc = new SourceLocation(_sourceFile, token.Line, token.Column);
+        var end = new SourceLocation(_sourceFile, token.Line, token.Column + (token.Text?.Length ?? 0));
+        return new SourceProvenance(token.Line, token.Column, new SourceRange(loc, end));
+    }
+
+    private SourceRange? MakeRange(ParserRuleContext ctx)
+    {
+        if (ctx.Start is null) return null;
+        var start = new SourceLocation(_sourceFile, ctx.Start.Line, ctx.Start.Column);
+        var stop = ctx.Stop is not null
+            ? new SourceLocation(_sourceFile, ctx.Stop.Line, ctx.Stop.Column + (ctx.Stop.Text?.Length ?? 0))
+            : new SourceLocation(_sourceFile, ctx.Start.Line, ctx.Start.Column + (ctx.Start.Text?.Length ?? 0));
+        return new SourceRange(start, stop);
     }
 
     private string NearestDiagnosticReason(int line, int column)

@@ -102,10 +102,26 @@ require a flagship model like Opus.
 | 4 | reasoning | session-verification | gpt-5-4 | high | Non-negotiable cross-provider gate for session integrity. |
 
 **Actuals (filled after the session runs):**
+- Orchestrator used: claude-code Sonnet 4.6 (effort: unknown — cannot self-introspect).
+- Total routed cost: $0.2302
+  - test-generation (gemini-pro): $0.0204
+  - session-verification R1 (gpt-5-4): $0.1150
+  - session-verification R2 (gpt-5-4): $0.0819
+  - session-verification R3 (gpt-5-4): $0.0129
+  - next-orchestrator recommendation (gemini-pro): ~$0.0015 (est)
+- Verifier verdicts: R1 ISSUES_FOUND (2 Major + 1 Minor); R2 ISSUES_FOUND (1 Major); R3 VERIFIED.
+- Issues resolved: expected.json originalSource verbatim (R1 MAJ-1), source.location narrowed to procedure span (R1 MAJ-2 + R2 follow-up for correct endLine), added targeted walker/visitor dispatch tests (R1 MIN-1).
+- Deviations from recommendation: none for code work. 3 verification rounds instead of 1-2; all were expected.json fixture accuracy issues, not code bugs.
+- Notes for next-session calibration: Session 4 is almost entirely mechanical. Sonnet 4.6 @ effort=low is appropriate per next-orchestrator recommendation.
+
+**Next session orchestrator recommendation (Session 4 — LAST):**
+claude-code Sonnet 4.6 @ effort=low
+
+**Rationale:** Session 3 actuals confirmed Sonnet 4.6 is sufficient for mechanical orchestration. Session 4's scope consists entirely of low-complexity script execution and git operations, justifying effort=low.
 
 ## Session 4 of 4: Cross-Cut + Mechanical Tightening
 
-**Recommended orchestrator:** claude-code Sonnet 4.6 @ effort=medium
+**Recommended orchestrator:** claude-code Sonnet 4.6 @ effort=low
 **Rationale:** This session is almost entirely mechanical (running tests, git ops) with routed checks. Sonnet is the appropriate and most cost-effective choice.
 **Estimated routed cost:** $0.52
 

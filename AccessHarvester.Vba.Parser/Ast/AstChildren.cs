@@ -205,6 +205,9 @@ internal static class AstChildren
             case LabelStatement:
                 break;
 
+            case PreprocessorStatement:
+                break;
+
             case UnknownStatement:
                 break;
 

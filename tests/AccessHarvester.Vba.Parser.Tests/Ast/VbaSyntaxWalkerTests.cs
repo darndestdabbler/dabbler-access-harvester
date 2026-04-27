@@ -134,6 +134,76 @@ public class VbaSyntaxWalkerTests
             "VbaSyntaxVisitor<T> dispatch is missing arms for: " + string.Join(", ", fallthroughs));
     }
 
+    // Session 3: confirms PreprocessorStatement nodes inside a procedure body
+    // reach both the walker's VisitPreprocessorStatement arm and the
+    // visitor's VisitPreprocessorStatement arm via the dispatch switch.
+    [Fact]
+    public void Walker_VisitPreprocessorStatement_IsReachedForProcedureBodyDirectives()
+    {
+        var src = """
+            Sub S()
+            #If VBA7 Then
+                Dim x As LongPtr
+            #Else
+                Dim x As Long
+            #End If
+            End Sub
+            """;
+        var ast = VbaParserPipeline.Parse(src).BuildAst();
+
+        var collector = new PreprocessorCollectingWalker();
+        collector.Visit(ast);
+
+        Assert.True(collector.Count >= 2,
+            $"Expected at least #If + #Else PreprocessorStatement nodes, got {collector.Count}");
+        Assert.Contains(collector.Kinds, k => k == PreprocessorKind.If);
+    }
+
+    [Fact]
+    public void Visitor_VisitPreprocessorStatement_IsReachedForProcedureBodyDirectives()
+    {
+        var src = """
+            Sub S()
+            #If VBA7 Then
+                Dim x As LongPtr
+            #Else
+                Dim x As Long
+            #End If
+            End Sub
+            """;
+        var ast = VbaParserPipeline.Parse(src).BuildAst();
+
+        var sub = Assert.IsType<SubProcedure>(ast.Items.Single());
+        var ppStmt = sub.Body.OfType<PreprocessorStatement>().First();
+
+        // Visitor visit method must reach VisitPreprocessorStatement, not the
+        // default throw arm.
+        var visitor = new CountingVisitor();
+        visitor.Visit(ppStmt);
+        Assert.Equal(1, visitor.Count);
+    }
+
+    private sealed class PreprocessorCollectingWalker : VbaSyntaxWalker
+    {
+        public int Count;
+        public readonly System.Collections.Generic.List<PreprocessorKind> Kinds = new();
+        public override void VisitPreprocessorStatement(PreprocessorStatement n)
+        {
+            Count++;
+            Kinds.Add(n.Kind);
+        }
+    }
+
+    private sealed class CountingVisitor : VbaSyntaxVisitor<int>
+    {
+        public int Count;
+        public override int VisitPreprocessorStatement(PreprocessorStatement n)
+        {
+            Count++;
+            return Count;
+        }
+    }
+
     private sealed class NoOpWalker : VbaSyntaxWalker
     {
         // Stop child traversal — uninitialized instances have null collections.

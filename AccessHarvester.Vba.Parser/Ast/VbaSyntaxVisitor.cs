@@ -62,6 +62,7 @@ public abstract class VbaSyntaxVisitor<TResult>
             LetStatement n                              => VisitLetStatement(n),
             CallStatement n                             => VisitCallStatement(n),
             LabelStatement n                            => VisitLabelStatement(n),
+            PreprocessorStatement n                     => VisitPreprocessorStatement(n),
             UnknownStatement n                          => VisitUnknownStatement(n),
 
             LiteralExpression n                         => VisitLiteralExpression(n),
@@ -153,6 +154,7 @@ public abstract class VbaSyntaxVisitor<TResult>
     public virtual TResult? VisitLetStatement(LetStatement n) => DefaultVisit(n);
     public virtual TResult? VisitCallStatement(CallStatement n) => DefaultVisit(n);
     public virtual TResult? VisitLabelStatement(LabelStatement n) => DefaultVisit(n);
+    public virtual TResult? VisitPreprocessorStatement(PreprocessorStatement n) => DefaultVisit(n);
     public virtual TResult? VisitUnknownStatement(UnknownStatement n) => DefaultVisit(n);
 
     public virtual TResult? VisitLiteralExpression(LiteralExpression n) => DefaultVisit(n);

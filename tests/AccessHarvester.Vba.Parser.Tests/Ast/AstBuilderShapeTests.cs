@@ -504,6 +504,95 @@ public class AstBuilderShapeTests
     // Tests cannot reach the internal AstChildren helper in the
     // production assembly, so duplicate the minimum traversal here.
     // This is intentional — keeping the production helper internal.
+    // ── Session 3: SourceRange on Provenance ─────────────────────
+
+    [Fact]
+    public void Provenance_ModuleNode_HasNonNullRange()
+    {
+        var ast = BuildAst("Option Explicit\n");
+        Assert.NotNull(ast.Provenance.Range);
+    }
+
+    [Fact]
+    public void Provenance_Range_StartMatchesLineAndColumn()
+    {
+        var ast = BuildAst("Option Explicit\n");
+        var item = Assert.Single(ast.Items);
+        var option = Assert.IsType<OptionDirective>(item);
+        var range = option.Provenance.Range;
+        Assert.NotNull(range);
+        Assert.Equal(option.Provenance.Line, range!.Start.Line);
+        Assert.Equal(option.Provenance.Column, range.Start.Column);
+    }
+
+    [Fact]
+    public void Provenance_Range_EndIsAtOrAfterStart()
+    {
+        var src = """
+            Public Sub Greet()
+                Debug.Print "hi"
+            End Sub
+            """;
+        var ast = BuildAst(src);
+        var sub = Assert.IsType<SubProcedure>(ast.Items.Single());
+        var range = sub.Provenance.Range;
+        Assert.NotNull(range);
+        // A multi-line Sub must span at least one line.
+        Assert.True(range!.End.Line >= range.Start.Line,
+            $"End.Line ({range.End.Line}) < Start.Line ({range.Start.Line})");
+    }
+
+    [Fact]
+    public void Provenance_Range_FileIsThreadedFromBuildAst()
+    {
+        var result = VbaParserPipeline.Parse("Option Explicit\n");
+        var ast = result.BuildAst(sourceFile: "MyModule.bas");
+        var range = ast.Provenance.Range;
+        Assert.NotNull(range);
+        Assert.Equal("MyModule.bas", range!.Start.File);
+        Assert.Equal("MyModule.bas", range.End.File);
+    }
+
+    // ── Session 3: PreprocessorStatement in procedure body ────────
+
+    [Fact]
+    public void SubProcedure_WithPreprocessorGuard_BuildsPreprocessorStatements()
+    {
+        var src = """
+            Sub Compat()
+            #If VBA7 Then
+                Dim x As LongPtr
+            #Else
+                Dim x As Long
+            #End If
+            End Sub
+            """;
+        var ast = BuildAst(src);
+        var sub = Assert.IsType<SubProcedure>(ast.Items.Single());
+
+        // Expect #If, LocalDecl (LongPtr branch), #Else, LocalDecl (Long branch), #End If.
+        // Exact count depends on parse-tree structure; assert at minimum
+        // that PreprocessorStatement nodes are present and have the right kinds.
+        var ppStmts = sub.Body.OfType<PreprocessorStatement>().ToList();
+        Assert.True(ppStmts.Count >= 2,
+            $"Expected at least 2 PreprocessorStatement nodes, got {ppStmts.Count}");
+
+        var ifStmt = ppStmts.First(p => p.Kind == PreprocessorKind.If);
+        Assert.Equal(PreprocessorKind.If, ifStmt.Kind);
+        Assert.Contains("VBA7", ifStmt.Body);
+    }
+
+    [Fact]
+    public void Module_TopLevelPreprocessorDirective_BuildsPreprocessorDirective()
+    {
+        var src = "#Const DEBUG_MODE = 1\n";
+        var ast = BuildAst(src);
+        var item = Assert.Single(ast.Items);
+        var ppDirective = Assert.IsType<PreprocessorDirective>(item);
+        Assert.Equal(PreprocessorKind.Const, ppDirective.Kind);
+        Assert.Contains("DEBUG_MODE", ppDirective.Body);
+    }
+
     private static System.Collections.Generic.IEnumerable<VbaSyntaxNode> TestAstChildren(VbaSyntaxNode node)
     {
         var props = node.GetType().GetProperties();
