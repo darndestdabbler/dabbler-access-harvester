@@ -50,12 +50,12 @@ Low — synthesis in-conversation; only `session-verification` and Step-8 analys
 | 6 | Cost report, ai-assignment actuals, next-orchestrator recommendation. | `route(task_type="analysis")` → gemini-pro |
 
 ### Actuals (filled after the session)
-- Orchestrator used:
-- Total routed cost:
-- Deviations from recommendation:
-- Notes for next-session calibration:
+- Orchestrator used: claude-code / claude-opus-4-7 @ effort=high
+- Total routed cost: $0.3852 across 4 calls — gemini-pro analysis $0.0021 (next-orch recommendation), gpt-5-4 verification round 1 $0.2082 (3 Majors found), gpt-5-4 verification round 2 $0.1749 (1 Minor — fixed without round-3 reverify since Minor doesn't block commit per workflow Step 7)
+- Deviations from recommendation: none. Synthesis authored in-conversation per the orchestrator-matches-target convention; architecture call not routed (intentional, sidesteps the documented Opus/architecture timeout pattern). Round-3 skipped because the round-2 finding was Minor (record `Equals` reference-equality fabricates divergence in WalkLoopBody/AllAlternativesEqual) and was fixed pre-emptively via a SymbolicSqlValueEquality.DeepEquals helper rather than re-verified.
+- Notes for next-session calibration: cross-provider verification caught three real Majors round-1 (param-seed, eager full-flatten before cap, loop one-iteration mutation) the orchestrator missed — exactly the verifier-as-second-pair-of-eyes value the workflow is designed for. Round-2 caught a structural-equality subtlety that record auto-equality hides. Verification spend ran ~$0.38 vs Session 1's $0.17 (Session 1 cleared in 1 reverify round; Session 2 needed 1 reverify plus a Minor pre-empt). The ~2x verifier spend was correct value at this tier of code complexity. Round-1 prompt size was 81420 chars (~17.7K input tokens to gpt-5-4); round-2 was 52740 chars (~11.1K).
 
-**Next-session orchestrator recommendation (Session 3):** claude-code / claude-sonnet-4-6 @ effort=medium. Session 3 shifts from synthesis to mechanical cross-cut + schema validation. The primary routed task (`schema-validation`) is Sonnet-pinned per Convention; matching the orchestrator to Sonnet avoids paying Opus rates for mechanical correspondence work.
+**Next-session orchestrator recommendation (Session 3):** claude-code / claude-sonnet-4-6 @ effort=low. Per routed analysis (gemini-pro, $0.0021): Session 3's task mix (mechanical schema-validation + summarization, no novel synthesis) eliminates the need for a high-end synthesis orchestrator. Primary routed task (`schema-validation`) is Sonnet-pinned per Convention; the routed analysis returned `effort=low` (tighter than the Session-1-authored `effort=medium`) on the rationale that schema-validation against fixture 05's `expected.json` is pure mechanical correspondence. Estimated routed cost band: Low. (Note: the routed analysis emitted the model-id `claude-sonnet-3-5`, which does not exist; normalized to `claude-sonnet-4-6` — the deployed Sonnet — for the Session-3 trigger phrase.)
 
 ---
 

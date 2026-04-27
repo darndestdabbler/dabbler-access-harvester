@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "jet-sql-resolution-and-dynamic",
-  "currentSession": 1,
+  "currentSession": 2,
   "totalSessions": 4,
-  "status": "complete",
-  "startedAt": "2026-04-27T13:43:15.878050-04:00",
-  "completedAt": "2026-04-27T14:01:04.466145-04:00",
-  "verificationVerdict": "VERIFIED",
+  "status": "in-progress",
+  "startedAt": "2026-04-27T14:06:36.914990-04:00",
+  "completedAt": null,
+  "verificationVerdict": null,
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",

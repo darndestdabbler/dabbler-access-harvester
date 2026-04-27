@@ -1,0 +1,29 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "AccessHarvester.Sql.Parser/DynamicSql/DynamicSqlAnalyzer.cs",
+    "summary": "String parameters added to tracked set but never seeded into env -> misclassified as unbound-variable instead of runtime-unknown hole.",
+    "fix": "Seed env[paramName] = SqlUnknownHole(null, paramName) for each String parameter in Analyze(). Made SqlUnknownHole.OriginalExpression nullable to allow synthesized holes without a real source expression.",
+    "status": "fixed",
+    "resolution": "accept-finding"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "AccessHarvester.Sql.Parser/DynamicSql/DynamicSqlAnalyzer.cs",
+    "summary": "Combinatorial-blowup safeguard runs after Flatten materializes the full cross-product -> excessive time/memory before the cap fires.",
+    "fix": "Added CardinalityCapped(value, cap) precheck in BuildSite. On overflow (cap+1 sentinel), use FlattenWithLimit which never materializes more than MaxRepresentativeSamples leaves at any intermediate accumulator. Within-cap path keeps the existing full Flatten enumeration.",
+    "status": "fixed",
+    "resolution": "accept-finding"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "AccessHarvester.Sql.Parser/DynamicSql/DynamicSqlAnalyzer.cs",
+    "summary": "Loop bodies mutate shared env as if executed once -> fabricates one-iteration post-loop SQL state.",
+    "fix": "Added WalkLoopBody helper. Snapshots env before walking the body, then post-loop replaces any tracked-variable whose value changed (or was newly introduced) with SqlUnknownHole(null, '<loop-mutation:varName>'). Execution sites inside the loop body still see in-flight mutated state for site detection.",
+    "status": "fixed",
+    "resolution": "accept-finding"
+  }
+]
