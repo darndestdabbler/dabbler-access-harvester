@@ -1,0 +1,3 @@
+Recommended orchestrator for Session 2: `claude-code / claude-opus-4-7 @ effort=high`. Rationale: Session 2 is a complex synthesis task where the `architecture` call is routed to Opus, and continuing with an Opus orchestrator allows this critical step to be authored in-conversation. This approach was reliable in Session 1 and, more importantly, it sidesteps the documented timeout risk associated with large, routed synthesis calls to the Opus model.
+
+Estimated routed cost band: Medium
