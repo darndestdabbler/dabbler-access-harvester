@@ -111,3 +111,38 @@ for any minor cleanup, documentation touches, or a minimal close-out commit.
 If the orchestrator finds non-trivial work (e.g., a verifier-surfaced architecture
 question), escalate to Sonnet. Routed analysis recommends Haiku-class effort,
 which maps to gemini-flash in the router's configured tier 1.
+
+---
+
+## Session 3: Close-out (Optional Buffer)
+
+### Recommended orchestrator
+gemini-flash @ effort=low (per Session 2 recommendation)
+
+### Rationale
+Session 3 is the optional buffer — reserved for verifier-surfaced cleanup. Session 2 VERIFIED cleanly after one fix round. No major work carried over. The cheapest tier-1 model is appropriate for a close-out commit.
+
+### Estimated routed cost
+Minimal
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1 | Register session start, review deferred Minor | in-conversation |
+| 2 | Confirm deferred Minor stays deferred | in-conversation |
+| 3 | Build + test | in-conversation |
+| 4 | Generate change-log.md | route(task_type="summarization", max_tier=1) → gemini-flash |
+| 5 | Route next-set recommendation | route(task_type="analysis") → gemini-pro |
+| 6 | Cross-provider session verification | route(task_type="session-verification") → gpt-5-4 |
+
+### Actuals (Session 3)
+- **Orchestrator used:** claude-sonnet-4-6 @ effort=high (Sonnet used per human trigger phrase; gemini-flash recommended but not actioned — current Claude Code environment defaulted to Sonnet)
+- **Total routed cost:** ~$0.009 (gemini-flash change-log $0.0006 + gemini-pro rec $0.0035 + gpt-5-4 verification $0.0057)
+- **Deviations from recommendation:** Orchestrator was Sonnet (not gemini-flash) due to the Claude Code environment. Cost negligible since no synthesis work was performed; all routed tasks were cheap.
+- **Verification:** VERIFIED on Round 1. No issues.
+- **Test footprint:** 1148 passed, 0 failed, 2 Windows-only skips. No changes from Session 2.
+- **Notes:** Set is complete. Next set is #13 jet-sql-resolution-and-dynamic (prereqs #11b and #12 both complete).
+
+---
+
+**Next-session-set recommendation:** `jet-sql-resolution-and-dynamic` (#13)
+**Rationale:** Both prereqs (#11b access-resolver-symbol-table-integration and #12 jet-sql-grammar-and-parser) are now complete. #13 is the only unblocked set. It covers Phase 5.3-5.4 (form-reference detection in SQL + dynamic SQL analysis). Contains 2 synthesis steps — recommend Opus 4.7 @ effort=high for Session 1 (architecture synthesis).

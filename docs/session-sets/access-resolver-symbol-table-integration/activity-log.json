@@ -239,6 +239,68 @@
       "description": "Appended Session 2 actuals and Session 3 next-orchestrator recommendation to ai-assignment.md. Recommendation: gemini-flash @ effort=low for optional buffer session.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/register-start",
+      "dateTime": "2026-04-27T13:35:26.368123-04:00",
+      "description": "Registered session 3 start, verified API keys",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/read-spec-prereqs",
+      "dateTime": "2026-04-27T13:36:33.691548-04:00",
+      "description": "Read spec config (requiresUAT:false requiresE2E:false). Verified prereqs: AccessIntegration/ (5 source files), 5 test classes all present.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/deferred-minor-review",
+      "dateTime": "2026-04-27T13:36:33.694058-04:00",
+      "description": "Reviewed Session 2 deferred Minor (embedded VBA strings). Fixtures remain 20-30 lines \u2014 lean-by-default; stays deferred. No code changes.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-04-27T13:36:33.694058-04:00",
+      "description": "dotnet build (0 errors, 283 warnings) + dotnet test: 1148 passed (400 resolver, 328 access, 294 grammar, 72 SQL, 54 parser), 0 failed, 2 Windows-only skipped.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/session-verification",
+      "dateTime": "2026-04-27T13:39:08.745871-04:00",
+      "description": "Cross-provider verification routed to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 1421,
+          "outputTokens": 146,
+          "costUsd": 0.0057425
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/ai-assignment-update",
+      "dateTime": "2026-04-27T13:39:50.890940-04:00",
+      "description": "Updated ai-assignment.md with Session 3 actuals and next-session-set recommendation (jet-sql-resolution-and-dynamic).",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
