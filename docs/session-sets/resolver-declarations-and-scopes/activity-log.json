@@ -1,0 +1,102 @@
+{
+  "sessionSetName": "resolver-declarations-and-scopes",
+  "createdDate": "2026-04-27T07:24:46.433112+00:00",
+  "totalSessions": 4,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-27T07:29:34.371242+00:00",
+      "description": "Routed analysis (gemini-pro) authoring ai-assignment.md",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1147,
+          "outputTokens": 1767,
+          "costUsd": 0.01910375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/declaration-model-synthesis",
+      "dateTime": "2026-04-27T07:41:20.872594+00:00",
+      "description": "Authored declaration types in-conversation per Convention (Opus orchestrator matches architecture target)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-04-27T07:41:20.872594+00:00",
+      "description": "dotnet build (Build succeeded, 0 Errors). dotnet test: 14/14 new resolver tests, all existing suites green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/session-verification-round-1",
+      "dateTime": "2026-04-27T07:41:20.873363+00:00",
+      "description": "Cross-provider verification (gpt-5-4) returned ISSUES_FOUND with 4 findings (2 Major, 2 Minor)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9676,
+          "outputTokens": 6525,
+          "costUsd": 0.122065
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/issue-fixes",
+      "dateTime": "2026-04-27T07:41:20.873363+00:00",
+      "description": "All 4 round-1 findings fixed: ConstantDeclaration : VariableDeclaration; ImplicitDeclaration.Type added; Declaration.NameComparer added; SyntheticDeclarationProvenance removed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/session-verification-round-2",
+      "dateTime": "2026-04-27T07:41:20.874434+00:00",
+      "description": "Cross-provider re-verification (gpt-5-4) returned VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4909,
+          "outputTokens": 1132,
+          "costUsd": 0.0292525
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T07:42:11.209312+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 2",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 750,
+          "outputTokens": 73,
+          "costUsd": 0.0016675
+        }
+      ]
+    }
+  ]
+}
