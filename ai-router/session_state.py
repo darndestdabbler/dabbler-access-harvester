@@ -68,7 +68,36 @@ def register_session_start(
     with open(path, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2)
         f.write("\n")
+
+    # Propagate to activity-log.json. Historically, activity-log.json was
+    # created with totalSessions=0 by the SessionLog constructor and was
+    # never updated, so done sets ended up with totalSessions=0 in the log
+    # even though the orchestrator knew the real total. The orchestrator
+    # passes total_sessions on every register_session_start call, so this
+    # is the natural sync point: if the activity log has 0/null and the
+    # caller knows a real total, write it.
+    if total_sessions and total_sessions > 0:
+        _propagate_total_sessions(session_set, total_sessions)
+
     return path
+
+
+def _propagate_total_sessions(session_set: str, total: int) -> None:
+    """Update activity-log.json's totalSessions if it is missing or zero."""
+    log_path = os.path.join(session_set, "activity-log.json")
+    if not os.path.isfile(log_path):
+        return
+    try:
+        with open(log_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return
+    current = data.get("totalSessions") or 0
+    if current > 0:
+        return  # trust the existing value
+    data["totalSessions"] = total
+    with open(log_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
 
 
 def mark_session_complete(
@@ -93,7 +122,44 @@ def mark_session_complete(
     with open(path, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2)
         f.write("\n")
+
+    # If the orchestrator just authored change-log.md (this is the last
+    # session of the set) and the activity log's totalSessions is still
+    # missing or zero, finalize it from the unique sessionNumbers
+    # recorded in entries. Catches the "spec said 4-5 sessions; we ended
+    # at 4" case where no earlier register_session_start had a definitive
+    # total to propagate.
+    if os.path.isfile(os.path.join(session_set, "change-log.md")):
+        _finalize_total_sessions_from_entries(session_set)
+
     return path
+
+
+def _finalize_total_sessions_from_entries(session_set: str) -> None:
+    """If activity-log.json's totalSessions is missing or zero, set it to
+    the count of unique sessionNumbers in entries. Idempotent.
+    """
+    log_path = os.path.join(session_set, "activity-log.json")
+    if not os.path.isfile(log_path):
+        return
+    try:
+        with open(log_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return
+    current = data.get("totalSessions") or 0
+    if current > 0:
+        return
+    sessions = {
+        e.get("sessionNumber")
+        for e in data.get("entries", [])
+        if isinstance(e.get("sessionNumber"), int)
+    }
+    if not sessions:
+        return
+    data["totalSessions"] = len(sessions)
+    with open(log_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
 
 
 def read_session_state(session_set_dir: str) -> Optional[dict]:
