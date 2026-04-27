@@ -46,13 +46,15 @@ high
 | 2.3 | Land the generated file under `AccessHarvester.Pipeline/Enrichment/`. | `orchestrator-local` |
 
 ### Actuals (filled after the session)
-- **Actual orchestrator:**
-- **Actual cost:**
-- **Session commits:**
-- **Verification route:** `route(task_type="session-verification", complexity_hint=70)` to `gpt-5-4`
+- **Actual orchestrator:** Claude Code with `claude-opus-4-7` at `effort=high`. Synthesis (FormComponentSpec.cs + FormComponentSpecBuilder.cs + 37 unit tests) authored in-conversation per the convention "When the orchestrator's model matches the routing target, handle the task in-conversation." No `route(task_type="architecture")` call was made; the orchestrator handled the synthesis directly and the verification step was the only Opus-tier route.
+- **Actual cost:** ~$0.05 routed total. Session-2 next-orchestrator recommendation (`analysis` -> gemini-pro): $0.0030. Verification round 1 (`session-verification` -> gpt-5-4 returned HTTP 429 after 3 retries; fell back to gemini-pro): $0.0473. Verification round 2 (same fallback path): $0.0022. Aggregate set-level routed total now $0.1471 across 6 calls (Sessions 1-2 combined).
+- **Session commits:** one commit landing `AccessHarvester.Pipeline/Enrichment/FormComponentSpec.cs` (records + enums for FormComponentSpec, FormDataSourceBinding, FormSectionDescriptor, FormControlSpec, ControlBinding, ControlRenderHints, SubformRelationship, EventHandlerReference, ValidationRuleReference + their discriminator enums), `AccessHarvester.Pipeline/Enrichment/FormComponentSpecBuilder.cs` (visitor walking FormMetadata; lifts data-source binding, section walk with Begin unwrapping, control flattening, subform relationships, control + form-level event-handler refs, validation refs, render hints), `tests/AccessHarvester.Pipeline.Tests/FormComponentSpecBuilderTests.cs` (37 hermetic unit tests), the round-1 + round-2 verifier outputs, the issue log (1 Minor fixed), the routed Session-3 recommendation, and ai-assignment.md actuals.
+- **Verification route:** `route(task_type="session-verification", complexity_hint=70)` -> gpt-5-4 (HTTP 429, 3 retries on both rounds) -> fell back to `query("gemini-pro", task_type="session-verification")`. Round 1: ISSUES_FOUND (1 Minor — comment in `Build` method described synthetic Detail attribution that the code didn't actually do). Round 2: VERIFIED, issues: []. Build: green; 1227 passed, 2 skipped (Windows-only Access COM integration tests), 0 failed.
+- **Deviations from recommendation:** none on the orchestrator. Verification provider deviated due to gpt-5-4 quota exhaustion — same pattern as Session 1, now confirmed in two consecutive sessions.
+- **Notes for next-session calibration:** (a) gpt-5-4 verifier 429 has now hit twice in this set; Session 3 should preempt by either pre-warming the gpt-5-4 quota or routing verification straight to gemini-pro via the `query()` short path to avoid the 3-retry-then-fallback latency. (b) The round-1 finding was a comment/code mismatch that targeted scrutiny would have caught at authoring time — a good hint for Session 3 to scan author-time comments against authored code paths before committing. (c) The bracketed-bareword test (`[My Customers]`) was a useful add — Session 3's pipeline run against fixture form metadata may surface more record-source shapes worth fixturing.
 
 ---
-**Next-session orchestrator recommendation (Session 3):** Claude Sonnet 4.6 (`claude-sonnet-4-6`) at `effort=medium`. Session 3 is a mechanical tightening task, which is Sonnet-pinned and does not require Opus.
+**Next-session orchestrator recommendation (Session 3):** Claude Sonnet 4.6 (`claude-sonnet-4-6`) at `effort=medium`. Confirmed by routed `analysis` call (gemini-pro, $0.0030, 2026-04-27): Session 3 is mechanical pipeline integration + schema validation, the mechanical-correspondence convention pins it to Sonnet rather than Opus, and `medium` effort matches the work depth (more than a script run, less than architectural synthesis). Full text in `session-2-next-orchestrator-recommendation.md`.
 
 ## Session 3: End-to-End Pipeline + Mechanical Tightening
 

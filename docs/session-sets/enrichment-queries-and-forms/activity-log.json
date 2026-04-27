@@ -62,6 +62,76 @@
           "note": "narrative + VERIFIED"
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/read-prereqs",
+      "dateTime": "2026-04-27T17:57:13.484472-04:00",
+      "description": "Read Phase 6.2, fixtures 02 + 12, FormMetadata schema, and Session 1 outputs (QueryAbstraction.cs/Builder.cs).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/synthesize-form-component-spec",
+      "dateTime": "2026-04-27T17:57:13.484472-04:00",
+      "description": "Authored FormComponentSpec.cs (records + enums) and FormComponentSpecBuilder.cs in-conversation per Convention 'When the orchestrator's model matches the routing target, handle the task in-conversation.' Synthesis is the second of two architecture-routed deliverables in this set; verifier review pending.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/author-tests",
+      "dateTime": "2026-04-27T17:57:13.485471-04:00",
+      "description": "Authored FormComponentSpecBuilderTests.cs covering: component-name suggestion + frm prefix stripping; record-source classification (NamedReference / InlineSql / None / bracketed bareword); section walk + Begin unwrapping + section attribution; component-kind classification; binding (TableField / ComputedExpression / RowSourceList / Unbound); render-hints lift incl. Access string-bool encoding; subform relationship; control + form-level event handler lift incl. [Event Procedure] sentinel + 'On' uppercase guard; validation references (rule, Required, LimitToList, BeforeUpdateHandler, record-level); geometry/label/non-default pass-through; switchboard scenario (fixture-12-shaped).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-04-27T17:57:55.279606-04:00",
+      "description": "dotnet build (clean: 0 errors, preexisting CA1416/xUnit warnings only). dotnet test --no-build: AccessHarvester.Pipeline.Tests 66/66 passing (29 from Session 1 + 37 new FormComponentSpec tests). Solution-wide: 1227 passed, 2 skipped (Windows-only Access COM integration tests gated [SkippableFact]), 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-04-27T18:00:03.395929-04:00",
+      "description": "Cross-provider session-verification via route(task_type='session-verification', complexity_hint=70). Verifier: gemini-pro. Cost: $0.0473. Verdict captured in session-reviews/session-002.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 29691,
+          "outputTokens": 1019,
+          "costUsd": 0.04730375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/cross-provider-verification-round-2",
+      "dateTime": "2026-04-27T18:01:28.297868-04:00",
+      "description": "Round-2 verification after Minor comment fix. Verifier: gemini-pro. Cost: $0.0022. Captured in session-reviews/session-002-round-2.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 527,
+          "outputTokens": 150,
+          "costUsd": 0.00215875
+        }
+      ]
     }
   ]
 }

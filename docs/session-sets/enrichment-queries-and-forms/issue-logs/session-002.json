@@ -1,0 +1,10 @@
+[
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "FormComponentSpecBuilder.cs",
+    "summary": "Comment in `Build` method inaccurately described handling of root-level controls.",
+    "fix": "Updated the comment to correctly state that controls directly under the form root are emitted with SectionName = null (no synthetic Detail attribution).",
+    "status": "fixed"
+  }
+]
