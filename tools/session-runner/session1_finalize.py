@@ -3,7 +3,7 @@ recommendation via route(analysis), and print cost report.
 """
 from __future__ import annotations
 import importlib.util, sys, pathlib, json
-from datetime import datetime, timezone
+from datetime import datetime
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 
@@ -26,7 +26,7 @@ ASSIGNMENT = SESSION_SET / "ai-assignment.md"
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now().astimezone().isoformat()
 
 
 def write_activity_log() -> None:
