@@ -1,0 +1,66 @@
+[
+  {
+    "severity": "Major",
+    "round": 1,
+    "status": "fixed",
+    "location": "ReferenceResolver.cs (VisitForEachStatement)",
+    "summary": "Collection expression of For Each was never visited.",
+    "fix": "Visit n.Collection at enclosing scope before pushing ForEachScope."
+  },
+  {
+    "severity": "Major",
+    "round": 1,
+    "status": "fixed",
+    "location": "ReferenceResolver.cs (DecideMemberOutcome)",
+    "summary": "_collector[^1] lookup is wrong for non-emitting wrapper targets.",
+    "fix": "Replace with _outcomesByExpression Dictionary<Expression, Outcome>."
+  },
+  {
+    "severity": "Major",
+    "round": 1,
+    "status": "fixed",
+    "location": "ResolutionOutcome.cs / ReferenceResolver.cs / tests",
+    "summary": "Object-model registry hits collapsed into Resolved instead of separate variant.",
+    "fix": "Added ResolutionOutcome.ResolvedToObjectModel(Declaration); registry hits emit it."
+  },
+  {
+    "severity": "Minor",
+    "round": 1,
+    "status": "fixed",
+    "location": "ResolutionOutcome.cs",
+    "summary": "private protected ctor allowed same-assembly variants.",
+    "fix": "Changed to private; nested variants still compile via nested-type access."
+  },
+  {
+    "severity": "Minor",
+    "round": 1,
+    "status": "fixed",
+    "location": "tests/References/ReferenceResolverTests.cs",
+    "summary": "Tests missed top-level Access registry fallback and For Each collection.",
+    "fix": "Added BareIdentifier_FallsBackToTopLevelRegistry_WhenNotInScopeOrBuiltins and ForEachCollection_IsResolvedAtEnclosingScope."
+  },
+  {
+    "severity": "Major",
+    "round": 2,
+    "status": "fixed",
+    "location": "ReferenceResolver.cs (DecideMemberOutcome wrapper handling)",
+    "summary": "Parenthesized targets lose outcome and miss object-model resolution.",
+    "fix": "Added UnwrapTransparent helper; DecideMemberOutcome unwraps ParenthesizedExpression chains before lookup."
+  },
+  {
+    "severity": "Minor",
+    "round": 2,
+    "status": "fixed",
+    "location": "tests/References/ReferenceResolverTests.cs",
+    "summary": "Coverage gap \u2014 registry-before-builtin precedence on a colliding name not tested.",
+    "fix": "Added TopLevelRegistry_TakesPrecedenceOverBuiltIns and ParenthesizedTarget_UnwrapsForMemberDispatch."
+  },
+  {
+    "severity": "Minor",
+    "round": 2,
+    "status": "fixed",
+    "location": "synthesis/session-1-resolution-algorithm.md",
+    "summary": "Stale 'for-loop-variable-implicit-deferred' reason in \u00a79 contradicts \u00a74.5.",
+    "fix": "Replaced with current behavior (For Each collection at enclosing scope, normal \u00a74.3 path)."
+  }
+]

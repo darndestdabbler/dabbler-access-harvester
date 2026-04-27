@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "sessionSetName": "resolver-references-and-with-blocks",
+  "currentSession": 1,
+  "totalSessions": 4,
+  "status": "complete",
+  "startedAt": "2026-04-27T06:38:47.836813-04:00",
+  "completedAt": "2026-04-27T07:15:22.430740-04:00",
+  "verificationVerdict": "VERIFIED",
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "unknown"
+  }
+}
