@@ -9,6 +9,14 @@ __pycache__/
 # AI router runtime state — local only
 ai-router/router-state.db
 
+# Router metrics log — append-only, grows with every route() call.
+# Treat as local telemetry; archive or rotate manually when large.
+ai-router/router-metrics.jsonl
+
+# NorthwindDevEdition sample — Access mutates internal timestamps on every
+# open, producing byte-level changes even on read-only access.
+samples/NorthwindDevEdition.accdb
+
 # .NET build artifacts (will appear in later sessions)
 **/bin/
 **/obj/
