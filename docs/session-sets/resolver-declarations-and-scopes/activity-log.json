@@ -97,6 +97,102 @@
           "costUsd": 0.0016675
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/scope-hierarchy-synthesis",
+      "dateTime": "2026-04-27T08:10:13.376371+00:00",
+      "description": "Authored Scope/ProjectScope/ModuleScope/ProcedureScope/WithBlockScope/ForEachScope in-conversation per Convention (Opus orchestrator matches architecture target).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/scope-building-visitor-synthesis",
+      "dateTime": "2026-04-27T08:10:13.377373+00:00",
+      "description": "Authored ScopeBuildingVisitor + AccessLevelCanonicalizer in-conversation; visitor walks parser AST Module and produces ModuleScope subtree under caller-supplied ProjectScope.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/visitor-tests-authored",
+      "dateTime": "2026-04-27T08:10:13.377373+00:00",
+      "description": "Authored 41 ScopeBuildingVisitorTests in-conversation. Deviation from ai-assignment.md Step 3 (Sonnet test-generation routed): per Session-1 calibration note routing overhead exceeded savings at this scale.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-04-27T08:10:13.378603+00:00",
+      "description": "dotnet build (0 errors) + dotnet test sequential. Resolver: 59/59. Parser: 54/54. Grammar: 294/294. Harvester: 328/330 + 2 skipped (Windows-COM gated).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/session-verification-round-1",
+      "dateTime": "2026-04-27T08:10:13.378603+00:00",
+      "description": "Cross-provider verification (gpt-5-4) returned ISSUES_FOUND with 2 Major findings.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 27522,
+          "outputTokens": 10591,
+          "costUsd": 0.22767
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/issue-fixes",
+      "dateTime": "2026-04-27T08:10:13.378603+00:00",
+      "description": "Fixed both Major findings: (1) ToSourceRange helper + non-root-scope-range invariant test; (2) Declare/Event parameters keep Scope=null instead of breaking the bidirectional invariant. Re-ran tests: 60/60 resolver tests green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/session-verification-round-2",
+      "dateTime": "2026-04-27T08:10:13.378603+00:00",
+      "description": "Cross-provider re-verification (gpt-5-4) returned VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14000,
+          "outputTokens": 800,
+          "costUsd": 0.092378
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T08:10:33.902512+00:00",
+      "description": "Routed analysis recommending orchestrator for Session 3.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 686,
+          "outputTokens": 95,
+          "costUsd": 0.0018075
+        }
+      ]
     }
   ]
 }

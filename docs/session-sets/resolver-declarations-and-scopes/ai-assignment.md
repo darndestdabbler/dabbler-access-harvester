@@ -42,12 +42,15 @@
 | 4    | reasoning  | `session-verification`   | `gpt-5-4`           | `medium`          | Cross-provider verification of the visitor logic and scope hierarchy design.     |
 
 **Actuals (filled after the session runs):**
-*   **Orchestrator Used:**
-*   **Total Routed Cost:**
-*   **Deviations from Plan:**
-*   **Calibration Notes:**
+*   **Orchestrator Used:** claude-code claude-opus-4-7 (effort: unknown self-report)
+*   **Total Routed Cost:** $0.320 (session-verification round 1 $0.2277 + round 2 $0.0924 + next-orchestrator analysis $0.0018)
+*   **Deviations from Plan:** Step 3 test-generation was authored by the Opus orchestrator in-conversation rather than routed to Sonnet — at this scale (41 hand-built AST tests) the routing overhead exceeded the savings, matching Session 1's calibration. Steps 1-2 routed-cost was $0 because Opus orchestrator handles `architecture` task type per the "Orchestrator-matches-routing-target" Convention.
+*   **Calibration Notes:** Estimated cost $2.00 was an order of magnitude high — actuals were $0.32. Verifier (gpt-5-4) caught two genuine Major findings on the visitor surface (scope Range nullability + Declare/Event parameter Scope back-pointer breaking the bidirectional invariant) — both fixed in round 2 (VERIFIED). Round-2 prompt deliberately included only the changed files plus disclosure of unchanged files; cost dropped from $0.228 → $0.092 (mirroring Session 1's same-shaped drop).
 
----
+**Next session orchestrator recommendation (Session 3):**
+claude-sonnet claude-sonnet-4.6 @ effort=medium
+
+**Rationale:** Session 3's work is mechanical validation and fixture testing, which is less complex than the full-class synthesis of Session 2. A capable, cost-effective model like Sonnet is sufficient for this tightening and verification phase, as it does not require the advanced reasoning of a flagship model.---
 
 ## Session 3 of 4
 **Session Goal:** Validate the scope tree construction against anchor fixtures and ensure complete declaration coverage.
