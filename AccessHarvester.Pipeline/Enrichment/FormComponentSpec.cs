@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 using AccessHarvester.Access;
 
 namespace AccessHarvester.Pipeline.Enrichment;
@@ -41,8 +42,8 @@ namespace AccessHarvester.Pipeline.Enrichment;
 /// <list type="bullet">
 ///   <item><see cref="ControlBinding.QueryAbstractionRef"/> and
 ///   <see cref="FormDataSourceBinding.QueryAbstractionRef"/> — wired to
-///   built <see cref="QueryAbstraction"/> objects by Session 3's
-///   end-to-end pipeline.</item>
+///   built <see cref="QueryAbstraction"/> objects by a downstream pipeline
+///   stage once the symbol table is resolved.</item>
 ///   <item><see cref="EventHandlerReference.Classification"/> — populated by
 ///   the next enrichment set (events + validation; tree row #15).</item>
 ///   <item><see cref="ValidationRuleReference.Classification"/> — populated
@@ -202,13 +203,14 @@ public sealed record FormDataSourceBinding
     /// <summary>
     /// Reference to a built <see cref="QueryAbstraction"/> when the record
     /// source resolves to one (a saved query, or inline SQL the pipeline
-    /// has parsed). Null at this tier; Session 3's end-to-end pipeline run
-    /// wires it up.
+    /// has parsed). Null at this tier; populated by a downstream pipeline
+    /// stage once the symbol table is resolved.
     /// </summary>
     public string? QueryAbstractionRef { get; init; }
 }
 
 /// <summary>Discriminator for <see cref="FormDataSourceBinding.Kind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum FormDataSourceKind
 {
     /// <summary>The record source is a bareword name — table or query — and
@@ -263,6 +265,7 @@ public sealed record FormSectionDescriptor
 }
 
 /// <summary>Discriminator for <see cref="FormSectionDescriptor.Kind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum FormSectionKind
 {
     /// <summary><c>FormHeader</c>.</summary>
@@ -362,6 +365,7 @@ public sealed record FormControlSpec
 }
 
 /// <summary>Discriminator for <see cref="FormControlSpec.ComponentKind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum FormControlComponentKind
 {
     /// <summary>Plain single-line text input (Access <c>TextBox</c>).</summary>
@@ -456,13 +460,14 @@ public sealed record ControlBinding
     /// <summary>
     /// Reference to a built <see cref="QueryAbstraction"/> when the
     /// <see cref="RowSource"/> or <see cref="ControlSource"/> resolves to
-    /// one. Null at this tier; Session 3's end-to-end pipeline run wires it
-    /// up.
+    /// one. Null at this tier; populated by a downstream pipeline stage
+    /// once the symbol table is resolved.
     /// </summary>
     public string? QueryAbstractionRef { get; init; }
 }
 
 /// <summary>Discriminator for <see cref="ControlBinding.Kind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ControlBindingKind
 {
     /// <summary><see cref="ControlBinding.ControlSource"/> is a bareword
@@ -614,6 +619,7 @@ public sealed record EventHandlerReference
 }
 
 /// <summary>Discriminator for <see cref="EventHandlerReference.HostKind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum EventHandlerHostKind
 {
     /// <summary>The handler is bound to the form itself (<c>Form_Load</c>,
@@ -678,6 +684,7 @@ public sealed record ValidationRuleReference
 }
 
 /// <summary>Discriminator for <see cref="ValidationRuleReference.HostKind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ValidationRuleHostKind
 {
     /// <summary>Form-level rule (record validation).</summary>
@@ -688,6 +695,7 @@ public enum ValidationRuleHostKind
 }
 
 /// <summary>Discriminator for <see cref="ValidationRuleReference.Source"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ValidationRuleSource
 {
     /// <summary>The control's <c>ValidationRule</c> property is non-empty.</summary>

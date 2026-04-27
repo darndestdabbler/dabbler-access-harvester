@@ -805,4 +805,136 @@ public class FormComponentSpecBuilderTests
         Assert.Equal(4, spec.EventHandlers.Count(e => e.HostKind == EventHandlerHostKind.Control &&
                                                        e.EventName == "Click"));
     }
+
+    // ── End-to-end serialization (fixture 02 + fixture 12 shaped) ────────
+
+    [Fact]
+    public void Build_Fixture02Shape_SerializesToJsonMatchingPhase62Contract()
+    {
+        // End-to-end: construct a FormMetadata mirroring frmCaseManagement
+        // (fixture 02: cascading combos, subform, AfterUpdate events) →
+        // build FormComponentSpec → serialize to JSON → verify shape matches
+        // Phase 6.2 requirements.
+        var form = new FormMetadata
+        {
+            Name = "frmCaseManagement",
+            ModuleName = "Form_frmCaseManagement",
+            RecordSource = "tblCases",
+            Children = new[]
+            {
+                Section("Detail",
+                    Control("ComboBox", "cboCaseworker",
+                        Props(
+                            ("AfterUpdate", "[Event Procedure]"),
+                            ("RowSource", "SELECT CaseworkerID, CaseworkerName, Email, Phone FROM tblCaseworkers"),
+                            ("RowSourceType", "Table/Query"),
+                            ("ColumnCount", 4))),
+                    Control("ComboBox", "cboClient",
+                        Props(
+                            ("RowSource", "SELECT ClientID, ClientName FROM tblClients WHERE AssignedCaseworkerID = 1"),
+                            ("RowSourceType", "Table/Query"))),
+                    Control("TextBox", "txtCaseworkerEmail",
+                        Props(("ControlSource", "Email"))),
+                    Control("TextBox", "txtCaseworkerPhone",
+                        Props(("ControlSource", "Phone"))),
+                    Control("Subform", "sfrmOpenCases",
+                        Props(
+                            ("SourceObject", "frmOpenCasesEmbed"),
+                            ("LinkChildFields", "CaseworkerID"),
+                            ("LinkMasterFields", "cboCaseworker")))),
+            },
+        };
+
+        var spec = FormComponentSpecBuilder.Build(form);
+        var json = JsonSerializer.Serialize(spec);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        // Core identity
+        Assert.Equal("frmCaseManagement", root.GetProperty("SourceFormName").GetString());
+        Assert.Equal("Form_frmCaseManagement", root.GetProperty("ModuleName").GetString());
+        Assert.Equal("CaseManagementComponent", root.GetProperty("SuggestedComponentName").GetString());
+
+        // Phase 6.2: data-source binding — enums serialize as string names (JsonStringEnumConverter)
+        Assert.Equal(JsonValueKind.Object, root.GetProperty("DataSource").ValueKind);
+        var ds = root.GetProperty("DataSource");
+        Assert.Equal("NamedReference", ds.GetProperty("Kind").GetString());
+        Assert.Equal("tblCases", ds.GetProperty("TargetName").GetString());
+        // QueryAbstractionRef deferred (null at this tier)
+        Assert.Equal(JsonValueKind.Null, ds.GetProperty("QueryAbstractionRef").ValueKind);
+
+        // Phase 6.2: controls flat list
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("Controls").ValueKind);
+        Assert.Equal(5, root.GetProperty("Controls").GetArrayLength());
+
+        // Phase 6.2: subform relationships
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("Subforms").ValueKind);
+        Assert.Equal(1, root.GetProperty("Subforms").GetArrayLength());
+
+        // Phase 6.2: event handler references (AfterUpdate on cboCaseworker)
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("EventHandlers").ValueKind);
+        Assert.True(root.GetProperty("EventHandlers").GetArrayLength() >= 1);
+
+        // Interpretive slots remain null at the ir/ tier
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Purpose").ValueKind);
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Intent").ValueKind);
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Notes").ValueKind);
+    }
+
+    [Fact]
+    public void Build_Fixture12Shape_SerializesToJsonMatchingPhase62Contract()
+    {
+        // End-to-end: construct a FormMetadata mirroring frmMainSwitchboard
+        // (fixture 12: unbound navigation form, Form_Load handler,
+        // CommandButton Click handlers) → verify JSON shape.
+        var form = new FormMetadata
+        {
+            Name = "frmMainSwitchboard",
+            Properties = Props(("OnLoad", "[Event Procedure]")),
+            Children = new[]
+            {
+                Section("Detail",
+                    Control("Label", "lblHeader",
+                        Props(("Caption", "Case Management System"))),
+                    Control("CommandButton", "btnNewCase",
+                        Props(("OnClick", "[Event Procedure]"), ("Caption", "New Case"))),
+                    Control("CommandButton", "btnSearchCases",
+                        Props(("OnClick", "[Event Procedure]"), ("Caption", "Search Cases"))),
+                    Control("CommandButton", "btnReports",
+                        Props(("OnClick", "[Event Procedure]"), ("Caption", "Reports"))),
+                    Control("CommandButton", "btnAdminTools",
+                        Props(("OnClick", "[Event Procedure]"), ("Caption", "Admin Tools"))),
+                    Control("CommandButton", "btnExit",
+                        Props(("OnClick", "[Event Procedure]"), ("Caption", "Exit")))),
+            },
+        };
+
+        var spec = FormComponentSpecBuilder.Build(form);
+        var json = JsonSerializer.Serialize(spec);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        // Core identity
+        Assert.Equal("frmMainSwitchboard", root.GetProperty("SourceFormName").GetString());
+        Assert.Equal("MainSwitchboardComponent", root.GetProperty("SuggestedComponentName").GetString());
+
+        // Unbound switchboard: no record source → no DataSource object
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("DataSource").ValueKind);
+
+        // Phase 6.2: controls (1 Label + 5 CommandButtons)
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("Controls").ValueKind);
+        Assert.Equal(6, root.GetProperty("Controls").GetArrayLength());
+
+        // Phase 6.2: event handler references (Form_Load + 5 Click handlers)
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("EventHandlers").ValueKind);
+        Assert.Equal(6, root.GetProperty("EventHandlers").GetArrayLength());
+
+        // No subforms, no validation rules
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Subforms").ValueKind);
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("ValidationRules").ValueKind);
+
+        // Interpretive slots remain null
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Purpose").ValueKind);
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Notes").ValueKind);
+    }
 }

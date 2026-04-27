@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Text.Json;
 using AccessHarvester.Pipeline.Enrichment;
 using AccessHarvester.Sql.Parser;
 using Xunit;
@@ -340,5 +341,56 @@ public class QueryAbstractionBuilderTests
         var col = Assert.Single(qa.ReturnShape!);
         Assert.Equal("c.*", col.Name);
         Assert.Equal(ReturnColumnOrigin.Unknown, col.Origin);
+    }
+
+    // ── End-to-end serialization (fixture 04) ─────────────────────────
+
+    [Fact]
+    public void Build_Fixture04_SerializesToJsonMatchingPhase61Contract()
+    {
+        // End-to-end: parse fixture-04 SQL → build QueryAbstraction →
+        // serialize to JSON → verify the JSON shape matches Phase 6.1
+        // requirements (method name, parameters, return shape, WHERE,
+        // ORDER BY, null interpretive slots).
+        var result = SqlParserPipeline.Parse(
+            Fixture04Sql,
+            new ParseOptions { RequestedMode = ParseMode.Strict });
+        var ast = result.BuildAst("qryActiveCasesByDistrict");
+        var abstraction = QueryAbstractionBuilder.Build("qryActiveCasesByDistrict", ast);
+
+        var json = JsonSerializer.Serialize(abstraction);
+        using var doc = JsonDocument.Parse(json);
+        var root = doc.RootElement;
+
+        // Core identity and shape — enums serialize as string names (JsonStringEnumConverter)
+        Assert.Equal("qryActiveCasesByDistrict", root.GetProperty("SourceQueryName").GetString());
+        Assert.Equal("Select", root.GetProperty("Shape").GetString());
+        Assert.Equal("GetActiveCasesByDistrict", root.GetProperty("SuggestedMethodName").GetString());
+
+        // Phase 6.1: parameters list — fixture 04 has two declared PARAMETERS
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("Parameters").ValueKind);
+        Assert.Equal(2, root.GetProperty("Parameters").GetArrayLength());
+
+        // Phase 6.1: return shape — fixture 04 has named SELECT columns
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("ReturnShape").ValueKind);
+        Assert.True(root.GetProperty("ReturnShape").GetArrayLength() > 0);
+
+        // Phase 6.1: FROM / JOIN structure
+        Assert.Equal(JsonValueKind.Object, root.GetProperty("PrimaryFrom").ValueKind);
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("Joins").ValueKind);
+
+        // Phase 6.1: WHERE predicate (structured tree)
+        Assert.Equal(JsonValueKind.Object, root.GetProperty("Where").ValueKind);
+
+        // Phase 6.1: ORDER BY
+        Assert.Equal(JsonValueKind.Array, root.GetProperty("OrderBy").ValueKind);
+
+        // Interpretive slots remain null at the ir/ tier
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Purpose").ValueKind);
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Intent").ValueKind);
+        Assert.Equal(JsonValueKind.Null, root.GetProperty("Notes").ValueKind);
+
+        // QueryAbstractionRef deferred — not present on QueryAbstraction itself
+        // (that field lives on FormDataSourceBinding / ControlBinding, wired in Session 3+)
     }
 }

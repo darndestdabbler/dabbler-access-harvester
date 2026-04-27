@@ -132,6 +132,68 @@
           "costUsd": 0.00215875
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/build-test-and-pipeline-run",
+      "dateTime": "2026-04-27T18:38:41.053920-04:00",
+      "description": "dotnet build (0 errors, 283 preexisting warnings). dotnet test: 1176 passed, 2 skipped (Access COM), 0 failed. Added 3 end-to-end serialization tests (fixture-04 query abstraction, fixture-02 form shape, fixture-12 form shape). Applied tightening: added [JsonConverter(typeof(JsonStringEnumConverter))] to all 14 enum types in QueryAbstraction.cs and FormComponentSpec.cs for AI-consumer readability.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/schema-validation",
+      "dateTime": "2026-04-27T18:38:41.053920-04:00",
+      "description": "In-conversation schema validation (handled in-conversation per convention: schema-validation target = Sonnet = orchestrator). Phase 6.1 review: QueryAbstraction.cs fully covers all required facets -- method name, parameters (origin/type-deferred), return shape (name/type-deferred/nullable-deferred/origin/source-expression), PrimaryFrom, Joins, WHERE predicate tree, GroupBy, Having, OrderBy, AggregationMarkers, interpretive slots null. Phase 6.2 review: FormComponentSpec.cs fully covers all required facets -- component name, DataSource (QueryAbstractionRef deferred), Controls with type/binding/render hints/geometry/label, Sections, Subforms, EventHandlers (Classification deferred), ValidationRules (Classification deferred), interpretive slots null. One tightening finding: enum integer serialization replaced with string names (JsonStringEnumConverter) for AI-consumer readability.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/tightening-commits",
+      "dateTime": "2026-04-27T18:38:41.053920-04:00",
+      "description": "Applied enum string serialization tightening: QueryAbstraction.cs (7 enums: QueryShape, ParameterOrigin, ReturnColumnOrigin, JoinDescriptorKind, OrderDirection, ExpressionKind, LiteralKind) and FormComponentSpec.cs (7 enums: FormDataSourceKind, FormSectionKind, FormControlComponentKind, ControlBindingKind, EventHandlerHostKind, ValidationRuleHostKind, ValidationRuleSource). Updated 3 new serialization tests to assert string enum values. Full build: 0 errors. Full test: 1176 passed, 2 skipped, 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/cross-provider-verification",
+      "dateTime": "2026-04-27T18:42:30.255704-04:00",
+      "description": "Round-1: gemini-pro, ISSUES_FOUND (1 Minor: comment mismatch in QueryAbstractionBuilder.cs). Round-2: gemini-pro, VERIFIED. Fixed: updated remarks on QueryAbstractionBuilder to accurately describe that QueryParameterAbstraction.Type IS populated for declared PARAMETERS clause parameters; only implicit form-reference parameter types and ReturnColumn.Type/Nullable are deferred. Also removed stale Session-3 forward-references from property docs in QueryAbstraction.cs and FormComponentSpec.cs.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 10137,
+          "outputTokens": 170,
+          "costUsd": 0.0144,
+          "note": "Round 1 - ISSUES_FOUND (1 Minor)"
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 500,
+          "outputTokens": 30,
+          "costUsd": 0.0012,
+          "note": "Round 2 - VERIFIED"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/build-test-final",
+      "dateTime": "2026-04-27T18:42:30.255704-04:00",
+      "description": "dotnet build: 0 errors, 283 preexisting warnings. dotnet test: 1176 passed (69 Pipeline + 294 Grammar + 400 Resolver + 85 Sql + 328 Core), 2 skipped (Windows-only Access COM), 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }

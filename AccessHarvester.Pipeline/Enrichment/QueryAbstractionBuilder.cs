@@ -16,12 +16,16 @@ namespace AccessHarvester.Pipeline.Enrichment;
 /// <remarks>
 /// The builder is intentionally pure (no I/O, no symbol-table
 /// resolution) so it stays unit-testable per the
-/// <c>project-guidance.md</c> Testing Hierarchy. Symbol-table-dependent
-/// fields (<see cref="QueryParameterAbstraction.Type"/>,
-/// <see cref="ReturnColumn.Type"/>, <see cref="ReturnColumn.Nullable"/>)
-/// are deliberately left null at this stage; the end-to-end pipeline
-/// session (Session 3 of the enrichment-queries-and-forms set) wires
-/// them up using the <c>AccessHarvester.Vba.Resolver</c> output.
+/// <c>project-guidance.md</c> Testing Hierarchy.
+/// <para>
+/// <see cref="QueryParameterAbstraction.Type"/> is populated for
+/// parameters with an explicit type keyword in the
+/// <c>PARAMETERS</c> clause (e.g., <c>Long</c>, <c>DateTime</c>).
+/// Type information for implicit form-reference parameters and
+/// the return-shape fields (<see cref="ReturnColumn.Type"/>,
+/// <see cref="ReturnColumn.Nullable"/>) require a resolved symbol
+/// table and are left null for downstream pipeline stages.
+/// </para>
 /// </remarks>
 public static class QueryAbstractionBuilder
 {

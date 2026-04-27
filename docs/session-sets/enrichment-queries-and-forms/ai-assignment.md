@@ -74,13 +74,15 @@ low
 | 3.3 | Apply AI-suggested fixes and land the tightening commits. | `orchestrator-local` |
 
 ### Actuals (filled after the session)
-- **Actual orchestrator:**
-- **Actual cost:**
-- **Session commits:**
-- **Verification route:** `route(task_type="session-verification", complexity_hint=70)` to `gpt-5-4`
+- **Actual orchestrator:** Claude Code with `claude-sonnet-4-6` at `effort=medium`. Matched the recommendation exactly.
+- **Actual cost:** $0.0198 routed total. Schema validation handled in-conversation (per convention: Sonnet orchestrator matches Sonnet target for mechanical tasks). Next-orchestrator recommendation (`analysis` → gemini-pro): $0.0030. Verification round 1 (gemini-pro): $0.0144. Verification round 2 (gemini-pro): $0.0012. Aggregate set-level routed total now $0.1669 across 9 calls (Sessions 1-3 combined).
+- **Session commits:** one commit landing: 3 new end-to-end serialization tests (`Build_Fixture04_SerializesToJsonMatchingPhase61Contract`, `Build_Fixture02Shape_SerializesToJsonMatchingPhase62Contract`, `Build_Fixture12Shape_SerializesToJsonMatchingPhase62Contract`); `[JsonConverter(typeof(JsonStringEnumConverter))]` on all 14 enum types in `QueryAbstraction.cs` and `FormComponentSpec.cs`; updated `QueryAbstractionBuilder.cs` remarks to accurately describe declared-parameter type population vs. deferred implicit-parameter type inference; removed stale "Session 3" forward-references from property docs in `QueryAbstraction.cs` and `FormComponentSpec.cs`.
+- **Verification route:** `query("gemini-pro", task_type="session-verification")` (skipped gpt-5-4 retry per Session 2 calibration note; went straight to gemini-pro). Round 1: ISSUES_FOUND (1 Minor — comment/code mismatch in QueryAbstractionBuilder.cs). Round 2: VERIFIED. Build: green; 1176 passed, 2 skipped (Windows-only Access COM integration tests), 0 failed.
+- **Deviations from recommendation:** none on orchestrator. schema-validation handled in-conversation rather than routed (per "When orchestrator matches routing target" convention); recorded deviation in activity log.
+- **Notes for next-session calibration:** (a) Session 4 is the cleanup buffer; Sessions 1-3 produced only Minor issues so the cleanup scope should be small. (b) The router recommended `Claude 3 Haiku` for Session 4 (not available in this setup); Sonnet at low effort is equivalent. (c) All "Session 3 will wire this up" forward-references in doc comments have been corrected — no similar stale comments remain.
 
 ---
-**Next-session orchestrator recommendation (Session 4):** TBD based on verifier findings. Use Opus for synthesis/redesign issues, or Sonnet for mechanical fixes.
+**Next-session orchestrator recommendation (Session 4):** Claude Sonnet 4.6 (`claude-sonnet-4-6`) at `effort=low`. Session 4 is a cleanup buffer; Sessions 1-3 produced only Minor issues, so the expected work is minimal targeted fixes at low reasoning depth. Full text in `session-3-next-orchestrator-recommendation.md`.
 
 ## Session 4: Verifier-Surfaced Cleanup
 
