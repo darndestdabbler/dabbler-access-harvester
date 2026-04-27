@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "enrichment-queries-and-forms",
-  "currentSession": 2,
+  "currentSession": 3,
   "totalSessions": 4,
   "status": "complete",
-  "startedAt": "2026-04-27T17:48:28.743339-04:00",
-  "completedAt": "2026-04-27T18:02:38.155858-04:00",
+  "startedAt": "2026-04-27T18:28:24.125748-04:00",
+  "completedAt": "2026-04-27T18:43:16.763034-04:00",
   "verificationVerdict": "VERIFIED",
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
+    "model": "claude-sonnet-4-6",
+    "effort": "medium"
   }
 }

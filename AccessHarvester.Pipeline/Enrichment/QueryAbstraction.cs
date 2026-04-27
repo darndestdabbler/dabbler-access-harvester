@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace AccessHarvester.Pipeline.Enrichment;
 
@@ -33,9 +34,9 @@ namespace AccessHarvester.Pipeline.Enrichment;
 /// <see cref="AccessHarvester.Sql.Parser.Ast.SqlStatement"/> and the
 /// associated form-reference annotations to populate as many facets as
 /// the input unambiguously determines. Facets that require a resolved
-/// symbol table (e.g., parameter type inference from underlying table
-/// columns, return-column nullability from declared column types) are
-/// left null until Session 3's end-to-end pipeline run wires them up.
+/// symbol table (e.g., type inference for implicit form-reference
+/// parameters, return-column type from table schema, column nullability)
+/// are left null for downstream pipeline stages.
 /// </para>
 /// </remarks>
 public sealed record QueryAbstraction
@@ -146,6 +147,7 @@ public sealed record QueryAbstraction
 /// flattened into a single enum so the consumer does not have to walk the
 /// AST hierarchy to know the query's kind.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum QueryShape
 {
     /// <summary>Plain <c>SELECT</c> (the <see cref="ReturnShape"/>-bearing case).</summary>
@@ -239,6 +241,7 @@ public sealed record QueryParameterAbstraction
 }
 
 /// <summary>Provenance discriminator for <see cref="QueryParameterAbstraction.Origin"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ParameterOrigin
 {
     /// <summary>Declared via a <c>PARAMETERS &lt;name&gt; &lt;type&gt;;</c> clause.</summary>
@@ -271,8 +274,8 @@ public sealed record ReturnColumn
 
     /// <summary>
     /// Inferred type label (e.g., <c>long</c>, <c>string</c>, <c>DateTime</c>).
-    /// Null when type inference requires the symbol table — populated by
-    /// Session 3's end-to-end pass.
+    /// Null when type inference requires the symbol table (e.g., the column's
+    /// declared type from the underlying table schema).
     /// </summary>
     public string? Type { get; init; }
 
@@ -304,6 +307,7 @@ public sealed record ReturnColumn
 }
 
 /// <summary>Discriminator for <see cref="ReturnColumn.Origin"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ReturnColumnOrigin
 {
     /// <summary>Direct reference to a table column (e.g., <c>c.CaseID</c>).</summary>
@@ -363,6 +367,7 @@ public sealed record JoinDescriptor
 }
 
 /// <summary>Discriminator for <see cref="JoinDescriptor.Kind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum JoinDescriptorKind
 {
     /// <summary><c>INNER JOIN</c>.</summary>
@@ -389,6 +394,7 @@ public sealed record OrderByDescriptor
 }
 
 /// <summary>Discriminator for <see cref="OrderByDescriptor.Direction"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum OrderDirection
 {
     /// <summary>Ascending — the source default when no direction is written.</summary>
@@ -570,6 +576,7 @@ public sealed record ExpressionDescriptor
 }
 
 /// <summary>Discriminator for <see cref="ExpressionDescriptor.Kind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ExpressionKind
 {
     /// <summary>Direct column reference (qualified or unqualified).</summary>
@@ -601,6 +608,7 @@ public enum ExpressionKind
 }
 
 /// <summary>Discriminator for <see cref="ExpressionDescriptor.LiteralKind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum LiteralKind
 {
     /// <summary>Quoted string literal.</summary>
