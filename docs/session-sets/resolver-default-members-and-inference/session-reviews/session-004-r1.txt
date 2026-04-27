@@ -1,0 +1,19 @@
+```json
+{
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Major",
+      "location": "TypeInferenceFixtureTests.cs",
+      "summary": "The new inference tests only prove that the four anchor fixtures produce empty InferredTypeMap results; they do not verify the Session 4 requirement that inferred-type/default-member annotations are surfaced on the resolved AST or serialized resolver output.",
+      "fix": "Add assertions against the resolved AST or resolver-output-vs-expected.json for fixtures 02, 03, 09, and 11, and include at least one positive fixture/module with a non-empty inferred type so the annotation plumbing is actually exercised."
+    },
+    {
+      "severity": "Major",
+      "location": "Session 4 schema-validation coverage",
+      "summary": "Nothing in the shown Session 4 changes routes or tests schema validation for resolver-output-vs-expected.json correspondence, which is explicitly called out in the session spec.",
+      "fix": "Add the schema-validation hook and fixture-based tests that generate resolver output for 02, 03, 09, and 11 and validate it against the expected JSON/schema."
+    }
+  ]
+}
+```

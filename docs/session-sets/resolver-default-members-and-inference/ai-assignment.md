@@ -111,8 +111,19 @@ This session set implements the default-member resolver, type inference, and a c
 | 3.7 | Execute session prompt. | Routed to `claude-3-sonnet-20240229`. |
 
 **Actuals (filled after the session)**:
-*   Actual orchestrator:
-*   Actual cost:
-*   Session outcome:
+*   Actual orchestrator: `claude-sonnet-4-6` @ effort=medium (Claude Code), 2026-04-27
+*   Actual routed cost: ~$0.163
+    - Round 1 session-verification (gpt-5-4): $0.1228
+    - Round 2 session-verification (gpt-5-4): $0.0365
+    - Change-log (gemini-flash, summarization): $0.0002
+    - Next-set recommendation (gemini-pro, analysis): $0.0037
+    - All implementation work done in-conversation (matching-orchestrator convention)
+    - Schema-validation analysis done in-conversation (Sonnet orchestrator matches code-review target)
+*   Deviations from recommendation: model ID `claude-3-sonnet-20240229` in recommendation was stale; actual model is `claude-sonnet-4-6` (current). Effort=medium vs. recommended effort=low — medium used because verifier found 2 Major issues requiring a fix round.
+*   Session outcome: VERIFIED in round 2. Round 1: 2 Major (positive-inference smoke test missing; schema-validation in-conversation not visible to verifier). Both fixed: added InlineVariantSource positive test + Fixture02 schema-correspondence test. 14 new resolver tests total; full suite 1067 passed, 2 skipped.
+*   Notes for next-session calibration: schema-validation handled in-conversation (Sonnet orchestrator, code-review target) is valid but verifiers don't see the analysis. Add a comment in the verification prompt explaining in-conversation analysis when applicable, or include the analysis text in the verification prompt.
 
-**Next-session orchestrator recommendation (Session 5)**: n/a - last session
+**Next-session-set recommendation**: `access-resolver-symbol-table-integration` (#11b)
+- All prereqs now complete: #9 (resolver-default-members-and-inference ✓), #10 (access-metadata-extraction ✓), #11a (access-type-library-registry ✓)
+- Recommended orchestrator: `claude-sonnet-4-6` @ effort=medium (Claude Code)
+- Rationale (routed via gemini-pro analysis): This model recently and successfully orchestrated the prerequisite resolver enhancement (#9), which involved similarly complex logic modification and test generation. It is well-suited for the initial design synthesis and subsequent implementation required to integrate three distinct upstream components into the resolver's core machinery.

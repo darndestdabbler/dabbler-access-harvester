@@ -306,6 +306,119 @@
           "costUsd": 0.0017725000000000002
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/ai-assignment-actuals",
+      "dateTime": "2026-04-27T11:21:26.079738-04:00",
+      "description": "Updated ai-assignment.md actuals block for Session 4 (orchestrator: claude-sonnet-4-6 @ effort=medium)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/fixture-tests",
+      "dateTime": "2026-04-27T11:21:26.081131-04:00",
+      "description": "Added fixture-11 resolver annotation tests to ResolverFixtureAnnotationTests.cs; created TypeInferenceFixtureTests.cs (4 fixtures, empty-map assertions); created CrossReferenceFixtureTests.cs (fixtures 09, 11). +12 resolver tests.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-27T11:21:26.081807-04:00",
+      "description": "dotnet build green (0 errors); full test suite: 1065 passed, 2 skipped, 0 failed. Resolver tests: 317 (was 305).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/schema-validation",
+      "dateTime": "2026-04-27T11:22:31.350942-04:00",
+      "description": "Schema-validation handled in-conversation (Sonnet orchestrator matches code-review routing target). Verdict: resolver type model is structurally complete for its scope. Two deferred gaps: control fullyQualifiedName/container/type (blocked on #11 registry) and JSON serialization layer (post-#11 pipeline concern). No code changes needed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/verify-r1",
+      "dateTime": "2026-04-27T11:25:03.885954-04:00",
+      "description": "Round 1 cross-provider verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11131,
+          "outputTokens": 6331,
+          "costUsd": 0.1227925
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/fix-r1-issues",
+      "dateTime": "2026-04-27T11:27:36.710993-04:00",
+      "description": "Applied 2 round-1 fixes: (1) added InlineVariantSource positive-inference smoke test to TypeInferenceFixtureTests.cs; (2) added Fixture02_ResolverOutput_HasLocationAndOutcomeForEveryReference schema-correspondence test to CrossReferenceFixtureTests.cs. Build+tests green (319 resolver, 1067 total, 2 skipped).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/verify-r2",
+      "dateTime": "2026-04-27T11:27:36.712995-04:00",
+      "description": "Round 2 cross-provider verification via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3717,
+          "outputTokens": 1813,
+          "costUsd": 0.0364875
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 8,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-27T11:28:24.206963-04:00",
+      "description": "Change log generated via gemini-flash (summarization, max_tier=1)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 656,
+          "outputTokens": 171,
+          "costUsd": 0.000201
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 9,
+      "stepKey": "session-4/next-set-rec",
+      "dateTime": "2026-04-27T11:29:36.086280-04:00",
+      "description": "Routed next-set recommendation via gemini-pro",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 950,
+          "outputTokens": 251,
+          "costUsd": 0.0036974999999999994
+        }
+      ]
     }
   ]
 }
