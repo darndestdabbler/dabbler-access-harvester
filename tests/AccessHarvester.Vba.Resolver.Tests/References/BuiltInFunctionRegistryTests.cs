@@ -65,6 +65,20 @@ public sealed class BuiltInFunctionRegistryTests
         Assert.NotNull(BuiltInFunctionRegistry.TryGet("Eval"));
     }
 
+    // Theory covering every name that ResolverFixtureAnnotationTests
+    // asserts will be ResolvedToBuiltIn — missing any one would silently
+    // produce Unresolved(not-in-scope) with no compile-time warning.
+    [Theory]
+    [InlineData("CurrentDb")]
+    [InlineData("CurrentUser")]
+    [InlineData("DLookup")]
+    [InlineData("DoCmd")]
+    [InlineData("Application")]
+    [InlineData("Eval")]
+    [InlineData("MsgBox")]
+    public void FixtureAnnotationTest_DependentNames_AreInRegistry(string name)
+        => Assert.NotNull(BuiltInFunctionRegistry.TryGet(name));
+
     [Fact]
     public void AllPropertyEnumeratesAllEntries()
     {

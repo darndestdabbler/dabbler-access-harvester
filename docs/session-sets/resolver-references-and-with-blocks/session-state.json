@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "resolver-references-and-with-blocks",
-  "currentSession": 3,
+  "currentSession": 4,
   "totalSessions": 4,
   "status": "complete",
-  "startedAt": "2026-04-27T07:55:11.932795-04:00",
-  "completedAt": "2026-04-27T08:12:26.655671-04:00",
+  "startedAt": "2026-04-27T08:16:23.018883-04:00",
+  "completedAt": "2026-04-27T08:39:25.929758-04:00",
   "verificationVerdict": "VERIFIED",
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-opus-4-7",
+    "model": "claude-sonnet-4-6",
     "effort": "unknown"
   }
 }
