@@ -212,6 +212,101 @@
           "costUsd": 0.0021
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/register-and-context",
+      "dateTime": "2026-04-27T14:37:17.192309-04:00",
+      "description": "Registered session start (claude-sonnet-4-6 @ effort=medium). Read planning + spec + prior sessions. Session 3 = Cross-Cut + Mechanical Tightening: run E2E pipeline on fixtures 04 and 05, schema-validate vs expected.json, land change-log.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-04-27T14:46:00.401026-04:00",
+      "description": "dotnet build: 0 errors, 283 pre-existing warnings. dotnet test --no-build: Sql.Grammar 84/84 (+12 new FormReference + DynamicSql fixture tests), Vba.Parser 54/54, Vba.Grammar 294/294, Vba.Resolver 400/400, Tests 328/330 + 2 Windows-only [SkippableFact] skips.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/schema-validation",
+      "dateTime": "2026-04-27T14:47:00.315512-04:00",
+      "description": "Routed schema-validation of fixture 04+05 test coverage vs expected.json. Model: gemini-pro, cost: $0.0160. Output saved to schema-validation-session3.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "schema-validation",
+          "inputTokens": 5963,
+          "outputTokens": 855,
+          "costUsd": 0.01600375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/build-and-test-final",
+      "dateTime": "2026-04-27T14:49:39.677821-04:00",
+      "description": "dotnet build (no-incremental): 0 errors, 283 pre-existing warnings. dotnet test --no-build: Sql.Grammar 85/85 (+13 new: 6 FormReference + 6 DynamicSql + 1 conditional-fragments; schema-validation gaps addressed), Vba.Parser 54/54, Vba.Grammar 294/294, Vba.Resolver 400/400, Tests 328/330 + 2 Windows-only [SkippableFact] skips. No regressions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/verify-round-1",
+      "dateTime": "2026-04-27T14:52:08.683320-04:00",
+      "description": "Cross-provider session-verification routed to gpt-5-4, cost: $0.1155. See session-reviews/session-003.md for full output.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.1155
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/change-log",
+      "dateTime": "2026-04-27T14:52:34.733362-04:00",
+      "description": "Generated change-log via route(summarization, max_tier=1). Model: gemini-flash, cost: $0.0002.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 623,
+          "outputTokens": 227,
+          "costUsd": 0.00022964999999999997
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/next-set-recommendation",
+      "dateTime": "2026-04-27T14:53:04.394350-04:00",
+      "description": "Routed analysis for next-session-set recommendation. Model: gemini-pro, cost: $0.0038.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1375,
+          "outputTokens": 210,
+          "costUsd": 0.00381875
+        }
+      ]
     }
   ]
 }
