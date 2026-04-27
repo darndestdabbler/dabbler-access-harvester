@@ -126,9 +126,13 @@ sqlType
 // JET-specific. Wraps an aggregating SELECT and pivots one column
 // into a row of result columns.
 
+// PIVOT uses concatExpression (not the full expression) so that the optional
+// `IN (...)` clause is not ambiguously consumed by the comparison-expression
+// IN-predicate rule. Real-world PIVOT columns are always column references,
+// arithmetic, or function calls — never comparison predicates.
 transformStatement
     : TRANSFORM expression (AS? columnAlias)? unionStatement
-      PIVOT expression (IN LPAREN expressionList RPAREN)?
+      PIVOT concatExpression (IN LPAREN expressionList RPAREN)?
     ;
 
 // ------------------------------------------------------------

@@ -450,4 +450,302 @@ public class SqlAstBuilderShapeTests
         Assert.False(inSub.Negated);
         Assert.NotNull(inSub.Subquery);
     }
+
+    // ── GROUP BY / HAVING / aggregates ────────────────────────────────────
+
+    [Fact]
+    public void GroupBy_WithCountStarAggregate_GroupByAndCountStarNode()
+    {
+        var ast = BuildAst("SELECT COUNT(*) FROM tbl GROUP BY dept");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.NotNull(select.GroupBy);
+        Assert.Single(select.GroupBy!);
+        var item = Assert.IsType<ExpressionSelectItem>(Assert.IsType<ColumnSelectList>(select.SelectList).Items.Single());
+        Assert.IsType<CountStarExpression>(item.Value);
+    }
+
+    [Fact]
+    public void GroupBy_WithHavingClause_HavingIsGreaterThanBinaryExpression()
+    {
+        var ast = BuildAst("SELECT dept, COUNT(*) FROM tbl GROUP BY dept HAVING COUNT(*) > 5");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.NotNull(select.Having);
+        var having = Assert.IsType<BinaryExpression>(select.Having);
+        Assert.Equal(BinaryOperator.GreaterThan, having.Operator);
+        Assert.IsType<CountStarExpression>(having.Left);
+    }
+
+    [Fact]
+    public void SumAggregate_InSelectList_BuildsFunctionCallExpression()
+    {
+        var ast = BuildAst("SELECT SUM(amount) FROM tbl GROUP BY dept");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var item = Assert.IsType<ExpressionSelectItem>(Assert.IsType<ColumnSelectList>(select.SelectList).Items.Single());
+        var fn = Assert.IsType<FunctionCallExpression>(item.Value);
+        Assert.Equal("SUM", fn.FunctionName);
+    }
+
+    // ── SELECT DISTINCT / TOP ─────────────────────────────────────────────
+
+    [Fact]
+    public void Select_Distinct_QuantifierIsDistinct()
+    {
+        var ast = BuildAst("SELECT DISTINCT name FROM tbl");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.Equal(SelectQuantifier.Distinct, select.Quantifier);
+    }
+
+    [Fact]
+    public void Select_TopN_TopClauseNIsCorrect()
+    {
+        var ast = BuildAst("SELECT TOP 10 * FROM tbl");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.NotNull(select.Top);
+        Assert.Equal(10, select.Top!.N);
+        Assert.False(select.Top.Percent);
+    }
+
+    [Fact]
+    public void Select_TopNPercent_PercentFlagIsTrue()
+    {
+        var ast = BuildAst("SELECT TOP 25 PERCENT name FROM tbl");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.NotNull(select.Top);
+        Assert.Equal(25, select.Top!.N);
+        Assert.True(select.Top.Percent);
+    }
+
+    // ── Switch / Choose ────────────────────────────────────────────────────
+
+    [Fact]
+    public void Switch_ThreePairs_BuildsSwitchExpressionWithThreePairs()
+    {
+        var ast = BuildAst("SELECT Switch(x=1, 'one', x=2, 'two', True, 'other') FROM t");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var item = Assert.IsType<ExpressionSelectItem>(Assert.IsType<ColumnSelectList>(select.SelectList).Items.Single());
+        var sw = Assert.IsType<SwitchExpression>(item.Value);
+        Assert.Equal(3, sw.Pairs.Count);
+    }
+
+    [Fact]
+    public void Choose_ThreeChoices_BuildsChooseExpressionWithIndexAndChoices()
+    {
+        var ast = BuildAst("SELECT Choose(n, 'first', 'second', 'third') FROM t");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var item = Assert.IsType<ExpressionSelectItem>(Assert.IsType<ColumnSelectList>(select.SelectList).Items.Single());
+        var ch = Assert.IsType<ChooseExpression>(item.Value);
+        Assert.NotNull(ch.Index);
+        Assert.Equal(3, ch.Choices.Count);
+    }
+
+    // ── EXISTS / negated predicates ───────────────────────────────────────
+
+    [Fact]
+    public void WhereClause_Exists_BuildsExistsExpression()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE EXISTS (SELECT 1 FROM other WHERE other.id = t.id)");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.IsType<ExistsExpression>(select.Where);
+    }
+
+    [Fact]
+    public void WhereClause_NotInList_NegatedTrueWithTwoValues()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE status NOT IN ('Closed', 'Archived')");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var notIn = Assert.IsType<InListExpression>(select.Where);
+        Assert.True(notIn.Negated);
+        Assert.Equal(2, notIn.Values.Count);
+    }
+
+    [Fact]
+    public void WhereClause_NotBetween_BuildsNotBetweenExpression()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE age NOT BETWEEN 18 AND 65");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.IsType<NotBetweenExpression>(select.Where);
+    }
+
+    [Fact]
+    public void WhereClause_NotLike_BinaryExpressionWithNotLikeOperator()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE name NOT LIKE '*Smith*'");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var expr = Assert.IsType<BinaryExpression>(select.Where);
+        Assert.Equal(BinaryOperator.NotLike, expr.Operator);
+    }
+
+    // ── Reports! / domain functions ───────────────────────────────────────
+
+    [Fact]
+    public void FormReference_ReportsCollection_RootIsReportsRoot()
+    {
+        var ast = BuildAst("SELECT Reports![rptSummary]![txtTotal] FROM t");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var item = Assert.IsType<ExpressionSelectItem>(Assert.IsType<ColumnSelectList>(select.SelectList).Items.Single());
+        var formRef = Assert.IsType<FormReference>(item.Value);
+        Assert.IsType<ReportsRoot>(formRef.Root);
+    }
+
+    [Fact]
+    public void DomainFunction_DSum_TwoArgs_CriteriaExprIsNull()
+    {
+        var ast = BuildAst("SELECT DSum('Amount', 'tblOrders') FROM t");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var item = Assert.IsType<ExpressionSelectItem>(Assert.IsType<ColumnSelectList>(select.SelectList).Items.Single());
+        var fn = Assert.IsType<DomainFunctionExpression>(item.Value);
+        Assert.Equal("DSUM", fn.FunctionName);
+        Assert.Null(fn.CriteriaExpr);
+    }
+
+    [Fact]
+    public void DomainFunction_DCount_ThreeArgs_CriteriaExprIsNotNull()
+    {
+        var ast = BuildAst("SELECT DCount('*', 'tblOrders', 'Status=1') FROM t");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var item = Assert.IsType<ExpressionSelectItem>(Assert.IsType<ColumnSelectList>(select.SelectList).Items.Single());
+        var fn = Assert.IsType<DomainFunctionExpression>(item.Value);
+        Assert.Equal("DCOUNT", fn.FunctionName);
+        Assert.NotNull(fn.CriteriaExpr);
+    }
+
+    // ── JOIN kinds ────────────────────────────────────────────────────────
+
+    [Fact]
+    public void FromClause_RightJoin_JoinKindIsRight()
+    {
+        var ast = BuildAst("SELECT 1 FROM tblA RIGHT JOIN tblB ON tblA.id = tblB.id");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.NotNull(select.From);
+        var src = Assert.IsType<SimpleTableSource>(select.From!.Sources.Single());
+        Assert.Single(src.Joins);
+        Assert.Equal(JoinKind.Right, src.Joins[0].Kind);
+    }
+
+    // ── INSERT ... SELECT ─────────────────────────────────────────────────
+
+    [Fact]
+    public void Insert_SelectSource_BuildsSelectSourceNotValuesSource()
+    {
+        var ast = BuildAst("INSERT INTO tblArchive SELECT * FROM tblCases WHERE status = 'Closed'");
+        var ins = Assert.IsType<InsertStatement>(ast.Body);
+        Assert.Equal("tblArchive", ins.TableName);
+        Assert.IsType<SelectSource>(ins.Source);
+    }
+
+    // ── TRANSFORM with PIVOT IN ───────────────────────────────────────────
+
+    [Fact]
+    public void Transform_WithPivotInClause_PivotInValuesHasFourItems()
+    {
+        const string sql = """
+            TRANSFORM Sum(o.Amount)
+            SELECT o.CustomerID
+            FROM tblOrders AS o
+            GROUP BY o.CustomerID
+            PIVOT o.Quarter IN ('Q1','Q2','Q3','Q4')
+            """;
+        var ast = BuildAst(sql);
+        var xform = Assert.IsType<TransformStatement>(ast.Body);
+        Assert.NotNull(xform.PivotInValues);
+        Assert.Equal(4, xform.PivotInValues!.Count);
+    }
+
+    // ── Literals: NULL / TRUE / FALSE ────────────────────────────────────
+
+    [Fact]
+    public void Literal_Null_InWhereComparison_RightSideIsNullLiteralExpression()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE col = NULL");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var cmp = Assert.IsType<BinaryExpression>(select.Where);
+        Assert.IsType<NullLiteralExpression>(cmp.Right);
+    }
+
+    [Fact]
+    public void Literal_True_InWhereComparison_RightSideIsTrueLiteralExpression()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE active = True");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var cmp = Assert.IsType<BinaryExpression>(select.Where);
+        Assert.IsType<TrueLiteralExpression>(cmp.Right);
+    }
+
+    // ── Logical operators ─────────────────────────────────────────────────
+
+    [Fact]
+    public void WhereClause_OrOperator_BuildsBinaryExpressionWithOrOperator()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE a = 1 OR b = 2");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var expr = Assert.IsType<BinaryExpression>(select.Where);
+        Assert.Equal(BinaryOperator.Or, expr.Operator);
+    }
+
+    // ── UNION 3-way ────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Union_ThreeSelects_ThirdHasAllFlagTrue()
+    {
+        var ast = BuildAst("SELECT 1 FROM a UNION SELECT 2 FROM b UNION ALL SELECT 3 FROM c");
+        var union = Assert.IsType<UnionStatement>(ast.Body);
+        Assert.Equal(3, union.Selects.Count);
+        Assert.Equal(3, union.AllFlags.Count);
+        Assert.False(union.AllFlags[1]); // plain UNION before second
+        Assert.True(union.AllFlags[2]);  // UNION ALL before third
+    }
+
+    // ── Parameter placeholder ─────────────────────────────────────────────
+
+    [Fact]
+    public void WhereClause_ParameterPlaceholder_RightSideIsParameterPlaceholderExpression()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE id = ?");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var cmp = Assert.IsType<BinaryExpression>(select.Where);
+        Assert.IsType<ParameterPlaceholderExpression>(cmp.Right);
+    }
+
+    // ── Subquery table source ─────────────────────────────────────────────
+
+    [Fact]
+    public void FromClause_SubqueryTableSource_BuildsSubqueryTableSource()
+    {
+        var ast = BuildAst("SELECT 1 FROM (SELECT id FROM base) AS sub");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        Assert.NotNull(select.From);
+        Assert.IsType<SubqueryTableSource>(select.From!.Sources.Single());
+    }
+
+    // ── Additional coverage from verifier review ──────────────────────────
+
+    [Fact]
+    public void Literal_False_InWhereComparison_RightSideIsFalseLiteralExpression()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE active = False");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var cmp = Assert.IsType<BinaryExpression>(select.Where);
+        Assert.IsType<FalseLiteralExpression>(cmp.Right);
+    }
+
+    [Fact]
+    public void WhereClause_NotInSubquery_NegatedTrueWithSubquery()
+    {
+        var ast = BuildAst("SELECT 1 FROM t WHERE id NOT IN (SELECT id FROM excluded)");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var notIn = Assert.IsType<InSubqueryExpression>(select.Where);
+        Assert.True(notIn.Negated);
+        Assert.NotNull(notIn.Subquery);
+    }
+
+    [Fact]
+    public void FormReference_BracketedReportsRoot_RootIsReportsRoot()
+    {
+        // [Reports]![rptX]![ctlY] — bracketed form via semantic predicate path
+        var ast = BuildAst("SELECT [Reports]![rptSummary]![txtTotal] FROM t");
+        var select = Assert.IsType<SelectCore>(Assert.IsType<UnionStatement>(ast.Body).Selects.Single());
+        var item = Assert.IsType<ExpressionSelectItem>(Assert.IsType<ColumnSelectList>(select.SelectList).Items.Single());
+        var formRef = Assert.IsType<FormReference>(item.Value);
+        Assert.IsType<ReportsRoot>(formRef.Root);
+    }
 }

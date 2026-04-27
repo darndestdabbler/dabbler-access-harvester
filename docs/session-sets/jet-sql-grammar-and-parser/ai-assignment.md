@@ -79,8 +79,14 @@
 | 4 | Verification | `session-verification` | `codex` (gpt-5.4) | `medium` | Verify that the new tests correctly target the previously uncovered grammar rules and that the parser handles them correctly. |
 | 5 | Documentation | `summarization` | `gemini-cli` (Gemini Flash) | `thinking_level: 1` | Generate a summary of the session's work for the change log. |
 
-### Actuals
-*TBD by orchestrator*
+### Actuals (Session 4)
+- **Orchestrator used:** claude-code Sonnet 4.6 @ effort=unknown
+- **Total routed cost:** ~$0.23 (test-gen $0.028, verification R1 $0.196, change-log $0.001, next-set recommendation $0.002)
+- **Deviations:** Test-generation routed to gemini-pro but output was truncated (~11/24 tests); remaining 16 tests authored in-conversation. Grammar fix (PIVOT concatExpression ambiguity) identified and applied directly by orchestrator.
+- **Verification:** VERIFIED by GPT-5-4 on round 1.
+- **Next session-set recommendation:** `jet-sql-resolution-and-dynamic` (#13) with claude-code Sonnet 4.6 @ effort=medium — blocked on #11b.
+
+---
 
 ### Session 1 Actuals (filled by orchestrator at end of session)
 
