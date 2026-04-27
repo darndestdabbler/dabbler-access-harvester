@@ -50,27 +50,35 @@ This session set implements the default-member resolver, type inference, and a c
 | 3.7 | Execute session prompt. | `claude-opus-4-7` (in-conversation synthesis) |
 
 **Actuals (filled after the session)**:
-*   Actual orchestrator:
-*   Actual cost:
-*   Session outcome:
+*   Actual orchestrator: `claude-opus-4-7` @ effort=high (Claude Code), 2026-04-27.
+*   Actual routed cost: ~$0.57
+    - Round 1 session-verification (gpt-5-4): $0.1699
+    - Round 2 session-verification (gpt-5-4): $0.2268
+    - Round 3 session-verification (gpt-5-4): $0.2278
+    - Next-orchestrator recommendation (gemini-pro, analysis): $0.0020
+    - Synthesis itself: $0 (in-conversation per the matching-orchestrator convention)
+*   Deviations from recommendation: none — synthesis authored in-conversation as expected.
+*   Session outcome: 3 verification rounds (initial + 2 retries — cap hit). Round 1 = 2 Major + 1 Minor (all fixed: TypeSuffix fallback, With-flattening unwrap in EvaluateCall, ReadOnlyCollection wrap on InferredType.Evidence). Round 2 = 2 Major (all fixed: ConcreteName filters Variant from evidence; EvaluateDeclarationOutcome routes bare-name procedure refs through ReturnTypeOf). Round 3 = 1 Minor (fixed: replaced misleading With-flattening test with Form-module + StubRegistry test that actually exercises the path). Resolver tests 295 passed; full suite 1043 passed, 2 skipped.
+*   Notes for next-session calibration: Synthesis doc was overconfident about Variant-as-evidence semantics — verifier correctly pushed back. For Session 3 the synthesis should explicitly enumerate every ResolutionOutcome variant the new code touches (the bare-name vs. call distinction was missed at synthesis time and surfaced at round 2). Three rounds is at the cap; if a future session needs a fourth round the spec should be revisited.
 
-**Next-session orchestrator recommendation (Session 3)**: `claude-opus-4-7`
+**Next-session orchestrator recommendation (Session 3)**: `claude-opus-4-7` @ effort=medium
+**Rationale (routed via gemini-pro analysis):** The task is a well-defined implementation (map inversion) rather than novel design, warranting a step down in effort from Session 2's high. Retaining the incumbent orchestrator provides continuity and leverages its proven context handling for the complex resolver system, while the reduced effort level appropriately matches the task's lower complexity.
 
 ---
 
 ## Session 3: Cross-Reference Index
 
-**Recommended orchestrator**: `claude-opus-4-7`
+**Recommended orchestrator**: `claude-opus-4-7` @ effort=medium
 
-**Rationale**: The task involves API design and implementation, which benefits from strong reasoning. The specification explicitly allows for this to be handled in-conversation with an Opus orchestrator, maintaining momentum from the previous synthesis sessions.
+**Rationale (routed via gemini-pro analysis after Session 2)**: The task is a well-defined implementation (map inversion) rather than novel design, warranting a step down in effort from Session 2's high. Retaining the incumbent orchestrator provides continuity and leverages its proven context handling for the complex resolver system, while the reduced effort level appropriately matches the task's lower complexity.
 
-**Estimated routed cost**: Moderate
+**Estimated routed cost**: Low
 
 | Step | Action | Routing Decision |
 | :--- | :--- | :--- |
 | 3.5 | Analyze session spec and select orchestrator. | Human analysis. |
-| 3.6 | Author session prompt. | `claude-opus-4-7` (in-conversation synthesis) |
-| 3.7 | Execute session prompt. | `claude-opus-4-7` (in-conversation synthesis) |
+| 3.6 | Author session prompt. | `claude-opus-4-7` (medium effort, in-conversation if Opus stays orchestrator; otherwise routed analysis/architecture) |
+| 3.7 | Execute session prompt. | `claude-opus-4-7` |
 
 **Actuals (filled after the session)**:
 *   Actual orchestrator:

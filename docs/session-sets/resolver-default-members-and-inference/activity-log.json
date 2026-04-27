@@ -106,6 +106,119 @@
           "costUsd": 0.0015137500000000001
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/synthesis",
+      "dateTime": "2026-04-27T10:14:35.326736-04:00",
+      "description": "Authored synthesis doc in-conversation (Opus orchestrator); landed Types/ inference pass + InferredTypeMap + ConfidenceVote",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-27T10:14:35.327810-04:00",
+      "description": "dotnet build green; full test suite: 1034 passed, 2 skipped (Windows-only). Resolver tests: 286 passed (+39 new across TypeInferencePassTests, InferredTypeMapTests, ConfidenceVoteTests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/verify-round-1",
+      "dateTime": "2026-04-27T10:18:40.298731-04:00",
+      "description": "Round 1 cross-provider verification. Verifier gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 25451,
+          "outputTokens": 10029,
+          "costUsd": 0.2140625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/fix-round-1-issues",
+      "dateTime": "2026-04-27T10:24:27.827792-04:00",
+      "description": "Applied 3 round-1 fixes: TypeSuffix fallback in TypeOfBoundDeclaration; ResolvedViaWithFlattening peek in EvaluateCall; ReadOnlyCollection wrap in ConfidenceVote. Build+tests green (291 resolver passed; 1039 total passed, 2 skipped). Added 5 regression tests.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/verify-round-2",
+      "dateTime": "2026-04-27T10:29:11.355393-04:00",
+      "description": "Round 2 cross-provider verification. Verifier gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 19266,
+          "outputTokens": 11907,
+          "costUsd": 0.22676999999999997
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/fix-round-2-issues",
+      "dateTime": "2026-04-27T10:32:25.803312-04:00",
+      "description": "Applied 2 round-2 fixes: ConcreteName helper filters Variant from evidence collection (TypeOfBoundDeclaration / ReturnTypeOf / DefaultMemberReturnFor / built-in returns); EvaluateDeclarationOutcome handles bare zero-arg procedure references (x = SomeFunc) by checking ReturnTypeOf before falling to bound-declaration type. Build+tests green (294 resolver passed; 1042 total passed, 2 skipped). Added 3 regression tests.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify-round-3",
+      "dateTime": "2026-04-27T10:36:44.539013-04:00",
+      "description": "Round 3 cross-provider verification. Verifier gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 13356,
+          "outputTokens": 12964,
+          "costUsd": 0.22785
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/fix-round-3-issues",
+      "dateTime": "2026-04-27T10:40:18.720701-04:00",
+      "description": "Applied round-3 Minor fix: replaced misleading With-flattening test with a Form-module + StubRegistry test that genuinely exercises ResolvedViaWithFlattening unwrapping in EvaluateReferenceOutcome. Build+tests green (295 resolver passed; 1043 total passed, 2 skipped). Cap of 2 retries hit; proceeding to Step 8.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/next-orc-recommendation",
+      "dateTime": "2026-04-27T10:41:11.543446-04:00",
+      "description": "Routed analysis (gemini-pro) for Session 3 orchestrator recommendation.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 686,
+          "outputTokens": 117,
+          "costUsd": 0.0020275
+        }
+      ]
     }
   ]
 }
