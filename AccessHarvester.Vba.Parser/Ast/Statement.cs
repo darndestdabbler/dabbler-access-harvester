@@ -189,6 +189,19 @@ public sealed record LabelStatement(
     string Name)                                        // alpha label or numeric line-number, source spelling preserved
     : Statement(Provenance);
 
+// ── Preprocessor pass-through (statement position) ───────────────
+
+// Mirrors PreprocessorDirective (ModuleItem) for #If/#ElseIf/#Else/
+// #End If/#Const lines that appear inside procedure bodies. Body is
+// the raw source text after the directive keyword (line-trimmed).
+// Per ast-shape.md §4 and Phase 2.5 of the plan: parse but don't
+// evaluate — preserve as opaque blocks.
+public sealed record PreprocessorStatement(
+    Provenance Provenance,
+    PreprocessorKind Kind,
+    string Body)
+    : Statement(Provenance);
+
 // ── Recovery sentinel ─────────────────────────────────────────────
 
 // Emitted when a parse-tree subtree at statement position contains an

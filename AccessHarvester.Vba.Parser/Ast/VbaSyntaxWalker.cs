@@ -63,6 +63,7 @@ public abstract class VbaSyntaxWalker
             case LetStatement n:                        VisitLetStatement(n); break;
             case CallStatement n:                       VisitCallStatement(n); break;
             case LabelStatement n:                      VisitLabelStatement(n); break;
+            case PreprocessorStatement n:               VisitPreprocessorStatement(n); break;
             case UnknownStatement n:                    VisitUnknownStatement(n); break;
             // Expressions
             case LiteralExpression n:                   VisitLiteralExpression(n); break;
@@ -164,6 +165,7 @@ public abstract class VbaSyntaxWalker
     public virtual void VisitLetStatement(LetStatement n) => DefaultVisit(n);
     public virtual void VisitCallStatement(CallStatement n) => DefaultVisit(n);
     public virtual void VisitLabelStatement(LabelStatement n) => DefaultVisit(n);
+    public virtual void VisitPreprocessorStatement(PreprocessorStatement n) => DefaultVisit(n);
     public virtual void VisitUnknownStatement(UnknownStatement n) => DefaultVisit(n);
 
     // Expressions
