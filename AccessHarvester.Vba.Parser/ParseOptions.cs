@@ -1,0 +1,6 @@
+namespace AccessHarvester.Vba.Parser;
+
+public sealed record ParseOptions(
+    ParseMode RequestedMode = ParseMode.Recovering,
+    int LossyFallbackErrorThreshold = 25,
+    string? SourcePath = null);

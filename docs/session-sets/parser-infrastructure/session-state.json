@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "sessionSetName": "parser-infrastructure",
+  "currentSession": 1,
+  "totalSessions": 4,
+  "status": "complete",
+  "startedAt": "2026-04-26T22:37:35.623832+00:00",
+  "completedAt": "2026-04-27T00:03:10.197950+00:00",
+  "verificationVerdict": "ISSUES_FOUND_DEFERRED_PER_TIEBREAKER",
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "unknown"
+  }
+}

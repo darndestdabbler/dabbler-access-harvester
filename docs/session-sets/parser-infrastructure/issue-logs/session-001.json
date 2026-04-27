@@ -1,0 +1,42 @@
+[
+  {
+    "id": "R1-I1",
+    "severity": "Major",
+    "status": "fixed",
+    "description": "VBA0001 not produced for ERROR_TOKEN.",
+    "fix": "ScanForLexerErrors after tokens.Fill()."
+  },
+  {
+    "id": "R1-I2",
+    "severity": "Major",
+    "status": "fixed",
+    "description": "Missing-End-Sub test did not validate structural claim.",
+    "fix": "CollectTopLevelProcedureNames helper walks moduleItem()."
+  },
+  {
+    "id": "R1-I3",
+    "severity": "Major",
+    "status": "deferred",
+    "description": "Sync set: FRIEND added (fix), STATIC ambiguous so behavior unchanged.",
+    "fix": "FRIEND added + Friend regression test. STATIC documented as known limitation; salvage scan deferred per synthesis doc 6.",
+    "adjudication": {
+      "tiebreaker": "gemini-pro",
+      "verdict": "SIDE_WITH_ORCHESTRATOR",
+      "rationale": "Synthesis doc 6 deferral is sound; FRIEND fix is sufficient round-1 progress; documented limitation is adequate hand-off to Session 4 corpus cross-cut."
+    }
+  },
+  {
+    "id": "R1-I4",
+    "severity": "Minor",
+    "status": "fixed",
+    "description": "SourcePath unused.",
+    "fix": "Threaded through both listeners + strict-mode wrap; 2 new tests."
+  },
+  {
+    "id": "R1-I5",
+    "severity": "Minor",
+    "status": "fixed",
+    "description": "Mid-procedure-garbage test too loose.",
+    "fix": "Bounded count (<=10), constrained codes to {VBA0001..VBA0004}."
+  }
+]
