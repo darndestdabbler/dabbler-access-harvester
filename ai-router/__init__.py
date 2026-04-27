@@ -853,16 +853,24 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
             except Exception:
                 pass
 
+        if os.path.isfile(changelog_path):
+            state = "done"
+        elif os.path.isfile(activity_path) or os.path.isfile(state_path):
+            state = "in-progress"
+        else:
+            state = "not-started"
+
         record = {
             "name": name,
             "completed": sessions_completed,
             "total": total_sessions,
             "last_touched": last_touched or "",
+            "state": state,
         }
 
-        if os.path.isfile(changelog_path):
+        if state == "done":
             done.append(record)
-        elif os.path.isfile(activity_path) or os.path.isfile(state_path):
+        elif state == "in-progress":
             in_progress.append(record)
         else:
             not_started.append(record)
@@ -897,6 +905,12 @@ def print_session_set_status(base_dir: str = "docs/session-sets") -> None:
     for icon, r in rows:
         if r["total"] not in (None, 0):
             progress = f"{r['completed']}/{r['total']}"
+        elif r["state"] == "done" and r["completed"] > 0:
+            # Done sets: completed == total by definition. Render as N/N even
+            # when totalSessions is missing in the activity-log (some historical
+            # logs never had it populated). Mirrors the same fix in
+            # tools/vscode-session-sets/extension.js progressText().
+            progress = f"{r['completed']}/{r['completed']}"
         elif r["completed"] > 0:
             progress = f"{r['completed']} done"
         else:
