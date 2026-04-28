@@ -1,0 +1,13 @@
+[
+  {
+    "severity": "Minor",
+    "location": "AccessHarvester.Pipeline/Enrichment/ValidationRuleExtractor.cs",
+    "summary": "BeforeUpdate handler comparisons emitted as CustomPredicate, not Range.",
+    "fix_proposed": "Parse VBA AST binary comparisons into Range rules.",
+    "status": "deferred-by-design",
+    "rationale": "Verifier-suggested fix is semantically inverted: `If <cond> Then Cancel = True` is the rejection predicate, so direct Range parsing would describe the rejected window not the valid one. Compound `>=...And...<=` guards negate to a disjunction (`<` Or `>`) that cannot fit a single ValidationRangeConstraint. Tiebreaker verifier (sonnet) confirmed: 'orchestrator-right; recommended action: none \u2014 keep ClassifyBeforeUpdateCondition as is'. The verbatim Expression slot preserves all information for downstream negation-aware extraction if needed.",
+    "verifier_round": 1,
+    "tiebreaker_verdict": "orchestrator-right",
+    "human_decision": "second-opinion (option d); tiebreaker confirmed dismissal."
+  }
+]

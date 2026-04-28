@@ -1,0 +1,336 @@
+{
+  "sessionSetName": "enrichment-events-and-validation",
+  "createdDate": "2026-04-27T19:57:43.043111-04:00",
+  "totalSessions": 4,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-04-27T19:59:12.394811-04:00",
+      "description": "Authored ai-assignment.md via routed analysis call.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2718,
+          "outputTokens": 1533,
+          "costUsd": 0.0187275
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-04-27T20:10:26.612950-04:00",
+      "description": "Cross-provider session verification (gemini-pro round 1).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 29310,
+          "outputTokens": 1308,
+          "costUsd": 0.0497175
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/verification-round-2",
+      "dateTime": "2026-04-27T20:14:30.624453-04:00",
+      "description": "Round 2 cross-provider verification after With-block fix.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 15630,
+          "outputTokens": 443,
+          "costUsd": 0.023967500000000003
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-04-27T20:15:38.459458-04:00",
+      "description": "dotnet build (green, 0 errors) and full dotnet test (1290 passed, 4 skipped, 0 failed; was 1233 pre-session).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T20:15:52.549678-04:00",
+      "description": "Routed analysis recommending Session 2 orchestrator + effort.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 729,
+          "outputTokens": 155,
+          "costUsd": 0.00246125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-04-28T01:04:09.918259-04:00",
+      "description": "Cross-provider session verification (gemini-pro round 1).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 17981,
+          "outputTokens": 193,
+          "costUsd": 0.02440625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/tiebreaker",
+      "dateTime": "2026-04-28T01:56:47.712002-04:00",
+      "description": "Tiebreaker (second-opinion) verification on disputed Minor finding (gpt-5-4).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "session-verification",
+          "inputTokens": 19882,
+          "outputTokens": 2894,
+          "costUsd": 0.10305600000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-28T01:58:17.694069-04:00",
+      "description": "dotnet build (green, 0 errors) and full dotnet test (1322 passed, 4 skipped, 0 failed; was 1290 pre-session).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/adjudication",
+      "dateTime": "2026-04-28T01:58:17.696501-04:00",
+      "description": "Recorded verifier disagreement; tiebreaker (sonnet) ruled orchestrator-right; finding deferred-by-design.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/next-orchestrator-recommendation",
+      "dateTime": "2026-04-28T01:58:36.573395-04:00",
+      "description": "Routed analysis recommending Session 3 orchestrator + effort.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2253,
+          "outputTokens": 322,
+          "costUsd": 0.00603625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/read-context",
+      "dateTime": "2026-04-28T02:11:08.354736-04:00",
+      "description": "Read project-guidance, lessons-learned, authoring guide, spec, prior-session ai-assignment, fixture 02, Phase 6.5, FormComponentSpec, ValidationRule, EventHandlerClassification.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/synthesize",
+      "dateTime": "2026-04-28T02:11:08.355254-04:00",
+      "description": "Authored RowSourceSpec.cs (RowSourceSpec record + RowSourceKind enum + RowSourceColumnDescriptor + RowSourceCascadingDriver) and RowSourceSpecBuilder.cs (Build / BuildAll / AnnotateCascadingDrivers + helpers) in-conversation per the matches-orchestrator convention. Synthesis profile: analysis (complexity 55), well-trodden enrichment shape mirroring FormComponentSpecBuilder + ValidationRuleExtractor structure.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/tests",
+      "dateTime": "2026-04-28T02:11:08.356252-04:00",
+      "description": "Authored 31 hermetic xUnit tests in RowSourceSpecBuilderTests.cs covering eligibility, all RowSourceKind branches (TableOrQueryNamed, InlineSql, ValueList, FieldList, Empty, Unknown), bareword/bracketed names, value-list quote/trailing handling, ColumnWidths twips/inches/Hidden parsing including blank entries, string-encoded numerics, Yes/No bools, ListBox eligibility, BuildAll tree walking, six cascading-driver branches (bang access, dot access, Form_-prefixed handler, multiple drivers, non-RowSource signals, undriven combo), and the anchor fixture 02 round-trip.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-28T02:11:08.356252-04:00",
+      "description": "dotnet build AccessHarvester.sln -> 0 errors. dotnet test --no-build -> 1353 passed, 4 skipped (Windows-only Access COM integration), 0 failed. New tests: 31 passed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/verification-round-1",
+      "dateTime": "2026-04-28T02:12:44.432847-04:00",
+      "description": "route(session-verification) via query(\"gemini-pro\") at complexity_hint=70.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 22866,
+          "outputTokens": 24,
+          "costUsd": 0.0288225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/verification-round-2",
+      "dateTime": "2026-04-28T02:13:37.268753-04:00",
+      "description": "Re-prompted gemini-pro for analysis-first response after round 1 returned JSON-only verdict.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 22949,
+          "outputTokens": 824,
+          "costUsd": 0.03692625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-28T02:27:09.323138-04:00",
+      "description": "dotnet build (green, 0 errors) and dotnet test (1367 passed, 4 skipped Windows-only, 0 failed; 14 new EnrichmentPipelineRunnerTests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/verification-round-1",
+      "dateTime": "2026-04-28T02:30:01.327708-04:00",
+      "description": "Round 1 verification (gemini-pro): JSON-only VERIFIED, 24 output tokens (terse). Reprompted with analysis-first instruction.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 9925,
+          "outputTokens": 24,
+          "costUsd": 0.0126
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/verification-round-2",
+      "dateTime": "2026-04-28T02:30:01.329218-04:00",
+      "description": "Round 2 verification (gemini-pro) with explicit analysis-first prompt: VERIFIED with detailed prose analysis. No issues found.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 9484,
+          "outputTokens": 1213,
+          "costUsd": 0.024
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-28T02:31:49.219506-04:00",
+      "description": "Generated change-log.md via route(summarization, max_tier=1, gemini-flash). Last session \u2014 set complete.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 700,
+          "outputTokens": 489,
+          "costUsd": 0.0004
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/next-set-recommendation",
+      "dateTime": "2026-04-28T02:31:49.219506-04:00",
+      "description": "Routed next-session-set recommendation: enrichment-functions-navigation-review (both prereqs now complete).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 568,
+          "outputTokens": 487,
+          "costUsd": 0.0072
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/build-verify",
+      "dateTime": "2026-04-28T02:32:39.071981-04:00",
+      "description": "dotnet build: 0 errors, 283 warnings (existing CA1416 platform warnings). dotnet test: 1353 passed, 4 skipped (Windows-only COM integration tests), 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/pipeline-e2e",
+      "dateTime": "2026-04-28T02:32:39.072980-04:00",
+      "description": "Ran full test suite covering anchor fixtures 01 (validation), 02 (cascading+RowSource), 06 (validation ranges), 09 (report events), 12 (navigation). All 1353 tests pass covering EventHandlerClassifier (59 tests), ValidationRuleExtractor (32 tests), RowSourceSpecBuilder (31 tests), FormComponentSpecBuilder (214 tests including 6 new ApplyEnrichments integration tests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/schema-validation",
+      "dateTime": "2026-04-28T02:32:39.072980-04:00",
+      "description": "In-conversation schema validation (Sonnet, mechanical-correspondence). FormComponentSpec.EventHandlerReference.Classification uses camelCase per harvester-schema.v0.json purposeTags convention. FormComponentSpec.ValidationRuleReference.Classification uses camelCase. EventHandlerClassification.Categories enum serializes PascalCase (standalone enrichment artifact, not the schema's procedureItem.classification.purposeTags \u2014 downstream pipeline stage handles conversion; disclosed in verification prompt). No schema conflicts found.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/apply-enrichments-wiring",
+      "dateTime": "2026-04-28T02:32:39.074488-04:00",
+      "description": "Added FormComponentSpecBuilder.ApplyEnrichments(spec, classifications, validationRules) pipeline visitor to FormComponentSpecBuilder.cs. Wires EventHandlerClassification -> EventHandlerReference.Classification (camelCase, comma-joined for mixed) and ValidationRule.Kind -> ValidationRuleReference.Classification (camelCase). BeforeUpdateHandler refs aggregate all extracted rules' unique kinds. Added 6 hermetic tests.",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}
