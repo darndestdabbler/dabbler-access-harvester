@@ -155,3 +155,11 @@ inside `main/` (or the session-set worktree), never from the container
 root. See
 `../../dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`
 for the layout, recipe, and gotchas.
+
+If a file-system operation (typically `mv` or `git worktree remove`)
+fails with a Windows file-lock error, run `python -m ai_router.utils
+cleanup-dev-orphans` from inside `main/` first — it shuts down dotnet
+build servers, kills stale Claude Code background polling loops, and
+clears orphan `conhost.exe`. Pass `--match-path
+dabbler-access-harvester` to scope the polling-loop kill to this
+container only.
