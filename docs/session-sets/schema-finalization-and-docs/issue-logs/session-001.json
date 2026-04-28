@@ -1,0 +1,16 @@
+[
+  {
+    "severity": "Major",
+    "location": "docs/test-cases/harvester-schema.v1.0.json -> DatabaseManifest.SchemaVersion",
+    "summary": "SchemaVersion accepted any semantic-version-like string; should be exact discriminator.",
+    "fix": "Changed to `\"const\": \"1.0\"`.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Major",
+    "location": "docs/test-cases/harvester-schema.v1.0.json -> FormExport.ParserOutput; DatabaseManifest.NavigationGraph; ModuleExport.ParserOutput",
+    "summary": "Nullable fields did not allow null; valid no-code-behind and no-navigation states would fail validation.",
+    "fix": "Wrapped with anyOf: [{ $ref }, { type: null }].",
+    "status": "fixed"
+  }
+]

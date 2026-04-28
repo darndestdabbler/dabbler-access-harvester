@@ -1,0 +1,1 @@
+Decision: Option B — A consistent casing convention across all schema families simplifies consumption for downstream AI agents and eliminates a permanent API inconsistency. The one-time cost of updating test fixtures is a worthwhile investment for establishing a clean, unified data model for the v1.0 release.
