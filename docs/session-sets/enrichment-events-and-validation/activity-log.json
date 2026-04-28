@@ -1,0 +1,84 @@
+{
+  "sessionSetName": "enrichment-events-and-validation",
+  "createdDate": "2026-04-27T19:57:43.043111-04:00",
+  "totalSessions": 4,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-04-27T19:59:12.394811-04:00",
+      "description": "Authored ai-assignment.md via routed analysis call.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2718,
+          "outputTokens": 1533,
+          "costUsd": 0.0187275
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-04-27T20:10:26.612950-04:00",
+      "description": "Cross-provider session verification (gemini-pro round 1).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 29310,
+          "outputTokens": 1308,
+          "costUsd": 0.0497175
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/verification-round-2",
+      "dateTime": "2026-04-27T20:14:30.624453-04:00",
+      "description": "Round 2 cross-provider verification after With-block fix.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 15630,
+          "outputTokens": 443,
+          "costUsd": 0.023967500000000003
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-04-27T20:15:38.459458-04:00",
+      "description": "dotnet build (green, 0 errors) and full dotnet test (1290 passed, 4 skipped, 0 failed; was 1233 pre-session).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T20:15:52.549678-04:00",
+      "description": "Routed analysis recommending Session 2 orchestrator + effort.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 729,
+          "outputTokens": 155,
+          "costUsd": 0.00246125
+        }
+      ]
+    }
+  ]
+}
