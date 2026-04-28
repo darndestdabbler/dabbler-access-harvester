@@ -218,6 +218,119 @@
           "costUsd": 0.03692625
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-28T02:27:09.323138-04:00",
+      "description": "dotnet build (green, 0 errors) and dotnet test (1367 passed, 4 skipped Windows-only, 0 failed; 14 new EnrichmentPipelineRunnerTests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/verification-round-1",
+      "dateTime": "2026-04-28T02:30:01.327708-04:00",
+      "description": "Round 1 verification (gemini-pro): JSON-only VERIFIED, 24 output tokens (terse). Reprompted with analysis-first instruction.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 9925,
+          "outputTokens": 24,
+          "costUsd": 0.0126
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/verification-round-2",
+      "dateTime": "2026-04-28T02:30:01.329218-04:00",
+      "description": "Round 2 verification (gemini-pro) with explicit analysis-first prompt: VERIFIED with detailed prose analysis. No issues found.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 9484,
+          "outputTokens": 1213,
+          "costUsd": 0.024
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/change-log",
+      "dateTime": "2026-04-28T02:31:49.219506-04:00",
+      "description": "Generated change-log.md via route(summarization, max_tier=1, gemini-flash). Last session \u2014 set complete.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 700,
+          "outputTokens": 489,
+          "costUsd": 0.0004
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/next-set-recommendation",
+      "dateTime": "2026-04-28T02:31:49.219506-04:00",
+      "description": "Routed next-session-set recommendation: enrichment-functions-navigation-review (both prereqs now complete).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 568,
+          "outputTokens": 487,
+          "costUsd": 0.0072
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/build-verify",
+      "dateTime": "2026-04-28T02:32:39.071981-04:00",
+      "description": "dotnet build: 0 errors, 283 warnings (existing CA1416 platform warnings). dotnet test: 1353 passed, 4 skipped (Windows-only COM integration tests), 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/pipeline-e2e",
+      "dateTime": "2026-04-28T02:32:39.072980-04:00",
+      "description": "Ran full test suite covering anchor fixtures 01 (validation), 02 (cascading+RowSource), 06 (validation ranges), 09 (report events), 12 (navigation). All 1353 tests pass covering EventHandlerClassifier (59 tests), ValidationRuleExtractor (32 tests), RowSourceSpecBuilder (31 tests), FormComponentSpecBuilder (214 tests including 6 new ApplyEnrichments integration tests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/schema-validation",
+      "dateTime": "2026-04-28T02:32:39.072980-04:00",
+      "description": "In-conversation schema validation (Sonnet, mechanical-correspondence). FormComponentSpec.EventHandlerReference.Classification uses camelCase per harvester-schema.v0.json purposeTags convention. FormComponentSpec.ValidationRuleReference.Classification uses camelCase. EventHandlerClassification.Categories enum serializes PascalCase (standalone enrichment artifact, not the schema's procedureItem.classification.purposeTags \u2014 downstream pipeline stage handles conversion; disclosed in verification prompt). No schema conflicts found.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/apply-enrichments-wiring",
+      "dateTime": "2026-04-28T02:32:39.074488-04:00",
+      "description": "Added FormComponentSpecBuilder.ApplyEnrichments(spec, classifications, validationRules) pipeline visitor to FormComponentSpecBuilder.cs. Wires EventHandlerClassification -> EventHandlerReference.Classification (camelCase, comma-joined for mixed) and ValidationRule.Kind -> ValidationRuleReference.Classification (camelCase). BeforeUpdateHandler refs aggregate all extracted rules' unique kinds. Added 6 hermetic tests.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
