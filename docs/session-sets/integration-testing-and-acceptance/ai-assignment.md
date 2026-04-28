@@ -76,25 +76,31 @@ moderate (revised post-reframe — verification rounds dominated)
 claude-code (Claude Opus 4.7) @ effort=high.
 Rationale: Session 3 is the most judgment-intensive session — threshold calibration against real bench results requires interpreting score distributions and deciding whether rubric adjustments mask real IR gaps. Estimated cost moderate-to-high (~$4–$8) driven almost entirely by ~80 answer+judge calls during the bench run. Full recommendation at `session-2-next-orchestrator-recommendation.md`.
 
-## Session 3: Performance Benchmarks
+## Session 3: Scenarios Capture + Question Drafting + Curated Banks + First Green Baseline (REFRAMED 2026-04-28)
+
+> **Replaces stale "Performance Benchmarks" block.** Performance benchmarks were descoped from this set per the 2026-04-28 reframe (deferred to a follow-up `performance-benchmarks-and-baseline` set). Session 3's new shape is the AI-comprehension test bench's first green baseline, with two human gates (scenarios input — closed — and question curation — pending mid-session).
 
 ### Recommended orchestrator
-anthropic claude-3-opus-20240229 @ effort=high
+claude-code (Claude Opus 4.7) @ effort=high
 
 ### Rationale
-Session requires setting up a `BenchmarkDotNet` project, writing correct benchmark harnesses, and establishing a valid baseline. A high-capability orchestrator is best for generating this specialized, boilerplate-heavy code correctly.
+Opus high-effort is well-suited for the session's core tasks: nuanced schema validation, data-driven code modification of the scoring rubric, and optional synthetic test case generation. The orchestrator primarily directs local tool execution, handling the complex, context-sensitive coding steps directly while scripts manage their own routed analysis calls.
 
 ### Estimated routed cost
-moderate
+high (~$4–$8) — driven almost entirely by the bench-runner's internal ~80 answer+judge `route(task_type="analysis")` calls during Step 5 (one per curated question per DB, both legs); the orchestrator itself only routes once for session-verification at Step 10.
 
 | Step | Action | Routing Decision |
 |------|--------|------------------|
-| 1 | Create a new console application project `AccessHarvester.Benchmarks` under `tests/` and add the `BenchmarkDotNet` package. | Orchestrator-direct |
-| 2 | Author a benchmark suite that measures the execution time and memory allocation of the full `run` command. | Orchestrator-direct |
-| 3 | Parameterize the benchmark to run against a small (`MiniComplex.accdb`), medium (`NorthwindDevEdition.accdb`), and large (one of the new samples) database. | Orchestrator-direct |
-| 4 | Execute the benchmarks to establish a performance baseline and commit the results summary to `docs/performance/baseline.md`. | Orchestrator-direct |
-| 5 | Update the CI configuration to run the benchmarks and fail the build if key metrics regress by more than a set threshold (e.g., 15%) against the baseline. | Orchestrator-direct |
-| 6 | Verify session outputs, particularly the new benchmark project and the CI integration. | `route(task_type="session-verification", complexity_hint=70)` |
+| 1 | Capture user's scenarios.md (already supplied). | Orchestrator-direct (simple file commit) |
+| 2 | Run draft_questions.py for NorthwindDevEdition + HomeHealthCare. | Orchestrator-direct (script execution; script routes internally as `task_type="analysis"`) |
+| 3 | Commit drafts; pause for human curation. | Orchestrator-direct (human gate) |
+| 4 | Validate curated questions.yaml schema. | Orchestrator-direct (schema validation and file system checks) |
+| 5 | Run comprehension-bench run.py for both DBs (HARVESTER_COMPREHENSION_BENCH=1). | Orchestrator-direct (script execution; script routes ~80 answer+judge calls internally as `task_type="analysis"`) |
+| 6 | Threshold calibration if needed (inspect failing questions' supporting_ir_paths first). | Orchestrator-direct (code modification requiring analysis of test results) |
+| 7 | Archive per-question score JSONL as comprehension-baseline.jsonl. | Orchestrator-direct (simple file move) |
+| 8 | (Optional) add synthetic fixture for uncovered scenarios. | Orchestrator-direct (complex, context-aware code generation) |
+| 9 | dotnet build && dotnet test (bench env-flag set). | Orchestrator-direct (simple command execution) |
+| 10 | Cross-provider session-verification. | `route(task_type="session-verification", complexity_hint=70)` |
 
 ### Actuals (filled after the session)
 - Orchestrator used:
@@ -103,8 +109,7 @@ moderate
 - Notes for next-session calibration:
 
 **Next-session orchestrator recommendation (Session 4):**
-anthropic claude-3-opus-20240229 @ effort=medium
-Rationale: The orchestrator's main task is to package context for a single, high-stakes routed synthesis call, not iterative coding.
+_To be filled at Session 3 close via `route(task_type="analysis")`._
 
 ## Session 4: Acceptance Criteria Checkoff (Synthesis)
 

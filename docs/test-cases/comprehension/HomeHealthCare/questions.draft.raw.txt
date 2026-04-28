@@ -1,0 +1,172 @@
+- id: hh-low-001
+  question: What property of the `btnSave` control on `frmClientDetail` is modified when the form becomes dirty?
+  accepted_answers:
+    - The `Enabled` property is set to True.
+    - It becomes enabled.
+    - The `btnSave.Enabled` property is set to True.
+  supporting_ir_paths:
+    - ir/Forms/frmClientDetail.ir.json
+  difficulty: low
+- id: hh-low-002
+  question: In `frmClientSearch`, what is the exact name of the event procedure that executes when the user presses the Enter key while the `txtFilterName` textbox has focus?
+  accepted_answers:
+    - txtFilterName_KeyPress
+  supporting_ir_paths:
+    - ir/Forms/frmClientSearch.ir.json
+  difficulty: low
+- id: hh-low-003
+  question: In `frmProviderDetail`, what is the visual effect on the `lblLicenseWarning` label if a provider's license has expired?
+  accepted_answers:
+    - The label's caption changes to "LICENSE EXPIRED", its foreground color becomes red (RGB(255, 0, 0)), and it becomes visible.
+    - It displays "LICENSE EXPIRED" in red text.
+  supporting_ir_paths:
+    - ir/Forms/frmProviderDetail.ir.json
+  difficulty: low
+- id: hh-low-004
+  question: In the VBA code for `frmClientSearch`, what control property is implicitly being accessed when the code checks `If Not IsNull(Me.cboFilterState)`?
+  accepted_answers:
+    - The `.Value` property.
+    - Its default property, which is `Value`.
+  supporting_ir_paths:
+    - ir/Forms/frmClientSearch.ir.json
+  difficulty: low
+- id: hh-low-005
+  question: The `basUtilities` module contains a function named `IsFormLoaded`. What does this function do?
+  accepted_answers:
+    - It checks if a form with a given name is currently open and loaded in the user interface.
+    - It returns True if the specified form is loaded, and False otherwise.
+  supporting_ir_paths:
+    - ir/ModulesAndClasses/basUtilities.ir.json
+  difficulty: low
+- id: hh-low-006
+  question: In `frmProviderDetail`, what is the minimum condition for the `Form_BeforeUpdate` validation to pass?
+  accepted_answers:
+    - The `txtProviderName` control must not be null or an empty string.
+    - The provider name must be filled in.
+  supporting_ir_paths:
+    - ir/Forms/frmProviderDetail.ir.json
+  difficulty: low
+- id: hh-med-001
+  question: When a user selects a state from the `cboFilterState` combo box on `frmClientSearch`, what happens to the `cboFilterCity` combo box?
+  accepted_answers:
+    - The `RowSource` of `cboFilterCity` is updated with a SQL query to show only the cities within the selected state.
+    - The city dropdown is repopulated with cities from the selected state.
+    - It triggers a cascading dropdown effect, filtering the city list based on the chosen state.
+  supporting_ir_paths:
+    - ir/Forms/frmClientSearch.ir.json
+  difficulty: medium
+- id: hh-med-002
+  question: On the `frmClientSearch` form, a user double-clicks a client record in the results list subform (`sfrmClientList`). Describe the sequence of actions that leads to the client's detail form being displayed.
+  accepted_answers:
+    - The `OnDblClick` event of the subform `sfrmClientList` executes `DoCmd.OpenForm` to open `frmClientDetail`, passing the current record's `ClientID` in the `OpenArgs` parameter.
+    - Double-clicking the list opens the `frmClientDetail` form, using the selected `ClientID` as an argument to show the correct record.
+  supporting_ir_paths:
+    - ir/Forms/sfrmClientList.ir.json
+    - ir/Forms/frmClientDetail.ir.json
+  difficulty: medium
+- id: hh-med-003
+  question: In `frmPlanNeed`, after a user selects a provider from the `cboProvider` dropdown, where does the form look up the corresponding hourly rate to populate the `txtRatePerHour` field?
+  accepted_answers:
+    - It uses the `DLookup` function to find the rate in the `qryProviderServiceCatalogDetail` query.
+    - It performs a DLookup on `qryProviderServiceCatalogDetail` using the `ProviderServiceID` from the combobox to find the `Rate`.
+  supporting_ir_paths:
+    - ir/Forms/frmPlanNeed.ir.json
+    - ir/Queries/qryProviderServiceCatalogDetail.ir.json
+  difficulty: medium
+- id: hh-med-004
+  question: On `frmClientDetail`, what validation logic is triggered when the user exits the `txtEmail` field, and where is this logic defined?
+  accepted_answers:
+    - The `OnExit` property of the `txtEmail` control is set to run the `ValidateEmail` sub-macro within the `mcrValidation` macro.
+    - It calls the `ValidateEmail` macro from `mcrValidation`.
+  supporting_ir_paths:
+    - ir/Forms/frmClientDetail.ir.json
+    - ir/Macros/mcrValidation.ir.json
+  difficulty: medium
+- id: hh-med-005
+  question: The form `frmCopyFiscalYearData` allows copying data between fiscal years. What specific data entities does the `btnCopy_Click` procedure attempt to copy?
+  accepted_answers:
+    - It copies "Client Budgets" if `chkCopyBudgets` is checked and "Service Rate Limits" if `chkCopyRates` is checked.
+    - It can copy Client Budgets and Service Rate Limits, depending on which checkboxes are selected.
+  supporting_ir_paths:
+    - ir/Forms/frmCopyFiscalYearData.ir.json
+    - ir/ModulesAndClasses/basDataOperations.ir.json
+  difficulty: medium
+- id: hh-med-006
+  question: How does the `frmProviderDetail` form determine which provider's record to display when it is opened?
+  accepted_answers:
+    - The `Form_Open` event procedure checks for a value in `Me.OpenArgs`. If it's a numeric ID, it searches the form's recordset for that `ProviderID` and navigates to it.
+    - It uses the `OpenArgs` property passed when the form was opened to find and display the corresponding provider record.
+  supporting_ir_paths:
+    - ir/Forms/frmProviderDetail.ir.json
+  difficulty: medium
+- id: hh-med-007
+  question: A user is on `frmProviderSearch` and clicks the "Clear" button. What is the `RecordSource` of the subform `sfrmProviderList` set to?
+  accepted_answers:
+    - The RecordSource is set to a SQL string that selects all active providers from `tblProviders`, ordered by `ProviderName`.
+    - `SELECT ProviderID, ProviderName, City, StateCode, Phone, IsActive FROM tblProviders WHERE IsActive=True ORDER BY ProviderName`
+  supporting_ir_paths:
+    - ir/Forms/frmProviderSearch.ir.json
+  difficulty: medium
+- id: hh-med-008
+  question: In `frmProviderSearch`, if a user enters "Medical" into `txtFilterName` and leaves all other filters blank, what would the `WHERE` clause of the generated SQL query look like?
+  accepted_answers:
+    - `WHERE 1=1 AND (ProviderName LIKE '*Medical*' OR ContactFirstName LIKE '*Medical*' OR ContactLastName LIKE '*Medical*')`
+    - It would be `1=1` plus a condition that searches for "Medical" in the provider name, contact first name, or contact last name fields.
+  supporting_ir_paths:
+    - ir/Forms/frmProviderSearch.ir.json
+  difficulty: medium
+- id: hh-high-001
+  question: A user on `frmReportMenu` selects the "Client Profile" report and clicks "Run Report". Trace the sequence of forms and events that occur until the `rptClientProfile` report is finally opened, and explain how the selected client is passed to the report.
+  accepted_answers:
+    - The menu's `btnRunReport_Click` opens the parameter form `frmReportParam_Client`. The user selects a client on this form and clicks its Run button. The button's `Click` event then opens the `rptClientProfile` report, passing a `WhereCondition` string like `"ClientID = 123"` to filter the report's data.
+    - The menu opens a parameter form. The parameter form collects the Client ID and then opens the final report using a `WhereCondition` argument in `DoCmd.OpenReport`.
+  supporting_ir_paths:
+    - ir/Forms/frmReportMenu.ir.json
+    - ir/Forms/frmReportParam_Client.ir.json
+    - ir/Reports/rptClientProfile.ir.json
+  difficulty: high
+- id: hh-high-002
+  question: On the `frmPlanNeed` form, what business logic is executed to validate the record before it is saved? Describe the role of the `clsServicePlanValidator` class in this process.
+  accepted_answers:
+    - The form's `BeforeUpdate` event instantiates a `clsServicePlanValidator` object. It then calls the validator's `IsValid` method, passing the form as an argument. The `IsValid` method in the class module contains the actual validation rules (checking for overlapping dates, etc.) and returns True or False.
+    - It delegates validation to the `clsServicePlanValidator` class. The form creates an instance of the class and calls its `IsValid` method, which performs the complex validation logic.
+  supporting_ir_paths:
+    - ir/Forms/frmPlanNeed.ir.json
+    - ir/ModulesAndClasses/clsServicePlanValidator.ir.json
+  difficulty: high
+- id: hh-high-003
+  question: A user clicks a button on the main `frmSwitchboard`. Trace the entire flow of execution, from the button click event to the final action being performed.
+  accepted_answers:
+    - The button's `OnClick` event calls the `HandleButtonClick` function, passing its `Tag` property. This function looks up the `Tag` value in `tblSwitchboardItems` to find a command and argument. It then calls the `mcrSwitchboardActions.PerformAction` macro, which uses a `Switch` statement on the command to execute the correct action, like opening a form.
+    - The button click calls a VBA function which reads `tblSwitchboardItems` to determine what to do, then it calls a shared macro `mcrSwitchboardActions` to actually perform the action (e.g. open a form).
+  supporting_ir_paths:
+    - ir/Forms/frmSwitchboard.ir.json
+    - ir/Tables/tblSwitchboardItems.ir.json
+    - ir/Macros/mcrSwitchboardActions.ir.json
+  difficulty: high
+- id: hh-high-004
+  question: The form `frmClientSearch` constructs a SQL query in its `btnSearch_Click` event. Construct the full SQL query string that would be assigned to the subform's `RecordSource` if the user enters "Smith" in the name field, selects "NY" for the state, "New York" for the city, and "Active" for the status.
+  accepted_answers:
+    - "SELECT ClientID, FirstName, LastName, City, StateCode, Phone, IsActive FROM tblClients WHERE 1=1 AND (FirstName LIKE '*Smith*' OR LastName LIKE '*Smith*') AND StateCode='NY' AND City='New York' AND IsActive=True ORDER BY LastName, FirstName"
+  supporting_ir_paths:
+    - ir/Forms/frmClientSearch.ir.json
+  difficulty: high
+- id: hh-high-005
+  question: The report `rptProviderPlansByClient` is based on the query `qryProviderPlansByClient_Param`. What is the data source for its subreport, `srptServicePlanEntries`, and how is it linked to the main report?
+  accepted_answers:
+    - The subreport's `SourceObject` is `srptServicePlanEntries`. Its data `RecordSource` is `qryClientServicePlanDetail`. It is linked to the main report by the `LinkMasterFields` property set to `ClientID` and `LinkChildFields` also set to `ClientID`.
+    - The subreport uses the `qryClientServicePlanDetail` query and is linked to the parent report on the `ClientID` field.
+  supporting_ir_paths:
+    - ir/Reports/rptProviderPlansByClient.ir.json
+    - ir/Reports/srptServicePlanEntries.ir.json
+    - ir/Queries/qryClientServicePlanDetail.ir.json
+  difficulty: high
+- id: hh-high-006
+  question: In `basDataOperations`, the function `CopyFiscalYearData` takes three arguments: `SourceFY`, `TargetFY`, and `DataType`. If this function is called with `DataType = "ClientBudgets"`, what specific SQL operations are performed on which tables?
+  accepted_answers:
+    - It first executes a DELETE statement to remove any existing budgets for the target fiscal year from `tblClientBudgets`. Then, it executes an INSERT INTO statement to copy all budget records from the source fiscal year into `tblClientBudgets` for the target fiscal year.
+    - It deletes all budgets for the target year from `tblClientBudgets`, then runs an append query to insert the source year's budgets into `tblClientBudgets` with the new target year ID.
+  supporting_ir_paths:
+    - ir/ModulesAndClasses/basDataOperations.ir.json
+    - ir/Tables/tblClientBudgets.ir.json
+  difficulty: high
