@@ -186,6 +186,86 @@
           "costUsd": 0.0046
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/register-start",
+      "dateTime": "2026-04-28T00:56:31.068391-04:00",
+      "description": "Registered Session 2 in session-state.json (orchestrator=claude-code/claude-opus-4-7@high). 5 total sessions per spec.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/read-spec-and-config",
+      "dateTime": "2026-04-28T00:56:31.069384-04:00",
+      "description": "Spec has no Session Set Configuration block; per workflow rule, requiresUAT=false, requiresE2E=false applied for the rest of this session. Session 2 plan: NavigationGraph synthesis (2 of 2 synthesis sessions) per spec hint.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/verify-prereqs",
+      "dateTime": "2026-04-28T00:56:31.069384-04:00",
+      "description": "Confirmed Session 1 outputs present: AccessHarvester.Pipeline/Enrichment/FunctionClassification.cs (423 LOC) and FunctionClassificationBuilder.cs (979 LOC). Cross-set prereq #14 (enrichment-queries-and-forms) change-log.md verified at session set start. Session 2 unblocked.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/author-navigation-records",
+      "dateTime": "2026-04-28T01:08:28.199890-04:00",
+      "description": "Created AccessHarvester.Pipeline/Enrichment/NavigationGraph.cs (record types + 4 enums for action/entry-point/target kinds + ribbon/switchboard/macro/entry-point shapes + opt-in NavigationGraphInputs). Authored in-conversation per the matching-orchestrator convention.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/author-navigation-builder",
+      "dateTime": "2026-04-28T01:08:28.201027-04:00",
+      "description": "Created AccessHarvester.Pipeline/Enrichment/NavigationGraphBuilder.cs: visitor walking CallStatement nodes for DoCmd.{OpenForm,OpenReport,Close,BrowseTo}, literal-target extraction with VBA double-quote unescape, unresolved-target surfacing for non-literal/missing targets, sort helpers for determinism, ExpressionTextFormatter for unresolved-target text reconstruction, entry-point assembly from optional inputs in (AutoExec -> default form -> switchboard) order.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/author-navigation-tests",
+      "dateTime": "2026-04-28T01:08:28.201027-04:00",
+      "description": "Created tests/AccessHarvester.Pipeline.Tests/NavigationGraphBuilderTests.cs: 47 hermetic xUnit tests covering empty bodies, OpenForm/OpenReport/Close/BrowseTo dispatches in bare-call and parenthesised forms, escaped-quote literal handling, WhereCondition/OpenArgs slot extraction, unresolved targets (variable/concat/function-call), source-procedure-kind Theory across all 5 procedure kinds, switchboard fixture, role-based dispatch fixture, multi-module aggregation/sort, determinism, non-DoCmd ignores, ribbon/switchboard/macro/AutoExec/default-form input pass-through.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-04-28T01:08:28.202026-04:00",
+      "description": "dotnet build -> 0 errors (existing CA1416/NU1903 warnings unchanged). dotnet test --no-build -> 1317 passed, 4 skipped (Windows-only Access COM integration tests), 0 failed. Pipeline.Tests grew from 111 to 158 (+47 new NavigationGraph tests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verification-round-1",
+      "dateTime": "2026-04-28T01:10:38.267685-04:00",
+      "description": "Cross-provider session-verification via query(\"gemini-pro\") (preempted gpt-5-4 per Session-1 calibration). Verdict VERIFIED, issues=[]. Note: verifier returned 24 output tokens (JSON block only, no preceding prose analysis); JSON-block-present + VERIFIED clears commit per Rule 6, but the terseness is logged for calibration.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 31347,
+          "outputTokens": 24,
+          "costUsd": 0.0394
+        }
+      ]
     }
   ]
 }

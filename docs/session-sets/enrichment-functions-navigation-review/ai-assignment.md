@@ -45,9 +45,15 @@ High. Same cost profile as Session 1: in-conversation synthesis with routed veri
 | `session-verification` | `query("gemini-pro", ...)` | Continue avoiding GPT-5.4 due to quota issues. |
 
 ### Actuals (filled after the session)
-_To be filled after the session._
+- **Actual orchestrator:** Claude Code with `claude-opus-4-7` at `effort=high`. Synthesis (`NavigationGraph.cs` records + `NavigationGraphBuilder.cs` visitor + 47 hermetic xUnit tests) authored entirely in-conversation per the matching-orchestrator convention, replicating Session 1's pattern.
+- **Actual cost:** ~$0.044 routed total. Verification round 1 (`query("gemini-pro", task_type="session-verification")`): $0.0394. Next-session recommendation (`analysis` -> gemini-pro): $0.0048. No other routed calls — synthesis was orchestrator-handled.
+- **Session commits:** one commit landing: new `AccessHarvester.Pipeline/Enrichment/NavigationGraph.cs` (record types + 4 enums + entry-point/edge/unresolved-target/ribbon/switchboard/macro shapes + `NavigationGraphInputs`), `AccessHarvester.Pipeline/Enrichment/NavigationGraphBuilder.cs` (CallStatement-walking visitor + DoCmd dispatch detector + literal/unresolved target classifier + `ExpressionTextFormatter` + `BuildEntryPoints` + sort helpers for determinism), `tests/AccessHarvester.Pipeline.Tests/NavigationGraphBuilderTests.cs` (47 hermetic tests), session-002 verifier review, session-2-next-orchestrator-recommendation.md, ai-assignment.md actuals, activity-log.json, session-state.json.
+- **Verification route:** `query("gemini-pro", task_type="session-verification")` per Session-1 calibration (gpt-5-4 still throttled). Round 1: VERIFIED, issues=[]. Build: green; 1317 passed, 4 skipped (Windows-only Access COM integration tests), 0 failed. Pipeline.Tests grew from 111 to 158 (+47).
+- **Deviations from recommendation:** none on the orchestrator or verification route.
+- **Notes for next-session calibration:** (a) Verifier returned only the JSON block (24 output tokens, no preceding prose analysis) despite the prompt's request that prose precede JSON. The JSON-block-present + VERIFIED outcome cleared commit per Rule 6, but the terseness is worth tracking — if it recurs, consider strengthening the prompt's "prose before JSON" framing. (b) Session 1's pre-emptive sort guards paid off — every output collection sorted before return; no determinism issues surfaced. (c) Session 1's lesson about pre-emptive Theory tests for every dispatch arm paid off — Session 2 included a 5-row `[Theory]` over all `ProcedureKind` values, no missing-coverage findings.
 
-**Next-session orchestrator recommendation (Session N+1):** `gemini-pro-2-5`
+---
+**Next-session orchestrator recommendation (Session 3):** Claude Opus 4.7 (`claude-opus-4-7`) at `effort=high`. Confirmed by routed `analysis` call (gemini-pro, $0.0048, 2026-04-28). Recommendation revises Session 1's earlier proposal: although Session 3 is labelled `analysis`, the unification of every prior set's unresolved-emission shape into a unified `UnresolvedItem.cs` carries enough synthesis weight that Opus-as-orchestrator with in-conversation authoring is the safer, cheaper outcome (Session 2 cost ~$0.04 total). Full text in `session-2-next-orchestrator-recommendation.md`.
 
 ***
 
