@@ -1,0 +1,9 @@
+[
+  {
+    "severity": "Major",
+    "location": "AccessHarvester.Pipeline/Enrichment/EventHandlerClassifier.cs",
+    "summary": "Classifier mishandles assignments and calls within `With` statement blocks because the chain helpers do not recognize ImplicitWithMemberExpression / ImplicitWithBangExpression nodes.",
+    "fix": "Extended LastMemberName and WalkChain to recognize the two implicit-with AST nodes and surface their MemberName. Property-based classification (FilterAssignment, AppearanceAssignment, default ControlAssignment) now works for With-block bodies. .Execute classifies as SideEffect regardless of receiver. For .Requery inside a With block, the receiver is genuinely unresolvable into form vs. subform vs. control without a With-target resolver, so the classifier emits explicit silence per project-guidance.md -> VBA Parser Strategy (Unresolvable constructs are explicit, not silent) rather than guessing a category. Six new tests cover the With-block scenarios.",
+    "status": "fixed"
+  }
+]
