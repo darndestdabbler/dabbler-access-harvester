@@ -1,0 +1,592 @@
+{
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "1.0.0",
+  "Database": {
+    "Name": "NorthwindDevEdition.accdb",
+    "FilePath": "C:\\Repos\\dabbler-access-harvester\\samples\\NorthwindDevEdition.accdb",
+    "ExportedAt": "2026-04-28T06:00:00Z"
+  },
+  "Summary": {
+    "FormCount": 3,
+    "ReportCount": 1,
+    "QueryCount": 2,
+    "ModuleCount": 1,
+    "TableCount": 4,
+    "UnresolvedItemCount": 2
+  },
+  "Forms": [
+    {
+      "Spec": {
+        "SourceFormName": "Customers",
+        "ModuleName": "Form_Customers",
+        "SuggestedComponentName": "CustomersForm",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "Customers"
+        },
+        "DefaultView": "Single Form",
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "ControlNames": ["lblFormTitle"]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "ControlNames": ["txtCompanyName", "txtContactName", "txtContactTitle", "cboCountry", "cmdNew", "cmdDelete", "fsubOrders"]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblFormTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Customers" }
+          },
+          {
+            "Name": "txtCompanyName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Company Name" },
+            "Binding": { "Kind": "TableField", "ControlSource": "CompanyName" }
+          },
+          {
+            "Name": "txtContactName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Contact Name" },
+            "Binding": { "Kind": "TableField", "ControlSource": "ContactName" }
+          },
+          {
+            "Name": "txtContactTitle",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Contact Title" },
+            "Binding": { "Kind": "TableField", "ControlSource": "ContactTitle" }
+          },
+          {
+            "Name": "cboCountry",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Country" },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Country",
+              "RowSource": "SELECT DISTINCT Country FROM Customers ORDER BY Country",
+              "RowSourceType": "Table/Query",
+              "BoundColumn": 1,
+              "ColumnCount": 1
+            }
+          },
+          {
+            "Name": "cmdNew",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "New Customer" }
+          },
+          {
+            "Name": "cmdDelete",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Delete" }
+          },
+          {
+            "Name": "fsubOrders",
+            "SourceType": "Subform",
+            "ComponentKind": "SubformHost",
+            "SectionName": "Detail",
+            "Binding": { "Kind": "Unbound" }
+          }
+        ],
+        "Subforms": [
+          {
+            "SubformControlName": "fsubOrders",
+            "ContainedObjectName": "Orders Subform",
+            "LinkChildFields": ["CustomerID"],
+            "LinkMasterFields": ["CustomerID"]
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cmdNew",
+            "PropertyName": "Click",
+            "EventName": "Click",
+            "VbaProcedureName": "cmdNew_Click",
+            "Classification": "Navigation"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cmdDelete",
+            "PropertyName": "Click",
+            "EventName": "Click",
+            "VbaProcedureName": "cmdDelete_Click",
+            "Classification": "SideEffect"
+          }
+        ],
+        "ValidationRules": []
+      },
+      "ParserOutput": null
+    },
+    {
+      "Spec": {
+        "SourceFormName": "Orders",
+        "ModuleName": "Form_Orders",
+        "SuggestedComponentName": "OrdersForm",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "Orders"
+        },
+        "DefaultView": "Continuous Forms",
+        "Sections": [
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "ControlNames": ["txtOrderID", "txtOrderDate", "cboEmployee", "txtFreight"]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "txtOrderID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Order ID" },
+            "Binding": { "Kind": "TableField", "ControlSource": "OrderID" },
+            "RenderHints": { "IsLocked": true }
+          },
+          {
+            "Name": "txtOrderDate",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Order Date" },
+            "Binding": { "Kind": "TableField", "ControlSource": "OrderDate" },
+            "RenderHints": { "Format": "Short Date" }
+          },
+          {
+            "Name": "cboEmployee",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Employee" },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "EmployeeID",
+              "RowSource": "qryEmployeeList",
+              "RowSourceType": "Table/Query",
+              "BoundColumn": 1,
+              "ColumnCount": 2
+            }
+          },
+          {
+            "Name": "txtFreight",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Freight" },
+            "Binding": { "Kind": "TableField", "ControlSource": "Freight" },
+            "RenderHints": { "Format": "Currency" }
+          }
+        ],
+        "Subforms": [],
+        "EventHandlers": [],
+        "ValidationRules": []
+      },
+      "ParserOutput": null
+    },
+    {
+      "Spec": {
+        "SourceFormName": "MainSwitchboard",
+        "ModuleName": "Form_MainSwitchboard",
+        "SuggestedComponentName": "MainSwitchboardForm",
+        "DataSource": { "Kind": "None" },
+        "DefaultView": "Single Form",
+        "Sections": [
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "ControlNames": ["cmdCustomers", "cmdOrders", "cmdReports", "cmdQuit"]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "cmdCustomers",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Customers" }
+          },
+          {
+            "Name": "cmdOrders",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Orders" }
+          },
+          {
+            "Name": "cmdReports",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Reports" }
+          },
+          {
+            "Name": "cmdQuit",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Quit" }
+          }
+        ],
+        "Subforms": [],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cmdCustomers",
+            "PropertyName": "Click",
+            "EventName": "Click",
+            "VbaProcedureName": "cmdCustomers_Click",
+            "Classification": "Navigation"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cmdOrders",
+            "PropertyName": "Click",
+            "EventName": "Click",
+            "VbaProcedureName": "cmdOrders_Click",
+            "Classification": "Navigation"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cmdQuit",
+            "PropertyName": "Click",
+            "EventName": "Click",
+            "VbaProcedureName": "cmdQuit_Click",
+            "Classification": "SideEffect"
+          }
+        ],
+        "ValidationRules": []
+      },
+      "ParserOutput": null
+    }
+  ],
+  "Reports": [
+    {
+      "Spec": {
+        "SourceFormName": "Sales by Category",
+        "SuggestedComponentName": "SalesByCategoryReport",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "qrySalesByCategory"
+        },
+        "DefaultView": "Report",
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "FormHeader",
+            "ControlNames": ["lblReportTitle"]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "ControlNames": ["txtCategory", "txtSalesAmount"]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblReportTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Sales by Category" }
+          },
+          {
+            "Name": "txtCategory",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Category" },
+            "Binding": { "Kind": "TableField", "ControlSource": "CategoryName" }
+          },
+          {
+            "Name": "txtSalesAmount",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Sales" },
+            "Binding": { "Kind": "TableField", "ControlSource": "SalesAmount" },
+            "RenderHints": { "Format": "Currency" }
+          }
+        ],
+        "Subforms": [],
+        "EventHandlers": [],
+        "ValidationRules": []
+      },
+      "ParserOutput": null
+    }
+  ],
+  "Queries": [
+    {
+      "SourceQueryName": "qryEmployeeList",
+      "Shape": "Select",
+      "SuggestedMethodName": "GetEmployeeList",
+      "Parameters": [],
+      "ReturnShape": [
+        { "Name": "EmployeeID", "Type": "Long", "Nullable": false, "Origin": "Direct", "SourceExpression": "EmployeeID" },
+        { "Name": "FullName", "Type": "Text", "Nullable": true, "Origin": "Computed", "SourceExpression": "[LastName] & ', ' & [FirstName]" }
+      ],
+      "PrimaryFrom": { "TableName": "Employees", "IsSubquery": false },
+      "Joins": [],
+      "OrderBy": [
+        {
+          "Expression": { "Display": "LastName", "Kind": "Column", "ColumnName": "LastName" },
+          "Direction": "Ascending"
+        }
+      ]
+    },
+    {
+      "SourceQueryName": "qrySalesByCategory",
+      "Shape": "Select",
+      "SuggestedMethodName": "GetSalesByCategory",
+      "Parameters": [],
+      "ReturnShape": [
+        { "Name": "CategoryName", "Type": "Text", "Nullable": false, "Origin": "Direct", "SourceExpression": "CategoryName" },
+        { "Name": "SalesAmount", "Type": "Currency", "Nullable": true, "Origin": "Aggregate", "SourceExpression": "Sum([UnitPrice]*[Quantity]*(1-[Discount]))" }
+      ],
+      "PrimaryFrom": { "TableName": "Categories", "IsSubquery": false },
+      "Joins": [
+        {
+          "Kind": "Inner",
+          "RightSource": { "TableName": "Products", "IsSubquery": false },
+          "On": {
+            "NodeKind": "Comparison",
+            "Operator": "=",
+            "Left": { "Display": "Categories.CategoryID", "Kind": "Column", "ColumnName": "CategoryID", "TableQualifier": "Categories" },
+            "Right": { "Display": "Products.CategoryID", "Kind": "Column", "ColumnName": "CategoryID", "TableQualifier": "Products" }
+          }
+        }
+      ],
+      "Aggregation": {
+        "IsDistinct": false,
+        "IsDistinctRow": false,
+        "HasAggregates": true,
+        "HasGrouping": true
+      }
+    }
+  ],
+  "Modules": [
+    {
+      "ModuleName": "modUtility",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Procedure",
+          "Location": { "Module": "modUtility", "StartLine": 1, "StartColumn": 1 }
+        },
+        "Items": [],
+        "UnresolvedItems": [],
+        "Diagnostics": []
+      }
+    }
+  ],
+  "Tables": [
+    {
+      "Name": "Customers",
+      "Type": "TABLE",
+      "Fields": [
+        { "Name": "CustomerID", "TypeCode": 10, "TypeName": "Text", "Size": 5, "Required": true },
+        { "Name": "CompanyName", "TypeCode": 10, "TypeName": "Text", "Size": 40, "Required": true },
+        { "Name": "ContactName", "TypeCode": 10, "TypeName": "Text", "Size": 30 },
+        { "Name": "ContactTitle", "TypeCode": 10, "TypeName": "Text", "Size": 30 },
+        { "Name": "Country", "TypeCode": 10, "TypeName": "Text", "Size": 15 }
+      ],
+      "Indexes": [
+        { "Name": "PrimaryKey", "Primary": true, "Unique": true, "Foreign": false, "Fields": ["CustomerID"] }
+      ]
+    },
+    {
+      "Name": "Orders",
+      "Type": "TABLE",
+      "Fields": [
+        { "Name": "OrderID", "TypeCode": 4, "TypeName": "Long", "Required": true },
+        { "Name": "CustomerID", "TypeCode": 10, "TypeName": "Text", "Size": 5 },
+        { "Name": "EmployeeID", "TypeCode": 4, "TypeName": "Long" },
+        { "Name": "OrderDate", "TypeCode": 8, "TypeName": "Date/Time" },
+        { "Name": "Freight", "TypeCode": 6, "TypeName": "Currency" }
+      ],
+      "Indexes": [
+        { "Name": "PrimaryKey", "Primary": true, "Unique": true, "Foreign": false, "Fields": ["OrderID"] },
+        { "Name": "idxCustomer", "Primary": false, "Unique": false, "Foreign": true, "Fields": ["CustomerID"] }
+      ]
+    },
+    {
+      "Name": "Employees",
+      "Type": "TABLE",
+      "Fields": [
+        { "Name": "EmployeeID", "TypeCode": 4, "TypeName": "Long", "Required": true },
+        { "Name": "LastName", "TypeCode": 10, "TypeName": "Text", "Size": 20, "Required": true },
+        { "Name": "FirstName", "TypeCode": 10, "TypeName": "Text", "Size": 10, "Required": true }
+      ],
+      "Indexes": [
+        { "Name": "PrimaryKey", "Primary": true, "Unique": true, "Foreign": false, "Fields": ["EmployeeID"] }
+      ]
+    },
+    {
+      "Name": "Categories",
+      "Type": "TABLE",
+      "Fields": [
+        { "Name": "CategoryID", "TypeCode": 4, "TypeName": "Long", "Required": true },
+        { "Name": "CategoryName", "TypeCode": 10, "TypeName": "Text", "Size": 15, "Required": true }
+      ],
+      "Indexes": [
+        { "Name": "PrimaryKey", "Primary": true, "Unique": true, "Foreign": false, "Fields": ["CategoryID"] }
+      ]
+    }
+  ],
+  "Relationships": [
+    {
+      "Name": "CustomersOrders",
+      "Table": "Orders",
+      "ForeignTable": "Customers",
+      "Attributes": 2,
+      "Fields": [{ "Name": "CustomerID", "ForeignName": "CustomerID" }]
+    },
+    {
+      "Name": "EmployeesOrders",
+      "Table": "Orders",
+      "ForeignTable": "Employees",
+      "Attributes": 2,
+      "Fields": [{ "Name": "EmployeeID", "ForeignName": "EmployeeID" }]
+    }
+  ],
+  "ValidationRules": [],
+  "RowSourceSpecs": [
+    {
+      "SourceFormName": "Customers",
+      "ControlName": "cboCountry",
+      "ControlType": "ComboBox",
+      "Kind": "TableOrQueryInlineSql",
+      "RowSourceText": "SELECT DISTINCT Country FROM Customers ORDER BY Country",
+      "RowSourceType": "Table/Query",
+      "InlineSql": "SELECT DISTINCT Country FROM Customers ORDER BY Country",
+      "BoundColumn": 1,
+      "ColumnCount": 1,
+      "LimitToList": false
+    },
+    {
+      "SourceFormName": "Orders",
+      "ControlName": "cboEmployee",
+      "ControlType": "ComboBox",
+      "Kind": "TableOrQueryNamed",
+      "RowSourceText": "qryEmployeeList",
+      "RowSourceType": "Table/Query",
+      "TargetName": "qryEmployeeList",
+      "BoundColumn": 1,
+      "ColumnCount": 2,
+      "LimitToList": true,
+      "QueryAbstractionRef": "qryEmployeeList"
+    }
+  ],
+  "FunctionClassifications": [],
+  "EventHandlerClassifications": [],
+  "NavigationGraph": {
+    "EntryPoints": [
+      {
+        "Kind": "DefaultForm",
+        "Name": "MainSwitchboard",
+        "OpensFormName": "MainSwitchboard"
+      }
+    ],
+    "Edges": [
+      {
+        "SourceModule": "Form_MainSwitchboard",
+        "SourceProcedure": "cmdCustomers_Click",
+        "SourceProcedureKind": "Sub",
+        "SourceLine": 5,
+        "SourceColumn": 5,
+        "Action": "OpenForm",
+        "TargetKind": "Form",
+        "TargetName": "Customers"
+      },
+      {
+        "SourceModule": "Form_MainSwitchboard",
+        "SourceProcedure": "cmdOrders_Click",
+        "SourceProcedureKind": "Sub",
+        "SourceLine": 10,
+        "SourceColumn": 5,
+        "Action": "OpenForm",
+        "TargetKind": "Form",
+        "TargetName": "Orders"
+      }
+    ],
+    "UnresolvedTargets": [
+      {
+        "SourceModule": "Form_MainSwitchboard",
+        "SourceProcedure": "cmdReports_Click",
+        "SourceProcedureKind": "Sub",
+        "SourceLine": 15,
+        "SourceColumn": 5,
+        "Action": "OpenReport",
+        "Reason": "Target report name resolved from variable — cannot determine statically",
+        "TargetExpressionText": "strReportName"
+      }
+    ],
+    "Macros": []
+  },
+  "UnresolvedItems": [
+    {
+      "Source": "NavigationTarget",
+      "Reason": "Dynamic report name cannot be resolved statically",
+      "ConstructDescription": "DoCmd.OpenReport strReportName in cmdReports_Click",
+      "Location": {
+        "ModuleName": "Form_MainSwitchboard",
+        "ProcedureName": "cmdReports_Click",
+        "Line": 15,
+        "Column": 5
+      },
+      "SurroundingText": "DoCmd.OpenReport strReportName, acViewPreview",
+      "SuggestedNextSteps": [
+        "Inspect strReportName assignment to determine which reports are reachable",
+        "Consider converting to hardcoded report names in target framework"
+      ]
+    },
+    {
+      "Source": "Resolver",
+      "Reason": "Unresolved reference to external COM automation library",
+      "ConstructDescription": "CreateObject call in modUtility",
+      "Location": {
+        "ModuleName": "modUtility",
+        "ProcedureName": "CreateExcelExport",
+        "Line": 45,
+        "Column": 9
+      },
+      "SuggestedNextSteps": ["Replace with .NET interop or native export mechanism"]
+    }
+  ],
+  "Diagnostics": [
+    {
+      "Severity": "Info",
+      "Message": "Form 'MainSwitchboard' has no module (no code-behind); ParserOutput omitted.",
+      "Code": "HARV-0001"
+    }
+  ]
+}

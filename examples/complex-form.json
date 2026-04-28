@@ -1,0 +1,511 @@
+{
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "1.0.0",
+  "Database": {
+    "Name": "Complex.accdb",
+    "FilePath": "C:\\Samples\\Complex.accdb",
+    "ExportedAt": "2026-04-28T00:00:00Z"
+  },
+  "Summary": {
+    "FormCount": 1,
+    "ReportCount": 0,
+    "QueryCount": 1,
+    "ModuleCount": 1,
+    "TableCount": 2,
+    "UnresolvedItemCount": 1
+  },
+  "Forms": [
+    {
+      "Spec": {
+        "SourceFormName": "frmOrderEntry",
+        "ModuleName": "Form_frmOrderEntry",
+        "SuggestedComponentName": "OrderEntryForm",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblOrders",
+          "Filter": "Status = 'Open'",
+          "OrderBy": "OrderDate DESC"
+        },
+        "DefaultView": "Single Form",
+        "GeometryIn": { "X": 0.0, "Y": 0.0, "W": 8.5, "H": 6.0 },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": { "X": 0.0, "Y": 0.0, "W": 8.5, "H": 0.5 },
+            "ControlNames": ["lblTitle"]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": { "X": 0.0, "Y": 0.5, "W": 8.5, "H": 5.0 },
+            "ControlNames": ["txtOrderID", "cboCustomer", "txtOrderDate", "fsubOrderItems", "cmdSave", "cmdCancel"]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": { "X": 0.0, "Y": 5.5, "W": 8.5, "H": 0.5 },
+            "ControlNames": ["lblStatus"]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Order Entry", "IsVisible": true }
+          },
+          {
+            "Name": "txtOrderID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Order ID" },
+            "GeometryIn": { "X": 1.5, "Y": 0.2, "W": 2.0, "H": 0.25 },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "OrderID"
+            },
+            "RenderHints": { "IsLocked": true, "TabIndex": 0 }
+          },
+          {
+            "Name": "cboCustomer",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Customer" },
+            "GeometryIn": { "X": 1.5, "Y": 0.55, "W": 3.0, "H": 0.25 },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "CustomerID",
+              "RowSource": "qryCustomerList",
+              "RowSourceType": "Table/Query",
+              "BoundColumn": 1,
+              "ColumnCount": 2
+            },
+            "RenderHints": { "TabIndex": 1 }
+          },
+          {
+            "Name": "txtOrderDate",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": { "Source": "Attached", "Text": "Order Date" },
+            "GeometryIn": { "X": 1.5, "Y": 0.9, "W": 2.0, "H": 0.25 },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "OrderDate"
+            },
+            "RenderHints": { "Format": "Short Date", "TabIndex": 2 }
+          },
+          {
+            "Name": "fsubOrderItems",
+            "SourceType": "Subform",
+            "ComponentKind": "SubformHost",
+            "SectionName": "Detail",
+            "GeometryIn": { "X": 0.1, "Y": 1.3, "W": 8.0, "H": 3.0 },
+            "Binding": { "Kind": "Unbound" }
+          },
+          {
+            "Name": "cmdSave",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "GeometryIn": { "X": 6.0, "Y": 4.5, "W": 1.0, "H": 0.35 },
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Save", "TabIndex": 10 }
+          },
+          {
+            "Name": "cmdCancel",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "GeometryIn": { "X": 7.1, "Y": 4.5, "W": 1.0, "H": 0.35 },
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Cancel", "TabIndex": 11 }
+          },
+          {
+            "Name": "lblStatus",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormFooter",
+            "Binding": { "Kind": "Unbound" },
+            "RenderHints": { "Caption": "Ready" }
+          }
+        ],
+        "Subforms": [
+          {
+            "SubformControlName": "fsubOrderItems",
+            "ContainedObjectName": "fsubOrderItemsDetail",
+            "LinkChildFields": ["OrderID"],
+            "LinkMasterFields": ["OrderID"]
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate",
+            "Classification": "Validation"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cboCustomer",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "cboCustomer_AfterUpdate",
+            "Classification": "CascadingUpdate"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cmdSave",
+            "PropertyName": "Click",
+            "EventName": "Click",
+            "VbaProcedureName": "cmdSave_Click",
+            "Classification": "SideEffect"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler",
+            "RuleExpression": "Not IsNull([CustomerID])",
+            "ValidationText": "Customer is required.",
+            "Classification": "Required"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cboCustomer",
+            "Source": "LimitToList",
+            "Classification": "Membership"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "Module": "Form_frmOrderEntry",
+            "StartLine": 1,
+            "StartColumn": 1
+          },
+          "HostContext": {
+            "HostKind": "Form",
+            "HostName": "frmOrderEntry"
+          }
+        },
+        "Items": [
+          {
+            "ItemKind": "Procedure",
+            "Name": "Form_BeforeUpdate",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "StartLine": 5,
+            "EventBinding": {
+              "ControlName": "Form",
+              "EventName": "BeforeUpdate"
+            },
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "Cancel",
+                  "Type": "Integer",
+                  "PassingMechanism": "ByRef"
+                }
+              ]
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "If",
+                  "Location": { "Module": "Form_frmOrderEntry", "StartLine": 6, "StartColumn": 5, "EndLine": 8, "EndColumn": 10 },
+                  "Summary": "Validate CustomerID is not null"
+                }
+              ],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "cboCustomer_AfterUpdate",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "StartLine": 12,
+            "EventBinding": {
+              "ControlName": "cboCustomer",
+              "EventName": "AfterUpdate"
+            },
+            "Signature": { "Parameters": [] },
+            "Body": {
+              "Statements": [],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "cmdSave_Click",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "StartLine": 20,
+            "EventBinding": {
+              "ControlName": "cmdSave",
+              "EventName": "Click"
+            },
+            "Signature": { "Parameters": [] },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Call",
+                  "Location": { "Module": "Form_frmOrderEntry", "StartLine": 21, "StartColumn": 5 },
+                  "Summary": "DoCmd.Save"
+                }
+              ],
+              "References": [],
+              "Calls": [
+                {
+                  "CalleeText": "DoCmd.Save",
+                  "Location": { "Module": "Form_frmOrderEntry", "StartLine": 21, "StartColumn": 5 }
+                }
+              ],
+              "SqlStrings": []
+            }
+          }
+        ],
+        "UnresolvedItems": [],
+        "Diagnostics": []
+      }
+    }
+  ],
+  "Reports": [],
+  "Queries": [
+    {
+      "SourceQueryName": "qryCustomerList",
+      "Shape": "Select",
+      "SuggestedMethodName": "GetCustomerList",
+      "Parameters": [],
+      "ReturnShape": [
+        { "Name": "CustomerID", "Type": "Long", "Nullable": false, "Origin": "Direct", "SourceExpression": "CustomerID" },
+        { "Name": "CustomerName", "Type": "Text", "Nullable": true, "Origin": "Direct", "SourceExpression": "CustomerName" }
+      ],
+      "PrimaryFrom": { "TableName": "tblCustomers", "IsSubquery": false },
+      "Joins": [],
+      "OrderBy": [
+        {
+          "Expression": { "Display": "CustomerName", "Kind": "Column", "ColumnName": "CustomerName" },
+          "Direction": "Ascending"
+        }
+      ]
+    }
+  ],
+  "Modules": [
+    {
+      "ModuleName": "modUtility",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Procedure",
+          "Location": { "Module": "modUtility", "StartLine": 1, "StartColumn": 1 }
+        },
+        "Items": [
+          {
+            "ItemKind": "Procedure",
+            "Name": "FormatCurrency",
+            "ProcedureKind": "Function",
+            "Visibility": "Public",
+            "IsStatic": false,
+            "StartLine": 3,
+            "Signature": {
+              "Parameters": [
+                { "Name": "Amount", "Type": "Currency", "PassingMechanism": "ByVal" }
+              ],
+              "ReturnType": "String"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Assignment",
+                  "Location": { "Module": "modUtility", "StartLine": 4, "StartColumn": 5 },
+                  "Summary": "Format Amount as currency string"
+                }
+              ],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          }
+        ],
+        "UnresolvedItems": [],
+        "Diagnostics": []
+      }
+    }
+  ],
+  "Tables": [
+    {
+      "Name": "tblOrders",
+      "Type": "TABLE",
+      "Fields": [
+        { "Name": "OrderID", "TypeCode": 4, "TypeName": "Long", "Required": true },
+        { "Name": "CustomerID", "TypeCode": 4, "TypeName": "Long", "Required": true },
+        { "Name": "OrderDate", "TypeCode": 8, "TypeName": "Date/Time", "Required": false },
+        { "Name": "Status", "TypeCode": 10, "TypeName": "Text", "Size": 20, "Required": false }
+      ],
+      "Indexes": [
+        { "Name": "PrimaryKey", "Primary": true, "Unique": true, "Foreign": false, "Fields": ["OrderID"] },
+        { "Name": "idxCustomer", "Primary": false, "Unique": false, "Foreign": true, "Fields": ["CustomerID"] }
+      ]
+    },
+    {
+      "Name": "tblCustomers",
+      "Type": "TABLE",
+      "Fields": [
+        { "Name": "CustomerID", "TypeCode": 4, "TypeName": "Long", "Required": true },
+        { "Name": "CustomerName", "TypeCode": 10, "TypeName": "Text", "Size": 100, "Required": false }
+      ],
+      "Indexes": [
+        { "Name": "PrimaryKey", "Primary": true, "Unique": true, "Foreign": false, "Fields": ["CustomerID"] }
+      ]
+    }
+  ],
+  "Relationships": [
+    {
+      "Name": "tblOrders_CustomerID",
+      "Table": "tblOrders",
+      "ForeignTable": "tblCustomers",
+      "Attributes": 2,
+      "Fields": [
+        { "Name": "CustomerID", "ForeignName": "CustomerID" }
+      ]
+    }
+  ],
+  "ValidationRules": [
+    {
+      "Scope": "Form",
+      "SourceObject": "frmOrderEntry",
+      "Origin": "BeforeUpdateHandler",
+      "Kind": "Required",
+      "Expression": "Not IsNull([CustomerID])",
+      "Message": "Customer is required.",
+      "Location": {
+        "Line": 6,
+        "Column": 9,
+        "ProcedureName": "Form_BeforeUpdate"
+      }
+    }
+  ],
+  "RowSourceSpecs": [
+    {
+      "SourceFormName": "frmOrderEntry",
+      "ControlName": "cboCustomer",
+      "ControlType": "ComboBox",
+      "Kind": "TableOrQueryNamed",
+      "RowSourceText": "qryCustomerList",
+      "RowSourceType": "Table/Query",
+      "TargetName": "qryCustomerList",
+      "BoundColumn": 1,
+      "ColumnCount": 2,
+      "Columns": [
+        { "Index": 0, "WidthTwips": 0, "WidthInches": 0.0, "Hidden": true },
+        { "Index": 1, "WidthTwips": 2400, "WidthInches": 1.667, "Hidden": false }
+      ],
+      "LimitToList": true,
+      "QueryAbstractionRef": "qryCustomerList"
+    }
+  ],
+  "FunctionClassifications": [
+    {
+      "ModuleName": "modUtility",
+      "ProcedureName": "FormatCurrency",
+      "Kind": "Function",
+      "IsPublic": true,
+      "IsStatic": false,
+      "ParameterCount": 1,
+      "HasReturnValue": true,
+      "Categories": ["Pure"],
+      "PrimaryCategory": "Pure",
+      "IsMixed": false,
+      "Metrics": {
+        "CyclomaticComplexity": 1,
+        "LinesOfCode": 3,
+        "StatementCount": 1
+      },
+      "DirectDependencies": [],
+      "TransitiveDependencies": [],
+      "Callers": []
+    }
+  ],
+  "EventHandlerClassifications": [
+    {
+      "ProcedureName": "Form_BeforeUpdate",
+      "Categories": ["Validation"],
+      "Mixed": false,
+      "Signals": [
+        {
+          "Category": "Validation",
+          "Kind": "CancelAssignment",
+          "Line": 7,
+          "Column": 9,
+          "TargetExpression": "Cancel"
+        }
+      ]
+    },
+    {
+      "ProcedureName": "cboCustomer_AfterUpdate",
+      "Categories": ["CascadingUpdate"],
+      "Mixed": false,
+      "Signals": [
+        {
+          "Category": "CascadingUpdate",
+          "Kind": "ControlAssignment",
+          "Line": 13,
+          "Column": 9,
+          "TargetExpression": "Me.txtOrderDate"
+        }
+      ]
+    }
+  ],
+  "NavigationGraph": {
+    "EntryPoints": [],
+    "Edges": [
+      {
+        "SourceModule": "Form_frmOrderEntry",
+        "SourceProcedure": "cmdSave_Click",
+        "SourceProcedureKind": "Sub",
+        "SourceLine": 21,
+        "SourceColumn": 5,
+        "Action": "Close",
+        "TargetKind": "Form",
+        "TargetName": "frmOrderEntry"
+      }
+    ],
+    "UnresolvedTargets": [],
+    "Macros": []
+  },
+  "UnresolvedItems": [
+    {
+      "Source": "Resolver",
+      "Reason": "Unresolved late-bound call to DoCmd.Save",
+      "ConstructDescription": "DoCmd.Save in cmdSave_Click",
+      "Location": {
+        "ModuleName": "Form_frmOrderEntry",
+        "ProcedureName": "cmdSave_Click",
+        "Line": 21,
+        "Column": 5
+      },
+      "SuggestedNextSteps": ["Verify DoCmd.Save maps to Me.Dirty = False in target framework"]
+    }
+  ],
+  "Diagnostics": []
+}
