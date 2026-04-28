@@ -1,0 +1,38 @@
+[
+  {
+    "id": "session-1/round-1/major-1",
+    "severity": "Major",
+    "location": "FunctionClassificationBuilder.cs",
+    "summary": "DirectDependencies, TransitiveDependencies, and Callers iteration order depends on HashSet enumeration; same input may yield different output orderings.",
+    "fix": "Sort each output list deterministically by (ModuleName, ProcedureName, Kind) using ordinal-case-insensitive comparison. Sort BFS enqueues so the visit sequence is stable.",
+    "status": "fixed",
+    "resolution": "Added SortEdges + SortProcedures helpers; called from BuildDependencyEdges, BuildCallerEdges, ComputeTransitiveClosure, and the per-step callee enqueue in the BFS. Three new tests (Build_OnSameInputs..., Build_TransitiveDependencies..., Build_Callers...) lock in the sort order and reproducibility."
+  },
+  {
+    "id": "session-1/round-1/minor-1",
+    "severity": "Minor",
+    "location": "FunctionClassificationBuilderTests.cs",
+    "summary": "No coverage for SyntheticTypeLibraryMemberDeclaration categorization (the namespace-prefix dispatch in CategorizeTypeLibraryOwner).",
+    "fix": "Either set up an AccessObjectModelRegistry-driven test or expose CategorizeTypeLibraryOwner as internal and add direct unit tests via InternalsVisibleTo.",
+    "status": "fixed",
+    "resolution": "Marked CategorizeTypeLibraryOwner internal; added AccessHarvester.Pipeline/AssemblyInfo.cs declaring InternalsVisibleTo(\"AccessHarvester.Pipeline.Tests\"); added the 16-row Theory CategorizeTypeLibraryOwner_DispatchesByNamespacePrefix covering Access.*, DAO.*, ADODB.*, Scripting.*, Excel.*, Word.*, Outlook.*, PowerPoint.*, unknown libraries, and the empty string."
+  },
+  {
+    "id": "session-1/round-2/minor-1",
+    "severity": "Minor",
+    "location": "AccessHarvester.Pipeline/Enrichment/FunctionClassification.cs",
+    "summary": "XML docs for DirectDependencies / TransitiveDependencies / Callers did not document the sort-order guarantee added by the round-1 fix.",
+    "fix": "Add a sentence to each property's <summary> stating the case-insensitive (ModuleName, ProcedureName, Kind) sort order.",
+    "status": "fixed",
+    "resolution": "Updated all three properties' XML <summary> blocks to document the sort-order contract explicitly. DirectDependencies also now documents the self-reference exclusion (the VBA return-via-name idiom)."
+  },
+  {
+    "id": "session-1/round-3/minor-1",
+    "severity": "Minor",
+    "location": "AccessHarvester.Pipeline/Enrichment/FunctionClassification.cs",
+    "summary": "Callers <summary> documented the sort-order guarantee but omitted the symmetric self-reference exclusion that DirectDependencies now documents.",
+    "fix": "Add the same self-reference exclusion sentence to Callers' <summary>.",
+    "status": "fixed-without-reverification",
+    "resolution": "Added the symmetric exclusion sentence to Callers. Round 3 was the second retry of cross-provider verification; the workflow's max-2-retries budget is exhausted, so this Minor doc-only fix lands without a fourth verifier round per Rule 6 (Minor issues do not block commit). All Critical/Major findings are resolved (one Major from round 1, fixed and verified in round 2)."
+  }
+]

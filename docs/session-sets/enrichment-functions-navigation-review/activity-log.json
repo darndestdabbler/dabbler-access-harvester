@@ -1,0 +1,191 @@
+{
+  "sessionSetName": "enrichment-functions-navigation-review",
+  "createdDate": "2026-04-27T19:56:38.621729-04:00",
+  "totalSessions": 5,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/register-start",
+      "dateTime": "2026-04-27T20:24:49.324936-04:00",
+      "description": "Wrote session-state.json (status=in-progress, orchestrator=claude-code/claude-opus-4-7@high). Five total sessions per spec hint.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/read-spec-and-config",
+      "dateTime": "2026-04-27T20:24:49.324936-04:00",
+      "description": "Spec has no Session Set Configuration block; per workflow rule, requiresUAT=false, requiresE2E=false applied for the rest of this session.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/verify-prereqs",
+      "dateTime": "2026-04-27T20:24:49.324936-04:00",
+      "description": "Confirmed prereq #14 (enrichment-queries-and-forms) has change-log.md. DAG check complete; Session 1 is unblocked.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-04-27T20:24:49.324936-04:00",
+      "description": "Routed analysis call produced docs/session-sets/enrichment-functions-navigation-review/ai-assignment.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3268,
+          "outputTokens": 1307,
+          "costUsd": 0.0172
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/author-classification-records",
+      "dateTime": "2026-04-27T20:24:49.324936-04:00",
+      "description": "Created AccessHarvester.Pipeline/Enrichment/FunctionClassification.cs (record types + 4 enums + complexity / dependency / unresolved-fact records). Authored in-conversation per the matching-orchestrator convention.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/author-classification-builder",
+      "dateTime": "2026-04-27T20:24:49.324936-04:00",
+      "description": "Created AccessHarvester.Pipeline/Enrichment/FunctionClassificationBuilder.cs: visitor walking the parser AST against ResolvedModule, complexity collector, dependency-edge construction, BFS transitive-closure, sort helpers (added in round-1 fix).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/wire-project-references",
+      "dateTime": "2026-04-27T20:24:49.324936-04:00",
+      "description": "Updated AccessHarvester.Pipeline.csproj (+ Vba.Parser, + Vba.Resolver) and AccessHarvester.Pipeline.Tests.csproj (+ Vba.Parser, + Vba.Resolver). Added AssemblyInfo.cs with InternalsVisibleTo for tests.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/author-tests",
+      "dateTime": "2026-04-27T20:24:49.336349-04:00",
+      "description": "Created tests/AccessHarvester.Pipeline.Tests/FunctionClassificationBuilderTests.cs \u2014 47 hermetic xUnit tests covering identity facets, all 5 categorization buckets, mixed/PrimaryCategory precedence, late-bound + UnresolvedReferences, cyclomatic decision-point rules, LOC/StatementCount, dependency edges + dedup, callers, transitive closure, recursion safety, BuildAll convenience, argument validation, type-library categorization Theory, determinism Theories.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-04-27T20:24:49.336349-04:00",
+      "description": "dotnet build -> 0 errors, pre-existing warnings only. dotnet test -> 1278 passed, 4 skipped (Windows-only Access COM integration), 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/verification-round-1",
+      "dateTime": "2026-04-27T20:24:49.336349-04:00",
+      "description": "Cross-provider session-verification via query(\"gemini-pro\") (preempted gpt-5-4 per prereq-set 4/4 429 calibration). Verdict ISSUES_FOUND: 1 Major (HashSet non-determinism) + 1 Minor (no test for type-library category dispatch).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 24465,
+          "outputTokens": 273,
+          "costUsd": 0.0333
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/round-1-fixes",
+      "dateTime": "2026-04-27T20:24:49.337350-04:00",
+      "description": "Added SortEdges + SortProcedures helpers to FunctionClassificationBuilder. Marked CategorizeTypeLibraryOwner internal + added AssemblyInfo.cs InternalsVisibleTo. Added 19 new tests (16-row CategorizeTypeLibraryOwner Theory + 3 determinism tests). Build green; 1278 tests pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 12,
+      "stepKey": "session-1/verification-round-2",
+      "dateTime": "2026-04-27T20:24:49.337350-04:00",
+      "description": "Re-verify after round-1 fixes. Verdict ISSUES_FOUND: 1 Minor (sort-order guarantee not documented in XML <summary>). Round-1 findings confirmed resolved.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 23817,
+          "outputTokens": 181,
+          "costUsd": 0.0316
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 13,
+      "stepKey": "session-1/round-2-fix",
+      "dateTime": "2026-04-27T20:24:49.338348-04:00",
+      "description": "Updated XML <summary> blocks on DirectDependencies / TransitiveDependencies / Callers in FunctionClassification.cs to document the sort-order contract; DirectDependencies also documents the self-reference exclusion.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 14,
+      "stepKey": "session-1/verification-round-3",
+      "dateTime": "2026-04-27T20:24:49.338348-04:00",
+      "description": "Re-verify after round-2 doc fix. Verdict ISSUES_FOUND: 1 Minor (Callers <summary> missing the self-reference exclusion sentence that DirectDependencies got). Hit max-2-retries budget; per Rule 6 Minor issues do not block commit.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 17044,
+          "outputTokens": 158,
+          "costUsd": 0.0229
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 15,
+      "stepKey": "session-1/round-3-fix-without-reverify",
+      "dateTime": "2026-04-27T20:24:49.338348-04:00",
+      "description": "Added the symmetric self-reference exclusion sentence to Callers' <summary>. Recorded as fixed-without-reverification in issue-logs/session-001.json since the retry budget is exhausted; Minor-only so commit proceeds. Build green; 1278 tests still pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 16,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-27T20:24:49.339348-04:00",
+      "description": "Routed analysis call produced session-1-next-orchestrator-recommendation.md \u2014 recommends Claude Code claude-opus-4-7 @ effort=high for Session 2 (Navigation Graph synthesis), same routing profile as Session 1.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1234,
+          "outputTokens": 387,
+          "costUsd": 0.0046
+        }
+      ]
+    }
+  ]
+}
