@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AccessHarvester.Comprehension.Tests</RootNamespace>
+    <AssemblyName>AccessHarvester.Comprehension.Tests</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- CLI is invoked black-box via Process.Start to build IR before the
+         bench runs. ReferenceOutputAssembly=false copies the exe alongside
+         the test assembly without dragging Program.Main's IL into our
+         compilation. Core + Pipeline references are needed so the CLI's
+         runtime dependency closure ends up in the test bin folder.
+         Mirrors AccessHarvester.Integration's pattern. -->
+    <ProjectReference Include="..\..\AccessHarvester.Cli\AccessHarvester.Cli.csproj"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="Content"
+                      CopyToOutputDirectory="PreserveNewest"
+                      Private="true" />
+    <ProjectReference Include="..\..\AccessHarvester.Core\AccessHarvester.Core.csproj" />
+    <ProjectReference Include="..\..\AccessHarvester.Pipeline\AccessHarvester.Pipeline.csproj" />
+  </ItemGroup>
+
+</Project>

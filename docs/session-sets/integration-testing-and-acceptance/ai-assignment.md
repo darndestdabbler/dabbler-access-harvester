@@ -33,35 +33,48 @@ gemini-code @ gemini-pro, effort=medium.
 Rationale: Session 2 is mechanical scripting (sample-DB scrub + snapshot capture + CI wiring) with low novel-reasoning content; mid-tier at moderate effort is the most efficient choice.
 Recommended addition to the routed-task list: a privacy/scrub audit step (the routed analysis suggested `task_type="data-privacy-audit"` but no such task type exists in router-config.yaml today — Session 2 should either route the audit as `task_type="security-review"` or handle in-conversation with explicit grep-based scrub verification).
 
-## Session 2: Regression Suite + Corpus Expansion
+## Session 2: Layer C Scaffolding (REFRAMED 2026-04-28 mid-set)
 
-### Recommended orchestrator
+> **Reframed in-session.** The original Session 2 (corpus expansion + snapshot regression suite) was paused after the human reframed the testing approach. New shape: scaffold the AI-comprehension test bench (Layer C). See `spec.md` → *Reframing Note*.
+
+### Recommended orchestrator (original — superseded)
 anthropic claude-3-opus-20240229 @ effort=high
 
-### Rationale
-This session requires careful file handling, running the harvester against new databases, and generating consistent snapshot files. A high-capability model minimizes the risk of errors in the mechanical but critical process of establishing the regression baseline.
+### Actual orchestrator
+claude-code (Claude Opus 4.7) @ effort=high. Reframed mid-set; the original recommendation's "Opus-class for careful file handling" rationale still applies.
+
+### Rationale (revised post-reframe)
+The reframed Session 2 is structurally similar (mechanical scaffolding + careful file handling) but with much higher novelty: a new test paradigm (AI-comprehension testing), new Python tooling, new xUnit project, and a complete spec rewrite. Opus-class reasoning at effort=high earns its keep on the spec amendment + scaffolding-coherence judgment calls.
 
 ### Estimated routed cost
-low
+moderate (revised post-reframe — verification rounds dominated)
 
-| Step | Action | Routing Decision |
+| Step | Action | Routing Decision (actual) |
 |------|--------|------------------|
-| 1 | Identify and commit 5-10 new, scrubbed `.accdb` samples to the `samples/` directory per the spec. | Orchestrator-direct (assuming manual sourcing/scrubbing) |
-| 2 | For each new sample, author a test in `AccessHarvester.Integration` that runs the full `run` command. | Orchestrator-direct |
-| 3 | Capture the initial JSON output for each new sample and commit it as a snapshot file under `tests/AccessHarvester.Integration/RegressionSnapshots/`. | Orchestrator-direct |
-| 4 | Modify the tests from Step 2 to be snapshot regression tests: run the pipeline and assert the output matches the committed snapshot file. | Orchestrator-direct |
-| 5 | Run `dotnet test` to confirm all new regression tests pass and that no existing tests were broken. | Orchestrator-direct |
-| 6 | Verify session outputs, including the new samples and the passing regression suite. | `route(task_type="session-verification", complexity_hint=70)` |
+| 1 | Read required-reading docs + verify API keys. | Orchestrator-direct |
+| 2 | Register session start via `register_session_start()`. | Orchestrator-direct |
+| 3 | Amend spec.md Sessions 2-5 + Session Set Configuration block + Reframing Note. | Orchestrator-direct |
+| 4 | Scaffold `tools/comprehension-bench/` (`draft_questions.py`, `run.py`, `scoring.py`, `README.md`). | Orchestrator-direct |
+| 5 | Create `tests/AccessHarvester.Comprehension.Tests/` xUnit project. | Orchestrator-direct |
+| 6 | Add the new test project to `AccessHarvester.sln`. | Orchestrator-direct |
+| 7 | Run harvester pipeline against `samples/NorthwindDevEdition.accdb` + `samples/HomeHealthCare.accdb` to verify IR-generation works end-to-end. | Orchestrator-direct |
+| 8 | `dotnet build && dotnet test` (sequentially per CLAUDE.md). | Orchestrator-direct |
+| 9 | Cross-provider session-verification (rounds 1-4). | `route(task_type="session-verification", complexity_hint=70-85)` |
+| 10 | Next-orchestrator recommendation for Session 3. | `route(task_type="analysis")` |
 
-### Actuals (filled after the session)
-- Orchestrator used:
-- Total routed cost:
-- Deviations from recommendation:
-- Notes for next-session calibration:
+### Actuals (Session 2 — filled after completion)
+- **Orchestrator used:** claude-code (Claude Opus 4.7) @ effort=high.
+- **Total routed cost:** ~$1.10 across 5 routed calls:
+  - 4× session-verification rounds (gpt-5-4): $0.22 + $0.20 + $0.19 + $0.24 = $0.85
+  - 1× analysis (next-orc recommendation, opus): $0.24
+- **Deviations from recommendation:** Major mid-session reframe — original Session 2 (corpus expansion + snapshot regression) descoped; new Session 2 scaffolds Layer C. The user-supplied scenarios capture and routed question drafting were further deferred from this session to Session 3 because the user did not provide the scenarios list during Session 2's window. Session 2 closes with a *scenarios-input handoff* (instead of the originally-planned *drafted-banks curation handoff*).
+- **Notes for next-session calibration:**
+  - Verification took 4 rounds (1 initial + 3 retries). Each round surfaced new but real issues — the verifier was thorough rather than stuck-loop. The orchestrator-vs-verifier ratio came out 100% accept (no dismissals); each Major was a real correctness or robustness gap. *Lesson:* on bench-infrastructure scaffolding work, plan for 3-4 verification rounds and budget accordingly.
+  - The Session 2 → Session 3 deferral pattern is non-trivial: a *scenarios-input handoff* in addition to the planned *question-curation handoff* turns Session 3 into a longer, more multi-stage session. Calibrate Session 3 expectations accordingly (see Session 3 actuals when filled).
 
-**Next-session orchestrator recommendation (Session 3):**
-anthropic claude-3-opus-20240229 @ effort=high
-Rationale: Session 3 requires generating specialized `BenchmarkDotNet` project code, which benefits from a high-capability model.
+**Next-session orchestrator recommendation (Session 3) — routed via task_type="analysis" 2026-04-28:**
+claude-code (Claude Opus 4.7) @ effort=high.
+Rationale: Session 3 is the most judgment-intensive session — threshold calibration against real bench results requires interpreting score distributions and deciding whether rubric adjustments mask real IR gaps. Estimated cost moderate-to-high (~$4–$8) driven almost entirely by ~80 answer+judge calls during the bench run. Full recommendation at `session-2-next-orchestrator-recommendation.md`.
 
 ## Session 3: Performance Benchmarks
 

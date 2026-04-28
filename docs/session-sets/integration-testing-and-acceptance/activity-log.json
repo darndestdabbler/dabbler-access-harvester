@@ -124,6 +124,172 @@
           "costUsd": 0.00257375
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/required-reading",
+      "dateTime": "2026-04-28T09:13:23.219458-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, session-set-authoring-guide.md, ai-led-session-workflow.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/api-key-verification",
+      "dateTime": "2026-04-28T09:13:23.219458-04:00",
+      "description": "Verified ANTHROPIC_API_KEY, GEMINI_API_KEY, OPENAI_API_KEY all present.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/register-session-start",
+      "dateTime": "2026-04-28T09:13:23.220453-04:00",
+      "description": "Wrote session-state.json marking Session 2 as in-progress (Claude Opus 4.7 @ effort=high).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/spec-amendment",
+      "dateTime": "2026-04-28T09:13:23.221451-04:00",
+      "description": "Rewrote Sessions 2-5 in spec.md; added Session Set Configuration block + Reframing Note + descope rationale for corpus-expansion + perf-benchmarks.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/bench-scaffolding",
+      "dateTime": "2026-04-28T09:13:23.221451-04:00",
+      "description": "Authored tools/comprehension-bench/{README.md, scoring.py, draft_questions.py, run.py}.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/test-project",
+      "dateTime": "2026-04-28T09:13:23.222448-04:00",
+      "description": "Created tests/AccessHarvester.Comprehension.Tests/ (csproj + ComprehensionBenchTests.cs).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/sln-update",
+      "dateTime": "2026-04-28T09:13:23.223534-04:00",
+      "description": "Added AccessHarvester.Comprehension.Tests to AccessHarvester.sln.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/pipeline-smoke",
+      "dateTime": "2026-04-28T09:13:23.223534-04:00",
+      "description": "Ran harvester pipeline against Northwind + HomeHealthCare; both completed cleanly into tmp/ (gitignored).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-28T09:13:23.224525-04:00",
+      "description": "dotnet build (0 errors, 283 pre-existing warnings) + dotnet test (~1530 pass, 3 expected skips including the new bench's HARVESTER_COMPREHENSION_BENCH gate).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/verification-r1",
+      "dateTime": "2026-04-28T09:13:23.225090-04:00",
+      "description": "Cross-provider session-verification round 1 (complexity_hint=70). Verdict: ISSUES_FOUND (1 Critical + 2 Major + 1 Minor).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 13678,
+          "outputTokens": 12406,
+          "costUsd": 0.220285
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 11,
+      "stepKey": "session-2/verification-r2",
+      "dateTime": "2026-04-28T09:13:23.225600-04:00",
+      "description": "Cross-provider session-verification round 2 (complexity_hint=85 after Major+Critical fixes). Verdict: ISSUES_FOUND (2 Major + 2 Minor \u2014 different findings).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14424,
+          "outputTokens": 10812,
+          "costUsd": 0.19824
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 12,
+      "stepKey": "session-2/verification-r3",
+      "dateTime": "2026-04-28T09:13:23.226850-04:00",
+      "description": "Cross-provider session-verification round 3 (complexity_hint=85). Verdict: ISSUES_FOUND (2 Major + 1 Minor \u2014 path-traversal and YAML error handling).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 15436,
+          "outputTokens": 10197,
+          "costUsd": 0.191545
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 13,
+      "stepKey": "session-2/verification-r4",
+      "dateTime": "2026-04-28T09:13:23.226850-04:00",
+      "description": "Cross-provider session-verification round 4 (complexity_hint=80). Verdict: VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16126,
+          "outputTokens": 13583,
+          "costUsd": 0.24406
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 14,
+      "stepKey": "session-2/next-orc-recommendation",
+      "dateTime": "2026-04-28T09:13:23.227854-04:00",
+      "description": "Routed analysis for Session 3 next-orchestrator recommendation. Output: claude-code (Opus 4.7) @ effort=high; cost moderate-to-high (~$4-$8).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "analysis",
+          "inputTokens": 7048,
+          "outputTokens": 1800,
+          "costUsd": 0.24072
+        }
+      ]
     }
   ]
 }
