@@ -1,0 +1,182 @@
+# AUTO-DRAFTED — NOT CURATED. Review against scenarios.md before promoting to questions.yaml.
+# DB: NorthwindDevEdition
+# Model: gemini-pro
+# Cost: $0.0953
+# Generated: see router-metrics.jsonl
+#
+# Curate by:
+#   1. Removing questions that don't map to a real scenario or DB artifact.
+#   2. Editing accepted_answers for accuracy.
+#   3. Verifying supporting_ir_paths exist on disk.
+#   4. Renaming this file to questions.yaml when done.
+
+- id: nw-list-filter-001
+  question: "On the `frmProductList` form, how is the list of products filtered when a user types in the `txtSearch` box and clicks the `cmdSearch` button?"
+  accepted_answers:
+    - "The `cmdSearch_Click` event procedure builds a SQL WHERE clause from the search box and other controls, then assigns it to the form's `Filter` property and sets `Me.FilterOn = True`."
+    - "It uses the form's Filter property. The VBA in the search button's Click event constructs a filter string and applies it."
+  supporting_ir_paths:
+    - ir/Forms/frmProductList.ir.json
+    - ir/ModulesAndClasses/modGlobal.ir.json
+  difficulty: medium
+- id: nw-drill-through-002
+  question: "From the `frmCompanyList`, what user action opens the `frmCompanyDetail` form for a specific company, and how is the correct company's data loaded?"
+  accepted_answers:
+    - "Double-clicking a record in the list triggers an event that calls `DoCmd.OpenForm` for `frmCompanyDetail`, passing the `CompanyID` in the `WhereCondition` argument."
+    - "The `On Dbl Click` event of a control in the detail section opens the detail form, using the current record's `CompanyID` to filter it."
+  supporting_ir_paths:
+    - ir/Forms/frmCompanyList.ir.json
+    - ir/Forms/frmCompanyDetail.ir.json
+  difficulty: medium
+- id: nw-subform-source-003
+  question: "On the `frmCompanyDetail` form, what is the `SourceObject` property for the subform control named `sfrmCustomerOrders`?"
+  accepted_answers:
+    - "The `SourceObject` is `Form.sfrmCompanyDetail_CustomerOrders`."
+    - "`sfrmCompanyDetail_CustomerOrders`"
+  supporting_ir_paths:
+    - ir/Forms/frmCompanyDetail.ir.json
+  difficulty: low
+- id: nw-parent-ref-004
+  question: "In the VBA code for the subform `sfrmOrderLineItems`, what expression is used to access the `OrderID` control on its parent form, `frmOrderDetails`?"
+  accepted_answers:
+    - "`Me.Parent!OrderID`"
+    - "It uses the `Parent` property of the subform's `Form` object, like `Me.Parent.Form!OrderID` or simply `Me.Parent!OrderID`."
+  supporting_ir_paths:
+    - ir/Forms/frmOrderDetails.ir.json
+    - ir/Forms/sfrmOrderLineItems.ir.json
+  difficulty: medium
+- id: nw-calculated-control-005
+  question: "In the `sfrmOrderLineItems` subform, what is the formula in the `ControlSource` property of the `txtLineTotal` text box used to calculate the extended price for an order line?"
+  accepted_answers:
+    - "The formula is `=[Quantity]*[UnitPrice]*(1-[Discount])`."
+  supporting_ir_paths:
+    - ir/Forms/sfrmOrderLineItems.ir.json
+  difficulty: low
+- id: nw-startup-sequence-006
+  question: "Trace the application's startup process. What function is called by the `AutoExec` macro, and what is the first form displayed to the user?"
+  accepted_answers:
+    - "The `AutoExec` macro calls the `App_Startup` function in the `modStartup` module, which then opens the `frmStartup` form."
+    - "It runs `App_Startup` from `modStartup`, which in turn opens `frmStartup`."
+  supporting_ir_paths:
+    - ir/Macros/AutoExec.ir.json
+    - ir/ModulesAndClasses/modStartup.ir.json
+    - ir/Forms/frmStartup.ir.json
+  difficulty: high
+- id: nw-report-param-007
+  question: "On `frmReports`, how does the 'Print Sales By Employee' button filter the `rptSalesByEmployee` report based on the employee selected in the `cboEmployee` combobox?"
+  accepted_answers:
+    - "The button's `OnClick` event calls `DoCmd.OpenReport` and builds a `WhereCondition` argument like `\"[EmployeeID] = \" & Me!cboEmployee`."
+    - "It passes a WHERE condition to the `OpenReport` command, restricting the report's records to the selected employee's ID."
+  supporting_ir_paths:
+    - ir/Forms/frmReports.ir.json
+    - ir/Reports/rptSalesByEmployee.ir.json
+    - ir/Queries/qryrptSalesByEmployee.ir.json
+  difficulty: medium
+- id: nw-event-handler-name-008
+  question: "According to standard VBA naming conventions, what is the name of the event handler subroutine for the `AfterUpdate` event of the `txtCompanyName` control on form `frmCompanyDetail`?"
+  accepted_answers:
+    - "`txtCompanyName_AfterUpdate`"
+  supporting_ir_paths:
+    - ir/Forms/frmCompanyDetail.ir.json
+  difficulty: low
+- id: nw-ribbon-callback-009
+  question: "The `modRibbonCallback` module contains UI event handlers for the custom ribbon. How does a function like `r_File_NewOrder_OnAction` interact with the currently active form to perform its task?"
+  accepted_answers:
+    - "It uses the global `Screen.ActiveForm` property to get a reference to the currently active form and its controls."
+    - "By referencing `Screen.ActiveForm`, it can manipulate the form that has focus when the ribbon button is clicked."
+  supporting_ir_paths:
+    - ir/ModulesAndClasses/modRibbonCallback.ir.json
+  difficulty: high
+- id: nw-subform-linking-010
+  question: "How is the data in the `sfrmCompanyDetail_CustomerOrders` subform linked to the main record on the `frmCompanyDetail` form?"
+  accepted_answers:
+    - "The subform control's `LinkMasterFields` and `LinkChildFields` properties are both set to `CompanyID`, linking the parent and child records on that field."
+    - "Via the `CompanyID` field, specified in the `LinkMasterFields` property on the main form and `LinkChildFields` on the subform."
+  supporting_ir_paths:
+    - ir/Forms/frmCompanyDetail.ir.json
+    - ir/Forms/sfrmCompanyDetail_CustomerOrders.ir.json
+  difficulty: high
+- id: nw-openargs-011
+  question: "How are the caption, message, and button configuration for the reusable `frmGenericDialog` form set when it is opened?"
+  accepted_answers:
+    - "This information is passed as a delimited string in the `OpenArgs` argument of the `DoCmd.OpenForm` call, which is then parsed by the dialog's `Form_Load` event."
+    - "The `OpenArgs` parameter is used to pass configuration details, which the dialog form reads on load to set up its appearance and behavior."
+  supporting_ir_paths:
+    - ir/Forms/frmGenericDialog.ir.json
+    - ir/ModulesAndClasses/modForms.ir.json
+  difficulty: medium
+- id: nw-error-handler-012
+  question: "Based on `clsErrorHandler` and `modGlobal`, what is the standard pattern for error handling within VBA procedures in this application?"
+  accepted_answers:
+    - "Procedures use an `On Error GoTo ErrorHandler` statement. The `ErrorHandler` block calls the global `HandleError` function, passing `Err.Number`, `Err.Description`, and the procedure name."
+    - "It uses a standard `On Error GoTo` label, which then delegates to a global `HandleError` sub in `modGlobal` to log or display the error."
+  supporting_ir_paths:
+    - ir/ModulesAndClasses/clsErrorHandler.ir.json
+    - ir/ModulesAndClasses/modGlobal.ir.json
+  difficulty: medium
+- id: nw-validation-rule-013
+  question: "In `frmEmployeeList`, what is the `Validation Rule` property for the `Email` control, and which module contains the code for this validation?"
+  accepted_answers:
+    - "The rule is `=ValidateEmail([Email]) Or Is Null`. The `ValidateEmail` function is located in the `modValidation` module."
+    - "It calls the `ValidateEmail` function from the `modValidation` module."
+  supporting_ir_paths:
+    - ir/Forms/frmEmployeeList.ir.json
+    - ir/ModulesAndClasses/modValidation.ir.json
+  difficulty: high
+- id: nw-query-expression-014
+  question: "In the query `qryInvoice`, what is the expression used for the `ExtendedPrice` calculated field?"
+  accepted_answers:
+    - "`CCur([OrderDetails].[UnitPrice]*[Quantity]*(1-[Discount])/100)*100`"
+  supporting_ir_paths:
+    - ir/Queries/qryInvoice.ir.json
+  difficulty: low
+- id: nw-dlookup-usage-015
+  question: "In the `modInventory` module, the `UpdateProductStockLevel` function is responsible for recalculating the quantity on hand for a product. How does it calculate the total number of items purchased?"
+  accepted_answers:
+    - "It uses the `DSum` domain aggregate function on the `PurchaseOrderDetails` table to sum the `Quantity` field for a given `ProductID`."
+    - "It calls `DSum` to get a sum of quantities from `PurchaseOrderDetails` where the ProductID matches."
+  supporting_ir_paths:
+    - ir/ModulesAndClasses/modInventory.ir.json
+    - ir/Tables/PurchaseOrderDetails.ir.json
+  difficulty: medium
+- id: nw-cross-form-comm-016
+  question: "When a user selects a vendor in the `frmSelectVendorDialog` and clicks OK, how is the selected vendor's ID transferred back to the calling form (e.g., `frmPurchaseOrderDetails`)?"
+  accepted_answers:
+    - "The dialog's VBA code directly sets the value of the vendor control on the calling form using a fully-qualified reference like `Forms!frmPurchaseOrderDetails!cboVendor = Me.lstVendors` before closing itself."
+    - "It writes the selected value back to the control on the calling form by using the `Forms` collection to get a reference to it."
+  supporting_ir_paths:
+    - ir/Forms/frmSelectVendorDialog.ir.json
+    - ir/Forms/frmPurchaseOrderDetails.ir.json
+  difficulty: medium
+- id: nw-recordset-clone-017
+  question: "The `FindRecord` function in `modGlobal` is a generic utility for navigating to a specific record on a form. What two form properties does it use to accomplish this?"
+  accepted_answers:
+    - "It uses the form's `RecordsetClone` property to perform a `FindFirst` operation, and then sets the form's `Bookmark` property to match the bookmark of the found record."
+    - "It finds the record in the `RecordsetClone` and then synchronizes the main form's position using the `Bookmark` property."
+  supporting_ir_paths:
+    - ir/ModulesAndClasses/modGlobal.ir.json
+  difficulty: medium
+- id: nw-property-manipulation-018
+  question: "On `frmPurchaseOrderDetails`, what determines if the `cmdReceivePO` button is visible?"
+  accepted_answers:
+    - "In the `Form_Current` event, the button's `Visible` property is set to true only if the `PurchaseOrderStatusID` is not yet 'Closed'."
+    - "The `Form_Current` event procedure checks the PO status and sets the `Visible` property of the `cmdReceivePO` button accordingly."
+  supporting_ir_paths:
+    - ir/Forms/frmPurchaseOrderDetails.ir.json
+    - ir/Tables/PurchaseOrderStatus.ir.json
+  difficulty: high
+- id: nw-form-recordsource-019
+  question: "What is the `RecordSource` for the `frmProductDetail` form?"
+  accepted_answers:
+    - "`qryProductDetail`"
+  supporting_ir_paths:
+    - ir/Forms/frmProductDetail.ir.json
+  difficulty: low
+- id: nw-with-block-020
+  question: "In the `SetControlStates` procedure within the `frmOrderDetails` form module, a `With...End With` block is used. What object is this block referencing?"
+  accepted_answers:
+    - "The `With` block references `Me.Recordset`, allowing direct access to its properties like `.RecordCount`, `.AbsolutePosition`, and fields."
+    - "It is using `With Me.Recordset`."
+  supporting_ir_paths:
+    - ir/Forms/frmOrderDetails.ir.json
+  difficulty: medium
