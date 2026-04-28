@@ -1,0 +1,4 @@
+- **Next session set slug:** `testing-harness-and-unit-tests` (or the first session set defined for Phase 8 in the full `Session-Set Tree`)
+- **Why:** The completed session sets cover all major implementation phases from 1 (Grammar) through 7 (Output Schema). The master plan designates Phase 8 (Testing and Quality Assurance) as the next logical step to validate the completed work.
+- **Prerequisites check:** all met
+- **Recommended orchestrator:** `Claude 3 Opus @ High`

@@ -193,6 +193,119 @@
           "costUsd": 0.0903175
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/ai-assignment-update",
+      "dateTime": "2026-04-28T06:53:57.237287-04:00",
+      "description": "Read Session 2 actuals from ai-assignment.md. Actuals confirmed complete for Sessions 1 and 2. Session 3 recommendation already present (Claude Sonnet 4.6 @ effort=medium).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/docgen-authored",
+      "dateTime": "2026-04-28T06:53:57.237287-04:00",
+      "description": "Authored AccessHarvester.Pipeline/DocGen/SchemaDocGenerator.cs. Generates three-section markdown from a DatabaseManifest JSON: (a) database overview table (name, form/report/query/module/table/unresolved counts), (b) form-by-form catalog (form name, record source, control table, event handler count), (c) subform dependency table. Uses System.Text.Json for parsing.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/cli-wired",
+      "dateTime": "2026-04-28T06:53:57.237287-04:00",
+      "description": "Wired SchemaDocGenerator into AccessHarvester.Cli as the 'generate-docs' subcommand (--in <manifest.json> --out <output-dir>). Writes <output-dir>/<database-slug>/schema-summary.md. Added ProjectReference from Cli to Pipeline in AccessHarvester.Cli.csproj. Used 'using CorePipeline = AccessHarvester.Core.Pipeline' alias to resolve ambiguity between AccessHarvester.Core.Pipeline type and AccessHarvester.Pipeline namespace.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/doc-comments-routed",
+      "dateTime": "2026-04-28T06:53:57.237287-04:00",
+      "description": "Routed XML doc comment generation for SchemaDocGenerator public API via route(task_type='documentation', complexity_hint=30). Model: gemini-pro. Auto-verifier (gpt-5-4-mini) flagged format issue (included class declarations in response); content of comments was correct and consistent with existing in-code docs. No code change needed.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "documentation",
+          "inputTokens": 317,
+          "outputTokens": 118,
+          "costUsd": 0.0016
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/tests-authored",
+      "dateTime": "2026-04-28T06:53:57.237287-04:00",
+      "description": "Authored tests/AccessHarvester.Pipeline.Tests/DocGen/SchemaDocGeneratorTests.cs. Four tests: (a) minimal document contains database name and overview section; (b) document with form contains form catalog section with form name, record source, controls, event handler count; (c) document with subforms contains subform dependency section; (d) document without subforms has no dependency section.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-28T06:53:57.237287-04:00",
+      "description": "dotnet build: 0 errors (pre-existing warnings only). dotnet test: 1516 passed, 2 skipped (COM-gated, same as prior sessions). All 4 new SchemaDocGeneratorTests pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/change-log",
+      "dateTime": "2026-04-28T06:54:27.063629-04:00",
+      "description": "Generated change-log via route(summarization, max_tier=1). Model: gemini-flash. Written to docs/session-sets/schema-finalization-and-docs/change-log.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 841,
+          "outputTokens": 799,
+          "costUsd": 0.00060555
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/next-set-recommendation",
+      "dateTime": "2026-04-28T06:55:09.247958-04:00",
+      "description": "Routed next-session-set recommendation via route(analysis). Model: gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1500,
+          "outputTokens": 115,
+          "costUsd": 0.003025
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/verification",
+      "dateTime": "2026-04-28T06:56:36.467448-04:00",
+      "description": "End-of-session verification via route(session-verification). Verifier: gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3385,
+          "outputTokens": 2884,
+          "costUsd": 0.0517225
+        }
+      ]
     }
   ]
 }

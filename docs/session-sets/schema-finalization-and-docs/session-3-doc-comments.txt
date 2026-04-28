@@ -1,0 +1,31 @@
+```xml
+/// <summary>
+/// Generates a three-section markdown document from a DatabaseManifest JSON schema.
+/// </summary>
+public sealed class SchemaDocGenerator
+{
+    /// <summary>
+    /// Generates a human-readable markdown summary from a DatabaseManifest JSON document.
+    /// </summary>
+    /// <param name="manifestJson">The DatabaseManifest JSON content to process.</param>
+    /// <returns>A string containing the generated markdown document.</returns>
+    public string Generate(string manifestJson);
+}
+```
+
+---
+**Verification (gpt-5-4-mini, openai):** ISSUES_FOUND
+
+**Issue 1** [? / ?]: S_FOUND",
+  "confidence": "high",
+  "summary": "The response contains reasonable XML comments, but it does not follow the requested output format because it includes the class and method declarations instead of only the updated doc comments.",
+  "issues": [
+    {
+      "category": "Completeness",
+      "severity": "Major",
+      "title": "Returned the full class body instead of only doc comments",
+      "details": "The prompt explicitly asked for only the updated XML doc comments, not the full class body. The answer should have provided just the comment blocks to paste into the source file."
+    }
+  ]
+}
+```

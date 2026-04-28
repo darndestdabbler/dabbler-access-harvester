@@ -2,9 +2,11 @@ using System.Runtime.Versioning;
 using System.Text.Json;
 using AccessHarvester.Core;
 using AccessHarvester.Core.Abstractions;
+using AccessHarvester.Pipeline.DocGen;
 using AccessHarvester.Vba.Grammar.Generated;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using CorePipeline = AccessHarvester.Core.Pipeline;
 
 [assembly: SupportedOSPlatform("windows")]
 
@@ -57,7 +59,7 @@ public static class Program
         if (args.Length == 1
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
-            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse"))
+            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs"))
         {
             return RunParse(args);
         }
@@ -65,11 +67,12 @@ public static class Program
         var rest = args.Skip(1).ToArray();
         return args[0].ToLowerInvariant() switch
         {
-            "extract" => RunExtract(rest),
-            "translate" => RunTranslate(rest),
-            "run" => RunRun(rest),
-            "parse" => RunParse(rest),
-            _ => UnknownCommand(args[0]),
+            "extract"       => RunExtract(rest),
+            "translate"     => RunTranslate(rest),
+            "run"           => RunRun(rest),
+            "parse"         => RunParse(rest),
+            "generate-docs" => RunGenerateDocs(rest),
+            _               => UnknownCommand(args[0]),
         };
     }
 
@@ -166,15 +169,50 @@ public static class Program
         return exit;
     }
 
-    private static Pipeline BuildPipeline(Dictionary<string, string> opts)
+    private static CorePipeline BuildPipeline(Dictionary<string, string> opts)
     {
-        var pipeline = Pipeline.Default();
+        var pipeline = CorePipeline.Default();
         if (opts.TryGetValue("types", out var types))
         {
             var cats = types.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             pipeline = pipeline.WithCategories(cats);
         }
         return pipeline;
+    }
+
+    // ── generate-docs subcommand ────────────────────────────────────────────────
+    // Generates a markdown schema summary from a DatabaseManifest JSON file.
+    //
+    // Usage: AccessHarvester generate-docs --in <manifest.json> --out <output-dir>
+    //
+    // Writes: <output-dir>/<database-slug>/schema-summary.md
+    // Exit codes: 0 = success, 1 = usage error, 2 = unexpected error.
+    private static int RunGenerateDocs(string[] args)
+    {
+        var opts = ParseOptions(args);
+        string manifestFile = Path.GetFullPath(Require(opts, "in"));
+        string outDir = Path.GetFullPath(Require(opts, "out"));
+
+        string manifestJson = File.ReadAllText(manifestFile, System.Text.Encoding.UTF8);
+
+        // Derive the slug from the database name encoded in the manifest.
+        using var doc = System.Text.Json.JsonDocument.Parse(manifestJson);
+        string dbName = "(output)";
+        if (doc.RootElement.TryGetProperty("Database", out var db) && db.TryGetProperty("Name", out var nameEl))
+            dbName = nameEl.GetString() ?? dbName;
+        string slug = System.Text.RegularExpressions.Regex.Replace(
+            Path.GetFileNameWithoutExtension(dbName), @"[^\w-]", "-").ToLowerInvariant();
+
+        string targetDir = Path.Combine(outDir, slug);
+        Directory.CreateDirectory(targetDir);
+        string targetFile = Path.Combine(targetDir, "schema-summary.md");
+
+        var generator = new SchemaDocGenerator();
+        string markdown = generator.Generate(manifestJson);
+        File.WriteAllText(targetFile, markdown, System.Text.Encoding.UTF8);
+
+        Console.Error.WriteLine($"Schema summary written to: {targetFile}");
+        return 0;
     }
 
     // ── parse subcommand ────────────────────────────────────────────────────────
@@ -328,14 +366,18 @@ public static class Program
             AccessHarvester — extract Access DB metadata and translate into a JSON knowledge base.
 
             Usage:
-              AccessHarvester extract   --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
-              AccessHarvester translate --in <raw-dir>    --out <kb-dir>          [--types ...] [--json-status]
-              AccessHarvester run       --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
-              AccessHarvester parse     <source-file>
-              AccessHarvester parse     --in <source-file>
-              AccessHarvester           <source-file>       (bare-file mode; equivalent to 'parse')
+              AccessHarvester extract       --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
+              AccessHarvester translate     --in <raw-dir>    --out <kb-dir>          [--types ...] [--json-status]
+              AccessHarvester run           --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
+              AccessHarvester generate-docs --in <manifest.json> --out <output-dir>
+              AccessHarvester parse         <source-file>
+              AccessHarvester parse         --in <source-file>
+              AccessHarvester               <source-file>       (bare-file mode; equivalent to 'parse')
 
             `run` is extract + translate + enrich in one invocation.
+            `generate-docs` reads a DatabaseManifest JSON and writes a markdown schema summary to
+              <output-dir>/<database-slug>/schema-summary.md.
+
             Layout under <output-root-dir>: AccessMetaData/<dbName>/{raw,kb,ir}/<Category>/...
 
             --types         Comma-separated category filter. Valid categories:
