@@ -148,6 +148,76 @@
           "costUsd": 0.00603625
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/read-context",
+      "dateTime": "2026-04-28T02:11:08.354736-04:00",
+      "description": "Read project-guidance, lessons-learned, authoring guide, spec, prior-session ai-assignment, fixture 02, Phase 6.5, FormComponentSpec, ValidationRule, EventHandlerClassification.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/synthesize",
+      "dateTime": "2026-04-28T02:11:08.355254-04:00",
+      "description": "Authored RowSourceSpec.cs (RowSourceSpec record + RowSourceKind enum + RowSourceColumnDescriptor + RowSourceCascadingDriver) and RowSourceSpecBuilder.cs (Build / BuildAll / AnnotateCascadingDrivers + helpers) in-conversation per the matches-orchestrator convention. Synthesis profile: analysis (complexity 55), well-trodden enrichment shape mirroring FormComponentSpecBuilder + ValidationRuleExtractor structure.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/tests",
+      "dateTime": "2026-04-28T02:11:08.356252-04:00",
+      "description": "Authored 31 hermetic xUnit tests in RowSourceSpecBuilderTests.cs covering eligibility, all RowSourceKind branches (TableOrQueryNamed, InlineSql, ValueList, FieldList, Empty, Unknown), bareword/bracketed names, value-list quote/trailing handling, ColumnWidths twips/inches/Hidden parsing including blank entries, string-encoded numerics, Yes/No bools, ListBox eligibility, BuildAll tree walking, six cascading-driver branches (bang access, dot access, Form_-prefixed handler, multiple drivers, non-RowSource signals, undriven combo), and the anchor fixture 02 round-trip.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-28T02:11:08.356252-04:00",
+      "description": "dotnet build AccessHarvester.sln -> 0 errors. dotnet test --no-build -> 1353 passed, 4 skipped (Windows-only Access COM integration), 0 failed. New tests: 31 passed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/verification-round-1",
+      "dateTime": "2026-04-28T02:12:44.432847-04:00",
+      "description": "route(session-verification) via query(\"gemini-pro\") at complexity_hint=70.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 22866,
+          "outputTokens": 24,
+          "costUsd": 0.0288225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/verification-round-2",
+      "dateTime": "2026-04-28T02:13:37.268753-04:00",
+      "description": "Re-prompted gemini-pro for analysis-first response after round 1 returned JSON-only verdict.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 22949,
+          "outputTokens": 824,
+          "costUsd": 0.03692625
+        }
+      ]
     }
   ]
 }
