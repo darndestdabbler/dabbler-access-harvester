@@ -143,3 +143,11 @@ The intended layout (filled in by Session Set #1):
 
 Code style conventions (namespaces, casing, nullable, `Async` suffix)
 live in `docs/planning/project-guidance.md` → Conventions → Code Style.
+
+This repo uses the bare-repo + flat-worktree layout — the working tree
+is at `<container>/main/` and parallel session-set worktrees live at
+`<container>/<slug>/`. Run all build, test, and Python commands from
+inside `main/` (or the session-set worktree), never from the container
+root. See
+`../../dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`
+for the layout, recipe, and gotchas.

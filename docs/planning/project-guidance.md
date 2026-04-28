@@ -390,18 +390,34 @@ the human before proceeding.
   calls where switching the orchestrator IS the right move).
 - **Run each parallel session set in its own per-set git worktree.**
   When multiple session sets run in parallel, create a
-  `session-set/<slug>` branch off main and a worktree at
-  `../<repo>-<slug>` for each set. All sessions of that set work
-  inside the worktree; the last session merges `origin/main` into the
-  session-set branch (resolving conflicts), then merges the
-  session-set branch into main and pushes. `router-metrics.jsonl` and
-  `samples/NorthwindDevEdition.accdb` are the predictable merge-noise
-  files — expect one reconciliation commit per completed set. Confirmed
-  in two contexts: initial `vba-lexical-and-expression-grammar` +
-  `access-metadata-extraction` parallel run (first hit), and
-  `vba-lexical-and-expression-grammar` Session 4 merge (second
-  confirmation). Full action sequence in `lessons-learned.md` →
-  "Run Parallel Session Sets In Per-Set Git Worktrees".
+  `session-set/<slug>` branch off main and a worktree for each set
+  inside this container — `dabbler-access-harvester/<slug>/` under the
+  bare-repo + flat-worktree layout (the standard going forward, see
+  `dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`).
+  All sessions of that set work inside the worktree; the last session
+  merges `origin/main` into the session-set branch (resolving
+  conflicts), merges the session-set branch into main, pushes, then
+  removes the worktree and deletes the local + remote `session-set/<slug>`
+  branch (per the workflow doc's Step 8 cleanup). `router-metrics.jsonl`
+  and `samples/NorthwindDevEdition.accdb` are the predictable
+  merge-noise files — expect one reconciliation commit per completed
+  set. Confirmed in two contexts: initial
+  `vba-lexical-and-expression-grammar` + `access-metadata-extraction`
+  parallel run (first hit), and `vba-lexical-and-expression-grammar`
+  Session 4 merge (second confirmation). Full action sequence in
+  `lessons-learned.md` → "Run Parallel Session Sets In Per-Set Git
+  Worktrees".
+
+- **This repo uses the bare-repo + flat-worktree layout.** The
+  container at `~/source/repos/dabbler-access-harvester/` holds
+  `.bare/` (the real git data), a `.git` pointer file, `main/` (the
+  main worktree), and one directory per active session-set worktree.
+  The container has no source files at its top level — `dotnet
+  build`, `python -m pytest`, etc. all run from inside `main/` (or
+  `<slug>/`). The Python venv (`.venv/`) lives in `main/`, not at the
+  container root. The full layout description, fresh-repo setup
+  recipe, migration recipe, and gotchas live at
+  `dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`.
 
 ### Token-Window Budget Overrides
 
