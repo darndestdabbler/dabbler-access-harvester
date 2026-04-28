@@ -35,6 +35,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessHarvester.Pipeline", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessHarvester.Pipeline.Tests", "tests\AccessHarvester.Pipeline.Tests\AccessHarvester.Pipeline.Tests.csproj", "{4C909582-BC1E-46B1-9997-566D64BEE5EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessHarvester.Integration", "tests\AccessHarvester.Integration\AccessHarvester.Integration.csproj", "{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -225,6 +227,18 @@ Global
 		{4C909582-BC1E-46B1-9997-566D64BEE5EE}.Release|x64.Build.0 = Release|Any CPU
 		{4C909582-BC1E-46B1-9997-566D64BEE5EE}.Release|x86.ActiveCfg = Release|Any CPU
 		{4C909582-BC1E-46B1-9997-566D64BEE5EE}.Release|x86.Build.0 = Release|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Debug|x64.Build.0 = Debug|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Debug|x86.Build.0 = Debug|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Release|x64.ActiveCfg = Release|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Release|x64.Build.0 = Release|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Release|x86.ActiveCfg = Release|Any CPU
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -236,5 +250,6 @@ Global
 		{68CF30B2-ADCA-46F9-9F6C-87BB59A690F5} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{E2C3D4E5-F6A7-8901-BCDE-F12345678901} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{4C909582-BC1E-46B1-9997-566D64BEE5EE} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{15768DA9-BCD2-43FF-BF9C-0C81B48ECE20} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
