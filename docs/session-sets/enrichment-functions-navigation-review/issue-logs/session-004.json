@@ -1,0 +1,26 @@
+[
+  {
+    "round": "schema-validation",
+    "severity": "Critical",
+    "location": "EndToEndFixtureTests.cs - BuildRunOutputEnvelope",
+    "summary": "ProcedureKind.Declare serialises as 'Declare' but harvester-schema.v0.json procedureKind enum contains 'EventHandler' (not 'Declare'). Known v0 schema gap (v0-G5 in docs/schema/v0-vs-tiers.md) deferred to schema-finalization-and-docs (#17). Currently theoretical for the 5 anchor fixtures (none use Declare), but a future fixture would emit non-conforming output.",
+    "status": "fixed",
+    "fix_applied": "Added MapProcedureKind helper that emits Function for the Declare placeholder (documented v0-G5 inline). Updated test assertion to use the schema's closed enum, and added an explicit guard asserting no anchor fixture currently produces Declare so a future regression surfaces immediately. Schema-side resolution remains a #17 concern."
+  },
+  {
+    "round": "schema-validation",
+    "severity": "Major",
+    "location": "EndToEndFixtureTests.cs - BuildRunOutputEnvelope (unresolvedItems location projection)",
+    "summary": "UnresolvedLocation.Column from Resolver / SqlFormReference sources is 0-based ANTLR; null-coalescing (Column ?? 1) does not catch value 0, so envelope can emit startColumn: 0, violating schema's minimum: 1 constraint.",
+    "status": "fixed",
+    "fix_applied": "Replaced `u.Location.Column ?? 1` and `u.Location.Line ?? 1` with Math.Max(1, ...) coercions in both sourceLocation projections. Inline note flags the 0-based ANTLR convention so future readers know why the coercion is necessary."
+  },
+  {
+    "round": "schema-validation",
+    "severity": "Minor",
+    "location": "EndToEndFixtureTests.cs - RunOutputEnvelope_HasSchemaRequiredFields",
+    "summary": "Test assertion set for procedureKind mirrored the Pipeline enum (includes 'Declare'), masking the Critical issue.",
+    "status": "fixed",
+    "fix_applied": "Replaced the hardcoded set with the schema's closed enum: {Sub, Function, PropertyGet, PropertyLet, PropertySet, EventHandler}. The Declare guard test (added under Critical fix) is the second line of defence."
+  }
+]
