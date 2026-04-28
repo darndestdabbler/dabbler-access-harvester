@@ -1,0 +1,37 @@
+[
+  {
+    "severity": "Critical",
+    "location": "coverage-audit.md Component->Test-Project Map (multiple rows)",
+    "summary": "Producing-set numbering systematically off-by-one+ vs canonical session-set-tree.md.",
+    "fix": "Renumbered every row to match the tree. Specifically: VBA grammar #2-#5 -> #3-#5; AST belongs to #6 parser-infrastructure (not #2-#5); Jet SQL grammar #6 -> #12; Jet SQL resolution #12 -> #13; enrichment sets #13/#14/#15 -> #14/#15/#16.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Major",
+    "location": "coverage-audit.md (omission)",
+    "summary": "Tree row #1 parser-foundations was completely omitted.",
+    "fix": "Added a row for #1 with disposition that it is infrastructure-only (parser harness + ANTLR build wiring); downstream test runs validate it transitively.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Major",
+    "location": "coverage-audit.md ('#16 enrichment-pipeline runner' row)",
+    "summary": "Spurious row labelling EnrichmentPipelineRunner as a #16 deliverable; tree row #16 outputs are FunctionClassification/NavigationGraph/UnresolvedItem, not a runner.",
+    "fix": "Reclassified the row as cross-cut '(Cross-cut from #14-#16)' since the runner orchestrates components from those three sets and is not a single set's canonical output.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "coverage-audit.md ('#10 access-metadata-extraction' row)",
+    "summary": "Audit names AccessHarvester.Tests; tree's planned path was tests/AccessHarvester.Access.Tests/.",
+    "fix": "Added inline note that the tree's planned path differed from where the work actually landed; both are now disclosed.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "coverage-audit.md ('#2-#5 vba-grammar' row)",
+    "summary": "Producing-set range incorrectly included #2 (which produced docs only).",
+    "fix": "Range corrected to #3-#5; added a non-gap note explaining that #2 vba-spec-study is docs-only.",
+    "status": "fixed"
+  }
+]

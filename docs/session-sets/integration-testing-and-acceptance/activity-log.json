@@ -1,0 +1,129 @@
+{
+  "sessionSetName": "integration-testing-and-acceptance",
+  "createdDate": "2026-04-28T07:00:48.779840-04:00",
+  "totalSessions": 5,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/coverage-audit",
+      "dateTime": "2026-04-28T07:07:24.283742-04:00",
+      "description": "Authored coverage-audit.md (Phase 8.1-8.2 inventory). Identified Gap A (no pipeline-output -> schema-validation E2E gate; manifest-aggregator does not exist) and Gap B (no black-box CLI tests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/scaffold-integration-project",
+      "dateTime": "2026-04-28T07:13:08.015592-04:00",
+      "description": "Created tests/AccessHarvester.Integration xUnit project (csproj + TestSupport/{RepoPaths,CliInvoker,AccessAvailability}); added to AccessHarvester.sln. CLI exe copied to test bin via ReferenceOutputAssembly=false ProjectReference.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/cli-hermetic-tests",
+      "dateTime": "2026-04-28T07:13:08.015592-04:00",
+      "description": "Authored Cli/CliBootstrapTests, CliParseTests, CliGenerateDocsTests \u2014 7 hermetic black-box CLI tests covering --help/no-args/unknown-cmd, parse flag/bare-file/file-not-found, generate-docs against examples/minimal-form.json.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/schema-and-pipeline-tests",
+      "dateTime": "2026-04-28T07:13:08.016594-04:00",
+      "description": "Authored Pipeline/SchemaConformanceTests (3 theory rows: minimal-form, complex-form, northwind-output validate against harvester-schema.v1.0.json) and Pipeline/EndToEndPipelineTests (SkippableFact: drives Pipeline.Default().Run against samples/MiniComplex.accdb, asserts raw/kb/ir tier shape).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-04-28T07:13:08.016594-04:00",
+      "description": "dotnet build AccessHarvester.sln: succeeded, 0 errors. dotnet test AccessHarvester.sln: 1530 passed, 2 skipped (pre-existing synthetic-DB skips), 0 failed. Integration: 14/14 passed including the SkippableFact pipeline run.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/route-coverage-audit",
+      "dateTime": "2026-04-28T07:14:24.260298-04:00",
+      "description": "Routed coverage-vs-target audit via task_type=schema-validation. Model=gemini-pro. Output saved to coverage-audit-routed.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "schema-validation",
+          "inputTokens": 9063,
+          "outputTokens": 1268,
+          "costUsd": 0.024008750000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/audit-issues-fixed",
+      "dateTime": "2026-04-28T07:17:05.305670-04:00",
+      "description": "Applied 5 fixes to coverage-audit.md per the schema-validation verifier's findings (1 Critical, 2 Major, 2 Minor). All status=fixed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/session-verification",
+      "dateTime": "2026-04-28T07:21:28.461730-04:00",
+      "description": "Cross-provider session-verification routed (round 1). Model=gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9707,
+          "outputTokens": 9468,
+          "costUsd": 0.1662875
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/session-verification-round-2",
+      "dateTime": "2026-04-28T07:24:21.857945-04:00",
+      "description": "Re-verification round 2 after fixes. Model=gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6378,
+          "outputTokens": 4806,
+          "costUsd": 0.088035
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/next-orc-recommendation",
+      "dateTime": "2026-04-28T07:25:32.904858-04:00",
+      "description": "Routed next-orchestrator recommendation for Session 2. Model=gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 587,
+          "outputTokens": 184,
+          "costUsd": 0.00257375
+        }
+      ]
+    }
+  ]
+}
