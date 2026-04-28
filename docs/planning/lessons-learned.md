@@ -543,6 +543,15 @@ reference; if it proves out twice in *this* repo, propose promotion to
   and pass it directly to `log.save_issue_log()` rather than
   interpreting free-form prose. If the JSON block is absent, treat
   the response as malformed and retry once with an explicit reminder.
+  Additionally, open the verification prompt with an explicit prose-first
+  instruction (e.g., "Your response MUST begin with a detailed prose
+  analysis for each concern below BEFORE the JSON block") placed BEFORE
+  the file listings — gemini-pro skips analysis prose when the instruction
+  appears only in the trailing JSON-schema section. Confirmed in
+  `enrichment-events-and-validation` Sessions 3 and 4 (2026-04-28):
+  both rounds returned JSON-only `VERIFIED` (24 output tokens) despite the
+  trailing block instruction being present; adding the lead instruction to
+  round 2 produced substantive per-section prose analysis.
 
 ### Routed Output Truncation — `stop_reason="end_turn"` Is Not Proof Of Completeness
 
