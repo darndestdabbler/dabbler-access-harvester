@@ -1,0 +1,111 @@
+{
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "1.0.0",
+  "Database": {
+    "Name": "Minimal.accdb",
+    "FilePath": "C:\\Samples\\Minimal.accdb",
+    "ExportedAt": "2026-04-28T00:00:00Z"
+  },
+  "Summary": {
+    "FormCount": 1,
+    "ReportCount": 0,
+    "QueryCount": 0,
+    "ModuleCount": 0,
+    "TableCount": 1,
+    "UnresolvedItemCount": 0
+  },
+  "Forms": [
+    {
+      "Spec": {
+        "SourceFormName": "frmCustomer",
+        "ModuleName": "Form_frmCustomer",
+        "SuggestedComponentName": "CustomerForm",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblCustomer"
+        },
+        "DefaultView": "Single Form",
+        "Sections": [
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "ControlNames": ["txtName", "lblName"]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "txtName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Customer Name"
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "CustomerName"
+            }
+          },
+          {
+            "Name": "lblName",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "Detail",
+            "Binding": {
+              "Kind": "Unbound"
+            },
+            "RenderHints": {
+              "Caption": "Customer Name"
+            }
+          }
+        ],
+        "EventHandlers": [],
+        "ValidationRules": []
+      },
+      "ParserOutput": null
+    }
+  ],
+  "Reports": [],
+  "Queries": [],
+  "Modules": [],
+  "Tables": [
+    {
+      "Name": "tblCustomer",
+      "Type": "TABLE",
+      "Fields": [
+        {
+          "Name": "CustomerID",
+          "TypeCode": 4,
+          "TypeName": "Long",
+          "Required": true
+        },
+        {
+          "Name": "CustomerName",
+          "TypeCode": 10,
+          "TypeName": "Text",
+          "Size": 100,
+          "Required": false
+        }
+      ],
+      "Indexes": [
+        {
+          "Name": "PrimaryKey",
+          "Primary": true,
+          "Unique": true,
+          "Foreign": false,
+          "Fields": ["CustomerID"]
+        }
+      ]
+    }
+  ],
+  "Relationships": [],
+  "ValidationRules": [],
+  "RowSourceSpecs": [],
+  "FunctionClassifications": [],
+  "EventHandlerClassifications": [],
+  "NavigationGraph": null,
+  "UnresolvedItems": [],
+  "Diagnostics": []
+}

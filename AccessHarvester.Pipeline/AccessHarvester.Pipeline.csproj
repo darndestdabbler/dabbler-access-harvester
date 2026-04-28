@@ -15,4 +15,8 @@
     <ProjectReference Include="..\AccessHarvester.Vba.Resolver\AccessHarvester.Vba.Resolver.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="JsonSchema.Net" Version="9.2.0" />
+  </ItemGroup>
+
 </Project>
