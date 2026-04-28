@@ -1,0 +1,90 @@
+[
+  {
+    "round": 1,
+    "severity": "Critical",
+    "location": "tools/comprehension-bench/run.py",
+    "summary": "Runner raises ValueError when --out is an absolute path outside the repo (the xUnit wrapper's expected invocation).",
+    "fix": "Wrapped args.out.relative_to(REPO_ROOT) in try/except ValueError; falls back to absolute path display.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "tools/comprehension-bench/run.py + scoring.py",
+    "summary": "Empty questions.yaml produced overall_passed=True (vacuous pass).",
+    "fix": "run.py exits 2 if zero questions loaded after --limit; scoring.compute_pass([]) returns overall_passed=False.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "tools/comprehension-bench/README.md",
+    "summary": "Workflow example used --input/--output (wrong CLI flags) and omitted --questions.",
+    "fix": "Rewrote the workflow block to use --db/--out, separated draft + run invocations, added --questions, clarified --ir-root semantics.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "docs/session-sets/integration-testing-and-acceptance/spec.md",
+    "summary": "Stale text in Project Overview, Routing notes, and Open questions still implied original (pre-reframe) scope.",
+    "fix": "Project Overview split into As-originally-scoped + As-reframed; routing-notes question-drafting bullet now says Session 3; Open questions lists three handoffs including scenarios-input.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "location": "tools/comprehension-bench/run.py",
+    "summary": "Runner did not validate question-bank schema upfront; malformed YAML and missing IR files were treated as bench data instead of exit-2 misconfiguration.",
+    "fix": "Added validate_questions(): checks required fields, types, non-empty list constraints, allowed difficulty values, unique IDs, and on-disk existence of every supporting_ir_path. Returns exit code 2 on any violation.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "location": "tests/AccessHarvester.Comprehension.Tests/ComprehensionBenchTests.cs",
+    "summary": "Test deleted temp output directory unconditionally in finally, destroying scores.jsonl on failure (the very artifact the assertion message pointed at).",
+    "fix": "Track 'succeeded' flag; only delete outRoot when succeeded || HARVESTER_COMPREHENSION_BENCH_CLEANUP=1. On failure, log the preserved temp path to test output for diagnosis.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Minor",
+    "location": "tools/comprehension-bench/draft_questions.py",
+    "summary": "Same outside-repo path bug as run.py \u2014 relative_to(REPO_ROOT) on the summary call would crash if --out is outside REPO_ROOT.",
+    "fix": "Wrapped both relative_to(REPO_ROOT) calls in a _display() helper with try/except ValueError fallback.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Minor",
+    "location": "tools/comprehension-bench/draft_questions.py + README.md",
+    "summary": "Drafting was still labeled as Session 2 in defaults and README despite the spec moving it to Session 3.",
+    "fix": "Default --session-number changed to 3 with explanatory help; README phrased as 'Session-agnostic drafting helper (used in Session 3 ...)'.",
+    "status": "fixed"
+  },
+  {
+    "round": 3,
+    "severity": "Major",
+    "location": "tools/comprehension-bench/run.py",
+    "summary": "validate_questions accepted absolute, traversing, and non-file supporting_ir_paths because pathlib '/' with absolute right operand silently overrides the left.",
+    "fix": "Added explicit absolute-path rejection, ir_root.resolve() basis for traversal check via Path.relative_to ValueError, and is_file() requirement.",
+    "status": "fixed"
+  },
+  {
+    "round": 3,
+    "severity": "Major",
+    "location": "tools/comprehension-bench/run.py",
+    "summary": "Malformed YAML, missing pyyaml, and top-level-shape errors crashed with a traceback instead of returning exit 2.",
+    "fix": "Wrapped load_questions(args.questions) in try/except for any Exception; concise stderr message + exit 2 on failure.",
+    "status": "fixed"
+  },
+  {
+    "round": 3,
+    "severity": "Minor",
+    "location": "tests/AccessHarvester.Comprehension.Tests/ComprehensionBenchTests.cs",
+    "summary": "Skip paths after outRoot creation triggered the failure-diagnostic preservation path, leaking temp dirs and printing misleading messages on skipped runs.",
+    "fix": "Hoisted per-DB Skip.IfNot checks above outRoot creation; tracking 'failed' (set in catch) instead of 'succeeded' so skips no longer trigger preservation.",
+    "status": "fixed"
+  }
+]
