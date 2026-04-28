@@ -266,6 +266,121 @@
           "costUsd": 0.0394
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/register-start",
+      "dateTime": "2026-04-28T01:57:54.086988-04:00",
+      "description": "Wrote session-state.json (status=in-progress, orchestrator=claude-code/claude-opus-4-7@high). Session 3 of 5; previous sessions 1+2 verified, change-log not yet authored.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/read-spec-and-config",
+      "dateTime": "2026-04-28T01:57:54.087999-04:00",
+      "description": "Read spec.md (no Session Set Configuration block; per workflow rule treat all flags false). Session 3 of 4-5: Manual Review Routing + Aggregator. Deliverable: AccessHarvester.Pipeline/Enrichment/UnresolvedItem.cs + aggregator that unifies provenance from resolver, SQL form-references, dynamic-SQL analyzer, and navigation-graph builder. May be in-conversation since orchestrator is Opus.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/verify-prereqs",
+      "dateTime": "2026-04-28T01:57:54.088993-04:00",
+      "description": "Verified prereq #14 (enrichment-queries-and-forms) has change-log.md. Verified Session 1 + 2 deliverables (FunctionClassification.cs + NavigationGraph.cs) exist with their unresolved-emission shapes (UnresolvedReferenceFact, UnresolvedNavigationTarget) referenced from the spec. Verified upstream emission shapes exist: ResolverDiagnostic + UnresolvedReasons (Vba.Resolver), UnresolvedFormReference + UnresolvedReason (Sql.Parser.FormReferences), DynamicSqlExecutionSite + UnanalyzableReason + ParameterBinding (Sql.Parser.DynamicSql).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/author-unresolved-item",
+      "dateTime": "2026-04-28T02:07:54.074387-04:00",
+      "description": "Authored AccessHarvester.Pipeline/Enrichment/UnresolvedItem.cs (record + UnresolvedSource enum + UnresolvedLocation record). Unifies provenance from resolver (ResolverDiagnostic), SQL form-references (UnresolvedFormReference), dynamic-SQL analyzer (DynamicSqlExecutionSite), navigation graph (UnresolvedNavigationTarget), and function classification (UnresolvedReferenceFact) without information loss. In-conversation per matching-orchestrator convention.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/author-aggregator",
+      "dateTime": "2026-04-28T02:07:54.074387-04:00",
+      "description": "Authored AccessHarvester.Pipeline/Enrichment/UnresolvedItemAggregator.cs (Build + 5 From* projectors). Sorts by Source, Module, Procedure, Line, Column, Reason for determinism. Closed reason->next-steps lookup with documented generic fall-through. AdditionalContext keys are SortedDictionary-emitted for stable JSON.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/author-tests",
+      "dateTime": "2026-04-28T02:07:54.075378-04:00",
+      "description": "Authored tests/AccessHarvester.Pipeline.Tests/UnresolvedItemAggregatorTests.cs (34 hermetic xUnit tests). Theory tests pre-emptively cover every reason code per session-1 lesson. Added Sql.Parser ProjectReference to test csproj.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-28T02:07:54.076377-04:00",
+      "description": "dotnet build: green (1 fixed type-namespace conflict mid-session: SQL SourceRange vs VBA SourceRange \u2014 aggregator now reads form-reference line/column from Node.Provenance directly, since SQL SourceRange carries character offsets only). dotnet test: 1351 passed, 4 skipped (Windows-only Access COM integration), 0 failed. Pipeline.Tests grew 158->192 (+34).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/verify-round-1",
+      "dateTime": "2026-04-28T02:10:32.446607-04:00",
+      "description": "Round 1 cross-provider verification (gemini-pro, $0.0287, 873 output tokens). Verdict ISSUES_FOUND with 1 Minor: DescribeFormReferenceReason if/else inconsistent with peer switch expressions. No Critical/Major.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 15998,
+          "outputTokens": 873,
+          "costUsd": 0.0287
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/fix-minor",
+      "dateTime": "2026-04-28T02:12:31.949741-04:00",
+      "description": "Fixed Minor (DescribeFormReferenceReason -> switch expression with _ when StartsWith clause). Re-ran aggregator tests: 34/34 passed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-3/route-next-orchestrator-recommendation",
+      "dateTime": "2026-04-28T02:12:31.952415-04:00",
+      "description": "Routed analysis call recommending claude-sonnet-4-6 @ effort=low for Session 4 (mechanical schema-validation + end-to-end run). Saved to session-3-next-orchestrator-recommendation.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0027
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 11,
+      "stepKey": "session-3/update-ai-assignment",
+      "dateTime": "2026-04-28T02:12:31.952415-04:00",
+      "description": "Updated ai-assignment.md with Session 3 actuals + Session 4 recommendation revision (was: Sonnet without effort spec; now: Sonnet @ effort=low).",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
