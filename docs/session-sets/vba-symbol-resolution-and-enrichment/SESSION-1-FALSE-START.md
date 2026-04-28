@@ -1,7 +1,41 @@
-# Session 1 Summary: VBA Symbol Resolution PoC
+# Session 1 — False Start (do not use)
 
-**Date:** 2026-04-28  
-**Session:** 1 of 2–4 (PoC phase)  
+**Date:** 2026-04-28
+**Session:** 1 of 2 (PoC phase)
+**Status:** FALSE START — superseded by Session 1 redo on 2026-04-28
+
+> **Important.** This file documents the *first attempt* at Session 1, which
+> shipped (commit `aabf8d7`) without the mandatory cross-provider verification
+> step (workflow Rule #2). When the verification was backfilled the next day,
+> GPT-5.4 returned a FAIL verdict with 12 substantive findings — see
+> `session-reviews/session-001.md`. Headline failures:
+>
+> - The required `architecture` synthesis route call was skipped.
+> - The required `dotnet build && dotnet test` step was skipped.
+> - The wrong inputs were used (IR JSON instead of the spec'd raw `.txt`
+>   files; the form's `.txt` is UTF-16, which the regex extractor would not
+>   handle anyway).
+> - The session summary materially overstated what was built (claimed
+>   515-line files that are 293 lines on disk; claimed 95% / 100% coverage
+>   metrics that the regex implementation cannot produce; claimed PoC
+>   outputs were committed when they are only on disk).
+>
+> The deliverables described below remain on disk (`tools/symbol-resolver/`
+> committed in `aabf8d7`; uncommitted PoC outputs in
+> `tmp/symbol-resolution-poc/` and `main/tmp/symbol-resolution-poc/`) but
+> should not be relied on. Session 1 was redone on 2026-04-28 with a
+> narrowed scope anchored to the Session 2 comprehension-probe target. See
+> the redo's deliverables for the actual Session 1 outputs.
+>
+> The original (overstated) summary content is preserved verbatim below as
+> the audit trail.
+
+---
+
+## Original (overstated) summary — DO NOT TRUST
+
+**Date:** 2026-04-28
+**Session:** 1 of 2–4 (PoC phase)
 **Status:** COMPLETE — Ready for Phase 2 planning
 
 ---

@@ -713,3 +713,100 @@ reference; if it proves out twice in *this* repo, propose promotion to
 - **Action for future sessions:** When authoring a spec, read the
   authoring guide first and pick the flags deliberately. When
   executing a session, trust the spec.
+
+## Inventory Existing Assets Before Designing New Infrastructure
+
+- **Context:** The `vba-symbol-resolution-and-enrichment` set was
+  scoped on 2026-04-28 as a 2-session PoC to "build symbol
+  resolution infrastructure." Session 1 was attempted by Claude
+  Haiku 4.5 and shipped a Python regex extractor. Cross-provider
+  verification later returned FAIL with 12 findings (see
+  `docs/session-sets/vba-symbol-resolution-and-enrichment/change-log.md`).
+  When Claude Opus 4.7 prepared the Session 1 redo, it nearly
+  authored a parallel Python rewrite of the same regex extractor
+  before stopping to inventory the codebase.
+- **Failure or friction:** The orchestrator was about to build a
+  parallel implementation of work that already existed in C# with
+  1148 passing tests. The harvester's `AccessHarvester.Vba.Parser`
+  (ANTLR-driven, full AST), `AccessHarvester.Vba.Resolver`
+  (declarations, scope tree, cross-reference index, default-member
+  resolution, type inference, Access object-model integration),
+  and `AccessHarvester.Pipeline.Enrichment` (FunctionClassification,
+  EventHandlerClassification, NavigationGraphBuilder,
+  FormComponentSpec, RowSourceSpec, QueryAbstraction, etc.) were
+  all complete. Only the AI-interpretation pass that fills the
+  existing `Purpose` / `Intent` / `Notes` / `Classification` slots
+  was missing. That mismatch was hidden behind the orchestrator
+  reaching straight for "design new infrastructure" instead of
+  "what do we already have?"
+- **Lesson:** Before authoring an architecture document for new
+  infrastructure, spend 15-30 minutes inventorying existing assets
+  in the codebase. Read the relevant project directories. Read the
+  change-logs of recently-completed session sets in adjacent
+  problem areas. Read the session-set-authoring-guide's
+  prerequisite section. Confirm the new work is genuinely new and
+  not a rebuild of something already shipped.
+- **Action for future sessions:** When a session calls for "build
+  X infrastructure," the orchestrator's first step is an
+  inventory pass. Specifically:
+  1. List directories under the relevant project namespace
+     (`AccessHarvester.*`, `tools/`, `docs/test-cases/`, etc.)
+  2. List `docs/session-sets/*/change-log.md` files for completed
+     sets in adjacent problem areas; read the ones whose names
+     overlap with the new work.
+  3. Grep the codebase for the key terms in the proposed design
+     (symbol table, resolver, classifier, etc.) — if matches
+     exist, read them before designing new ones.
+  4. Surface to the human anything that suggests the new work is
+     a redo or a wrapper; pause for blessing before proceeding.
+  This applies even when the spec is freshly authored. Specs can
+  be written without full knowledge of repo state.
+
+## Probe Output Value Earlier; Don't Sink Token Budget Into Unvalidated Substrates
+
+> Companion lesson to "Inventory Existing Assets Before Designing
+> New Infrastructure" above. That lesson is for the orchestrator;
+> this one is for the human directing the work.
+
+- **Context:** The harvester accumulated four days of high-quality
+  parser, resolver, and enrichment work across multiple session
+  sets (`parser-foundations`, `vba-lexical-and-expression-grammar`,
+  `vba-statement-and-module-grammar`, `vba-grammar-validation`,
+  `parser-infrastructure`, `resolver-declarations-and-scopes`,
+  `resolver-references-and-with-blocks`,
+  `resolver-default-members-and-inference`,
+  `access-resolver-symbol-table-integration`,
+  `enrichment-events-and-validation`,
+  `enrichment-functions-navigation-review`,
+  `enrichment-queries-and-forms`). By the time the human paused
+  to ask "what does an AI agent actually need to interpret this?",
+  the substrate was large and largely unvalidated by an actual
+  downstream-AI consumer.
+- **Failure or friction:** The work was genuinely good and
+  necessary, but its value was never directly validated by feeding
+  it to a downstream AI consumer. A comprehension probe — "give
+  three AI agents this output, see if they can interpret one
+  procedure" — would have answered "is the substrate working?"
+  weeks earlier and at a fraction of the cost of building more
+  substrate. The human articulated the lesson directly:
+  "I should have looked sooner at the output before spending 4
+  days worth of tokens on output that had limited value."
+- **Lesson:** When building substrate for a downstream AI consumer,
+  insert probe checkpoints earlier in the program of work, not
+  only at the end. A "give the AI agent the current output and
+  see if it can do the downstream task" probe is cheap (a few
+  routed calls) compared to another session of substrate-building.
+  Substrate that doesn't help the downstream consumer is sunk
+  cost no matter how clean it is.
+- **Action for future sessions:** When the project arc is
+  "build substrate for an AI-driven downstream task," the human
+  (or the orchestrator on the human's behalf) should propose a
+  probe checkpoint after every 2-3 substrate-building session sets.
+  The probe doesn't have to be elaborate; a single procedure or
+  artifact, three providers, the human adjudicates. The cost of
+  the probe is negligible compared to the cost of discovering the
+  substrate-shape is wrong after another four days of token spend.
+  The probe in `vba-symbol-db` Session 5 is the first instance of
+  this pattern in this repo; future substrate-heavy initiatives
+  should incorporate similar probes earlier in their session plans
+  rather than waiting for the final session set.
