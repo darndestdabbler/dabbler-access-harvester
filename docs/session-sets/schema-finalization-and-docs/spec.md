@@ -6,7 +6,17 @@
 > **Prerequisite:** docs/session-sets/enrichment-events-and-validation/, docs/session-sets/enrichment-functions-navigation-review/
 > **Workflow:** Orchestrator → AI Router → Cross-provider verification
 
-> **This spec is a stub.** The orchestrator executing Session 1 of this set must elaborate the step lists before running them.
+---
+
+## Session Set Configuration
+
+```yaml
+requiresUAT: false
+requiresE2E: false
+uatScope: none
+```
+
+> Rationale: This repo has no UI surface. The deliverables (a JSON Schema file, a validation C# class, and generated markdown docs) are internal pipeline artifacts consumed by downstream AI tools, not human-operated UI. Automated build/test plus cross-provider AI verification is the complete quality bar.
 
 ---
 
@@ -87,28 +97,91 @@ Per Phase 7.4, generate human-readable documentation alongside JSON: per-databas
 
 ## Session Plan
 
-### Session 1 of 3-4: Schema v0→v1 Review Pass (Synthesis)
+### Session 1 of 3: Schema v0→v1 Review Pass (Synthesis)
 
-- Read v0 schema + every enrichment output shape + `docs/schema/v0-vs-tiers.md` from #1.
-- Route an `architecture` synthesis call producing v1 schema + backward-compatibility plan (1 of 1 synthesis session for this set).
-- Land `docs/test-cases/harvester-schema.v1.0.json` + ADR-style note documenting v0→v1 changes.
+**Steps:**
+1. Elaborate this spec (add Session Set Configuration block and full step lists). *(Session 1 only — stub expansion.)*
+2. Route `ai-assignment.md` authoring: `route(task_type="analysis")` with the full spec + all session step lists. Save to `docs/session-sets/schema-finalization-and-docs/ai-assignment.md`.
+3. Enumerate the v0→v1 design decisions by reading `docs/schema/v0-vs-tiers.md` §11–12 and identifying the two open decisions (D20 casing normalization strategy; D1/D2 DatabaseManifest envelope shape). Route focused architecture sub-calls, each under ~1500 input tokens, to resolve each decision.
+4. Apply all pre-decided gap fixes (D3: add `DeclareFunction`/`DeclareSub` to `procedureKind` enum; D4: rename `visibility` → `accessModifier`; D8: add flat `startLine` shorthand on `procedureItem`; D10: migrate `byRef:boolean` → `passingMechanism` string enum; D9: add `lib`/`alias` to `procedureItem`; D13: add DAO fields to `queryItem`; D16: add `databaseManifest`, `tableSchemas[]`, `relationships[]` top-level sections; plus casing and envelope decisions from step 3) to produce `docs/test-cases/harvester-schema.v1.0.json`.
+5. Write `docs/schema/v1-adr.md` — an ADR-style note enumerating every v0→v1 change with rationale, a back-compatibility plan (v0 outputs remain valid until a migration script is shipped; consumer must check `schemaVersion`), and a summary of deferred items (still post-v1).
+6. Run `dotnet build && dotnet test` to confirm nothing broke (no C# changes in this session).
+7. End-of-session verification: `route(task_type="session-verification", complexity_hint=70)`. Include v0 schema, v1 schema, v1-adr.md, and disclose all non-schema files (enrichment C# models, test cases) are out of scope for this session.
+8. Commit and push.
 
-### Session 2 of 3-4: Examples + Output Validation Pass
+**Creates:**
+- `docs/test-cases/harvester-schema.v1.0.json`
+- `docs/schema/v1-adr.md`
+- `docs/session-sets/schema-finalization-and-docs/ai-assignment.md`
+- `docs/session-sets/schema-finalization-and-docs/session-state.json`
+- `docs/session-sets/schema-finalization-and-docs/session-reviews/session-001.md`
 
-- Generate `examples/*.json` from the harvester pipeline against Northwind + a minimal fixture + a complex form fixture.
-- Land output-validation pass under `AccessHarvester.Pipeline/Validation/`.
-- Route `schema-validation` for examples-vs-schema correspondence.
+**Touches:**
+- `docs/session-sets/schema-finalization-and-docs/spec.md` (this file — stub expansion)
 
-### Session 3 of 3-4: Documentation Generation
+**Ends with:** `harvester-schema.v1.0.json` committed and verified against v0-vs-tiers.md gap list; ADR committed.
 
-- Generate per-database markdown summary, form-by-form catalog, dependency diagrams under `docs/schema/`.
-- Wire generation into the harvester run; documentation regenerates whenever output regenerates.
+**Progress keys:** `session-1/spec-elaborated`, `session-1/ai-assignment`, `session-1/architecture-decisions`, `session-1/v1-schema`, `session-1/v1-adr`, `session-1/build-test`, `session-1/verification`
 
-### Session 4 of 3-4 (optional buffer): Verifier-Surfaced Cleanup
+---
 
-- Reserved for cross-provider verifier findings.
+### Session 2 of 3: Examples + Output Validation Pass
 
-> Step lists above are bullet hints. The orchestrator running each session must elaborate them per `docs/ai-led-session-workflow.md`.
+**Steps:**
+1. Read `ai-assignment.md` actuals for Session 1 and route a fresh recommendation for Session 3.
+2. Generate example fixtures by running the harvester pipeline against `samples/NorthwindDevEdition.accdb` (Windows COM) and the committed synthetic test-case `.bas` + `.expected.json` files. Target: `examples/northwind-output.json`, `examples/minimal-form.json`, `examples/complex-form.json`.
+3. Route `route(task_type="code-review")` on the generated examples for schema conformance spot-check.
+4. Author `AccessHarvester.Pipeline/Validation/SchemaValidator.cs` — a validator that loads `harvester-schema.v1.0.json` at runtime and validates each pipeline output document before writing. Use `JsonSchema.Net` or equivalent NuGet package. Hard-fail the pipeline on schema-non-conformance.
+5. Author unit tests in `tests/AccessHarvester.Pipeline.Tests/Validation/SchemaValidatorTests.cs` covering: (a) a conformant document returns no errors; (b) a document with a missing required field returns an error; (c) a document with an unknown field is accepted (additionalProperties not forbidden at v1).
+6. Route `route(task_type="schema-validation", complexity_hint=40)` for examples-vs-schema correspondence (mechanical, Sonnet-pinned per retrospective #10). Include each example file and the v1 schema.
+7. Run `dotnet build && dotnet test`.
+8. End-of-session verification.
+9. Commit and push.
+
+**Creates:**
+- `examples/northwind-output.json`
+- `examples/minimal-form.json`
+- `examples/complex-form.json`
+- `AccessHarvester.Pipeline/Validation/SchemaValidator.cs`
+- `tests/AccessHarvester.Pipeline.Tests/Validation/SchemaValidatorTests.cs`
+
+**Touches:**
+- `AccessHarvester.Pipeline/AccessHarvester.Pipeline.csproj` (NuGet reference)
+- `tests/AccessHarvester.Pipeline.Tests/AccessHarvester.Pipeline.Tests.csproj` (NuGet reference)
+
+**Ends with:** Examples committed and validated; validator wired into pipeline; tests green.
+
+**Progress keys:** `session-2/ai-assignment-update`, `session-2/examples-generated`, `session-2/schema-validation-routed`, `session-2/validator-authored`, `session-2/tests-authored`, `session-2/build-test`, `session-2/verification`
+
+---
+
+### Session 3 of 3: Documentation Generation
+
+**Steps:**
+1. Read `ai-assignment.md` actuals for Session 2.
+2. Author `AccessHarvester.Pipeline/DocGen/SchemaDocGenerator.cs` — walks a pipeline output document and produces: (a) a per-database markdown summary (database name, form count, query count, module count, unresolved-item count); (b) a form-by-form catalog section for each `FormComponentSpec` (form name, record source, control list, event handler count); (c) a dependency section listing subform relationships. Output path: `docs/output/<database-slug>/schema-summary.md`.
+3. Wire `SchemaDocGenerator` into the harvester CLI (`dotnet run -- generate-docs <output-dir>`) so docs regenerate whenever output regenerates.
+4. Route `route(task_type="documentation", complexity_hint=30)` for XML doc comments on `SchemaDocGenerator`'s public API.
+5. Author unit tests in `tests/AccessHarvester.Pipeline.Tests/DocGen/SchemaDocGeneratorTests.cs` covering the summary and catalog sections against a minimal synthetic document.
+6. Run `dotnet build && dotnet test`.
+7. Generate change-log: `route(task_type="summarization", max_tier=1)`.
+8. Route next-session-set recommendation: `route(task_type="analysis")`.
+9. End-of-session verification.
+10. Commit and push.
+
+**Creates:**
+- `AccessHarvester.Pipeline/DocGen/SchemaDocGenerator.cs`
+- `tests/AccessHarvester.Pipeline.Tests/DocGen/SchemaDocGeneratorTests.cs`
+- `docs/session-sets/schema-finalization-and-docs/change-log.md`
+- `docs/session-sets/schema-finalization-and-docs/next-session-set-recommendation.md`
+
+**Touches:**
+- `AccessHarvester.Cli/` (new `generate-docs` subcommand)
+- `AccessHarvester.Pipeline/AccessHarvester.Pipeline.csproj`
+
+**Ends with:** Doc-gen wired and tested; change-log committed; set marked complete.
+
+**Progress keys:** `session-3/ai-assignment-update`, `session-3/docgen-authored`, `session-3/cli-wired`, `session-3/tests-authored`, `session-3/build-test`, `session-3/change-log`, `session-3/next-set-recommendation`, `session-3/verification`
 
 ---
 

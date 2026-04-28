@@ -1,0 +1,118 @@
+{
+  "sessionSetName": "schema-finalization-and-docs",
+  "createdDate": "2026-04-28T05:55:24.722759-04:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/spec-elaborated",
+      "dateTime": "2026-04-28T05:56:55.541652-04:00",
+      "description": "Elaborated stub spec: added Session Set Configuration block (requiresUAT: false, requiresE2E: false) and full step lists for Sessions 1-3.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-04-28T05:57:47.730742-04:00",
+      "description": "Routed ai-assignment.md authoring via analysis call.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 955,
+          "outputTokens": 1331,
+          "costUsd": 0.01450375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/architecture-decisions",
+      "dateTime": "2026-04-28T06:01:03.968453-04:00",
+      "description": "Routed two focused architecture sub-calls to gemini-pro (Anthropic API credits depleted): (A) D20 casing normalization decision, (B) D1/D2 DatabaseManifest shape. Deviation from spec: used gemini-pro via query() instead of opus via route() due to Anthropic API credit exhaustion.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "architecture",
+          "inputTokens": 480,
+          "outputTokens": 55,
+          "costUsd": 0.00115
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "architecture",
+          "inputTokens": 455,
+          "outputTokens": 179,
+          "costUsd": 0.0023587499999999997
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/v1-schema",
+      "dateTime": "2026-04-28T06:07:14.727924-04:00",
+      "description": "Authored harvester-schema.v1.0.json in-conversation: applied D20 (PascalCase), D1/D2 (DatabaseManifest), D3/D4/D8/D9/D10/D13/D16 gap fixes, and added all enrichment pipeline types from sessions #14-#16 (FormComponentSpec, QueryAbstraction, EventHandlerClassification, FunctionClassification, NavigationGraph, ValidationRule, RowSourceSpec, UnresolvedItem). Note: architecture call could not route to Opus (Anthropic API credits depleted); authored in-conversation on Sonnet orchestrator using focused gemini-pro sub-calls for the two open design decisions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/v1-adr",
+      "dateTime": "2026-04-28T06:07:14.727924-04:00",
+      "description": "Authored docs/schema/v1-adr.md: ADR documenting all v0->v1 changes, architecture decisions (D20 PascalCase, D1/D2 DatabaseManifest), gap fixes applied, new types added, deferred items, known issues (PredicateNode polymorphism), and back-compatibility plan.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-04-28T06:07:47.343914-04:00",
+      "description": "dotnet build: 283 warnings, 0 errors. dotnet test: 1509 passed, 2 skipped (COM-gated). No regressions from schema file additions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-04-28T06:09:59.326945-04:00",
+      "description": "End-of-session verification via route(session-verification). Verifier: gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4075,
+          "outputTokens": 5088,
+          "costUsd": 0.0865075
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-04-28T06:12:12.821156-04:00",
+      "description": "Routed next-orchestrator recommendation for Session 2 via analysis.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 380,
+          "outputTokens": 369,
+          "costUsd": 0.004165
+        }
+      ]
+    }
+  ]
+}
