@@ -110,4 +110,10 @@ Rationale: Session 3 is primarily C# code generation (SchemaDocGenerator.cs ~150
 
 ### Actuals
 
-*(No actuals recorded for this session yet.)*
+- **Orchestrator used:** Claude Code / claude-sonnet-4-6 @ effort=medium
+- **Total routed cost:** $0.0569 (3 calls: 1× gemini-pro documentation, 1× gemini-pro analysis, 1× gpt-5-4 session-verification)
+- **Deviations from recommendation:**
+  - Step 4 (documentation routing): routed to gemini-pro as expected; auto-verifier (gpt-5-4-mini) found a format issue (class declarations included in response) but comment content was correct; no code change needed.
+  - Step 7 (next-session-set recommendation): routed via route(analysis) per workflow rules (spec suggested self-assign, but workflow rule #17 requires routing for recommendations).
+  - Session 3 required adding `AccessHarvester.Pipeline` project reference to `AccessHarvester.Cli.csproj` (not anticipated in spec) and a `using CorePipeline` alias to resolve namespace/type ambiguity.
+- **Notes:** Session set complete. All 3 sessions verified. Final test count: 1516 passed, 2 skipped (COM-gated). Total set cost: $0.2560 across 10 routed calls.
