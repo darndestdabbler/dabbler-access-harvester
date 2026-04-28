@@ -31,33 +31,33 @@ The full set of architecturally distinct ways VBA code reads or modifies form/co
 
 | # | Category | Use Case | Description |
 |---|---|---|---|
-| 1 | Filtering / data sourcing | Filter subform `RecordSource` / `RowSource` | Dropdowns, textboxes, checkboxes, option buttons, or list boxes are read to rebuild a subform's source (typically datasheet view). |
-| 2 | Filtering / data sourcing | Filter a DAO/ADODB recordset in VBA | Same controls as #1, but VBA opens a recordset and uses it to populate a form. |
-| 3 | Filtering / data sourcing | Cascading dropdowns | One combo's value rebuilds the `RowSource` of another combo. |
-| 4 | Filtering / data sourcing | Datasheet drill-through to another form | Selected datasheet record's key drives the `RecordSource`/`Filter` of another (often dynamically opened) form. |
-| 5 | Filtering / data sourcing | Form controls → report parameters | Control values build `DoCmd.OpenReport`'s `WhereCondition` (or set the report's `RecordSource`/`Filter`/`OrderBy`). |
-| 6 | Filtering / data sourcing | Form-level `Me.Filter` from controls | Control values are concatenated into a filter string assigned to `Me.Filter` with `FilterOn = True`, leaving `RecordSource` intact. |
-| 7 | Parameter passing | Values passed by value to a procedure | Control values extracted at the call site and passed as scalars to a standard VBA function/sub. |
-| 8 | Parameter passing | Controls passed as `Control` objects | The control objects themselves are passed; the procedure reads `.Value` (and possibly properties) inside. |
-| 9 | Parameter passing | Form reference passed | A `Form` object reference is passed; the procedure reaches into named controls through it. |
-| 10 | Parameter passing | Form-backing module using `Me` | Code in the form's own module uses `Me.ControlName` to extract values for processing/updates/calculations. |
-| 11 | Parameter passing | `OpenArgs` | Control values are concatenated into `OpenArgs` when opening another form/report; the receiver parses `Me.OpenArgs`. |
-| 12 | Declarative expression reference | Validation rule expression | A control's `ValidationRule` contains fully qualified `Forms!Form!Control` references. |
-| 13 | Declarative expression reference | Macro expression | A macro condition or argument contains `Forms!Form!Control` references. |
-| 14 | Declarative expression reference | Calculated `ControlSource` | A control's `ControlSource` is an expression like `=[Quantity]*[UnitPrice]` that references other controls on the form. |
-| 15 | Cross-form / hierarchy reference | Sibling-form references | Code on one open form reads/writes controls on a separately open form via `Forms!OtherForm!Control`. |
-| 16 | Cross-form / hierarchy reference | Parent ↔ subform references | Subform code uses `Me.Parent.Control`; main-form code uses `Me.SubformCtl.Form.Control` to traverse hierarchy. |
-| 17 | Cross-form / hierarchy reference | Runtime active references | Code uses `Screen.ActiveControl` / `Screen.ActiveForm` / `Screen.ActiveReport` with no statically resolvable target (common in ribbon callbacks and shared utility routines). |
-| 18 | Event-driven property/value manipulation | Event handler reads/writes control properties | A form or control event triggers VBA that reads and/or modifies properties (`Value`, `Visible`, `Enabled`, `Locked`, `BackColor`, `DefaultValue`, etc.) on one or more controls. |
-| 19 | Event-driven property/value manipulation | Multi-select listbox processing | Code iterates `lst.ItemsSelected` to build IN-clauses or process each chosen value. |
-| 20 | Event-driven property/value manipulation | `Controls` collection iteration | Code loops `Me.Controls` to apply bulk property changes (e.g., lock all bound controls when in read-only mode, hide/show by `Tag`). |
-| 21 | Event-driven property/value manipulation | Section-scoped iteration | Code loops `Me.Section(acDetail).Controls` (or `acHeader`, `acFooter`) to scope bulk operations to a form region. |
-| 22 | Event-driven property/value manipulation | Recordset navigation by control value | Control values drive `Me.RecordsetClone.FindFirst` followed by `Me.Bookmark = rs.Bookmark` to jump the form to a specific record. |
-| 23 | Event-driven property/value manipulation | `Tag`-based metadata | `.Tag` reads passed through `Split`, `InStr`, or pattern matching to drive conditional behavior across grouped controls. |
-| 24 | Class-based delegation | `WithEvents` control wrappers | Custom class module declares `Private WithEvents ctl As Access.TextBox` (or similar); form's `Form_Load` instantiates the class and assigns a control reference, centralizing event handling. |
-| 25 | Ribbon / extensibility | IRibbonControl callbacks | `Sub Cb(ctl As IRibbonControl, ByRef returnedVal)` signatures (and the three-arg `cancelDefault` variant); often reach back into `Screen.ActiveForm` to read form state. |
-| 26 | Design-time metaprogramming | `CreateControl` / `DeleteControl` | `Application.CreateControl` calls that fabricate UI elements at runtime (only valid in Design view; rare but real). |
-| 27 | Parallel reference grammar | `TempVars` references | `TempVars!name` and `TempVars("name")` parallel `Forms!...` syntax and appear in the same expression contexts. |
+| FC1 | Filtering / data sourcing | Filter subform `RecordSource` / `RowSource` | Dropdowns, textboxes, checkboxes, option buttons, or list boxes are read to rebuild a subform's source (typically datasheet view). |
+| FC2 | Filtering / data sourcing | Filter a DAO/ADODB recordset in VBA | Same controls as #1, but VBA opens a recordset and uses it to populate a form. |
+| FC3 | Filtering / data sourcing | Cascading dropdowns | One combo's value rebuilds the `RowSource` of another combo. |
+| FC4 | Filtering / data sourcing | Datasheet drill-through to another form | Selected datasheet record's key drives the `RecordSource`/`Filter` of another (often dynamically opened) form. |
+| FC5 | Filtering / data sourcing | Form controls → report parameters | Control values build `DoCmd.OpenReport`'s `WhereCondition` (or set the report's `RecordSource`/`Filter`/`OrderBy`). |
+| FC6 | Filtering / data sourcing | Form-level `Me.Filter` from controls | Control values are concatenated into a filter string assigned to `Me.Filter` with `FilterOn = True`, leaving `RecordSource` intact. |
+| FC7 | Parameter passing | Values passed by value to a procedure | Control values extracted at the call site and passed as scalars to a standard VBA function/sub. |
+| FC8 | Parameter passing | Controls passed as `Control` objects | The control objects themselves are passed; the procedure reads `.Value` (and possibly properties) inside. |
+| FC9 | Parameter passing | Form reference passed | A `Form` object reference is passed; the procedure reaches into named controls through it. |
+| FC10 | Parameter passing | Form-backing module using `Me` | Code in the form's own module uses `Me.ControlName` to extract values for processing/updates/calculations. |
+| FC11 | Parameter passing | `OpenArgs` | Control values are concatenated into `OpenArgs` when opening another form/report; the receiver parses `Me.OpenArgs`. |
+| FC12 | Declarative expression reference | Validation rule expression | A control's `ValidationRule` contains fully qualified `Forms!Form!Control` references. |
+| FC13 | Declarative expression reference | Macro expression | A macro condition or argument contains `Forms!Form!Control` references. |
+| FC14 | Declarative expression reference | Calculated `ControlSource` | A control's `ControlSource` is an expression like `=[Quantity]*[UnitPrice]` that references other controls on the form. |
+| FC15 | Cross-form / hierarchy reference | Sibling-form references | Code on one open form reads/writes controls on a separately open form via `Forms!OtherForm!Control`. |
+| FC16 | Cross-form / hierarchy reference | Parent ↔ subform references | Subform code uses `Me.Parent.Control`; main-form code uses `Me.SubformCtl.Form.Control` to traverse hierarchy. |
+| FC17 | Cross-form / hierarchy reference | Runtime active references | Code uses `Screen.ActiveControl` / `Screen.ActiveForm` / `Screen.ActiveReport` with no statically resolvable target (common in ribbon callbacks and shared utility routines). |
+| FC18 | Event-driven property/value manipulation | Event handler reads/writes control properties | A form or control event triggers VBA that reads and/or modifies properties (`Value`, `Visible`, `Enabled`, `Locked`, `BackColor`, `DefaultValue`, etc.) on one or more controls. |
+| FC19 | Event-driven property/value manipulation | Multi-select listbox processing | Code iterates `lst.ItemsSelected` to build IN-clauses or process each chosen value. |
+| FC20 | Event-driven property/value manipulation | `Controls` collection iteration | Code loops `Me.Controls` to apply bulk property changes (e.g., lock all bound controls when in read-only mode, hide/show by `Tag`). |
+| FC21 | Event-driven property/value manipulation | Section-scoped iteration | Code loops `Me.Section(acDetail).Controls` (or `acHeader`, `acFooter`) to scope bulk operations to a form region. |
+| FC22 | Event-driven property/value manipulation | Recordset navigation by control value | Control values drive `Me.RecordsetClone.FindFirst` followed by `Me.Bookmark = rs.Bookmark` to jump the form to a specific record. |
+| FC23 | Event-driven property/value manipulation | `Tag`-based metadata | `.Tag` reads passed through `Split`, `InStr`, or pattern matching to drive conditional behavior across grouped controls. |
+| FC24 | Class-based delegation | `WithEvents` control wrappers | Custom class module declares `Private WithEvents ctl As Access.TextBox` (or similar); form's `Form_Load` instantiates the class and assigns a control reference, centralizing event handling. |
+| FC25 | Ribbon / extensibility | IRibbonControl callbacks | `Sub Cb(ctl As IRibbonControl, ByRef returnedVal)` signatures (and the three-arg `cancelDefault` variant); often reach back into `Screen.ActiveForm` to read form state. |
+| FC26 | Design-time metaprogramming | `CreateControl` / `DeleteControl` | `Application.CreateControl` calls that fabricate UI elements at runtime (only valid in Design view; rare but real). |
+| FC27 | Parallel reference grammar | `TempVars` references | `TempVars!name` and `TempVars("name")` parallel `Forms!...` syntax and appear in the same expression contexts. |
 
 ---
 
