@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "sessionSetName": "vba-symbol-resolution-and-enrichment",
+  "currentSession": 1,
+  "totalSessions": 2,
+  "status": "in-progress",
+  "startedAt": "2026-04-28T14:19:54.602777-04:00",
+  "completedAt": null,
+  "verificationVerdict": null,
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-haiku-4-5-20251001",
+    "effort": "high"
+  }
+}
