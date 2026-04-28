@@ -1,0 +1,9 @@
+[
+  {
+    "severity": "Minor",
+    "location": "AccessHarvester.Pipeline/Enrichment/UnresolvedItemAggregator.cs",
+    "summary": "DescribeFormReferenceReason uses if-else chain; peers use switch expression.",
+    "fix": "Refactor to switch expression with  clause.",
+    "status": "fixed"
+  }
+]
