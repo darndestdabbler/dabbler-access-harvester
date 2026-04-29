@@ -419,6 +419,22 @@ the human before proceeding.
   recipe, migration recipe, and gotchas live at
   `dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`.
 
+- **Probe substrate value early.** When a project arc is "build
+  substrate for an AI-driven downstream task," insert probe
+  checkpoints after every 2-3 substrate-building session sets — a
+  single procedure or artifact, multiple providers (or in-IDE
+  orchestrator pair), the human adjudicates. The probe cost (a few
+  routed calls plus a session or two of in-IDE work) is negligible
+  compared to discovering the substrate-shape is wrong after another
+  four days of token spend. Confirmed in two contexts: `vba-symbol-db`
+  Session 7 (PIVOT verdict driven by the comprehension probe +
+  calibration analysis) and `vba-symbol-db-path-b-probe` (a
+  three-session, ~$0.21 probe that materially settled the Path A vs.
+  Path B direction with a Hybrid recommendation grounded in concrete
+  test pins). Action-detail reference is preserved in
+  `lessons-learned.md` → "Probe Output Value Earlier; Don't Sink
+  Token Budget Into Unvalidated Substrates".
+
 ### Token-Window Budget Overrides
 
 The human has recurring token allotments across three orchestrator providers with
@@ -458,6 +474,32 @@ independent branches (e.g., `vba-lexical-and-expression-grammar` + `access-metad
 naturally consumes both allotments simultaneously. "maxout Claude" on one branch and
 "maxout Codex" on the other is the most efficient way to drain both windows when
 both are running low.
+
+**Subscription in-IDE orchestrator pair as cross-provider rigor.**
+When a routed cross-provider rigor model has been calibrated and
+found to pay high cost for low-correlation signal (e.g.,
+`vba-symbol-db` Session 6's Pearson +0.004 between self-rated
+confidence and cross-provider agreement), the cost-effective
+substitute is a subscription-paid in-IDE orchestrator pair: one
+provider authors, the other reviews. Codex (GitHub Copilot
+window) translates a procedure; Claude (Anthropic Max window)
+peer-reviews and adds falsification tests; the cross-provider
+property is preserved without any per-call routed cost beyond one
+mandatory cross-provider session-verification per session.
+Confirmed in two contexts: `vba-symbol-db` Session 7's PIVOT
+verdict (which articulated the pattern) and
+`vba-symbol-db-path-b-probe` Sessions 2-3 (which executed it —
+Codex translated, Claude reviewed, $0.078 routed across both
+sessions vs. the ~$24 routed-rigor cost of the calibration arc).
+The trade is wall-clock (slower per session, parallelizable across
+two IDE windows) and the loss of fine-grained per-symbol cost
+telemetry. Drop AI-self-rated columns
+(`Confidence*` / `Justification*`) from the writeback path at the
+same time — the routed-rigor calibration proved they had no
+correlation value. Action-detail reference is preserved in
+`lessons-learned.md` → "When Routed Cross-Provider Rigor Returns
+'Your Rigor Isn't Paying For Itself,' Drop The Rigor MODEL — Not
+The Rigor Itself".
 
 ### Cross-Repo Coordination
 
