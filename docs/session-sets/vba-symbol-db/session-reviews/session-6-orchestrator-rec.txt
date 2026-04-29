@@ -1,0 +1,31 @@
+---MODEL: gemini-pro cost=$0.0090---
+### Orchestrator Recommendation Analysis
+
+The primary cognitive load of Session 6 is not the mechanical generation of Python code but the synthesis of a statistical report (`correlation-report.md`) that interprets correlation metrics and renders a final verdict on the trustworthiness of a dataset's confidence scores. This elevates the session beyond a standard implementation task.
+
+1.  **Workload Breakdown**:
+    *   **Implementation (Medium Complexity)**: Creating `grader.py`, `aggregator.py`, and `correlation.py` involves structured logic, database interaction, and managing 126 API calls with idempotency. This is a standard coding task.
+    *   **Synthesis (High Complexity)**: The core deliverable is the analysis in `correlation-report.md`. This requires understanding statistical concepts (Pearson, Spearman, Krippendorff's alpha), interpreting the results in context, identifying significant patterns (e.g., false confidence), and authoring a conclusive, data-backed narrative.
+    *   **Routing (Fixed Cost)**: The 126 routed calls have a fixed cost and are provider-agnostic from the orchestrator's perspective.
+
+2.  **Orchestrator Evaluation**:
+    *   **`claude-code` with Sonnet 4.6 @ `medium`**: While sufficient for the Python implementation (as demonstrated in Session 5), Sonnet is not the optimal choice for the high-level synthesis and statistical interpretation required for the final report. This would violate the repository convention of routing synthesis tasks to Opus.
+    *   **`claude-code` with Opus 4.7 @ `high`**: This choice directly aligns with repository conventions. Opus is purpose-built for the session's most complex task: synthesis and analysis. It is also more than capable of handling the multi-file Python implementation, ensuring high-quality output across the entire session. The `high` effort level is justified by the need to maintain context across multiple modules, statistical concepts, and the final report generation.
+    *   **Other Orchestrators (`codex`, `gemini-cli`)**: While capable, selecting `claude-code` with Opus maintains consistency with the established workflow and leverages the specific strengths noted in the repository conventions for synthesis tasks.
+
+3.  **Cost-Benefit**: As established in Session 5, the cost of the orchestrator's own work is marginal compared to the cost of the routed calls. The marginal increase in cost from using Opus over Sonnet as the orchestrator is a sound investment for a significant increase in the quality and reliability of the session's primary analytical deliverable.
+
+### Recommendation
+
+The recommended orchestrator is **`claude-code`** using **Anthropic Opus 4.7** at **`high`** effort.
+
+The session's success hinges on the quality of the final synthesis and statistical interpretation in `correlation-report.md`. This task falls squarely under the repository convention of using Opus for synthesis. Using a single, powerful model for both the complex implementation and the nuanced analysis ensures a coherent and high-quality result. The `high` effort level is necessary to manage the context across the multiple Python modules, database schema, and the final analytical report.
+
+```json
+{
+  "recommended_engine": "claude-code",
+  "recommended_model": "Anthropic Opus 4.7",
+  "effort": "high",
+  "rationale": "The session is dominated by a complex synthesis and statistical interpretation task (correlation-report.md), which aligns with the repo convention of using Opus for synthesis."
+}
+```
