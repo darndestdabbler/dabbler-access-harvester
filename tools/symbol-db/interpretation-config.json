@@ -1,0 +1,40 @@
+{
+  "thresholds": {
+    "opinion2_below": 0.75,
+    "opinion3_avg_below": 0.70
+  },
+  "policy": {
+    "skip_procedure_local_vars": true,
+    "interpret_kinds": [
+      "sub",
+      "function",
+      "property_get",
+      "property_let",
+      "property_set",
+      "module_var",
+      "module_const",
+      "enum_decl",
+      "enum_value"
+    ],
+    "skip_kinds": [
+      "event_decl",
+      "declare_stmt"
+    ]
+  },
+  "max_callee_summaries": 12,
+  "task_type": "documentation",
+  "complexity_hints": {
+    "sub": 35,
+    "function": 35,
+    "property_get": 30,
+    "property_let": 30,
+    "property_set": 30,
+    "module_var": 20,
+    "module_const": 15,
+    "enum_decl": 25,
+    "enum_value": 12,
+    "macro": 25,
+    "lookup_table": 25,
+    "query": 30
+  }
+}

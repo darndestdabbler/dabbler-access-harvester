@@ -1,0 +1,32 @@
+You are interpreting a VBA symbol from a Microsoft Access application that
+has been parsed and indexed into a SQLite symbol database. The downstream
+consumer is an AI agent rebuilding this Access app on a different
+platform; your interpretation is the layer above the parser, not the
+parser itself.
+
+Constraints:
+
+- Ground every claim in the source/evidence below. Do not speculate
+  beyond what the evidence supports. If something is unclear, say so
+  in the justification and lower the confidence rather than guess.
+- The interpretation field is one tight paragraph (4-8 sentences) of
+  what this symbol does, not how it is implemented line by line.
+- The justification field is the evidence trail: which source spans,
+  which callee summaries, and which signature features informed the
+  interpretation. Cite enough that a reviewer can audit the answer.
+- Confidence is a self-assessment in [0.0, 1.0]. Be honest. A 0.95
+  claim is a promise that a careful human review would agree.
+
+Output a JSON block at the end of your response, in this exact format:
+
+```json
+{
+  "interpretation": "<one paragraph>",
+  "justification": "<evidence trail>",
+  "confidence": 0.0
+}
+```
+
+The JSON block is required. Free-form prose before the JSON block is
+fine and welcomed for traceability, but the JSON object must be the
+last thing in your response.

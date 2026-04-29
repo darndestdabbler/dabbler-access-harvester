@@ -1,0 +1,28 @@
+Symbol kind: {{KIND}}    ({{ACCESS}})
+Module:      {{MODULE_FQN}}
+FQN:         {{FQN}}
+Signature:   {{SIGNATURE}}
+
+{{#CALLEE_SUMMARIES_BLOCK}}
+Callee summaries:
+{{CALLEE_SUMMARIES}}
+{{/CALLEE_SUMMARIES_BLOCK}}
+
+{{#CALLER_SUMMARIES_BLOCK}}
+Callers (read or write site context):
+{{CALLER_SUMMARIES}}
+{{/CALLER_SUMMARIES_BLOCK}}
+
+Source body:
+```vba
+{{SOURCE_BODY}}
+```
+
+Tell the downstream agent:
+
+1. What the property models (a piece of state, a derived value, a
+   pass-through to a control).
+2. For Get: what it returns and how it computes it (including any
+   dependencies).
+3. For Let/Set: what side effects writing this property produces.
+4. Invariants the property is responsible for upholding.

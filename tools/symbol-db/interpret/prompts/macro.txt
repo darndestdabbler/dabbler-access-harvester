@@ -1,0 +1,21 @@
+Symbol kind: Access macro
+FQN:         {{FQN}}
+Is dead?     {{IS_DEAD}}
+
+Action sequence (from MacroActions):
+{{ACTION_SEQUENCE}}
+
+Source XML (truncated to {{XML_LIMIT}} chars):
+```xml
+{{SOURCE_XML}}
+```
+
+Tell the downstream agent:
+
+1. What the macro accomplishes when run.
+2. Its trigger context if known (some macros are bound as event
+   handlers; others run from the database's startup configuration or
+   from buttons/ribbons).
+3. Whether it is doing data-mutation work, navigation, or both.
+4. Whether the same logic could be expressed as a VBA procedure with
+   no semantic loss, or whether it relies on macro-only behaviour.

@@ -1,0 +1,22 @@
+Symbol kind: Access query
+FQN:         {{FQN}}
+Is dead?     {{IS_DEAD}}
+Twin of:     {{EQUIVALENCE_CANONICAL_FQN}}
+
+Source SQL:
+```sql
+{{SOURCE_SQL}}
+```
+
+{{#CONSUMER_SUMMARIES_BLOCK}}
+Consumers (controls / VBA procedures / macros that reference this query):
+{{CONSUMER_SUMMARIES}}
+{{/CONSUMER_SUMMARIES_BLOCK}}
+
+Tell the downstream agent:
+
+1. What rows this query produces and what it filters on.
+2. Its consumer context — is it a row source for a control, a backing
+   query for a form/report, or a stepping stone in a longer pipeline?
+3. Whether it could be inlined into the consumer or whether it is
+   shared and worth keeping as a named view in the migration target.

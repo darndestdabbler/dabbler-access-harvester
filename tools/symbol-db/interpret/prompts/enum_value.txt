@@ -1,0 +1,24 @@
+Symbol kind: enum value
+Module:      {{MODULE_FQN}}
+FQN:         {{FQN}}
+Name:        {{NAME}}
+Numeric:     {{NUMERIC_VALUE}}
+Enum:        {{ENUM_FQN}}{{#ENUM_INTERPRETATION}} — {{ENUM_INTERPRETATION}}{{/ENUM_INTERPRETATION}}
+
+{{#CALLER_SUMMARIES_BLOCK}}
+Procedures that use this value (sample):
+{{CALLER_SUMMARIES}}
+{{/CALLER_SUMMARIES_BLOCK}}
+
+Tell the downstream agent, in 2-4 sentences:
+
+1. What this specific enum value represents (read the name; the
+   conventions in this codebase use `s<TopicName>` for localised-
+   string keys and `enum<Domain>` for the enum itself).
+2. Where in the application it is consumed and what the consumer
+   does with it.
+3. Whether the value's numeric position (vs. its symbolic identity)
+   matters to the consumer.
+
+Keep it short. The interpretation here will be one of many feeding the
+enum-decl interpretation, so brevity is a feature.

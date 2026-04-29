@@ -370,6 +370,173 @@
           "costUsd": 0.0078
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/required-reading",
+      "dateTime": "2026-04-29T08:00:08.315612-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, session-set-authoring-guide.md, ai-led-session-workflow.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/runner-scaffold",
+      "dateTime": "2026-04-29T08:00:08.318497-04:00",
+      "description": "Authored Python interpretation runner under tools/symbol-db/interpret/: db.py (SQLite read/write helpers + InterpretationHistory), topology.py (Tarjan-based leaves-first ordering with self-loops dropped to avoid VBA return-value false-cycles), parsing.py (defensive JSON-block extraction with fenced/bare/last-brace fallback), prompt_builder.py (per-kind template renderer), runner.py (interpret_module + interpret_macros + interpret_lookup_tables), __main__.py (CLI), and interpretation-config.json (thresholds + per-kind complexity hints).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/topological-leaves-first",
+      "dateTime": "2026-04-29T08:00:08.318497-04:00",
+      "description": "Implemented Tarjan-based leaves-first topological sort. Multi-node SCCs are emitted as cycle units and tagged so InterpretationHistory.reason marks them as first-pass cycle members. Single-node self-loops are filtered before scheduling because in VBA they almost always represent the function-name return-value pattern, not real recursion. Verified on a 4-function/49-enum-value modStrings schedule.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/prompt-templates",
+      "dateTime": "2026-04-29T08:00:08.318497-04:00",
+      "description": "Authored eight per-kind prompt templates (function_sub, property, module_var, enum_decl, enum_value, macro, lookup_table, query) plus a shared header that defines the structured-JSON response contract. Non-leaf templates include a \"Callee summaries\" block that is populated from already-interpreted callees rather than re-walking source.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/confidence-escalation",
+      "dateTime": "2026-04-29T08:55:58.665617-04:00",
+      "description": "Wired confidence-thresholded escalation: opinion 2 fires when Confidence1 < 0.75; opinion 3 when avg(Conf1, Conf2) < 0.70. Thresholds live in tools/symbol-db/interpretation-config.json. Per-opinion calls go through the standard route() rotation so opinion 2 lands on a different cross-provider verifier than opinion 1 by virtue of the rule-based selector.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/md5-copy",
+      "dateTime": "2026-04-29T08:55:58.666617-04:00",
+      "description": "Implemented post-pass copy of Interpretation1 from canonical twins to MD5-equivalent siblings (reason=\"copied-from-md5-twin\"). NorthwindDevEdition's probe modules contain zero hash-twin clusters per Session 1 measurement, so this run produced 0 copies; the path is exercised by the unit tests in interpret/tests/.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/dry-run-modstrings",
+      "dateTime": "2026-04-29T08:55:58.667617-04:00",
+      "description": "Build run #1: modStrings interpreted (53 symbols including 1 enum_decl, 48 enum_values, 4 functions). 0 escalations. 0 parse failures. 11 procedure-local module_var/const skipped via \"skipped-procedure-local-var\" history rows. Cost $0.6202.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "documentation",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.6202,
+          "note": "aggregated across 53 routed calls in build run #1"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 8,
+      "stepKey": "session-4/run-form-frmcompanydetail",
+      "dateTime": "2026-04-29T08:55:58.668616-04:00",
+      "description": "Build run #2: Form_frmCompanyDetail interpreted (31 symbols including 7 module-level m_lng*/m_str* vars and 24 procedures) plus 1 macro and 2 lookup tables (Tables run aborted at gemini-pro 503 mid-pass). 1 opinion 2 fired, 1 opinion 3 fired. 1 parse failure. 20 procedure-local skips. Cost ~$0.71. Build run #3 retried lookup tables only with a transient-error guard added; 12 more tables interpreted at $0.16, 14 low-score tables skipped. Total cost across the 3 build runs: $1.4887.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "documentation",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.71,
+          "note": "aggregated across 34 routed calls in build run #2"
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "documentation",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.1585,
+          "note": "aggregated across 12 routed calls in build run #3"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 9,
+      "stepKey": "session-4/summary-report",
+      "dateTime": "2026-04-29T08:55:58.670119-04:00",
+      "description": "Authored tools/symbol-db/interpret/summary.py and ran it against the populated symbol DB. Output: tools/symbol-db/interpretation-summary-northwind.md. Headline numbers \u2014 84 / 115 symbols routed (27% reduction vs. interpret-everything-once), 98% landed at confidence >= 0.90, escalation rate 1.2% (well below the 20% spec budget), $1.49 total routed cost (well under the $2-4 estimate).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 10,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-29T08:55:58.671133-04:00",
+      "description": "dotnet build (0 errors, 286 warnings \u2014 pre-existing CA1416/xUnit warnings unchanged); dotnet test (1246+ passing, 3 skipped \u2014 comprehension bench skip + 2 unrelated tests). Python unit tests for tools/symbol-db/interpret/topology.py and parsing.py: 16 passing.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 11,
+      "stepKey": "session-4/verification",
+      "dateTime": "2026-04-29T09:01:11.426382-04:00",
+      "description": "Cross-provider verification routed via task_type=session-verification (gpt-5-4 per router-config.yaml). Full review saved to session-reviews/session-4.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 26277,
+          "outputTokens": 11865,
+          "costUsd": 0.24366749999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 12,
+      "stepKey": "session-4/verification-round-2",
+      "dateTime": "2026-04-29T10:03:14.631155-04:00",
+      "description": "Round-2 cross-provider verification after fixing 2 Critical + 4 Major + 1 Minor Round-1 findings. Verifier called with complexity_hint=85 per workflow Step 7.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20825,
+          "outputTokens": 13644,
+          "costUsd": 0.2567225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 13,
+      "stepKey": "session-4/verification-round-3",
+      "dateTime": "2026-04-29T10:09:26.870406-04:00",
+      "description": "Round-3 cross-provider verification after fixing 4 Major + 1 Minor Round-2 findings.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 18628,
+          "outputTokens": 8346,
+          "costUsd": 0.17176
+        }
+      ]
     }
   ]
 }
