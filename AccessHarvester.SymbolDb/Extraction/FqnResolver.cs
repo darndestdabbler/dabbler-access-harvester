@@ -36,6 +36,18 @@ internal static class FqnResolver
     {
         if (declaration is null) return null;
 
+        // Enum members are nested under their EnumDeclaration and never
+        // added to a Scope's Declarations list, so their own Scope back-
+        // pointer is null. Reach the owning module via ContainingEnum.Scope
+        // and mint <Module>.<Enum>.<Member> to match the FQN scheme
+        // SymbolDbBuilder.ExtractEnum writes for the corresponding rows.
+        if (declaration is EnumMemberDeclaration enumMember)
+        {
+            string? enumModule = ModuleNameFromScope(enumMember.ContainingEnum.Scope);
+            if (enumModule is null) return null;
+            return $"{enumModule}.{enumMember.ContainingEnum.Name}.{enumMember.Name}";
+        }
+
         var scope = declaration.Scope;
 
         // Local variable or parameter — declared directly in a ProcedureScope.
