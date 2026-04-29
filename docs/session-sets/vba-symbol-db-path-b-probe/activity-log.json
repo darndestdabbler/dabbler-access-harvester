@@ -1,0 +1,95 @@
+{
+  "sessionSetName": "vba-symbol-db-path-b-probe",
+  "createdDate": "2026-04-29T15:24:10.802361-04:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/required-reading",
+      "dateTime": "2026-04-29T15:28:12.747983-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, session-set-authoring-guide.md, ai-led-session-workflow.md, and the vba-symbol-db verdict + change-log + comprehension-packet for context.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-04-29T15:28:12.748991-04:00",
+      "description": "Authored ai-assignment.md via routed analysis (gemini-pro). Recommended orchestrator for Session 1: Claude Opus 4.7 @ effort=high (current). Session 2 recommendation: split between in-IDE orchestrators per the spec's cross-provider design.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1167,
+          "outputTokens": 728,
+          "costUsd": 0.0087
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/regression-test-failing",
+      "dateTime": "2026-04-29T15:35:34.514441-04:00",
+      "description": "Authored CrossModuleResolutionTests.cs in tests/AccessHarvester.SymbolDb.Tests/. 5 hermetic tests. On unfixed code: 3 fail (GetString/StringFormat/sCompanyDelete_CompanyTypeChange unresolved with reason 'not-in-scope'); 2 pass (within-module CompanyIsActive binds, out-of-scope IsFormOpen stays unresolved).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/writer-fix",
+      "dateTime": "2026-04-29T15:35:34.514441-04:00",
+      "description": "Fixed AccessHarvester.Vba.Resolver.References.ReferenceResolver: added Step 1.5 cross-module Public lookup (TryResolveAcrossModules + IsPublicVisible). Walks ProjectScope.Children for sibling Standard ModuleScopes, matches Public declarations and Public-enum-member spillover by case-insensitive name. Form/Report/Class modules excluded (those host class members, not bare-callable functions). Also extended FqnResolver.DeclarationFqn to mint FQNs for EnumMemberDeclaration via ContainingEnum.Scope (members carry no Scope back-pointer).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/symbol-db-rebuild",
+      "dateTime": "2026-04-29T15:35:34.514441-04:00",
+      "description": "Added end-to-end persistence test (RebuiltSymbolDb_PersistsResolvedCrossModuleReferences) that builds the canonical fixture, writes to a temp SQLite DB via SymbolDbWriter, and asserts the [References] table rows for GetString/StringFormat/sCompanyDelete_CompanyTypeChange resolve correctly. Did NOT overwrite tools/symbol-db/symbol-db.sqlite \u2014 the committed DB carries vba-symbol-db Sessions 4-7 interpretation columns and the spec's Open Question flags committing a rebuilt DB as a human decision. Surfaced as a deferred decision to the human in the close-out report.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/adjacent-tests",
+      "dateTime": "2026-04-29T15:35:34.515947-04:00",
+      "description": "Adjacent regression tests included in CrossModuleResolutionTests: WithinModule_CompanyIsActive_StillBinds (no within-module regression), OutOfFixtureScope_IsFormOpen_RemainsUnresolved (true unresolved still gets reason 'not-in-scope', no spurious cross-module bind). Plus the persistence-level test above.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-04-29T15:35:34.515947-04:00",
+      "description": "dotnet build AccessHarvester.sln: 0 errors, 4 NU1903/preview warnings (pre-existing). dotnet test AccessHarvester.sln --no-build: 1600 passed, 3 skipped (non-Windows/Access-not-installed), 0 failed. SymbolDb tests went 69 -> 70 (CrossModuleResolutionTests added 6 facts). Resolver tests still all 400 green (no regression on the existing scope-chain path).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-04-29T15:40:14.198075-04:00",
+      "description": "Cross-provider session verification (round 1) routed to gpt-5-4. Output saved to session-reviews/session-001.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9652,
+          "outputTokens": 8217,
+          "costUsd": 0.14738500000000002
+        }
+      ]
+    }
+  ]
+}

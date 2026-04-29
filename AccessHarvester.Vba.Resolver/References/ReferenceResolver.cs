@@ -306,6 +306,32 @@ public sealed class ReferenceResolver
                     return new ResolutionOutcome.Resolved(hit);
             }
 
+            // Step 1.5: cross-module Public lookup. The scope-chain walk
+            // bottoms out at ProjectScope, which by design owns no
+            // declarations of its own (see Scopes/Scope.cs ProjectScope
+            // comment). Public declarations in other Standard modules of
+            // the same project are visible bare from any module in the
+            // project; this step closes the gap surfaced by the
+            // vba-symbol-db Session 7 comprehension probe (e.g.,
+            // `GetString` and `StringFormat` calls in a Form module
+            // referencing modStrings.GetString / modStrings.StringFormat).
+            // Public-enum members spill into their owning module's Public
+            // namespace under VBA's enum visibility rule, so a bare use
+            // of an enum value (e.g., `sCompanyDelete_CompanyTypeChange`)
+            // also binds here when the enum is Public in a sibling module.
+            //
+            // Restricted to Standard modules: Form/Report/Class modules
+            // host class members, not bare-callable functions. Public
+            // procedures in those modules are reached via the class type
+            // (`Forms!frmFoo.Bar`), not as bare names from other modules.
+            // Option Private Module is intentionally NOT filtered here —
+            // it suppresses visibility to host-VBA consumers (Excel/Access
+            // calling into the project) but leaves intra-project Public
+            // declarations visible to other modules in the same project.
+            var crossModule = TryResolveAcrossModules(name);
+            if (crossModule is not null)
+                return new ResolutionOutcome.Resolved(crossModule);
+
             // Step 2: form / report class-context lookup. VBA allows
             // bare control name access from a form / report module's
             // code-behind (e.g. `txtFirstName = ""` rather than the
@@ -339,6 +365,65 @@ public sealed class ReferenceResolver
             // Step 5: explicit unresolved.
             return new ResolutionOutcome.Unresolved(UnresolvedReasons.NotInScope);
         }
+
+        // Cross-module Public lookup helper for Step 1.5. Returns the
+        // first matching Public declaration found in any sibling
+        // Standard module of the same ProjectScope, or a Public-enum
+        // member of such a module's Public enum, or null when no match
+        // exists. Match is case-insensitive per VBA name comparison.
+        private Declaration? TryResolveAcrossModules(string name)
+        {
+            // _module is the resolved module; its Parent is the project root
+            // when the scope tree was built normally. Defensive: if the
+            // module has no ProjectScope parent (a hand-constructed test
+            // module, or a future scope-tree shape change), fall through.
+            if (_module.Parent is not ProjectScope project)
+                return null;
+
+            foreach (var child in project.Children)
+            {
+                if (child is not ModuleScope sibling) continue;
+                if (ReferenceEquals(sibling, _module)) continue;
+                if (sibling.Kind != ModuleKind.Standard) continue;
+
+                foreach (var decl in sibling.Declarations)
+                {
+                    if (IsPublicVisible(decl)
+                        && Declaration.NameComparer.Equals(decl.Name, name))
+                    {
+                        return decl;
+                    }
+
+                    // Public-enum member spillover: a Public Enum's members
+                    // are visible bare in any module of the same project.
+                    if (decl is Declarations.EnumDeclaration enumDecl
+                        && enumDecl.Access == AccessLevel.Public)
+                    {
+                        foreach (var member in enumDecl.Members)
+                        {
+                            if (Declaration.NameComparer.Equals(member.Name, name))
+                                return member;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        // True when the declaration is Public at module level — i.e.,
+        // visible to other modules in the same project. Returns false
+        // for declarations that have no module-level Access concept
+        // (parameters, locals, type-members, implicit declarations).
+        private static bool IsPublicVisible(Declaration decl) => decl switch
+        {
+            Declarations.ProcedureDeclaration p => p.Access == AccessLevel.Public,
+            DeclareDeclaration d   => d.Access == AccessLevel.Public,
+            Declarations.EnumDeclaration e => e.Access == AccessLevel.Public,
+            Declarations.EventDeclaration ev => ev.Access == AccessLevel.Public,
+            UserDefinedTypeDeclaration t => t.Access == AccessLevel.Public,
+            VariableDeclaration v  => v.Access == AccessLevel.Public,
+            _ => false,
+        };
 
         private ResolutionOutcome DecideMemberOutcome(
             Expression target, string memberName, bool isBang)
