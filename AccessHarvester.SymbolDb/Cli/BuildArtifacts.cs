@@ -19,6 +19,18 @@ public static class BuildArtifacts
 {
     public static int RunForNorthwind(string repoRoot)
     {
+        return RunForNorthwind(repoRoot,
+            Path.Combine(repoRoot, "tools", "symbol-db", "symbol-db.sqlite"),
+            writeMeasurementReport: true,
+            reportPath: Path.Combine(repoRoot, "tools", "symbol-db", "measurement-northwind.md"));
+    }
+
+    public static int RunForNorthwind(
+        string repoRoot,
+        string dbPath,
+        bool writeMeasurementReport,
+        string? reportPath = null)
+    {
         if (!Directory.Exists(repoRoot))
             throw new DirectoryNotFoundException(repoRoot);
 
@@ -96,21 +108,27 @@ public static class BuildArtifacts
         var tablePaths = Directory.GetFiles(Path.Combine(kbRoot, "Tables"), "*.json");
         var tables = TableSchemaExtractor.Extract(tablePaths, rowSourceCounts);
 
-        string outDir = Path.Combine(repoRoot, "tools", "symbol-db");
-        Directory.CreateDirectory(outDir);
-
-        string dbPath = Path.Combine(outDir, "symbol-db.sqlite");
+        Directory.CreateDirectory(Path.GetDirectoryName(dbPath)
+            ?? throw new InvalidOperationException($"Cannot determine directory for {dbPath}."));
         var dedupReport = WriteDb(
             vbaResult, formResult, macroResult, queries, tables, dbPath);
 
-        string reportPath = Path.Combine(outDir, "measurement-northwind.md");
-        var report = new MeasurementReportBuilder().Build(
-            vbaResult, dedupReport,
-            "NorthwindDevEdition.accdb (Session 3 fixture: Form_frmCompanyDetail + modStrings + all macros/queries/tables)");
-        File.WriteAllText(reportPath, report);
-
         Console.WriteLine($"Wrote {dbPath}");
-        Console.WriteLine($"Wrote {reportPath}");
+
+        if (writeMeasurementReport)
+        {
+            string effectiveReportPath = reportPath
+                ?? Path.Combine(repoRoot, "tools", "symbol-db", "measurement-northwind.md");
+            Directory.CreateDirectory(Path.GetDirectoryName(effectiveReportPath)
+                ?? throw new InvalidOperationException(
+                    $"Cannot determine directory for {effectiveReportPath}."));
+            var report = new MeasurementReportBuilder().Build(
+                vbaResult, dedupReport,
+                "NorthwindDevEdition.accdb (Session 3 fixture: Form_frmCompanyDetail + modStrings + all macros/queries/tables)");
+            File.WriteAllText(effectiveReportPath, report);
+            Console.WriteLine($"Wrote {effectiveReportPath}");
+        }
+
         Console.WriteLine(
             $"Modules={vbaResult.Statistics.ModuleCount} " +
             $"Symbols={vbaResult.Statistics.SymbolCount} " +
