@@ -1,4 +1,4 @@
-# Symbol DB Measurement — NorthwindDevEdition.accdb (Session 1 fixture: Form_frmCompanyDetail + modStrings)
+# Symbol DB Measurement — NorthwindDevEdition.accdb (Session 3 fixture: Form_frmCompanyDetail + modStrings + all macros/queries/tables)
 
 > **Session:** 1 of 5 (`vba-symbol-db`).
 > **Purpose:** Quantify how many AI interpretation calls are needed once dead-

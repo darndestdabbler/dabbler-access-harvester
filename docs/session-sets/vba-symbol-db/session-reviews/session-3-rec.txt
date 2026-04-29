@@ -1,0 +1,28 @@
+### Recommendation
+
+*   **Orchestrator**: `claude-haiku` (or equivalent cost/performance tier model)
+*   **Effort**: `low`
+
+---
+
+### Analysis
+
+#### 1. Task Profile
+
+Session 3 is a deterministic, mechanical task focused on data transformation and persistence. The core work involves iterating through existing in-memory data structures (`FormComponentSpec`, `MacroXmlParser`, `QueryAbstraction`) and writing their contents to a SQLite database. This work does not require complex reasoning, code synthesis, or architectural decisions. The logic is repetitive and follows a clear pattern (read from object, map to record, write to table).
+
+#### 2. Model Selection Rationale
+
+The "No AI synthesis required" note is the key determinant. The task is not a good fit for high-capability, high-cost models (e.g., `claude-opus`, `claude-code`/`sonnet`). These models excel at complex reasoning and synthesis, which would be underutilized here.
+
+A cost-effective, high-throughput model like `claude-haiku` is optimized for this type of structured, boilerplate generation. Its primary function will be to correctly map object properties to database columns based on a clear prompt, a task where speed and cost-efficiency are more valuable than advanced reasoning.
+
+#### 3. Effort Calibration
+
+Session 2's `medium` effort was appropriate for a task with more logical complexity (FQN resolution). For Session 3, a `low` effort setting is recommended. The inputs are well-defined, and the output is a direct translation. A lower effort setting biases the model towards simple, literal interpretations of the prompt, which is precisely what is needed for this data-mapping task, reducing the risk of unnecessary abstraction or over-engineering.
+
+---
+
+### Risk Mitigation
+
+The established multi-round verification process is sufficient to mitigate the risk of minor mapping errors (e.g., incorrect column name, off-by-one error) that a lower-tier model might introduce. The expected cost of an additional verification cycle is lower than the upfront cost of using a more capable orchestrator for a task that does not require it. If the initial run with `claude-haiku` @ `low` proves inefficient (e.g., requires >2 verification rounds), the fallback is to revert to the known-good Session 2 configuration (`claude-code` @ `medium`).

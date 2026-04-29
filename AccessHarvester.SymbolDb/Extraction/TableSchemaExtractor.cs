@@ -32,16 +32,28 @@ public static class TableSchemaExtractor
         IEnumerable<string> kbJsonPaths,
         IReadOnlySet<string>? rowSourceTableNames = null)
     {
+        // Wrap a presence-only set into a count map so callers without
+        // count data still get the binary "is-row-source" signal.
+        IReadOnlyDictionary<string, int>? counts = rowSourceTableNames is null
+            ? null
+            : rowSourceTableNames.ToDictionary(n => n, _ => 1, StringComparer.OrdinalIgnoreCase);
+        return Extract(kbJsonPaths, counts);
+    }
+
+    public static IReadOnlyList<TableRow> Extract(
+        IEnumerable<string> kbJsonPaths,
+        IReadOnlyDictionary<string, int>? rowSourceControlCounts)
+    {
         var rows = new List<TableRow>();
         foreach (var path in kbJsonPaths)
         {
-            var row = ExtractOne(path, rowSourceTableNames);
+            var row = ExtractOne(path, rowSourceControlCounts);
             if (row is not null) rows.Add(row);
         }
         return rows;
     }
 
-    private static TableRow? ExtractOne(string path, IReadOnlySet<string>? rowSourceNames)
+    private static TableRow? ExtractOne(string path, IReadOnlyDictionary<string, int>? rowSourceCounts)
     {
         using var stream = File.OpenRead(path);
         var root = JsonNode.Parse(stream)?.AsObject();
@@ -110,7 +122,13 @@ public static class TableSchemaExtractor
         if (primaryKeyColumn is not null) { score += 20; reasons.Add("has-pk(+20)"); }
         if (recordCount is not null && recordCount.Value <= 200) { score += 30; reasons.Add($"record-count={recordCount}(+30)"); }
         if (candidateLabelColumn is not null) { score += 20; reasons.Add($"label-col={candidateLabelColumn}(+20)"); }
-        if (rowSourceNames is not null && rowSourceNames.Contains(tableName)) { score += 30; reasons.Add("is-row-source(+30)"); }
+        // Count-tiered row-source signal: spec calls for "is RowSource of N
+        // controls". A single referencing control is a weaker lookup signal
+        // than several; we tier the bonus accordingly.
+        int rowSourceUses = 0;
+        if (rowSourceCounts is not null) rowSourceCounts.TryGetValue(tableName, out rowSourceUses);
+        if (rowSourceUses >= 3) { score += 30; reasons.Add($"row-source-uses={rowSourceUses}(+30)"); }
+        else if (rowSourceUses >= 1) { score += 20; reasons.Add($"row-source-uses={rowSourceUses}(+20)"); }
 
         string? reason = reasons.Count > 0 ? string.Join("; ", reasons) : null;
 

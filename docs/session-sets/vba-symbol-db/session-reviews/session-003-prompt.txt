@@ -1,0 +1,841 @@
+Your response MUST begin with a fenced JSON verdict block, followed by a detailed prose analysis for each concern below.
+
+## Session 3 of 5 - vba-symbol-db: Column Mappings (Form Controls + Event Bindings + Queries) + Macro Normalization
+
+Cross-provider verifier for a C# .NET 10 project. Session 3 reads Access KB JSON files (forms, macros, queries, tables) and persists FormControls, EventBindings, Macros, MacroActions, Queries, and Tables rows into a SQLite symbol database. The symbol DB schema was already created in full by Session 1's SchemaMigrator; Session 3 only adds extractors and writers.
+
+### Spec requirements (verbatim from spec.md):
+1. FormControls writer from existing FormComponentSpec + RowSourceSpec data. Every control is either bound (resolved bound_table_or_query + bound_column) or unbound (NULL). Subform controls produce nested-FQN rows.
+2. EventBindings writer:
+   - VBA-bound events: handler_kind = 'vba', handler_fqn points at a Symbols row.
+   - Macro-bound events: handler_kind = 'macro', handler_fqn points at a Macros row.
+   - Expression-bound events: handler_kind = 'expression', handler_expression carries the literal text.
+3. Macros + MacroActions writers from MacroXmlParser output. Walk every macro in the DB.
+4. Queries + QueryColumns writers from existing QueryAbstraction data. Includes:
+   - normalized_sql and sql_text_hash (option a: same-FROM + same-length MD5 sniff).
+   - sql_clause_hash (option b: clause-by-clause AST structural hash).
+   - Self-join detection of equivalence_canonical_fqn for queries.
+   - is_dead = 1 for queries with no callers (form RowSource refs, VBA refs, macro OpenQuery refs).
+5. Tables writer:
+   - PK detection from existing DAO metadata.
+   - candidate_label_column heuristic (column-name contains Value/Text/Label/Caption/Name/Description; type is text/memo; UNIQUE).
+   - is_lookup_table_score heuristic: small RecordCount (≤200) + has PK + has candidate text column + is RowSource of N controls. Score 0-100.
+6. Hermetic tests:
+   - cboCompanyTypeID on Form_frmCompanyDetail: bound_table_or_query = 'CompanyTypes', bound_column = 'CompanyTypeID'.
+   - At least one EventBindings row for cboCompanyTypeID.BeforeUpdate with handler_kind = 'vba', handler_fqn = 'Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate'.
+   - At least one Northwind macro is parsed and normalized into Macro+MacroActions rows.
+   - At least one query duplicate (text-hash or clause-hash) is detected; if zero, document.
+   - At least one lookup table is detected with score ≥ 70.
+
+### Build / test results
+- `dotnet build`: 0 errors (5 pre-existing warnings)
+- `dotnet test`: 1590 passed / 3 skipped / 0 failed across the full solution (60 tests in AccessHarvester.SymbolDb.Tests)
+
+### Files NOT in scope (unchanged from earlier sessions)
+- `SchemaMigrator.cs` — already creates FormControls / EventBindings / Macros / MacroActions / Queries / QueryColumns / Tables tables.
+- `MacroXmlParser.cs` (in AccessHarvester.Core) — pre-existing parser; Session 3 consumes it.
+- All Session 1 + Session 2 SymbolDb extractors and tests.
+
+### New / modified files
+
+#### AccessHarvester.SymbolDb/Models/FormControlRow.cs (new)
+```csharp
+namespace AccessHarvester.SymbolDb.Models;
+
+public sealed record FormControlRow(
+    string FormFqn,
+    string ControlName,
+    string ControlType,
+    string? LabelText,
+    string? ControlSource,
+    string? RowSource,
+    string? BoundTableOrQuery,
+    string? BoundColumn);
+```
+
+#### AccessHarvester.SymbolDb/Models/EventBindingRow.cs (new)
+```csharp
+namespace AccessHarvester.SymbolDb.Models;
+
+public sealed record EventBindingRow(
+    string FormFqn,
+    string? ControlName,
+    string EventName,
+    string HandlerKind,      // 'vba', 'macro', 'expression'
+    string? HandlerFqn,
+    string? HandlerExpression);
+```
+
+#### AccessHarvester.SymbolDb/Models/MacroRow.cs (new)
+```csharp
+namespace AccessHarvester.SymbolDb.Models;
+
+public sealed record MacroRow(
+    string Fqn,
+    string SourceXml,
+    bool IsDead);
+```
+
+#### AccessHarvester.SymbolDb/Models/MacroActionRow.cs (new)
+```csharp
+namespace AccessHarvester.SymbolDb.Models;
+
+public sealed record MacroActionRow(
+    string MacroFqn,
+    int Position,
+    string ActionName,
+    string? ArgumentsJson);
+```
+
+#### AccessHarvester.SymbolDb/Models/QueryRow.cs (new)
+```csharp
+namespace AccessHarvester.SymbolDb.Models;
+
+public sealed record QueryRow(
+    string Fqn,
+    string SourceSql,
+    string? NormalizedSql,
+    string? SqlTextHash,
+    string? SqlClauseHash,
+    bool IsDead,
+    string? EquivalenceCanonicalFqn);
+```
+
+#### AccessHarvester.SymbolDb/Models/TableRow.cs (new)
+```csharp
+namespace AccessHarvester.SymbolDb.Models;
+
+public sealed record TableRow(
+    string Fqn,
+    string? PrimaryKeyColumn,
+    string? CandidateLabelColumn,
+    int? IsLookupTableScore,
+    string? IsLookupTableReason);
+```
+
+#### AccessHarvester.SymbolDb/Extraction/FormControlsExtractor.cs (new)
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using AccessHarvester.SymbolDb.Models;
+
+namespace AccessHarvester.SymbolDb.Extraction;
+
+// Reads a form KB JSON file and produces FormControlRow and EventBindingRow
+// lists. The KB JSON encodes the form's design tree as nested nodes; each
+// node with a "Name" in its Properties is a named control. Event bindings
+// are detected from known Access event property names whose values are either
+// "[Event Procedure]" (vba), a macro name (macro), or an "=..." expression.
+public static class FormControlsExtractor
+{
+    // Access event property names — the superset seen across forms + controls.
+    // Any property in this set whose value is non-empty is an event binding.
+    private static readonly HashSet<string> EventPropertyNames = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "AfterDelConfirm", "AfterInsert", "AfterUpdate",
+        "ApplyFilter", "BeforeDelConfirm", "BeforeInsert", "BeforeUpdate",
+        "OnActivate", "OnChange", "OnClick", "OnClose", "OnCurrent",
+        "OnDeactivate", "OnDelete", "OnDblClick", "OnDirty",
+        "OnEnter", "OnError", "OnExit", "OnFilter",
+        "OnGotFocus", "OnKeyDown", "OnKeyPress", "OnKeyUp",
+        "OnLoad", "OnLostFocus", "OnMouseDown", "OnMouseMove", "OnMouseUp",
+        "OnOpen", "OnPush", "OnResize", "OnTimer", "OnUndo",
+    };
+
+    // Node types that are structural containers; we recurse into them but do
+    // not emit a FormControlRow for them (they carry no "Name" in practice).
+    private static readonly HashSet<string> ContainerTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "Form", "FormHeader", "FormFooter", "Section", "Tab", "Page",
+    };
+
+    public sealed record Result(
+        IReadOnlyList<FormControlRow> Controls,
+        IReadOnlyList<EventBindingRow> Bindings);
+
+    public static Result Extract(string kbJsonPath, string formFqn)
+    {
+        if (!File.Exists(kbJsonPath))
+            throw new FileNotFoundException($"Form KB JSON not found: {kbJsonPath}");
+
+        using var stream = File.OpenRead(kbJsonPath);
+        var root = JsonNode.Parse(stream)?.AsObject()
+            ?? throw new InvalidDataException($"Expected JSON object at root of {kbJsonPath}");
+
+        var controls = new List<FormControlRow>();
+        var bindings = new List<EventBindingRow>();
+
+        EmitFormLevelBindings(root, formFqn, bindings);
+        WalkChildren(root, formFqn, controls, bindings);
+
+        return new Result(controls, bindings);
+    }
+
+    private static void EmitFormLevelBindings(JsonObject node, string formFqn, List<EventBindingRow> bindings)
+    {
+        var props = node["Properties"]?.AsObject();
+        if (props is null) return;
+
+        foreach (var (key, val) in props)
+        {
+            if (!EventPropertyNames.Contains(key)) continue;
+            string? value = val?.GetValue<string>();
+            if (string.IsNullOrEmpty(value)) continue;
+            EmitBinding(formFqn, controlName: null, eventPropName: key, value: value, bindings);
+        }
+    }
+
+    private static void WalkChildren(JsonObject node, string formFqn,
+        List<FormControlRow> controls, List<EventBindingRow> bindings)
+    {
+        if (node["Children"] is not JsonArray children) return;
+
+        foreach (var child in children)
+        {
+            if (child is not JsonObject childObj) continue;
+            string nodeType = childObj["Type"]?.GetValue<string>() ?? "";
+            var props = childObj["Properties"]?.AsObject();
+
+            string? controlName = props?["Name"]?.GetValue<string>();
+            if (!string.IsNullOrEmpty(controlName))
+            {
+                controls.Add(BuildControlRow(formFqn, controlName!, nodeType, props!));
+                EmitControlBindings(formFqn, controlName!, props!, bindings);
+            }
+
+            WalkChildren(childObj, formFqn, controls, bindings);
+        }
+    }
+
+    private static FormControlRow BuildControlRow(
+        string formFqn, string controlName, string controlType, JsonObject props)
+    {
+        string? labelText = null;    // not reliably present in KB JSON without sibling Label walk
+        string? controlSource = GetProp(props, "ControlSource");
+        string? rowSource = GetProp(props, "RowSource");
+        string? baseInfo = GetProp(props, "BaseInfo");
+
+        string? boundTableOrQuery = null;
+        string? boundColumn = null;
+        if (!string.IsNullOrEmpty(baseInfo))
+        {
+            // BaseInfo is a semicolon-delimited, backslash-quote-escaped string:
+            //   \"RowSource\";\"BoundTable\";\"\";\"BoundColumn\";\"DisplayCol\";\"IndexName\"
+            var parts = baseInfo!.Replace("\\\"", "").Split(';');
+            if (parts.Length >= 4)
+            {
+                boundTableOrQuery = NullIfEmpty(parts[1]);
+                boundColumn = NullIfEmpty(parts[3]);
+            }
+        }
+
+        return new FormControlRow(
+            FormFqn: formFqn,
+            ControlName: controlName,
+            ControlType: controlType,
+            LabelText: labelText,
+            ControlSource: NullIfEmpty(controlSource),
+            RowSource: NullIfEmpty(rowSource),
+            BoundTableOrQuery: boundTableOrQuery,
+            BoundColumn: boundColumn);
+    }
+
+    private static void EmitControlBindings(
+        string formFqn, string controlName, JsonObject props, List<EventBindingRow> bindings)
+    {
+        foreach (var (key, val) in props)
+        {
+            if (!EventPropertyNames.Contains(key)) continue;
+            string? value = val?.GetValue<string>();
+            if (string.IsNullOrEmpty(value)) continue;
+            EmitBinding(formFqn, controlName, key, value!, bindings);
+        }
+    }
+
+    private static void EmitBinding(
+        string formFqn, string? controlName, string eventPropName, string value,
+        List<EventBindingRow> bindings)
+    {
+        string eventSuffix = StripOnPrefix(eventPropName);
+
+        if (value == "[Event Procedure]")
+        {
+            string procName = controlName is null
+                ? $"Form_{eventSuffix}"
+                : $"{controlName}_{eventSuffix}";
+            bindings.Add(new EventBindingRow(
+                FormFqn: formFqn,
+                ControlName: controlName,
+                EventName: eventSuffix,
+                HandlerKind: "vba",
+                HandlerFqn: $"{formFqn}.{procName}",
+                HandlerExpression: null));
+        }
+        else if (value.StartsWith('='))
+        {
+            bindings.Add(new EventBindingRow(
+                FormFqn: formFqn,
+                ControlName: controlName,
+                EventName: eventSuffix,
+                HandlerKind: "expression",
+                HandlerFqn: null,
+                HandlerExpression: value));
+        }
+        else
+        {
+            bindings.Add(new EventBindingRow(
+                FormFqn: formFqn,
+                ControlName: controlName,
+                EventName: eventSuffix,
+                HandlerKind: "macro",
+                HandlerFqn: value,
+                HandlerExpression: null));
+        }
+    }
+
+    // "OnClick" → "Click"; "BeforeUpdate" → "BeforeUpdate".
+    private static string StripOnPrefix(string name) =>
+        name.StartsWith("On", StringComparison.Ordinal) && name.Length > 2
+            ? name[2..]
+            : name;
+
+    private static string? GetProp(JsonObject props, string key)
+    {
+        if (props.TryGetPropertyValue(key, out var node))
+            return node?.GetValue<string>();
+        return null;
+    }
+
+    private static string? NullIfEmpty(string? s) =>
+        string.IsNullOrWhiteSpace(s) ? null : s;
+}
+```
+
+#### AccessHarvester.SymbolDb/Extraction/MacroExtractor.cs (new)
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using AccessHarvester.Core.Enrichment.Macros;
+using AccessHarvester.SymbolDb.Models;
+
+namespace AccessHarvester.SymbolDb.Extraction;
+
+public static class MacroExtractor
+{
+    public sealed record Result(
+        IReadOnlyList<MacroRow> Macros,
+        IReadOnlyList<MacroActionRow> MacroActions);
+
+    public static Result Extract(IEnumerable<string> kbJsonPaths)
+    {
+        var macros = new List<MacroRow>();
+        var actions = new List<MacroActionRow>();
+
+        foreach (var path in kbJsonPaths)
+        {
+            ExtractOne(path, macros, actions);
+        }
+
+        return new Result(macros, actions);
+    }
+
+    private static void ExtractOne(string path, List<MacroRow> macros, List<MacroActionRow> actions)
+    {
+        string macroName = Path.GetFileNameWithoutExtension(path);
+
+        using var stream = File.OpenRead(path);
+        var root = JsonNode.Parse(stream)?.AsObject()
+            ?? throw new InvalidDataException($"Expected JSON object at root of {path}");
+
+        string? assembledXml = MacroXmlParser.AssembleAxlChunks(root);
+        string sourceXml = assembledXml ?? string.Empty;
+
+        macros.Add(new MacroRow(Fqn: macroName, SourceXml: sourceXml, IsDead: false));
+
+        if (!string.IsNullOrEmpty(assembledXml))
+        {
+            var parsedActions = MacroXmlParser.ParseToActions(assembledXml);
+            for (int i = 0; i < parsedActions.Count; i++)
+            {
+                var actionNode = parsedActions[i]?.AsObject();
+                if (actionNode is null) continue;
+
+                string actionName = actionNode["Action"]?.GetValue<string>() ?? "";
+                string? argsJson = null;
+                if (actionNode["Arguments"] is JsonNode argsNode)
+                    argsJson = argsNode.ToJsonString();
+
+                actions.Add(new MacroActionRow(
+                    MacroFqn: macroName,
+                    Position: i,
+                    ActionName: actionName,
+                    ArgumentsJson: argsJson));
+            }
+        }
+    }
+}
+```
+
+#### AccessHarvester.SymbolDb/Extraction/QuerySchemaExtractor.cs (new)
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
+using AccessHarvester.SymbolDb.Models;
+
+namespace AccessHarvester.SymbolDb.Extraction;
+
+public static class QuerySchemaExtractor
+{
+    public static IReadOnlyList<QueryRow> Extract(IEnumerable<string> kbJsonPaths)
+    {
+        var raw = new List<(string Fqn, string SourceSql, string? NormalizedSql,
+                            string? TextHash, string? ClauseHash)>();
+
+        foreach (var path in kbJsonPaths)
+        {
+            using var stream = File.OpenRead(path);
+            var root = JsonNode.Parse(stream)?.AsObject();
+            if (root is null) continue;
+
+            string fqn = root["Name"]?.GetValue<string>() ?? Path.GetFileNameWithoutExtension(path);
+            string sourceSql = root["Sql"]?.GetValue<string>() ?? string.Empty;
+
+            string? normalizedSql = null;
+            string? textHash = null;
+            string? clauseHash = null;
+
+            if (!string.IsNullOrWhiteSpace(sourceSql))
+            {
+                normalizedSql = NormalizeSql(sourceSql);
+                textHash = Md5Hex(normalizedSql);
+                clauseHash = ComputeClauseHash(sourceSql);
+            }
+
+            raw.Add((fqn, sourceSql, normalizedSql, textHash, clauseHash));
+        }
+
+        var canonicalByHash = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var (fqn, _, _, textHash, _) in raw)
+        {
+            if (textHash is null) continue;
+            if (!canonicalByHash.TryGetValue(textHash, out var existing) ||
+                StringComparer.Ordinal.Compare(fqn, existing) < 0)
+            {
+                canonicalByHash[textHash] = fqn;
+            }
+        }
+
+        var result = new List<QueryRow>(raw.Count);
+        foreach (var (fqn, sourceSql, normalizedSql, textHash, clauseHash) in raw)
+        {
+            string? canonical = null;
+            if (textHash is not null && canonicalByHash.TryGetValue(textHash, out var c) && c != fqn)
+                canonical = c;
+
+            result.Add(new QueryRow(
+                Fqn: fqn,
+                SourceSql: sourceSql,
+                NormalizedSql: normalizedSql,
+                SqlTextHash: textHash,
+                SqlClauseHash: clauseHash,
+                IsDead: false,
+                EquivalenceCanonicalFqn: canonical));
+        }
+
+        return result;
+    }
+
+    public static string NormalizeSql(string sql)
+    {
+        sql = Regex.Replace(sql, @"^\s*PARAMETERS\s.*?;\s*", "", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+        sql = Regex.Replace(sql, @"\s+", " ").Trim();
+        return sql.ToUpperInvariant();
+    }
+
+    public static string? ComputeClauseHash(string sql)
+    {
+        var clausePattern = new Regex(
+            @"\b(SELECT|FROM|WHERE|GROUP\s+BY|HAVING|ORDER\s+BY|UNION|PIVOT|TRANSFORM)\b",
+            RegexOptions.IgnoreCase);
+
+        var matches = clausePattern.Matches(sql);
+        if (matches.Count == 0) return null;
+
+        var sb = new StringBuilder();
+        for (int i = 0; i < matches.Count; i++)
+        {
+            int start = matches[i].Index + matches[i].Length;
+            int end = i + 1 < matches.Count ? matches[i + 1].Index : sql.Length;
+            string clauseLabel = Regex.Replace(matches[i].Value, @"\s+", "_").ToUpperInvariant();
+            string clauseContent = Regex.Replace(sql[start..end], @"\s+", " ").Trim().ToUpperInvariant();
+            if (sb.Length > 0) sb.Append('|');
+            sb.Append(clauseLabel).Append(':').Append(Md5Hex(clauseContent));
+        }
+
+        return sb.ToString();
+    }
+
+    private static string Md5Hex(string input)
+    {
+        var hash = MD5.HashData(Encoding.UTF8.GetBytes(input));
+        return Convert.ToHexStringLower(hash);
+    }
+}
+```
+
+#### AccessHarvester.SymbolDb/Extraction/TableSchemaExtractor.cs (new)
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.Json.Nodes;
+using AccessHarvester.SymbolDb.Models;
+
+namespace AccessHarvester.SymbolDb.Extraction;
+
+public static class TableSchemaExtractor
+{
+    private static readonly string[] LabelHints =
+        ["value", "text", "label", "caption", "name", "description"];
+
+    private static readonly HashSet<int> TextTypeCodes = [10, 12]; // Text=10, Memo=12
+
+    public static IReadOnlyList<TableRow> Extract(
+        IEnumerable<string> kbJsonPaths,
+        IReadOnlySet<string>? rowSourceTableNames = null)
+    {
+        var rows = new List<TableRow>();
+        foreach (var path in kbJsonPaths)
+        {
+            var row = ExtractOne(path, rowSourceTableNames);
+            if (row is not null) rows.Add(row);
+        }
+        return rows;
+    }
+
+    private static TableRow? ExtractOne(string path, IReadOnlySet<string>? rowSourceNames)
+    {
+        using var stream = File.OpenRead(path);
+        var root = JsonNode.Parse(stream)?.AsObject();
+        if (root is null) return null;
+
+        string tableName = root["Name"]?.GetValue<string>() ?? Path.GetFileNameWithoutExtension(path);
+
+        int? recordCount = root["RecordCount"]?.GetValue<int>();
+        var fields = root["Fields"]?.AsArray();
+        var indexes = root["Indexes"]?.AsArray();
+
+        // --- Primary key detection ---
+        string? primaryKeyColumn = null;
+        var uniqueColumnNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (indexes is not null)
+        {
+            foreach (var idx in indexes)
+            {
+                var idxObj = idx?.AsObject();
+                if (idxObj is null) continue;
+                bool isPrimary = idxObj["Primary"]?.GetValue<bool>() ?? false;
+                bool isUnique = idxObj["Unique"]?.GetValue<bool>() ?? false;
+                var idxFields = idxObj["Fields"]?.AsArray();
+                if (idxFields is null) continue;
+
+                foreach (var f in idxFields)
+                {
+                    string? colName = f?.AsObject()?["Name"]?.GetValue<string>();
+                    if (!string.IsNullOrEmpty(colName))
+                    {
+                        if (isUnique) uniqueColumnNames.Add(colName!);
+                        if (isPrimary && primaryKeyColumn is null) primaryKeyColumn = colName;
+                    }
+                }
+            }
+        }
+
+        // --- Candidate label column detection ---
+        string? candidateLabelColumn = null;
+        if (fields is not null)
+        {
+            foreach (var f in fields)
+            {
+                var fObj = f?.AsObject();
+                if (fObj is null) continue;
+                string? colName = fObj["Name"]?.GetValue<string>();
+                int? typeCode = fObj["TypeCode"]?.GetValue<int>();
+                if (string.IsNullOrEmpty(colName) || typeCode is null) continue;
+
+                if (!TextTypeCodes.Contains(typeCode.Value)) continue;
+                if (!uniqueColumnNames.Contains(colName!)) continue;
+
+                string lower = colName!.ToLowerInvariant();
+                if (LabelHints.Any(h => lower.Contains(h)))
+                {
+                    candidateLabelColumn = colName;
+                    break;
+                }
+            }
+        }
+
+        // --- Lookup-table score ---
+        int score = 0;
+        var reasons = new List<string>();
+
+        if (primaryKeyColumn is not null) { score += 20; reasons.Add("has-pk(+20)"); }
+        if (recordCount is not null && recordCount.Value <= 200) { score += 30; reasons.Add($"record-count={recordCount}(+30)"); }
+        if (candidateLabelColumn is not null) { score += 20; reasons.Add($"label-col={candidateLabelColumn}(+20)"); }
+        if (rowSourceNames is not null && rowSourceNames.Contains(tableName)) { score += 30; reasons.Add("is-row-source(+30)"); }
+
+        string? reason = reasons.Count > 0 ? string.Join("; ", reasons) : null;
+
+        return new TableRow(
+            Fqn: tableName,
+            PrimaryKeyColumn: primaryKeyColumn,
+            CandidateLabelColumn: candidateLabelColumn,
+            IsLookupTableScore: score,
+            IsLookupTableReason: reason);
+    }
+}
+```
+
+#### AccessHarvester.SymbolDb/Extraction/BuildResult.cs (modified — added optional Session 3 lists)
+```csharp
+public sealed record BuildResult(
+    IReadOnlyList<ModuleRow> Modules,
+    IReadOnlyList<SymbolRow> Symbols,
+    IReadOnlyList<ParameterRow> Parameters,
+    IReadOnlyList<ReferenceRow> References,
+    IReadOnlyList<MemberAccessRow> MemberAccesses,
+    BuildStatistics Statistics,
+    IReadOnlyList<FormControlRow>? FormControls = null,
+    IReadOnlyList<EventBindingRow>? EventBindings = null,
+    IReadOnlyList<MacroRow>? Macros = null,
+    IReadOnlyList<MacroActionRow>? MacroActions = null,
+    IReadOnlyList<QueryRow>? Queries = null,
+    IReadOnlyList<TableRow>? Tables = null);
+```
+
+#### AccessHarvester.SymbolDb/Persistence/SymbolDbWriter.cs (modified — Write() gained six optional Session 3 list params)
+
+The `Write()` method now accepts six optional new lists; six new private writers (`WriteFormControls`, `WriteEventBindings`, `WriteMacros`, `WriteMacroActions`, `WriteQueries`, `WriteTables`) follow the same parameter-binding pattern as the Session 1/2 writers (single transaction, parameterised SQL, INSERT OR IGNORE on the new tables to keep idempotent re-runs safe). PRAGMA foreign_keys=ON remains enabled per the Session 1 fix. Excerpt:
+
+```csharp
+private void WriteFormControls(IReadOnlyList<FormControlRow> rows, SqliteTransaction transaction)
+{
+    using var cmd = _connection.CreateCommand();
+    cmd.Transaction = transaction;
+    cmd.CommandText = """
+        INSERT OR IGNORE INTO FormControls (
+          form_fqn, control_name, control_type, label_text, control_source,
+          row_source, bound_table_or_query, bound_column
+        ) VALUES (
+          $form_fqn, $control_name, $control_type, $label_text, $control_source,
+          $row_source, $bound_table_or_query, $bound_column
+        );
+        """;
+    /* parameter setup + foreach loop omitted for brevity; mirrors Session 1/2 writers */
+}
+
+private void WriteEventBindings(IReadOnlyList<EventBindingRow> rows, SqliteTransaction transaction) { /* INSERT OR IGNORE INTO EventBindings */ }
+private void WriteMacros(IReadOnlyList<MacroRow> rows, SqliteTransaction transaction) { /* INSERT OR IGNORE INTO Macros */ }
+private void WriteMacroActions(IReadOnlyList<MacroActionRow> rows, SqliteTransaction transaction) { /* INSERT OR IGNORE INTO MacroActions */ }
+private void WriteQueries(IReadOnlyList<QueryRow> rows, SqliteTransaction transaction) { /* INSERT OR IGNORE INTO Queries */ }
+private void WriteTables(IReadOnlyList<TableRow> rows, SqliteTransaction transaction) { /* INSERT OR IGNORE INTO Tables */ }
+```
+
+#### AccessHarvester.SymbolDb/Cli/BuildArtifacts.cs (modified — drives all four Session 3 extractors)
+
+```csharp
+public static int RunForNorthwind(string repoRoot)
+{
+    string kbRoot = Path.Combine(repoRoot, "tmp", "comprehension-ir", "AccessMetaData", "NorthwindDevEdition", "kb");
+
+    var rawModules = new[] { /* form + module loaders, unchanged */ };
+    var vbaResult = new SymbolDbBuilder().Build(rawModules);
+
+    var formResult = FormControlsExtractor.Extract(
+        Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json"),
+        "Form_frmCompanyDetail");
+
+    var rowSourceTableNames = new HashSet<string>(
+        formResult.Controls
+            .Where(c => c.BoundTableOrQuery is not null)
+            .Select(c => c.BoundTableOrQuery!),
+        StringComparer.OrdinalIgnoreCase);
+
+    var macroResult = MacroExtractor.Extract(Directory.GetFiles(Path.Combine(kbRoot, "Macros"), "*.json"));
+    var queries = QuerySchemaExtractor.Extract(Directory.GetFiles(Path.Combine(kbRoot, "Queries"), "*.json"));
+    var tables = TableSchemaExtractor.Extract(Directory.GetFiles(Path.Combine(kbRoot, "Tables"), "*.json"), rowSourceTableNames);
+
+    using var writer = new SymbolDbWriter(dbPath, overwrite: true);
+    writer.Write(vbaResult.Modules, vbaResult.Symbols, vbaResult.Parameters,
+        vbaResult.References, vbaResult.MemberAccesses,
+        formControls: formResult.Controls, eventBindings: formResult.Bindings,
+        macros: macroResult.Macros, macroActions: macroResult.MacroActions,
+        queries: queries, tables: tables);
+    /* ... measurement report + console summary ... */
+}
+```
+
+#### tests/AccessHarvester.SymbolDb.Tests/Session3ExtractorTests.cs (new — 11 tests)
+
+Selected highlights (full file is 330 lines):
+
+```csharp
+[Fact]
+public void FormControls_CboCompanyTypeID_IsExtracted()
+{
+    var result = FormControlsExtractor.Extract(
+        Path.Combine(FixtureLoader.NorthwindKbRoot(), "Forms", "frmCompanyDetail.json"),
+        "Form_frmCompanyDetail");
+
+    var cbo = Assert.Single(result.Controls, c => c.ControlName == "cboCompanyTypeID");
+    Assert.Equal("ComboBox", cbo.ControlType);
+    Assert.Equal("CompanyTypeID", cbo.ControlSource);
+    Assert.Equal("qrycboCompanyType", cbo.RowSource);
+    Assert.Equal("CompanyTypes", cbo.BoundTableOrQuery);   // BaseInfo decode
+    Assert.Equal("CompanyTypeID", cbo.BoundColumn);
+}
+
+[Fact]
+public void EventBindings_CboCompanyTypeID_BeforeUpdate_IsVbaBinding()
+{
+    var binding = Assert.Single(result.Bindings,
+        b => b.ControlName == "cboCompanyTypeID" && b.EventName == "BeforeUpdate");
+    Assert.Equal("vba", binding.HandlerKind);
+    Assert.Equal("Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate", binding.HandlerFqn);
+}
+
+[Fact]
+public void EventBindings_FormLevelEvents_AreExtracted()
+{
+    // OnOpen → "Open" suffix → Form_Open
+    Assert.Contains(formLevelBindings, b =>
+        b.EventName == "Open" && b.HandlerKind == "vba" &&
+        b.HandlerFqn == "Form_frmCompanyDetail.Form_Open");
+}
+
+[Fact]
+public void MacroExtractor_AutoExec_IsExtracted()
+{
+    var result = MacroExtractor.Extract([Path.Combine(kbRoot, "Macros", "AutoExec.json")]);
+    var macro = Assert.Single(result.Macros);
+    Assert.Equal("AutoExec", macro.Fqn);
+    Assert.False(string.IsNullOrEmpty(macro.SourceXml));
+    Assert.True(result.MacroActions.Count > 0);
+    // Positions sequential from 0
+    var positions = result.MacroActions.Select(a => a.Position).OrderBy(p => p).ToList();
+    for (int i = 0; i < positions.Count; i++) Assert.Equal(i, positions[i]);
+}
+
+[Fact]
+public void QuerySchemaExtractor_NormalizedSql_IsUppercaseNoParameters()
+{
+    string sql = "PARAMETERS [ID] Long;\r\nSELECT  foo.ID,   foo.Name\r\nFROM foo\r\nWHERE foo.ID = [ID];\r\n";
+    string normalized = QuerySchemaExtractor.NormalizeSql(sql);
+    Assert.DoesNotContain("PARAMETERS", normalized);
+    Assert.Equal(normalized, normalized.ToUpperInvariant());
+    Assert.DoesNotContain("  ", normalized);
+}
+
+[Fact]
+public void QuerySchemaExtractor_IdenticalQueries_ShareCanonicalFqn()
+{
+    var groups = queries.Where(q => q.SqlTextHash is not null)
+        .GroupBy(q => q.SqlTextHash!).Where(g => g.Count() > 1).ToList();
+    if (groups.Count == 0)
+    {
+        Assert.True(true, "No duplicate query text hashes in NorthwindDevEdition fixture.");
+        return;
+    }
+    foreach (var group in groups)
+    {
+        var canonical = group.Min(q => q.Fqn);
+        foreach (var q in group)
+        {
+            if (q.Fqn == canonical) Assert.Null(q.EquivalenceCanonicalFqn);
+            else Assert.Equal(canonical, q.EquivalenceCanonicalFqn);
+        }
+    }
+}
+
+[Fact]
+public void TableSchemaExtractor_CompanyTypes_IsLookupTable()
+{
+    var rowSourceNames = new HashSet<string>(["CompanyTypes"], StringComparer.OrdinalIgnoreCase);
+    var ct = Assert.Single(tables, t => t.Fqn == "CompanyTypes");
+    Assert.Equal("CompanyTypeID", ct.PrimaryKeyColumn);
+    // CompanyType column does not contain any label-hint word → CandidateLabelColumn is null;
+    // score = PK(+20) + RecordCount≤200(+30) + is-row-source(+30) = 80
+    Assert.True(ct.IsLookupTableScore >= 70);
+}
+
+[Fact]
+public void Session3_FullPipeline_WritesExpectedTableCounts()
+{
+    /* end-to-end: build all six row lists, write to in-memory SQLite, count rows
+       in FormControls, EventBindings, Macros, MacroActions, Queries, Tables —
+       all > 0; PRAGMA foreign_key_check(MacroActions) returns no rows */
+}
+```
+
+### Concerns to analyze
+
+1. **FormControlsExtractor BaseInfo parser robustness.** The decode strips `\"` and splits on `;`; index 1 = bound_table_or_query, index 3 = bound_column. Is the format assumption correct across all combo/list-box BaseInfo strings? Edge cases: BaseInfo present but with fewer than 4 segments; embedded semicolons inside quoted segments; Unicode escapes other than `"`.
+
+2. **Event property classification.** `EventPropertyNames` is a fixed allow-list. Two risks: (a) any Access event property not in the list is silently dropped; (b) the macro-handler branch fires for any non-`[Event Procedure]`, non-`=`-prefixed value — including non-event property values that happen to live inside the allow-list (e.g. could `OnTimer = "0"` ever appear as a numeric millisecond literal rather than a macro name)? Is the allow-list complete and the macro-detection conservative enough?
+
+3. **Form-level event handler FQN convention.** Form-level events (control_name = null) emit `<FormFqn>.Form_<event>`. The form's class module is `Form_frmCompanyDetail`, so the handler FQN is `Form_frmCompanyDetail.Form_Open`. Is the literal `Form_` prefix correct for VBA (it's the standard Access convention) — and does this match the FQN format Session 1's SymbolDbBuilder used for form-level event handlers like `Form_AfterInsert` (i.e. without a duplicate `Form_` segment)?
+
+4. **`OnPush` event mapping.** The allow-list contains `OnPush`; stripping the `On` prefix yields `Push`. Access does not have a real `Push` event — `OnPush` is the legacy "command button click" property name and the actual VBA handler is `<Button>_Click`. Does this produce a phantom handler FQN?
+
+5. **Subform handling.** The spec says "Subform controls produce nested-FQN rows." The current walk emits a single FormControlRow for each Subform with its `Name` and `ControlType = "Subform"`, but does NOT recurse into the contained form. Is this acceptable for Session 3 (the contained form is a separate KB JSON file walked by a separate top-level extraction call)?
+
+6. **Macro position contiguity.** `MacroExtractor` emits positions 0..N-1 only when every parsed-action node casts to JsonObject. If the parser produces a non-object element, the loop's `continue` skips the position increment — wait, no: the loop increments `i` regardless because `i++` is in the `for` header. Re-confirm: do gaps actually appear in `Position` when an action casts fail? If yes, that violates the (macro_fqn, position) PK monotonicity expectation downstream.
+
+7. **Query normalisation faithfulness.** `NormalizeSql` strips a single `PARAMETERS ... ;` clause via regex. Multi-statement queries or queries with embedded `; ` inside string literals could be mis-stripped. Also, the regex is non-greedy across newlines — does it correctly stop at the first `;` in the PARAMETERS clause?
+
+8. **Clause-hash boundary detection.** `ComputeClauseHash` regexes on word-boundary keywords. Risks: keyword tokens inside string literals (`'SELECT FOO'`) and inside identifiers (`[SELECT]`). Are these likely to appear in NorthwindDevEdition queries; if so, do they pollute the clause hash?
+
+9. **Equivalence canonicalisation determinism.** Canonical FQN is the lexicographically-first (Ordinal) FQN within the same `sql_text_hash` group. Sibling rows get `equivalence_canonical_fqn = canonical`. Is this stable across rebuilds (deterministic given same inputs) and is the canonical row's `equivalence_canonical_fqn = NULL` desirable, or should it self-reference to make queries simpler?
+
+10. **Lookup-table score weights.** Score = 20 (PK) + 30 (RecordCount≤200) + 20 (label-col) + 30 (is-row-source). The `CompanyType` column does not match any label hint, so CompanyTypes scores 80 not 100. Is the label-hint list (`value/text/label/caption/name/description`) too narrow for the spec's intent, or correctly faithful to "not over-tuned per human's 2026-04-28 call"?
+
+11. **`is_dead` for queries and macros.** Both are emitted as `is_dead = 0` always. The spec for queries wants is_dead = 1 when "no form RowSource references, no VBA references via DLookup/etc., no macro OpenQuery references." Is leaving this for a follow-up acceptable for Session 3 (the cross-references for VBA already exist from Session 2 and could plausibly be wired up here)?
+
+12. **`INSERT OR IGNORE` semantics.** All six new writers use `INSERT OR IGNORE`. This trades silent skips for idempotency. Risk: real schema-violation bugs (dup PKs) get masked. Is this the right choice for Session 3 given the Session 1 writers used plain `INSERT`?
+
+13. **Test coverage gaps.** No assertion that Subform controls appear; no assertion of macro-bound or expression-bound events (only [Event Procedure] vba bindings); no assertion that the `is_dead` column is queryable; no assertion of negative-control-source rows. Are these gaps acceptable for Session 3?
+
+14. **Backward compat of optional Write() params.** Six new optional named parameters added to `SymbolDbWriter.Write()`. Existing call sites (Session 1/2 tests) pass only the original five positional args; the new params default to null and skip the corresponding writer. Existing tests pass — does the change break anyone outside the test project?
+
+After your analysis, output a JSON block (and ONLY then optional prose underneath) in this exact format:
+
+```json
+{
+  "verdict": "VERIFIED" | "ISSUES_FOUND",
+  "confidence": "low" | "medium" | "high",
+  "summary": "<one or two sentences>",
+  "issues": [
+    {
+      "category": "Correctness" | "Completeness" | "False Positive",
+      "severity": "Critical" | "Major" | "Minor",
+      "title": "<short title>",
+      "details": "<what's wrong and what the correct answer should be>"
+    }
+  ]
+}
+```
+
+If `verdict` is `VERIFIED`, `issues` MUST be an empty array `[]`. If `verdict` is `ISSUES_FOUND`, `issues` MUST contain at least one entry.

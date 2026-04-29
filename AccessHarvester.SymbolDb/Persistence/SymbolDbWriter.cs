@@ -55,6 +55,21 @@ public sealed class SymbolDbWriter : IDisposable
 
     public SqliteConnection Connection => _connection;
 
+    // Original Sessions 1+2 overload, kept verbatim for binary compatibility
+    // with assemblies compiled before Session 3 added the FormControl /
+    // EventBinding / Macro / Query / Table parameters. Delegates to the
+    // wider overload below with the new parameters defaulted to null.
+    public void Write(
+        IReadOnlyList<ModuleRow> modules,
+        IReadOnlyList<SymbolRow> symbols,
+        IReadOnlyList<ParameterRow> parameters,
+        IReadOnlyList<ReferenceRow>? references,
+        IReadOnlyList<MemberAccessRow>? memberAccesses)
+        => Write(modules, symbols, parameters, references, memberAccesses,
+                 formControls: null, eventBindings: null,
+                 macros: null, macroActions: null,
+                 queries: null, tables: null);
+
     public void Write(
         IReadOnlyList<ModuleRow> modules,
         IReadOnlyList<SymbolRow> symbols,

@@ -86,10 +86,14 @@ low
 | ... | ... | ... |
 
 ### Actuals (filled after the session)
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+- Orchestrator used: claude-code (Anthropic Sonnet 4.6 @ effort=medium) — within recommended Sonnet/Haiku-class envelope
+- Total routed cost: ~$0.34 (Round 1 verification $0.237 + Round 2 re-verification $0.100; no tiebreaker)
+- Deviations from recommendation: None on orchestrator. Two verification rounds were needed (Round 1 ISSUES_FOUND with 6 Major + 2 Minor; Round 2 VERIFIED with 5 fixes accepted + 4 deferrals accepted).
+- Notes for next-session calibration:
+  - Round-1 verifier flagged 8 issues; the orchestrator fixed 4 Major + 1 Minor in-session and explicitly deferred 3 Major + 1 Minor with documented rationale (QueryColumns, subform nested-FQN, AST clause-hash, BaseInfo parser). All four deferrals were accepted by Round 2; treat the deferral pattern (with explicit unblock criteria) as the working contract for "out-of-scope-but-acknowledged" findings.
+  - Round-1 also caught a binary-compatibility break from default-parameter additions on a public method. For future sessions that extend public Writer / Builder surfaces, **default to keeping the original signature as a separate overload** rather than relying on default-parameter source compatibility. Add this to the "future sessions checklist" before extending Sessions 4 / 5 writers.
+  - The query-deadness wiring shows the value of the Session 2 reference graph: with `vbaResult.References` available the deadness signal landed cheaply. Session 4 should similarly lean on Session 2/3 outputs (reference graph + form/macro/query/table data) when computing leaves-first interpretation order.
+  - QueryColumns deferral exposes a concrete raw-IR coverage gap (`AccessHarvester.Core.Extraction.QueryExporter` does not enumerate `QueryDef.Fields`). If Session 5's migration probe needs output-column metadata, schedule a small raw-exporter widening session before Session 5 — or accept that the JET-SQL parser session set is the gating dependency.
 
 ## Session 4: AI Interpretation Pipeline (Leaves-First; Confidence-Thresholded)
 
@@ -144,3 +148,12 @@ claude-code (Anthropic Haiku 3.5 @ effort=medium)
 Session 2 is a mechanical data transformation task for which Haiku is the most cost-effective capable orchestrator.
 
 The post-Session-1 recommendation supersedes; Sonnet @ medium is the right balance because mechanical correspondence tasks in this repo have historically benefitted from Anthropic's careful line-by-line reasoning (see `lessons-learned.md` -- "Mechanical-Gate Task Types Calibrate To Sonnet-Cost").
+
+## Next-session orchestrator recommendation (Session 4)
+
+**Recommended (post-Session-3 re-route via `analysis` to gemini-pro):**
+claude-code (Anthropic Opus 4.7 @ effort=high)
+
+Rationale: Session 4 shifts from the mechanical work of Sessions 2-3 to complex system design and implementation, which mirrors Session 1's profile where Opus proved effective. The session requires strong reasoning for both algorithmic Python code (leaves-first topological sort with cycle handling, confidence-thresholded escalation logic) and the nuanced prompt engineering for 8+ distinct symbol-kind templates. Using Opus at high effort minimises verification cycles and produces a more robust initial implementation for this core pipeline component. Sticking with the incumbent Anthropic toolchain reduces variability versus switching providers.
+
+(Full routed analysis preserved at `session-reviews/session-4-rec.txt`.)
