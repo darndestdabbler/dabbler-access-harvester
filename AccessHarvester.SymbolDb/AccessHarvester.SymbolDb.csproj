@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AccessHarvester.Core\AccessHarvester.Core.csproj" />
     <ProjectReference Include="..\AccessHarvester.Vba.Parser\AccessHarvester.Vba.Parser.csproj" />
     <ProjectReference Include="..\AccessHarvester.Vba.Resolver\AccessHarvester.Vba.Resolver.csproj" />
     <ProjectReference Include="..\AccessHarvester.Pipeline\AccessHarvester.Pipeline.csproj" />

@@ -60,7 +60,13 @@ public sealed class SymbolDbWriter : IDisposable
         IReadOnlyList<SymbolRow> symbols,
         IReadOnlyList<ParameterRow> parameters,
         IReadOnlyList<ReferenceRow>? references = null,
-        IReadOnlyList<MemberAccessRow>? memberAccesses = null)
+        IReadOnlyList<MemberAccessRow>? memberAccesses = null,
+        IReadOnlyList<FormControlRow>? formControls = null,
+        IReadOnlyList<EventBindingRow>? eventBindings = null,
+        IReadOnlyList<MacroRow>? macros = null,
+        IReadOnlyList<MacroActionRow>? macroActions = null,
+        IReadOnlyList<QueryRow>? queries = null,
+        IReadOnlyList<TableRow>? tables = null)
     {
         using var transaction = _connection.BeginTransaction();
         WriteModules(modules, transaction);
@@ -68,6 +74,12 @@ public sealed class SymbolDbWriter : IDisposable
         WriteParameters(parameters, transaction);
         if (references is not null) WriteReferences(references, transaction);
         if (memberAccesses is not null) WriteMemberAccesses(memberAccesses, transaction);
+        if (formControls is not null) WriteFormControls(formControls, transaction);
+        if (eventBindings is not null) WriteEventBindings(eventBindings, transaction);
+        if (macros is not null) WriteMacros(macros, transaction);
+        if (macroActions is not null) WriteMacroActions(macroActions, transaction);
+        if (queries is not null) WriteQueries(queries, transaction);
+        if (tables is not null) WriteTables(tables, transaction);
         transaction.Commit();
     }
 
@@ -255,6 +267,180 @@ public sealed class SymbolDbWriter : IDisposable
             pPath.Value = row.Path;
             pTarget.Value = (object?)row.ResolvedTargetFqn ?? DBNull.Value;
             pLine.Value = (object?)row.SourceLine ?? DBNull.Value;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    private void WriteFormControls(IReadOnlyList<FormControlRow> rows, SqliteTransaction transaction)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            INSERT OR IGNORE INTO FormControls (
+              form_fqn, control_name, control_type, label_text, control_source,
+              row_source, bound_table_or_query, bound_column
+            ) VALUES (
+              $form_fqn, $control_name, $control_type, $label_text, $control_source,
+              $row_source, $bound_table_or_query, $bound_column
+            );
+            """;
+        var pForm = cmd.CreateParameter(); pForm.ParameterName = "$form_fqn"; cmd.Parameters.Add(pForm);
+        var pName = cmd.CreateParameter(); pName.ParameterName = "$control_name"; cmd.Parameters.Add(pName);
+        var pType = cmd.CreateParameter(); pType.ParameterName = "$control_type"; cmd.Parameters.Add(pType);
+        var pLabel = cmd.CreateParameter(); pLabel.ParameterName = "$label_text"; cmd.Parameters.Add(pLabel);
+        var pSrc = cmd.CreateParameter(); pSrc.ParameterName = "$control_source"; cmd.Parameters.Add(pSrc);
+        var pRow = cmd.CreateParameter(); pRow.ParameterName = "$row_source"; cmd.Parameters.Add(pRow);
+        var pBound = cmd.CreateParameter(); pBound.ParameterName = "$bound_table_or_query"; cmd.Parameters.Add(pBound);
+        var pCol = cmd.CreateParameter(); pCol.ParameterName = "$bound_column"; cmd.Parameters.Add(pCol);
+
+        foreach (var row in rows)
+        {
+            pForm.Value = row.FormFqn;
+            pName.Value = row.ControlName;
+            pType.Value = row.ControlType;
+            pLabel.Value = (object?)row.LabelText ?? DBNull.Value;
+            pSrc.Value = (object?)row.ControlSource ?? DBNull.Value;
+            pRow.Value = (object?)row.RowSource ?? DBNull.Value;
+            pBound.Value = (object?)row.BoundTableOrQuery ?? DBNull.Value;
+            pCol.Value = (object?)row.BoundColumn ?? DBNull.Value;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    private void WriteEventBindings(IReadOnlyList<EventBindingRow> rows, SqliteTransaction transaction)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            INSERT OR IGNORE INTO EventBindings (
+              form_fqn, control_name, event_name, handler_kind, handler_fqn, handler_expression
+            ) VALUES (
+              $form_fqn, $control_name, $event_name, $handler_kind, $handler_fqn, $handler_expression
+            );
+            """;
+        var pForm = cmd.CreateParameter(); pForm.ParameterName = "$form_fqn"; cmd.Parameters.Add(pForm);
+        var pCtrl = cmd.CreateParameter(); pCtrl.ParameterName = "$control_name"; cmd.Parameters.Add(pCtrl);
+        var pEvt = cmd.CreateParameter(); pEvt.ParameterName = "$event_name"; cmd.Parameters.Add(pEvt);
+        var pKind = cmd.CreateParameter(); pKind.ParameterName = "$handler_kind"; cmd.Parameters.Add(pKind);
+        var pFqn = cmd.CreateParameter(); pFqn.ParameterName = "$handler_fqn"; cmd.Parameters.Add(pFqn);
+        var pExpr = cmd.CreateParameter(); pExpr.ParameterName = "$handler_expression"; cmd.Parameters.Add(pExpr);
+
+        foreach (var row in rows)
+        {
+            pForm.Value = row.FormFqn;
+            pCtrl.Value = (object?)row.ControlName ?? DBNull.Value;
+            pEvt.Value = row.EventName;
+            pKind.Value = row.HandlerKind;
+            pFqn.Value = (object?)row.HandlerFqn ?? DBNull.Value;
+            pExpr.Value = (object?)row.HandlerExpression ?? DBNull.Value;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    private void WriteMacros(IReadOnlyList<MacroRow> rows, SqliteTransaction transaction)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            INSERT OR IGNORE INTO Macros (fqn, source_xml, is_dead)
+            VALUES ($fqn, $source_xml, $is_dead);
+            """;
+        var pFqn = cmd.CreateParameter(); pFqn.ParameterName = "$fqn"; cmd.Parameters.Add(pFqn);
+        var pXml = cmd.CreateParameter(); pXml.ParameterName = "$source_xml"; cmd.Parameters.Add(pXml);
+        var pDead = cmd.CreateParameter(); pDead.ParameterName = "$is_dead"; cmd.Parameters.Add(pDead);
+
+        foreach (var row in rows)
+        {
+            pFqn.Value = row.Fqn;
+            pXml.Value = row.SourceXml;
+            pDead.Value = row.IsDead ? 1 : 0;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    private void WriteMacroActions(IReadOnlyList<MacroActionRow> rows, SqliteTransaction transaction)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            INSERT OR IGNORE INTO MacroActions (macro_fqn, position, action_name, arguments_json)
+            VALUES ($macro_fqn, $position, $action_name, $arguments_json);
+            """;
+        var pMacro = cmd.CreateParameter(); pMacro.ParameterName = "$macro_fqn"; cmd.Parameters.Add(pMacro);
+        var pPos = cmd.CreateParameter(); pPos.ParameterName = "$position"; cmd.Parameters.Add(pPos);
+        var pName = cmd.CreateParameter(); pName.ParameterName = "$action_name"; cmd.Parameters.Add(pName);
+        var pArgs = cmd.CreateParameter(); pArgs.ParameterName = "$arguments_json"; cmd.Parameters.Add(pArgs);
+
+        foreach (var row in rows)
+        {
+            pMacro.Value = row.MacroFqn;
+            pPos.Value = row.Position;
+            pName.Value = row.ActionName;
+            pArgs.Value = (object?)row.ArgumentsJson ?? DBNull.Value;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    private void WriteQueries(IReadOnlyList<QueryRow> rows, SqliteTransaction transaction)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            INSERT OR IGNORE INTO Queries (
+              fqn, source_sql, normalized_sql, sql_text_hash, sql_clause_hash,
+              is_dead, equivalence_canonical_fqn
+            ) VALUES (
+              $fqn, $source_sql, $normalized_sql, $sql_text_hash, $sql_clause_hash,
+              $is_dead, $equivalence_canonical_fqn
+            );
+            """;
+        var pFqn = cmd.CreateParameter(); pFqn.ParameterName = "$fqn"; cmd.Parameters.Add(pFqn);
+        var pSql = cmd.CreateParameter(); pSql.ParameterName = "$source_sql"; cmd.Parameters.Add(pSql);
+        var pNorm = cmd.CreateParameter(); pNorm.ParameterName = "$normalized_sql"; cmd.Parameters.Add(pNorm);
+        var pHash = cmd.CreateParameter(); pHash.ParameterName = "$sql_text_hash"; cmd.Parameters.Add(pHash);
+        var pClause = cmd.CreateParameter(); pClause.ParameterName = "$sql_clause_hash"; cmd.Parameters.Add(pClause);
+        var pDead = cmd.CreateParameter(); pDead.ParameterName = "$is_dead"; cmd.Parameters.Add(pDead);
+        var pEquiv = cmd.CreateParameter(); pEquiv.ParameterName = "$equivalence_canonical_fqn"; cmd.Parameters.Add(pEquiv);
+
+        foreach (var row in rows)
+        {
+            pFqn.Value = row.Fqn;
+            pSql.Value = row.SourceSql;
+            pNorm.Value = (object?)row.NormalizedSql ?? DBNull.Value;
+            pHash.Value = (object?)row.SqlTextHash ?? DBNull.Value;
+            pClause.Value = (object?)row.SqlClauseHash ?? DBNull.Value;
+            pDead.Value = row.IsDead ? 1 : 0;
+            pEquiv.Value = (object?)row.EquivalenceCanonicalFqn ?? DBNull.Value;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    private void WriteTables(IReadOnlyList<TableRow> rows, SqliteTransaction transaction)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            INSERT OR IGNORE INTO Tables (
+              fqn, primary_key_column, candidate_label_column,
+              is_lookup_table_score, is_lookup_table_reason
+            ) VALUES (
+              $fqn, $primary_key_column, $candidate_label_column,
+              $is_lookup_table_score, $is_lookup_table_reason
+            );
+            """;
+        var pFqn = cmd.CreateParameter(); pFqn.ParameterName = "$fqn"; cmd.Parameters.Add(pFqn);
+        var pPk = cmd.CreateParameter(); pPk.ParameterName = "$primary_key_column"; cmd.Parameters.Add(pPk);
+        var pLabel = cmd.CreateParameter(); pLabel.ParameterName = "$candidate_label_column"; cmd.Parameters.Add(pLabel);
+        var pScore = cmd.CreateParameter(); pScore.ParameterName = "$is_lookup_table_score"; cmd.Parameters.Add(pScore);
+        var pReason = cmd.CreateParameter(); pReason.ParameterName = "$is_lookup_table_reason"; cmd.Parameters.Add(pReason);
+
+        foreach (var row in rows)
+        {
+            pFqn.Value = row.Fqn;
+            pPk.Value = (object?)row.PrimaryKeyColumn ?? DBNull.Value;
+            pLabel.Value = (object?)row.CandidateLabelColumn ?? DBNull.Value;
+            pScore.Value = (object?)row.IsLookupTableScore ?? DBNull.Value;
+            pReason.Value = (object?)row.IsLookupTableReason ?? DBNull.Value;
             cmd.ExecuteNonQuery();
         }
     }
