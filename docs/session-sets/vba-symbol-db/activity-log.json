@@ -238,6 +238,138 @@
           "costUsd": 0.08071500000000001
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/required-reading",
+      "dateTime": "2026-04-29T10:30:00.000000-04:00",
+      "description": "Read spec.md (Session 3 requirements), inspected existing SymbolDb extractors, FormMetadata + QueryMetadata + TableMetadata + MacroXmlParser, NorthwindDevEdition KB JSON shapes",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/form-controls-writer",
+      "dateTime": "2026-04-29T10:45:00.000000-04:00",
+      "description": "Implemented FormControlsExtractor (FormControlRow + EventBindingRow models; KB JSON walker; BaseInfo decode; event property allow-list; control + form-level event binding emission)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/event-bindings-writer",
+      "dateTime": "2026-04-29T10:50:00.000000-04:00",
+      "description": "EventBindings emission integrated into FormControlsExtractor: vba ([Event Procedure]), expression (=), and macro handler kinds with handler_fqn / handler_expression population",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/macro-writer",
+      "dateTime": "2026-04-29T11:00:00.000000-04:00",
+      "description": "Implemented MacroExtractor + MacroRow + MacroActionRow; consumes existing MacroXmlParser to assemble _AXL: chunks and emit dense (macro_fqn, position) rows",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/query-writer",
+      "dateTime": "2026-04-29T11:08:00.000000-04:00",
+      "description": "Implemented QuerySchemaExtractor + QueryRow with normalized_sql, sql_text_hash (MD5 of normalized SQL), sql_clause_hash (regex-based per-clause heuristic), equivalence_canonical_fqn via text-hash grouping",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/table-writer",
+      "dateTime": "2026-04-29T11:14:00.000000-04:00",
+      "description": "Implemented TableSchemaExtractor + TableRow with PK detection from Indexes, candidate label-column heuristic, count-tiered is_lookup_table_score (PK + small RecordCount + label-col + row-source uses)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/persistence-wiring",
+      "dateTime": "2026-04-29T11:18:00.000000-04:00",
+      "description": "Extended BuildResult with optional Session 3 row lists; added six WriteX private methods on SymbolDbWriter; updated BuildArtifacts.RunForNorthwind to drive all four extractors and assemble query caller-name set + row-source count map",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-29T11:25:00.000000-04:00",
+      "description": "dotnet build clean; dotnet test passed 1590 / 3 skipped / 0 failed (60 SymbolDb tests including 11 new Session3ExtractorTests)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/verification-round-1",
+      "dateTime": "2026-04-29T11:30:00.000000-04:00",
+      "description": "Cross-provider session-verification round 1 via gpt-5-4 \u2014 verdict ISSUES_FOUND with 6 Major + 2 Minor (QueryColumns missing, query is_dead never computed, subform nested-FQN missing, OnPush phantom mapping, regex clause-hash, presence-flag lookup score, BaseInfo brittle, Write() binary compat)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 8800,
+          "outputTokens": 4500,
+          "costUsd": 0.237308
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-3/round-1-fixes",
+      "dateTime": "2026-04-29T11:38:00.000000-04:00",
+      "description": "Applied 5 fixes: OnPush\u2192Click irregular mapping, dense macro position counter, count-tiered lookup score, query is_dead via callerNames overload, original 5-param Write() overload restored. Documented 4 deferrals (QueryColumns, subform, AST clause-hash, BaseInfo) in issue-logs/session-003.json. Added 4 new tests; 64 SymbolDb tests pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 11,
+      "stepKey": "session-3/verification-round-2",
+      "dateTime": "2026-04-29T11:42:00.000000-04:00",
+      "description": "Round-2 re-verification via gpt-5-4 @ complexity_hint=85 \u2014 verdict VERIFIED; all 5 fixes accepted, all 4 deferrals accepted with documented rationale",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2700,
+          "outputTokens": 1900,
+          "costUsd": 0.100343
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 12,
+      "stepKey": "session-3/next-session-recommendation",
+      "dateTime": "2026-04-29T11:44:00.000000-04:00",
+      "description": "Routed analysis call to recommend Session 4 orchestrator \u2014 gemini-pro returned claude-code (Anthropic Opus 4.7 @ effort=high). Saved to session-reviews/session-4-rec.txt; appended to ai-assignment.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 580,
+          "outputTokens": 600,
+          "costUsd": 0.0078
+        }
+      ]
     }
   ]
 }
