@@ -58,12 +58,16 @@ public sealed class SymbolDbWriter : IDisposable
     public void Write(
         IReadOnlyList<ModuleRow> modules,
         IReadOnlyList<SymbolRow> symbols,
-        IReadOnlyList<ParameterRow> parameters)
+        IReadOnlyList<ParameterRow> parameters,
+        IReadOnlyList<ReferenceRow>? references = null,
+        IReadOnlyList<MemberAccessRow>? memberAccesses = null)
     {
         using var transaction = _connection.BeginTransaction();
         WriteModules(modules, transaction);
         WriteSymbols(symbols, transaction);
         WriteParameters(parameters, transaction);
+        if (references is not null) WriteReferences(references, transaction);
+        if (memberAccesses is not null) WriteMemberAccesses(memberAccesses, transaction);
         transaction.Commit();
     }
 
@@ -185,6 +189,72 @@ public sealed class SymbolDbWriter : IDisposable
             pParam.Value = row.IsParamArray ? 1 : 0;
             pArray.Value = row.IsArray ? 1 : 0;
             pDefault.Value = (object?)row.DefaultValue ?? DBNull.Value;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    private void WriteReferences(IReadOnlyList<ReferenceRow> rows, SqliteTransaction transaction)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            INSERT INTO [References] (
+              from_fqn, to_fqn, identifier, kind, caller_kind,
+              source_line, source_column, resolution_status, resolution_reason
+            ) VALUES (
+              $from_fqn, $to_fqn, $identifier, $kind, $caller_kind,
+              $source_line, $source_column, $resolution_status, $resolution_reason
+            );
+            """;
+        var pFrom = cmd.CreateParameter(); pFrom.ParameterName = "$from_fqn"; cmd.Parameters.Add(pFrom);
+        var pTo = cmd.CreateParameter(); pTo.ParameterName = "$to_fqn"; cmd.Parameters.Add(pTo);
+        var pId = cmd.CreateParameter(); pId.ParameterName = "$identifier"; cmd.Parameters.Add(pId);
+        var pKind = cmd.CreateParameter(); pKind.ParameterName = "$kind"; cmd.Parameters.Add(pKind);
+        var pCaller = cmd.CreateParameter(); pCaller.ParameterName = "$caller_kind"; cmd.Parameters.Add(pCaller);
+        var pLine = cmd.CreateParameter(); pLine.ParameterName = "$source_line"; cmd.Parameters.Add(pLine);
+        var pCol = cmd.CreateParameter(); pCol.ParameterName = "$source_column"; cmd.Parameters.Add(pCol);
+        var pStatus = cmd.CreateParameter(); pStatus.ParameterName = "$resolution_status"; cmd.Parameters.Add(pStatus);
+        var pReason = cmd.CreateParameter(); pReason.ParameterName = "$resolution_reason"; cmd.Parameters.Add(pReason);
+
+        foreach (var row in rows)
+        {
+            pFrom.Value = row.FromFqn;
+            pTo.Value = (object?)row.ToFqn ?? DBNull.Value;
+            pId.Value = row.Identifier;
+            pKind.Value = row.Kind;
+            pCaller.Value = (object?)row.CallerKind ?? DBNull.Value;
+            pLine.Value = (object?)row.SourceLine ?? DBNull.Value;
+            pCol.Value = (object?)row.SourceColumn ?? DBNull.Value;
+            pStatus.Value = row.ResolutionStatus;
+            pReason.Value = (object?)row.ResolutionReason ?? DBNull.Value;
+            cmd.ExecuteNonQuery();
+        }
+    }
+
+    private void WriteMemberAccesses(IReadOnlyList<MemberAccessRow> rows, SqliteTransaction transaction)
+    {
+        using var cmd = _connection.CreateCommand();
+        cmd.Transaction = transaction;
+        cmd.CommandText = """
+            INSERT INTO MemberAccesses (
+              from_fqn, receiver, path, resolved_target_fqn, source_line
+            ) VALUES (
+              $from_fqn, $receiver, $path, $resolved_target_fqn, $source_line
+            );
+            """;
+        var pFrom = cmd.CreateParameter(); pFrom.ParameterName = "$from_fqn"; cmd.Parameters.Add(pFrom);
+        var pReceiver = cmd.CreateParameter(); pReceiver.ParameterName = "$receiver"; cmd.Parameters.Add(pReceiver);
+        var pPath = cmd.CreateParameter(); pPath.ParameterName = "$path"; cmd.Parameters.Add(pPath);
+        var pTarget = cmd.CreateParameter(); pTarget.ParameterName = "$resolved_target_fqn"; cmd.Parameters.Add(pTarget);
+        var pLine = cmd.CreateParameter(); pLine.ParameterName = "$source_line"; cmd.Parameters.Add(pLine);
+
+        foreach (var row in rows)
+        {
+            pFrom.Value = row.FromFqn;
+            pReceiver.Value = row.Receiver;
+            pPath.Value = row.Path;
+            pTarget.Value = (object?)row.ResolvedTargetFqn ?? DBNull.Value;
+            pLine.Value = (object?)row.SourceLine ?? DBNull.Value;
             cmd.ExecuteNonQuery();
         }
     }

@@ -10,6 +10,8 @@ public sealed record BuildResult(
     IReadOnlyList<ModuleRow> Modules,
     IReadOnlyList<SymbolRow> Symbols,
     IReadOnlyList<ParameterRow> Parameters,
+    IReadOnlyList<ReferenceRow> References,
+    IReadOnlyList<MemberAccessRow> MemberAccesses,
     BuildStatistics Statistics);
 
 public sealed record BuildStatistics(

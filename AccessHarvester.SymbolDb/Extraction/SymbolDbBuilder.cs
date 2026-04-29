@@ -107,8 +107,12 @@ public sealed class SymbolDbBuilder
             ExtractModuleSymbols(parsed_, crossRef, symbolRows, parameterRows);
         }
 
+        // Pass 5: extract reference edges and member-access expressions.
+        var resolvedModules = resolved.Select(r => r.Resolved).ToList();
+        var (referenceRows, memberAccessRows) = ReferencesExtractor.Extract(resolvedModules);
+
         var statistics = ComputeStatistics(moduleRows, symbolRows, deferredFqns);
-        return new BuildResult(moduleRows, symbolRows, parameterRows, statistics);
+        return new BuildResult(moduleRows, symbolRows, parameterRows, referenceRows, memberAccessRows, statistics);
     }
 
     private static void ExtractModuleSymbols(
