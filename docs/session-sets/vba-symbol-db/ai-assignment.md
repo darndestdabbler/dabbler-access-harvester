@@ -50,18 +50,30 @@ low
 
 | Step | Action | Routing Decision |
 |------|--------|------------------|
-| ... | ... | ... |
+| 1 | Required reading. | `local` |
+| 2 | Verify Session 1 prerequisites. | `local` |
+| 3 | Implement ReferencesExtractor + FqnResolver + model records. | `local` |
+| 4 | Implement MemberAccesses writer (integrated into ReferencesExtractor). | `local` |
+| 5 | Implement caller_kind annotation (naming-shape heuristic). | `local` |
+| 6 | Update BuildResult, SymbolDbBuilder, SymbolDbWriter, BuildArtifacts. | `local` |
+| 7 | Write hermetic xUnit tests. | `local` |
+| 8 | Run `dotnet build && dotnet test`. | `local` |
+| 9 | Cross-provider session verification (3 rounds). | `route(task_type="session-verification")` to `gpt-5-4`; M2 tiebreaker via `query("gemini-pro")` |
 
 ### Actuals (filled after the session)
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+- Orchestrator used: claude-code (Anthropic Sonnet 4.6 @ effort=medium) — post-Session-1 recommendation was Sonnet; matched
+- Total routed cost: ~$0.92 (3 verification rounds + 1 Gemini tiebreaker for M2 adjudication)
+- Deviations from recommendation: None. Three verification rounds were needed (vs. expected 1-2); all findings by round 3 were Minor.
+- Notes for next-session calibration:
+  - M1 (local FQN): DeclarationFqn must handle ProcedureScope locals with a 3-part FQN. Session 3 will have similar scope-to-FQN mappings — test all declaration-in-scope variants before routing for verification.
+  - M2 (variable_write): `ResolvedReference` has no write-context. Write detection requires AST parent walking. Dismissed via tiebreaker; document as known limitation if symbol DB ever needs this.
+  - Test assertiveness: guards that protect vacuous code paths should document WHY they guard (fixture count = 0). Assertive tests (e.g., `Assert.DoesNotContain`) are better than shape-only guards.
+  - Caller-kind heuristic: using naming convention (Form/Report + '_') is a correct approximation for Session 2. Session 3's EventBindings table will enable an exact join; update EntryPointHeuristic at that point.
 
 ## Session 3: Column Mappings (Form Controls + Event Bindings + Queries) + Macro Normalization
 
 ### Recommended orchestrator
-claude-code (Anthropic Haiku 3.5 @ effort=medium)
+claude-code (Anthropic Haiku-class @ effort=low) — or Sonnet @ effort=low
 
 ### Rationale
 Similar to Session 2, this work involves translating existing, well-structured in-memory objects into database records. Haiku remains the recommended choice for its efficiency in handling these mechanical correspondence tasks.

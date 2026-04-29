@@ -51,14 +51,15 @@ public static class BuildArtifacts
 
         Console.WriteLine($"Wrote {dbPath}");
         Console.WriteLine($"Wrote {reportPath}");
-        Console.WriteLine($"Modules={result.Statistics.ModuleCount} Symbols={result.Statistics.SymbolCount} Dead={result.Statistics.DeadSymbolCount} Twins={dedupReport.SiblingsTagged}");
+        Console.WriteLine($"Modules={result.Statistics.ModuleCount} Symbols={result.Statistics.SymbolCount} Dead={result.Statistics.DeadSymbolCount} Twins={dedupReport.SiblingsTagged} References={result.References.Count} MemberAccesses={result.MemberAccesses.Count}");
         return 0;
     }
 
     private static Md5DedupReport WriteDb(BuildResult result, string dbPath)
     {
         using var writer = new SymbolDbWriter(dbPath, overwrite: true);
-        writer.Write(result.Modules, result.Symbols, result.Parameters);
+        writer.Write(result.Modules, result.Symbols, result.Parameters,
+            result.References, result.MemberAccesses);
         var dedup = new Md5Deduper();
         return dedup.Run(writer.Connection);
     }

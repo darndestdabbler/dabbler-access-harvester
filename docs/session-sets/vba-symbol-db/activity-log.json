@@ -133,6 +133,111 @@
           "costUsd": 0.0696225
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/required-reading",
+      "dateTime": "2026-04-29T04:55:13.427402-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, session-set-authoring-guide.md",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/prerequisites",
+      "dateTime": "2026-04-29T04:55:13.428905-04:00",
+      "description": "Verified Session 1 Creates: AccessHarvester.SymbolDb/, tests/AccessHarvester.SymbolDb.Tests/, tools/symbol-db/symbol-db.sqlite, tools/symbol-db/measurement-northwind.md",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/references-writer",
+      "dateTime": "2026-04-29T04:55:13.428905-04:00",
+      "description": "Created ReferenceRow, MemberAccessRow, FqnResolver, ReferencesExtractor; updated BuildResult, SymbolDbBuilder (Pass 5), SymbolDbWriter, BuildArtifacts",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/member-accesses-writer",
+      "dateTime": "2026-04-29T04:55:13.429910-04:00",
+      "description": "MemberAccesses extraction integrated into ReferencesExtractor.Extract(); Me/dot/bang/implicit-with handled",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/caller-kind-annotation",
+      "dateTime": "2026-04-29T04:55:13.429910-04:00",
+      "description": "CallerKind: ui-event-handler for Form/Report procs with _ in name; non-ui otherwise; null for module-level",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-29T04:55:13.430919-04:00",
+      "description": "dotnet build: 0 errors. dotnet test: 1575 passed / 3 skipped / 0 failed",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verification-round-1",
+      "dateTime": "2026-04-29T04:59:35.247133-04:00",
+      "description": "Cross-provider session-verification round 1 via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6057,
+          "outputTokens": 9245,
+          "costUsd": 0.1538175
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verification-round-2",
+      "dateTime": "2026-04-29T05:34:54.736313-04:00",
+      "description": "Round-2 verification after M1 fix + minor test additions; M2 dismissed via tiebreaker; via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3567,
+          "outputTokens": 4421,
+          "costUsd": 0.0752325
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/verification-round-3",
+      "dateTime": "2026-04-29T05:39:07.265755-04:00",
+      "description": "Round-3 verification after strDlgMsg test made assertive; via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3492,
+          "outputTokens": 4799,
+          "costUsd": 0.08071500000000001
+        }
+      ]
     }
   ]
 }
