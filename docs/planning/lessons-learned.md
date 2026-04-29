@@ -764,6 +764,11 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ## Probe Output Value Earlier; Don't Sink Token Budget Into Unvalidated Substrates
 
+> **Promoted to `project-guidance.md` → Conventions → Workflow
+> Expectations** on 2026-04-29 (after `vba-symbol-db-path-b-probe`
+> Sessions 1-3, second-context confirmation). Retained here as the
+> action-detail reference; the rule itself is now a Convention.
+
 > Companion lesson to "Inventory Existing Assets Before Designing
 > New Infrastructure" above. That lesson is for the orchestrator;
 > this one is for the human directing the work.
@@ -825,7 +830,68 @@ reference; if it proves out twice in *this* repo, propose promotion to
   early probe checkpoint and the probe materially changes
   direction.**
 
+## Verify The Prior Session Actually Committed And Pushed Before Starting A New One
+
+- **Context:** Picking up the next session of an in-progress session
+  set when the prior session was run by a different in-IDE
+  orchestrator. First hit on 2026-04-29 in
+  `vba-symbol-db-path-b-probe` Session 3: Session 2 (Codex /
+  GPT-5.5) had finished its workflow steps cleanly —
+  `session-state.json` flipped to `complete`, verification was
+  VERIFIED, `ai-assignment.md` was updated, the verifier review file
+  was saved — but Codex did NOT execute Step 8's commit/push.
+- **Failure or friction:** All Session 2 deliverables sat untracked
+  in the working tree until Session 3 noticed during `git status`.
+  Affected files: `tests/AccessHarvester.TranslationProbe.Tests/`
+  (the new project), `docs/session-sets/<slug>/translation-packet.md`,
+  `docs/session-sets/<slug>/translation/*`,
+  `docs/session-sets/<slug>/session-reviews/session-002.md`,
+  `tools/symbol-db/probe-builder/` (new C# project), and modifications
+  to `AccessHarvester.SymbolDb/Cli/BuildArtifacts.cs`,
+  `AccessHarvester.sln`, and `tools/symbol-db/probe/build_packet.py`.
+  The recovery cost was small (Session 3 bundled both sessions in
+  one commit and noted the catch-up in the message), but the failure
+  mode generalizes: any external tool or downstream session that
+  reads `session-state.json` to detect "Session N is done" and
+  assumes the artifacts are in git will be wrong.
+- **Lesson:** External tooling reads `session-state.json` for
+  in-progress detection (correct), but the orchestrator picking up
+  the next session must NOT trust that signal alone for
+  artifact-on-disk-vs-in-git questions. The git working tree is the
+  only source of truth for "did the prior session actually commit?"
+  Run `git status` against the session-set folder (and any code
+  paths the prior session was supposed to touch) as part of Step 0.
+- **Action for future sessions:** Add to the Step 0 checklist (after
+  `register_session_start`, before the first content-producing
+  step): run `git status --short -- docs/session-sets/<slug>/
+  tests/ tools/`. If untracked or unstaged files matching the prior
+  session's expected deliverables exist (cross-reference against
+  the prior session's `## Acceptance Criteria` checked items in
+  `ai-assignment.md`), surface to the human:
+  "Prior session marked complete but did not commit; should I
+  include those files in this session's commit, or push them as a
+  separate catch-up commit first?" Default to bundling unless the
+  human says otherwise. If a second session set hits this same
+  failure mode (any orchestrator, any session), promote to a
+  Convention in `project-guidance.md` → Workflow Expectations and
+  add a `verify_prior_session_committed()` helper in
+  `ai-router/session_log.py` so the check is mechanical rather than
+  manual.
+
 ## When Routed Cross-Provider Rigor Returns "Your Rigor Isn't Paying For Itself," Drop The Rigor MODEL — Not The Rigor Itself
+
+> **Promoted to `project-guidance.md` → Conventions → Token-Window
+> Budget Overrides** on 2026-04-29 (after `vba-symbol-db-path-b-probe`
+> Sessions 2-3 successfully executed the in-IDE-orchestrator-pair
+> pivot — Codex translated, Claude reviewed, $0.078 routed across
+> both sessions). Retained here as the action-detail reference; the
+> rule itself is now a Convention. Note: the strict trigger ("a
+> second session set hits the calibration → pivot pattern within one
+> set") was not met — `vba-symbol-db-path-b-probe` only executed the
+> pivot stage, inheriting the calibration result from `vba-symbol-db`.
+> The human accepted the looser reading "second session set
+> incorporates the in-IDE-orchestrator pivot" at the Step 9
+> reorganization review.
 
 - **Context:** A multi-session set built around the
   AI-router's routed cross-provider verification rigor as the primary
