@@ -647,6 +647,151 @@
           "costUsd": 0.1002
         }
       ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 1,
+      "stepKey": "session-6/required-reading",
+      "dateTime": "2026-04-29T12:53:36.595740-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, session-set-authoring-guide.md (skim), workflow doc; verified API keys.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 2,
+      "stepKey": "session-6/spec-and-config-block",
+      "dateTime": "2026-04-29T12:53:36.596738-04:00",
+      "description": "Read spec.md Session 6 plan + Session Set Configuration block (requiresUAT=false, requiresE2E=false, uatScope=none).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 3,
+      "stepKey": "session-6/prereq-verify",
+      "dateTime": "2026-04-29T12:53:36.598739-04:00",
+      "description": "Verified Session 5 outputs: sample.json (42 items across 4 tables), all 42 sampled items have Interpretation1/2/3 populated.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 4,
+      "stepKey": "session-6/orchestrator-recommendation",
+      "dateTime": "2026-04-29T12:53:36.599740-04:00",
+      "description": "Routed task_type=analysis to recommend orchestrator/effort. gemini-pro returned: claude-code Opus 4.7 @ high. Updated ai-assignment.md Session 6 block. Preserved full analysis at session-reviews/session-6-orchestrator-rec.txt.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": null,
+          "outputTokens": null,
+          "costUsd": 0.009
+        }
+      ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 5,
+      "stepKey": "session-6/grader",
+      "dateTime": "2026-04-29T13:38:37.595102-04:00",
+      "description": "Implemented tools/symbol-db/consistency/grader.py: schema for grades.sqlite (Grades, GradeRuns, GradeRawResponses, GradeFailures), prompt builder with sha256-seeded A/B/C anonymization, 3-pair structured-JSON parser, threaded runner with concurrent.futures (max_workers=4), idempotent re-runs.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 6,
+      "stepKey": "session-6/grading-passes",
+      "dateTime": "2026-04-29T13:38:37.596606-04:00",
+      "description": "Ran 126 grading calls (42 items x 3 judges): gemini-pro $0.30, opus $9.13, gpt-5-4 $2.53 = total $11.96 routed. 378 grade rows in grades.sqlite. One transient gemini-pro 503 was recovered on the follow-up pass (idempotent).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "costUsd": 0.3,
+          "inputTokens": null,
+          "outputTokens": null
+        },
+        {
+          "model": "claude-opus-4-7",
+          "taskType": "analysis",
+          "costUsd": 9.13,
+          "inputTokens": null,
+          "outputTokens": null
+        },
+        {
+          "model": "gpt-5-4-2025",
+          "taskType": "analysis",
+          "costUsd": 2.53,
+          "inputTokens": null,
+          "outputTokens": null
+        }
+      ]
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 7,
+      "stepKey": "session-6/per-judge-data-reduction",
+      "dateTime": "2026-04-29T13:38:37.598611-04:00",
+      "description": "aggregator.py per-judge intra-correlations: gemini-pro=0.170 (near-zero), opus=0.496, gpt-5-4=0.443. Decision: split path (gemini-pro below 0.30 magnitude threshold).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 8,
+      "stepKey": "session-6/correlation",
+      "dateTime": "2026-04-29T13:38:37.599157-04:00",
+      "description": "correlation.py: confidence vs interpretation r=0.004 (Pearson) / 0.113 (Spearman); confidence vs justification r=-0.177 / -0.230. Per-kind module_var r=-0.729 (n=7). Krippendorff alpha 0.36 (interp) / 0.20 (justif).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 9,
+      "stepKey": "session-6/report",
+      "dateTime": "2026-04-29T13:38:37.604177-04:00",
+      "description": "Authored correlation-report.md (in-conversation per synthesis convention, Opus orchestrator). Generated correlation-scatter.png (two-panel split-path scatter, 8 strata color-coded). Saved correlation-summary.json. Verdict: split-dimensions, recalibrate. Confidence column not trustworthy at 0.75/0.70 thresholds.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 10,
+      "stepKey": "session-6/build-test",
+      "dateTime": "2026-04-29T13:39:34.402445-04:00",
+      "description": "dotnet build clean (286 warnings, 0 errors). dotnet test: 1594 passed / 2 skipped / 0 failed across 9 test projects. Python hermetic tests: 94 passed (consistency/tests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 6,
+      "stepNumber": 11,
+      "stepKey": "session-6/verification",
+      "dateTime": "2026-04-29T13:52:29.657984-04:00",
+      "description": "Round 1: ISSUES_FOUND (2 Major + 2 Minor) at $0.2334. Round 2: 4 fixes verified clean, 1 new Minor found at $0.1913. Round 3: VERIFIED at $0.0615. Total verification: $0.4862.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.2334
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.1913
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.0615
+        }
+      ]
     }
   ]
 }

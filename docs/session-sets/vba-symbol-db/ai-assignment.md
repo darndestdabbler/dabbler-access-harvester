@@ -165,23 +165,38 @@ Session 5's complexity is low: it primarily involves generating boilerplate Pyth
 ## Session 6: Cross-Provider Consistency + Confidence Calibration
 
 ### Recommended orchestrator
-*to be filled at Session 6 start (routed analysis)*
+claude-code (Anthropic Opus 4.7 @ effort=high)
 
 ### Rationale
-*to be filled*
+Session 6's primary deliverable is a synthesis-heavy statistical report (`correlation-report.md`) that interprets Pearson/Spearman correlations, Krippendorff's alpha, and per-kind breakdowns to render a verdict on whether the symbol DB's confidence column is trustworthy. The repo convention pins synthesis work to Opus. The implementation side (grader/aggregator/correlation modules + 126-call runner) is comfortably within Sonnet's range, but using a single Opus orchestrator across both implementation and synthesis keeps context coherent and avoids a mid-session handoff. The 126 routed grading calls carry their own provider identity (gemini-pro / opus / gpt-5-4) regardless of orchestrator choice; the orchestrator's marginal cost is a small fraction of the session's total spend.
+
+(Full routed analysis preserved at `session-reviews/session-6-orchestrator-rec.txt`.)
 
 ### Estimated routed cost
-high (~$7–$15 routed across three judging providers on the 42-item sample)
+high (~$7–$15 routed across three judging providers on the 42-item sample, plus ~$0.30–$0.50 orchestrator-side verification)
 
 | Step | Action | Routing Decision |
 |------|--------|------------------|
-| ... | ... | ... |
+| 1 | Required reading | `local` |
+| 2 | Define grading rubric (already specified) | `local` |
+| 3 | Implement `grader.py` (prompt builder + parser + grades.sqlite schema) | `local` |
+| 4 | Run 126 grading calls (3 judges × 42 items) | `query("gemini-pro" / "opus" / "gpt-5-4", task_type="analysis")` pinned |
+| 5 | Per-judge intra-correlation reduction (`aggregator.py`) | `local` |
+| 6 | Confidence vs consistency correlation + per-kind + IRR + outliers (`correlation.py`) | `local` |
+| 7 | Generate `correlation-report.md` + `correlation-scatter.png` | `local` (Opus orchestrator authors in-conversation per the synthesis convention) |
+| 8 | Hermetic Python tests | `local` |
+| 9 | `dotnet build && dotnet test` | `local` |
+| 10 | Cross-provider session verification | `route(task_type="session-verification")` to `gpt-5-4` |
 
 ### Actuals (filled after the session)
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+- Orchestrator used: claude-code (Anthropic Opus 4.7 @ effort=high) -- matched recommendation
+- Total routed cost: ~$12.46 ($0.01 orchestrator-rec analysis + $11.96 grading [gemini-pro $0.30, opus $9.13, gpt-5-4 $2.53] + $0.49 verification across 3 rounds)
+- Deviations from recommendation: None on orchestrator. The 126 grading calls were threaded (max_workers=4 per judge) after the initial sequential run hit ~1 item/min on Gemini-Pro latency; threading cut wall time roughly 4x without changing semantics.
+- Notes for next-session calibration:
+  - Verifier ran three rounds. Round 1 found 4 issues (2 Major outlier-selection + IRR-counting bugs, 2 Minor retry-failure-persistence + rationale-precision bugs); round 2 verified all four fixes clean and surfaced 1 new Minor (split-path per-kind only emitting interpretation, omitting justification); round 3 VERIFIED. The pattern matches the workflow's "max 2 retries" guidance well -- round 3 was a focused 19-second re-check at $0.06 because the scope shrank to one finding.
+  - **Headline finding worth flagging for Session 7:** confidence is essentially uncorrelated with cross-provider interpretation agreement (Pearson +0.004) and mildly negative against justification agreement (-0.18). The Session 4 escalation thresholds (0.75/0.70) are not validated. Session 7's go/no-go verdict on the symbol DB should land separately from any decision about whether to *trust the confidence column at scale*; the right framing is "the substrate works, the self-rating layer needs recalibration."
+  - **Threaded SQLite gotcha:** sqlite3 connections aren't thread-safe. The first threaded grader pass used a shared symbol_con across worker threads and produced 84 false triplet_missing failures before the bug surfaced. Fix: do all DB reads on the main thread, then thread only the API calls. Worth a `lessons-learned.md` entry if a second context hits the same pattern.
+  - **Module_var stratum is the highest false-confidence risk.** Per-kind interp r = -0.73; justif r = -0.88 across the 7 sampled module variables. Session 7's comprehension probe targets a Form_*_BeforeUpdate handler, which is in the safer `sub` stratum (interp r = +0.05); but if the probe surfaces interpretation drift, the result generalizes worse than the per-stratum mean would suggest.
 
 ## Session 7: Comprehension Probe + Migration-Readiness Review
 
@@ -250,3 +265,12 @@ claude-code (Anthropic Sonnet 4.6 @ effort=medium)
 Rationale: Session 5's work is mechanical Python wiring of existing Session-4 components (prompt_builder, db.py, topology). The 84 reasoning calls carry their own model identity. Sonnet is optimal for this non-synthesis orchestration task.
 
 (Full routed analysis preserved at `session-reviews/session-5-orchestrator-rec.txt`.)
+
+## Next-session orchestrator recommendation (Session 7, capstone)
+
+**Recommended (post-Session-6 re-route via `analysis` to gemini-pro):**
+claude-code (Anthropic Opus 4.7 @ effort=high)
+
+Rationale: Session 7 is the capstone — the orchestrator authors the source-grounded reference description, compares three providers' probe + migration-readiness responses, drafts `verdict.md`, generates `change-log.md`, and runs the Step 9 reorganization review. All five tasks are synthesis and judgment work, and the repo convention pins synthesis to Opus. `effort=high` is right for capstone-level go/no-go reasoning; reserve `effort=max` for if the human invokes the maxout suffix to drain the Anthropic window.
+
+(Full routed analysis preserved at `session-reviews/session-7-orchestrator-rec.txt`.)

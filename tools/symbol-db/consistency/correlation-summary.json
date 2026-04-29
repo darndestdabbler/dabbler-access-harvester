@@ -1,0 +1,185 @@
+{
+  "item_count": 42,
+  "aggregate_path": false,
+  "decision_rationale": "At least one judge returned a near-zero correlation (|r| < 0.30). The two agreement dimensions are treated as distinct and reported separately.",
+  "judge_correlations": [
+    {
+      "judge": "gemini-pro",
+      "n": 42,
+      "pearson_r": 0.17039168832869805,
+      "note": "near-zero"
+    },
+    {
+      "judge": "opus",
+      "n": 42,
+      "pearson_r": 0.49565537632392703,
+      "note": "ok"
+    },
+    {
+      "judge": "gpt-5-4",
+      "n": 42,
+      "pearson_r": 0.4430965059766696,
+      "note": "ok"
+    }
+  ],
+  "headline": {
+    "consistency": null,
+    "interpretation": {
+      "n": 42,
+      "pearson_r": 0.004315476746845085,
+      "spearman_r": 0.11349818188978492
+    },
+    "justification": {
+      "n": 42,
+      "pearson_r": -0.17662244718193687,
+      "spearman_r": -0.23015809884649954
+    }
+  },
+  "per_kind": [
+    {
+      "kind": "enum_decl",
+      "n": 1,
+      "pearson_r": null,
+      "mean_confidence": 0.8766666666666666,
+      "mean_consistency": 89.77777777777777,
+      "pearson_r_secondary": null,
+      "mean_consistency_secondary": 78.55555555555556
+    },
+    {
+      "kind": "enum_value",
+      "n": 8,
+      "pearson_r": -0.15986366842558244,
+      "mean_confidence": 0.6775,
+      "mean_consistency": 85.95833333333333,
+      "pearson_r_secondary": -0.16674444077562792,
+      "mean_consistency_secondary": 76.36111111111111
+    },
+    {
+      "kind": "function",
+      "n": 6,
+      "pearson_r": 0.006714200699744372,
+      "mean_confidence": 0.9494444444444445,
+      "mean_consistency": 85.72222222222223,
+      "pearson_r_secondary": 0.05519168664035622,
+      "mean_consistency_secondary": 79.48148148148148
+    },
+    {
+      "kind": "macro",
+      "n": 1,
+      "pearson_r": null,
+      "mean_confidence": 0.9333333333333335,
+      "mean_consistency": 81.44444444444444,
+      "pearson_r_secondary": null,
+      "mean_consistency_secondary": 85.8888888888889
+    },
+    {
+      "kind": "module_var",
+      "n": 7,
+      "pearson_r": -0.7288953046145293,
+      "mean_confidence": 0.7614285714285713,
+      "mean_consistency": 82.07936507936508,
+      "pearson_r_secondary": -0.8758090528050012,
+      "mean_consistency_secondary": 86.63492063492063
+    },
+    {
+      "kind": "query",
+      "n": 3,
+      "pearson_r": 0.1749077877786573,
+      "mean_confidence": 0.9722222222222222,
+      "mean_consistency": 88.85185185185185,
+      "pearson_r_secondary": 0.9665704406521504,
+      "mean_consistency_secondary": 78.8888888888889
+    },
+    {
+      "kind": "sub",
+      "n": 8,
+      "pearson_r": 0.05499028498437793,
+      "mean_confidence": 0.9433333333333332,
+      "mean_consistency": 82.19444444444446,
+      "pearson_r_secondary": 0.12473828862467136,
+      "mean_consistency_secondary": 73.04166666666667
+    },
+    {
+      "kind": "table",
+      "n": 8,
+      "pearson_r": 0.2142013043491697,
+      "mean_confidence": 0.8062499999999999,
+      "mean_consistency": 83.1388888888889,
+      "pearson_r_secondary": -0.009244878063436962,
+      "mean_consistency_secondary": 81.41666666666667
+    }
+  ],
+  "irr": {
+    "krippendorff_alpha_interpretation": 0.3603308635610861,
+    "krippendorff_alpha_justification": 0.19856061764970312,
+    "n_units": 42
+  },
+  "outliers": {
+    "false_confidence": [
+      {
+        "fqn": "Form_frmCompanyDetail.cmdEmail_Click",
+        "kind": "sub",
+        "confidence": 0.9533333333333335,
+        "consistency": 68.22222222222223
+      },
+      {
+        "fqn": "Form_frmCompanyDetail.CompanyCantBeDeleted",
+        "kind": "sub",
+        "confidence": 0.96,
+        "consistency": 73.77777777777779
+      },
+      {
+        "fqn": "Employees",
+        "kind": "table",
+        "confidence": 0.8033333333333332,
+        "consistency": 71.22222222222221
+      },
+      {
+        "fqn": "Form_frmCompanyDetail.cboCompanyTypeID_AfterUpdate",
+        "kind": "sub",
+        "confidence": 0.8999999999999999,
+        "consistency": 78.11111111111113
+      },
+      {
+        "fqn": "modStrings.StringFormatSQL",
+        "kind": "function",
+        "confidence": 0.96,
+        "consistency": 80.8888888888889
+      }
+    ],
+    "justified_uncertainty": [
+      {
+        "fqn": "modStrings.enumStrings.sOneLineItem",
+        "kind": "enum_value",
+        "confidence": 0.5533333333333333,
+        "consistency": 81.33333333333333
+      },
+      {
+        "fqn": "SystemSettings",
+        "kind": "table",
+        "confidence": 0.6566666666666666,
+        "consistency": 80.44444444444446
+      },
+      {
+        "fqn": "modStrings.enumStrings.sPOCannotDelete",
+        "kind": "enum_value",
+        "confidence": 0.6933333333333334,
+        "consistency": 78.88888888888889
+      },
+      {
+        "fqn": "Employees",
+        "kind": "table",
+        "confidence": 0.8033333333333332,
+        "consistency": 71.22222222222221
+      },
+      {
+        "fqn": "modStrings.enumStrings.sCannotDelete",
+        "kind": "enum_value",
+        "confidence": 0.7266666666666667,
+        "consistency": 81.55555555555556
+      }
+    ]
+  },
+  "verdict": "split-dimensions",
+  "verdict_text": "The two agreement dimensions are not interchangeable: per-judge intra-correlations did not all clear the positive non-trivial threshold. Confidence should be calibrated against each dimension separately rather than against a single consistency score. See the split-path correlations for the actual signs and magnitudes."
+}
