@@ -1,0 +1,58 @@
+{
+  "session": 1,
+  "verifier": "gpt-5-4",
+  "rounds": [
+    {
+      "round": 1,
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "id": "fk-enforcement",
+          "severity": "Major",
+          "location": "AccessHarvester.SymbolDb/Persistence/SymbolDbWriter.cs",
+          "summary": "SQLite foreign key enforcement is never enabled, so declared REFERENCES constraints are not actually honoured at runtime.",
+          "fix": "Execute PRAGMA foreign_keys = ON immediately after opening every SqliteConnection and add a negative test that an invalid module_fqn or procedure_fqn insert fails.",
+          "status": "fixed-round-2"
+        },
+        {
+          "id": "body-hasher-string-literals",
+          "severity": "Major",
+          "location": "AccessHarvester.SymbolDb/Extraction/BodyHasher.cs",
+          "summary": "Comment stripping is regex-based and can remove apostrophes or REM inside VBA string literals, producing incorrect body_hash_md5 values and false duplicate matches.",
+          "fix": "Replace the regex comment remover with a token-aware normalizer that tracks VBA string-literal state and strips comments only when apostrophe/REM occur outside strings; add tests for apostrophes and REM inside string constants.",
+          "status": "fixed-round-2"
+        },
+        {
+          "id": "tests-too-weak",
+          "severity": "Major",
+          "location": "tests/AccessHarvester.SymbolDb.Tests",
+          "summary": "The test suite is materially weaker than the Session 1 spec: it does not assert the exact probe-target shapes or the required dead-code/deferral/schema/foreign-key behaviors.",
+          "fix": "Add exact assertions for the seven m_lng*/m_str* module variables and the two local Dims, verify signature_string text for GetString, add dead-code detector tests for after-Exit/after-Goto/If False Then, prove deferred modules are not parsed, assert schema columns/indexes, assert FK enforcement, and add a deterministic-canonical-choice dedup test.",
+          "status": "fixed-round-2"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "id": "property-fqn-collision",
+          "severity": "Major",
+          "location": "AccessHarvester.SymbolDb/Extraction/SymbolDbBuilder.cs",
+          "summary": "Property Get/Let/Set procedures with the same VBA property name are persisted under the same Symbols.fqn, which makes paired property accessors collide and dead-code lookup ambiguous.",
+          "fix": "Encode accessor kind into the persisted property FQN (#get/#let/#set suffix) and update FindResolverProcedure to match property symbols by name plus accessor kind.",
+          "status": "fixed-round-3"
+        },
+        {
+          "id": "module-var-stats-overcount",
+          "severity": "Minor",
+          "location": "AccessHarvester.SymbolDb/Extraction/SymbolDbBuilder.cs and AccessHarvester.SymbolDb/Reporting/MeasurementReportBuilder.cs",
+          "summary": "Statistics and the measurement report counted procedure-local Dim rows as module variables because all kind='module_var' symbols were aggregated together.",
+          "fix": "Filter ModuleVarCount to declared_in_fqn IS NULL; add a separate Local vars column to the per-module breakdown.",
+          "status": "fixed-round-3"
+        }
+      ]
+    }
+  ]
+}
