@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>AccessHarvester.SymbolDb</RootNamespace>
+    <AssemblyName>AccessHarvester.SymbolDb</AssemblyName>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AccessHarvester.Vba.Parser\AccessHarvester.Vba.Parser.csproj" />
+    <ProjectReference Include="..\AccessHarvester.Vba.Resolver\AccessHarvester.Vba.Resolver.csproj" />
+    <ProjectReference Include="..\AccessHarvester.Pipeline\AccessHarvester.Pipeline.csproj" />
+  </ItemGroup>
+
+</Project>
