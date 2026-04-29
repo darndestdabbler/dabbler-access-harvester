@@ -810,3 +810,75 @@ reference; if it proves out twice in *this* repo, propose promotion to
   this pattern in this repo; future substrate-heavy initiatives
   should incorporate similar probes earlier in their session plans
   rather than waiting for the final session set.
+
+- **First confirmed hit (2026-04-29):** `vba-symbol-db` Session 7
+  closed with a PIVOT verdict driven directly by what the probe and
+  Session 6's calibration analysis surfaced — routed
+  cross-provider rigor was paying high cost for low correlation
+  signal (Session 6 found Pearson +0.004 between confidence and
+  cross-provider agreement; ~$24 routed across 7 sessions). The
+  pivot is to subscription-paid in-IDE orchestrators on the full
+  Northwind DB. The probe earned its keep by changing direction
+  before another set's worth of token spend went into the same
+  pattern. **Promote to a Convention in `project-guidance.md` the
+  next time a second substrate-heavy initiative incorporates an
+  early probe checkpoint and the probe materially changes
+  direction.**
+
+## When Routed Cross-Provider Rigor Returns "Your Rigor Isn't Paying For Itself," Drop The Rigor MODEL — Not The Rigor Itself
+
+- **Context:** A multi-session set built around the
+  AI-router's routed cross-provider verification rigor as the primary
+  quality gate. First hit in `vba-symbol-db` Sessions 4-7 (2026-04-29).
+- **Failure or friction:** The set spent ~$24 routed across 7 sessions.
+  The most expensive sessions were the ones designed to *measure*
+  whether routed rigor was earning its keep — Session 5 ($7.98,
+  84 cross-provider re-interpretations) and Session 6 ($12.46, 126
+  cross-provider grading calls). Their headline finding was that
+  self-reported `Confidence` is essentially uncorrelated with
+  cross-provider interpretation agreement (Pearson +0.004) and mildly
+  *negative* against justification agreement (-0.18). In other words,
+  the rigor model itself was not paying for itself — the routed
+  per-symbol verification was paying high cost for an uncalibrated
+  signal. By Session 7 the cumulative cost had reached the human's
+  pain threshold and Session 7's migration-readiness round and
+  cross-provider session verification were both skipped. The instinct
+  to "just drop rigor" was wrong; the right move was to drop the
+  *rigor model*.
+- **Lesson:** When a calibration session returns "your routed
+  cross-provider rigor isn't paying for itself" (low or zero
+  correlation between the rigor signal and the thing it is supposed
+  to gate), the cost-effective response is to switch to a *cheaper*
+  rigor model rather than to abandon rigor. Subscription-paid in-IDE
+  orchestrator pairs (Claude Code + Codex/GPT, both billed against
+  flat-rate windows the human is paying for anyway) provide
+  cross-provider independence at marginal-zero per-call cost. Trade
+  is wall-clock (slower per session, parallelizable across two
+  orchestrators in different VS Code windows) and the loss of
+  fine-grained per-symbol cost telemetry — both acceptable when the
+  per-call billing was the binding constraint in the first place.
+  Drop `Confidence*` and `Justification*` columns from the writeback
+  path at the same time — they were the routed-rigor-era signals
+  that Session 6 proved had no calibration value.
+- **Action for future sessions:** If a session set's calibration
+  output reports a zero-or-negative correlation between
+  self-rated confidence (or any AI-self-rated signal) and
+  cross-provider agreement, the next set should:
+  1. Drop the AI-self-rated columns from the writeback path entirely
+     (keep them in the schema if downstream consumers need them, but
+     stop populating them).
+  2. Re-platform the next iteration of the same work onto
+     subscription-paid in-IDE orchestrators (Claude Code + Codex/GPT)
+     — the per-call cost goes to zero, the cross-provider independence
+     stays.
+  3. Use the in-IDE-orchestrator pair as the cross-provider check
+     directly (Claude reviews Codex's output and vice versa, in
+     batches). Skip the routed grading rubric — the calibration
+     session already proved it didn't add signal.
+  4. Leave Gemini out of the interpretation/review path unless a
+     Gemini coding assistant becomes available in VS Code that
+     reads against the same subscription budget.
+  If a second session set hits this same pattern (routed-rigor
+  calibration that returns near-zero correlation, followed by an
+  in-IDE-orchestrator pivot), promote to a Convention in
+  `project-guidance.md` under Token-Window Budget Overrides.
