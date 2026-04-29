@@ -255,6 +255,110 @@ public sealed class Session3ExtractorTests
         Assert.Equal(fqns.Distinct().Count(), fqns.Count);
     }
 
+    // ── Round-1 verification fixes ───────────────────────────────────────────
+
+    [Fact]
+    public void EventBindings_OnPush_MapsToClickHandler()
+    {
+        // Synthesise a minimal form JSON containing a CommandButton with OnPush.
+        // OnPush is the legacy click-event property name; the VBA handler
+        // procedure Access generates is named <Control>_Click, not _Push.
+        string tempPath = Path.Combine(Path.GetTempPath(),
+            $"onpush_{System.Guid.NewGuid():N}.json");
+        File.WriteAllText(tempPath, """
+            {
+              "Type": "Form",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "Name": "btnLegacy",
+                    "OnPush": "[Event Procedure]"
+                  },
+                  "Children": []
+                }
+              ]
+            }
+            """);
+        try
+        {
+            var result = FormControlsExtractor.Extract(tempPath, "Form_test");
+            var binding = Assert.Single(result.Bindings,
+                b => b.ControlName == "btnLegacy");
+            Assert.Equal("Click", binding.EventName);
+            Assert.Equal("Form_test.btnLegacy_Click", binding.HandlerFqn);
+        }
+        finally
+        {
+            if (File.Exists(tempPath)) File.Delete(tempPath);
+        }
+    }
+
+    [Fact]
+    public void MacroExtractor_PositionsAreDenseAndContiguous()
+    {
+        // Run against the AutoExec macro and assert (macro_fqn, position) is
+        // dense from 0..N-1 — no gaps even if the parser yields non-object
+        // elements that the extractor skips.
+        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        var paths = Directory.GetFiles(Path.Combine(kbRoot, "Macros"), "*.json");
+        var result = MacroExtractor.Extract(paths);
+
+        // Group by macro_fqn; each group's positions must be 0..count-1.
+        var byMacro = result.MacroActions.GroupBy(a => a.MacroFqn);
+        foreach (var g in byMacro)
+        {
+            var positions = g.Select(a => a.Position).OrderBy(p => p).ToList();
+            for (int i = 0; i < positions.Count; i++)
+                Assert.Equal(i, positions[i]);
+        }
+    }
+
+    [Fact]
+    public void QuerySchemaExtractor_DeadQuery_IsFlagged()
+    {
+        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        var paths = Directory.GetFiles(Path.Combine(kbRoot, "Queries"), "*.json");
+
+        // Caller set contains every query name except one — that one becomes is_dead.
+        var allFqns = paths.Select(Path.GetFileNameWithoutExtension).ToList();
+        string toKill = allFqns[0]!;
+        var callerNames = new HashSet<string>(allFqns!.Where(n => n != toKill)!,
+            System.StringComparer.OrdinalIgnoreCase);
+
+        var queries = QuerySchemaExtractor.Extract(paths, callerNames);
+
+        Assert.True(queries.Single(q => q.Fqn == toKill).IsDead,
+            $"Query '{toKill}' should be is_dead = 1 when omitted from caller set.");
+        Assert.All(queries.Where(q => q.Fqn != toKill),
+            q => Assert.False(q.IsDead, $"Query '{q.Fqn}' should not be is_dead."));
+    }
+
+    [Fact]
+    public void TableSchemaExtractor_RowSourceCount_TiersTheScore()
+    {
+        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        var paths = Directory.GetFiles(Path.Combine(kbRoot, "Tables"), "*.json");
+
+        // CompanyTypes: simulate 3 controls referencing it (≥3 → +30).
+        var counts = new Dictionary<string, int>(System.StringComparer.OrdinalIgnoreCase)
+        {
+            ["CompanyTypes"] = 3,
+        };
+        var heavy = TableSchemaExtractor.Extract(paths, counts);
+        var ctHeavy = Assert.Single(heavy, t => t.Fqn == "CompanyTypes");
+
+        // Now simulate exactly 1 control (1 ≤ uses < 3 → +20).
+        counts["CompanyTypes"] = 1;
+        var light = TableSchemaExtractor.Extract(paths, counts);
+        var ctLight = Assert.Single(light, t => t.Fqn == "CompanyTypes");
+
+        Assert.True(ctHeavy.IsLookupTableScore > ctLight.IsLookupTableScore,
+            $"Heavier row-source usage ({ctHeavy.IsLookupTableScore}) should outscore light ({ctLight.IsLookupTableScore}).");
+        Assert.Equal(10, ctHeavy.IsLookupTableScore - ctLight.IsLookupTableScore);
+    }
+
     // ── End-to-end persistence smoke ─────────────────────────────────────────
 
     [Fact]

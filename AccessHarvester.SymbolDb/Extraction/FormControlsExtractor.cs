@@ -35,6 +35,17 @@ public static class FormControlsExtractor
         "Form", "FormHeader", "FormFooter", "Section", "Tab", "Page",
     };
 
+    // Irregular property-name → VBA-event-suffix mappings. Most events strip
+    // the "On" prefix uniformly, but a few do not match the procedure name
+    // VBA generates. The most consequential case is OnPush, which Access
+    // emits for the "click" event on legacy command buttons; the actual VBA
+    // handler is named <ControlName>_Click, not <ControlName>_Push.
+    private static readonly Dictionary<string, string> IrregularEventSuffix =
+        new(StringComparer.OrdinalIgnoreCase)
+    {
+        { "OnPush", "Click" },
+    };
+
     public sealed record Result(
         IReadOnlyList<FormControlRow> Controls,
         IReadOnlyList<EventBindingRow> Bindings);
@@ -187,11 +198,17 @@ public static class FormControlsExtractor
         }
     }
 
-    // "OnClick" → "Click"; "BeforeUpdate" → "BeforeUpdate".
-    private static string StripOnPrefix(string name) =>
-        name.StartsWith("On", StringComparison.Ordinal) && name.Length > 2
+    // Map an Access event property name to the VBA procedure-name suffix
+    // Access uses for the corresponding event handler. Most names just lose
+    // their "On" prefix (OnClick → Click, OnLoad → Load); a few are irregular
+    // and need explicit handling — see IrregularEventSuffix.
+    private static string StripOnPrefix(string name)
+    {
+        if (IrregularEventSuffix.TryGetValue(name, out var mapped)) return mapped;
+        return name.StartsWith("On", StringComparison.Ordinal) && name.Length > 2
             ? name[2..]
             : name;
+    }
 
     private static string? GetProp(JsonObject props, string key)
     {

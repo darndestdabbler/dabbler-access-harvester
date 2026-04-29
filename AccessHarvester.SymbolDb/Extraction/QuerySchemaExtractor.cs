@@ -25,7 +25,17 @@ namespace AccessHarvester.SymbolDb.Extraction;
 //             is_dead = 0; a post-Session-3 annotation pass can update these.
 public static class QuerySchemaExtractor
 {
-    public static IReadOnlyList<QueryRow> Extract(IEnumerable<string> kbJsonPaths)
+    public static IReadOnlyList<QueryRow> Extract(IEnumerable<string> kbJsonPaths) =>
+        Extract(kbJsonPaths, callerNames: null);
+
+    // Overload that accepts the set of query names referenced by some live
+    // caller (form RowSource, VBA reference identifier, macro OpenQuery
+    // argument). A query whose Fqn is not in the set is marked is_dead = 1.
+    // When callerNames is null, the dead-query analysis is deferred and all
+    // rows are emitted with is_dead = 0.
+    public static IReadOnlyList<QueryRow> Extract(
+        IEnumerable<string> kbJsonPaths,
+        IReadOnlySet<string>? callerNames)
     {
         // Phase 1: build raw rows.
         var raw = new List<(string Fqn, string SourceSql, string? NormalizedSql,
@@ -75,13 +85,18 @@ public static class QuerySchemaExtractor
             if (textHash is not null && canonicalByHash.TryGetValue(textHash, out var c) && c != fqn)
                 canonical = c;
 
+            // is_dead = 1 when an explicit caller-name set was supplied and
+            // this query's fqn is absent from it. Without a caller set the
+            // dead-query analysis is deferred and is_dead defaults to 0.
+            bool isDead = callerNames is not null && !callerNames.Contains(fqn);
+
             result.Add(new QueryRow(
                 Fqn: fqn,
                 SourceSql: sourceSql,
                 NormalizedSql: normalizedSql,
                 SqlTextHash: textHash,
                 SqlClauseHash: clauseHash,
-                IsDead: false,
+                IsDead: isDead,
                 EquivalenceCanonicalFqn: canonical));
         }
 

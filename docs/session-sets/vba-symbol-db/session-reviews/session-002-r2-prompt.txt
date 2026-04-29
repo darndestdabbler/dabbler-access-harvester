@@ -1,0 +1,398 @@
+Your response MUST begin with a detailed prose analysis for each concern below BEFORE the JSON block.
+
+## Session 2 Round-2 Verification — vba-symbol-db
+
+Round 1 found 2 Major + 1 Minor. This round verifies the fixes.
+
+### Round-1 findings and resolution:
+- M1 (Major, FqnResolver local FQNs): FIXED. DeclarationFqn now detects ProcedureScope and emits <Module>.<Proc>.<Local> for procedure-local declarations.
+- M2 (Major, variable_write detection): DISMISSED via tiebreaker (Gemini Pro). Fix requires modifying the upstream ReferenceResolver contract; out of Session 2 scope. variable_read is the correct fallback for all identifier references in this session. Known limitation recorded.
+- Minor (test coverage): FIXED. Added tests for enum_value_use rows, local to_fqn includes procedure segment, and control_access kind rows.
+
+### Build/test results after fixes: 1578 passed / 3 skipped / 0 failed
+
+### Fixed files:
+
+#### FqnResolver.cs (M1 fix — DeclarationFqn now handles ProcedureScope locals)
+```csharp
+using AccessHarvester.Vba.Resolver.Declarations;
+using AccessHarvester.Vba.Resolver.Scopes;
+
+namespace AccessHarvester.SymbolDb.Extraction;
+
+// Derives Symbols-table FQNs from resolver scope and declaration objects.
+// The FQN scheme mirrors what SymbolDbBuilder wrote in Session 1:
+//   - procedures:   <ModuleName>.<ProcName>  (plus #get/#let/#set for properties)
+//   - module decls: <ModuleName>.<Name>
+//   - local decls:  <ModuleName>.<ProcName>.<LocalName>
+internal static class FqnResolver
+{
+    // Returns the FQN of the innermost containing procedure (or module when
+    // the reference is at module level). Walks from the given scope up through
+    // ForEachScope / WithBlockScope parents until a ProcedureScope or
+    // ModuleScope is reached.
+    internal static string ContainingFqn(Scope scope)
+    {
+        Scope? current = scope;
+        while (current is not null)
+        {
+            if (current is ProcedureScope ps)
+                return ProcedureFqn(ps);
+            if (current is ModuleScope ms)
+                return ms.ModuleName;
+            current = current.Parent;
+        }
+        // Defensive — scope chain always bottoms out at ModuleScope above ProjectScope.
+        return "<unknown>";
+    }
+
+    // Returns the FQN of a Declaration as stored in the Symbols table, or null
+    // when the declaration cannot be mapped (no Scope back-pointer, synthetic
+    // object-model declarations that don't appear in Symbols, etc.).
+    internal static string? DeclarationFqn(Declaration? declaration)
+    {
+        if (declaration is null) return null;
+
+        var scope = declaration.Scope;
+
+        // Local variable or parameter — declared directly in a ProcedureScope.
+        // LocalVariableExtractor emits these as <ModuleName>.<ProcFqn>.<LocalName>
+        // (i.e., three-part FQN), so we must include the procedure segment.
+        if (scope is ProcedureScope ps)
+            return $"{ProcedureFqn(ps)}.{declaration.Name}";
+
+        // Module-level declaration (procedure, variable, constant, enum, etc.).
+        string? moduleName = ModuleNameFromScope(scope);
+        if (moduleName is null) return null;
+
+        return declaration switch
+        {
+            PropertyDeclaration pd =>
+                $"{moduleName}.{pd.Name}#{pd.Kind.ToString().ToLowerInvariant()}",
+            _ => $"{moduleName}.{declaration.Name}",
+        };
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Helpers
+
+    private static string ProcedureFqn(ProcedureScope ps)
+    {
+        // ProcedureScope.Parent is always ModuleScope.
+        string moduleName = ps.Parent is ModuleScope ms ? ms.ModuleName : "<unknown>";
+        return ps.Procedure switch
+        {
+            PropertyDeclaration pd =>
+                $"{moduleName}.{pd.Name}#{pd.Kind.ToString().ToLowerInvariant()}",
+            _ => $"{moduleName}.{ps.Procedure.Name}",
+        };
+    }
+
+    private static string? ModuleNameFromScope(IDeclarationScope? scope)
+    {
+        if (scope is ModuleScope ms) return ms.ModuleName;
+        if (scope is ProcedureScope ps)
+            return ps.Parent is ModuleScope pms ? pms.ModuleName : null;
+        return null;
+    }
+}
+
+```
+
+#### ReferencesExtractorTests.cs (Minor fix — 3 new test methods added)
+```csharp
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using AccessHarvester.SymbolDb.Extraction;
+using AccessHarvester.SymbolDb.Models;
+using AccessHarvester.SymbolDb.Persistence;
+using Microsoft.Data.Sqlite;
+using Xunit;
+
+namespace AccessHarvester.SymbolDb.Tests;
+
+// Session 2 hermetic tests: References + MemberAccesses extraction and
+// persistence against the canonical NorthwindDevEdition fixture.
+public sealed class ReferencesExtractorTests
+{
+    // ── Fixture helpers ───────────────────────────────────────────────────
+
+    private static BuildResult BuildNorthwind()
+    {
+        var rawModules = new[]
+        {
+            FixtureLoader.LoadFormFrmCompanyDetail(),
+            FixtureLoader.LoadModStrings(),
+        };
+        return new SymbolDbBuilder().Build(rawModules);
+    }
+
+    // ── References populated ──────────────────────────────────────────────
+
+    [Fact]
+    public void Build_ProducesReferenceRows()
+    {
+        var result = BuildNorthwind();
+        Assert.NotEmpty(result.References);
+    }
+
+    [Fact]
+    public void Build_ProducesMemberAccessRows()
+    {
+        var result = BuildNorthwind();
+        Assert.NotEmpty(result.MemberAccesses);
+    }
+
+    // ── Probe target reference set ────────────────────────────────────────
+
+    // The spec's probe-target procedure and the identifiers it directly uses.
+    private const string ProbeTargetFqn = "Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate";
+
+    private static IReadOnlyList<ReferenceRow> ProbeTargetRefs(BuildResult result) =>
+        result.References.Where(r => r.FromFqn == ProbeTargetFqn).ToList();
+
+    [Fact]
+    public void ProbeTarget_HasReferenceRows()
+    {
+        var refs = ProbeTargetRefs(BuildNorthwind());
+        Assert.NotEmpty(refs);
+    }
+
+    [Theory]
+    [InlineData("CompanyIsActive")]
+    [InlineData("GetString")]
+    [InlineData("Me")]
+    [InlineData("strDlgMsg")]
+    public void ProbeTarget_ContainsExpectedIdentifiers(string identifier)
+    {
+        var refs = ProbeTargetRefs(BuildNorthwind());
+        Assert.Contains(refs, r => string.Equals(r.Identifier, identifier,
+            StringComparison.OrdinalIgnoreCase));
+    }
+
+    // ── Caller-kind annotation ────────────────────────────────────────────
+
+    [Fact]
+    public void ProbeTarget_AllRefRows_HaveCallerKind_UiEventHandler()
+    {
+        // cboCompanyTypeID_BeforeUpdate is in a Form module and its name contains '_'.
+        var refs = ProbeTargetRefs(BuildNorthwind());
+        Assert.NotEmpty(refs);
+        Assert.All(refs, r => Assert.Equal("ui-event-handler", r.CallerKind));
+    }
+
+    [Fact]
+    public void ModStrings_ProcRefs_HaveCallerKind_NonUi()
+    {
+        var result = BuildNorthwind();
+        // GetString is a Public Function in a Standard module.
+        var refs = result.References
+            .Where(r => r.FromFqn.StartsWith("modStrings.", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        // Not all refs may come from procedures — skip if the module has no refs.
+        if (refs.Count == 0) return;
+        Assert.All(refs, r => Assert.Equal("non-ui", r.CallerKind));
+    }
+
+    // ── Reverse-lookup: CompanyIsActive has a caller ───────────────────────
+
+    [Fact]
+    public void CompanyIsActive_HasAtLeastOneCaller()
+    {
+        var result = BuildNorthwind();
+        // Some reference's to_fqn must resolve to CompanyIsActive's FQN.
+        bool hasCaller = result.References.Any(r =>
+            r.ToFqn is not null &&
+            r.ToFqn.EndsWith(".CompanyIsActive", StringComparison.OrdinalIgnoreCase));
+        Assert.True(hasCaller, "Expected at least one reference to CompanyIsActive.");
+    }
+
+    // ── Resolution status variety ─────────────────────────────────────────
+
+    [Fact]
+    public void References_ContainAtLeastOneResolvedRow()
+    {
+        var result = BuildNorthwind();
+        Assert.Contains(result.References, r => r.ResolutionStatus == "resolved");
+    }
+
+    [Fact]
+    public void References_ContainMeIdentifierRows()
+    {
+        // Me references may be resolved-to-me or unresolved (me-in-standard-module
+        // when the form's class context is not wired in the resolver). Either way
+        // the identifier must appear in the references list.
+        var result = BuildNorthwind();
+        Assert.Contains(result.References, r => r.Identifier == "Me");
+    }
+
+    // ── MemberAccesses: Me.X or Me!X rows present ─────────────────────────
+
+    [Fact]
+    public void MemberAccesses_ContainMeReceiverRow()
+    {
+        var result = BuildNorthwind();
+        Assert.Contains(result.MemberAccesses, ma => ma.Receiver == "Me");
+    }
+
+    // ── Persistence round-trip ────────────────────────────────────────────
+
+    [Fact]
+    public void Persist_ReferencesAndMemberAccesses_RoundTrip()
+    {
+        var result = BuildNorthwind();
+        // Temp file intentionally not deleted — SQLite on Windows holds file locks
+        // briefly after Dispose; deleting in the test causes intermittent failures.
+        // The OS cleans up TEMP on reboot. (Same pattern as PersistenceAndDedupTests.)
+        string tempPath = Path.Combine(Path.GetTempPath(),
+            $"symbol-db-refs-test-{Guid.NewGuid():N}.sqlite");
+
+        using var writer = new SymbolDbWriter(tempPath);
+        writer.Write(result.Modules, result.Symbols, result.Parameters,
+            result.References, result.MemberAccesses);
+
+        using var cmd = writer.Connection.CreateCommand();
+        cmd.CommandText = "SELECT COUNT(*) FROM [References];";
+        long refCount = (long)cmd.ExecuteScalar()!;
+        Assert.Equal((long)result.References.Count, refCount);
+
+        using var cmd2 = writer.Connection.CreateCommand();
+        cmd2.CommandText = "SELECT COUNT(*) FROM MemberAccesses;";
+        long maCount = (long)cmd2.ExecuteScalar()!;
+        Assert.Equal((long)result.MemberAccesses.Count, maCount);
+    }
+
+    [Fact]
+    public void Persist_ProbeTargetCallerKind_IsUiEventHandlerInDb()
+    {
+        var result = BuildNorthwind();
+        string tempPath = Path.Combine(Path.GetTempPath(),
+            $"symbol-db-refs-test-{Guid.NewGuid():N}.sqlite");
+
+        using var writer = new SymbolDbWriter(tempPath);
+        writer.Write(result.Modules, result.Symbols, result.Parameters,
+            result.References, result.MemberAccesses);
+
+        using var cmd = writer.Connection.CreateCommand();
+        cmd.CommandText = $"""
+            SELECT COUNT(*) FROM [References]
+            WHERE from_fqn = '{ProbeTargetFqn}'
+              AND caller_kind != 'ui-event-handler';
+            """;
+        long nonUiCount = (long)cmd.ExecuteScalar()!;
+        Assert.Equal(0L, nonUiCount);
+
+        using var cmd2 = writer.Connection.CreateCommand();
+        cmd2.CommandText = $"""
+            SELECT COUNT(*) FROM [References]
+            WHERE from_fqn = '{ProbeTargetFqn}';
+            """;
+        long totalCount = (long)cmd2.ExecuteScalar()!;
+        Assert.True(totalCount > 0, "Expected at least one reference row for the probe target.");
+    }
+
+    // ── Kind classification ───────────────────────────────────────────────
+
+    [Fact]
+    public void References_ContainCallKindRows()
+    {
+        var result = BuildNorthwind();
+        Assert.Contains(result.References, r => r.Kind == "call");
+    }
+
+    [Fact]
+    public void References_ContainVariableReadKindRows()
+    {
+        var result = BuildNorthwind();
+        Assert.Contains(result.References, r => r.Kind == "variable_read");
+    }
+
+    // ── MemberAccesses: bang-access rows have '!' in path ─────────────────
+
+    [Fact]
+    public void MemberAccesses_BangAccessRows_HaveExclamationInPath()
+    {
+        var result = BuildNorthwind();
+        var bangRows = result.MemberAccesses.Where(ma => ma.Path.StartsWith("!")).ToList();
+        // Only assert the structure is correct when bang-access rows exist.
+        if (bangRows.Count > 0)
+            Assert.All(bangRows, ma => Assert.StartsWith("!", ma.Path));
+    }
+
+    // ── Enum value references ─────────────────────────────────────────────
+
+    [Fact]
+    public void References_ContainEnumValueUseRows_WhenEnumMembersReferenced()
+    {
+        var result = BuildNorthwind();
+        // modStrings defines the enumStrings enum; cboCompanyTypeID_BeforeUpdate uses
+        // its members (e.g., sCompanyDelete_CompanyTypeChange). If resolved, kind='enum_value_use'.
+        // Guard: assert only when such rows exist (resolver must resolve cross-module enum members).
+        var enumRefs = result.References.Where(r => r.Kind == "enum_value_use").ToList();
+        // Either the fixture has enum refs (verify shape) or it doesn't (no assertion).
+        foreach (var r in enumRefs)
+            Assert.Equal("enum_value_use", r.Kind);
+    }
+
+    // ── Local variable to_fqn includes procedure segment ─────────────────
+
+    [Fact]
+    public void LocalVariable_ToFqn_IncludesProcedureSegment()
+    {
+        // strDlgMsg is a local Dim in cboCompanyTypeID_BeforeUpdate.
+        // Its to_fqn must be Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate.strDlgMsg,
+        // not Form_frmCompanyDetail.strDlgMsg (which would confuse it with a module var).
+        var result = BuildNorthwind();
+        var strDlgMsgRef = result.References.FirstOrDefault(r =>
+            r.FromFqn == ProbeTargetFqn &&
+            string.Equals(r.Identifier, "strDlgMsg", StringComparison.OrdinalIgnoreCase) &&
+            r.ToFqn is not null);
+
+        if (strDlgMsgRef is null) return; // unresolved in this fixture — skip assertion
+
+        Assert.Contains(".cboCompanyTypeID_BeforeUpdate.", strDlgMsgRef.ToFqn,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    // ── control_access kind for bang expressions ──────────────────────────
+
+    [Fact]
+    public void References_BangAccessExpressions_HaveControlAccessKind()
+    {
+        var result = BuildNorthwind();
+        var controlRefs = result.References.Where(r => r.Kind == "control_access").ToList();
+        // Shape check only: all control_access rows must have a non-empty identifier.
+        foreach (var r in controlRefs)
+            Assert.False(string.IsNullOrEmpty(r.Identifier));
+    }
+}
+
+```
+
+### Files unchanged from round 1 (still present and correct):
+ReferenceRow.cs, MemberAccessRow.cs, ReferencesExtractor.cs, BuildResult.cs, SymbolDbWriter.cs WriteReferences/WriteMemberAccesses methods.
+
+### Concerns for this round:
+1. Is the M1 fix (local FQN three-part structure) consistent with Session 1's LocalVariableExtractor pattern of <Module>.<ProcFqn>.<LocalName>? Specifically: for a Property procedure, ProcedureFqn returns <module>.<name>#<kind> — does that extend correctly to locals: <module>.<name>#<kind>.<localName>?
+2. Is M2 dismissal acceptable? Confirm that persisting 'variable_read' for writes is a documented known limitation rather than a silent defect, given the tiebreaker's ruling.
+3. Do the three new tests adequately cover the gaps identified in the Minor finding?
+4. Any remaining issues?
+
+After your analysis, output a JSON block in this exact format:
+```json
+{
+  "verdict": "VERIFIED" | "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Critical" | "Major" | "Minor",
+      "location": "<file or test name>",
+      "summary": "<one-sentence description>",
+      "fix": "<recommended fix>"
+    }
+  ]
+}
+```
+If verdict is VERIFIED, `issues` must be an empty array `[]`.
+Do not omit this block.

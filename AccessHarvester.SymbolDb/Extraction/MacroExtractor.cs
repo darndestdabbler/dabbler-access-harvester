@@ -46,6 +46,7 @@ public static class MacroExtractor
         if (!string.IsNullOrEmpty(assembledXml))
         {
             var parsedActions = MacroXmlParser.ParseToActions(assembledXml);
+            int position = 0;   // dense, gap-free position for the (macro_fqn, position) PK
             for (int i = 0; i < parsedActions.Count; i++)
             {
                 var actionNode = parsedActions[i]?.AsObject();
@@ -58,7 +59,7 @@ public static class MacroExtractor
 
                 actions.Add(new MacroActionRow(
                     MacroFqn: macroName,
-                    Position: i,
+                    Position: position++,
                     ActionName: actionName,
                     ArgumentsJson: argsJson));
             }

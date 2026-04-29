@@ -1,0 +1,26 @@
+Recommended: `claude-code` (Anthropic Opus 4.7 @ effort=high)
+Rationale: Session 4 shifts from the mechanical work of Sessions 2-3 to complex system design and implementation, which is more aligned with the architectural tasks of Session 1 where Opus proved effective. The session requires strong reasoning for both algorithmic Python code (topological sort, confidence logic) and the nuanced, multi-variant prompt engineering. Using a top-tier model like Opus at a high effort level is justified to minimize verification cycles and produce a more robust initial implementation for this core pipeline component.
+
+### Assessment
+
+#### 1. Analysis of Task Complexity
+
+Session 4 represents a significant step-up in complexity compared to the preceding sessions.
+
+*   **Algorithmic Implementation:** The task requires implementing a topological sort for a dependency graph, including cycle detection and breaking logic. This is non-trivial algorithmic work.
+*   **System Design:** The orchestrator is a multi-component Python application, not a simple script. It reads from a database, applies conditional logic (confidence thresholds), writes back results, and manages a history table.
+*   **Nuanced Prompt Engineering:** Designing 8+ distinct prompt templates requires a deep understanding of the source language (VBA) and the desired output format. This is a creative reasoning task, not a mechanical one.
+*   **State Management:** The pipeline must correctly handle symbol states (e.g., MD5-equivalents, deferred, dead) and escalate interpretations based on confidence scores, which introduces stateful logic.
+
+This combination of algorithmic coding, system design, and creative reasoning moves the task out of the "medium complexity / mechanical" category that was suitable for Sonnet 4.6.
+
+#### 2. Model and Effort Recommendation
+
+*   **Engine & Provider: `claude-code` (Anthropic)**
+    *   **Reasoning:** The project has established a successful workflow and calibration data with the Anthropic toolchain. There is no compelling feature gap in the Session 4 spec that would warrant the overhead of switching providers. Sticking with the incumbent reduces variability.
+
+*   **Model: `Opus 4.7`**
+    *   **Reasoning:** The task's complexity profile mirrors Session 1 (schema/architecture) more than Sessions 2-3 (data plumbing). Opus is better suited for generating the initial, high-quality scaffolding for the Python application and designing the sophisticated prompt templates. While Sonnet *could* accomplish the task, it would likely require more verification rounds and significant fix-ups for the algorithmic and prompt-design components, increasing total project time.
+
+*   **Effort: `high`**
+    *   **Reasoning:** This session involves creating a new, multi-file Python application from scratch, complete with database interaction, file I/O for prompts, and complex internal logic. This constitutes a substantial unit of work. A `high` effort level correctly scopes the task for the orchestrator, allocating sufficient resources to generate a comprehensive first draft of the entire interpretation pipeline, which can then be refined. A `medium` setting would likely result in a partial or less-integrated implementation.

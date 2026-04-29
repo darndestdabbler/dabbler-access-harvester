@@ -46,25 +46,55 @@ public static class BuildArtifacts
             Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json"),
             "Form_frmCompanyDetail");
 
-        // Collect table names used as bound_table_or_query in any form control,
-        // so the table-lookup-score extractor can award the row-source bonus.
-        var rowSourceTableNames = new HashSet<string>(
-            formResult.Controls
-                .Where(c => c.BoundTableOrQuery is not null)
-                .Select(c => c.BoundTableOrQuery!),
-            StringComparer.OrdinalIgnoreCase);
+        // Count, per table or query name, how many form controls reference it
+        // as a row source or bound table. The TableSchemaExtractor uses this
+        // for the count-tiered is_lookup_table_score bonus, and the union of
+        // names here also feeds the query-deadness analysis below.
+        var rowSourceCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var c in formResult.Controls)
+        {
+            if (c.RowSource is not null)
+                rowSourceCounts[c.RowSource] = rowSourceCounts.GetValueOrDefault(c.RowSource) + 1;
+            if (c.BoundTableOrQuery is not null)
+                rowSourceCounts[c.BoundTableOrQuery] = rowSourceCounts.GetValueOrDefault(c.BoundTableOrQuery) + 1;
+        }
 
         // --- Session 3: Macros ---
         var macroPaths = Directory.GetFiles(Path.Combine(kbRoot, "Macros"), "*.json");
         var macroResult = MacroExtractor.Extract(macroPaths);
 
-        // --- Session 3: Queries ---
+        // --- Session 3: Queries (with deadness analysis) ---
+        // A query is alive if any of these reference its Fqn:
+        //   * form-control RowSource or BoundTableOrQuery
+        //   * a VBA reference identifier (literal-string DLookup et al. cases
+        //     that survived as identifiers in Session 2's reference graph)
+        //   * a macro OpenQuery / RunSQL action argument
+        var callerNames = new HashSet<string>(rowSourceCounts.Keys, StringComparer.OrdinalIgnoreCase);
+        foreach (var r in vbaResult.References)
+        {
+            if (!string.IsNullOrEmpty(r.Identifier)) callerNames.Add(r.Identifier);
+        }
+        foreach (var a in macroResult.MacroActions)
+        {
+            // Cheap: any non-null arguments_json with the action's quoted
+            // value is enough to keep a referenced query alive. We extract
+            // potential query names from common macro-action arg shapes.
+            if (a.ActionName is "OpenQuery" or "RunSQL" or "DeleteObject" && a.ArgumentsJson is not null)
+            {
+                foreach (var token in a.ArgumentsJson.Split(['"', ',', ':', '{', '}', '[', ']']))
+                {
+                    string trimmed = token.Trim();
+                    if (trimmed.Length > 0) callerNames.Add(trimmed);
+                }
+            }
+        }
+
         var queryPaths = Directory.GetFiles(Path.Combine(kbRoot, "Queries"), "*.json");
-        var queries = QuerySchemaExtractor.Extract(queryPaths);
+        var queries = QuerySchemaExtractor.Extract(queryPaths, callerNames);
 
         // --- Session 3: Tables ---
         var tablePaths = Directory.GetFiles(Path.Combine(kbRoot, "Tables"), "*.json");
-        var tables = TableSchemaExtractor.Extract(tablePaths, rowSourceTableNames);
+        var tables = TableSchemaExtractor.Extract(tablePaths, rowSourceCounts);
 
         string outDir = Path.Combine(repoRoot, "tools", "symbol-db");
         Directory.CreateDirectory(outDir);
