@@ -111,10 +111,18 @@ high
 | ... | ... | ... |
 
 ### Actuals (filled after the session)
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+- Orchestrator used: claude-code (Anthropic Opus 4.7 @ effort=high) — matched recommendation
+- Total routed cost: ~$2.16 (interpretation pipeline $1.49 + three verification rounds at $0.244 / $0.257 / $0.172 = $0.67)
+- Deviations from recommendation: None on orchestrator. Three verification rounds were needed (vs. anticipated 1-2):
+  - Round 1: ISSUES_FOUND with 2 Critical + 4 Major + 1 Minor (queries-not-interpreted + Step-11 dotnet-test re-running BuildArtifacts and wiping the AI columns mid-flight + several idempotency gaps in skip-row writes).
+  - Round 2: ISSUES_FOUND with 4 Major + 1 Minor (symbol-side transient skips not idempotent, parse-failure retry outside transient handler, broken `--limit` exception path, docstring drift, plus a verify-prompt-construction artifact where the helper sent placeholder Justification1 fields for non-symbol classes).
+  - Round 3: VERIFIED (clean) after fixing the four Major + one Minor and sending the actual stored Justification1 text in the prompt.
+- Notes for next-session calibration:
+  - **Critical lesson — Step-11 `dotnet test` was destructive.** The Session-1 `GenerateArtifacts` test ran `BuildArtifacts.RunForNorthwind` on every test invocation, which DELETES and recreates `symbol-db.sqlite`. Session 4 added a `HasInterpretationsPopulated` guard so the regeneration is now a no-op once Session 4+ has populated AI columns. This needs to land alongside any future session that writes downstream-only data into the same artifact (Session 5's probe outputs go elsewhere, so it's already safe).
+  - **Cost framing.** $2.16 is comfortably under the $2-4 spec estimate, but only because escalation hardly fired (1 opinion-2 + 1 opinion-3 across 84 symbols, well below the 20% spec budget). With 98% of interpretations landing at confidence >= 0.90, the cross-provider auto-verification on `documentation` was sufficient calibration; opinions 2/3 were rarely necessary.
+  - **Idempotent audit rows are non-trivial.** Round 2's findings exposed three different skip-write paths that needed `_already_skipped_history()` guards. Future sessions adding new audit-row writers should mirror the helper pattern from the start, not retrofit it.
+  - **Verifier prompt construction matters.** Round 2 flagged "weakly grounded" Justification1 because the verify script sent literal placeholder text `'(macro)'` / `'(table)'` / `'(query)'` instead of pulling stored values. Always send the real DB-backed text into the verification prompt; the verifier cannot assume the prompt is a faithful sample.
+  - Macros, lookup tables, and queries must be runnable by default — Round 1 flagged the original opt-in `--include-*` flags as a spec gap. Default-on with `--no-*` opt-outs is the right shape.
 
 ## Session 5: Comprehension Probe + Migration-Readiness Review
 
@@ -157,3 +165,12 @@ claude-code (Anthropic Opus 4.7 @ effort=high)
 Rationale: Session 4 shifts from the mechanical work of Sessions 2-3 to complex system design and implementation, which mirrors Session 1's profile where Opus proved effective. The session requires strong reasoning for both algorithmic Python code (leaves-first topological sort with cycle handling, confidence-thresholded escalation logic) and the nuanced prompt engineering for 8+ distinct symbol-kind templates. Using Opus at high effort minimises verification cycles and produces a more robust initial implementation for this core pipeline component. Sticking with the incumbent Anthropic toolchain reduces variability versus switching providers.
 
 (Full routed analysis preserved at `session-reviews/session-4-rec.txt`.)
+
+## Next-session orchestrator recommendation (Session 5)
+
+**Recommended (post-Session-4 re-route via `analysis` to gemini-pro):**
+claude-code (Anthropic Opus 4.7 @ effort=max)
+
+Rationale: Session 5 is the capstone — the primary tasks are not code generation but high-judgment synthesis, adjudication, and authoring the go/no-go verdict. The orchestrator must draft a ground-truth reference, compare three providers' probe responses against it, and write a defensible recommendation. Using Opus at max effort prioritises a definitive, well-supported conclusion over marginal cost savings in this final session.
+
+(Full routed analysis preserved at `session-reviews/session-5-rec.txt`.)

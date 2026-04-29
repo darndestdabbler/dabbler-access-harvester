@@ -1,0 +1,48 @@
+Symbol kind: {{KIND}}     ({{ACCESS}})
+Module:      {{MODULE_FQN}}
+FQN:         {{FQN}}
+Signature:   {{SIGNATURE}}
+Returns:     {{RETURN_TYPE}}
+
+{{#EVENT_BINDING_BLOCK}}
+This procedure is bound as the {{EVENT_NAME}} event handler for control
+{{CONTROL_NAME}} on form {{FORM_FQN}}. It runs in response to that
+user-driven event in the running Access app.
+{{/EVENT_BINDING_BLOCK}}
+
+{{#PARAMETERS_BLOCK}}
+Parameters:
+{{PARAMETERS_LIST}}
+{{/PARAMETERS_BLOCK}}
+
+{{#CALLEE_SUMMARIES_BLOCK}}
+Callee summaries (already interpreted; you can lean on these instead of
+re-deriving what each callee does):
+{{CALLEE_SUMMARIES}}
+{{/CALLEE_SUMMARIES_BLOCK}}
+
+{{#CALLER_SUMMARIES_BLOCK}}
+Inbound callers (interpret this symbol in the context of how it is used):
+{{CALLER_SUMMARIES}}
+{{/CALLER_SUMMARIES_BLOCK}}
+
+{{#CLASSIFICATION_BLOCK}}
+Mechanical classification (from the harvester's static analysis, treat as
+ground truth):
+{{CLASSIFICATION}}
+{{/CLASSIFICATION_BLOCK}}
+
+Source body:
+```vba
+{{SOURCE_BODY}}
+```
+
+Tell the downstream agent:
+
+1. What the procedure does, in user-visible / behavioural terms.
+2. Its preconditions (state of form, record, parameters, etc.).
+3. Its side effects (record edits, navigation, message boxes, control
+   updates) and their categories.
+4. Its error/edge-case behaviour where the source reveals one.
+5. The UI behaviour the user sees when this procedure runs, if it is
+   bound to an event.

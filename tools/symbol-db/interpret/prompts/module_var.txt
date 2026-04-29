@@ -1,0 +1,24 @@
+Symbol kind: module-level variable     ({{ACCESS}})
+Module:      {{MODULE_FQN}}
+FQN:         {{FQN}}
+Declared as: {{NAME}} As {{DATA_TYPE}}
+
+{{#WRITERS_BLOCK}}
+Procedures that write this variable:
+{{WRITERS_LIST}}
+{{/WRITERS_BLOCK}}
+
+{{#READERS_BLOCK}}
+Procedures that read this variable:
+{{READERS_LIST}}
+{{/READERS_BLOCK}}
+
+Tell the downstream agent:
+
+1. What this variable represents (a counter, a cached lookup result,
+   a flag, a state-machine slot, etc.).
+2. Its lifecycle: when it is initialised, when it is reset, who
+   maintains it.
+3. Whether it is form-private state that should become an instance
+   field on the equivalent component, or a cross-procedure sentinel
+   that should be redesigned away during migration.

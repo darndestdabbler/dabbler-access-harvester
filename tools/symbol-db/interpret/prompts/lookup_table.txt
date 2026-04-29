@@ -1,0 +1,18 @@
+Symbol kind: lookup table
+FQN:         {{FQN}}
+PK column:   {{PRIMARY_KEY_COLUMN}}
+Label col:   {{CANDIDATE_LABEL_COLUMN}}
+Score:       {{IS_LOOKUP_TABLE_SCORE}} ({{IS_LOOKUP_TABLE_REASON}})
+
+{{#BOUND_CONTROLS_BLOCK}}
+Form controls bound to this table:
+{{BOUND_CONTROLS}}
+{{/BOUND_CONTROLS_BLOCK}}
+
+Tell the downstream agent:
+
+1. What domain this lookup table represents (a finite set of what?).
+2. Whether it is a stable reference table (rare migrations) or a
+   user-curated set that the application is expected to extend.
+3. How it is consumed by the UI (combo box, list box, validation
+   constraint, foreign-key target).

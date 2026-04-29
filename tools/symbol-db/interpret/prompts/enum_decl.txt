@@ -1,0 +1,21 @@
+Symbol kind: enum declaration
+Module:      {{MODULE_FQN}}
+FQN:         {{FQN}}
+
+This enum has {{VALUE_COUNT}} members. A representative sample of names:
+{{SAMPLE_VALUES}}
+
+{{#CALLER_SUMMARIES_BLOCK}}
+Procedures that consume values of this enum (sample):
+{{CALLER_SUMMARIES}}
+{{/CALLER_SUMMARIES_BLOCK}}
+
+Tell the downstream agent:
+
+1. What the enum models (a finite domain of what?).
+2. The shape of the consumer pattern (e.g., used as a key into a
+   localised string lookup, or as a state-machine state, or as a
+   user-action selector).
+3. Whether this enum is purely internal indexing or whether the
+   numeric values themselves carry meaning (default sequential vs.
+   bit-flag vs. authored numeric assignments).
