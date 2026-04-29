@@ -124,7 +124,52 @@ high
   - **Verifier prompt construction matters.** Round 2 flagged "weakly grounded" Justification1 because the verify script sent literal placeholder text `'(macro)'` / `'(table)'` / `'(query)'` instead of pulling stored values. Always send the real DB-backed text into the verification prompt; the verifier cannot assume the prompt is a faithful sample.
   - Macros, lookup tables, and queries must be runnable by default — Round 1 flagged the original opt-in `--include-*` flags as a spec gap. Default-on with `--no-*` opt-outs is the right shape.
 
-## Session 5: Comprehension Probe + Migration-Readiness Review
+## Session 5: Block-Randomized Independent Cross-Provider Re-Interpretation
+
+### Recommended orchestrator
+*to be filled at Session 5 start (routed analysis)*
+
+### Rationale
+*to be filled*
+
+### Estimated routed cost
+high (~$5–$15 routed across Opus + GPT-5.4 on a 42-item stratified sample)
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| ... | ... | ... |
+
+### Actuals (filled after the session)
+- Orchestrator used: <to be filled>
+- Total routed cost: <to be filled>
+- Deviations from recommendation: <to be filled>
+- Notes for next-session calibration: <to be filled>
+
+## Session 6: Cross-Provider Consistency + Confidence Calibration
+
+### Recommended orchestrator
+*to be filled at Session 6 start (routed analysis)*
+
+### Rationale
+*to be filled*
+
+### Estimated routed cost
+high (~$7–$15 routed across three judging providers on the 42-item sample)
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| ... | ... | ... |
+
+### Actuals (filled after the session)
+- Orchestrator used: <to be filled>
+- Total routed cost: <to be filled>
+- Deviations from recommendation: <to be filled>
+- Notes for next-session calibration: <to be filled>
+
+## Session 7: Comprehension Probe + Migration-Readiness Review
+
+> Originally numbered Session 5 of 5; renumbered 2026-04-29 when the
+> calibration block (Sessions 5–6) was inserted.
 
 ### Recommended orchestrator
 claude-code (Anthropic Opus 4.7 @ effort=max)
@@ -166,11 +211,25 @@ Rationale: Session 4 shifts from the mechanical work of Sessions 2-3 to complex 
 
 (Full routed analysis preserved at `session-reviews/session-4-rec.txt`.)
 
-## Next-session orchestrator recommendation (Session 5)
+## Next-session orchestrator recommendation (Session 7, originally Session 5)
+
+> The recommendation below was routed at Session 4 close, when the
+> capstone was Session 5 of 5. After the 2026-04-29 spec extension it
+> applies to Session 7 (still the capstone). A fresh recommendation
+> for the new Session 5 (block-randomization) appears below.
 
 **Recommended (post-Session-4 re-route via `analysis` to gemini-pro):**
 claude-code (Anthropic Opus 4.7 @ effort=max)
 
-Rationale: Session 5 is the capstone — the primary tasks are not code generation but high-judgment synthesis, adjudication, and authoring the go/no-go verdict. The orchestrator must draft a ground-truth reference, compare three providers' probe responses against it, and write a defensible recommendation. Using Opus at max effort prioritises a definitive, well-supported conclusion over marginal cost savings in this final session.
+Rationale: Session 7 is the capstone — the primary tasks are not code generation but high-judgment synthesis, adjudication, and authoring the go/no-go verdict. The orchestrator must draft a ground-truth reference, compare three providers' probe responses against it, and write a defensible recommendation. Using Opus at max effort prioritises a definitive, well-supported conclusion over marginal cost savings in this final session.
 
 (Full routed analysis preserved at `session-reviews/session-5-rec.txt`.)
+
+## Next-session orchestrator recommendation (Session 5, block-randomization)
+
+*to be filled at Session 5 start (routed analysis), after the 2026-04-29
+spec extension. The work profile is moderate-judgment Python plus
+heavy routed-call orchestration (84 cross-provider calls over a 42-item
+sample). A Sonnet-class orchestrator is likely sufficient; the
+block-sampling and writer code is mechanical, and the routed calls
+themselves carry their own model identity.*

@@ -16,7 +16,7 @@ requiresE2E: false
 uatScope: none
 ```
 
-> Rationale: No UI surface. Quality bar is build + tests + cross-provider AI verification per the harvester's standard. The comprehension probe in Session 5 is *not* human UAT — it is an AI-versus-AI judgment call that the human adjudicates inline at session close.
+> Rationale: No UI surface. Quality bar is build + tests + cross-provider AI verification per the harvester's standard. The comprehension probe in Session 7 (and the consistency-grading review in Session 6) are *not* human UAT — they are AI-versus-AI judgment calls that the human adjudicates inline at session close.
 
 ---
 
@@ -32,7 +32,9 @@ A SQLite database (`tools/symbol-db/symbol-db.sqlite` — checked in) that holds
 4. Mechanical dead-code and dead-object detection so the AI interpretation pipeline never spends tokens on artifacts that are not live.
 5. MD5-hash equivalence detection so duplicated procedures (a common Access pattern) get interpreted once, with the interpretation copied to all hash-equivalent twins.
 6. AI-written interpretations (purpose, justification, confidence) for every live, non-duplicate symbol, populated leaves-first so each interpretation prompt can lean on its callees' interpretations rather than re-walking source.
-7. A comprehension probe that takes a representative target procedure, sends three providers the symbol-table view *minus* the target's interpretation, and asks each to reconstruct what the procedure does. Human adjudicates. Outcome drives the go/no-go for the migration-readiness review.
+7. A block-randomized cross-provider re-interpretation pass that populates opinion 2 (Opus, Anthropic) and opinion 3 (GPT-5.4, OpenAI) on a stratified sample (~42 items across symbol kinds, macros, lookup tables, and queries). Each provider sees the same neutral evidence package — never another provider's interpretation — so the three opinions are genuinely independent.
+8. A cross-provider consistency + confidence-calibration analysis that grades pairwise interpretation agreement and justification agreement (0–100% each), then asks whether self-reported confidence positively correlates with cross-provider consistency. The headline output is a per-judge correlation between the two agreement scores: if all three judges return positive correlations, the two scores aggregate to one consistency dimension; otherwise they are reported separately and confidence is correlated against each.
+9. A comprehension probe that takes a representative target procedure, sends three providers the symbol-table view *minus* the target's interpretation, and asks each to reconstruct what the procedure does. Human adjudicates. Outcome drives the go/no-go for the migration-readiness review.
 
 ### What this set does NOT do
 
@@ -79,14 +81,14 @@ This set is small because the substrate is large. Confirmed present at spec auth
 | Enrichment pipeline runner | `AccessHarvester.Pipeline/Enrichment/EnrichmentPipelineRunner.cs` | Stitches the per-form enrichers together. |
 | Test footprint | `tests/` | 1148 tests passing across resolver / parser / grammar / harvester. |
 
-**Implication for this set:** every column we want in the symbol DB except the AI-interpretation columns is already produced in memory by the existing pipeline. This set is plumbing (Sessions 1–3) plus the AI interpretation pass that has been deliberately deferred (Session 4) plus the comprehension gate (Session 5).
+**Implication for this set:** every column we want in the symbol DB except the AI-interpretation columns is already produced in memory by the existing pipeline. This set is plumbing (Sessions 1–3) plus the AI interpretation pass that has been deliberately deferred (Session 4), plus a cross-provider calibration block (Sessions 5–6) added 2026-04-29 after Session 4 returned 98% of interpretations at confidence ≥ 0.90 — a result strong enough to be suspicious without independent verification, plus the comprehension gate (Session 7).
 
 ---
 
 ## Concrete fixture and probe target
 
 - **Canonical fixture:** `samples/NorthwindDevEdition.accdb`. Already extracted to `tmp/comprehension-ir/AccessMetaData/NorthwindDevEdition/` (raw + kb + ir). Already used as the test corpus by the resolver-* and enrichment-* sets.
-- **Probe target (Session 5):** `Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate` and the 12 identifiers it directly references (7 module-level `Private m_lng*` / `m_str*` variables, 2 local `Dim` strings, `CompanyIsActive`, `GetString`, `sCompanyDelete_CompanyTypeChange`).
+- **Probe target (Session 7):** `Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate` and the 12 identifiers it directly references (7 module-level `Private m_lng*` / `m_str*` variables, 2 local `Dim` strings, `CompanyIsActive`, `GetString`, `sCompanyDelete_CompanyTypeChange`).
 
 The probe target was chosen because the human knows its behavior cold and can adjudicate AI interpretations against ground truth without re-deriving them.
 
@@ -350,11 +352,15 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 
 ## Session Plan
 
-> Five sessions. The orchestrator running each session must elaborate the
+> Seven sessions. The orchestrator running each session must elaborate the
 > bullet hints below — including the mandatory Step 6 (build + test) and
 > Step 8 (cross-provider verification) per `docs/ai-led-session-workflow.md`.
+>
+> Sessions 5 and 6 were inserted on 2026-04-29 after Session 4 closed; the
+> original capstone (comprehension probe + migration-readiness verdict)
+> renumbered from Session 5 of 5 to Session 7 of 7.
 
-### Session 1 of 5: Symbols Table + Dead-Code / Dead-Object / MD5 Detection + Measurement
+### Session 1 of 7: Symbols Table + Dead-Code / Dead-Object / MD5 Detection + Measurement
 
 **Steps:**
 
@@ -399,7 +405,7 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 
 ---
 
-### Session 2 of 5: References + Member Accesses + Caller-Kind Annotation
+### Session 2 of 7: References + Member Accesses + Caller-Kind Annotation
 
 **Steps:**
 
@@ -424,7 +430,7 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 
 ---
 
-### Session 3 of 5: Column Mappings (Form Controls + Event Bindings + Queries) + Macro Normalization
+### Session 3 of 7: Column Mappings (Form Controls + Event Bindings + Queries) + Macro Normalization
 
 **Steps:**
 
@@ -460,7 +466,7 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 
 ---
 
-### Session 4 of 5: AI Interpretation Pipeline (Leaves-First; Confidence-Thresholded)
+### Session 4 of 7: AI Interpretation Pipeline (Leaves-First; Confidence-Thresholded)
 
 **Steps:**
 
@@ -487,7 +493,7 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 9. Run the pipeline for `modStrings` first (pure leaves: enum, four utility functions). Then run for `Form_frmCompanyDetail` (which leans on `modStrings`'s now-populated interpretations).
 10. Generate `tools/symbol-db/interpretation-summary-northwind.md`: total interpretations written, per-confidence distribution, escalation rate (how often opinion 2 / 3 fired), MD5-copy rate, total cost.
 11. `dotnet build && dotnet test` (no new C# code expected; sanity check).
-12. Cross-provider verification of the interpretation pipeline itself (not the interpretations — that's Session 5).
+12. Cross-provider verification of the interpretation pipeline itself (not the interpretations — those land in Sessions 5–6 for cross-provider regeneration and consistency grading, and in Session 7 for the comprehension probe).
 
 **Creates:** `tools/symbol-db/interpret/` (Python runner + prompt templates), `tools/symbol-db/interpretation-summary-northwind.md`.
 **Touches:** `symbol-db.sqlite` (now populated with interpretations).
@@ -496,7 +502,104 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 
 ---
 
-### Session 5 of 5: Comprehension Probe + Migration-Readiness Review
+### Session 5 of 7: Block-Randomized Independent Cross-Provider Re-Interpretation
+
+> Inserted 2026-04-29 after Session 4 returned 98% of interpretations at
+> confidence ≥ 0.90 — a result strong enough to need calibration against
+> independent cross-provider regeneration before the comprehension probe
+> in Session 7.
+
+**Steps:**
+
+1. Required reading.
+2. **Define the stratification policy.** Block-sample the existing 103 Session-4 interpretations by `kind`. Take every item from the small strata and 8 each (random) from the large ones:
+
+   | Stratum | Population | Sample |
+   |---|---|---|
+   | `enum_decl` | 1 | 1 (all) |
+   | `macro` | 1 | 1 (all) |
+   | `query` (live) | 3 | 3 (all) |
+   | `function` | 6 | 6 (all) |
+   | `module_var` (module-level) | 7 | 7 (all) |
+   | `sub` | 22 | 8 (random) |
+   | `enum_value` | 48 | 8 (random) |
+   | `lookup_table` (score ≥ 70) | 15 | 8 (random) |
+   | **Total** | **103** | **42** |
+
+   Persist the seed, the policy, and the resolved FQN list to `tools/symbol-db/consistency/sample.json` so re-runs and Session 6 work off the same sample.
+3. Implement `tools/symbol-db/consistency/sampler.py`: deterministic stratified sampler keyed by seed. Hermetic-testable; takes the existing symbol DB as input.
+4. Implement `tools/symbol-db/consistency/independent_runner.py`. Reuses the **same** `prompt_builder.build_*_prompt` calls Session 4 used, but the per-symbol prompt is rebuilt with `enum_interpretation=None` and `callee_summaries=[]` (and the equivalent for tables/queries) so each provider sees only the neutral evidence package — never another agent's interpretation. Routes through `query()` (not `route()`) to bypass the tier-picker and pin the model explicitly.
+5. **Run opinion 2 — Opus (Anthropic).** Per-item: `query("opus", task_type="documentation", ...)`. Persist to `Interpretation2/Justification2/Confidence2/Agent2/InterpretedAt2` (and the parallel triplets on `Macros` / `Tables` / `Queries`). One `InterpretationHistory` row per write with `reason="independent-cross-provider"`.
+6. **Run opinion 3 — GPT-5.4 (OpenAI).** Same shape, populates `Interpretation3` / etc. via `query("gpt-5-4", ...)`.
+7. Idempotency: items already populated in that opinion slot are no-ops. Transient errors record `skipped-provider-error` and continue (mirror the symbol-pass pattern from Session 4).
+8. Generate `tools/symbol-db/consistency/sample-report.md`: per-stratum sample sizes, per-provider cost, parse failures, per-provider mean confidence (so Session 6 has the per-provider baseline).
+9. Hermetic Python tests: sampler determinism, opinion-slot routing, neutral-evidence prompt construction.
+10. `dotnet build && dotnet test`.
+11. Cross-provider verification.
+
+**Creates:** `tools/symbol-db/consistency/__init__.py`, `sampler.py`, `independent_runner.py`, `sample.json`, `sample-report.md`, `tests/test_sampler.py`, `tests/test_independent_runner.py`.
+
+**Touches:** `tools/symbol-db/symbol-db.sqlite` (Interpretation2/3 columns + InterpretationHistory).
+
+**Ends with:** Every sampled item carries three independent interpretations — gemini-pro from Session 4, opus and gpt-5-4 from this session — generated against the same neutral evidence package, ready for Session 6 grading.
+
+**Progress keys:** `session-5/sampler`, `session-5/independent-runner`, `session-5/opinion-2-opus`, `session-5/opinion-3-gpt5`, `session-5/sample-report`, `session-5/build-test`, `session-5/verification`.
+
+---
+
+### Session 6 of 7: Cross-Provider Consistency + Confidence Calibration
+
+> Inserted 2026-04-29. Consumes the 42-item three-opinion sample written
+> by Session 5 and decides whether the symbol DB's confidence column is
+> trustworthy for downstream consumers.
+
+**Steps:**
+
+1. Required reading.
+2. **Define the grading rubric — two ratings, percent-agreement scale.** For each pair of interpretations on the same item (1↔2, 2↔3, 1↔3), score:
+
+   - **`interpretation_agreement_pct`** (0–100): how much of what each interpretation *says about behavior* — preconditions, side effects, control flow, return shape — is the same across the pair.
+   - **`justification_agreement_pct`** (0–100): how much of the *evidence cited* — source spans, callees, callers, signature features — is the same across the pair.
+
+   Plus a one-line `summary` of the disagreement and a `disagreement_type` ∈ {`factual`, `scope`, `framing`, `convergent`}.
+
+3. Implement `tools/symbol-db/consistency/grader.py`: builds the grading prompt (target FQN + three interpretations side-by-side, anonymized as A/B/C to remove provider-name bias) and parses the structured response.
+
+4. **Three judging passes per item.** Each sampled item gets graded by gemini-pro, opus, and gpt-5-4 — every provider grades the same three triplets, anonymized. Persist to a fresh `tools/symbol-db/consistency/grades.sqlite` with one row per `(item_fqn, judge_provider, pair, interpretation_agreement_pct, justification_agreement_pct, disagreement_type, summary)`. Keeping it separate from `symbol-db.sqlite` keeps the Session-1 schema stable.
+
+5. **Data-reduction step (per-judge intra-correlation).** For each of the three judging providers separately, compute the correlation across the 42 items between `interpretation_agreement_pct` and `justification_agreement_pct` (averaged across the three pairs to one item-level value per dimension). This produces three correlation coefficients — one per judge.
+
+   - If **all three are positive** (sign agreement across judges + non-trivial magnitude), the two ratings can be aggregated to one **consistency score** per item (mean of the two percentages) and the rest of the analysis runs on the aggregate.
+   - If **the signs disagree** or any judge returns a near-zero correlation, treat the two ratings as measuring **distinct dimensions**. Section 6 below splits into two parallel correlation analyses.
+
+   Record the three coefficients and the chosen path in `correlation-report.md`.
+
+6. **Confidence vs. consistency correlation.** Whichever path step 5 selected:
+
+   - **Aggregated path:** Pearson and Spearman correlation between mean opinion-confidence (mean of `Confidence1/2/3` per item) and the aggregate consistency score.
+   - **Split path:** two parallel correlations — confidence vs. interpretation-agreement and confidence vs. justification-agreement — reported side by side.
+
+   Per-kind breakdown either way (does the correlation hold for `enum_value` as much as for `sub`?). Plus inter-rater reliability across the three judges (Krippendorff's alpha on the percent-agreement totals). If judges disagree on consistency, the meta-question collapses — surface that loudly. Plus top-5 false-confidence items (high confidence, low consistency) and top-5 justified-uncertainty items (low confidence, low consistency).
+
+7. Generate `tools/symbol-db/consistency/correlation-report.md` plus `correlation-scatter.png` (matplotlib). The headline is the per-judge data-reduction result from step 5 followed by the chosen step-6 correlation; the verdict is "trust the confidence column at the configured 0.75/0.70 thresholds" or "recalibrate" or "the two agreement dimensions are not interchangeable, so confidence should be calibrated against each separately".
+
+8. Hermetic Python tests: grader prompt shape (anonymization preserved), per-judge correlation calculation, aggregation-vs-split decision logic, correlation calculation against synthetic fixtures.
+
+9. `dotnet build && dotnet test`.
+
+10. Cross-provider verification.
+
+**Creates:** `tools/symbol-db/consistency/grader.py`, `aggregator.py`, `correlation.py`, `grades.sqlite`, `correlation-report.md`, `correlation-scatter.png`, `tests/test_grader.py`, `tests/test_aggregator.py`, `tests/test_correlation.py`.
+
+**Touches:** None to `symbol-db.sqlite` (consistency data lives in `grades.sqlite`).
+
+**Ends with:** A single defensible answer to "does Session 4's confidence column correlate with cross-provider agreement?", grounded in a per-judge data-reduction step that decides whether interpretation-agreement and justification-agreement are one dimension or two. If r is high (on whichever scoring path), Session 4's escalation thresholds (0.75 / 0.70) are validated; if r is low or negative, recalibration is the obvious follow-up before scaling beyond the probe modules.
+
+**Progress keys:** `session-6/grader`, `session-6/grading-passes`, `session-6/per-judge-data-reduction`, `session-6/correlation`, `session-6/report`, `session-6/build-test`, `session-6/verification`.
+
+---
+
+### Session 7 of 7: Comprehension Probe + Migration-Readiness Review
 
 **Steps:**
 
@@ -525,7 +628,7 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 **Creates:** `docs/session-sets/vba-symbol-db/probe-results/` (per-provider responses + adjudication), `docs/session-sets/vba-symbol-db/migration-readiness/`, `verdict.md`, `change-log.md`.
 **Touches:** None.
 **Ends with:** Human-adjudicated verdict on whether the symbol DB is fit for purpose; recommendation for next session set.
-**Progress keys:** `session-5/packet-build`, `session-5/probe-route-three-providers`, `session-5/reference-description`, `session-5/adjudication`, `session-5/migration-readiness`, `session-5/verdict`, `session-5/change-log`, `session-5/next-set-recommendation`, `session-5/build-test`, `session-5/verification`, `session-5/step-9-reorganization`.
+**Progress keys:** `session-7/packet-build`, `session-7/probe-route-three-providers`, `session-7/reference-description`, `session-7/adjudication`, `session-7/migration-readiness`, `session-7/verdict`, `session-7/change-log`, `session-7/next-set-recommendation`, `session-7/build-test`, `session-7/verification`, `session-7/step-9-reorganization`.
 
 ---
 
@@ -533,21 +636,30 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 
 - **Session 1–3** are mechanically driven (read existing in-memory shapes, write to SQLite). `route()` is needed only for session-verification at end of each session. Per the Delegation Discipline convention: extractor code under ~50 lines per file is direct; anything over is routed for review via `code-review`.
 - **Session 4** is heavily routed by definition — every interpretation is a routed call. Use the standard `route(task_type="documentation")` per-symbol; the Python runner threads `session_set` and `session_number` for cost grouping.
-- **Session 5** routes the three probe responses (`task_type="analysis"`, complexity_hint=70 to bypass cost caps; cross-provider verification still applies). The migration-readiness call is `task_type="documentation"` with `complexity_hint=70`.
+- **Session 5** uses `query("opus", ...)` and `query("gpt-5-4", ...)` to pin model selection rather than letting the tier picker resolve. Cross-provider auto-verification on `documentation` still applies, but the model identity is what matters for opinion independence — bypassing `route()` is the point.
+- **Session 6** routes one grading call per (item × judge), 42 × 3 = 126 calls. `task_type="analysis"` with `complexity_hint=70` so the prompts (which carry three interpretations side-by-side) escalate cleanly. Cross-provider auto-verification stays on but applies to the grading call, not to the per-judge agreement scores themselves.
+- **Session 7** routes the three probe responses (`task_type="analysis"`, complexity_hint=70 to bypass cost caps; cross-provider verification still applies). The migration-readiness call is `task_type="documentation"` with `complexity_hint=70`.
 
 ## Cost expectations
 
-Conservative estimate based on the 2026-04-28 cost-saving discussion:
+Original (Sessions 1–4 + the original Session 5 capstone, now Session 7):
 
 - **Naive baseline** (interpret-everything-once on the full Northwind probe modules): ~80 symbols × ~$0.05/interpretation ≈ $4.00.
 - **With deferral + dead-code + MD5 dedup + leaves-first ordering:** ~50 symbols × ~$0.04/interpretation ≈ $2.00.
 - **With confidence-thresholded escalation to opinion 2/3 on ~20% of symbols:** ~$2.50.
-- **Comprehension probe (Session 5):** 3 providers × ~$0.10 ≈ $0.30 + migration-readiness ~$0.30 ≈ $0.60.
+- **Comprehension probe (Session 7):** 3 providers × ~$0.10 ≈ $0.30 + migration-readiness ~$0.30 ≈ $0.60.
 
-**Total set estimate: $3–4 in routed AI cost**, plus orchestrator-side time. Adjustable up if the measurement in Session 1 shows the corpus is denser than estimated.
+Sessions 5–6 (added 2026-04-29):
+
+- **Session 5 — block-randomized cross-provider re-interpretation:** 42 items × 2 providers (Opus, GPT-5.4) ≈ 84 calls at $0.05–$0.20/call → **$5–$15** routed. Wider range than Session 4 because Opus is materially more expensive than gemini-pro for the same prompt size.
+- **Session 6 — consistency + calibration grading:** 42 items × 3 judging providers ≈ 126 calls at $0.05–$0.15/call → **$7–$15** routed (longer prompts because each carries three interpretations side-by-side).
+
+**Total set estimate: $15–$30 in routed AI cost**, plus orchestrator-side time. Sessions 5–6 dominate the budget. Worth it because they answer whether Session 4's confidence column is trustworthy at scale; absent calibration, the symbol DB ships with an unverified self-rating system.
 
 ---
 
 ## Open questions for the human
 
-None at spec authoring. Prior conversation (2026-04-28) closed all the design decisions (parallel-column denormalization, confidence-thresholded escalation, MD5 over alpha-equivalence, deferral pre-filter scope, no runtime string text in EnumValues, no row-data extraction, all macros up-front).
+None at spec authoring. Prior conversation (2026-04-28) closed all the design decisions for the original Sessions 1–5 (parallel-column denormalization, confidence-thresholded escalation, MD5 over alpha-equivalence, deferral pre-filter scope, no runtime string text in EnumValues, no row-data extraction, all macros up-front).
+
+The 2026-04-29 spec extension (Sessions 5–6, original Session 5 → Session 7) closed: sample size of 8 each for the large strata (`sub`, `enum_value`, `lookup_table`) for a 42-item total; grading rubric simplified to two ratings (interpretation agreement, justification agreement) on a 0–100% scale; per-judge data reduction step that decides whether the two agreement dimensions can be aggregated to a single consistency score before correlating against confidence; consistency data persisted to a separate `grades.sqlite` to keep the Session-1 schema stable.
