@@ -90,6 +90,184 @@
           "costUsd": 0.14738500000000002
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/required-reading",
+      "dateTime": "2026-04-29T16:09:43.0007170-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, session-set-authoring-guide.md, the Session 2 spec block, and honored the human's session-local override: no router use except the mandatory Gemini Pro verification.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/translation-packet",
+      "dateTime": "2026-04-29T16:10:30.000000-04:00",
+      "description": "Extended tools/symbol-db/probe/build_packet.py with a title override, direct-procedure section, and a temp rebuilt-DB path backed by a new tools/symbol-db/probe-builder/ utility. Generated docs/session-sets/vba-symbol-db-path-b-probe/translation-packet.md from a Session-1-fixed temporary symbol DB so the committed interpreted symbol-db.sqlite was not overwritten.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/probe-project-scaffold",
+      "dateTime": "2026-04-29T16:12:30.000000-04:00",
+      "description": "Created tests/AccessHarvester.TranslationProbe.Tests/ and added the new xUnit project to AccessHarvester.sln.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/translation-authored",
+      "dateTime": "2026-04-29T16:13:30.000000-04:00",
+      "description": "Authored FrmCompanyDetailTranslationProbe.cs: translated cboCompanyTypeID_BeforeUpdate plus CompanyIsActive into a POCO-style C# class with IFormContext / IComboBoxControl / IDaoCounts / IStringRepository / IDialogService / IErrorHandler seams and local StringFormat / StringFormatSql helpers.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/own-tests-authored",
+      "dateTime": "2026-04-29T16:14:00.000000-04:00",
+      "description": "Authored 5 Session-2 xUnit tests covering the active-company path, inactive path, vendor-products-only blocking path, error-handler delegation path, and DAO-criteria formatting path.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/test-run",
+      "dateTime": "2026-04-29T16:14:30.000000-04:00",
+      "description": "Ran dotnet test on tests/AccessHarvester.TranslationProbe.Tests/AccessHarvester.TranslationProbe.Tests.csproj: 5 passed, 0 failed, 0 skipped. Saved run output and notes to translation/test-run-session-2.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/symbol-db-gaps",
+      "dateTime": "2026-04-29T16:15:00.000000-04:00",
+      "description": "Authored translation/translation-rationale.md and translation/symbol-db-gaps.md, documenting the POCO translation shape, test coverage rationale, unresolved IsFormOpen/constants, and string-table-content gap.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-29T16:16:00.000000-04:00",
+      "description": "dotnet build AccessHarvester.sln: 0 errors, 283 warnings (pre-existing warning profile). dotnet test AccessHarvester.sln --no-build: 1605 passed, 3 skipped, 0 failed. New AccessHarvester.TranslationProbe.Tests project passed 5/5 inside the full suite.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-04-29T16:17:15.000000-04:00",
+      "description": "Mandatory cross-provider session verification executed via Gemini Pro per human direction. Review saved to session-reviews/session-002.md. Verdict VERIFIED on round 1.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": null,
+          "outputTokens": null,
+          "costUsd": 0.026698
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/required-reading",
+      "dateTime": "2026-04-29T18:17:47.631687-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, session-set-authoring-guide.md, spec.md, prior session deliverables (translation-rationale, test-run-session-2, symbol-db-gaps, FrmCompanyDetailTranslationProbe.cs, FrmCompanyDetailTranslationProbeTests.cs).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/translation-review",
+      "dateTime": "2026-04-29T18:26:01.974308-04:00",
+      "description": "Authored peer-review/translation-review.md: 3 acceptable divergences (D1-D3), 4 under-tested invariants (U1-U4).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/independent-tests-authored",
+      "dateTime": "2026-04-29T18:26:01.974888-04:00",
+      "description": "Created tests/AccessHarvester.TranslationProbe.Tests/Session3RegressionTests.cs with 4 xUnit tests covering U1-U4. All pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/test-run",
+      "dateTime": "2026-04-29T18:26:01.974888-04:00",
+      "description": "Ran combined suite: 9 probe tests pass, 1609 total tests pass, 4 skipped. Captured to peer-review/test-run-session-3.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/decision-document",
+      "dateTime": "2026-04-29T18:26:01.974888-04:00",
+      "description": "Authored decision.md: Hybrid (Path B for procedures with falsifiable behavior; Path A for the rest). Three concrete probe instances. Six open follow-ups.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/change-log",
+      "dateTime": "2026-04-29T18:26:01.976897-04:00",
+      "description": "Authored change-log.md in-conversation per spec.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/next-set-recommendation",
+      "dateTime": "2026-04-29T18:26:01.977400-04:00",
+      "description": "path-b-translation-pipeline (3-5 sessions). Captured in ai-assignment.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-29T18:26:01.978450-04:00",
+      "description": "dotnet build (4 warnings, 0 errors); dotnet test (1609 passed, 4 skipped, 0 failed). Run sequentially.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/verification",
+      "dateTime": "2026-04-29T18:28:21.447073-04:00",
+      "description": "Cross-provider session verification via gemini-pro (per human session-local direction). Model: gemini-pro. Cost: $0.0516.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 31029,
+          "outputTokens": 1284,
+          "costUsd": 0.05162625
+        }
+      ]
     }
   ]
 }
