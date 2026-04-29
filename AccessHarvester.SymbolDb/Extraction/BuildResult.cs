@@ -3,16 +3,21 @@ using AccessHarvester.SymbolDb.Models;
 
 namespace AccessHarvester.SymbolDb.Extraction;
 
-// Output of SymbolDbBuilder. Aggregated by table; the persistence layer
-// writes each list independently. MD5-equivalence canonicalisation is a
-// post-write SQL pass and is therefore not represented here.
+// Output of SymbolDbBuilder + Session 3 extractors. Aggregated by table;
+// the persistence layer writes each list independently.
 public sealed record BuildResult(
     IReadOnlyList<ModuleRow> Modules,
     IReadOnlyList<SymbolRow> Symbols,
     IReadOnlyList<ParameterRow> Parameters,
     IReadOnlyList<ReferenceRow> References,
     IReadOnlyList<MemberAccessRow> MemberAccesses,
-    BuildStatistics Statistics);
+    BuildStatistics Statistics,
+    IReadOnlyList<FormControlRow>? FormControls = null,
+    IReadOnlyList<EventBindingRow>? EventBindings = null,
+    IReadOnlyList<MacroRow>? Macros = null,
+    IReadOnlyList<MacroActionRow>? MacroActions = null,
+    IReadOnlyList<QueryRow>? Queries = null,
+    IReadOnlyList<TableRow>? Tables = null);
 
 public sealed record BuildStatistics(
     int ModuleCount,
