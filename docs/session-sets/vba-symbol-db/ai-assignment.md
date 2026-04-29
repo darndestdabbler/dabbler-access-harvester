@@ -217,10 +217,47 @@ moderate
 | ... | ... | ... |
 
 ### Actuals (filled after the session)
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+- Orchestrator used: claude-code (Anthropic Opus 4.7 @ effort=high) -- matched recommendation
+- Total routed cost: ~$0.14 (gemini-pro probe $0.023 + gpt-5-4 probe $0.101 + ai-assignment recommendation analysis ~$0.006; Opus probe authored in-conversation per the in-conversation convention; no migration-readiness; no cross-provider session verification)
+- Deviations from recommendation: Significant scope reduction at the human's direction. Skipped Steps 7 (migration-readiness three-provider round) and 11 (cross-provider session verification) after the cumulative set cost (~$24 routed) reached the human's pain threshold. The verdict landed on a PIVOT to subscription-paid in-IDE orchestrators rather than continuing the routed-rigor pattern. Deliverables shipped: comprehension packet, three saved probe responses (gemini-pro routed, gpt-5-4 routed, opus in-conversation), source-grounded reference description, verdict.md, change-log.md.
+- Notes for next-session calibration:
+  - **Cost vs. rigor pattern.** When routed cross-provider rigor is paying high cost for low correlation signal (Session 6 found Pearson +0.004 between confidence and cross-provider agreement), the right move is to drop the rigor *model* rather than to drop rigor entirely. Subscription-orchestrator pairs (Claude Code + Codex) provide cross-provider independence at marginal-zero per-call cost. Lessons-learned proposal landed at Step 9.
+  - **Cross-module resolver gap.** The probe surfaced a Sessions 1-2 reference-writer gap: `modStrings.GetString`, `modStrings.StringFormat`, and the enum value `modStrings.enumStrings.sCompanyDelete_CompanyTypeChange` all exist in the same symbol DB but call sites in `Form_frmCompanyDetail` show as `unresolved / not-in-scope`. Targeted fix in the reference writer is the small follow-up that should land before or as part of the next set's first session.
+  - **Drop Confidence + Justification columns from the writeback path.** Session 6's calibration result is conclusive enough to stop paying for these columns going forward; both add tokens to no signal.
+  - **Probe Output Value Earlier lesson confirmed.** This set was the first instance of the probe pattern in this repo; the pivot it produced (cheaper substrate work via subscription orchestrators) is exactly the kind of mid-program steer the lesson predicted. Promotion to convention is a Step 9 candidate after a second context confirms it.
+
+## Next-session-set recommendation (Path A)
+
+> The recommendation below was set by the human in conversation at
+> Session 7 close, not via routed `task_type="analysis"`. Routed analysis
+> would normally run here per workflow Rule #17, but the human set the
+> direction explicitly in conversation; no orchestrator-self-opinion
+> displacement was needed.
+
+**Recommended:** open a new session set whose plan is "full-Northwind
+extraction + in-IDE-orchestrator interpretation pass + Claude<->Codex
+cross-judge", working from the existing `tools/symbol-db/` substrate.
+
+Specifically:
+
+- Full-Northwind symbol DB (extend Sessions 1-3 from two probe modules
+  to every module in `NorthwindDevEdition.accdb`).
+- Drop `Confidence*` and `Justification*` from the writeback path.
+- Interpretation pass orchestrated by Claude Code and (in a parallel
+  pass) Codex/GPT-5 from inside VS Code, exploiting Anthropic Max +
+  GitHub Copilot subscriptions for marginal-zero per-call cost.
+- Cross-provider check is Claude<->Codex peer review of the other's
+  interpretations in batches; skip the Session 6 rubric.
+- Leave Gemini out of interpretation and review.
+- Land the cross-module resolver gap fix before or as part of the
+  first session.
+
+Suggested slugs (human's call): `vba-symbol-db-full-northwind` or
+`vba-symbol-db-in-ide-interpretation`.
+
+**Path B** (VBA->C# translator with AI fallback) remains the right
+eventual destination but is a multi-set program. Hold until Path A
+produces full-DB substrate and a working cross-judge process.
 
 ## Next-session orchestrator recommendation (Session 2)
 

@@ -1,0 +1,10 @@
+{
+  "provider_slug": "gemini-pro",
+  "model_name": "gemini-pro",
+  "task_type": "analysis",
+  "input_tokens": 8475,
+  "output_tokens": 1282,
+  "cost_usd": 0.023413749999999997,
+  "elapsed_seconds": 26.89535903930664,
+  "prompt_chars": 29412
+}
