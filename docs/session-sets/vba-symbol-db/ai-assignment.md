@@ -127,23 +127,40 @@ high
 ## Session 5: Block-Randomized Independent Cross-Provider Re-Interpretation
 
 ### Recommended orchestrator
-*to be filled at Session 5 start (routed analysis)*
+claude-code (Anthropic Sonnet 4.6 @ effort=medium)
 
 ### Rationale
-*to be filled*
+Session 5's complexity is low: it primarily involves generating boilerplate Python for sampling and routing, reusing existing complex components from Session 4. The 84 core reasoning tasks are pinned to Opus and GPT-5.4 via `query()` regardless of which orchestrator runs the script. A Sonnet-class model is optimal for this well-defined, non-creative implementation task.
+
+(Full routed analysis preserved at `session-reviews/session-5-orchestrator-rec.txt`.)
 
 ### Estimated routed cost
-high (~$5–$15 routed across Opus + GPT-5.4 on a 42-item stratified sample)
+- Orchestrator-side: ~$0.30–$0.50 (session verification + any analysis calls)
+- 84 pinned `query()` calls: $5–$15 (fixed regardless of orchestrator)
 
 | Step | Action | Routing Decision |
 |------|--------|------------------|
-| ... | ... | ... |
+| 1 | Required reading | `local` |
+| 2 | Define stratification policy, persist sample.json | `local` |
+| 3 | Implement sampler.py | `local` |
+| 4 | Implement independent_runner.py | `local` |
+| 5 | Run opinion 2 — Opus (42 calls) | `query("opus", ...)` pinned |
+| 6 | Run opinion 3 — GPT-5.4 (42 calls) | `query("gpt-5-4", ...)` pinned |
+| 7 | Generate sample-report.md | `local` |
+| 8 | Write hermetic Python tests | `local` |
+| 9 | `dotnet build && dotnet test` | `local` |
+| 10 | Cross-provider session verification | `route(task_type="session-verification")` to `gpt-5-4` |
 
 ### Actuals (filled after the session)
-- Orchestrator used: <to be filled>
-- Total routed cost: <to be filled>
-- Deviations from recommendation: <to be filled>
-- Notes for next-session calibration: <to be filled>
+- Orchestrator used: claude-code (Anthropic Sonnet 4.6 @ effort=medium) — matched recommendation
+- Total routed cost: ~$7.98 ($5.41 opinion 2 Opus + $2.14 opinion 3 GPT-5.4 + ~$0.43 orchestrator verification)
+- Deviations from recommendation: None.
+- Notes for next-session calibration:
+  - Opinion 2 (Opus) mean confidence: 0.787 — materially lower than Gemini Pro's ~0.97 from Session 4.
+  - Opinion 3 (GPT-5.4) mean confidence: 0.754 — similarly lower. Both providers agree on the hard items: `m_lng*` module vars, `sOneLineItem`/`sCatalog_QualityHeader` enum values, `SystemSettings` table.
+  - Per-item cost actuals: Gemini ~$0.014/item, Opus ~$0.129/item, GPT-5.4 ~$0.051/item. Useful for scaling estimates to full DB.
+  - **Batching opportunity for Session 6:** Session 6 makes 126 grading calls (42 items × 3 judges). Per-item calls add latency; batching 6–8 short items (enum values, tables) per call would cut call count to ~30–40 with no idempotency cost. Worth implementing given the scale.
+  - The `independent_runner.py` pattern (neutral-evidence prompts, idempotent per-slot writes, per-item transient-error recovery) is reusable for Session 6's grading pass.
 
 ## Session 6: Cross-Provider Consistency + Confidence Calibration
 
@@ -227,9 +244,9 @@ Rationale: Session 7 is the capstone — the primary tasks are not code generati
 
 ## Next-session orchestrator recommendation (Session 5, block-randomization)
 
-*to be filled at Session 5 start (routed analysis), after the 2026-04-29
-spec extension. The work profile is moderate-judgment Python plus
-heavy routed-call orchestration (84 cross-provider calls over a 42-item
-sample). A Sonnet-class orchestrator is likely sufficient; the
-block-sampling and writer code is mechanical, and the routed calls
-themselves carry their own model identity.*
+**Recommended (post-Session-4 re-route via `analysis` to gemini-pro):**
+claude-code (Anthropic Sonnet 4.6 @ effort=medium)
+
+Rationale: Session 5's work is mechanical Python wiring of existing Session-4 components (prompt_builder, db.py, topology). The 84 reasoning calls carry their own model identity. Sonnet is optimal for this non-synthesis orchestration task.
+
+(Full routed analysis preserved at `session-reviews/session-5-orchestrator-rec.txt`.)

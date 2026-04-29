@@ -1,0 +1,227 @@
+{
+  "seed": 42,
+  "db_path": "symbol-db.sqlite",
+  "policy": {
+    "enum_decl": null,
+    "macro": null,
+    "query": null,
+    "function": null,
+    "module_var": null,
+    "sub": 8,
+    "enum_value": 8,
+    "lookup_table": 8
+  },
+  "total": 42,
+  "items": [
+    {
+      "fqn": "modStrings.enumStrings",
+      "table": "Symbols",
+      "stratum": "enum_decl"
+    },
+    {
+      "fqn": "AutoExec",
+      "table": "Macros",
+      "stratum": "macro"
+    },
+    {
+      "fqn": "qrycboCompanyType",
+      "table": "Queries",
+      "stratum": "query"
+    },
+    {
+      "fqn": "qrycboStates",
+      "table": "Queries",
+      "stratum": "query"
+    },
+    {
+      "fqn": "qrycboTaxStatus",
+      "table": "Queries",
+      "stratum": "query"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.CompanyConfirmDelete",
+      "table": "Symbols",
+      "stratum": "function"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.CompanyIsActive",
+      "table": "Symbols",
+      "stratum": "function"
+    },
+    {
+      "fqn": "modStrings.GetString",
+      "table": "Symbols",
+      "stratum": "function"
+    },
+    {
+      "fqn": "modStrings.StringFormat",
+      "table": "Symbols",
+      "stratum": "function"
+    },
+    {
+      "fqn": "modStrings.StringFormatSQL",
+      "table": "Symbols",
+      "stratum": "function"
+    },
+    {
+      "fqn": "modStrings.StringToDictionary",
+      "table": "Symbols",
+      "stratum": "function"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.m_lngCalledFromID",
+      "table": "Symbols",
+      "stratum": "module_var"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.m_lngCompanyContactCount",
+      "table": "Symbols",
+      "stratum": "module_var"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.m_lngCustomerOrderCount",
+      "table": "Symbols",
+      "stratum": "module_var"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.m_lngShipperOrderCount",
+      "table": "Symbols",
+      "stratum": "module_var"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.m_lngVendorProductCount",
+      "table": "Symbols",
+      "stratum": "module_var"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.m_lngVendorPurchaseOrderCount",
+      "table": "Symbols",
+      "stratum": "module_var"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.m_strMsgCaption",
+      "table": "Symbols",
+      "stratum": "module_var"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.CompanyCantBeDeleted",
+      "table": "Symbols",
+      "stratum": "sub"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.Form_AfterUpdate",
+      "table": "Symbols",
+      "stratum": "sub"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.Form_BeforeDelConfirm",
+      "table": "Symbols",
+      "stratum": "sub"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.Form_Delete",
+      "table": "Symbols",
+      "stratum": "sub"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.Form_Load",
+      "table": "Symbols",
+      "stratum": "sub"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.cboCompanyTypeID_AfterUpdate",
+      "table": "Symbols",
+      "stratum": "sub"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.cmdEmail_Click",
+      "table": "Symbols",
+      "stratum": "sub"
+    },
+    {
+      "fqn": "Form_frmCompanyDetail.txtBusinessPhone_Click",
+      "table": "Symbols",
+      "stratum": "sub"
+    },
+    {
+      "fqn": "modStrings.enumStrings.sAlreadyOnNewRecord",
+      "table": "Symbols",
+      "stratum": "enum_value"
+    },
+    {
+      "fqn": "modStrings.enumStrings.sCannotDelete",
+      "table": "Symbols",
+      "stratum": "enum_value"
+    },
+    {
+      "fqn": "modStrings.enumStrings.sCatalog_Quality",
+      "table": "Symbols",
+      "stratum": "enum_value"
+    },
+    {
+      "fqn": "modStrings.enumStrings.sCatalog_QualityHeader",
+      "table": "Symbols",
+      "stratum": "enum_value"
+    },
+    {
+      "fqn": "modStrings.enumStrings.sOneLineItem",
+      "table": "Symbols",
+      "stratum": "enum_value"
+    },
+    {
+      "fqn": "modStrings.enumStrings.sOrderMustBePaid",
+      "table": "Symbols",
+      "stratum": "enum_value"
+    },
+    {
+      "fqn": "modStrings.enumStrings.sPOCannotDelete",
+      "table": "Symbols",
+      "stratum": "enum_value"
+    },
+    {
+      "fqn": "modStrings.enumStrings.sReportNoData",
+      "table": "Symbols",
+      "stratum": "enum_value"
+    },
+    {
+      "fqn": "Companies",
+      "table": "Tables",
+      "stratum": "lookup_table"
+    },
+    {
+      "fqn": "CompanyTypes",
+      "table": "Tables",
+      "stratum": "lookup_table"
+    },
+    {
+      "fqn": "Employees",
+      "table": "Tables",
+      "stratum": "lookup_table"
+    },
+    {
+      "fqn": "ProductCategories",
+      "table": "Tables",
+      "stratum": "lookup_table"
+    },
+    {
+      "fqn": "Products",
+      "table": "Tables",
+      "stratum": "lookup_table"
+    },
+    {
+      "fqn": "States",
+      "table": "Tables",
+      "stratum": "lookup_table"
+    },
+    {
+      "fqn": "SystemSettings",
+      "table": "Tables",
+      "stratum": "lookup_table"
+    },
+    {
+      "fqn": "TaxStatus",
+      "table": "Tables",
+      "stratum": "lookup_table"
+    }
+  ]
+}
