@@ -83,6 +83,77 @@
           "verdict": "VERIFIED"
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/required-reading",
+      "dateTime": "2026-04-30T07:46:48.7860679-04:00",
+      "description": "Re-read spec.md and Session 1 inventory/template materials for the Add an Order workflow before authoring the package.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/harvester-pull",
+      "dateTime": "2026-04-30T07:46:48.7860679-04:00",
+      "description": "Pulled Add-an-Order source evidence from the NorthwindDevEdition IR: frmOrderDetails, sfrmOrderLineItems, modValidation, modInventory, modOrders, related queries, tables, and enum definitions.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/package-draft",
+      "dateTime": "2026-04-30T07:46:48.7860679-04:00",
+      "description": "Authored packages/add-an-order.md using the Session 1 template and recorded confirmed business rules, source operationalization, generic component hints, and ambiguity log entries.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/characterization-tests",
+      "dateTime": "2026-04-30T07:46:48.7860679-04:00",
+      "description": "Added AddAnOrder characterization models and tests covering order defaults, customer tax-status defaulting, order save validation, line-item validation and uniqueness, allocation ordering/status filtering, and reallocation behavior.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-30T07:46:48.7860679-04:00",
+      "description": "dotnet build succeeded; dotnet test for AccessHarvester.CharacterizationTests passed (19 tests), and the full solution test run passed with only pre-existing warnings/skips elsewhere.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-04-30T07:46:48.7860679-04:00",
+      "description": "Cross-provider session verification was routed to Claude Opus per human direction instead of the spec's Gemini pin. Round 1 returned ISSUES_FOUND with 6 grounded findings; all were fixed and Round 2 returned VERIFIED.",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "costUsd": 1.43628,
+          "inputTokens": 32712,
+          "outputTokens": 12608,
+          "verdict": "ISSUES_FOUND"
+        },
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "costUsd": 0.59736,
+          "inputTokens": 16904,
+          "outputTokens": 4584,
+          "verdict": "VERIFIED"
+        }
+      ]
     }
   ]
 }
