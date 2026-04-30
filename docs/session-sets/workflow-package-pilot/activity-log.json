@@ -287,6 +287,87 @@
           "verdict": "VERIFIED"
         }
       ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 1,
+      "stepKey": "session-5/required-reading",
+      "dateTime": "2026-04-30T08:48:53.807009-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, session-set-authoring-guide.md (skipped - not changed), CLAUDE.md, ai-led-session-workflow.md, spec.md, and re-read inventory.md (Update a Product row), template, and Session 4 deliverables (packages/update-an-order.md + UpdateAnOrder tests) as the established single-pass pattern.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 2,
+      "stepKey": "session-5/harvester-pull",
+      "dateTime": "2026-04-30T08:51:11.059720-04:00",
+      "description": "Pulled harvester evidence for Update a Product: frmProductDetail VBA + procedures, sfrmProductDetail_StockTake VBA, modInventory 12 functions, modPurchaseOrders (AddPurchaseOrderDetail, ReorderProduct), modGlobal enums (osNew/posNew/posApprove/posSubmitted/odsAllocated/odsNoStock/odsOnOrder), Tables/Products required fields + unique indexes on ProductCode and ProductName.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 3,
+      "stepKey": "session-5/ai-assignment",
+      "dateTime": "2026-04-30T08:51:11.060775-04:00",
+      "description": "Appended Session 5 block to ai-assignment.md per session-local direction (in-conversation, no routed analysis). Recommended orchestrator: Claude Opus 4.7. Verification: Gemini Pro.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 4,
+      "stepKey": "session-5/package",
+      "dateTime": "2026-04-30T08:57:07.609715-04:00",
+      "description": "Authored packages/update-a-product.md following the seven-section template. Captures 17 confirmed business rules with evidence citations into frmProductDetail VBA, sfrmProductDetail_StockTake, modInventory (AllocateInventory, ProductReorderQuantity), modPurchaseOrders (AddPurchaseOrderDetail, ReorderProduct), modGlobal enums, and Tables/Products required-fields/unique-indexes.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 5,
+      "stepKey": "session-5/characterization-tests",
+      "dateTime": "2026-04-30T08:57:07.611413-04:00",
+      "description": "Authored UpdateAProduct workflow models + 7 test files: ProductSaveValidationTests, ProductCodeFormattingTests, ProductDeletePolicyTests, ProductReorderPolicyTests, ProductReorderRoutingTests, ProductInventoryAllocationTests, ProductReorderQuantityTests. All anti-coupled: pure-function tests against UpdateProductWorkflow, no Forms/Recordset/MsgBox dependencies.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 6,
+      "stepKey": "session-5/build-test",
+      "dateTime": "2026-04-30T08:57:07.612269-04:00",
+      "description": "dotnet build: 0 errors, 286 pre-existing warnings. dotnet test: AccessHarvester.CharacterizationTests = 96 passed (7 new UpdateAProduct test files contributed 30 tests). Full solution = all projects pass; CharacterizationTests + Vba.Parser/Grammar/Resolver + Sql.Grammar + Pipeline + Integration + SymbolDb + Tests projects all green.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 7,
+      "stepKey": "session-5/verification",
+      "dateTime": "2026-04-30T08:59:31.998016-04:00",
+      "description": "Cross-provider session verification via Gemini Pro returned VERIFIED, 0 issues. Verifier confirmed faithfulness, anti-coupling, confidence-tag conservatism, cascading-effect coverage, spec adherence, no missing invariants, and build/test fidelity. Cost: 0.030053 USD; tokens: 16306 in / 967 out.",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "costUsd": 0.030053,
+          "inputTokens": 16306,
+          "outputTokens": 967,
+          "verdict": "VERIFIED"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 5,
+      "stepNumber": 8,
+      "stepKey": "session-5/cost-and-recommendation",
+      "dateTime": "2026-04-30T09:00:19.638954-04:00",
+      "description": "Printed cost report (set total: 3.3691 USD across 5 sessions; Session 5 contributed 0.030053 USD via Gemini Pro). Updated ai-assignment.md with Session 5 actuals (VERIFIED, 0 issues) and Session 6 recommendation (Codex GPT-5.4 in-conversation; verification routes to Claude Opus by default for cross-provider against a Codex orchestrator).",
+      "status": "completed",
+      "routedApiCalls": []
     }
   ]
 }
