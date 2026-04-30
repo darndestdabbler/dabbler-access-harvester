@@ -42,3 +42,7 @@ tmp/
 # VS Code extension build artifacts — rebuild via `vsce package` per
 # tools/vscode-session-sets/README.md
 *.vsix
+
+# Blazor pilot SQLite databases — runtime state, regenerated on startup
+output-tests/blazor-add-an-order/Data/*.db
+output-tests/blazor-add-an-order/Data/*.db-*

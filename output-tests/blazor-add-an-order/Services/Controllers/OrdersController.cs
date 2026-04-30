@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using BlazorAddAnOrder.Contracts;
 using BlazorAddAnOrder.Services.Domain;
-using BlazorAddAnOrder.Services.Stubs;
+using BlazorAddAnOrder.Services.Persistence;
+using BlazorAddAnOrder.Services.Persistence.Entities;
+using BlazorAddAnOrder.Services.Persistence.Mappings;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorAddAnOrder.Services.Controllers;
@@ -13,16 +15,16 @@ public sealed class OrdersController : ControllerBase
 {
     private readonly OrderCreationService _orderCreation;
     private readonly OrderLineItemService _lineItems;
-    private readonly InMemoryCatalog _catalog;
+    private readonly OrdersStore _orders;
 
     public OrdersController(
         OrderCreationService orderCreation,
         OrderLineItemService lineItems,
-        InMemoryCatalog catalog)
+        OrdersStore orders)
     {
         _orderCreation = orderCreation;
         _lineItems = lineItems;
-        _catalog = catalog;
+        _orders = orders;
     }
 
     [HttpPost]
@@ -97,41 +99,46 @@ public sealed class OrdersController : ControllerBase
             });
         }
 
-        var stored = _catalog.PersistOrder(draft, lineDrafts);
+        var stored = _orders.Persist(draft, lineDrafts);
         return CreatedAtAction(nameof(Get), new { id = stored.Id }, MapToResponse(stored));
     }
 
     [HttpGet("{id:long}")]
     public ActionResult<OrderResponse> Get(long id)
     {
-        var order = _catalog.FindOrder(id);
-        if (order is null)
+        var entity = _orders.Find(id);
+        if (entity is null)
         {
             return NotFound();
         }
 
-        return Ok(MapToResponse(order));
+        return Ok(MapToResponse(entity));
     }
 
-    private static OrderResponse MapToResponse(CatalogOrder order)
+    private static OrderResponse MapToResponse(OrderEntity entity)
     {
+        var draft = OrderMappings.ToDraft(entity);
         return new OrderResponse
         {
-            Id = order.Id,
-            EmployeeId = order.Draft.EmployeeId,
-            CustomerId = order.Draft.CustomerId,
-            TaxRate = order.Draft.TaxRate,
-            TaxStatusId = order.Draft.TaxStatusId,
-            Status = order.Draft.Status?.ToString(),
-            OrderDate = order.Draft.OrderDate,
-            LineItems = order.LineItems.Select(li => new LineItemResponse
+            Id = entity.Id,
+            EmployeeId = draft.EmployeeId,
+            CustomerId = draft.CustomerId,
+            TaxRate = draft.TaxRate,
+            TaxStatusId = draft.TaxStatusId,
+            Status = draft.Status?.ToString(),
+            OrderDate = draft.OrderDate,
+            LineItems = entity.LineItems.Select(li =>
             {
-                Id = li.Id ?? 0,
-                OrderId = li.OrderId,
-                ProductId = li.ProductId,
-                Quantity = li.Quantity,
-                UnitPrice = li.UnitPrice,
-                Status = li.Status.ToString(),
+                var lineDraft = OrderMappings.ToDraft(li);
+                return new LineItemResponse
+                {
+                    Id = li.Id,
+                    OrderId = li.OrderId,
+                    ProductId = li.ProductId,
+                    Quantity = li.Quantity,
+                    UnitPrice = li.UnitPrice,
+                    Status = lineDraft.Status.ToString(),
+                };
             }).ToList(),
         };
     }

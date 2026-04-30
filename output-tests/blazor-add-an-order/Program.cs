@@ -1,6 +1,7 @@
 using BlazorAddAnOrder.Services.Domain;
-using BlazorAddAnOrder.Services.Stubs;
+using BlazorAddAnOrder.Services.Persistence;
 using BlazorAddAnOrder.Ui;
+using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,9 +13,18 @@ builder.Services.AddControllers();
 
 builder.Services.AddMudServices();
 
-builder.Services.AddSingleton<InMemoryCatalog>();
-builder.Services.AddSingleton<ICustomerCatalog>(sp => sp.GetRequiredService<InMemoryCatalog>());
-builder.Services.AddSingleton<IProductCatalog>(sp => sp.GetRequiredService<InMemoryCatalog>());
+var ordersConnectionString = builder.Configuration.GetConnectionString("Orders")
+    ?? throw new InvalidOperationException(
+        "ConnectionStrings:Orders is required in appsettings.json.");
+
+builder.Services.AddDbContext<OrdersDbContext>(options =>
+    options.UseSqlite(ordersConnectionString));
+
+builder.Services.AddScoped<PersistenceCatalog>();
+builder.Services.AddScoped<ICustomerCatalog>(sp => sp.GetRequiredService<PersistenceCatalog>());
+builder.Services.AddScoped<IProductCatalog>(sp => sp.GetRequiredService<PersistenceCatalog>());
+builder.Services.AddScoped<OrdersStore>();
+
 builder.Services.AddSingleton<ISystemClock, SystemClock>();
 builder.Services.AddSingleton(new OrderCreationOptions { SystemTaxRate = 0.0825f });
 builder.Services.AddScoped<OrderCreationService>();
@@ -33,6 +43,12 @@ builder.Services.AddHttpClient("services", client =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<OrdersDbContext>();
+    DatabaseSeeder.EnsureCreatedAndSeeded(db);
+}
 
 if (!app.Environment.IsDevelopment())
 {
