@@ -225,6 +225,68 @@
           "costUsd": 0.0355525
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/required-reading",
+      "dateTime": "2026-04-30T08:42:11.5881742-04:00",
+      "description": "Re-read project-guidance, lessons-learned, authoring-guide, spec.md, Session 1 inventory for update-an-order, the Add-an-Order package/tests, and the shared frmOrderDetails/order-status source evidence.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/package",
+      "dateTime": "2026-04-30T08:42:11.5881742-04:00",
+      "description": "Authored packages/update-an-order.md covering the order lifecycle state machine: invoicing, shipping, payment, closure, delete eligibility, status-driven editability, operationalization, and open questions.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/characterization-tests",
+      "dateTime": "2026-04-30T08:42:11.5881742-04:00",
+      "description": "Added UpdateAnOrder workflow models plus transition/edit-policy characterization tests covering save validation, invoice/ship/pay/close transitions, delete eligibility and per-line reallocation, and the LockControls / SetFormStatus policy.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/build-test",
+      "dateTime": "2026-04-30T08:42:11.5881742-04:00",
+      "description": "Ran dotnet build and dotnet test sequentially. Build succeeded; CharacterizationTests now pass 54 tests total; full solution suite passed with only pre-existing warnings and skips.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/verification",
+      "dateTime": "2026-04-30T08:42:11.5881742-04:00",
+      "description": "Cross-provider session verification routed to Claude Opus per human direction. Round 1 returned VERIFIED with 1 minor missing-coverage note; added the Paid lock-set test and Round 2 returned VERIFIED with 0 issues.",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 18031,
+          "outputTokens": 9880,
+          "costUsd": 1.011465,
+          "verdict": "VERIFIED"
+        },
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 9768,
+          "outputTokens": 1145,
+          "costUsd": 0.232395,
+          "verdict": "VERIFIED"
+        }
+      ]
     }
   ]
 }

@@ -308,3 +308,60 @@ Codex) unless the human pins Gemini Pro.
 No routed analysis was used for this recommendation: per the
 session-local direction above, this Session 3 used in-conversation
 reasoning for ai-assignment authoring.
+
+## Session 4 Actuals
+
+- **Orchestrator used:** GitHub Copilot Chat / GPT-5.4 (Codex) —
+  matches the Session 3 recommendation to alternate back to Codex for
+  the first single-pass update workflow.
+- **Deliverables produced:** `packages/update-an-order.md` plus three
+  UpdateAnOrder characterization files covering state transitions,
+  save/delete policy, and status-driven editability.
+- **Total routed cost:** $1.24386 across two Claude Opus
+  `session-verification` calls (Round 1: $1.011465 for 18,031 input /
+  9,880 output tokens; Round 2: $0.232395 for 9,768 input / 1,145
+  output tokens). No other routed work was used in Session 4.
+- **Verification verdict:** VERIFIED. Round 1 returned `VERIFIED` with
+  one minor missing-coverage note (Paid lock-set assertion); the test
+  gap was fixed immediately, and Round 2 returned `VERIFIED` with zero
+  issues.
+- **Deviations from recommendation:** None on orchestrator choice.
+  Verification also matched the Session 3 recommendation because the
+  human explicitly pinned cross-provider verification to Claude Opus for
+  this session.
+- **Notes for Session 5 calibration:**
+    - The richest Update-an-Order surface was the order-status state
+      machine, not extra query spelunking. Session 5 should keep the
+      same discipline: focus on the behavior-bearing cascade rules and
+      avoid over-documenting Access UX mechanics.
+    - `LockControls` proved worth characterizing because it encodes a
+      concrete editability policy, but the package also records that the
+      exact field matrix may mix business intent with Access UX
+      convenience. Similar caution will matter for Update-a-Product's
+      cascade surface.
+    - Session 4 again confirmed that the local IR is sufficient for the
+      package/test workflow; no temp symbol DB rebuild was needed.
+
+## Session 5 Recommendation
+
+**Next-session orchestrator recommendation (Session 5):** Claude Opus
+4.7 (Claude Code), in-conversation single-pass authoring for
+`update-a-product`.
+
+**Rationale:** The spec asks Sessions 4-6 to alternate orchestrators
+where practical. Session 4 used Codex/GPT-5.4, so Session 5 should swap
+to Claude Opus for variety and independence before Session 6 returns to
+Codex or stays flexible for Session 7 planning. The `update-a-product`
+workflow is still single-pass, but it has the widest cascade surface of
+the remaining three and is a good fit for Claude's synthesis across
+product, inventory, order, and purchase-order evidence.
+
+If the human repeats the Session 4 instruction to route verification to
+Opus, revisit the assignment before starting Session 5: Opus cannot be
+the cross-provider verifier for an Opus-authored session. In that case,
+either use Codex for Session 5 authoring or keep Claude as author and
+route verification to Gemini Pro or another non-Anthropic verifier.
+
+No routed analysis was used for this recommendation: per the
+session-local direction above, this Session 4 used in-conversation
+reasoning for ai-assignment authoring.
