@@ -154,6 +154,77 @@
           "verdict": "VERIFIED"
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/required-reading",
+      "dateTime": "2026-04-30T08:15:07.340311-04:00",
+      "description": "Re-read project-guidance, lessons-learned, authoring-guide, spec.md, Session 2 deliverables (package + 4 test files), Session 2 verification rounds, and ai-assignment.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/package-review",
+      "dateTime": "2026-04-30T08:15:07.340311-04:00",
+      "description": "Independent semantic review of packages/add-an-order.md against source IR (modGlobal, modValidation, modInventory, frmOrderDetails, sfrmOrderLineItems, Tables/Orders, Tables/OrderDetails). Confirmed all Session 2 rules + confidence tags hold up; identified 3 gaps for falsification.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/test-review",
+      "dateTime": "2026-04-30T08:15:07.340311-04:00",
+      "description": "Independent review of 4 Session 2 characterization tests against source VBA. Anti-coupling check passed; falsifiability OK. Identified missing invariants: deletion-side reallocation (Form_AfterDelConfirm + Form_Delete) and explicit cross-order scope assertions for AllocateInventory.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/falsification-tests",
+      "dateTime": "2026-04-30T08:15:07.340311-04:00",
+      "description": "Authored Session3DeletionReallocationTests.cs (5 tests) and Session3CrossOrderScopeTests.cs (3 tests) under tests/AccessHarvester.CharacterizationTests/AddAnOrder/.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/package-refinement",
+      "dateTime": "2026-04-30T08:15:07.340311-04:00",
+      "description": "Refined packages/add-an-order.md: new deletion-reallocation business rule (Section 3), 2 new invariants (Section 4), tightened section 5 step 9 cboProductCategories prose, 3 new ambiguity-log entries (Section 7).",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-30T08:15:07.340311-04:00",
+      "description": "dotnet build (clean, 4 pre-existing NU1903 warnings out of scope) and dotnet test sequentially. All 27 CharacterizationTests pass; full solution suite green.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/verification",
+      "dateTime": "2026-04-30T08:15:07.340311-04:00",
+      "description": "Cross-provider session-verification routed to Gemini Pro per human session-local direction (overriding the router-config session-verification: gpt-5-4 default for one session). Verdict: VERIFIED, 0 issues.",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 18226,
+          "outputTokens": 1277,
+          "costUsd": 0.0355525
+        }
+      ]
     }
   ]
 }
