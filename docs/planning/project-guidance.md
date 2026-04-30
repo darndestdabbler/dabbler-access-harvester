@@ -435,6 +435,34 @@ the human before proceeding.
   `lessons-learned.md` → "Probe Output Value Earlier; Don't Sink
   Token Budget Into Unvalidated Substrates".
 
+- **Verify the prior session actually committed and pushed before
+  starting a new one.** External tooling reads `session-state.json`
+  for in-progress detection (correct), but the orchestrator picking
+  up the next session must NOT trust that signal alone for
+  artifact-on-disk-vs-in-git questions. The git working tree is the
+  only source of truth for "did the prior session actually commit?"
+  As part of Step 0, after `register_session_start` and before the
+  first content-producing step, run
+  `git status --short -- docs/session-sets/<slug>/ tests/ tools/`.
+  If untracked or unstaged files matching the prior session's
+  expected deliverables exist, surface to the human: "Prior session
+  marked complete but did not commit; should I include those files
+  in this session's commit, or push them as a separate catch-up
+  commit first?" Default to bundling unless the human says
+  otherwise. Confirmed in two contexts: `vba-symbol-db-path-b-probe`
+  Session 3 (2026-04-29, Codex/GPT-5.5 finished workflow steps but
+  did not commit — Session 3 caught it in `git status` and bundled)
+  and `workflow-package-pilot` Session 7 (2026-04-30, Codex/GPT-5.4
+  finished Session 6 cleanly with VERIFIED across four Opus rounds
+  but did not commit — Session 7 caught and bundled). The
+  promotion-trigger lesson also asked for a
+  `verify_prior_session_committed()` helper in
+  `ai-router/session_log.py` so the check is mechanical rather than
+  manual; that helper is a deliberate follow-up, not bundled with
+  this convention. Action-detail reference is preserved in
+  `lessons-learned.md` → "Verify The Prior Session Actually
+  Committed And Pushed Before Starting A New One".
+
 ### Token-Window Budget Overrides
 
 The human has recurring token allotments across three orchestrator providers with
