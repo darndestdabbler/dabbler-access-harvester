@@ -365,3 +365,123 @@ route verification to Gemini Pro or another non-Anthropic verifier.
 No routed analysis was used for this recommendation: per the
 session-local direction above, this Session 4 used in-conversation
 reasoning for ai-assignment authoring.
+
+## Session 5: Update a Product — Single-Pass Package
+
+### Recommended orchestrator
+Claude Code Opus 4.7 @ effort=high
+
+### Rationale
+Per the Session 4 recommendation to alternate orchestrators across
+Sessions 4-6, Session 5 swaps from Codex to Claude Opus. Claude
+authors the `update-a-product` package and tests; Gemini Pro
+cross-provider-verifies. This avoids the Opus-author / Opus-verify
+conflict the Session 4 actuals flagged, since the human has pinned
+verification to Gemini Pro for this session.
+
+### Estimated routed cost
+Low — one Gemini Pro `session-verification` call.
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1    | Required reading; re-read inventory + Session 4 deliverables | In-conversation (orchestrator) |
+| 2    | Pull harvester evidence for Update a Product (form, queries, modules) | Local file reads |
+| 3    | Author `packages/update-a-product.md` | In-conversation (per session-local direction) |
+| 4    | Author UpdateAProduct characterization tests + workflow models | In-conversation |
+| 5    | `dotnet build && dotnet test` (sequential) | Local |
+| 6    | Cross-provider session verification | Routed → Gemini Pro |
+
+### Session-Local Direction
+
+- Per the human's instruction at the start of this session: no routed
+  reasoning except the mandatory cross-provider session verification.
+- Cross-provider verification routes to **Gemini Pro** per the spec's
+  Routing Notes pin and the human's explicit pin for this session.
+  This is consistent with the Session 4 recommendation's note that
+  Opus cannot verify an Opus-authored session — Gemini Pro provides
+  the cross-provider check from a non-Anthropic provider.
+- Per the lessons-learned entry "Verify The Prior Session Actually
+  Committed And Pushed Before Starting A New One," Session 4's
+  deliverables were already committed and pushed (HEAD == origin/main
+  at session start, commit cd96b23 "workflow-package-pilot: complete
+  session 4 update-an-order"). Two unrelated working-tree changes
+  (`samples/MiniComplex.accdb` modified and the Access lock file
+  `samples/NorthwindDevEdition.laccdb` deleted) are out of scope for
+  this session and are not staged into the Session 5 commit.
+
+### Actuals (filled after the session)
+
+- **Orchestrator used:** Claude Opus 4.7 (Claude Code) — matches the
+  Session 4 recommendation to alternate back to Claude for the
+  `update-a-product` single-pass authoring.
+- **Deliverables produced:** `packages/update-a-product.md` plus the
+  `UpdateAProduct` workflow models file and seven characterization
+  test files (`ProductSaveValidationTests`,
+  `ProductCodeFormattingTests`, `ProductDeletePolicyTests`,
+  `ProductReorderPolicyTests`, `ProductReorderRoutingTests`,
+  `ProductInventoryAllocationTests`, `ProductReorderQuantityTests`)
+  covering 30 invariant assertions across the seven Section 4
+  invariants in the package.
+- **Total routed cost:** $0.030053 across one Gemini Pro
+  `session-verification` call (16,306 input tokens / 967 output
+  tokens). No other routed work was used in Session 5, per the
+  human's session-local direction.
+- **Verification verdict:** VERIFIED, 0 issues. Round 1 was clean.
+  Verifier (Gemini Pro) confirmed faithfulness, anti-coupling,
+  confidence-tag conservatism, cascading-effect coverage, spec
+  adherence (seven-section template + Section 7 ambiguity log
+  entries), no missing invariants, and build/test fidelity.
+- **Deviations from recommendation:** None on orchestrator choice.
+  Verification matched the spec's Routing Notes default of Gemini
+  Pro and the human's explicit session-local pin.
+- **Notes for Session 6 calibration:**
+    - The `update-a-product` workflow's cascading-effect surface
+      ended up being well-bounded by three concrete cascades —
+      delete cascade (StockTake → ProductVendors → Product),
+      inventory reallocation oldest-first by `OrderDate` then
+      `OrderID`, and reorder routing (existing-PO redirect /
+      append-vs-create / multi-vendor selection). All three landed
+      as confirmed rules with citations rather than ambiguity-log
+      entries.
+    - Two cross-package observations worth surfacing in Session 7's
+      cross-workflow audit: (1) the `OrderDate`/`OrderID` allocation
+      tie-break rule appears in both `add-an-order` and
+      `update-a-product` packages with the same wording, which is a
+      good consistency signal across packages; (2) `ValidateForm`
+      (modValidation) gates `Form_BeforeUpdate` in all three
+      packages so far (`frmOrderDetails`, `frmProductDetail`,
+      `sfrmOrderLineItems`, `sfrmProductDetail_StockTake`), and the
+      cross-workflow audit should confirm Session 6's Update an
+      Employee package follows the same pattern or surfaces a
+      reason it doesn't.
+    - Session 5 again confirmed the local IR is sufficient for the
+      package/test workflow; no temp symbol DB rebuild was needed.
+
+## Session 6 Recommendation
+
+**Next-session orchestrator recommendation (Session 6):** Codex /
+GPT-5.4 (GitHub Copilot Chat), in-conversation single-pass authoring
+for `update-an-employee`.
+
+**Rationale:** Per the spec's "Routing Notes" guidance to alternate
+orchestrators across the three update-workflow sessions, Session 6
+should swap back to Codex after Claude ran Session 5. This also lets
+Session 7 (the cross-workflow audit) be authored by whichever
+orchestrator has done the fewest prior sessions — currently Claude has
+authored Sessions 1, 3, and 5; Codex has authored Sessions 2 and 4. If
+Codex authors Session 6, that becomes Codex 3 / Claude 3 going into
+Session 7, and the spec's guidance "whichever orchestrator has done
+the fewest prior sessions, for maximum independence on the audit" is
+satisfied by either provider. The human can choose either at Session
+7 start.
+
+For verification: Session 6 should route to **Claude Opus** (cross-
+provider from a Codex/OpenAI orchestrator) unless the human pins
+Gemini Pro again. The Session 6 spec text emphasizes role-related
+logic (`HasPrivilege` call sites, role-gated visibility), which maps
+naturally to the Northwind `EmployeePrivileges` table and the
+`enumPrivileges` enum identified in the Session 1 inventory.
+
+No routed analysis was used for this recommendation: per the
+session-local direction above, this Session 5 used in-conversation
+reasoning for ai-assignment authoring.
