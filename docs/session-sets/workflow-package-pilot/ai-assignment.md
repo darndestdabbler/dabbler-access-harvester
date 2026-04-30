@@ -150,3 +150,161 @@ reasoning for ai-assignment authoring.
       has zero tests in Session 1. Session 2 adds tests under
       `AddAnOrder/`. Each subsequent session adds tests under its
       own folder.
+
+## Session 2 Actuals
+
+- **Orchestrator used:** GitHub Copilot Chat / GPT-5.4 (Codex) —
+  matches the Session 1 recommendation that Codex draft the Add an
+  Order package and leave Session 3's peer review to Claude for
+  cross-provider independence.
+- **Deliverables produced:** `packages/add-an-order.md` plus four
+  AddAnOrder characterization files covering order defaults,
+  customer tax-status defaulting, order save validation, line-item
+  validation and uniqueness, allocation ordering/status filtering,
+  and reallocation behavior.
+- **Total routed cost:** $2.03364 across two Claude Opus
+  `session-verification` calls (Round 1: $1.43628 for 32,712 input /
+  12,608 output tokens; Round 2: $0.59736 for 16,904 input / 4,584
+  output tokens). No other routed work was used in Session 2.
+- **Verification verdict:** VERIFIED. Round 1 returned 6 grounded
+  findings; Session 2 fixed all of them, and Round 2 returned
+  `VERIFIED` with zero remaining issues.
+- **Deviations from recommendation:** The orchestrator choice matched
+  the recommendation, but verification intentionally deviated from the
+  spec's Gemini Pro pin because the human explicitly instructed that
+  this session's only external routing should be cross-provider
+  verification via Claude Opus.
+- **Notes for Session 3 calibration:**
+    - Session 3 should review the Add-an-Order package and tests
+      against the original harvester evidence independently, not treat
+      Session 2's phrasing as authoritative. The most fruitful review
+      targets remain missing invariants, over-confident rule wording,
+      and anti-coupling drift in characterization tests.
+    - The verifier-surfaced fixes strengthened several important edges:
+      `OrderDate` defaulting, line-item save validation, the unique
+      `(OrderID, ProductID)` constraint, cross-order allocation scope,
+      the `(1,4,5)` reallocation status filter, and the negative cache
+      precondition for prior-product reallocation.
+    - The open questions still worth pressure-testing are whether
+      customer-derived tax status is merely a default or effectively
+      authoritative, and whether the `OrderID` tiebreak inside the
+      oldest-first allocation policy is business-visible or just an
+      implementation detail.
+
+## Session 3 Recommendation
+
+**Next-session orchestrator recommendation (Session 3):** Claude Opus
+4.7 (Claude Code), in-conversation for the peer review and
+falsification work.
+
+**Rationale:** The set spec explicitly calls for the *other*
+orchestrator to run Session 3 so Add-an-Order receives a genuinely
+independent second pass. Session 2 used Codex/GPT-5.4, so Session 3
+should move to Claude Opus for the package review, test falsification,
+and ambiguity-log tightening. That keeps the path-b-probe pattern
+intact: one provider drafts, the other provider tries to break it.
+
+If the human does not repeat the Session 2 override, cross-provider
+verification for Session 3 should revert to the set default of Gemini
+Pro. If the human wants Claude Opus reserved for verification again,
+the orchestrator assignment should be revisited because Session 3's key
+requirement is provider independence from Session 2.
+
+## Session 3: Add an Order — Peer Review and Falsification
+
+### Recommended orchestrator
+Claude Code Opus 4.7 @ effort=high
+
+### Rationale
+Session 2 was authored by Codex/GPT-5.4; the spec mandates the *other*
+orchestrator run Session 3 so Add-an-Order gets cross-provider
+falsification rather than self-review. Claude Opus 4.7 in-IDE handles
+the package re-read, the source-IR cross-check, and falsification-test
+authoring at marginal-zero per-call cost (Anthropic Max window).
+
+### Estimated routed cost
+Low — one Gemini Pro `session-verification` call.
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1    | Required reading; re-read package + tests | In-conversation (orchestrator) |
+| 2    | Independent semantic review of package | In-conversation (per session-local direction) |
+| 3    | Independent review of characterization tests | In-conversation |
+| 4    | Author falsification tests in `AddAnOrder/Session3*Tests.cs` | In-conversation |
+| 5    | Refine package (rules, ambiguity log) | In-conversation |
+| 6    | `dotnet build && dotnet test` (sequential) | Local |
+| 7    | Cross-provider session verification | Routed → Gemini Pro |
+
+### Session-Local Direction
+
+- Per the human's instruction at the start of this session: no routed
+  reasoning except the mandatory cross-provider session verification.
+- Cross-provider verification routes to **Gemini Pro** per the spec's
+  Routing Notes pin (Session 2's verification went to Claude Opus per
+  a one-off override; Session 3 reverts to the set default).
+- Per the lessons-learned entry "Verify The Prior Session Actually
+  Committed And Pushed Before Starting A New One," Session 2's
+  deliverables (`packages/add-an-order.md`, four AddAnOrder test
+  files, `session-reviews/session-002.md`, `issue-logs/session-002.json`,
+  and the Session 2 actuals appended to this file) were untracked at
+  the start of Session 3. They are bundled into the Session 3 commit
+  with disclosure in the commit message rather than created as a
+  separate catch-up commit.
+
+### Actuals (filled after the session)
+- **Orchestrator used:** Claude Opus 4.7 (Claude Code) — matches the
+  Session 2 recommendation (other-provider for Session 3 peer review).
+- **Total routed cost:** $0.0356 (one Gemini Pro `session-verification`
+  call: 18,226 input tokens / 1,277 output tokens).
+- **Verification verdict:** VERIFIED, 0 issues. Verifier (Gemini Pro)
+  confirmed test faithfulness, business-rule justification, prose
+  tightening accuracy, ambiguity-log conservatism, anti-coupling, and
+  falsifiability.
+- **Deviations from recommendation:** None on orchestrator choice.
+  Per session-local direction, all reasoning was in-conversation; only
+  cross-provider verification was routed (Gemini Pro per spec default,
+  reverting from Session 2's one-off Claude Opus override).
+- **Notes for Session 4 calibration:**
+    - Session 3 found no factual errors in Session 2's package or
+      tests. The two Round-1+Round-2 verification rounds Session 2 went
+      through (with Claude Opus as the verifier) appear to have caught
+      the substantive content gaps. Session 3's value-add was three
+      additional invariant pins (deletion-reallocation, cross-order
+      scope, OrderID tie-break) and four open-questions entries that
+      surface intent-vs-implementation ambiguities the original review
+      did not surface.
+    - Session 2's untracked deliverables were bundled into the Session 3
+      commit per the lessons-learned entry "Verify The Prior Session
+      Actually Committed And Pushed Before Starting A New One." This is
+      the **second** confirmed hit on this failure mode (first was
+      `vba-symbol-db-path-b-probe` Session 3 catching Codex's identical
+      lapse). The lesson should be promoted to a Convention in
+      `project-guidance.md` at Session 7's Step 9 reorganization
+      review, and a `verify_prior_session_committed()` helper should be
+      added to `ai-router/session_log.py` so the check is mechanical
+      rather than depending on the next orchestrator's discipline.
+    - Sessions 4-6 (`update-an-order`, `update-a-product`,
+      `update-an-employee`) are single-pass single-author per the
+      spec — no peer-review session for them. They will rely on
+      cross-provider session-verification only as the independence
+      check.
+
+## Session 4 Recommendation
+
+**Next-session orchestrator recommendation (Session 4):** Codex /
+GPT-5.4 (GitHub Copilot Chat), in-conversation single-pass authoring.
+
+**Rationale:** Per the spec's "Routing Notes" guidance to alternate
+orchestrators across the three update-workflow sessions, Session 4
+should swap back to Codex after Claude ran Session 3. This sets up the
+Sessions 4-6 alternation (Codex → Claude → Codex, or Codex → Claude →
+either, depending on Session 7 orchestrator preference). Session 4 is
+single-pass (no peer review session) per the spec's "compressed into
+one session" framing for the three updates, so the cross-provider check
+is solely the routed `session-verification` call at end of session.
+Verification should route to **Claude Opus** (cross-provider from
+Codex) unless the human pins Gemini Pro.
+
+No routed analysis was used for this recommendation: per the
+session-local direction above, this Session 3 used in-conversation
+reasoning for ai-assignment authoring.
