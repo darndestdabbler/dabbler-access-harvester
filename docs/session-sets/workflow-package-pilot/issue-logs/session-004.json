@@ -1,0 +1,10 @@
+[
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "tests/AccessHarvester.CharacterizationTests/UpdateAnOrder/OrderEditPolicyBehaviorTests.cs",
+    "summary": "Round-1 verification noted that the Paid lock set was not asserted directly: `PaymentMethod` and `PaidDate` were shown unlocked in `Shipped`, but not explicitly shown locked in `Paid`.",
+    "fix": "Added `LockedFieldsFor_PaidOrderLocksPaymentFieldsButNotNotes` to pin that `PaymentMethod` and `PaidDate` lock at `Paid` while `Notes` remains editable until `Closed`.",
+    "status": "fixed"
+  }
+]
