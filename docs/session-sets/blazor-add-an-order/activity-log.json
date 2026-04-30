@@ -189,6 +189,113 @@
           "costUsd": 0.0503
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 11,
+      "stepKey": "session-2/commit-push-notify",
+      "dateTime": "2026-04-30T13:07:36.480953-04:00",
+      "description": "Committed Session 2 (commit 253f940), pushed to origin/main, marked session-state.json complete with verdict VERIFIED, sent Pushover notification with next-session recommendation. samples/MiniComplex.accdb modification (predicted Access timestamp merge-noise) deliberately left unstaged.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/required-reading",
+      "dateTime": "2026-04-30T13:58:10.750339-04:00",
+      "description": "Read project-guidance, lessons-learned, ai-led workflow, spec end-to-end, ai-assignment Sessions 1-2 actuals, characterization tests AddAnOrder folder confirmed unchanged from Session 2.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/persistence-choice",
+      "dateTime": "2026-04-30T13:58:10.751339-04:00",
+      "description": "Chose EF Core 10.0 + SQLite per spec default. Connection string in appsettings.json points at Data/Orders.db (relative to ContentRoot). EnsureCreated on app startup; seed data matches Session 2 InMemoryCatalog exactly so UI/test behavior is unchanged across the swap. No reason surfaced to prefer InMemory.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/persistence-layer",
+      "dateTime": "2026-04-30T14:03:36.875880-04:00",
+      "description": "Authored BlazorAddAnOrder.Services.Persistence: Entities/{CustomerEntity,ProductEntity,OrderEntity,OrderLineItemEntity}.cs, OrdersDbContext.cs (model config: ValueGeneratedNever for seed-id catalogs, autoincrement for orders/line-items, decimal stored as TEXT), Mappings/OrderMappings.cs (entity<->workflow-domain Draft conversion, preserving Option D pure-domain logic), PersistenceCatalog.cs (implements ICustomerCatalog + IProductCatalog against DbContext with AsNoTracking reads), OrdersStore.cs (Persist + Find with Include for line items), DatabaseSeeder.cs (parent-dir creation + EnsureCreated + idempotent seed matching Session 2 InMemoryCatalog data).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/controller-rewiring",
+      "dateTime": "2026-04-30T14:03:36.875880-04:00",
+      "description": "Updated CustomersController, ProductsController, OrdersController to inject PersistenceCatalog/OrdersStore instead of InMemoryCatalog. OrdersController.MapToResponse now goes through OrderMappings.ToDraft(entity) so the response shape is preserved. Removed Services/Stubs/InMemoryCatalog.cs and the empty Stubs directory. The pure domain services (OrderCreationService, OrderLineItemService, InventoryAllocationService) are unchanged \u2014 only the I/O boundary moved.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/program-cs-and-config",
+      "dateTime": "2026-04-30T14:03:36.877387-04:00",
+      "description": "Program.cs: added AddDbContext<OrdersDbContext>(UseSqlite(connectionString)), registered PersistenceCatalog scoped (also serves ICustomerCatalog/IProductCatalog via factory), OrdersStore scoped, kept SystemClock + OrderCreationOptions singletons and the OrderCreation/OrderLineItemService scoped registrations. Added a startup scope that resolves OrdersDbContext and runs DatabaseSeeder.EnsureCreatedAndSeeded. appsettings.json: added ConnectionStrings:Orders pointing at Data/Orders.db (relative to ContentRoot). csproj: added Microsoft.EntityFrameworkCore 10.0.0 and Microsoft.EntityFrameworkCore.Sqlite 10.0.0. .gitignore: ignored output-tests/blazor-add-an-order/Data/*.db and *.db-* (sqlite WAL/SHM).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-04-30T14:03:36.877904-04:00",
+      "description": "dotnet build AccessHarvester.sln: 0 errors, 286 pre-existing warnings (unchanged from Session 2 baseline). dotnet test AccessHarvester.sln --no-build: 0 failed across all 14 test assemblies; AccessHarvester.CharacterizationTests still 111 passed (AddAnOrder/UpdateAnOrder/UpdateAProduct/UpdateAnEmployee folders unmodified). Aggregate ~1720 passed, 3 SkippableFact integration tests skipped (no Access COM in this CI environment).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/smoke-check",
+      "dateTime": "2026-04-30T14:03:36.878910-04:00",
+      "description": "Manual smoke: started the app at http://localhost:5080. Confirmed /api/health, /api/customers (3 seeded), /api/products (4 seeded), POST /api/orders (created order #1 with two line items \u2014 Trail Mix qty 3 -> Allocated, Stainless Bottle qty 6 -> NoStock, since physical=4 < 6), GET /api/orders/1 (round-trips persisted entity with line items). Stopped the app, deleted nothing, restarted on a different port: GET /api/orders/1 still returned the persisted order with the same date/status \u2014 confirming SQLite persistence across process restarts. Cleaned up the Data/ directory before commit.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/change-log",
+      "dateTime": "2026-04-30T14:06:08.192847-04:00",
+      "description": "Authored docs/session-sets/blazor-add-an-order/change-log.md in-conversation per the human set-wide directive (no external routing this set except cross-provider session-verification). Captures purpose, what shipped, Stop Rule #1 + Option D resolution carry-across, per-session summary, success-criteria check, cost actuals, and the lessons-considered/rejected list.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/next-session-set-recommendation",
+      "dateTime": "2026-04-30T14:06:08.193849-04:00",
+      "description": "Updated ai-assignment.md Session 3: appended Actuals block, Next-session-set recommendation block (in-conversation per directive). Recommended blazor-update-an-order as the next set with claude-code Opus 4.7 effort=high; surfaced the breadth-vs-hardening alternative; defaulted breadth-first per the pilot proof goal.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-3/verification",
+      "dateTime": "2026-04-30T14:08:16.267646-04:00",
+      "description": "Cross-provider session-verification routed via query('gemini-pro', task_type='session-verification') per the human set-wide directive. Verdict and routed cost in the api_calls entry below.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 29020,
+          "outputTokens": 954,
+          "costUsd": 0.045815
+        }
+      ]
     }
   ]
 }

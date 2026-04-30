@@ -290,3 +290,101 @@ file and a change-log, but the domain code is largely unchanged).
 | 10 | Cross-provider session verification | **Routed** — `query("gemini-pro", task_type="session-verification", ...)` per the directive |
 | 11 | Step 8: commit + push + mark complete + notify | In-conversation |
 | 12 | Step 9 reorganization review post-notify | In-conversation |
+
+### Actuals (filled after the session)
+
+- Orchestrator used: claude-code claude-opus-4-7 @ effort=high
+- Total routed cost: $0.0458 (one Gemini Pro session-verification call,
+  29,020 input / 954 output tokens — within the spec's $0.05–$0.10
+  expected range, slightly under because the prompt grew by exactly
+  the EF Core surface and the change-log without bloating).
+- Deviations from recommendation: None on routing. Three procedural
+  deviations from the workflow doc remain pre-disclosed by the human's
+  set-wide directive: (1) `ai-assignment.md` Session 3 update authored
+  in-conversation rather than via routed `analysis` (Rule #17); (2)
+  `change-log.md` authored in-conversation rather than via routed
+  `summarization` (per the orchestrator-model-matches-routing-target
+  Convention); (3) next-session-set recommendation authored
+  in-conversation rather than via routed `analysis` (Rule #17). All
+  three are disclosed in the verifier prompt.
+- Notes for next-session-set calibration:
+  - **SQLite parent-dir gotcha** — EF Core's `EnsureCreated` will
+    fail with `SQLite Error 14: 'unable to open database file'` if
+    the parent directory of the configured `Data Source` does not
+    exist. The session-3 `DatabaseSeeder` resolves the configured
+    `Data Source`, joins with `Directory.GetCurrentDirectory()` if
+    relative, and calls `Directory.CreateDirectory` before
+    `EnsureCreated`. Apply the same guard in any future session set
+    that uses SQLite with a relative path. Not surfaced as a
+    `lessons-learned.md` entry — it is a single mechanical fix that
+    does not generalize beyond pilot-style apps with relative
+    Data-Source paths.
+  - **The persistence rewire kept all domain code unchanged**, which
+    confirms the Option D resolution from Session 2 still holds
+    after persistence is added. The pure workflow models stay pure;
+    only the I/O boundary moved. This is the load-bearing property
+    for any follow-up set that revisits "should the workflow code
+    be shared?" — the answer remains: not until a second consumer
+    actually exists.
+
+### Next-session-set recommendation (Session 3 closeout)
+
+**Authoring note:** The human's set-wide directive against external
+routing for `analysis` task types (Rule #17) remains in force at
+session-set close. The recommendation below is the orchestrator's own
+opinion — disclosed for the verifier and any future reader.
+
+**Recommended next session set:** `blazor-update-an-order`
+(or a single combined `blazor-remaining-workflows` set if the human
+prefers to bundle Update an Order, Update a Product, and Update an
+Employee — see scope-split discussion below).
+
+**Why this and not an alternative:** The repo has no master plan
+file (`docs/planning/project-status.md` describes the harvester's
+domain plan, not the Blazor pilot's). The most informative source for
+"what comes next" is the `workflow-package-pilot` set's `handoff.md`,
+which explicitly listed Add an Order as the first downstream pilot
+target and named the other three workflows as the natural follow-ups.
+The pilot proved (with the Option D nuance) that the package shape +
+MudBlazor + the existing characterization tests can drive a correct
+Blazor slice; the next informative experiment is whether the same
+shape generalizes across the other three workflows. Update an Order
+is the smallest follow-up (705 LOC, 2 test files; one
+state-transition rule on `Order.Status`); it would prove or
+disprove the generalization at the lowest cost. Update a Product
+(1119 LOC, 7 test files) is the largest — a worthy second pilot if
+Update an Order succeeds. Update an Employee (480 LOC, 4 test files)
+is the smallest of the three behaviorally and a good third.
+
+**Scope-split decision:** Author Update an Order as its own set
+first. Bundling all three workflows into one `blazor-remaining-workflows`
+set risks repeating the "split candidate" lesson from
+`lessons-learned.md` — the three workflows have largely independent
+prereq footprints (each consumes its own characterization-test folder
+and its own workflow package), so a single combined set would force
+the slowest workflow to gate the others' merges. Per the
+"Split Session Sets Whose Features Span Independent Prereq Chains"
+lesson, prefer three short follow-up sets running sequentially or in
+parallel worktrees over one bundled set.
+
+**Alternative if the human prefers depth over breadth:** A
+`blazor-add-an-order-hardening` set that (a) decomposes the in-process
+HTTP boundary into a real two-process deployment (separate
+`BlazorAddAnOrder.Ui.csproj` and `BlazorAddAnOrder.Services.csproj`
+with the service exe published and the UI consuming it over real
+HTTP), (b) adds `requiresUAT: true` + a Playwright E2E suite to
+catch the gaps the human's hand-test cannot, (c) replaces
+`EnsureCreated` with a real EF Core migrations history. The
+hardening set is more useful for a production-readiness arc; the
+breadth-first set (Update an Order) is more useful for proving the
+package-shape generalization. **Default to breadth-first**
+(Update an Order) per the pilot's stated proof goal; surface the
+hardening alternative for the human to choose from.
+
+**Recommended orchestrator for the next set:**
+claude-code claude-opus-4-7 @ effort=high — same rationale as for
+this set's Sessions 1–3. The set-wide directive (no external routing
+except cross-provider session-verification to Gemini Pro) is a
+session-set-by-session-set call; the next set's spec author should
+re-affirm or revise it deliberately rather than carrying it forward
+silently.

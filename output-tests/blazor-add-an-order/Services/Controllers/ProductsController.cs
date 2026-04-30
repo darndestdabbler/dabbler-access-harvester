@@ -1,6 +1,6 @@
 using System.Linq;
 using BlazorAddAnOrder.Contracts;
-using BlazorAddAnOrder.Services.Stubs;
+using BlazorAddAnOrder.Services.Persistence;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorAddAnOrder.Services.Controllers;
@@ -9,9 +9,9 @@ namespace BlazorAddAnOrder.Services.Controllers;
 [Route("api/products")]
 public sealed class ProductsController : ControllerBase
 {
-    private readonly InMemoryCatalog _catalog;
+    private readonly PersistenceCatalog _catalog;
 
-    public ProductsController(InMemoryCatalog catalog)
+    public ProductsController(PersistenceCatalog catalog)
     {
         _catalog = catalog;
     }
