@@ -485,3 +485,242 @@ naturally to the Northwind `EmployeePrivileges` table and the
 No routed analysis was used for this recommendation: per the
 session-local direction above, this Session 5 used in-conversation
 reasoning for ai-assignment authoring.
+
+## Session 6: Update an Employee - Single-Pass Package
+
+### Recommended orchestrator
+Codex / GPT-5.4 (GitHub Copilot Chat), in-conversation single-pass
+authoring
+
+### Rationale
+Per the Session 5 recommendation to alternate orchestrators across
+Sessions 4-6, Session 6 swaps from Claude back to Codex for the
+`update-an-employee` workflow. This keeps the set balanced going into
+Session 7 and preserves cross-provider independence for the mandatory
+verification pass.
+
+### Estimated routed cost
+Moderate - one Claude Opus `session-verification` call.
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1    | Required reading; re-read inventory + Session 5 deliverables | In-conversation (orchestrator) |
+| 2    | Pull harvester evidence for Update an Employee (form, queries, modules, privilege tables/enums) | Local file reads |
+| 3    | Author `packages/update-an-employee.md` | In-conversation |
+| 4    | Author UpdateAnEmployee characterization tests + workflow models | In-conversation |
+| 5    | `dotnet build && dotnet test` (sequential) | Local |
+| 6    | Cross-provider session verification | Routed -> Claude Opus |
+
+### Session-Local Direction
+
+- Per the human's instruction at the start of this session, do not
+  route to an external provider except for the mandatory cross-provider
+  session verification.
+- Cross-provider verification for Session 6 routes to **Claude Opus**
+  (per human direction), not Gemini Pro.
+- All package authoring, test authoring, ai-assignment updates, and
+  next-session recommendations remain in-conversation.
+- Session 5's deliverables are already marked complete in
+  `session-state.json`; Session 6 starts from that verified baseline.
+
+### Actuals (filled after the session)
+- **Orchestrator used:** Codex / GPT-5.4 (GitHub Copilot Chat) —
+  matches the Session 5 recommendation to alternate back to Codex for
+  the final single-pass update workflow.
+- **Deliverables produced:** `packages/update-an-employee.md` plus the
+  `UpdateAnEmployeeWorkflowModels.cs` workflow-model file and four
+  characterization test files
+  (`EmployeeSaveValidationTests`,
+  `EmployeeIdentityConstraintTests`,
+  `EmployeeDeletePolicyTests`,
+  `EmployeePrivilegeAssignmentTests`) covering save validation,
+  identity uniqueness, delete gating/MRU cleanup, and post-insert
+  privilege-assignment scoping.
+- **Total routed cost:** $2.831925 across four Claude Opus
+  `session-verification` calls (41,000 input tokens / 29,559 output
+  tokens total). No other routed work was used in Session 6, per the
+  human's session-local direction.
+- **Verification verdict:** VERIFIED, 0 issues. Opus surfaced a series
+  of grounded minor nits across the first three rounds
+  (privilege-editor anti-coupling, Section 4 exclusion coverage,
+  delete-policy test precision, and MRU-cleanup naming fidelity); all
+  were fixed locally, and Round 4 returned clean `VERIFIED`.
+- **Deviations from recommendation:** None on orchestrator choice.
+  Verification matched the human's explicit session-local pin to
+  Claude Opus. The only variance from the initial estimate was that the
+  verifier needed four rounds instead of one because the package was
+  tightened incrementally against each grounded note.
+- **Notes for Session 7 calibration:**
+    - Session 6 completes the four pilot workflow packages and the
+      corresponding `UpdateAnEmployee/` characterization suite. The
+      cross-workflow audit can now review all four packages as a set
+      rather than reasoning from partial coverage.
+    - The recurring `ValidateForm(Me)` save-gate pattern now appears in
+      all four pilot workflows, which is worth checking for consistent
+      wording and abstraction level in Session 7.
+    - Session 6 also reinforced a useful audit lens for Session 7:
+      distinguish durable authorization/business rules from Access UI
+      mechanics. The employee workflow manages privilege data but does
+      not itself prove who is allowed to open the workflow, and similar
+      role-mapping caveats should be checked across the other packages.
+    - Cross-provider verification for Session 6 was intentionally the
+      only routed work, per human direction. Session 7 can keep the
+      same low-routing discipline unless the human asks for a different
+      review pattern.
+
+## Session 7 Recommendation
+
+**Next-session orchestrator recommendation (Session 7):** Claude Opus
+4.7 (Claude Code), in-conversation cross-workflow audit and
+documentation reorganization.
+
+**Rationale:** After Session 6, the authored-session count is balanced
+(`Claude`: 1, 3, 5; `Codex`: 2, 4, 6), so the spec's "fewest prior
+sessions" tiebreak no longer selects a unique winner. In that tie,
+Claude is a good fit for Session 7 because it is independent from the
+just-completed Codex-authored Session 6 and can review the full set of
+four packages with fresh provider perspective. If the human wants to
+keep **Claude Opus** reserved for verification again, then Session 7
+should instead stay with Codex so the cross-provider check can still be
+real.
+
+For verification: if Claude authors Session 7, route the mandatory
+cross-provider verification to **Gemini Pro** (or another non-Anthropic
+provider) unless the human explicitly overrides that plan. If Codex
+authors Session 7 instead, Claude Opus remains the natural verifier.
+
+No routed analysis was used for this recommendation: per the
+session-local direction above, this Session 6 used in-conversation
+reasoning for ai-assignment authoring.
+
+## Session 7: Cross-Workflow Audit + Handoff + Change Log + Step 9
+
+### Recommended orchestrator
+Claude Opus 4.7 (Claude Code), in-conversation cross-workflow audit
+and documentation work. (Confirmed by the human at session start —
+"do not route to an external provider, except for the cross-provider
+verification.")
+
+### Rationale
+Session 6's recommendation favored Claude for Session 7 to maximize
+cross-provider independence on the audit (Codex had just authored
+Session 6). The human accepted that recommendation and pinned
+cross-provider verification to Gemini Pro rather than Claude Opus
+(since Claude is the orchestrator, an Anthropic-provider verifier
+would defeat the cross-provider point).
+
+### Estimated routed cost
+Low — one Gemini Pro `session-verification` call. All other Session 7
+work (cross-workflow audit, handoff, change-log,
+ai-assignment update, next-session-set recommendation) authored
+in-conversation per the human's session-local direction.
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1    | Required reading; read all four packages + tests end-to-end | In-conversation (orchestrator) |
+| 2    | Cross-workflow audit | In-conversation |
+| 3    | Handoff document | In-conversation |
+| 4    | Change-log | In-conversation |
+| 5    | ai-assignment.md actuals + next-set recommendation | In-conversation |
+| 6    | Bundle Session 6 untracked deliverables into the Session 7 commit | Local git |
+| 7    | `dotnet build && dotnet test` (sequential) | Local |
+| 8    | Cross-provider session verification | Routed -> Gemini Pro |
+| 9    | Step 9 reorganization review (after notify) | In-conversation + human |
+
+### Session-Local Direction
+
+- Per the human's instruction at session start: do not route to an
+  external provider except for the mandatory cross-provider session
+  verification.
+- Cross-provider verification for Session 7 routes to **Gemini Pro**.
+- All audit, handoff, change-log, ai-assignment updates, and
+  next-session-set recommendation authored in-conversation.
+- Session 6's deliverables (the `update-an-employee` package + 5 test
+  files + ai-assignment.md / activity-log.json / session-state.json
+  updates + the `samples/MiniComplex.accdb` mtime + the deletion of
+  the lingering `samples/NorthwindDevEdition.laccdb` lock file)
+  remained untracked in the working tree at session start — Session 6
+  finished its workflow steps but did not run the commit/push step.
+  Per the lessons-learned entry "Verify The Prior Session Actually
+  Committed And Pushed Before Starting A New One," Session 7 bundles
+  those deliverables into the Session 7 commit and notes the catch-up
+  in the commit message.
+
+### Actuals (filled after the session)
+
+- **Orchestrator used:** Claude Opus 4.7 (Claude Code), matching the
+  Session 6 recommendation and the human's session-start pin.
+- **Deliverables produced:**
+  - `docs/session-sets/workflow-package-pilot/cross-workflow-audit.md`
+    (cross-workflow audit findings: recurring rules, confidence-tag
+    calibration, anti-coupling sweep, role-logic treatment,
+    source-operationalization-format fit)
+  - `docs/session-sets/workflow-package-pilot/handoff.md`
+    (downstream Blazor pilot handoff: ready/not-ready,
+    open-questions inheritance, recommended next-set scope)
+  - `docs/session-sets/workflow-package-pilot/change-log.md`
+    (session-set change log)
+  - `docs/session-sets/workflow-package-pilot/session-reviews/session-006.md`
+    (recovered from `tmp/workflow-package-pilot/session-6/verification-response.md`,
+    which was the saved verifier output Session 6 had not committed)
+  - `docs/session-sets/workflow-package-pilot/session-reviews/session-007.md`
+    (Session 7 cross-provider verification raw output)
+  - This `ai-assignment.md` Session 7 block + next-session-set
+    recommendation
+  - Session 6's previously untracked deliverables, bundled into the
+    Session 7 commit
+- **Total routed cost:** one Gemini Pro `session-verification` call.
+- **Verification verdict:** see `session-reviews/session-007.md` for
+  the raw verifier output.
+- **Deviations from recommendation:** none on orchestrator choice or
+  verifier choice. Session 6's missing commit was bundled into
+  Session 7 per the lessons-learned playbook.
+- **Notes for handoff:**
+  - The cross-workflow audit triangulated three pieces of guidance
+    that span the four packages: (a) the `ValidateForm` save gate is
+    a single shared abstraction, not four per-page validators;
+    (b) `AllocateInventory` should be a single domain service in the
+    Blazor pilot, since two packages cite it; (c) no in-form role
+    gating exists in any of the four pilot workflows, so the Blazor
+    pilot must decide role mappings explicitly.
+  - The pilot landed without triggering any of the spec's stop rules.
+
+## Next-session-set recommendation
+
+**Recommended next set:** Blazor implementation pilot for Add an Order
+(suggested slug: `blazor-implementation-pilot-add-an-order` or
+similar), contingent on Blazor component library readiness.
+
+**Rationale:** the cross-workflow audit (Section 6.1) confirms the
+package shape works on Northwind. The "What 'Success' Looks Like"
+criterion in the pilot spec is provable only by a downstream
+implementation that consumes a package and passes its
+characterization tests. Add an Order is the richest behavioral
+surface (multi-entity validation, customer-derived defaults,
+inventory allocation, per-line-item state transitions, cross-order
+rebalancing), so it is the strongest first proof. The three update
+workflows reuse most of its infrastructure and naturally follow as
+a single update-workflow follow-up set after Add an Order ships.
+
+**Conditional gate:** if the in-progress Blazor component library is
+not yet at the level of patterns listed in `handoff.md` Section 3.3
+(master-detail, grid-with-details, detail-with-tabs, status-driven
+action rail, modal/nested editor, required-field validation
+primitives), the next set should be a Blazor library extension set,
+not the implementation pilot. The next-set author confirms the
+library state at scoping time; this recommendation does not assume
+readiness.
+
+**Verifier choice for the next set's first session:** Claude Opus
+4.7 is the natural Anthropic-side cross-provider verifier if the
+next set's orchestrator is Codex/GPT-5.4 (current `task_type_overrides`
+already maps `session-verification: gpt-5-4` for a Claude
+orchestrator; if the human switches to Codex, swap that entry to
+`opus` per the lessons-learned `session-verification` playbook).
+
+This recommendation is advisory. If the human's master plan (when
+present) names a different next set, defer to it.
+
+No routed analysis was used for this recommendation; this Session 7
+used in-conversation reasoning for ai-assignment authoring per the
+session-local direction.
