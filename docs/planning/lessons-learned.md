@@ -832,6 +832,16 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ## Verify The Prior Session Actually Committed And Pushed Before Starting A New One
 
+> **Promoted to `project-guidance.md` → Conventions → Workflow
+> Expectations** on 2026-04-30 (after `workflow-package-pilot`
+> Session 7, second-context confirmation — Session 6 finished
+> workflow steps cleanly with VERIFIED across four Opus rounds but
+> did not commit; Session 7 caught and bundled). Retained here as
+> the action-detail reference; the rule itself is now a Convention.
+> The companion `verify_prior_session_committed()` helper in
+> `ai-router/session_log.py` is a deliberate follow-up, not yet
+> implemented.
+
 - **Context:** Picking up the next session of an in-progress session
   set when the prior session was run by a different in-IDE
   orchestrator. First hit on 2026-04-29 in
