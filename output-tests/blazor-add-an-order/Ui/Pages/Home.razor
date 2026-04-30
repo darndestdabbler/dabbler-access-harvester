@@ -12,7 +12,7 @@
     <code>GET /api/health</code> via the named HttpClient.
 </MudText>
 
-<MudCard Outlined="true">
+<MudCard Outlined="true" Class="mb-4">
     <MudCardHeader>
         <CardHeaderContent>
             <MudText Typo="Typo.h6">Service health</MudText>
@@ -36,6 +36,10 @@
         }
     </MudCardContent>
 </MudCard>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/orders/new">
+    Create a new order
+</MudButton>
 
 @code {
     private HealthResponse? _status;

@@ -139,3 +139,154 @@ claude-code claude-opus-4-7 @ effort=high
 Rationale: see above — the constraint reasoning + Razor authoring
 mix favors Opus on Claude Code, and the Session 1 directive against
 external routing remains in force.
+
+### Stop Rule #1 resolution (Session 2 first action)
+
+The Session 2 orchestrator (claude-code claude-opus-4-7 @ effort=high)
+re-confirmed the binding constraint at session start:
+
+- `AddAnOrderWorkflowModels.cs` declares only `internal sealed`
+  data/state types (`OrderStatus`, `OrderDetailStatus`, `OrderDraft`,
+  `OrderLineItemDraft`, `PendingOrderDetail`) — not workflow classes.
+  Even those are `internal` (assembly-scoped).
+- The workflow *classes* the spec names — `OrderCreationWorkflow`,
+  `OrderLineItemWorkflow`, `InventoryAllocator` (the actual name; the
+  spec said `InventoryAllocationService`), plus `LineItemDeletionWorkflow`
+  and `OrderDeletionWorkflow` from Session3 tests — are each
+  `private sealed class` nested inside one test file. They are
+  unsharable as written, even within the test assembly.
+- `AccessHarvester.CharacterizationTests.csproj` has no project
+  references and is by design a self-contained pure-function fixture.
+
+Four resolution options were surfaced to the human:
+
+- **A:** Treat tests-already-pass as the success criterion; Blazor
+  authors its own service-layer logic that honors the same invariants;
+  no shared workflow code.
+- **B:** Promote test-file workflow classes to a shared `internal`
+  file in the test project + `InternalsVisibleTo` to the Blazor project,
+  edit test files to remove their nested copies. Violates "do not
+  modify tests."
+- **C:** Same as B but workflow classes own-by-Blazor; test project
+  takes a project reference. Stronger violation of "do not refactor
+  the CharacterizationTests project."
+- **D:** Option A's code shape, with explicit documentation that the
+  spec's Section "What 'Success' Looks Like" #3 is clarified — the
+  pilot proves *invariant correspondence* between the package + tests
+  and the Blazor service layer, not *single-source workflow code*.
+
+**Human chose Option D** in-conversation at Session 2 start.
+
+### Clarified success criterion for the rest of this set (Option D)
+
+The pilot's success criterion #2 ("characterization tests pass without
+modification against the Blazor app's wiring") is preserved in letter:
+the existing tests pass, untouched. The deeper interpretation
+("Blazor service layer and test fixtures share workflow code") is
+explicitly **not** the criterion. Instead:
+
+- The Blazor service layer authors its own `OrderCreationService`,
+  `OrderLineItemService`, and `InventoryAllocationService` inside the
+  `BlazorAddAnOrder.Services.Domain` namespace, implementing the same
+  invariants the package's Section 3 rules and Section 4 invariants pin.
+- The CharacterizationTests/AddAnOrder/ folder is consumed unchanged
+  and continues to validate the package shape against its own private
+  workflow fixtures.
+- The Blazor project's behavioral correctness against the same rules
+  is validated by hand-test (the spec's `requiresUAT: false` rationale
+  applies — human hand-tests as user) plus cross-provider session
+  verification per the workflow.
+- A future session set may revisit shared workflow code if the
+  duplicated invariant logic becomes a maintenance pain point. For
+  this set the duplication is a deliberate trade for letter-perfect
+  test-file preservation.
+
+This clarification is logged here in `ai-assignment.md` and will be
+captured again in Session 3's `change-log.md` when the set closes.
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1 | Required reading | In-conversation |
+| 2 | Stop Rule #1 conversation with human | In-conversation (already happened — see above) |
+| 3 | Author `BlazorAddAnOrder.Services.Domain` types (own enums, drafts, services implementing the package's Section 3 rules / Section 4 invariants) | In-conversation (multi-file but mechanical against the package) |
+| 4 | Author `BlazorAddAnOrder.Contracts` DTOs | In-conversation (mechanical) |
+| 5 | Author `BlazorAddAnOrder.Services` controllers + `InMemoryCatalog` stub | In-conversation (mechanical) |
+| 6 | Author UI vertical slice (`OrderEntryPage.razor` + helpers) | In-conversation (multi-file Razor authoring) |
+| 7 | Wire DI in `Program.cs` | In-conversation (mechanical) |
+| 8 | `dotnet build && dotnet test` (sequential) | In-conversation (shell) |
+| 9 | Cross-provider session verification | **Routed** — `route(task_type="session-verification")` to Gemini Pro per the human's set-wide directive (overrides any task-type override). |
+| 10 | Step 8: commit + push + mark complete + notify | In-conversation |
+
+### Actuals (filled after the session)
+- Orchestrator used: claude-code claude-opus-4-7 @ effort=high
+- Total routed cost: $0.0503 (one Gemini Pro session-verification call,
+  30,353 input / 1,231 output tokens). The verification cost ran above
+  Session 1's $0.01 because the prompt now carries spec + ai-assignment +
+  workflow package + four characterization-test files + 16 Blazor source
+  files; this matches the spec's "$0.05–$0.20 expected" estimate.
+- Deviations from recommendation: None on routing. Two procedural
+  deviations from the workflow doc remain pre-disclosed by the human's
+  set-wide directive: (1) `ai-assignment.md` Session 2 update authored
+  in-conversation rather than via routed `analysis` (Rule #17); (2)
+  layer-separation code review and test-correspondence review performed
+  in-conversation rather than via routed `code-review`. The Stop Rule
+  #1 conversation at session start is logged in this file.
+- Notes for next-session calibration:
+  - **First Gemini Pro call returned 503 Service Unavailable** after
+    three internal retries; a 90s wait + manual retry succeeded. This
+    matches the verifier-failure escalation ladder's step 1 (try same
+    provider twice). No code change required; flag for Session 3 as a
+    transient-availability hint — if Gemini Pro is unreliable on the
+    morning of Session 3, fall back per the ladder rather than fight it.
+  - **Verification prompt size: ~30K input tokens.** Session 3's
+    verification will likely be similar (persistence + change-log + the
+    same Blazor surface), well within Gemini Pro's window.
+  - **Option D resolution worked cleanly** — the verifier explicitly
+    confirmed invariant correspondence between the Blazor service layer
+    and the test fixtures' private workflow logic, and accepted that no
+    shared workflow code exists. Session 3 can lean on the same model:
+    re-verify invariant correspondence after persistence rewires the
+    services to call EF Core instead of the in-memory stub. The pure
+    domain logic should be unchanged.
+  - **InMemoryCatalog seed data lives in `Services/Stubs/InMemoryCatalog.cs`.**
+    Session 3's persistence layer should match this seed exactly so the
+    UI experience and invariant-corresponding tests stay green across
+    the in-memory → SQLite swap.
+
+**Next-session orchestrator recommendation (Session 3):**
+claude-code claude-opus-4-7 @ effort=high
+
+Rationale (authored in-conversation per the human's set-wide directive
+against external routing for analysis/recommendation tasks; the
+orchestrator-bias caveat applies here too): Session 3 swaps the
+in-memory stub for EF Core + SQLite, threads the persistence boundary
+through the existing controllers without changing the domain services,
+generates the change-log, runs the Step 9 reorganization review, and
+must keep the characterization tests green plus the invariant
+correspondence intact. Opus 4.7 on Claude Code is the right fit because
+it can hold the EF Core entity-mapping work, the controller-rewiring
+diff, and the change-log authoring together in one window. Codex/GPT
+would also work; the only differentiator is the human's preference for
+the same orchestrator across the set so Session 3 inherits Session 2's
+context for the Step 9 review.
+
+The set-wide directive (no external routing except cross-provider
+session-verification, which goes to Gemini Pro) remains in force for
+Session 3 unless the human pivots. Expected routed cost: ~$0.05–$0.10
+for the Session 3 verification (the prompt grows by an EF Core entity
+file and a change-log, but the domain code is largely unchanged).
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1 | Required reading | In-conversation |
+| 2 | Choose persistence path (default SQLite per spec) | In-conversation |
+| 3 | Author `Services/Persistence/OrdersDbContext.cs` + entities + mapping | In-conversation |
+| 4 | Update controllers to call persistence instead of stubs | In-conversation |
+| 5 | Confirm characterization tests still pass | In-conversation (shell) |
+| 6 | Manual smoke check end-to-end | In-conversation (shell + prose) |
+| 7 | `dotnet build && dotnet test` | In-conversation (shell) |
+| 8 | Author `change-log.md` | In-conversation per `task_type="summarization"` substitution — the Convention says when the orchestrator's model matches the routing target, handle in-conversation. This applies cleanly here because the orchestrator IS the recommended summarization-tier when the human set-wide directive forbids routing to a tier-1 Gemini summarization model. |
+| 9 | Update next-session-set recommendation in `ai-assignment.md` | In-conversation per directive |
+| 10 | Cross-provider session verification | **Routed** — `query("gemini-pro", task_type="session-verification", ...)` per the directive |
+| 11 | Step 8: commit + push + mark complete + notify | In-conversation |
+| 12 | Step 9 reorganization review post-notify | In-conversation |

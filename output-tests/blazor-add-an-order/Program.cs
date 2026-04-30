@@ -1,3 +1,5 @@
+using BlazorAddAnOrder.Services.Domain;
+using BlazorAddAnOrder.Services.Stubs;
 using BlazorAddAnOrder.Ui;
 using MudBlazor.Services;
 
@@ -9,6 +11,15 @@ builder.Services.AddRazorComponents()
 builder.Services.AddControllers();
 
 builder.Services.AddMudServices();
+
+builder.Services.AddSingleton<InMemoryCatalog>();
+builder.Services.AddSingleton<ICustomerCatalog>(sp => sp.GetRequiredService<InMemoryCatalog>());
+builder.Services.AddSingleton<IProductCatalog>(sp => sp.GetRequiredService<InMemoryCatalog>());
+builder.Services.AddSingleton<ISystemClock, SystemClock>();
+builder.Services.AddSingleton(new OrderCreationOptions { SystemTaxRate = 0.0825f });
+builder.Services.AddScoped<OrderCreationService>();
+builder.Services.AddScoped<OrderLineItemService>();
+builder.Services.AddSingleton<InventoryAllocationService>();
 
 var servicesBaseAddress = builder.Configuration["Services:BaseAddress"]
     ?? throw new InvalidOperationException(

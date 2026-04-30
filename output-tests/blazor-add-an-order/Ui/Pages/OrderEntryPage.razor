@@ -1,0 +1,320 @@
+@namespace BlazorAddAnOrder.Ui.Pages
+@page "/orders/new"
+@inject IHttpClientFactory HttpClientFactory
+@inject ISnackbar Snackbar
+
+<PageTitle>New Order</PageTitle>
+
+<MudText Typo="Typo.h4" GutterBottom="true">New Order</MudText>
+
+<MudText Class="mb-4">
+    Master-detail entry: pick the customer, add line items, then save.
+    Tax status is derived from the customer; line-item unit price comes
+    from the selected product. Allocation status (Allocated / NoStock) is
+    decided by the service layer based on current physical inventory.
+</MudText>
+
+@if (_loadError is not null)
+{
+    <MudAlert Severity="Severity.Error" Class="mb-4">@_loadError</MudAlert>
+}
+
+@if (_customers is null || _products is null)
+{
+    <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+}
+else
+{
+    <MudCard Outlined="true" Class="mb-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Order header</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudForm @ref="_form">
+                <MudGrid>
+                    <MudItem xs="12" md="6">
+                        <MudNumericField T="long"
+                                          Label="Employee ID"
+                                          @bind-Value="_employeeId"
+                                          Required="true"
+                                          Min="1" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="long?"
+                                   Label="Customer"
+                                   @bind-Value="_selectedCustomerId"
+                                   Required="true"
+                                   AnchorOrigin="Origin.BottomCenter">
+                            @foreach (var customer in _customers)
+                            {
+                                <MudSelectItem T="long?" Value="@((long?)customer.Id)">
+                                    @customer.Name (tax @customer.StandardTaxStatusId)
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudForm>
+        </MudCardContent>
+    </MudCard>
+
+    <MudCard Outlined="true" Class="mb-4">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">Line items</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>
+        <MudCardContent>
+            @if (_pendingLines.Count == 0)
+            {
+                <MudText Typo="Typo.body2" Class="mb-2">No line items yet.</MudText>
+            }
+            else
+            {
+                <MudTable Items="_pendingLines" Dense="true" Hover="true" Class="mb-3">
+                    <HeaderContent>
+                        <MudTh>Product</MudTh>
+                        <MudTh>Quantity</MudTh>
+                        <MudTh>Unit Price</MudTh>
+                        <MudTh>Stock signal</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@LookupProductName(context.ProductId)</MudTd>
+                        <MudTd>@context.Quantity</MudTd>
+                        <MudTd>@context.UnitPrice.ToString("C")</MudTd>
+                        <MudTd>@StockSignal(context)</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                            Size="Size.Small"
+                                            OnClick="@(() => RemoveLine(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudSelect T="long?"
+                               Label="Add product"
+                               @bind-Value="_newLineProductId"
+                               AnchorOrigin="Origin.BottomCenter">
+                        @foreach (var product in _products)
+                        {
+                            <MudSelectItem T="long?" Value="@((long?)product.Id)">
+                                @product.Name — @product.UnitPrice.ToString("C") (phys @product.PhysicalAvailable / on-order @product.OnOrderAvailable)
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="6" md="3">
+                    <MudNumericField T="short" Label="Quantity" @bind-Value="_newLineQuantity" Min="(short)1" />
+                </MudItem>
+                <MudItem xs="6" md="3" Class="d-flex align-center">
+                    <MudButton Variant="Variant.Outlined"
+                                Color="Color.Primary"
+                                OnClick="AddLine"
+                                Disabled="@(_newLineProductId is null || _newLineQuantity <= 0)">
+                        Add line
+                    </MudButton>
+                </MudItem>
+            </MudGrid>
+
+            @if (_lineError is not null)
+            {
+                <MudAlert Severity="Severity.Warning" Class="mt-3">@_lineError</MudAlert>
+            }
+        </MudCardContent>
+    </MudCard>
+
+    @if (_submitErrors.Count > 0)
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4">
+            <MudText Typo="Typo.subtitle2">Order could not be saved:</MudText>
+            <ul>
+                @foreach (var err in _submitErrors)
+                {
+                    <li>@err</li>
+                }
+            </ul>
+        </MudAlert>
+    }
+
+    @if (_savedOrder is not null)
+    {
+        <MudAlert Severity="Severity.Success" Class="mb-4">
+            Order #@_savedOrder.Id saved on @_savedOrder.OrderDate?.ToString("u").
+            Customer @_savedOrder.CustomerId, status @_savedOrder.Status, tax @_savedOrder.TaxStatusId.
+            <br />
+            @_savedOrder.LineItems.Count line item(s) persisted.
+        </MudAlert>
+    }
+
+    <MudButton Variant="Variant.Filled"
+                Color="Color.Primary"
+                OnClick="SubmitAsync"
+                Disabled="@(_isSubmitting || _selectedCustomerId is null || _pendingLines.Count == 0)">
+        @if (_isSubmitting)
+        {
+            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+            <span class="ml-2">Saving…</span>
+        }
+        else
+        {
+            <span>Save order</span>
+        }
+    </MudButton>
+}
+
+@code {
+    private MudForm? _form;
+    private List<CustomerLookupResponse>? _customers;
+    private List<ProductLookupResponse>? _products;
+
+    private long _employeeId = 42;
+    private long? _selectedCustomerId;
+
+    private long? _newLineProductId;
+    private short _newLineQuantity = 1;
+    private string? _lineError;
+
+    private readonly List<PendingLine> _pendingLines = new();
+
+    private bool _isSubmitting;
+    private List<string> _submitErrors = new();
+    private OrderResponse? _savedOrder;
+    private string? _loadError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("services");
+            var customers = await client.GetFromJsonAsync<CustomerLookupResponse[]>("api/customers");
+            var products = await client.GetFromJsonAsync<ProductLookupResponse[]>("api/products");
+            _customers = customers?.ToList() ?? new();
+            _products = products?.ToList() ?? new();
+        }
+        catch (Exception ex)
+        {
+            _loadError = $"Failed to load lookups: {ex.Message}";
+        }
+    }
+
+    private string LookupProductName(long productId)
+    {
+        return _products?.FirstOrDefault(p => p.Id == productId)?.Name ?? $"#{productId}";
+    }
+
+    private static string StockSignal(PendingLine line)
+    {
+        return line.PhysicalAvailable >= line.Quantity
+            ? "Allocated (preview)"
+            : "NoStock (preview)";
+    }
+
+    private void AddLine()
+    {
+        _lineError = null;
+        if (_newLineProductId is null)
+        {
+            _lineError = "Pick a product first.";
+            return;
+        }
+        if (_newLineQuantity <= 0)
+        {
+            _lineError = "Quantity must be greater than zero.";
+            return;
+        }
+
+        var product = _products!.First(p => p.Id == _newLineProductId.Value);
+
+        if (_pendingLines.Any(p => p.ProductId == product.Id))
+        {
+            _lineError = $"{product.Name} is already on this order. Each product may appear at most once.";
+            return;
+        }
+
+        _pendingLines.Add(new PendingLine
+        {
+            ProductId = product.Id,
+            Quantity = _newLineQuantity,
+            UnitPrice = product.UnitPrice,
+            PhysicalAvailable = product.PhysicalAvailable,
+        });
+        _newLineProductId = null;
+        _newLineQuantity = 1;
+    }
+
+    private void RemoveLine(PendingLine line) => _pendingLines.Remove(line);
+
+    private async Task SubmitAsync()
+    {
+        _isSubmitting = true;
+        _submitErrors = new();
+        _savedOrder = null;
+        try
+        {
+            if (_selectedCustomerId is null)
+            {
+                _submitErrors.Add("Customer is required.");
+                return;
+            }
+
+            var request = new OrderRequest
+            {
+                EmployeeId = _employeeId,
+                CustomerId = _selectedCustomerId,
+                LineItems = _pendingLines
+                    .Select(line => new OrderLineItemRequest
+                    {
+                        ProductId = line.ProductId,
+                        Quantity = line.Quantity,
+                    })
+                    .ToList(),
+            };
+
+            var client = HttpClientFactory.CreateClient("services");
+            var response = await client.PostAsJsonAsync("api/orders", request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _savedOrder = await response.Content.ReadFromJsonAsync<OrderResponse>();
+                Snackbar.Add($"Order #{_savedOrder?.Id} saved.", MudBlazor.Severity.Success);
+                _pendingLines.Clear();
+                _selectedCustomerId = null;
+            }
+            else
+            {
+                var problem = await response.Content.ReadFromJsonAsync<ValidationProblemResponse>();
+                if (problem is not null)
+                {
+                    _submitErrors.Add(problem.Message);
+                    _submitErrors.AddRange(problem.Errors);
+                }
+                else
+                {
+                    _submitErrors.Add($"Save failed with HTTP {(int)response.StatusCode}.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _submitErrors.Add($"Save failed: {ex.Message}");
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private sealed class PendingLine
+    {
+        public long ProductId { get; set; }
+        public short Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public int PhysicalAvailable { get; set; }
+    }
+}

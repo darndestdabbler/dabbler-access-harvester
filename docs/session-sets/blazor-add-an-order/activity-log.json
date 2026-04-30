@@ -91,6 +91,104 @@
           "costUsd": 0.0105
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/required-reading",
+      "dateTime": "2026-04-30T12:55:57.472724-04:00",
+      "description": "Read planning docs (project-guidance, lessons-learned), spec end-to-end, ai-led-session-workflow, add-an-order workflow package, handoff Section 3.3, characterization test sources to confirm constraint shape.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/stop-rule-resolution",
+      "dateTime": "2026-04-30T12:55:57.473723-04:00",
+      "description": "Surfaced Stop Rule #1 to human at session start (binding constraint: workflow classes are private sealed inside test files; AddAnOrderWorkflowModels.cs only contains internal sealed data types). Presented options A/B/C/D. Human chose D: clarify pilot success criterion to invariant-correspondence (no shared workflow code, no test-file edits). Decision logged in ai-assignment.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/ai-assignment-updated",
+      "dateTime": "2026-04-30T12:55:57.474723-04:00",
+      "description": "Appended Stop Rule resolution + Option D clarification + Session 2 routing-decision table to ai-assignment.md in-conversation per human set-wide directive.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/domain-services-authored",
+      "dateTime": "2026-04-30T13:00:56.051942-04:00",
+      "description": "Authored BlazorAddAnOrder.Services.Domain namespace: OrderEnums.cs (OrderStatus, OrderDetailStatus), OrderDraft.cs (OrderDraft, OrderLineItemDraft, PendingOrderDetail), OrderCreationService.cs (with ISystemClock, ICustomerCatalog, OrderCreationOptions), OrderLineItemService.cs (with IProductCatalog), InventoryAllocationService.cs (with ReallocationResult). Implements package Section 3 rules and Section 4 invariants without sharing code with the test fixtures (Option D resolution).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/contracts-authored",
+      "dateTime": "2026-04-30T13:00:56.052943-04:00",
+      "description": "Authored BlazorAddAnOrder.Contracts: OrderRequest/OrderLineItemRequest, OrderResponse/LineItemResponse, CustomerLookupResponse/ProductLookupResponse, ValidationProblemResponse.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/controllers-and-stub-authored",
+      "dateTime": "2026-04-30T13:00:56.054445-04:00",
+      "description": "Authored InMemoryCatalog (seeded with 3 customers + 4 products) implementing ICustomerCatalog and IProductCatalog and persisting orders. Authored CustomersController, ProductsController, OrdersController. OrdersController orchestrates BeginOrderEdit -> ApplyCustomerSelection -> CanSave -> per-line BeginLineItem/ApplyProductSelection/PrepareForSave/CanAddProductToOrder/CanSave -> persist.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/ui-vertical-slice",
+      "dateTime": "2026-04-30T13:00:56.055455-04:00",
+      "description": "Authored Ui/Pages/OrderEntryPage.razor (route /orders/new) using MudForm, MudSelect for customer + per-line product, MudTable for line items, MudNumericField for quantity, MudButton for save, MudSnackbar success feedback. Calls only the named HttpClient services for /api/customers, /api/products, /api/orders. Added a navigation button on Home.razor.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/di-wired",
+      "dateTime": "2026-04-30T13:00:56.055995-04:00",
+      "description": "Wired DI in Program.cs: InMemoryCatalog as singleton (also serves ICustomerCatalog and IProductCatalog via factory), ISystemClock/SystemClock, OrderCreationOptions singleton, OrderCreationService and OrderLineItemService scoped, InventoryAllocationService singleton.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-04-30T13:00:56.055995-04:00",
+      "description": "dotnet build AccessHarvester.sln: 0 errors, 286 pre-existing warnings (all CA1416 platform-suitability and xUnit2013/CS8602 unrelated to this session). dotnet test AccessHarvester.sln --no-build: 0 failed across all 14 test assemblies. AccessHarvester.CharacterizationTests: 111 passed (AddAnOrder/ + UpdateAnOrder/ + UpdateAProduct/ + UpdateAnEmployee/) unmodified. Aggregate ~1720 passed, 3 SkippableFact integration tests skipped (no Access COM in this environment).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-04-30T13:05:29.957351-04:00",
+      "description": "Cross-provider session-verification routed via query(\"gemini-pro\", task_type=\"session-verification\") per the human set-wide directive (overrides default session-verification override of gpt-5-4 for this set). First call returned 503 Service Unavailable (transient outage); 90s wait then retry succeeded. Verdict: VERIFIED, no issues. Verifier explicitly endorsed Option D resolution and confirmed all 7 focus areas (layer separation, invariant correspondence, test integrity, HTTP boundary, MudBlazor UX, DI wiring, build/test).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 30353,
+          "outputTokens": 1231,
+          "costUsd": 0.0503
+        }
+      ]
     }
   ]
 }
