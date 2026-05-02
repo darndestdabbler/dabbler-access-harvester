@@ -2,23 +2,12 @@
 recommendation via route(analysis), and print cost report.
 """
 from __future__ import annotations
-import importlib.util, sys, pathlib, json
+import pathlib, json
 from datetime import datetime
 
+from ai_router import route, print_cost_report
+
 REPO = pathlib.Path(__file__).resolve().parents[2]
-
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        "ai_router",
-        str(REPO / "ai-router" / "__init__.py"),
-        submodule_search_locations=[str(REPO / "ai-router")],
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ai_router"] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
 
 SESSION_SET = REPO / "docs" / "session-sets" / "vba-lexical-and-expression-grammar"
 ACTIVITY = SESSION_SET / "activity-log.json"
@@ -137,7 +126,6 @@ def write_activity_log() -> None:
 
 def next_orchestrator_recommendation():
     """Route an analysis call recommending the orchestrator for Session 2."""
-    ar = load_ai_router()
     spec_text = (SESSION_SET / "spec.md").read_text(encoding="utf-8")
     assignment_text = ASSIGNMENT.read_text(encoding="utf-8")
 
@@ -188,7 +176,7 @@ actual scope and (b) what Session 1 revealed about how this
 codebase is shaped>
 ```
 """
-    result = ar.route(
+    result = route(
         content=prompt,
         task_type="analysis",
         complexity_hint=40,
@@ -209,9 +197,8 @@ def main() -> None:
     print(rec.content)
     print("--- end ---")
 
-    ar = load_ai_router()
     print("\n--- cost report ---")
-    ar.print_cost_report(str(SESSION_SET))
+    print_cost_report(str(SESSION_SET))
 
 
 if __name__ == "__main__":

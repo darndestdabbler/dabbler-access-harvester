@@ -1,21 +1,10 @@
 """Author ai-assignment.md for vba-lexical-and-expression-grammar via route(analysis)."""
 from __future__ import annotations
-import importlib.util, sys, pathlib
+import pathlib
+
+from ai_router import route
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        "ai_router",
-        str(REPO / "ai-router" / "__init__.py"),
-        submodule_search_locations=[str(REPO / "ai-router")],
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ai_router"] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
 
 SESSION_SET = REPO / "docs" / "session-sets" / "vba-lexical-and-expression-grammar"
 SPEC = (SESSION_SET / "spec.md").read_text(encoding="utf-8")
@@ -97,8 +86,7 @@ in-conversation per the convention rather than a route(architecture).
 
 
 def main() -> None:
-    ar = load_ai_router()
-    result = ar.route(
+    result = route(
         content=PROMPT,
         task_type="analysis",
         complexity_hint=55,

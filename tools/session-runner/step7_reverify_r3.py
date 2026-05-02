@@ -1,18 +1,8 @@
 """Round 3 verification: line-number fixes only."""
-import importlib.util, sys, os, json
+import os, json
 from pathlib import Path
 
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        "ai_router", "ai-router/__init__.py",
-        submodule_search_locations=["ai-router"])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ai_router"] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-ar = load_ai_router()
-route = ar.route
+from ai_router import route
 from ai_router.session_log import SessionLog
 
 SESSION_SET = "docs/session-sets/vba-grammar-validation"

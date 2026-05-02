@@ -1,13 +1,7 @@
 """Session 1 of jet-sql-grammar-and-parser: produce ai-assignment.md via route(analysis)."""
-import sys, importlib.util
 from pathlib import Path
 
-spec = importlib.util.spec_from_file_location(
-    "ai_router", "ai-router/__init__.py", submodule_search_locations=["ai-router"])
-mod = importlib.util.module_from_spec(spec); sys.modules["ai_router"] = mod
-spec.loader.exec_module(mod)
-route = mod.route
-SessionLog = mod.SessionLog
+from ai_router import route, SessionLog
 
 SESSION_SET = Path("docs/session-sets/jet-sql-grammar-and-parser")
 log = SessionLog(SESSION_SET)

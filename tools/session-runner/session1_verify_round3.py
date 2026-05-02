@@ -1,21 +1,10 @@
 """Round-3 cross-provider session-verification (final retry per workflow Step 7)."""
 from __future__ import annotations
-import importlib.util, sys, pathlib
+import pathlib
+
+from ai_router import route
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        "ai_router",
-        str(REPO / "ai-router" / "__init__.py"),
-        submodule_search_locations=[str(REPO / "ai-router")],
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ai_router"] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
 
 SESSION_SET = REPO / "docs" / "session-sets" / "vba-lexical-and-expression-grammar"
 GRAMMAR = (REPO / "AccessHarvester.Vba.Grammar" / "Vba.g4").read_text(encoding="utf-8")
@@ -77,10 +66,9 @@ one-paragraph summary citing which earlier findings were re-checked.
 
 
 def main() -> None:
-    ar = load_ai_router()
     out_path = SESSION_SET / "session-reviews" / "session-001-round-3.md"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    result = ar.route(
+    result = route(
         content=PROMPT,
         task_type="session-verification",
         complexity_hint=85,

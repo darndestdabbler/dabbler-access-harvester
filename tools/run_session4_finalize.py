@@ -1,19 +1,7 @@
 """Session 4 finalization: change-log, next-set recommendation, cost report, mark complete."""
-import importlib.util, sys, pathlib
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        'ai_router', 'ai-router/__init__.py',
-        submodule_search_locations=['ai-router'])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules['ai_router'] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-ar = load_ai_router()
-route = ar.route
+import pathlib
+from ai_router import route, print_cost_report, print_session_set_status, mark_session_complete
 from ai_router.session_log import find_active_session_set, SessionLog
-from ai_router import print_cost_report, print_session_set_status, mark_session_complete
 
 SESSION_SET = find_active_session_set('docs/session-sets')
 log = SessionLog(SESSION_SET)

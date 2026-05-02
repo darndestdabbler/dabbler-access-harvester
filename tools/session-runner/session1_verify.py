@@ -1,21 +1,10 @@
 """Cross-provider session-verification for vba-lexical-and-expression-grammar Session 1."""
 from __future__ import annotations
-import importlib.util, sys, pathlib
+import pathlib
+
+from ai_router import route
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
-
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        "ai_router",
-        str(REPO / "ai-router" / "__init__.py"),
-        submodule_search_locations=[str(REPO / "ai-router")],
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ai_router"] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
 
 SESSION_SET = REPO / "docs" / "session-sets" / "vba-lexical-and-expression-grammar"
 GRAMMAR = (REPO / "AccessHarvester.Vba.Grammar" / "Vba.g4").read_text(encoding="utf-8")
@@ -139,10 +128,9 @@ your findings.
 
 
 def main() -> None:
-    ar = load_ai_router()
     out_path = SESSION_SET / "session-reviews" / "session-001-round-1.md"
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    result = ar.route(
+    result = route(
         content=PROMPT,
         task_type="session-verification",
         complexity_hint=70,
