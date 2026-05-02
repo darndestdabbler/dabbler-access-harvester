@@ -1,16 +1,5 @@
 """Tiebreaker: second opinion on M2 (variable_write detection) from a different provider."""
-import importlib.util, sys, pathlib
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        'ai_router', 'ai-router/__init__.py',
-        submodule_search_locations=['ai-router'])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules['ai_router'] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-ar = load_ai_router()
+import sys, pathlib
 from ai_router import route, record_adjudication
 
 SESSION_SET = 'docs/session-sets/vba-symbol-db'

@@ -1,19 +1,12 @@
 """Session 4 cross-provider verification script."""
-import importlib.util, sys, os
+import os
 
-def load_ai_router(base):
-    spec = importlib.util.spec_from_file_location(
-        'ai_router', f'{base}/ai-router/__init__.py',
-        submodule_search_locations=[f'{base}/ai-router'])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules['ai_router'] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
+# Historical artifact: see changelog_session4.py header comment.
 base = 'C:/Users/denmi/source/repos/dabbler-access-harvester-jet-sql-grammar-and-parser'
-os.chdir(base)
-ar = load_ai_router(base)
-route = ar.route
+if os.path.isdir(base):
+    os.chdir(base)
+
+from ai_router import route
 from ai_router.session_log import SessionLog
 log = SessionLog('docs/session-sets/jet-sql-grammar-and-parser')
 

@@ -1,19 +1,4 @@
 """Session 4 verification — round 1 cross-provider via gemini-pro."""
-import importlib.util
-import sys
-
-
-def load():
-    spec = importlib.util.spec_from_file_location(
-        'ai_router', 'ai-router/__init__.py',
-        submodule_search_locations=['ai-router'])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules['ai_router'] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-ar = load()
 from ai_router import query
 from ai_router.session_log import SessionLog
 

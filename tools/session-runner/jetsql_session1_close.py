@@ -1,24 +1,24 @@
 """Session 1 close: cost report, next-orchestrator recommendation,
 mark-complete. Commit + push + notify happen via shell after this."""
-import sys, importlib.util
 from pathlib import Path
 
-spec = importlib.util.spec_from_file_location(
-    "ai_router", "ai-router/__init__.py", submodule_search_locations=["ai-router"])
-mod = importlib.util.module_from_spec(spec); sys.modules["ai_router"] = mod
-spec.loader.exec_module(mod)
-route = mod.route
-SessionLog = mod.SessionLog
+from ai_router import (
+    route,
+    SessionLog,
+    print_cost_report,
+    print_session_set_status,
+    mark_session_complete,
+)
 
 SESSION_SET = Path("docs/session-sets/jet-sql-grammar-and-parser")
 log = SessionLog(str(SESSION_SET))
 N = 1
 
 print("=== COST REPORT ===")
-mod.print_cost_report(str(SESSION_SET))
+print_cost_report(str(SESSION_SET))
 
 print("=== SESSION-SET STATUS ===")
-mod.print_session_set_status()
+print_session_set_status()
 
 # Next-orchestrator recommendation for Session 2
 ai_assignment_md = (SESSION_SET / "ai-assignment.md").read_text(encoding="utf-8")[:4000]
@@ -102,7 +102,7 @@ with open(SESSION_SET / "ai-assignment.md", "a", encoding="utf-8") as f:
     f.write(result.content)
 
 # Mark session complete
-mod.mark_session_complete(session_set=str(SESSION_SET), verification_verdict="VERIFIED")
+mark_session_complete(session_set=str(SESSION_SET), verification_verdict="VERIFIED")
 print("MARKED COMPLETE")
 
 # Save the recommendation tail to a file (avoid cp1252 print)

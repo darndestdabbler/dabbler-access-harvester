@@ -34,7 +34,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import os
 import re
@@ -43,27 +42,16 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
+from ai_router import route
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SESSION_SETS_DIR = REPO_ROOT / "docs" / "session-sets"
 PLAYWRIGHT_DIR = REPO_ROOT / "tests" / "AcmeCoffeeOnline.Playwright"
-ROUTER_METRICS = REPO_ROOT / "ai-router" / "router-metrics.jsonl"
+ROUTER_METRICS = REPO_ROOT / "ai_router" / "router-metrics.jsonl"
 AI_ASSIGNMENT_FILENAME = "ai-assignment.md"
 SESSION_STATE_FILENAME = "session-state.json"
 PROPOSED_CONFIG_FILENAME = ".proposed-config-block.md"
-
-
-def load_ai_router():
-    spec_path = REPO_ROOT / "ai-router" / "__init__.py"
-    spec = importlib.util.spec_from_file_location(
-        "ai_router",
-        spec_path,
-        submodule_search_locations=[str(spec_path.parent)],
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ai_router"] = mod
-    spec.loader.exec_module(mod)
-    return mod
 
 
 # --- Set discovery -----------------------------------------------------
@@ -283,7 +271,7 @@ def render_ai_assignment(
 
 
 def author_routed_recommendation(
-    ar, slug: str, actuals: list[dict], inferred_config: dict
+    slug: str, actuals: list[dict], inferred_config: dict
 ) -> str:
     """Route a forward-looking recommendation. Falls back to a stub on
     router error so the backfill can still produce a reviewable file.
@@ -339,7 +327,7 @@ def author_routed_recommendation(
         f"{section_list}\n"
     )
     try:
-        result = ar.route(
+        result = route(
             content=prompt,
             task_type="analysis",
             session_set=str(SESSION_SETS_DIR / slug),
@@ -382,7 +370,7 @@ def write_session_state(set_dir: Path, slug: str, actuals: list[dict],
 
 # --- main --------------------------------------------------------------
 
-def process_set(set_dir: Path, *, dry_run: bool, ar) -> None:
+def process_set(set_dir: Path, *, dry_run: bool) -> None:
     slug = set_dir.name
     print(f"\n=== {slug} ===")
 
@@ -402,7 +390,7 @@ def process_set(set_dir: Path, *, dry_run: bool, ar) -> None:
         print(f"  - {AI_ASSIGNMENT_FILENAME}: already exists, leaving in place")
     else:
         recommendation = author_routed_recommendation(
-            ar, slug, actuals, inferred_config
+            slug, actuals, inferred_config
         )
         body = render_ai_assignment(slug, activity, actuals, recommendation)
         if dry_run:
@@ -460,9 +448,8 @@ def main() -> int:
 
     print(f"Found {len(sets)} in-progress session set(s) to backfill.")
 
-    ar = load_ai_router()
     for set_dir in sets:
-        process_set(set_dir, dry_run=args.dry_run, ar=ar)
+        process_set(set_dir, dry_run=args.dry_run)
 
     print(
         f"\nDone. {'(dry-run)' if args.dry_run else ''} "

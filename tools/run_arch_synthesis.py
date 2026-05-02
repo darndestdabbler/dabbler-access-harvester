@@ -1,17 +1,6 @@
 """Architecture synthesis route for access-resolver-symbol-table-integration Session 1."""
-import importlib.util, sys, pathlib
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        'ai_router', 'ai-router/__init__.py',
-        submodule_search_locations=['ai-router'])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules['ai_router'] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-ar = load_ai_router()
-route = ar.route
+import pathlib
+from ai_router import route
 from ai_router.session_log import SessionLog
 
 SESSION_SET = pathlib.Path('docs/session-sets/access-resolver-symbol-table-integration')

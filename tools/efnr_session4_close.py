@@ -1,19 +1,4 @@
 """Session 4 close-out: change-log + next-set recommendation via routed analysis."""
-import importlib.util
-import sys
-
-
-def load():
-    spec = importlib.util.spec_from_file_location(
-        'ai_router', 'ai-router/__init__.py',
-        submodule_search_locations=['ai-router'])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules['ai_router'] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-
-ar = load()
 from ai_router import route, query
 
 SESSION_SET_DIR = 'docs/session-sets/enrichment-functions-navigation-review'

@@ -1,19 +1,15 @@
 """Generate change-log for jet-sql-grammar-and-parser."""
-import importlib.util, sys, os
+import os
 
-def load_ai_router(base):
-    spec = importlib.util.spec_from_file_location(
-        'ai_router', f'{base}/ai-router/__init__.py',
-        submodule_search_locations=[f'{base}/ai-router'])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules['ai_router'] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
+# Historical artifact: this script ran in a sibling worktree
+# (legacy layout pre-dating the bare-repo + flat-worktree pattern).
+# Preserved as part of the session's audit trail; the chdir below
+# is a no-op if the path no longer exists.
 base = 'C:/Users/denmi/source/repos/dabbler-access-harvester-jet-sql-grammar-and-parser'
-os.chdir(base)
-ar = load_ai_router(base)
-route = ar.route
+if os.path.isdir(base):
+    os.chdir(base)
+
+from ai_router import route
 from ai_router.session_log import SessionLog
 log = SessionLog('docs/session-sets/jet-sql-grammar-and-parser')
 

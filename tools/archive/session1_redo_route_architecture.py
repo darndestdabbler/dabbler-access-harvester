@@ -7,25 +7,13 @@ The first Session 1 attempt skipped this routed call (workflow rule violation
 call now and saves the architecture design to disk for human review before
 implementation begins.
 """
-import importlib.util
 import sys
 from pathlib import Path
 
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        "ai_router", "ai-router/__init__.py",
-        submodule_search_locations=["ai-router"])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ai_router"] = mod
-    spec.loader.exec_module(mod)
-    return mod
+from ai_router import route
 
 
 def main():
-    ar = load_ai_router()
-    route = ar.route
-
     # Read the IR JSON for the form (UTF-16 source) so the architecture
     # designer has a real example of the structured input that's already
     # been mechanically processed once. Read raw modStrings.txt directly

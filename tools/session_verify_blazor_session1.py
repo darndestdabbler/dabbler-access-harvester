@@ -12,20 +12,11 @@ side effect (per `project-guidance.md` → "Persist Routed Output To Disk
 Before Any Display Or Logging Side Effects").
 """
 
-import importlib.util
 import os
 import sys
 from pathlib import Path
 
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        "ai_router", "ai-router/__init__.py", submodule_search_locations=["ai-router"]
-    )
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules["ai_router"] = mod
-    spec.loader.exec_module(mod)
-    return mod
+from ai_router import query
 
 
 SESSION_SET = Path("docs/session-sets/blazor-add-an-order")
@@ -193,8 +184,6 @@ def build_prompt() -> str:
 
 
 def main() -> None:
-    ar = load_ai_router()
-
     prompt = build_prompt()
     raw_path = Path("tmp") / "blazor-add-an-order-session1-verifier-prompt.txt"
     raw_path.parent.mkdir(parents=True, exist_ok=True)
@@ -204,7 +193,7 @@ def main() -> None:
 
     print("Routing to gemini-pro via query() to bypass session-verification"
           " task_type override (the human chose Gemini Pro for this set).")
-    result = ar.query(
+    result = query(
         model="gemini-pro",
         content=prompt,
         task_type="session-verification",
