@@ -1,11 +1,48 @@
 # Bootstrap: New Repo for `ai-orchestration-project-template` Work
 
+> ## ⚠️ Largely superseded by the canonical `Dabbler: Install ai-router` command
+>
+> This document was authored 2026-04-27 when the AI router lived as a
+> copy-into-your-project `ai-router/` directory loaded via an
+> importlib shim. As of canonical dabbler-ai-orchestration **Set 010
+> (2026-05-02)** the router is on PyPI as `dabbler-ai-router` and is
+> installed via:
+>
+> - `pip install dabbler-ai-router` (CLI), or
+> - `Dabbler: Install ai-router` from the bundled VS Code extension
+>   (handles venv creation, materializes
+>   `ai_router/router-config.yaml` into the workspace, preserves any
+>   prior local tuning, and writes a `.dabbler/install-method` marker
+>   so subsequent `Dabbler: Update ai-router` runs re-pull from the
+>   same source).
+>
+> The bulk of this document — Path A (fork-and-strip) and Path B
+> (empty repo + manual copy) — was a workaround for the missing PyPI
+> package and the absence of the install command. Both still work
+> mechanically but produce a more drift-prone setup. The canonical
+> bootstrap is now: create the directory, install the extension VSIX
+> (`dabbler-ai-orchestration-0.12.0.vsix` from the canonical repo),
+> open the workspace in VS Code, run **Dabbler: Install ai-router**.
+>
+> Specific steps below that have been overhauled rather than
+> wholesale-superseded:
+>
+> - **Step 9 (Install the VS Code Extension)** — bumped from VSIX
+>   v0.7.1 to v0.12.0 and pointed at the canonical repo.
+> - **Step 10 (Sanity-Check the Bootstrap)** — rewritten to use bare
+>   `from ai_router import ...` (no importlib shim).
+>
+> The original 2026-04-27 walkthrough follows below for historical
+> reference.
+
 > **Audience:** Claude Code (or Codex / Gemini CLI) running in a
 > brand-new, otherwise-empty repository whose job is to build the
 > reusable AI-orchestration template.
 > **Source-of-truth pattern lives at:** `../dabbler-access-harvester`
 > (assumed sibling of this new repo on disk).
 > **Created:** 2026-04-27, in `dabbler-access-harvester` for export.
+> **Banner added:** 2026-05-02, after canonical Set 010 published the
+> router on PyPI and shipped the install command.
 
 This file walks you through bootstrapping a new repo from zero so it can
 run the `ai-orchestration-project-template` session set under the same
@@ -235,17 +272,24 @@ You do NOT need to change anything else for the first session.
 ### Step 9: Install the VS Code Extension
 
 The Session-Set VS Code extension is a substantial productivity
-multiplier. Install it manually via the VS Code UI (the
+multiplier. As of canonical Set 010 (2026-05-02) the extension is
+distributed from the **canonical `dabbler-ai-orchestration` repo**,
+not vendored per-project. Install it manually via the VS Code UI (the
 `code --install-extension` CLI flag does NOT work in this setup —
 confirmed lesson):
 
 1. In VS Code: `View → Extensions` (or `Ctrl+Shift+X`).
 2. Click the `…` menu in the Extensions panel header → `Install from
    VSIX…`.
-3. Navigate to `tools/vscode-session-sets/` and pick the highest-
-   numbered `dabbler-session-sets-*.vsix` (currently 0.7.1; whichever
-   is highest in the folder you copied).
+3. Navigate to the canonical repo's
+   `tools/dabbler-ai-orchestration/` directory and pick
+   `dabbler-ai-orchestration-0.12.0.vsix` (or the highest-numbered
+   `dabbler-ai-orchestration-*.vsix` present).
 4. Reload VS Code if prompted.
+
+After install, run **Dabbler: Install ai-router** from the command
+palette to install the router into this repo's `.venv` and
+materialize `ai_router/router-config.yaml`.
 
 After install, the extension's *Session Sets* sidebar should show
 `ai-orchestration-project-template` as the only entry, in the
@@ -257,14 +301,8 @@ that entry produce the trigger phrases the workflow doc accepts.
 
 ```bash
 .venv/Scripts/python.exe -c "
-import importlib.util, sys
-spec = importlib.util.spec_from_file_location(
-    'ai_router', 'ai-router/__init__.py',
-    submodule_search_locations=['ai-router'])
-mod = importlib.util.module_from_spec(spec)
-sys.modules['ai_router'] = mod
-spec.loader.exec_module(mod)
-print('ai_router import OK')
+import ai_router
+print(f'ai_router {ai_router.__version__} import OK from {ai_router.__file__}')
 
 from ai_router.session_log import find_active_session_set
 ss = find_active_session_set('docs/session-sets')
@@ -275,7 +313,7 @@ print(f'Active session set: {ss}')
 Expected output:
 
 ```
-ai_router import OK
+ai_router 0.1.0 import OK from .../site-packages/ai_router/__init__.py
 Active session set: docs/session-sets/ai-orchestration-project-template
 ```
 

@@ -17,11 +17,16 @@ automated build/test plus mandatory cross-provider AI verification.
 - `AccessHarvester.Cli/` — Thin CLI exe. Subcommands: `extract`, `translate`, `run`.
 - `AccessHarvester.Core/` — Extractors, translators, enrichers, COM session, model.
 - `tests/AccessHarvester.Tests/` — xUnit hermetic unit tests + `[SkippableFact]` integration tests.
-- `tools/` — Python developer utilities (`generate_property_defaults.py`, `validate_against_yaml.py`) plus the [`vscode-session-sets`](tools/vscode-session-sets/README.md) extension that adds a "Session Set Explorer" view to the VS Code Activity Bar.
+- `tools/` — Python developer utilities (`generate_property_defaults.py`, `validate_against_yaml.py`) and the per-session-set runner scripts under `tools/session-runner/`. The VS Code "Session Set Explorer" extension previously vendored here is now distributed from the canonical [`dabbler-ai-orchestration`](https://github.com/darndestdabbler/dabbler-ai-orchestration) repo (`tools/dabbler-ai-orchestration/dabbler-ai-orchestration-0.12.0.vsix`).
 - `test-builder/` — Python synthetic-DB builder (pywin32 + Access COM).
 - `samples/` — Committed sample Access inputs: `HomeHealthCare.accdb`, `MiniComplex.accdb`, `NorthwindDevEdition.accdb`, `ProjectBoard.accdb`, `FormAndReportDefaults.accdb`, `MasterDbPropertyExtractor.accdb`. Plus `FormsAndReportsYaml/` ground-truth dumps consumed by the Python tools.
 - `docs/` — Workflow, planning, parser test cases, session sets.
-- `ai-router/` — Router code, prompt templates, workflow utilities.
+- `ai_router/` — Operator-tuned `router-config.yaml` and the
+  append-only `router-metrics.jsonl` cost telemetry. The router itself
+  is `pip install dabbler-ai-router` (declared in `requirements.txt`);
+  see CLAUDE.md → AI router import for the env-var setup.
+- `requirements.txt` — Python dependency manifest. Currently lists
+  `dabbler-ai-router>=0.1.0` only.
 
 ## Build & Test
 
