@@ -1,0 +1,11 @@
+# Runtime dependencies for the AI-led-workflow tooling in this repo.
+#
+# The router itself is published on PyPI as `dabbler-ai-router`; previously
+# this repo carried a copy of the router source under `ai-router/` and
+# every consumer script loaded it via an importlib shim. As of Set 010
+# (canonical dabbler-ai-orchestration, 2026-05-02) the router is a
+# regular `pip install` and `from ai_router import ...` works natively.
+#
+# Pin to a minimum version rather than an exact version: 0.x signals API
+# may change between minor versions, so adopters bump intentionally.
+dabbler-ai-router>=0.1.0

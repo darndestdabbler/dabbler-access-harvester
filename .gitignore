@@ -6,12 +6,16 @@ __pycache__/
 *.pyc
 *.pyo
 
-# AI router runtime state — local only
+# AI router runtime state — local only.
+# (Legacy ai-router/ paths kept here for any historical artifacts that
+# slipped through; the active path is ai_router/ post-Set-010.)
 ai-router/router-state.db
+ai_router/router-state.db
 
 # Router metrics log — append-only, grows with every route() call.
 # Treat as local telemetry; archive or rotate manually when large.
 ai-router/router-metrics.jsonl
+ai_router/router-metrics.jsonl
 
 # NorthwindDevEdition sample — Access mutates internal timestamps on every
 # open, producing byte-level changes even on read-only access.
