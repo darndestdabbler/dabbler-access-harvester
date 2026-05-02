@@ -70,26 +70,33 @@ If keys are missing, stop and tell the human.
 
 ### AI router import
 
+The router is the `dabbler-ai-router` PyPI package (canonical
+dabbler-ai-orchestration repo, Set 010 onwards). It is declared in
+`requirements.txt` and lives in the workspace `.venv`. Bare imports
+work:
+
 ```python
-import importlib.util, sys
-
-def load_ai_router():
-    spec = importlib.util.spec_from_file_location(
-        'ai_router', 'ai-router/__init__.py',
-        submodule_search_locations=['ai-router'])
-    mod = importlib.util.module_from_spec(spec)
-    sys.modules['ai_router'] = mod
-    spec.loader.exec_module(mod)
-    return mod
-
-ar = load_ai_router()
-route = ar.route
+from ai_router import route, send_session_complete_notification
+from ai_router.session_log import SessionLog
 ```
 
-Use `.venv/Scripts/python.exe` to run Python scripts on Windows. The
-same module exposes `send_session_complete_notification()`, which reads
-`PUSHOVER_API_KEY` and `PUSHOVER_USER_KEY` from the environment or
-Windows User environment.
+The operator-tuned config lives at `ai_router/router-config.yaml`
+(workspace-relative, not inside the venv). Set the env var so
+`route()` reads it:
+
+```bash
+export AI_ROUTER_CONFIG=ai_router/router-config.yaml
+export AI_ROUTER_METRICS_PATH=ai_router/router-metrics.jsonl
+```
+
+Use `.venv/Scripts/python.exe` to run Python scripts on Windows.
+`send_session_complete_notification()` reads `PUSHOVER_API_KEY` and
+`PUSHOVER_USER_KEY` from the environment or Windows User environment.
+
+If `pip install` of the router needs to be re-run (fresh clone, dropped
+venv, etc.), the canonical extension's **Dabbler: Install ai-router**
+command does it from VS Code: PyPI install (default) or GitHub
+sparse-checkout fallback for offline / pre-release / fork scenarios.
 
 ### Delegation Discipline (pointer)
 
@@ -101,7 +108,7 @@ single-file, and under ~50 lines.
 
 See `docs/ai-led-session-workflow.md` → **Delegation Discipline** for
 the full criteria, the human-tunable thresholds (in
-`ai-router/router-config.yaml` under `delegation:`), and the rationale.
+`ai_router/router-config.yaml` under `delegation:`), and the rationale.
 
 ## Building & Testing
 
@@ -137,7 +144,10 @@ The intended layout (filled in by Session Set #1):
 - `test-builder/` — Python synthetic-DB builder (pywin32 + Access COM)
 - `docs/` — workflow docs, planning docs, VBA parser plan, test cases,
   session sets
-- `ai-router/` — routing code, prompt templates, and workflow utilities
+- `ai_router/` — operator-tuned `router-config.yaml` and the
+  append-only `router-metrics.jsonl` cost telemetry; the router
+  itself is `pip install dabbler-ai-router` (declared in
+  `requirements.txt`)
 - `samples/` — committed sample `.accdb` inputs for integration tests
   (Windows-only)
 
