@@ -111,8 +111,14 @@ IR *does not* capture:
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 2–4: Symbol Resolution Algorithm + PoC Scaffolding
 
 - Read target VBA: `raw/Forms/frmCompanyDetail.txt` and `raw/ModulesAndClasses/modStrings.txt`

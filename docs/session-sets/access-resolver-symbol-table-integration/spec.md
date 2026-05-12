@@ -62,8 +62,14 @@ Output: `AccessHarvester.Vba.Resolver/AccessIntegration/` containing the injecti
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 2-3: Synthetic Declaration Injection (Synthesis)
 
 - Read Phase 4.4 + #9's resolver output + #10's metadata schema + #11a's `ITypeLibraryRegistry` contract + fixtures `01`, `02`, `03` from #10.

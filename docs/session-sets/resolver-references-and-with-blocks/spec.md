@@ -70,8 +70,14 @@ Output: `WithBlockScope.cs` under `AccessHarvester.Vba.Resolver/Scopes/`, plus r
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4-5: Resolution Algorithm (Synthesis)
 
 - Read Phase 3.3 + #7's declaration/scope output + fixtures `02`, `03`, `09`.

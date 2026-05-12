@@ -67,8 +67,14 @@ Output: `AccessHarvester.Sql.Parser/DynamicSql/` — the data-flow analyzer + th
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 3-4: Form-Reference Detection (Synthesis)
 
 - Read Phase 5.3 + #11b's symbol table + #12's SQL AST + fixture `04`.

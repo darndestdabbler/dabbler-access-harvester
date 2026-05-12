@@ -72,8 +72,14 @@ Land `docs/spec-coverage/parse-failure-log.md` — the running ledger of every f
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 3-4: Edge-Case Fixture Authoring
 
 - Read `docs/spec-coverage/hazard-list.md` and the 12 fixtures' coverage.
