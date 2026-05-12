@@ -92,8 +92,14 @@ Output: `AccessHarvester.Pipeline/Enrichment/UnresolvedItem.cs` plus the aggrega
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4-5: Function Classification (Synthesis)
 
 - Read Phase 6.6 + fixtures `07` (mixed-return), `10` (utility class).

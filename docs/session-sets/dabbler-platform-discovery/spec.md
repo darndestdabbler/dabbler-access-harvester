@@ -110,8 +110,14 @@ the convention.
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 3: Inventory + Schema
 
 - Walk `../dabbler-platform/` (and `../dabbler-pdf/`) read-only.

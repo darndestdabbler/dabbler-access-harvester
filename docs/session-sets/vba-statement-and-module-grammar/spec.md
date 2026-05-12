@@ -67,8 +67,14 @@ Test-case anchor: `10-clsAuditLogger.cls`.
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4: Statement Grammar
 
 - Read coverage matrix statement rows + hazard list statement entries + `01`, `05`, `07`, `09`, `11`, `12` fixtures.

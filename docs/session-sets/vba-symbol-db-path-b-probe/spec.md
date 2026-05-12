@@ -121,8 +121,7 @@ remains legitimately unresolved until full-DB extraction lands.
 
 ---
 
-## Session Plan
-
+## Sessions
 > Three sessions. Session 1 is a small focused fix. Sessions 2-3 are
 > the actual Path-B probe, deliberately split across two orchestrators
 > for cross-provider independence on translation vs. test-authoring.

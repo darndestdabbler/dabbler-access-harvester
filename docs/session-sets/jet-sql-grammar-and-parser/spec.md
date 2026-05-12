@@ -67,8 +67,14 @@ Output: `AccessHarvester.Sql.Parser/` with AST + error recovery.
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4-5: JET SQL Grammar (Synthesis)
 
 - Read Phase 5.1 + plan Appendix A SQL surfaces + fixtures `04`, `05`.

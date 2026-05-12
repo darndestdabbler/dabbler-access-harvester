@@ -70,8 +70,14 @@ Output:
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 2: Registry Curation + Contract Design (Synthesis)
 
 - Read Phase 4.5 + the parser plan's Appendix A "Recordset patterns" + the existing `AccessHarvester.Access/` project layout (the registry lives alongside the existing metadata types).
