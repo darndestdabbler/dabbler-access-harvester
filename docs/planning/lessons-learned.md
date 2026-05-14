@@ -958,3 +958,22 @@ reference; if it proves out twice in *this* repo, propose promotion to
   calibration that returns near-zero correlation, followed by an
   in-IDE-orchestrator pivot), promote to a Convention in
   `project-guidance.md` under Token-Window Budget Overrides.
+
+## Don't Name A Spec Deliverable `session-reviews/session-NNN.md` For Non-Verifier Content
+
+- **Context:** Spike/analysis session sets where the primary deliverable is a written
+  analysis rather than code (`access-object-extractor-spike`, Session 1, 2026-05-14).
+- **Failure or friction:** The spec named `session-reviews/session-001.md` as the
+  deliverable for the gap analysis and integration strategy document. After the
+  orchestrator wrote the analysis there, `log.save_session_review()` (called at Step 6
+  verification) overwrote it with the verifier's raw output. The analysis was lost and
+  had to be recreated at a different path.
+- **Lesson:** `log.save_session_review()` unconditionally writes to
+  `session-reviews/session-NNN.md` — that path is owned by the session log, not the
+  orchestrator. Spike and analysis deliverables must be placed at a session-set root
+  file (e.g. `gap-analysis-and-strategy.md`, `findings.md`) or a distinctly named path.
+  Only raw verifier output belongs under `session-reviews/`.
+- **Action for future sessions:** When authoring a spike spec, name the primary
+  deliverable at the session-set root level (alongside `spec.md`), not under
+  `session-reviews/`. The `session-reviews/` directory is reserved for
+  `log.save_session_review()` output.
