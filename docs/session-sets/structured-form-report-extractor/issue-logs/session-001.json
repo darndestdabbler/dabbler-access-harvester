@@ -1,0 +1,23 @@
+[
+  {
+    "severity": "Minor",
+    "location": "docs/session-sets/structured-form-report-extractor/ai-assignment.md (Session 1 Actuals)",
+    "summary": "Session 1 actuals had placeholders for routed cost, deviations, calibration notes.",
+    "fix": "Filled placeholders with actuals: orchestrator was Opus 4.7 (human-driven choice via trigger phrase, one tier above routed Sonnet recommendation); routed cost ~$0.17 across three calls; calibration note: Session 2 plan is provisional pending human adjudication of audit-findings.md \u00a74 strategic question.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "docs/session-sets/structured-form-report-extractor/ai-assignment.md (Session 2 plan/recommendation)",
+    "summary": "Session 2 routing plan still assumed Option A (narrow fix); audit recommends Option B (write Form/ReportMetadataExtractors).",
+    "fix": "Marked Session 2 as conditional on human adjudication; added explicit per-step rows for Option A and Option B paths.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "docs/session-sets/structured-form-report-extractor/audit-findings.md \u00a75",
+    "summary": "Session 2 scope said typed schema does not re-model Procedures but then said JSON view of FormMetadata should pass it through (contract inconsistency).",
+    "fix": "Clarified: Procedures stays on the underlying ir/ JSON (per FormMetadata.cs lines 122-129); the extractor does not pass it through; if a future consumer needs typed procedures on the metadata record, that is a separate spec change.",
+    "status": "fixed"
+  }
+]

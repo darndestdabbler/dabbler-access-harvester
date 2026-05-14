@@ -2,5 +2,101 @@
   "sessionSetName": "structured-form-report-extractor",
   "createdDate": "2026-05-14T09:57:57.050991+00:00",
   "totalSessions": 3,
-  "entries": []
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 0,
+      "stepKey": "session-1/ai-assignment-authored",
+      "dateTime": "2026-05-14T07:34:09.527909-04:00",
+      "description": "Authored ai-assignment.md via route(task_type=analysis) per Step 3.5.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1137,
+          "outputTokens": 759,
+          "costUsd": 0.009
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/audit-ir-schema",
+      "dateTime": "2026-05-14T07:37:31.812991-04:00",
+      "description": "Read AccessNode model, SaveAsTextTranslator, AccessTextParser, GeometryEnricher, LabelResolver, MacroActionsEnricher, VbaSignatureEnricher. Discovered the new AccessHarvester.Access project that already defines typed FormMetadata/ReportMetadata records with RecordSource/GroupLevels already promoted but lacks FormMetadataExtractor/ReportMetadataExtractor.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-05-14T07:37:31.812991-04:00",
+      "description": "dotnet build clean (0 errors, 321 pre-existing warnings). dotnet test: 1219 passing, 45 pre-existing SymbolDb failures (Northwind comprehension-ir fixture not present locally \u2014 documented baseline matches main), 2 [SkippableFact] integration tests skipped (Access COM).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/route-audit-analysis",
+      "dateTime": "2026-05-14T07:40:46.430985-04:00",
+      "description": "Routed analysis(complexity_hint=60) comparing current AccessNode ir/ shape vs YAML baseline vs aspirational FormMetadata/ReportMetadata typed schema. Findings: spec premise is materially miscalibrated. RecordSource not a gap vs YAML (both have it in Properties). Embedded-macro correlation already closed by MacroActionsEnricher. Real gap is vs aspirational typed schema. Recommended path: Option B \u2014 write FormMetadataExtractor/ReportMetadataExtractor following table-extractor-coverage pattern.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3544,
+          "outputTokens": 1662,
+          "costUsd": 0.021
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/gaps-confirmed",
+      "dateTime": "2026-05-14T07:42:35.564760-04:00",
+      "description": "Wrote audit-findings.md (session-set root) summarising current AccessNode ir/ schema, gap-by-gap audit vs YAML and vs typed FormMetadata/ReportMetadata schema. Strategic question surfaced: Option A (narrow in-place fix per spec) vs Option B (write Form/ReportMetadataExtractor following table-extractor-coverage pattern). Recommend Option B. Also fixed the spec deliverable-path footgun (was session-reviews/session-001.md \u2192 now audit-findings.md, per lessons-learned).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/verification-round-1",
+      "dateTime": "2026-05-14T07:49:29.807477-04:00",
+      "description": "Routed cross-provider session-verification (gpt-5-4). ISSUES_FOUND: 3 Minor \u2014 (1) ai-assignment.md Session 1 actuals had placeholders, (2) ai-assignment.md Session 2 plan still assumed Option A, (3) audit-findings.md \u00a75 had Procedures contract inconsistency.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7566,
+          "outputTokens": 2400,
+          "costUsd": 0.1367
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verification-round-2",
+      "dateTime": "2026-05-14T07:49:29.807477-04:00",
+      "description": "Re-routed cross-provider session-verification (gpt-5-4) after fixing all three Round 1 issues. VERIFIED \u2014 all three fixes confirmed real and complete, no new issues introduced.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6824,
+          "outputTokens": 5133,
+          "costUsd": 0.0941
+        }
+      ]
+    }
+  ]
 }
