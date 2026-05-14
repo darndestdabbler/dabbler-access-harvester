@@ -32,7 +32,7 @@ public class SyntheticMetadataExtractorIntegrationTests
             foreach (var expectedPath in expectedFiles)
             {
                 var expectedRoot = JsonNode.Parse(File.ReadAllText(expectedPath))!.AsObject();
-                var categories = new[] { "Queries", "Tables", "Relationships" }
+                var categories = new[] { "Queries", "Tables", "Relationships", "Forms", "Reports" }
                     .Where(category => expectedRoot.TryGetPropertyValue(category, out var node)
                         && node is JsonArray array
                         && array.Count > 0)
@@ -78,6 +78,12 @@ public class SyntheticMetadataExtractorIntegrationTests
         if (expectedRoot.TryGetPropertyValue("Relationships", out var expectedRelationships)
             && expectedRelationships is JsonArray relationships)
             AssertRelationships(relationships, ReadActualRelationships(Path.Combine(result.IrDir, "Relationships")));
+
+        if (expectedRoot.TryGetPropertyValue("Forms", out var expectedForms) && expectedForms is JsonArray forms)
+            AssertForms(forms, ReadActualForms(Path.Combine(result.IrDir, "Forms")));
+
+        if (expectedRoot.TryGetPropertyValue("Reports", out var expectedReports) && expectedReports is JsonArray reports)
+            AssertReports(reports, ReadActualReports(Path.Combine(result.IrDir, "Reports")));
     }
 
     private static void AssertQueries(JsonArray expectedQueries, IReadOnlyDictionary<string, QueryMetadata> actualQueries)
@@ -161,6 +167,162 @@ public class SyntheticMetadataExtractorIntegrationTests
             actualPrimaryKey!.ToArray());
     }
 
+    private static void AssertForms(
+        JsonArray expectedForms,
+        IReadOnlyDictionary<string, FormMetadata> actualForms)
+    {
+        Assert.Equal(expectedForms.Count, actualForms.Count);
+
+        foreach (var expectedNode in expectedForms.OfType<JsonObject>())
+        {
+            var expectedName = ReadRequiredString(expectedNode, "Name");
+            Assert.True(actualForms.TryGetValue(expectedName, out var actual), $"Missing form '{expectedName}'.");
+
+            AssertIfFixturePresent(expectedNode, "RecordSource", actual!.RecordSource);
+            AssertIfFixturePresent(expectedNode, "Filter", actual.Filter);
+            AssertIfFixturePresent(expectedNode, "OrderBy", actual.OrderBy);
+            AssertIfFixturePresent(expectedNode, "DefaultView", actual.DefaultView);
+            AssertControlsByName(
+                expectedName,
+                ReadArray(expectedNode, "Children"),
+                FlattenNamedControls(actual.Children));
+        }
+    }
+
+    private static void AssertReports(
+        JsonArray expectedReports,
+        IReadOnlyDictionary<string, ReportMetadata> actualReports)
+    {
+        Assert.Equal(expectedReports.Count, actualReports.Count);
+
+        foreach (var expectedNode in expectedReports.OfType<JsonObject>())
+        {
+            var expectedName = ReadRequiredString(expectedNode, "Name");
+            Assert.True(
+                actualReports.TryGetValue(expectedName, out var actual),
+                $"Missing report '{expectedName}'.");
+
+            AssertIfFixturePresent(expectedNode, "RecordSource", actual!.RecordSource);
+            AssertIfFixturePresent(expectedNode, "Filter", actual.Filter);
+            AssertIfFixturePresent(expectedNode, "OrderBy", actual.OrderBy);
+            AssertIfFixturePresent(expectedNode, "DefaultView", actual.DefaultView);
+
+            AssertGroupLevels(expectedName, ReadArray(expectedNode, "GroupLevels"), actual.GroupLevels);
+            AssertControlsByName(
+                expectedName,
+                ReadArray(expectedNode, "Children"),
+                FlattenNamedControls(actual.Children));
+        }
+    }
+
+    private static void AssertIfFixturePresent(JsonObject expectedNode, string key, string? actualValue)
+    {
+        if (!expectedNode.TryGetPropertyValue(key, out var node)) return;
+        Assert.Equal(node?.GetValue<string>(), actualValue);
+    }
+
+    private static void AssertGroupLevels(
+        string reportName,
+        JsonArray? expectedGroupLevels,
+        IReadOnlyList<GroupLevel>? actualGroupLevels)
+    {
+        if (expectedGroupLevels is null) return;
+
+        Assert.NotNull(actualGroupLevels);
+        var byLevel = actualGroupLevels!.ToDictionary(g => g.Level);
+
+        foreach (var expected in expectedGroupLevels.OfType<JsonObject>())
+        {
+            if (!expected.TryGetPropertyValue("Level", out var levelNode) || levelNode is null)
+                throw new InvalidOperationException(
+                    $"Expected GroupLevel on '{reportName}' is missing the required 'Level' field.");
+            int level = levelNode.GetValue<int>();
+            Assert.True(byLevel.TryGetValue(level, out var actual), $"Report '{reportName}' missing group level {level}.");
+
+            if (expected.TryGetPropertyValue("GroupOn", out var groupOnNode) && groupOnNode is not null)
+                Assert.Equal(groupOnNode.GetValue<string>(), actual!.GroupOn);
+            if (expected.TryGetPropertyValue("HasHeader", out var headerNode) && headerNode is not null)
+                Assert.Equal(headerNode.GetValue<bool>(), actual!.HasHeader);
+            if (expected.TryGetPropertyValue("HasFooter", out var footerNode) && footerNode is not null)
+                Assert.Equal(footerNode.GetValue<bool>(), actual!.HasFooter);
+        }
+    }
+
+    private static void AssertControlsByName(
+        string ownerName,
+        JsonArray? expectedChildren,
+        IReadOnlyDictionary<string, AccessControl> actualByName)
+    {
+        if (expectedChildren is null) return;
+
+        foreach (var expectedControl in EnumerateNamedControlsRecursive(expectedChildren))
+        {
+            var controlName = ReadRequiredString(expectedControl, "Name");
+            Assert.True(
+                actualByName.TryGetValue(controlName, out var actual),
+                $"'{ownerName}' missing control '{controlName}'.");
+
+            Assert.Equal(ReadRequiredString(expectedControl, "Type"), actual!.Type);
+
+            if (expectedControl.TryGetPropertyValue("Label", out var labelNode) && labelNode is JsonObject expectedLabel)
+            {
+                Assert.NotNull(actual.Label);
+                Assert.Equal(ReadOptionalString(expectedLabel, "Source"), actual.Label!.Source);
+                Assert.Equal(ReadOptionalString(expectedLabel, "Text"), actual.Label.Text);
+            }
+
+            if (expectedControl.TryGetPropertyValue("Properties", out var propsNode) && propsNode is JsonObject expectedProps)
+                AssertControlPropertiesMatch(ownerName, controlName, expectedProps, actual.Properties);
+        }
+    }
+
+    private static IEnumerable<JsonObject> EnumerateNamedControlsRecursive(JsonArray? children)
+    {
+        if (children is null) yield break;
+        foreach (var child in children.OfType<JsonObject>())
+        {
+            if (ReadOptionalString(child, "Name") is not null) yield return child;
+            if (child.TryGetPropertyValue("Children", out var grand) && grand is JsonArray grandArr)
+                foreach (var deep in EnumerateNamedControlsRecursive(grandArr))
+                    yield return deep;
+        }
+    }
+
+    private static IReadOnlyDictionary<string, AccessControl> FlattenNamedControls(IReadOnlyList<AccessControl>? controls)
+    {
+        var result = new Dictionary<string, AccessControl>(StringComparer.OrdinalIgnoreCase);
+        Walk(controls);
+        return result;
+
+        void Walk(IReadOnlyList<AccessControl>? items)
+        {
+            if (items is null) return;
+            foreach (var item in items)
+            {
+                if (item.Name is not null) result[item.Name] = item;
+                Walk(item.Children);
+            }
+        }
+    }
+
+    private static void AssertControlPropertiesMatch(
+        string ownerName,
+        string controlName,
+        JsonObject expectedProps,
+        IReadOnlyDictionary<string, JsonElement>? actualProps)
+    {
+        Assert.NotNull(actualProps);
+        foreach (var expected in expectedProps)
+        {
+            Assert.True(
+                actualProps!.TryGetValue(expected.Key, out var actualValue),
+                $"'{ownerName}.{controlName}' missing property '{expected.Key}'.");
+            string expectedString = expected.Value!.ToJsonString();
+            string actualString = actualValue.GetRawText();
+            Assert.Equal(expectedString, actualString);
+        }
+    }
+
     private static void AssertExpectedRelationshipFields(
         JsonArray? expectedFields,
         IReadOnlyList<RelationshipFieldPair>? actualFields)
@@ -189,6 +351,34 @@ public class SyntheticMetadataExtractorIntegrationTests
 
     private static IReadOnlyDictionary<string, RelationshipMetadata> ReadActualRelationships(string categoryDir)
         => ReadActualCategory(categoryDir, RelationshipMetadataExtractor.Extract, r => r.Name);
+
+    private static IReadOnlyDictionary<string, FormMetadata> ReadActualForms(string categoryDir)
+        => ReadNamedActualCategory(categoryDir, FormMetadataExtractor.Extract, f => f.Name);
+
+    private static IReadOnlyDictionary<string, ReportMetadata> ReadActualReports(string categoryDir)
+        => ReadNamedActualCategory(categoryDir, ReportMetadataExtractor.Extract, r => r.Name);
+
+    private static IReadOnlyDictionary<string, T> ReadNamedActualCategory<T>(
+        string categoryDir,
+        Func<string, JsonElement, T> extract,
+        Func<T, string> getName)
+    {
+        var result = new Dictionary<string, T>(StringComparer.OrdinalIgnoreCase);
+        if (!Directory.Exists(categoryDir))
+            return result;
+
+        foreach (var file in Directory.GetFiles(categoryDir, "*.ir.json").Order(StringComparer.OrdinalIgnoreCase))
+        {
+            var name = Path.GetFileNameWithoutExtension(file);
+            if (name.EndsWith(".ir", StringComparison.OrdinalIgnoreCase))
+                name = name[..^3];
+            using var doc = JsonDocument.Parse(File.ReadAllText(file));
+            var metadata = extract(name, doc.RootElement);
+            result[getName(metadata)] = metadata;
+        }
+
+        return result;
+    }
 
     private static IReadOnlyDictionary<string, T> ReadActualCategory<T>(
         string categoryDir,

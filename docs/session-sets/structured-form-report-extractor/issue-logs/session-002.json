@@ -1,0 +1,12 @@
+[
+  {
+    "severity": "Major",
+    "location": "tests/AccessHarvester.Tests/SyntheticMetadataExtractorIntegrationTests.cs",
+    "summary": "AssertForms/AssertReports unconditionally compared scalar fields via ReadOptionalString, treating omitted fixture keys as expected-null.",
+    "status": "fixed",
+    "fix_summary": "Introduced AssertIfFixturePresent helper; AssertForms/AssertReports only assert RecordSource/Filter/OrderBy/DefaultView when the fixture actually carries the key, mirroring the conditional pattern in AssertGroupLevels.",
+    "verifier": "gpt-5-4",
+    "round_found": 1,
+    "round_verified": 2
+  }
+]
