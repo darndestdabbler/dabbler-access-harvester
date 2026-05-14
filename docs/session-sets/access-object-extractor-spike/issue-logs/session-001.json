@@ -1,0 +1,20 @@
+[
+  {
+    "severity": "Major",
+    "location": "Sections 2.1 and 3.1 \u2014 Table DDL characterization",
+    "status": "fixed",
+    "fix_applied": "Clarified that DDL is reconstructed from both DAO field metadata AND relationship metadata; made FK constraint presence explicit in the analysis. The verifier's concern was a context gap \u2014 the actual YAML sample shows FK constraints inline."
+  },
+  {
+    "severity": "Minor",
+    "location": "Section 3.2 \u2014 pipeline in gap list",
+    "status": "fixed",
+    "fix_applied": "Moved Translation/Enrichment discussion to a note in 3.2, clearly labeled as downstream processing capability not an extraction output."
+  },
+  {
+    "severity": "Major",
+    "location": "Section 6 \u2014 Follow-on scope for structured-form-report-extractor",
+    "status": "fixed",
+    "fix_applied": "Expanded ReportExporter scope to explicitly require section structure (Detail, PageHeader/Footer, GroupHeader_N/GroupFooter_N), GroupLevel entries (grouping field, sort order, keep-together, force-new-page, repeat-section), and report-specific events. Set to 3-4 sessions instead of 2-3."
+  }
+]

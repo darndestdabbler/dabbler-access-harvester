@@ -22,4 +22,7 @@ it in-conversation; route only for session-verification and summarization.
 
 ### Actuals (filled after the session)
 
-*(To be completed by the orchestrator running Session 1.)*
+- **Orchestrator used:** claude-code / claude-opus-4-7 / effort=high (human upgraded from Sonnet to Opus)
+- **Total routed cost:** $0.1747 (2 session-verification calls to gpt-5-4) + $0.0003 (change-log, gemini-flash) + $0.0030 (next-set rec, gemini-pro) = **$0.18 total**
+- **Deviations from recommendation:** Spec recommended Sonnet @ effort=high; human upgraded to Opus @ effort=high. Analysis work handled in-conversation per "orchestrator matches routing target" convention rather than routing to `analysis` task type.
+- **Notes for next-session calibration:** Round-1 verification returned ISSUES_FOUND (2 Major, 1 Minor). Both Majors were resolved (DDL mechanism description, ReportExporter scope); round-2 returned VERIFIED. The DDL Major was partially a context gap (verifier couldn't see the YAML sample). Consider including YAML sample excerpts in future verification prompts for spikes that read YAML.
