@@ -3,19 +3,13 @@ using System.Text.Json;
 namespace AccessHarvester.Access;
 
 /// <summary>
-/// Structured metadata for a single Access table, covering the deliverables of
-/// Plan Phase 4.3. Holds the table's name, link metadata for attached tables,
-/// the field set with decoded data types, indexes (including the primary key
-/// as a derived <see cref="PrimaryKey"/> column list), and the raw property
-/// bag with promoted keys removed.
-/// <para>
-/// Table-level validation rules (<see cref="ValidationRule"/> /
-/// <see cref="ValidationText"/>) are typed slots in this schema but the
-/// current raw IR shape does not populate them — see the per-field remarks
-/// for the disclosure and the planned widening. Per-field validation
-/// (<see cref="TableField.ValidationRule"/>) is fully covered by the
-/// current pipeline.
-/// </para>
+/// Structured metadata for a single Access table. Holds the table's name,
+/// link metadata for attached tables, the field set with decoded data types,
+/// indexes (including the primary key as a derived <see cref="PrimaryKey"/>
+/// column list), table-level and per-field validation rules, per-field display
+/// metadata (<see cref="TableField.InputMask"/>, <see cref="TableField.Format"/>,
+/// <see cref="TableField.DisplayControl"/>), and the raw property bag with
+/// promoted keys removed.
 /// </summary>
 /// <remarks>
 /// Inter-table relationships (foreign keys) live in their own
@@ -122,30 +116,16 @@ public sealed record TableMetadata
     /// <summary>
     /// The table-level validation rule (a JET SQL boolean expression evaluated
     /// over the row about to be written) — distinct from per-field rules in
-    /// <see cref="TableField.ValidationRule"/>. Captured verbatim; structural
-    /// parsing is the <c>jet-sql-grammar-and-parser</c> / VBA-expression-
-    /// grammar set's work.
-    /// <para>
-    /// <b>Raw-IR coverage gap (acknowledged):</b> the current
-    /// <c>AccessHarvester.Core.Extraction.TableExporter</c> imported from
-    /// <c>accessexportertemp1-import</c> does not yet emit table-level
-    /// <c>ValidationRule</c> / <c>ValidationText</c> at the JSON root, so
-    /// <see cref="TableMetadataExtractor"/> currently always reads
-    /// <c>null</c> here. The typed slot is committed now so that the
-    /// minor raw-exporter widening this needs (added under a follow-up
-    /// session in this set or in the broader plan) can populate it
-    /// without a schema contract change. Per-field rules in
-    /// <see cref="TableField.ValidationRule"/> are unaffected — those
-    /// the raw exporter already emits.
-    /// </para>
+    /// <see cref="TableField.ValidationRule"/>. Captured verbatim from
+    /// <c>TableDef.ValidationRule</c>; structural parsing is the
+    /// <c>jet-sql-grammar-and-parser</c> / VBA-expression-grammar set's work.
+    /// Null when no table-level rule is defined.
     /// </summary>
     public string? ValidationRule { get; init; }
 
     /// <summary>
     /// The user-visible message Access shows when <see cref="ValidationRule"/>
-    /// rejects a row. Subject to the same raw-IR coverage gap noted on
-    /// <see cref="ValidationRule"/>: the typed slot is committed but the
-    /// current raw exporter does not populate it.
+    /// rejects a row. Null when not set.
     /// </summary>
     public string? ValidationText { get; init; }
 
@@ -168,13 +148,12 @@ public sealed record TableMetadata
 }
 
 /// <summary>
-/// One column in a <see cref="TableMetadata"/>. Field-level validation rules
-/// and defaults are first-class typed fields; the rest of DAO's per-field
-/// property surface (custom Format, Caption, InputMask, Description, etc.) is
-/// not modelled here because those are presentation properties downstream
-/// migration tooling treats as advisory rather than structural. If a future
-/// session needs them, promote on demand rather than scaling the schema
-/// pre-emptively.
+/// One column in a <see cref="TableMetadata"/>. Field-level validation rules,
+/// defaults, and the display metadata most valuable for downstream AI
+/// interpretation (<see cref="InputMask"/>, <see cref="Format"/>,
+/// <see cref="DisplayControl"/>) are first-class typed fields. Other DAO
+/// per-field properties (Caption, Description, etc.) remain in the raw
+/// property bag and can be promoted on demand if a future session needs them.
 /// </summary>
 public sealed record TableField
 {
@@ -243,6 +222,30 @@ public sealed record TableField
     /// rejects a value. Null when not set or empty.
     /// </summary>
     public string? ValidationText { get; init; }
+
+    /// <summary>
+    /// The field's input mask string (e.g. <c>"0000"</c> for a 4-digit SSN,
+    /// <c>"!\\(999\") \"000\\-0000;;_"</c> for a US phone). Sourced from the
+    /// DAO <c>Properties("InputMask")</c> collection entry; null when the
+    /// property is not set on this field (most fields have no input mask).
+    /// </summary>
+    public string? InputMask { get; init; }
+
+    /// <summary>
+    /// The display format string Access applies when the field value is
+    /// rendered in a datasheet or form (e.g. <c>"Short Date"</c>,
+    /// <c>"@@@@"</c>). Sourced from <c>Properties("Format")</c>; null when
+    /// not set.
+    /// </summary>
+    public string? Format { get; init; }
+
+    /// <summary>
+    /// The default display control code Access uses in forms for this field —
+    /// for example <c>109</c> (text box), <c>106</c> (check box),
+    /// <c>111</c> (combo box). Sourced from <c>Properties("DisplayControl")</c>;
+    /// null when not set.
+    /// </summary>
+    public int? DisplayControl { get; init; }
 
     /// <summary>
     /// Zero-based ordinal position; matches the order in

@@ -59,6 +59,9 @@ public sealed class RelationshipExporter : IObjectExporter
                     ChildTable = (string)rel.ForeignTable,
                     Attributes = attributes,
                     AttributesDecoded = DecodeAttributes(attributes),
+                    EnforceReferentialIntegrity = (attributes & 0x00000002) == 0,
+                    CascadeUpdate = (attributes & 0x00000100) != 0,
+                    CascadeDelete = (attributes & 0x00001000) != 0,
                     Fields = fields,
                 };
 

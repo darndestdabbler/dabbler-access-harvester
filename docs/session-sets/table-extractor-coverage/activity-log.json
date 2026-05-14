@@ -2,5 +2,128 @@
   "sessionSetName": "table-extractor-coverage",
   "createdDate": "2026-05-14T09:57:57.042780+00:00",
   "totalSessions": 2,
-  "entries": []
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 0,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-05-14T06:30:42.097063-04:00",
+      "description": "Routed ai-assignment.md authoring for both sessions",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2768,
+          "outputTokens": 689,
+          "costUsd": 0.01035
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/code-review",
+      "dateTime": "2026-05-14T06:34:03.919540-04:00",
+      "description": "Routed code review for TableExporter, RelationshipExporter, TableMetadata, TableMetadataExtractor, and tests",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 12949,
+          "outputTokens": 3255,
+          "costUsd": 0.087672
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/table-validation-rule",
+      "dateTime": "2026-05-14T06:35:47.260283-04:00",
+      "description": "Added ValidationRule and ValidationText to TableExporter table-level payload",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/field-display-metadata",
+      "dateTime": "2026-05-14T06:35:47.261277-04:00",
+      "description": "Added InputMask, Format, DisplayControl to per-field payload; updated TableField record and TableMetadataExtractor.ReadFields()",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/ddl-reconstruction",
+      "dateTime": "2026-05-14T06:35:47.261277-04:00",
+      "description": "DDL reconstruction deferred to Session 2 \u2014 requires passing db to BuildTablePayload for Relations access",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/relationship-bool-flags",
+      "dateTime": "2026-05-14T06:35:47.261277-04:00",
+      "description": "Added EnforceReferentialIntegrity, CascadeUpdate, CascadeDelete explicit booleans to RelationshipExporter",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/unit-tests",
+      "dateTime": "2026-05-14T06:35:47.262277-04:00",
+      "description": "Added 4 new unit tests: Extract_TableLevelValidationRuleAndTextAreLifted, Extract_FieldDisplayMetadataIsLifted, Extract_FieldWithNoDisplayMetadata_PropertiesAreNull, Extract_TableLevelValidationRuleAbsent_IsNull; also updated PromotedKeys test to assert ValidationRule/ValidationText stripped from Properties bag",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-05-14T06:35:47.262277-04:00",
+      "description": "dotnet build: succeeded (4 NU1903 warnings, pre-existing). dotnet test: AccessHarvester.Tests 332 passed, 2 skipped; AccessHarvester.Pipeline.Tests 355 passed; AccessHarvester.Integration 14 passed. AccessHarvester.SymbolDb.Tests 45 failures all pre-existing (NorthwindDevEdition pipeline artifacts gitignored).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-05-14T06:37:42.538275-04:00",
+      "description": "Cross-provider session verification",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11230,
+          "outputTokens": 4945,
+          "costUsd": 0.10225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/verification-round2",
+      "dateTime": "2026-05-14T06:40:02.889040-04:00",
+      "description": "Cross-provider session verification round 2 (after fixing stale doc comments; context-gap dismissal of session-reviews file finding)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11169,
+          "outputTokens": 2390,
+          "costUsd": 0.0637725
+        }
+      ]
+    }
+  ]
 }

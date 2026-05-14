@@ -66,6 +66,9 @@ public sealed class TableExporter : IObjectExporter
                 DefaultValue = SafeString(() => (string)f.DefaultValue),
                 ValidationRule = SafeString(() => (string)f.ValidationRule),
                 ValidationText = SafeString(() => (string)f.ValidationText),
+                InputMask = SafeString(() => (string)f.Properties("InputMask").Value),
+                Format = SafeString(() => (string)f.Properties("Format").Value),
+                DisplayControl = SafeInt(() => (int)f.Properties("DisplayControl").Value),
                 Attributes = SafeInt(() => (int)f.Attributes),
                 OrdinalPosition = SafeInt(() => (int)f.OrdinalPosition),
                 ForeignName = SafeString(() => (string)f.ForeignName),
@@ -104,6 +107,8 @@ public sealed class TableExporter : IObjectExporter
             RecordCount = SafeInt(() => (int)td.RecordCount),
             SourceTableName = SafeString(() => (string)td.SourceTableName),
             Connect = SafeString(() => (string)td.Connect),
+            ValidationRule = SafeString(() => (string)td.ValidationRule),
+            ValidationText = SafeString(() => (string)td.ValidationText),
             Fields = fields,
             Indexes = indexes,
         };
