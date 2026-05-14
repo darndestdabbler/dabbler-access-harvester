@@ -1,0 +1,32 @@
+{
+  "status": "in-progress",
+  "summary": "Session 1 of 3: read-only audit of current AccessNode ir/ schema for Forms and Reports vs YAML baseline vs aspirational FormMetadata/ReportMetadata typed records in AccessHarvester.Access. Findings: spec premise materially miscalibrated (the prior spike's table had RecordSource-promotion-in-YAML wrong; real gap is vs typed-metadata target). Surfaced strategic question (Option A narrow patch vs Option B write Form/ReportMetadataExtractor following TableMetadataExtractor pattern) for human adjudication before Session 2. Round 1 ISSUES_FOUND (3 Minor: ai-assignment.md placeholders, Session 2 plan still assumed Option A, audit-findings.md §5 Procedures contract inconsistency); all three fixed in-session; Round 2 VERIFIED (gpt-5-4).",
+  "files_changed": [
+    "docs/session-sets/structured-form-report-extractor/ai-assignment.md",
+    "docs/session-sets/structured-form-report-extractor/audit-findings.md",
+    "docs/session-sets/structured-form-report-extractor/spec.md",
+    "docs/session-sets/structured-form-report-extractor/activity-log.json",
+    "docs/session-sets/structured-form-report-extractor/session-state.json",
+    "docs/session-sets/structured-form-report-extractor/session-events.jsonl",
+    "docs/session-sets/structured-form-report-extractor/session-reviews/session-001.md",
+    "docs/session-sets/structured-form-report-extractor/issue-logs/session-001.json",
+    "docs/session-sets/structured-form-report-extractor/disposition.json",
+    "docs/session-sets/table-extractor-coverage/session-state.json",
+    "docs/session-sets/table-extractor-coverage/session-events.jsonl"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "effort": "medium",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 orchestrator choice (Sonnet 4.6 medium) holds under either Option A (narrow ir/ patch per the original spec) or Option B (write Form/ReportMetadataExtractor following table-extractor-coverage). Both are mechanical code editing well-suited to Sonnet. The procedural blocker on STARTING Session 2 (listed in blockers[]) is the human adjudication of Option A/B/C from audit-findings.md §4 — independent of the orchestrator choice."
+    }
+  },
+  "blockers": [
+    "Human adjudication required on strategic question: Option A (narrow RecordSource promotion in SaveAsTextTranslator per the original spec) vs Option B (write FormMetadataExtractor + ReportMetadataExtractor following the table-extractor-coverage TableMetadataExtractor pattern) vs Option C (hybrid). Audit recommends Option B; see audit-findings.md §4 for the full framing."
+  ]
+}
