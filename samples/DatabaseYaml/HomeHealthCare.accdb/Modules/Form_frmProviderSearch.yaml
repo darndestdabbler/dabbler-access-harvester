@@ -1,0 +1,164 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmProviderSearch"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  ' ============================================================================
+  '  Replaces sfrmProviderList with lstProviderList.
+  '
+  '    lstProviderList
+  '      ColumnCount    = 6
+  '      ColumnWidths   = "0;3120;1320;1560;720;720"    ' first col (PK) hidden
+  '      ColumnHeads    = True
+  '      BoundColumn    = 1
+  '      RowSourceType  = "Table/Query"
+  '      Tied to: frmProviderDetail
+  ' ============================================================================
+  
+  
+  Private Enum StatusEnum
+      STATUS_ALL = -1
+      STATUS_ACTIVE = 1
+      STATUS_INACTIVE = 2
+  End Enum
+  Private Sub PopulateProviderList(Optional whereClauseSql As String = "")
+      Dim baseSql As String
+      baseSql = _
+          "SELECT ProviderID AS ID, " & _
+                 "ProviderName AS [Provider Name], " & _
+                 "Phone, " & _
+                 "City, " & _
+                 "StateCode AS State, " & _
+                 "IsActive AS Active " & _
+          "FROM tblProviders " & whereClauseSql
+  
+      Me.lstProviderList.RowSource = basListHelpers.BuildAddableRowSource( _
+          dataSelect:=baseSql, _
+          addLabel:="(Add new provider...)", _
+          dataColCount:=6, _
+          orderBy:="2")          ' by Provider Name
+      Me.lstProviderList.Requery
+  End Sub
+  
+  
+  Private Sub lstProviderList_DblClick(Cancel As Integer)
+      basListHelpers.OpenDetailFromList Me.lstProviderList, "frmProviderDetail"
+  End Sub
+  
+  
+  Private Sub btnAddNew_Click()
+      DoCmd.OpenForm "frmProviderDetail", acNormal, , , acFormAdd
+      Me.lstProviderList.Requery
+  End Sub
+  
+  
+  Private Sub cboFilterState_AfterUpdate()
+      PopulateFilterCity
+      cboFilterCity = "(All)"
+  End Sub
+  Private Sub ResetFilters()
+      Me.txtFilterName = Null
+      cboFilterState = "(All)"
+      cboFilterCity = "(All)"
+      cboFilterStatus = StatusEnum.STATUS_ALL
+  
+      btnSearch_Click
+  End Sub
+  
+  
+  Private Sub Form_Activate()
+      PopulateFilterState
+      PopulateFilterCity
+      PopulateFilterStatus
+  
+      ResetFilters
+  End Sub
+  
+  Private Sub PopulateFilterStatus()
+      Dim dict As Scripting.Dictionary
+      Set dict = New Scripting.Dictionary
+  
+      dict.Add STATUS_INACTIVE, "Inactive"
+      dict.Add STATUS_ACTIVE, "Active"
+  
+      Me.cboFilterStatus.RowSource = basUtilities.GetFilterRowSourceFromDict(dict)
+  End Sub
+  
+  Private Sub PopulateFilterState()
+      Dim strSQL As String
+      strSQL = "SELECT s.StateCode, s.StateName " & _
+          "FROM tlkpStates AS s " & _
+          "WHERE EXISTS " & _
+              "(SELECT 'X' " & _
+                  "FROM tblProviders AS p " & _
+                  "WHERE s.StateCode = p.StateCode) " & _
+          "ORDER BY s.StateName"
+  
+      Me.cboFilterState.RowSource = basUtilities.GetFilterRowSourceFromSqlSelect(strSQL)
+  End Sub
+  
+  Private Sub PopulateFilterCity()
+      Dim strSQL As String
+      strSQL = "SELECT DISTINCT p.City  " & _
+          "FROM tblProviders AS p "
+  
+      If Not IsNull(Me.cboFilterState) And Me.cboFilterState <> "(All)" Then
+          strSQL = strSQL & _
+              " WHERE p.StateCode = '" & Me.cboFilterState & "'"
+      End If
+  
+      strSQL = strSQL & " ORDER BY p.City"
+  
+      Me.cboFilterCity.RowSource = basUtilities.GetFilterRowSourceFromSqlSelect(strSQL)
+  End Sub
+  
+  
+  Private Sub btnSearch_Click()
+      Dim where() As String
+      Dim i As Integer
+  
+      i = -1
+  
+      If Not IsNull(Me.txtFilterName) And Me.txtFilterName <> "" Then
+          i = i + 1
+          ReDim Preserve where(i)
+          where(i) = "ProviderName LIKE '*" & Me.txtFilterName & "*'"
+      End If
+  
+      If Not IsNull(Me.cboFilterState) And Me.cboFilterState <> "(All)" Then
+          i = i + 1
+          ReDim Preserve where(i)
+          where(i) = "StateCode = '" & Me.cboFilterState & "'"
+      End If
+  
+      If Not IsNull(Me.cboFilterCity) And Me.cboFilterCity <> "(All)" Then
+          i = i + 1
+          ReDim Preserve where(i)
+          where(i) = "City = '" & Me.cboFilterCity & "'"
+      End If
+  
+      If Not IsNull(Me.cboFilterStatus) And Me.cboFilterStatus <> StatusEnum.STATUS_ALL Then
+          i = i + 1
+          ReDim Preserve where(i)
+          Select Case Me.cboFilterStatus
+              Case StatusEnum.STATUS_ACTIVE
+                  where(i) = "IsActive=True"
+              Case StatusEnum.STATUS_INACTIVE
+                  where(i) = "IsActive=False"
+          End Select
+      End If
+  
+      PopulateProviderList basUtilities.whereClause(where)
+  End Sub
+  
+  
+  Private Sub btnClear_Click()
+      ResetFilters
+  End Sub

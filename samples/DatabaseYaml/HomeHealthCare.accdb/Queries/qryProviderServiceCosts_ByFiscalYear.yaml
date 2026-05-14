@@ -1,0 +1,31 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryProviderServiceCosts_ByFiscalYear"
+QueryType: "Select"
+SQL: |
+  SELECT psc.FiscalYear, p.ProviderID, p.ProviderName, Sum(csp.AnnualEstCost) AS TotalCost, Sum([csp.AnnualEstCost]/[qryCosts_ByFiscalYear].[TotalCost]) AS PctCost
+  FROM tblProviders AS p INNER JOIN ((tblProviderServiceCatalog AS psc INNER JOIN qryCosts_ByFiscalYear ON psc.FiscalYear = qryCosts_ByFiscalYear.FiscalYear) INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID
+  WHERE (((csp.Status)<>"Cancelled"))
+  GROUP BY psc.FiscalYear, p.ProviderID, p.ProviderName;
+  
+Properties:
+  DateCreated: "5/13/2026 3:39:26 AM"
+  LastUpdated: "5/13/2026 4:50:08 PM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "60"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  RecordsetType: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  TotalsRow: "False"
+  PublishToWeb: "1"

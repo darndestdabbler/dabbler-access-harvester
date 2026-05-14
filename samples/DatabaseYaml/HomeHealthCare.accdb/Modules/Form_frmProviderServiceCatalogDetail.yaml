@@ -1,0 +1,235 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmProviderServiceCatalogDetail"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  Private m_Canceling As Boolean
+  
+  ' ============================================================================
+  '  frmProviderServiceCatalogDetail
+  ' ----------------------------------------------------------------------------
+  '  Popup detail form for a single tblProviderServiceCatalog row.
+  '  Opened acDialog from frmProviderDetail.lstProviderServiceCatalog.
+  '
+  '  RecordSource:  tblProviderServiceCatalog
+  '  PopUp:         True
+  '  Modal:         True            (caller also passes acDialog)
+  '  BorderStyle:   3  (Dialog)
+  '
+  '  OpenArgs convention:
+  '     "ADD|ProviderID=123|FiscalYear=2025"   ? Add mode with parent context
+  '     "<numericID>"                          ? Edit mode for that ID
+  '
+  '  Controls:
+  '     ProviderServiceCatalogID   (PK, hidden)
+  '     cboProviderID              (FK to tblProviders; locked in Add mode
+  '                                 because the context already supplies it)
+  '     cboServiceID               (FK to tblServices)
+  '     FiscalYear                 (locked ? set from context in Add mode)
+  '     RatePerHour                (Currency, > 0)
+  '     Notes                      (memo)
+  '     btnSave / btnCancel / btnDelete
+  ' ============================================================================
+  
+  
+  Private Sub Form_Open(Cancel As Integer)
+      Dim args As Variant
+      args = Me.OpenArgs
+  
+      If basListHelpers.IsAddMode(args) Then
+          Me.DataEntry = True
+      ElseIf IsNumeric(Nz(args, "")) Then
+          Me.Filter = "ProviderServiceCatalogID=" & CLng(args)
+          Me.FilterOn = True
+      End If
+  End Sub
+  
+  Private Sub Form_Load()
+      ' Populate the two combos. They have no stored row source (per the
+      ' design view) ? set them here so they're always in sync with what
+      ' the form needs.
+      Me.cboProviderID.RowSource = _
+          "SELECT ProviderID, ProviderName FROM tblProviders " & _
+          "ORDER BY ProviderName"
+      Me.cboProviderID.ColumnCount = 2
+      Me.cboProviderID.ColumnWidths = "0;2.5 in"
+      Me.cboProviderID.BoundColumn = 1
+  
+      Me.cboServiceID.RowSource = _
+          "SELECT ServiceID, ServiceName FROM tblServices " & _
+          "WHERE IsActive=True ORDER BY ServiceName"
+      Me.cboServiceID.ColumnCount = 2
+      Me.cboServiceID.ColumnWidths = "0;2.5 in"
+      Me.cboServiceID.BoundColumn = 1
+  
+      If basListHelpers.IsAddMode(Me.OpenArgs) Then
+          Dim ProviderID As Long, fy As Long
+          ProviderID = basListHelpers.GetContextLong(Me.OpenArgs, "ProviderID")
+          fy = basListHelpers.GetContextLong(Me.OpenArgs, "FiscalYear")
+  
+          If ProviderID > 0 Then Me!ProviderID = ProviderID
+          If fy > 0 Then Me!FiscalYear = fy
+  
+          Me.btnDelete.Enabled = False
+          Me.Caption = "New Provider Service Catalog Entry"
+      Else
+          Me.btnDelete.Enabled = True
+          Me.Caption = "Edit Provider Service Catalog Entry"
+      End If
+  
+      ' FY and Provider are part of the row's identity in this scope ? the
+      ' user opened this dialog to edit ONE provider's offering for ONE FY.
+      ' Lock both, plus FY in either mode.
+      Me.cboProviderID.Locked = True
+      Me.FiscalYear.Locked = True
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Validation
+  ' ============================================================================
+  
+  Private Sub Form_BeforeUpdate(Cancel As Integer)
+      If m_Canceling Then Exit Sub
+      If IsNull(Me!ProviderID) Then
+          MsgBox "Provider is required.", vbExclamation, "Validation"
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If IsNull(Me!ServiceID) Then
+          MsgBox "Please select a service.", vbExclamation, "Validation"
+          Me.cboServiceID.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If IsNull(Me!FiscalYear) Then
+          MsgBox "Fiscal year is required.", vbExclamation, "Validation"
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If IsNull(Me!RatePerHour) Or Me!RatePerHour <= 0 Then
+          MsgBox "Rate per hour must be greater than zero.", _
+                 vbExclamation, "Validation"
+          Me.RatePerHour.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      ' Cap check against tblServiceRateLimits for this (ServiceID, FiscalYear).
+      ' Permissive: missing rate-limit row means no cap. The data macro on
+      ' tblProviderServiceCatalog enforces the same rule with the same policy.
+      Dim maxRate As Variant
+      maxRate = DLookup("MaxRatePerHour", "tblServiceRateLimits", _
+                        "ServiceID=" & Me!ServiceID & _
+                        " AND FiscalYear=" & Me!FiscalYear)
+  
+      If Not IsNull(maxRate) Then
+          If Me!RatePerHour > maxRate Then
+              MsgBox "Rate of " & Format(Me!RatePerHour, "Currency") & _
+                     " exceeds the FY" & Me!FiscalYear & " maximum of " & _
+                     Format(maxRate, "Currency") & " for this service.", _
+                     vbExclamation, "Rate Exceeds Limit"
+              Me.RatePerHour.SetFocus
+              Cancel = True
+              Exit Sub
+          End If
+      End If
+  
+      ' Duplicate check: same provider + service + FY (any other row).
+      Dim selfID As Long
+      selfID = Nz(Me!ProviderServiceCatalogID, 0)
+      If DCount("*", "tblProviderServiceCatalog", _
+                "ProviderID=" & Me!ProviderID & _
+                " AND ServiceID=" & Me!ServiceID & _
+                " AND FiscalYear=" & Me!FiscalYear & _
+                " AND ProviderServiceCatalogID<>" & selfID) > 0 Then
+          MsgBox "This provider already has a catalog entry for this service " & _
+                 "in FY" & Me!FiscalYear & ".", vbExclamation, "Duplicate"
+          Cancel = True
+      End If
+  End Sub
+  
+  ' Heads-up message while the rate field is still focused, before save.
+  ' BeforeUpdate is the authoritative check; this is a UX nicety.
+  Private Sub RatePerHour_AfterUpdate()
+      If IsNull(Me!ServiceID) Or IsNull(Me!FiscalYear) Or IsNull(Me!RatePerHour) Then Exit Sub
+  
+      Dim maxRate As Variant
+      maxRate = DLookup("MaxRatePerHour", "tblServiceRateLimits", _
+                        "ServiceID=" & Me!ServiceID & _
+                        " AND FiscalYear=" & Me!FiscalYear)
+  
+      If Not IsNull(maxRate) And Me!RatePerHour > maxRate Then
+          MsgBox "Heads-up: this exceeds the FY" & Me!FiscalYear & _
+                 " cap of " & Format(maxRate, "Currency") & _
+                 " for this service.", vbInformation, "Above Cap"
+      End If
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Action buttons
+  ' ============================================================================
+  
+  Private Sub btnSave_Click()
+      On Error GoTo Failed
+      If Me.Dirty Then Me.Dirty = False    ' fires Form_BeforeUpdate
+      DoCmd.Close acForm, Me.name
+      Exit Sub
+  Failed:
+      ' Validation canceled the save ? leave the dialog open.
+  End Sub
+  
+  Private Sub btnCancel_Click()
+      m_Canceling = True
+      DoCmd.Close acForm, Me.name, acSaveNo
+  End Sub
+  
+  Private Sub btnDelete_Click()
+      If Me.NewRecord Then Exit Sub
+  
+      ' Block delete if any tblClientServicePlan row references this catalog row.
+      Dim inUse As Long
+      inUse = DCount("*", "tblClientServicePlan", _
+                     "ProviderServiceCatalogID=" & Me!ProviderServiceCatalogID)
+      If inUse > 0 Then
+          MsgBox "Cannot delete this catalog entry." & vbCrLf & vbCrLf & _
+                 inUse & " client service plan row(s) reference it. " & _
+                 "Remove or reassign those plans first.", _
+                 vbExclamation, "Catalog Entry In Use"
+          Exit Sub
+      End If
+  
+      If MsgBox("Delete this catalog entry?", _
+                vbYesNo + vbQuestion + vbDefaultButton2, _
+                "Confirm Delete") = vbNo Then Exit Sub
+  
+      On Error GoTo Failed
+      RunCommand acCmdSelectRecord
+      RunCommand acCmdDeleteRecord
+      DoCmd.Close acForm, Me.name
+      Exit Sub
+  
+  Failed:
+      MsgBox "Could not delete: " & Err.Description, vbCritical, "Delete Failed"
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Combo niceties
+  ' ============================================================================
+  
+  Private Sub cboServiceID_NotInList(NewData As String, Response As Integer)
+      Response = acDataErrContinue
+      MsgBox "To add a new service, use the Service List form.", _
+             vbInformation, "Add Service Elsewhere"
+  End Sub

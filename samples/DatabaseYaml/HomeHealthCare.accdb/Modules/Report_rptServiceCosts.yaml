@@ -1,0 +1,57 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_rptServiceCosts"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_FiscalYear As Integer
+  Private m_GrandTotal As Currency
+  
+  Private Sub Report_Open(Cancel As Integer)
+      DoCmd.OpenForm "frmReportParam_FY", , , , , acDialog
+  
+      If Not IsLoaded("frmReportParam_FY") Then
+          Cancel = True
+          Exit Sub
+      End If
+  
+      m_FiscalYear = Forms!frmReportParam_FY!cboFiscalYear
+      Me.RecordSource = "SELECT ServiceName, TotalCost, PctCost " & _
+          "FROM qryServiceCosts_ByFiscalYear WHERE FiscalYear = " & m_FiscalYear & ";"
+      DoCmd.Close acForm, "frmReportParam_FY"
+  End Sub
+  
+  Private Sub Report_NoData(Cancel As Integer)
+      MsgBox "No service cost data found for this fiscal year.", vbInformation
+      Cancel = True
+  End Sub
+  
+  Private Sub Detail_Print(Cancel As Integer, PrintCount As Integer)
+      ' Two-pass report logic — migration stress test
+      'If m_GrandTotal > 0 Then
+      '    Me.txtPctOfTotal = Format(Nz(Me.txtTotalCost, 0) / m_GrandTotal, "0.0%")
+      'Else
+      '    Me.txtPctOfTotal = "0.0%"
+      'End If
+  End Sub
+  
+  Private Sub ReportFooter_Format(Cancel As Integer, FormatCount As Integer)
+      'Me.txtGrandTotal = FormatCurrency(m_GrandTotal)
+  End Sub
+  
+  Private Function IsLoaded(ByVal strFormName As String) As Boolean
+      Dim frm As Access.Form
+      For Each frm In Application.Forms
+          If frm.name = strFormName Then
+              IsLoaded = True
+              Exit Function
+          End If
+      Next
+      IsLoaded = False
+  End Function

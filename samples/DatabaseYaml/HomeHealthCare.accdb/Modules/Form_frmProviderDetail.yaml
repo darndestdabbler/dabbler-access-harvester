@@ -1,0 +1,294 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmProviderDetail"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_IsDirty As Boolean
+  
+  ' ============================================================================
+  '  Replaces sfrmProviderServiceCatalog with lstProviderServiceCatalog.
+  '
+  '    lstProviderServiceCatalog
+  '      ColumnCount    = 4
+  '      ColumnWidths   = "0;3520;1320;1760"   ' first col (PK) hidden
+  '      ColumnHeads    = True
+  '      BoundColumn    = 1
+  '      RowSourceType  = "Table/Query"
+  '      Tied to: frmProviderServiceCatalogDetail
+  ' ============================================================================
+  
+  
+  Private Sub PopulateProviderServiceCatalog()
+      If Me.NewRecord Or IsNull(Me.ProviderID) Then
+          Me.lstProviderServiceCatalog.RowSource = ""
+          Exit Sub
+      End If
+  
+      Dim fy As Integer
+      fy = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+  
+      Dim baseSql As String
+      baseSql = _
+          "SELECT psc.ProviderServiceCatalogID AS ID, " & _
+                 "s.ServiceName AS [Service], " & _
+                 "psc.FiscalYear AS FY, " & _
+                 "Format(psc.RatePerHour,'$#,##0.00') AS [Rate/Hr] " & _
+          "FROM tblProviderServiceCatalog AS psc " & _
+               "INNER JOIN tblServices AS s ON s.ServiceID = psc.ServiceID " & _
+          "WHERE psc.ProviderID=" & Me.ProviderID & _
+            " AND psc.FiscalYear=" & fy
+  
+      Me.lstProviderServiceCatalog.RowSource = basListHelpers.BuildAddableRowSource( _
+          dataSelect:=baseSql, _
+          addLabel:="(Add new catalog entry...)", _
+          dataColCount:=4, _
+          orderBy:="2")           ' by Service name
+      Me.lstProviderServiceCatalog.Requery
+  End Sub
+  
+  
+  Private Sub lstProviderServiceCatalog_DblClick(Cancel As Integer)
+      Dim ctx As String
+      ctx = basListHelpers.BuildContextArgs( _
+                  "ProviderID", Me.ProviderID, _
+                  "FiscalYear", Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear()))
+  
+      basListHelpers.OpenDetailFromList Me.lstProviderServiceCatalog, _
+                                        "frmProviderServiceCatalogDetail", _
+                                        ctx
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Existing form logic (preserved)
+  ' ============================================================================
+  
+  Private Sub cboFilterFiscalYear_AfterUpdate()
+      PopulateProviderServiceCatalog
+      UpdateCopyButtonState
+  End Sub
+  Private Sub Form_Open(Cancel As Integer)
+      If IsNull(Me.OpenArgs) Then Exit Sub
+  
+      If UCase(Me.OpenArgs) = "ADD" Then
+          Me.DataEntry = True
+      ElseIf IsNumeric(Me.OpenArgs) Then
+          Dim rs As DAO.Recordset
+          Set rs = Me.RecordsetClone
+          rs.FindFirst "ProviderID=" & Me.OpenArgs
+          If Not rs.NoMatch Then
+              Me.Bookmark = rs.Bookmark
+          End If
+          Set rs = Nothing
+      End If
+  End Sub
+  
+  Private Sub Form_Current()
+      Me.Caption = Nz(Me.txtProviderName, "New Provider") & " - Provider Detail"
+  
+      ' License expiration check
+      If Not IsNull(Me.txtLicenseExpDate) Then
+          If Me.txtLicenseExpDate < Date Then
+              Me.lblLicenseWarning.Caption = "LICENSE EXPIRED"
+              Me.lblLicenseWarning.ForeColor = RGB(255, 0, 0)
+              Me.lblLicenseWarning.Visible = True
+          ElseIf Me.txtLicenseExpDate < DateAdd("d", 90, Date) Then
+              Me.lblLicenseWarning.Caption = "License expires soon"
+              Me.lblLicenseWarning.ForeColor = RGB(255, 165, 0)
+              Me.lblLicenseWarning.Visible = True
+          Else
+              Me.lblLicenseWarning.Visible = False
+          End If
+      Else
+          Me.lblLicenseWarning.Visible = False
+      End If
+  
+      m_IsDirty = False
+  
+      ' PK display: locked but visible (not grayed)
+      Me.txtProviderID.Locked = True
+      Me.txtProviderID.Enabled = True
+      Me.txtProviderID.BorderStyle = 0
+      Me.txtProviderID.TabStop = False
+  
+      ' Default the FY filter to whatever the combo's first item is.
+      On Error Resume Next
+      Me.cboFilterFiscalYear = Me.cboFilterFiscalYear.ItemData(1)
+      On Error GoTo 0
+  
+      PopulateProviderServiceCatalog
+      UpdateCopyButtonState
+  
+      On Error Resume Next
+      Me.btnSave.Enabled = False
+      On Error GoTo 0
+  End Sub
+  
+  Private Sub Form_BeforeUpdate(Cancel As Integer)
+      If IsNull(Me.txtProviderName) Or Me.txtProviderName = "" Then
+          MsgBox "Provider Name is required.", vbExclamation, "Validation"
+          Me.txtProviderName.SetFocus
+          Cancel = True
+      End If
+  End Sub
+  
+  Private Sub Form_Dirty(Cancel As Integer)
+      m_IsDirty = True
+      On Error Resume Next
+      Me.btnSave.Enabled = True
+      On Error GoTo 0
+  End Sub
+  
+  Private Sub Form_Undo(Cancel As Integer)
+      m_IsDirty = False
+      On Error Resume Next
+      Me.btnSave.Enabled = False
+      On Error GoTo 0
+  End Sub
+  
+  Private Sub txtLicenseExpDate_AfterUpdate()
+      If Not IsNull(Me.txtLicenseExpDate) Then
+          If Me.txtLicenseExpDate < Date Then
+              Me.lblLicenseWarning.Caption = "LICENSE EXPIRED"
+              Me.lblLicenseWarning.ForeColor = RGB(255, 0, 0)
+              Me.lblLicenseWarning.Visible = True
+          ElseIf Me.txtLicenseExpDate < DateAdd("d", 90, Date) Then
+              Me.lblLicenseWarning.Caption = "License expires soon"
+              Me.lblLicenseWarning.ForeColor = RGB(255, 165, 0)
+              Me.lblLicenseWarning.Visible = True
+          Else
+              Me.lblLicenseWarning.Visible = False
+          End If
+      Else
+          Me.lblLicenseWarning.Visible = False
+      End If
+  End Sub
+  Private Sub txtProviderName_Exit(Cancel As Integer)
+      ' Trim was moved to txtProviderName_BeforeUpdate to avoid the Form_Dirty-poisoning
+      ' quirk caused by self-assignment inside _Exit. See lessons-learned.md.
+      ' Safe to delete this Sub entirely once the form's OnExit binding is cleared
+      ' in Design View.
+  End Sub
+  Private Sub txtProviderName_BeforeUpdate(Cancel As Integer)
+      ' Use .Text (in-progress edit), not .Value (locked during BeforeUpdate).
+      Dim s As String
+      s = Trim(Nz(Me.txtProviderName.Text, ""))
+      If Len(s) > 0 Then
+          If s <> Me.txtProviderName.Text Then
+              Me.txtProviderName.Text = s
+          End If
+          ' Duplicate-name check (excluding this record)
+          If DCount("*", "tblProviders", "ProviderName='" & _
+                    Replace(s, "'", "''") & "' AND ProviderID<>" & _
+                    Nz(Me.ProviderID, 0)) > 0 Then
+              MsgBox "A provider with this name already exists.", vbExclamation, "Duplicate Name"
+              Cancel = True
+          End If
+      End If
+  End Sub
+  
+  Private Sub btnCopyCatalog_Click()
+      ' Copies all service-catalog entries for this provider from the most
+      ' recent populated prior FY into the FY currently selected in
+      ' cboFilterFiscalYear. Replace-all semantics, single up-front prompt.
+  
+      Dim targetFY As Long
+      targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+  
+      Dim srcVar As Variant
+      srcVar = basDataOperations.MostRecentPopulatedFY( _
+                  "tblProviderServiceCatalog", _
+                  "ProviderID=" & Me.ProviderID, _
+                  targetFY)
+  
+      If IsNull(srcVar) Then
+          MsgBox "No prior fiscal year has catalog entries to copy.", _
+                 vbInformation, "Nothing to Copy"
+          Exit Sub
+      End If
+  
+      Dim sourceFY As Integer
+      sourceFY = CInt(srcVar)
+  
+      Dim srcCount As Long, tgtCount As Long
+      srcCount = DCount("*", "tblProviderServiceCatalog", _
+                        "ProviderID=" & Me.ProviderID & " AND FiscalYear=" & sourceFY)
+      tgtCount = DCount("*", "tblProviderServiceCatalog", _
+                        "ProviderID=" & Me.ProviderID & " AND FiscalYear=" & targetFY)
+  
+      Dim msg As String
+      msg = "Copy " & srcCount & " catalog entry(ies) from FY" & sourceFY & _
+            " into FY" & targetFY & "?"
+      If tgtCount > 0 Then
+          msg = msg & vbCrLf & vbCrLf & _
+                "FY" & targetFY & " currently has " & tgtCount & _
+                " catalog entry(ies) for this provider. They will be replaced."
+      End If
+  
+      If MsgBox(msg, vbQuestion + vbOKCancel + vbDefaultButton1, _
+                "Copy from FY" & sourceFY) <> vbOK Then
+          Exit Sub
+      End If
+  
+      On Error GoTo Failed
+      Dim n As Long
+      n = basDataOperations.CopyProviderCatalog( _
+                  Me.ProviderID, sourceFY, CInt(targetFY), overwrite:=True)
+  
+      MsgBox n & " catalog entry(ies) copied from FY" & sourceFY & _
+             " to FY" & targetFY & ".", vbInformation, "Copy Complete"
+  
+      PopulateProviderServiceCatalog
+      UpdateCopyButtonState
+      Exit Sub
+  
+  Failed:
+      Select Case Err.Number
+          Case basDataOperations.ERR_CANCELED
+              ' silent
+          Case basDataOperations.ERR_SAME_FY
+              MsgBox Err.Description, vbExclamation, "Invalid Fiscal Years"
+          Case Else
+              MsgBox "Error copying catalog: " & Err.Description, vbCritical
+      End Select
+  End Sub
+  
+  ' ----------------------------------------------------------------------------
+  '  Refreshes btnCopyCatalog's label and visibility based on the currently
+  '  selected target FY and what prior-year data exists for this provider.
+  ' ----------------------------------------------------------------------------
+  Private Sub UpdateCopyButtonState()
+      On Error Resume Next   ' button may not exist yet during form load
+      If Me.NewRecord Or IsNull(Me.ProviderID) Then
+          Me.btnCopyCatalog.Visible = False
+          Exit Sub
+      End If
+  
+      Dim targetFY As Long
+      targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+  
+      Dim srcVar As Variant
+      srcVar = basDataOperations.MostRecentPopulatedFY( _
+                  "tblProviderServiceCatalog", _
+                  "ProviderID=" & Me.ProviderID, _
+                  targetFY)
+  
+      If IsNull(srcVar) Then
+          Me.btnCopyCatalog.Visible = False
+      Else
+          Me.btnCopyCatalog.Caption = "Copy from FY" & CLng(srcVar)
+          Me.btnCopyCatalog.Visible = True
+      End If
+  End Sub
+  
+  
+  Private Sub btnClose_Click()
+      DoCmd.Close acForm, Me.name
+  End Sub

@@ -1,0 +1,205 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Table"
+Name: "tlkpFiscalYears"
+Connect: ""
+SourceTableName: ""
+Attributes: "0"
+DDL: |
+  CREATE TABLE [tlkpFiscalYears] (
+      [FiscalYear] SHORT NOT NULL,
+      [StartDate] DATETIME NOT NULL,
+      [EndDate] DATETIME NOT NULL,
+      [IsCurrent] BIT DEFAULT False,
+      CONSTRAINT [PrimaryKey] PRIMARY KEY ([FiscalYear])
+  );
+Properties:
+  Name: "tlkpFiscalYears"
+  Updatable: "True"
+  DateCreated: "3/28/2026 11:13:38 AM"
+  LastUpdated: "5/3/2026 3:18:40 PM"
+  Connect: ""
+  Attributes: "0"
+  SourceTableName: ""
+  RecordCount: "4"
+  ValidationRule: ""
+  ValidationText: ""
+  ConflictTable: null  # SKIPPED: Cannot perform this operation.
+  ReplicaFilter: null  # SKIPPED: Cannot perform this operation.
+  Orientation: "0"
+  OrderByOn: "False"
+  DefaultView: "2"
+  DisplayViewsOnSharePointSite: "1"
+  TotalsRow: "False"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  HideNewField: "False"
+  BackTint: "100"
+  BackShade: "100"
+  ThemeFontIndex: "-1"
+  AlternateBackThemeColorIndex: "-1"
+  AlternateBackTint: "100"
+  AlternateBackShade: "100"
+  ReadOnlyWhenDisconnected: "False"
+  DatasheetGridlinesThemeColorIndex: "-1"
+  DatasheetForeThemeColorIndex: "-1"
+Fields:
+  - Name: "FiscalYear"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "3"
+      Name: "FiscalYear"
+      OrdinalPosition: "0"
+      Size: "2"
+      SourceField: "FiscalYear"
+      SourceTable: "tlkpFiscalYears"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      DisplayControl: "109"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "StartDate"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "8"
+      Name: "StartDate"
+      OrdinalPosition: "1"
+      Size: "8"
+      SourceField: "StartDate"
+      SourceTable: "tlkpFiscalYears"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "Short Date"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ShowDatePicker: "1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "EndDate"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "8"
+      Name: "EndDate"
+      OrdinalPosition: "2"
+      Size: "8"
+      SourceField: "EndDate"
+      SourceTable: "tlkpFiscalYears"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "Short Date"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ShowDatePicker: "1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "IsCurrent"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "1"
+      Name: "IsCurrent"
+      OrdinalPosition: "3"
+      Size: "1"
+      SourceField: "IsCurrent"
+      SourceTable: "tlkpFiscalYears"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: "False"
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "106"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+Indexes:
+  - Name: "PrimaryKey"
+    Primary: "True"
+    Unique: "True"
+    Required: "True"
+    Foreign: "False"
+    Fields: "FiscalYear"
+    Properties:
+      Name: "PrimaryKey"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "True"
+      Foreign: "False"
+      Required: "True"
+      IgnoreNulls: "False"
+      DistinctCount: "4"
+DataMacros: null  # No data macros defined.

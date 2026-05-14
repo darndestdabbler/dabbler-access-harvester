@@ -1,0 +1,295 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Table"
+Name: "tblServices"
+Connect: ""
+SourceTableName: ""
+Attributes: "0"
+DDL: |
+  CREATE TABLE [tblServices] (
+      [ServiceID] COUNTER,
+      [ServiceCode] TEXT(10) NOT NULL,
+      [ServiceName] TEXT(100) NOT NULL,
+      [ServiceCategory] TEXT(50),
+      [Description] LONGTEXT,
+      [IsActive] BIT DEFAULT True,
+      CONSTRAINT [PrimaryKey] PRIMARY KEY ([ServiceID]),
+      CONSTRAINT [UQ_ServiceCode] UNIQUE ([ServiceCode])
+  );
+Properties:
+  Name: "tblServices"
+  Updatable: "True"
+  DateCreated: "3/28/2026 11:13:39 AM"
+  LastUpdated: "5/13/2026 4:48:39 PM"
+  Connect: ""
+  Attributes: "0"
+  SourceTableName: ""
+  RecordCount: "12"
+  ValidationRule: ""
+  ValidationText: ""
+  ConflictTable: null  # SKIPPED: Cannot perform this operation.
+  ReplicaFilter: null  # SKIPPED: Cannot perform this operation.
+  Orientation: "0"
+  OrderByOn: "False"
+  DefaultView: "2"
+  DisplayViewsOnSharePointSite: "1"
+  TotalsRow: "False"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  HideNewField: "False"
+  BackTint: "100"
+  BackShade: "100"
+  ThemeFontIndex: "-1"
+  AlternateBackThemeColorIndex: "-1"
+  AlternateBackTint: "100"
+  AlternateBackShade: "100"
+  ReadOnlyWhenDisconnected: "False"
+  DatasheetGridlinesThemeColorIndex: "-1"
+  DatasheetForeThemeColorIndex: "-1"
+Fields:
+  - Name: "ServiceID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "17"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "ServiceID"
+      OrdinalPosition: "0"
+      Size: "4"
+      SourceField: "ServiceID"
+      SourceTable: "tblServices"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ServiceCode"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "ServiceCode"
+      OrdinalPosition: "1"
+      Size: "10"
+      SourceField: "ServiceCode"
+      SourceTable: "tblServices"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ServiceName"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "ServiceName"
+      OrdinalPosition: "2"
+      Size: "100"
+      SourceField: "ServiceName"
+      SourceTable: "tblServices"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ServiceCategory"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "ServiceCategory"
+      OrdinalPosition: "3"
+      Size: "50"
+      SourceField: "ServiceCategory"
+      SourceTable: "tblServices"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Description"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "12"
+      Name: "Description"
+      OrdinalPosition: "4"
+      Size: "0"
+      SourceField: "Description"
+      SourceTable: "tblServices"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextFormat: "0"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "IsActive"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "1"
+      Name: "IsActive"
+      OrdinalPosition: "5"
+      Size: "1"
+      SourceField: "IsActive"
+      SourceTable: "tblServices"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: "True"
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "106"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+Indexes:
+  - Name: "PrimaryKey"
+    Primary: "True"
+    Unique: "True"
+    Required: "True"
+    Foreign: "False"
+    Fields: "ServiceID"
+    Properties:
+      Name: "PrimaryKey"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "True"
+      Foreign: "False"
+      Required: "True"
+      IgnoreNulls: "False"
+      DistinctCount: "12"
+  - Name: "UQ_ServiceCode"
+    Primary: "False"
+    Unique: "True"
+    Required: "False"
+    Foreign: "False"
+    Fields: "ServiceCode"
+    Properties:
+      Name: "UQ_ServiceCode"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "False"
+      Foreign: "False"
+      Required: "False"
+      IgnoreNulls: "False"
+      DistinctCount: "12"
+DataMacros: null  # No data macros defined.

@@ -1,0 +1,311 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Table"
+Name: "tblProviderServiceCatalog"
+Connect: ""
+SourceTableName: ""
+Attributes: "0"
+DDL: |
+  CREATE TABLE [tblProviderServiceCatalog] (
+      [ProviderServiceCatalogID] COUNTER,
+      [ProviderID] LONG NOT NULL,
+      [ServiceID] LONG NOT NULL,
+      [FiscalYear] SHORT NOT NULL,
+      [RatePerHour] CURRENCY NOT NULL,
+      [Notes] LONGTEXT,
+      CONSTRAINT [PrimaryKey] PRIMARY KEY ([ProviderServiceCatalogID]),
+      CONSTRAINT [rel_Provider_Catalog] FOREIGN KEY ([ProviderID]) REFERENCES [tblProviders] ([ProviderID]) ON UPDATE CASCADE,
+      CONSTRAINT [rel_Service_ProviderCatalog] FOREIGN KEY ([ServiceID]) REFERENCES [tblServices] ([ServiceID]) ON UPDATE CASCADE
+  );
+Properties:
+  Name: "tblProviderServiceCatalog"
+  Updatable: "True"
+  DateCreated: "3/28/2026 11:13:39 AM"
+  LastUpdated: "5/13/2026 4:48:39 PM"
+  Connect: ""
+  Attributes: "0"
+  SourceTableName: ""
+  RecordCount: "53"
+  ValidationRule: ""
+  ValidationText: ""
+  ConflictTable: null  # SKIPPED: Cannot perform this operation.
+  ReplicaFilter: null  # SKIPPED: Cannot perform this operation.
+  Orientation: "0"
+  OrderByOn: "False"
+  DefaultView: "2"
+  DisplayViewsOnSharePointSite: "1"
+  TotalsRow: "False"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  HideNewField: "False"
+  BackTint: "100"
+  BackShade: "100"
+  ThemeFontIndex: "-1"
+  AlternateBackThemeColorIndex: "-1"
+  AlternateBackTint: "100"
+  AlternateBackShade: "100"
+  ReadOnlyWhenDisconnected: "False"
+  DatasheetGridlinesThemeColorIndex: "-1"
+  DatasheetForeThemeColorIndex: "-1"
+  PublishToWeb: "1"
+  FCMinWriteVer: "14.0.0000.0000"
+  FCMinDesignVer: "14.0.0000.0000"
+Fields:
+  - Name: "ProviderServiceCatalogID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "17"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "ProviderServiceCatalogID"
+      OrdinalPosition: "0"
+      Size: "4"
+      SourceField: "ProviderServiceCatalogID"
+      SourceTable: "tblProviderServiceCatalog"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ProviderID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "ProviderID"
+      OrdinalPosition: "1"
+      Size: "4"
+      SourceField: "ProviderID"
+      SourceTable: "tblProviderServiceCatalog"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      DisplayControl: "109"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ServiceID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "ServiceID"
+      OrdinalPosition: "2"
+      Size: "4"
+      SourceField: "ServiceID"
+      SourceTable: "tblProviderServiceCatalog"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      DisplayControl: "109"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "FiscalYear"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "3"
+      Name: "FiscalYear"
+      OrdinalPosition: "3"
+      Size: "2"
+      SourceField: "FiscalYear"
+      SourceTable: "tblProviderServiceCatalog"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      DisplayControl: "109"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "RatePerHour"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "5"
+      Name: "RatePerHour"
+      OrdinalPosition: "6"
+      Size: "8"
+      SourceField: "RatePerHour"
+      SourceTable: "tblProviderServiceCatalog"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ">0"
+      ValidationText: "Rate must be greater than zero."
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "$#,##0.00;($#,##0.00)"
+      DecimalPlaces: "2"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Notes"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "12"
+      Name: "Notes"
+      OrdinalPosition: "7"
+      Size: "0"
+      SourceField: "Notes"
+      SourceTable: "tblProviderServiceCatalog"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextFormat: "0"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+Indexes:
+  - Name: "PrimaryKey"
+    Primary: "True"
+    Unique: "True"
+    Required: "True"
+    Foreign: "False"
+    Fields: "ProviderServiceCatalogID"
+    Properties:
+      Name: "PrimaryKey"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "True"
+      Foreign: "False"
+      Required: "True"
+      IgnoreNulls: "False"
+      DistinctCount: "53"
+  - Name: "rel_Provider_Catalog"
+    Primary: "False"
+    Unique: "False"
+    Required: "False"
+    Foreign: "True"
+    Fields: "ProviderID"
+    Properties:
+      Name: "rel_Provider_Catalog"
+      Unique: "False"
+      Clustered: "False"
+      Primary: "False"
+      Foreign: "True"
+      Required: "False"
+      IgnoreNulls: "False"
+      DistinctCount: "5"
+  - Name: "rel_Service_ProviderCatalog"
+    Primary: "False"
+    Unique: "False"
+    Required: "False"
+    Foreign: "True"
+    Fields: "ServiceID"
+    Properties:
+      Name: "rel_Service_ProviderCatalog"
+      Unique: "False"
+      Clustered: "False"
+      Primary: "False"
+      Foreign: "True"
+      Required: "False"
+      IgnoreNulls: "False"
+      DistinctCount: "11"
+DataMacros: |
+  <?xml version="1.0" encoding="UTF-16" standalone="no"?>
+  <DataMacros xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><DataMacro Event="BeforeChange"><Statements><Action Name="SetLocalVar"><Argument Name="Name">CurrentServiceID</Argument><Argument Name="Value">[tblProviderServiceCatalog].[ServiceID]</Argument></Action><Action Name="SetLocalVar"><Argument Name="Name">CurrentFiscalYear</Argument><Argument Name="Value">[tblProviderServiceCatalog].[FiscalYear]</Argument></Action><Action Name="SetLocalVar"><Argument Name="Name">MaxRateForService</Argument><Argument Name="Value">Null</Argument></Action><LookUpRecord><Data><Reference>tblServiceRateLimits</Reference><WhereCondition>[tblServiceRateLimits].[ServiceID]=[CurrentServiceID] And [tblServiceRateLimits].[FiscalYear]=[CurrentFiscalYear]</WhereCondition></Data><Statements><Action Name="SetLocalVar"><Argument Name="Name">MaxRateForService</Argument><Argument Name="Value">[tblServiceRateLimits].[MaxRatePerHour]</Argument></Action></Statements></LookUpRecord><ConditionalBlock><If><Condition>Not IsNull([MaxRateForService])</Condition><Statements><ConditionalBlock><If><Condition>[RatePerHour]&gt;[MaxRateForService]</Condition><Statements><Action Name="RaiseError"><Argument Name="Number">1001</Argument><Argument Name="Description">"Rate per hour exceeds the maximum allowed for this service in this fiscal year."</Argument></Action></Statements></If></ConditionalBlock></Statements></If></ConditionalBlock></Statements></DataMacro></DataMacros>

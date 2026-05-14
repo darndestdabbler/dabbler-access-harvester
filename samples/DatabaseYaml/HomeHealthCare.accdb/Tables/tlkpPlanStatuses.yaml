@@ -1,0 +1,130 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Table"
+Name: "tlkpPlanStatuses"
+Connect: ""
+SourceTableName: ""
+Attributes: "0"
+DDL: |
+  CREATE TABLE [tlkpPlanStatuses] (
+      [StatusID] COUNTER,
+      [StatusName] TEXT(20) NOT NULL,
+      CONSTRAINT [PrimaryKey] PRIMARY KEY ([StatusID])
+  );
+Properties:
+  Name: "tlkpPlanStatuses"
+  Updatable: "True"
+  DateCreated: "3/28/2026 11:13:38 AM"
+  LastUpdated: "5/3/2026 3:18:40 PM"
+  Connect: ""
+  Attributes: "0"
+  SourceTableName: ""
+  RecordCount: "2"
+  ValidationRule: ""
+  ValidationText: ""
+  ConflictTable: null  # SKIPPED: Cannot perform this operation.
+  ReplicaFilter: null  # SKIPPED: Cannot perform this operation.
+  Orientation: "0"
+  OrderByOn: "False"
+  DefaultView: "2"
+  DisplayViewsOnSharePointSite: "1"
+  TotalsRow: "False"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  HideNewField: "False"
+  BackTint: "100"
+  BackShade: "100"
+  ThemeFontIndex: "-1"
+  AlternateBackThemeColorIndex: "-1"
+  AlternateBackTint: "100"
+  AlternateBackShade: "100"
+  ReadOnlyWhenDisconnected: "False"
+  DatasheetGridlinesThemeColorIndex: "-1"
+  DatasheetForeThemeColorIndex: "-1"
+Fields:
+  - Name: "StatusID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "17"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "StatusID"
+      OrdinalPosition: "0"
+      Size: "4"
+      SourceField: "StatusID"
+      SourceTable: "tlkpPlanStatuses"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "StatusName"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "StatusName"
+      OrdinalPosition: "1"
+      Size: "20"
+      SourceField: "StatusName"
+      SourceTable: "tlkpPlanStatuses"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+Indexes:
+  - Name: "PrimaryKey"
+    Primary: "True"
+    Unique: "True"
+    Required: "True"
+    Foreign: "False"
+    Fields: "StatusID"
+    Properties:
+      Name: "PrimaryKey"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "True"
+      Foreign: "False"
+      Required: "True"
+      IgnoreNulls: "False"
+      DistinctCount: "2"
+DataMacros: null  # No data macros defined.

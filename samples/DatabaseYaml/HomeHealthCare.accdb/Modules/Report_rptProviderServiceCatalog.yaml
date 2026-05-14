@@ -1,0 +1,42 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_rptProviderServiceCatalog"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private Sub Report_Open(Cancel As Integer)
+      DoCmd.OpenForm "frmReportParam_Provider", , , , , acDialog
+  
+      If Not IsLoaded("frmReportParam_Provider") Then
+          Cancel = True
+          Exit Sub
+      End If
+  
+      Dim provId As Long
+      provId = Forms!frmReportParam_Provider!cboProvider  ' Reuses param form
+      Me.RecordSource = "SELECT * FROM qryProviderServiceCatalogDetail WHERE ProviderID = " & provId
+      DoCmd.Close acForm, "frmReportParam_Provider"
+  End Sub
+  
+  Private Sub Report_NoData(Cancel As Integer)
+      MsgBox "No service catalog data found for this provider.", vbInformation
+      Cancel = True
+  End Sub
+  
+  
+  Private Function IsLoaded(ByVal strFormName As String) As Boolean
+      Dim frm As Access.Form
+      For Each frm In Application.Forms
+          If frm.name = strFormName Then
+              IsLoaded = True
+              Exit Function
+          End If
+      Next
+      IsLoaded = False
+  End Function

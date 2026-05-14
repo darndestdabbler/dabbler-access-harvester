@@ -1,0 +1,455 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "basUtilities"
+ModuleType: "Standard"
+Definition: |
+  Option Compare Database
+  Option Explicit
+  
+  Public Const FILTER_ALL As Integer = -1
+  
+  Public Function GetCountOfClientsByFiscalYear(FiscalYear As Integer) As Integer
+  
+      Dim distinctCount As Integer
+      ' We use a subquery to get unique IDs first
+      distinctCount = DBEngine(0)(0).OpenRecordset( _
+          "SELECT COUNT(*) FROM (SELECT DISTINCT ClientID FROM tblClientServiceNeeds WHERE FiscalYear = " & FiscalYear & ")" _
+          ).Fields(0)
+  
+      GetCountOfClientsByFiscalYear = distinctCount
+  
+  End Function
+  
+  
+  
+  Public Function GetRptClientServicePlanAndShortFallTotals(ByVal ClientID As Integer, ByVal FiscalYear As Integer) As String
+  
+      Dim result As String
+      Dim TotalCost As Currency
+      Dim grandTotalCost As Currency
+      Dim budgetAmount As Currency
+      Dim shortfall As Currency
+      Dim sql As String
+  
+      sql = "SELECT FiscalYear, AnnualBudget, TotalPlannedCost, RemainingBudget FROM qryClientBudgetSummary WHERE " & _
+              "ClientID=" & ClientID & " AND FiscalYear=" & FiscalYear
+  
+      Dim db As DAO.Database
+      Dim rs As DAO.Recordset
+      Set db = CurrentDb
+      Set rs = db.OpenRecordset(sql, dbOpenSnapshot)
+  
+      If rs.EOF Then
+          TotalCost = 0
+          budgetAmount = 0
+          shortfall = 0
+      Else
+          TotalCost = rs!TotalPlannedCost
+          budgetAmount = rs!AnnualBudget
+          shortfall = rs!RemainingBudget
+      End If
+  
+      rs.Close
+      Set rs = Nothing
+      Set db = Nothing
+      
+  
+      result = Quote("Total Planned Cost") & ";" & Quote(FormatCurrency(TotalCost, 2)) & ";"
+      result = result & Quote("Budget") & ";" & Quote(FormatCurrency(budgetAmount, 2)) & ";"
+      result = result & Quote("Shortfall") & ";" & Quote(FormatCurrency(shortfall, 2))
+      
+      
+      GetRptClientServicePlanAndShortFallTotals = result
+  
+  End Function
+  
+  
+  Public Function Quote(stringToQuote) As String
+      Quote = Chr(34) & Nz(stringToQuote, "") & Chr(34)
+  End Function
+  
+  
+  Public Function GetFiscalYearFromTo(ByRef sourceFY As Integer, _
+                                       ByRef targetFY As Integer) As Boolean
+      sourceFY = -1
+      targetFY = -1
+      
+      If Not PromptForFiscalYear("Enter the 4-digit fiscal year to copy from", _
+                                 "Copy From", sourceFY) Then
+          Exit Function
+      End If
+      
+      If Not PromptForFiscalYear("Enter the 4-digit fiscal year to copy to", _
+                                 "Copy To", targetFY) Then
+          Exit Function
+      End If
+      
+      If sourceFY = targetFY Then
+          MsgBox "Source and target fiscal years must be different.", _
+                 vbExclamation, "Same Fiscal Year"
+          Exit Function
+      End If
+      
+      GetFiscalYearFromTo = True
+  End Function
+  
+  Private Function PromptForFiscalYear(prompt As String, title As String, _
+                                        ByRef fy As Integer) As Boolean
+      Dim raw As String
+      Dim i As Integer
+      
+      raw = InputBox(prompt, title)
+      
+      If Len(raw) = 0 Then
+          ' User canceled or entered nothing — silent exit, no message
+          Exit Function
+      End If
+      
+      If Len(raw) <> 4 Then
+          MsgBox "Please enter exactly four digits.", vbExclamation, "Invalid Year"
+          Exit Function
+      End If
+      
+      For i = 1 To 4
+          If Mid(raw, i, 1) < "0" Or Mid(raw, i, 1) > "9" Then
+              MsgBox "Please enter only digits.", vbExclamation, "Invalid Year"
+              Exit Function
+          End If
+      Next i
+      
+      fy = CInt(raw)
+      
+      If fy < 1900 Or fy > 2100 Then
+          MsgBox "Fiscal year must be between 1900 and 2100.", vbExclamation, "Invalid Year"
+          Exit Function
+      End If
+      
+      PromptForFiscalYear = True
+  End Function
+  
+  
+  ' Adds "(All)" to top of list
+  Public Function GetFilterRowSourceFromSqlSelect(sqlSelect As String) As String
+      
+      Dim db As DAO.Database
+      Dim rs As DAO.Recordset
+      Dim strSQL As String
+      
+      Set db = CurrentDb
+      Set rs = db.OpenRecordset(sqlSelect, dbOpenDynaset)
+          
+      ' build the dictionary by looping through the recordset
+      rs.MoveFirst
+      
+      Dim fldCount As Integer
+      fldCount = rs.Fields.count
+      Dim fldArray() As Variant
+      ReDim fldArray(fldCount - 1)
+          
+      Dim rsArray() As String
+      Dim i As Integer
+      Dim j As Integer
+      
+      ' column headers
+      For j = 0 To fldCount - 1
+          fldArray(j) = rs.Fields(j).name
+      Next j
+      
+      ReDim rsArray(0)
+      rsArray(0) = Join(fldArray, ";")
+          
+      
+      ' (All) entry
+      For j = 0 To fldCount - 1
+          fldArray(j) = "(All)"
+      Next j
+      ReDim Preserve rsArray(1)
+      rsArray(1) = Join(fldArray, ";")
+                  
+                  
+      ' build array of semicolon-separated strings representing records
+      i = -1
+      rs.MoveFirst
+      Do While Not rs.EOF
+          i = i + 1
+          ReDim Preserve rsArray(i + 2)
+          For j = 0 To fldCount - 1
+              fldArray(j) = Nz(rs(j).Value, "")
+          Next j
+          rsArray(i + 2) = Join(fldArray, ";")
+          rs.MoveNext
+      Loop
+      
+      rs.Close
+      Set rs = Nothing
+      Set db = Nothing
+      
+      ' join records with semicolons
+      GetFilterRowSourceFromSqlSelect = Join(rsArray, ";")
+      
+  End Function
+  
+  
+  ' Adds "(All)" to top of list
+  ' Bound column returns FILTER_ALL (-1) for the All option
+  Public Function GetFilterRowSourceFromDict(dict As Scripting.Dictionary) As String
+          
+      Dim rs As ADODB.Recordset
+      Set rs = New ADODB.Recordset
+      
+      With rs
+          .Fields.Append "Value", adInteger
+          .Fields.Append "Caption", adVarChar, 50
+          .CursorLocation = adUseClient
+      End With
+          
+      rs.Open
+          
+      ' build recordset from dicitonary
+      Dim k As Variant
+      For Each k In dict.Keys
+          With rs
+              .AddNew
+              .Fields("Value").Value = k
+              .Fields("Caption").Value = dict(k)
+              .Update
+          End With
+      Next
+                                      
+      ' add 'All' option
+      With rs
+          .AddNew
+          .Fields("Value").Value = FILTER_ALL
+          .Fields("Caption").Value = "(All)"
+          .Update
+      End With
+                                      
+      ' sort; (All) floats to top
+      rs.Sort = "Value ASC"
+      
+      Dim rsArray() As String
+      Dim i As Integer
+      
+      ' build array of semicolon-separated strings representing records
+      i = -1
+      rs.MoveFirst
+      Do While Not rs.EOF
+          i = i + 1
+          ReDim Preserve rsArray(i)
+          rsArray(i) = rs!Value & ";" & rs!Caption
+          rs.MoveNext
+      Loop
+      
+      rs.Close
+      Set rs = Nothing
+      
+      ' join records with semicolons
+      GetFilterRowSourceFromDict = Join(rsArray, ";")
+      
+              
+  End Function
+  
+  
+  
+  
+  ' --- Tag-driven required field check ---
+  ' Returns comma-delimited list of control names where Tag="Required" and value is empty.
+  ' Sets TempVars!RequiredButMissing for use by embedded macros (BeforeUpdate).
+  ' Migration stress test: RunCode + TempVars + Tag-driven metadata loop.
+  Public Function CheckRequiredTags(frm As Form) As String
+      Dim ctl As Control
+      Dim missing As String
+      Dim val As Variant
+      
+      For Each ctl In frm.Controls
+          If ctl.Tag = "Required" Then
+              Select Case ctl.ControlType
+                  Case acTextBox, acComboBox, acListBox
+                      val = ctl.Value
+                      If IsNull(val) Or val = "" Then
+                          If missing <> "" Then missing = missing & ", "
+                          missing = missing & ctl.name
+                      End If
+                  Case acCheckBox
+                      ' "Required" on a checkbox = must be True
+                      If ctl.Value <> True Then
+                          If missing <> "" Then missing = missing & ", "
+                          missing = missing & ctl.name
+                      End If
+                  Case acOptionGroup
+                      If IsNull(ctl.Value) Then
+                          If missing <> "" Then missing = missing & ", "
+                          missing = missing & ctl.name
+                      End If
+              End Select
+          End If
+      Next ctl
+      
+      TempVars!RequiredButMissing = missing
+      CheckRequiredTags = missing
+  End Function
+  
+  Public Function SqlQuote(v As Variant, _
+                            Optional pre As Variant, _
+                            Optional post As Variant) As String
+      ' Wraps a value in single quotes, doubling embedded apostrophes.
+      ' If pre or post is supplied, treats this as a LIKE expression:
+      '   - escapes LIKE metacharacters (* ? [ #) in the value
+      '   - inserts pre/post wildcards inside the quotes
+      Dim s As String
+      s = Replace(Nz(v, ""), "'", "''")
+  
+      Dim isLike As Boolean
+      isLike = (Not IsMissing(pre)) Or (Not IsMissing(post))
+  
+      If isLike Then s = EscapeLike(s)
+  
+      Dim preStr As String, postStr As String
+      If Not IsMissing(pre) Then preStr = CStr(pre)
+      If Not IsMissing(post) Then postStr = CStr(post)
+  
+      SqlQuote = "'" & preStr & s & postStr & "'"
+  End Function
+  
+  Public Function EscapeLike(ByVal s As String) As String
+      Dim out As String, i As Long, ch As String
+      For i = 1 To Len(s)
+          ch = Mid$(s, i, 1)
+          If InStr("*?[#", ch) > 0 Then
+              out = out & "[" & ch & "]"
+          Else
+              out = out & ch
+          End If
+      Next i
+      EscapeLike = out
+  End Function
+  
+  Public Function whereClause(where() As String) As String
+      Dim filtered() As String
+      Dim i As Long
+      Dim n As Long
+      Dim hasAny As Boolean
+      
+      ' Detect if the array was ever ReDim'd (uninitialized dynamic arrays can't be read)
+      On Error Resume Next
+      n = UBound(where) - LBound(where) + 1
+      If Err.Number <> 0 Then
+          Err.Clear
+          Exit Function    ' uninitialized array — return ""
+      End If
+      On Error GoTo 0
+      
+      ReDim filtered(0 To n - 1)
+      Dim count As Long
+      count = 0
+      For i = LBound(where) To UBound(where)
+          If Len(where(i)) > 0 Then
+              filtered(count) = where(i)
+              count = count + 1
+              hasAny = True
+          End If
+      Next i
+      
+      If Not hasAny Then Exit Function
+      
+      ReDim Preserve filtered(0 To count - 1)
+      whereClause = " WHERE (" & Join(filtered, ") AND (") & ") "
+  End Function
+  
+  Public Function TestWhereClause() As String
+      Dim clauses As New Collection
+      clauses.Add "id = 100"
+      clauses.Add "name = 'Jim'"
+      TestWhereClause = whereClauseFromCollection(clauses)
+  End Function
+  
+  Public Function whereClauseFromCollection(clauses As Collection) As String
+      If clauses.count = 0 Then Exit Function
+      Dim arr() As String
+      ReDim arr(0 To clauses.count - 1)
+      Dim i As Long
+      For i = 1 To clauses.count
+          arr(i - 1) = clauses(i)
+      Next i
+      whereClauseFromCollection = " WHERE (" & Join(arr, ") AND (") & ") "
+  End Function
+  
+  
+  
+  ' --- Age calculation (used in qryClientAge) ---
+  Public Function CalcAge(DateOfBirth As Variant) As Variant
+      If IsNull(DateOfBirth) Then
+          CalcAge = Null
+          Exit Function
+      End If
+      If Not IsDate(DateOfBirth) Then
+          CalcAge = Null
+          Exit Function
+      End If
+      If DateOfBirth > Date Then
+          CalcAge = Null
+          Exit Function
+      End If
+      
+      Dim age As Long
+      age = Year(Date) - Year(DateOfBirth)
+      If DateSerial(Year(Date), Month(DateOfBirth), Day(DateOfBirth)) > Date Then
+          age = age - 1
+      End If
+      CalcAge = age
+  End Function
+  
+  ' --- Budget utilization (used in qryBudgetUtilization) ---
+  Public Function GetBudgetUtilizationPct(ClientID As Long, FiscalYear As Integer) As Variant
+      Dim budget As Currency
+      Dim planned As Currency
+  
+      budget = Nz(DLookup("AnnualBudget", "tblClientBudgets", _
+                          "ClientID=" & ClientID & " AND FiscalYear=" & FiscalYear), 0)
+      If budget = 0 Then
+          GetBudgetUtilizationPct = Null
+          Exit Function
+      End If
+  
+      planned = Nz(DSum("AnnualEstCost", "tblClientServicePlan", _
+                        "FiscalYear=" & FiscalYear & _
+                        " AND ClientServiceNeedID IN (SELECT ClientServiceNeedID FROM tblClientServiceNeeds WHERE ClientID=" & ClientID & ")"), 0)
+  
+      GetBudgetUtilizationPct = Round((planned / budget) * 100, 1)
+  End Function
+  
+  ' --- Current fiscal year helper (used in crosstab queries) ---
+  Public Function GetCurrentFiscalYear() As Integer
+      Dim result As Variant
+      result = DLookup("FiscalYear", "tlkpFiscalYears", "IsCurrent = True")
+      If IsNull(result) Then
+          ' Fallback: assume July-June FY; if current month >= July, FY = next calendar year
+          If Month(Date) >= 7 Then
+              GetCurrentFiscalYear = Year(Date) + 1
+          Else
+              GetCurrentFiscalYear = Year(Date)
+          End If
+      Else
+          GetCurrentFiscalYear = CInt(result)
+      End If
+  End Function
+  
+  ' --- Format phone number ---
+  Public Function FormatPhone(PhoneRaw As Variant) As String
+      If IsNull(PhoneRaw) Then FormatPhone = "": Exit Function
+      Dim digits As String
+      Dim i As Integer
+      For i = 1 To Len(PhoneRaw)
+          If IsNumeric(Mid(PhoneRaw, i, 1)) Then digits = digits & Mid(PhoneRaw, i, 1)
+      Next i
+      If Len(digits) = 10 Then
+          FormatPhone = "(" & Left(digits, 3) & ") " & Mid(digits, 4, 3) & "-" & Right(digits, 4)
+      Else
+          FormatPhone = CStr(PhoneRaw)
+      End If
+  End Function
+  
+  ' --- Weeks between two dates ---
+  Public Function WeeksBetween(StartDate As Date, EndDate As Date) As Double
+      WeeksBetween = DateDiff("d", StartDate, EndDate) / 7
+  End Function

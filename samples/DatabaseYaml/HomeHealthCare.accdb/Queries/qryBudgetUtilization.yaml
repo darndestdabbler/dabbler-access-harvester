@@ -1,0 +1,29 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryBudgetUtilization"
+QueryType: "Select"
+SQL: |
+  SELECT c.ClientID, c.LastName & ", " & c.FirstName AS ClientName, cb.FiscalYear, cb.AnnualBudget, GetBudgetUtilizationPct([c].[ClientID],[cb].[FiscalYear]) AS UtilizationPct
+  FROM tblClients AS c INNER JOIN tblClientBudgets AS cb ON c.ClientID = cb.ClientID
+  ORDER BY cb.FiscalYear DESC , c.LastName;
+  
+Properties:
+  DateCreated: "3/28/2026 11:13:40 AM"
+  LastUpdated: "5/3/2026 3:18:40 PM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "60"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  RecordsetType: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  TotalsRow: "False"

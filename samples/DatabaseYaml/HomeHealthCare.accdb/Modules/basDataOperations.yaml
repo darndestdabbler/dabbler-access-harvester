@@ -1,0 +1,566 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "basDataOperations"
+ModuleType: "Standard"
+Definition: |
+  Option Compare Database
+  Option Explicit
+  
+  Public Const ERR_SAME_FY  As Long = vbObjectError + 1001
+  Public Const ERR_CANCELED As Long = vbObjectError + 1002
+  
+  Private Sub ValidateFYs(sourceFY As Integer, targetFY As Integer)
+      If sourceFY = targetFY Then
+          Err.Raise ERR_SAME_FY, "basDataOperations", _
+                    "Source and target fiscal years must differ (got " & sourceFY & ")."
+      End If
+  End Sub
+  
+  
+  ' Returns number of rows copied.
+  ' Raises ERR_CANCELED on user cancel; ERR_SAME_FY on equal FYs.
+  Public Function CopyProviderCatalog(ProviderID As Long, _
+                                      sourceFY As Integer, _
+                                      targetFY As Integer, _
+                                      Optional ByVal overwrite As Variant) As Long
+      Dim cn As ADODB.Connection
+      Dim rsSource As ADODB.Recordset
+      Dim rsTarget As ADODB.Recordset
+      Dim fld As ADODB.Field
+      Dim transactionActive As Boolean
+      Dim rowsCopied As Long
+  
+      ' Buffer the source rows so we can close rsSource before BeginTrans.
+      Dim sourceRows() As Variant
+      Dim sourceCount As Long
+      Dim fieldNames() As String
+      Dim fieldCount As Long
+  
+      ValidateFYs sourceFY, targetFY
+  
+      Set cn = CurrentProject.Connection
+  
+      Set rsSource = New ADODB.Recordset
+      rsSource.Open "SELECT ProviderID, ServiceID, RatePerHour, Notes " & _
+                    "FROM tblProviderServiceCatalog " & _
+                    "WHERE ProviderID=" & ProviderID & _
+                    "  AND FiscalYear=" & sourceFY, _
+                    cn, adOpenStatic, adLockReadOnly
+  
+      If rsSource.EOF Then
+          rsSource.Close
+          Set rsSource = Nothing
+          CopyProviderCatalog = 0
+          Exit Function
+      End If
+  
+      ' Snapshot field names + values, then close the read cursor.
+      fieldCount = rsSource.Fields.count
+      ReDim fieldNames(0 To fieldCount - 1)
+      Dim i As Long
+      For i = 0 To fieldCount - 1
+          fieldNames(i) = rsSource.Fields(i).name
+      Next i
+  
+      ReDim sourceRows(0 To fieldCount - 1, 0 To 1023)
+      Do Until rsSource.EOF
+          If sourceCount > UBound(sourceRows, 2) Then
+              ReDim Preserve sourceRows(0 To fieldCount - 1, 0 To sourceCount + 1023)
+          End If
+          For i = 0 To fieldCount - 1
+              sourceRows(i, sourceCount) = rsSource.Fields(i).Value
+          Next i
+          sourceCount = sourceCount + 1
+          rsSource.MoveNext
+      Loop
+      rsSource.Close
+      Set rsSource = Nothing
+  
+      ' --- Target check / overwrite decision ---
+      Dim targetExists As Long
+      targetExists = DCount("*", "tblProviderServiceCatalog", _
+                            "ProviderID=" & ProviderID & " AND FiscalYear=" & targetFY)
+  
+      If targetExists > 0 Then
+          Dim doOverwrite As Boolean
+          If IsMissing(overwrite) Then
+              doOverwrite = (MsgBox("A catalog for Provider " & ProviderID & _
+                                    " in FY" & targetFY & " already exists. Overwrite?", _
+                                    vbExclamation + vbOKCancel + vbDefaultButton2, _
+                                    "Overwrite Existing Catalog?") = vbOK)
+          Else
+              doOverwrite = CBool(overwrite)
+          End If
+          If Not doOverwrite Then
+              Err.Raise ERR_CANCELED, "CopyProviderCatalog", "User canceled overwrite."
+          End If
+      End If
+  
+      On Error GoTo CopyError
+  
+      cn.BeginTrans
+      transactionActive = True
+  
+      If targetExists > 0 Then
+          cn.Execute "DELETE FROM tblProviderServiceCatalog " & _
+                     "WHERE ProviderID=" & ProviderID & _
+                     "  AND FiscalYear=" & targetFY, _
+                     , adExecuteNoRecords
+      End If
+  
+      ' Empty-shaped target for AddNew
+      Set rsTarget = New ADODB.Recordset
+      rsTarget.Open "SELECT ProviderServiceCatalogID, ProviderID, ServiceID, " & _
+                    "       FiscalYear, RatePerHour, Notes " & _
+                    "FROM tblProviderServiceCatalog WHERE 1=0", _
+                    cn, adOpenKeyset, adLockOptimistic
+  
+      Dim r As Long
+      For r = 0 To sourceCount - 1
+          rsTarget.AddNew
+          For i = 0 To fieldCount - 1
+              Select Case LCase$(fieldNames(i))
+                  Case "providerservicecatalogid"
+                      ' identity — never copy
+                  Case Else
+                      rsTarget.Fields(fieldNames(i)).Value = sourceRows(i, r)
+              End Select
+          Next i
+          rsTarget!FiscalYear = targetFY
+          rsTarget.Update
+          rowsCopied = rowsCopied + 1
+      Next r
+  
+      cn.CommitTrans
+      transactionActive = False
+  
+  Cleanup:
+      On Error Resume Next
+      If Not rsTarget Is Nothing Then
+          If rsTarget.State = adStateOpen Then rsTarget.Close
+      End If
+      Set rsTarget = Nothing
+      Set cn = Nothing
+      On Error GoTo 0
+  
+      CopyProviderCatalog = rowsCopied
+      Exit Function
+  
+  CopyError:
+      Dim savedErr As Long, savedDesc As String, savedSrc As String
+      savedErr = Err.Number
+      savedDesc = Err.Description
+      savedSrc = Err.Source
+  
+      If transactionActive Then
+          On Error Resume Next
+          cn.RollbackTrans
+          On Error GoTo 0
+          transactionActive = False
+      End If
+  
+      On Error Resume Next
+      If Not rsTarget Is Nothing Then
+          If rsTarget.State = adStateOpen Then rsTarget.Close
+      End If
+      Set rsTarget = Nothing
+      Set cn = Nothing
+      On Error GoTo 0
+  
+      Err.Raise savedErr, savedSrc, savedDesc
+  End Function
+  
+  
+  ' ----------------------------------------------------------------------------
+  '  MostRecentPopulatedFY
+  '
+  '  Returns the largest FiscalYear in tableName matching scopeWhere, optionally
+  '  excluding excludeFY (so the "current" target year doesn't qualify as its
+  '  own source). Returns Null if no matching rows exist.
+  '
+  '  Example:
+  '    srcFY = MostRecentPopulatedFY("tblProviderServiceCatalog", _
+  '                                   "ProviderID=" & Me.ProviderID, _
+  '                                   targetFY)
+  ' ----------------------------------------------------------------------------
+  Public Function MostRecentPopulatedFY(tableName As String, _
+                                         scopeWhere As String, _
+                                         Optional excludeFY As Variant) As Variant
+      Dim sql As String
+      Dim where As String
+  
+      where = scopeWhere
+      If Not IsMissing(excludeFY) Then
+          If Len(where) > 0 Then where = where & " AND "
+          where = where & "FiscalYear < " & CLng(excludeFY)
+      End If
+  
+      If Len(where) > 0 Then where = " WHERE " & where
+  
+      sql = "SELECT MAX(FiscalYear) AS MaxFY FROM " & tableName & where
+  
+      Dim db As DAO.Database
+      Dim rs As DAO.Recordset
+      Set db = CurrentDb
+      Set rs = db.OpenRecordset(sql, dbOpenSnapshot)
+  
+      If rs.EOF Then
+          MostRecentPopulatedFY = Null
+      Else
+          MostRecentPopulatedFY = rs!MaxFY    ' Null if no rows matched
+      End If
+  
+      rs.Close
+      Set rs = Nothing
+      Set db = Nothing
+  End Function
+  Public Function CopyClientNeedsAndPlans(ClientID As Long, _
+                                           sourceFY As Integer, _
+                                           targetFY As Integer, _
+                                           Optional ByVal overwrite As Variant, _
+                                           Optional ByRef plansCopied As Long, _
+                                           Optional ByRef plansSkipped As Long) As Long
+      Dim ws As DAO.Workspace
+      Dim db As DAO.Database
+      Dim rsSource As DAO.Recordset
+      Dim rsTarget As DAO.Recordset
+      Dim rsPlans As DAO.Recordset
+      Dim transactionActive As Boolean
+      Dim needsCopied As Long
+      Dim sourceNotes As String
+      Dim targetStart As Variant
+      Dim oldNeedID As Long
+      Dim newNeedID As Long
+      Dim newCatID As Variant
+      Dim newPlanNotes As String
+  
+      plansCopied = 0
+      plansSkipped = 0
+  
+      targetStart = DLookup("StartDate", "tlkpFiscalYears", "FiscalYear=" & targetFY)
+      If IsNull(targetStart) Then
+          Err.Raise vbObjectError + 1003, "CopyClientNeedsAndPlans", _
+                    "FY" & targetFY & " is not defined in tlkpFiscalYears."
+      End If
+  
+      ValidateFYs sourceFY, targetFY
+  
+      Set ws = DBEngine.Workspaces(0)
+      Set db = ws(0)
+  
+      ' --- Source check ---
+      Set rsSource = db.OpenRecordset( _
+          "SELECT * FROM tblClientServiceNeeds " & _
+          "WHERE ClientID=" & ClientID & " AND FiscalYear=" & sourceFY, _
+          dbOpenSnapshot)
+  
+      If rsSource.EOF Then
+          GoTo Cleanup    ' nothing to copy; return 0
+      End If
+  
+      ' --- Target check / overwrite decision ---
+      Dim targetNeedCount As Long, targetPlanCount As Long
+      targetNeedCount = DCount("*", "tblClientServiceNeeds", _
+                               "ClientID=" & ClientID & " AND FiscalYear=" & targetFY)
+      targetPlanCount = DCount("*", "tblClientServicePlan", _
+                               "ClientServiceNeedID IN (SELECT ClientServiceNeedID " & _
+                               "FROM tblClientServiceNeeds WHERE ClientID=" & ClientID & _
+                               " AND FiscalYear=" & targetFY & ")")
+  
+      If targetNeedCount > 0 Or targetPlanCount > 0 Then
+          Dim doOverwrite As Boolean
+          If IsMissing(overwrite) Then
+              doOverwrite = (MsgBox("FY" & targetFY & " already has " & targetNeedCount & _
+                                    " service need(s) and " & targetPlanCount & _
+                                    " plan row(s) for this client." & vbCrLf & vbCrLf & _
+                                    "Replace them with the FY" & sourceFY & " data?", _
+                                    vbExclamation + vbOKCancel + vbDefaultButton2, _
+                                    "Overwrite Existing Needs and Plans?") = vbOK)
+          Else
+              doOverwrite = CBool(overwrite)
+          End If
+          If Not doOverwrite Then
+              Err.Raise ERR_CANCELED, "CopyClientNeedsAndPlans", "User canceled overwrite."
+          End If
+      End If
+  
+      On Error GoTo CopyError
+  
+      ws.BeginTrans
+      transactionActive = True
+  
+      ' Delete plans first (FK), then needs.
+      db.Execute "DELETE FROM tblClientServicePlan " & _
+                 "WHERE ClientServiceNeedID IN (" & _
+                 "  SELECT ClientServiceNeedID FROM tblClientServiceNeeds " & _
+                 "  WHERE ClientID=" & ClientID & " AND FiscalYear=" & targetFY & ")", _
+                 dbFailOnError
+  
+      db.Execute "DELETE FROM tblClientServiceNeeds " & _
+                 "WHERE ClientID=" & ClientID & " AND FiscalYear=" & targetFY, _
+                 dbFailOnError
+  
+      Set rsTarget = db.OpenRecordset("tblClientServiceNeeds", dbOpenDynaset, dbAppendOnly)
+  
+      Do While Not rsSource.EOF
+          oldNeedID = rsSource!ClientServiceNeedID
+          sourceNotes = Nz(rsSource!Notes, "")
+  
+          rsTarget.AddNew
+          rsTarget!ClientID = rsSource!ClientID
+          rsTarget!ServiceID = rsSource!ServiceID
+          rsTarget!FiscalYear = targetFY
+          rsTarget!Priority = rsSource!Priority
+          rsTarget!DaysOfWeek = rsSource!DaysOfWeek
+          rsTarget!PreferredTimeStart = rsSource!PreferredTimeStart
+          rsTarget!PreferredTimeEnd = rsSource!PreferredTimeEnd
+          rsTarget!HoursPerWeek = rsSource!HoursPerWeek
+          If Len(sourceNotes) > 0 Then
+              rsTarget!Notes = sourceNotes & " (Copied from FY" & sourceFY & ")"
+          Else
+              rsTarget!Notes = "Copied from FY" & sourceFY
+          End If
+          rsTarget.Update
+  
+          ' Capture the new autonumber for FK remapping in the plan copy.
+          rsTarget.Bookmark = rsTarget.LastModified
+          newNeedID = rsTarget!ClientServiceNeedID
+  
+          ' Plan copy: walk source plans, look up target catalog row via DLookup,
+          ' insert one by one. (Replaces a 3-table self-join INSERT-SELECT that
+          ' Jet rejected with "JOIN expression not supported" - see lessons-learned.md.)
+          Set rsPlans = db.OpenRecordset( _
+              "SELECT p.HoursPerWeek, p.Status, p.Notes, " & _
+              "       srcCat.ProviderID AS SrcProvID, srcCat.ServiceID AS SrcSvcID " & _
+              "FROM tblClientServicePlan AS p " & _
+              "  INNER JOIN tblProviderServiceCatalog AS srcCat " & _
+              "    ON p.ProviderServiceCatalogID = srcCat.ProviderServiceCatalogID " & _
+              "WHERE p.ClientServiceNeedID = " & oldNeedID, _
+              dbOpenSnapshot)
+  
+          Do While Not rsPlans.EOF
+              newCatID = DLookup("ProviderServiceCatalogID", "tblProviderServiceCatalog", _
+                                 "ProviderID=" & rsPlans!SrcProvID & _
+                                 " AND ServiceID=" & rsPlans!SrcSvcID & _
+                                 " AND FiscalYear=" & targetFY)
+  
+              If IsNull(newCatID) Then
+                  plansSkipped = plansSkipped + 1
+              Else
+                  If Len(Nz(rsPlans!Notes, "")) > 0 Then
+                      newPlanNotes = rsPlans!Notes & " (Copied from FY" & sourceFY & ")"
+                  Else
+                      newPlanNotes = "Copied from FY" & sourceFY
+                  End If
+  
+                  ' Insert with ApprovalDate=Null so the BeforeChange data macro
+                  ' resets Status to "Pending". WeeklyCost / AnnualEstCost are
+                  ' left to the macro to compute from the target FY's catalog rate.
+                  db.Execute _
+                      "INSERT INTO tblClientServicePlan " & _
+                      "  (ClientServiceNeedID, ProviderServiceCatalogID, FiscalYear, " & _
+                      "   HoursPerWeek, ApprovalDate, ApprovedBy, Status, Notes) " & _
+                      "VALUES (" & _
+                      newNeedID & ", " & CLng(newCatID) & ", " & targetFY & ", " & _
+                      Nz(rsPlans!HoursPerWeek, 0) & ", " & _
+                      "Null, Null, " & _
+                      "'" & Replace(Nz(rsPlans!Status, "Pending"), "'", "''") & "', " & _
+                      "'" & Replace(newPlanNotes, "'", "''") & "')", _
+                      dbFailOnError
+                  plansCopied = plansCopied + 1
+              End If
+              rsPlans.MoveNext
+          Loop
+          rsPlans.Close
+          Set rsPlans = Nothing
+  
+          needsCopied = needsCopied + 1
+          rsSource.MoveNext
+      Loop
+  
+      ws.CommitTrans
+      transactionActive = False
+  
+  Cleanup:
+      On Error Resume Next
+      If Not rsSource Is Nothing Then rsSource.Close
+      If Not rsTarget Is Nothing Then rsTarget.Close
+      If Not rsPlans Is Nothing Then rsPlans.Close
+      Set rsSource = Nothing
+      Set rsTarget = Nothing
+      Set rsPlans = Nothing
+      Set db = Nothing
+      Set ws = Nothing
+      On Error GoTo 0
+  
+      CopyClientNeedsAndPlans = needsCopied
+      Exit Function
+  
+  CopyError:
+      Dim savedErr As Long, savedDesc As String, savedSrc As String
+      savedErr = Err.Number
+      savedDesc = Err.Description
+      savedSrc = Err.Source
+  
+      If transactionActive Then
+          On Error Resume Next
+          ws.Rollback
+          On Error GoTo 0
+          transactionActive = False
+      End If
+  
+      On Error Resume Next
+      If Not rsSource Is Nothing Then rsSource.Close
+      If Not rsTarget Is Nothing Then rsTarget.Close
+      If Not rsPlans Is Nothing Then rsPlans.Close
+      Set rsSource = Nothing
+      Set rsTarget = Nothing
+      Set rsPlans = Nothing
+      Set db = Nothing
+      Set ws = Nothing
+      On Error GoTo 0
+  
+      Err.Raise savedErr, savedSrc, savedDesc
+  End Function
+  
+  
+  ' ============================================================
+  ' ADODB-BASED OPERATIONS
+  ' Uses ADODB for rate limit copying - intentionally different
+  ' from DAO to exercise both migration paths
+  ' ============================================================
+  
+  ' Returns number of rate-limit rows copied.
+  ' Raises ERR_CANCELED on user cancel; ERR_SAME_FY on equal FYs.
+  Public Function CopyServiceRateLimits(sourceFY As Integer, _
+                                        targetFY As Integer, _
+                                        Optional ByVal overwrite As Variant) As Long
+      Dim cn As ADODB.Connection
+      Dim rsSource As ADODB.Recordset
+      Dim cmdInsert As ADODB.Command
+      Dim transactionActive As Boolean
+      Dim rowsCopied As Long
+  
+      ' Buffer source rows so we can close rsSource before BeginTrans.
+      Dim serviceIds() As Long
+      Dim maxRates() As Currency
+      Dim Notes() As Variant
+      Dim sourceCount As Long
+      Const CHUNK As Long = 256
+  
+      ValidateFYs sourceFY, targetFY
+  
+      Set cn = CurrentProject.Connection
+  
+      Set rsSource = New ADODB.Recordset
+      rsSource.Open "SELECT ServiceID, MaxRatePerHour, Notes " & _
+                    "FROM tblServiceRateLimits " & _
+                    "WHERE FiscalYear=" & sourceFY, _
+                    cn, adOpenStatic, adLockReadOnly
+  
+      If rsSource.EOF Then
+          rsSource.Close
+          Set rsSource = Nothing
+          CopyServiceRateLimits = 0
+          Exit Function
+      End If
+  
+      ReDim serviceIds(0 To CHUNK - 1)
+      ReDim maxRates(0 To CHUNK - 1)
+      ReDim Notes(0 To CHUNK - 1)
+  
+      Do Until rsSource.EOF
+          If sourceCount > UBound(serviceIds) Then
+              ReDim Preserve serviceIds(0 To sourceCount + CHUNK - 1)
+              ReDim Preserve maxRates(0 To sourceCount + CHUNK - 1)
+              ReDim Preserve Notes(0 To sourceCount + CHUNK - 1)
+          End If
+          serviceIds(sourceCount) = CLng(rsSource!ServiceID)
+          maxRates(sourceCount) = CCur(Nz(rsSource!MaxRatePerHour, 0))
+          Notes(sourceCount) = rsSource!Notes
+          sourceCount = sourceCount + 1
+          rsSource.MoveNext
+      Loop
+      rsSource.Close
+      Set rsSource = Nothing
+  
+      ' --- Target check / overwrite decision ---
+      Dim targetExists As Long
+      targetExists = DCount("*", "tblServiceRateLimits", "FiscalYear=" & targetFY)
+  
+      If targetExists > 0 Then
+          Dim doOverwrite As Boolean
+          If IsMissing(overwrite) Then
+              doOverwrite = (MsgBox("A service rate record for FY" & targetFY & _
+                                    " already exists. Overwrite?", _
+                                    vbExclamation + vbOKCancel + vbDefaultButton2, _
+                                    "Overwrite Existing Records?") = vbOK)
+          Else
+              doOverwrite = CBool(overwrite)
+          End If
+          If Not doOverwrite Then
+              Err.Raise ERR_CANCELED, "CopyServiceRateLimits", "User canceled overwrite."
+          End If
+      End If
+  
+      ' --- Prepared insert command ---
+      Set cmdInsert = New ADODB.Command
+      With cmdInsert
+          Set .ActiveConnection = cn
+          .CommandType = adCmdText
+          .CommandText = "INSERT INTO tblServiceRateLimits " & _
+                         "(ServiceID, FiscalYear, MaxRatePerHour, Notes) " & _
+                         "VALUES (?, ?, ?, ?)"
+          .Parameters.Append .CreateParameter("p1", adInteger, adParamInput, , 0)
+          .Parameters.Append .CreateParameter("p2", adInteger, adParamInput, , targetFY)
+          .Parameters.Append .CreateParameter("p3", adCurrency, adParamInput, , 0)
+          .Parameters.Append .CreateParameter("p4", adLongVarWChar, adParamInput, 1073741823, "")
+      End With
+  
+      On Error GoTo CopyError
+  
+      cn.BeginTrans
+      transactionActive = True
+  
+      If targetExists > 0 Then
+          cn.Execute "DELETE FROM tblServiceRateLimits WHERE FiscalYear=" & targetFY, _
+                     , adExecuteNoRecords
+      End If
+  
+      Dim r As Long
+      For r = 0 To sourceCount - 1
+          cmdInsert.Parameters("p1").Value = serviceIds(r)
+          cmdInsert.Parameters("p2").Value = targetFY
+          cmdInsert.Parameters("p3").Value = maxRates(r)
+          cmdInsert.Parameters("p4").Value = Notes(r)
+          cmdInsert.Execute , , adExecuteNoRecords
+          rowsCopied = rowsCopied + 1
+      Next r
+  
+      cn.CommitTrans
+      transactionActive = False
+  
+  Cleanup:
+      Set cmdInsert = Nothing
+      Set cn = Nothing
+      CopyServiceRateLimits = rowsCopied
+      Exit Function
+  
+  CopyError:
+      Dim savedErr As Long, savedDesc As String, savedSrc As String
+      savedErr = Err.Number
+      savedDesc = Err.Description
+      savedSrc = Err.Source
+  
+      If transactionActive Then
+          On Error Resume Next
+          cn.RollbackTrans
+          On Error GoTo 0
+          transactionActive = False
+      End If
+  
+      Set cmdInsert = Nothing
+      Set cn = Nothing
+  
+      Err.Raise savedErr, savedSrc, savedDesc
+  End Function

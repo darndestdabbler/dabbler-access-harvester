@@ -1,0 +1,33 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmServiceList"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private Sub btnAddNew_Click()
+      On Error Resume Next
+      DoCmd.OpenForm "frmServiceDetail", acNormal, , , acFormAdd
+      
+  End Sub
+  
+  Private Sub Form_DblClick(Cancel As Integer)
+      On Error Resume Next
+      DoCmd.OpenForm "frmServiceDetail", , , "ServiceID=" & Me.ServiceID
+  End Sub
+  
+  
+  
+  Private Sub cboFilterCategory_AfterUpdate()
+      If Not IsNull(Me.cboFilterCategory) Then
+          Me.Filter = "ServiceCategory='" & Me.cboFilterCategory & "'"
+          Me.FilterOn = True
+      Else
+          Me.FilterOn = False
+      End If
+  End Sub

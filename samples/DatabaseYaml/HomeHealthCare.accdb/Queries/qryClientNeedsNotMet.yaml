@@ -1,0 +1,32 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryClientNeedsNotMet"
+QueryType: "Select"
+SQL: |
+  SELECT c.ClientID, c.LastName & ", " & c.FirstName AS ClientName, s.ServiceCode, s.ServiceName, csn.HoursPerWeek AS RequestedHours, csn.Priority, csn.FiscalYear
+  FROM tblServices AS s INNER JOIN (tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) ON s.ServiceID = csn.ServiceID
+  WHERE (((csn.ClientServiceNeedID) Not In (SELECT ClientServiceNeedID FROM tblClientServicePlan
+      WHERE Status = 'Approved'
+  )))
+  ORDER BY c.LastName, c.FirstName, csn.Priority;
+  
+Properties:
+  DateCreated: "3/28/2026 11:13:40 AM"
+  LastUpdated: "5/13/2026 4:50:03 PM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "60"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  RecordsetType: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  TotalsRow: "False"

@@ -1,0 +1,184 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Table"
+Name: "tlkpServiceCategories"
+Connect: ""
+SourceTableName: ""
+Attributes: "0"
+DDL: |
+  CREATE TABLE [tlkpServiceCategories] (
+      [CategoryID] COUNTER,
+      [CategoryName] TEXT(50) NOT NULL,
+      [Description] LONGTEXT,
+      CONSTRAINT [PrimaryKey] PRIMARY KEY ([CategoryID]),
+      CONSTRAINT [UQ_CategoryName] UNIQUE ([CategoryName])
+  );
+Properties:
+  Name: "tlkpServiceCategories"
+  Updatable: "True"
+  DateCreated: "3/28/2026 11:13:38 AM"
+  LastUpdated: "5/3/2026 3:18:40 PM"
+  Connect: ""
+  Attributes: "0"
+  SourceTableName: ""
+  RecordCount: "7"
+  ValidationRule: ""
+  ValidationText: ""
+  ConflictTable: null  # SKIPPED: Cannot perform this operation.
+  ReplicaFilter: null  # SKIPPED: Cannot perform this operation.
+  Orientation: "0"
+  OrderByOn: "False"
+  DefaultView: "2"
+  DisplayViewsOnSharePointSite: "1"
+  TotalsRow: "False"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  HideNewField: "False"
+  BackTint: "100"
+  BackShade: "100"
+  ThemeFontIndex: "-1"
+  AlternateBackThemeColorIndex: "-1"
+  AlternateBackTint: "100"
+  AlternateBackShade: "100"
+  ReadOnlyWhenDisconnected: "False"
+  DatasheetGridlinesThemeColorIndex: "-1"
+  DatasheetForeThemeColorIndex: "-1"
+Fields:
+  - Name: "CategoryID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "17"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "CategoryID"
+      OrdinalPosition: "0"
+      Size: "4"
+      SourceField: "CategoryID"
+      SourceTable: "tlkpServiceCategories"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "CategoryName"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "CategoryName"
+      OrdinalPosition: "1"
+      Size: "50"
+      SourceField: "CategoryName"
+      SourceTable: "tlkpServiceCategories"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Description"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "12"
+      Name: "Description"
+      OrdinalPosition: "2"
+      Size: "0"
+      SourceField: "Description"
+      SourceTable: "tlkpServiceCategories"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextFormat: "0"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+Indexes:
+  - Name: "PrimaryKey"
+    Primary: "True"
+    Unique: "True"
+    Required: "True"
+    Foreign: "False"
+    Fields: "CategoryID"
+    Properties:
+      Name: "PrimaryKey"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "True"
+      Foreign: "False"
+      Required: "True"
+      IgnoreNulls: "False"
+      DistinctCount: "7"
+  - Name: "UQ_CategoryName"
+    Primary: "False"
+    Unique: "True"
+    Required: "False"
+    Foreign: "False"
+    Fields: "CategoryName"
+    Properties:
+      Name: "UQ_CategoryName"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "False"
+      Foreign: "False"
+      Required: "False"
+      IgnoreNulls: "False"
+      DistinctCount: "7"
+DataMacros: null  # No data macros defined.

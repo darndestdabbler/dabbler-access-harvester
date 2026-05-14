@@ -1,0 +1,67 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_rptProviderCosts"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_FiscalYear As Integer
+  
+  Private Sub Report_Open(Cancel As Integer)
+      DoCmd.OpenForm "frmReportParam_FY", , , , , acDialog
+  
+      If Not IsLoaded("frmReportParam_FY") Then
+          Cancel = True
+          Exit Sub
+      End If
+  
+      m_FiscalYear = Forms!frmReportParam_FY!cboFiscalYear
+          
+      Me.txtGrandTotal.ControlSource = GetDSumForGrandTotal(m_FiscalYear)
+          
+      Me.RecordSource = SqlForFiscalYear(m_FiscalYear)
+      DoCmd.Close acForm, "frmReportParam_FY"
+  End Sub
+  
+  
+  Private Function GetDSumForGrandTotal(FiscalYear As Integer) As String
+      Dim str As String
+      str = "=FormatCurrency(Nz(DSum(" & Chr(34) & "TotalCost" & Chr(34) & ", " & Chr(34) & "qryCosts_ByFiscalYear" & Chr(34) & _
+          ", " & Chr(34) & "FiscalYear=" & FiscalYear & Chr(34) & "), 0))"
+      GetDSumForGrandTotal = str
+  End Function
+  
+  Private Function SqlForFiscalYear(FiscalYear As Integer) As String
+      Dim sql As String
+      sql = "SELECT " & _
+              "p.ProviderID, " & _
+              "p.ProviderName, " & _
+              "p.TotalCost, p.PctCost " & _
+              "FROM qryProviderServiceCosts_ByFiscalYear p " & _
+              "WHERE p.FiscalYear = " & FiscalYear & ";"
+  
+      SqlForFiscalYear = sql
+  End Function
+  
+  
+  Private Sub Report_NoData(Cancel As Integer)
+      MsgBox "No cost data found for this fiscal year.", vbInformation
+      Cancel = True
+  End Sub
+  
+  
+  Private Function IsLoaded(ByVal strFormName As String) As Boolean
+      Dim frm As Access.Form
+      For Each frm In Application.Forms
+          If frm.name = strFormName Then
+              IsLoaded = True
+              Exit Function
+          End If
+      Next
+      IsLoaded = False
+  End Function

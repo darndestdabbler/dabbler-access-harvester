@@ -1,0 +1,239 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmServiceRateLimits"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  ' ============================================================================
+  '  frmServiceRateLimits
+  ' ----------------------------------------------------------------------------
+  '  Continuous form bound to tblServiceRateLimits, filtered by fiscal year
+  '  via cboFilterFiscalYear. Direct-edit (not a listbox + popup pattern).
+  '
+  '  btnCopyRateLimits copies all rate-limit entries from the most recent
+  '  populated prior FY into the FY currently selected in cboFilterFiscalYear.
+  ' ============================================================================
+  
+  
+  Private Sub Form_Load()
+      Me.cboFilterFiscalYear = basUtilities.GetCurrentFiscalYear()
+      ApplyFiscalYearFilter
+      UpdateCopyButtonState
+  End Sub
+  
+  Private Sub cboFilterFiscalYear_AfterUpdate()
+      ApplyFiscalYearFilter
+      UpdateCopyButtonState
+  End Sub
+  
+  Private Sub ApplyFiscalYearFilter()
+      If Not IsNull(Me.cboFilterFiscalYear) Then
+          Me.Filter = "FiscalYear=" & Me.cboFilterFiscalYear
+          Me.FilterOn = True
+      Else
+          Me.FilterOn = False
+      End If
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Validation
+  ' ============================================================================
+  
+  Private Sub txtMaxRatePerHour_BeforeUpdate(Cancel As Integer)
+      If Not IsNull(Me.txtMaxRatePerHour) Then
+          If Me.txtMaxRatePerHour <= 0 Or Me.txtMaxRatePerHour > 500 Then
+              MsgBox "Rate must be between $0.01 and $500.00.", vbExclamation, "Validation"
+              Cancel = True
+          End If
+      End If
+  End Sub
+  
+  
+  ' ----------------------------------------------------------------------------
+  '  Form_BeforeUpdate
+  '
+  '  Fires when ANY row on this continuous form is committed (tab away, save
+  '  button, navigate, etc.). Catches:
+  '    - missing ServiceID (relational FK constraint would catch it too,
+  '      but the message here is friendlier)
+  '    - missing or non-positive MaxRatePerHour
+  '    - missing FiscalYear (shouldn't happen ? the row inherits the filter ?
+  '      but defensive)
+  '    - duplicate (ServiceID, FiscalYear) for any other row in the table
+  '
+  '  Note: txtMaxRatePerHour_BeforeUpdate already validates the rate range
+  '  on field exit, so this BeforeUpdate is the second line of defense for
+  '  someone who pastes a value or commits without typing.
+  ' ----------------------------------------------------------------------------
+  Private Sub Form_BeforeUpdate(Cancel As Integer)
+      If IsNull(Me!ServiceID) Then
+          MsgBox "Please select a service.", vbExclamation, "Validation"
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If IsNull(Me!FiscalYear) Then
+          Me!FiscalYear = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+      End If
+  
+      If IsNull(Me!MaxRatePerHour) Or Me!MaxRatePerHour <= 0 Then
+          MsgBox "Please enter a positive maximum rate per hour.", _
+                 vbExclamation, "Validation"
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If Me!MaxRatePerHour > 500 Then
+          MsgBox "Rate exceeds the $500.00 ceiling.", vbExclamation, "Validation"
+          Cancel = True
+          Exit Sub
+      End If
+  
+      ' Duplicate check (same service, same FY, different row).
+      Dim selfID As Long
+      selfID = Nz(Me!ServiceRateLimitID, 0)
+  
+      If DCount("*", "tblServiceRateLimits", _
+                "ServiceID=" & Me!ServiceID & _
+                " AND FiscalYear=" & Me!FiscalYear & _
+                " AND ServiceRateLimitID<>" & selfID) > 0 Then
+          MsgBox "A rate limit for this service in FY" & Me!FiscalYear & _
+                 " already exists.", vbExclamation, "Duplicate"
+          Cancel = True
+      End If
+  End Sub
+  
+  
+  ' ----------------------------------------------------------------------------
+  '  Form_BeforeDelConfirm
+  '
+  '  Fires after the user presses Delete on a row, before Access shows its
+  '  generic "You are about to delete N record(s)..." prompt. Two responsibilities:
+  '    1. Block the delete if any tblProviderServiceCatalog row in the same FY
+  '       references this service (the rate limit governs those rows).
+  '    2. Suppress Access's stock prompt and show a more informative one.
+  '
+  '  The "in-use" check intentionally scopes to the same FiscalYear: rate
+  '  limits for FY2024 don't constrain FY2025 catalog rows, so a FY2024
+  '  limit can be deleted even if FY2025 has matching catalog entries.
+  ' ----------------------------------------------------------------------------
+  Private Sub Form_BeforeDelConfirm(Cancel As Integer, Response As Integer)
+      Dim inUse As Long
+      inUse = DCount("*", "tblProviderServiceCatalog", _
+                     "ServiceID=" & Me!ServiceID & _
+                     " AND FiscalYear=" & Me!FiscalYear)
+  
+      If inUse > 0 Then
+          MsgBox "Cannot delete this rate limit." & vbCrLf & vbCrLf & _
+                 inUse & " provider catalog entry(ies) in FY" & Me!FiscalYear & _
+                 " are governed by it. Remove or reassign those first.", _
+                 vbExclamation, "Rate Limit In Use"
+          Cancel = True
+          Response = acDataErrContinue
+          Exit Sub
+      End If
+  
+      ' Replace Access's stock prompt with a clearer one.
+      If MsgBox("Delete the rate limit for service " & _
+                Nz(DLookup("ServiceName", "tblServices", _
+                           "ServiceID=" & Me!ServiceID), "(unknown)") & _
+                " in FY" & Me!FiscalYear & "?", _
+                vbYesNo + vbQuestion + vbDefaultButton2, _
+                "Confirm Delete") = vbNo Then
+          Cancel = True
+      End If
+      Response = acDataErrContinue   ' suppress Access's own prompt
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Copy from prior FY
+  ' ============================================================================
+  
+  Private Sub btnCopyRateLimits_Click()
+      Dim targetFY As Long
+      targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+  
+      Dim srcVar As Variant
+      srcVar = basDataOperations.MostRecentPopulatedFY( _
+                  "tblServiceRateLimits", "", targetFY)
+  
+      If IsNull(srcVar) Then
+          MsgBox "No prior fiscal year has service rate limits to copy.", _
+                 vbInformation, "Nothing to Copy"
+          Exit Sub
+      End If
+  
+      Dim sourceFY As Integer
+      sourceFY = CInt(srcVar)
+  
+      Dim srcCount As Long, tgtCount As Long
+      srcCount = DCount("*", "tblServiceRateLimits", "FiscalYear=" & sourceFY)
+      tgtCount = DCount("*", "tblServiceRateLimits", "FiscalYear=" & targetFY)
+  
+      Dim msg As String
+      msg = "Copy " & srcCount & " rate limit entry(ies) from FY" & sourceFY & _
+            " into FY" & targetFY & "?"
+      If tgtCount > 0 Then
+          msg = msg & vbCrLf & vbCrLf & _
+                "FY" & targetFY & " currently has " & tgtCount & _
+                " rate limit entry(ies). They will be replaced."
+      End If
+  
+      If MsgBox(msg, vbQuestion + vbOKCancel + vbDefaultButton1, _
+                "Copy from FY" & sourceFY) <> vbOK Then
+          Exit Sub
+      End If
+  
+      On Error GoTo Failed
+      Dim n As Long
+      n = basDataOperations.CopyServiceRateLimits( _
+                  sourceFY, CInt(targetFY), overwrite:=True)
+  
+      MsgBox n & " rate limit entry(ies) copied from FY" & sourceFY & _
+             " to FY" & targetFY & ".", vbInformation, "Copy Complete"
+  
+      Me.Requery
+      UpdateCopyButtonState
+      Exit Sub
+  
+  Failed:
+      Select Case Err.Number
+          Case basDataOperations.ERR_CANCELED
+              ' silent
+          Case basDataOperations.ERR_SAME_FY
+              MsgBox Err.Description, vbExclamation, "Invalid Fiscal Years"
+          Case Else
+              MsgBox "Error copying rate limits: " & Err.Description, vbCritical
+      End Select
+  End Sub
+  
+  
+  ' ----------------------------------------------------------------------------
+  '  Refreshes btnCopyRateLimits's label and visibility based on the currently
+  '  selected target FY and what prior-year data exists.
+  ' ----------------------------------------------------------------------------
+  Private Sub UpdateCopyButtonState()
+      On Error Resume Next   ' button may not exist yet during form load
+  
+      Dim targetFY As Long
+      targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+  
+      Dim srcVar As Variant
+      srcVar = basDataOperations.MostRecentPopulatedFY( _
+                  "tblServiceRateLimits", "", targetFY)
+  
+      If IsNull(srcVar) Then
+          Me.btnCopyRateLimits.Visible = False
+      Else
+          Me.btnCopyRateLimits.Caption = "Copy from FY" & CLng(srcVar)
+          Me.btnCopyRateLimits.Visible = True
+      End If
+  End Sub

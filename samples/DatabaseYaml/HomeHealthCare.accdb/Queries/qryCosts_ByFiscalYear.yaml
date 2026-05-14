@@ -1,0 +1,31 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryCosts_ByFiscalYear"
+QueryType: "Select"
+SQL: |
+  SELECT psc.FiscalYear, Sum(csp.AnnualEstCost) AS TotalCost
+  FROM tblProviders AS p INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID
+  WHERE (((csp.Status)<>"Cancelled"))
+  GROUP BY psc.FiscalYear;
+  
+Properties:
+  DateCreated: "5/13/2026 3:40:52 AM"
+  LastUpdated: "5/13/2026 3:28:06 PM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "60"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  RecordsetType: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  TotalsRow: "False"
+  PublishToWeb: "1"

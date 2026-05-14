@@ -1,0 +1,246 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmClientServicePlanDetail"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  ' ============================================================================
+  '  frmClientServicePlanDetail
+  ' ----------------------------------------------------------------------------
+  '  Popup detail form for a single tblClientServicePlan row.
+  '  Opened acDialog from frmBudgetServicePlan.lstClientServicePlan.
+  '
+  '  RecordSource:  tblClientServicePlan
+  '  PopUp:         True
+  '  Modal:         True            (the caller also passes acDialog)
+  '  BorderStyle:   3  (Dialog)
+  '
+  '  Bound controls (suggested):
+  '     txtClientServiceNeedID      (hidden; FK; populated from OpenArgs in Add)
+  '     txtFiscalYear               (locked; populated from OpenArgs in Add)
+  '     cboProviderServiceCatalogID (combo ? providers offering this need's
+  '                                  service in this FY; row source is rebuilt
+  '                                  in Form_Load once the FK is known)
+  '     txtHoursPerWeek             (Decimal/Double, > 0)
+  '     txtWeeklyCost               (LOCKED ? populated by data macro on save)
+  '     txtAnnualEstCost            (LOCKED ? populated by data macro on save)
+  '     txtApprovalDate             (Date; optional)
+  '     cboApprovedBy               (or txtApprovedBy; optional)
+  '     cboStatus                   (combo with: Pending, Approved, Cancelled)
+  '     txtNotes                    (memo)
+  '
+  '  Action buttons:
+  '     btnSave    ? validates + commits + closes
+  '     btnCancel  ? undoes + closes (no save)
+  '     btnDelete  ? confirms + deletes + closes (disabled in Add mode)
+  '
+  '  Cost fields:
+  '     WeeklyCost and AnnualEstCost are written by a Before Change data macro
+  '     on tblClientServicePlan, derived from HoursPerWeek ? RatePerHour
+  '     (and ?52 for the annual). The bound controls on this form display
+  '     those values but are Locked = True so the user can't override them.
+  '     They will appear blank in Add mode until the record is saved, at
+  '     which point Access requeries and the macro-computed values appear.
+  ' ============================================================================
+  
+  
+  Private Sub Form_Open(Cancel As Integer)
+      Dim args As Variant
+      args = Me.OpenArgs
+  
+      If basListHelpers.IsAddMode(args) Then
+          Me.DataEntry = True
+      ElseIf IsNumeric(Nz(args, "")) Then
+          Me.Filter = "ClientServicePlanID=" & CLng(args)
+          Me.FilterOn = True
+      End If
+  End Sub
+  Private Sub Form_Load()
+      On Error GoTo LoadFailed
+  
+      Dim needId As Long, fy As Long
+  
+      If basListHelpers.IsAddMode(Me.OpenArgs) Then
+          needId = basListHelpers.GetContextLong(Me.OpenArgs, "ClientServiceNeedID")
+          fy = basListHelpers.GetContextLong(Me.OpenArgs, "FiscalYear")
+  
+          If needId > 0 Then Me!ClientServiceNeedID = needId
+          If fy > 0 Then Me!FiscalYear = fy
+          If IsNull(Me!Status) Then Me!Status = "Pending"
+  
+          Me.btnDelete.Enabled = False
+          Me.Caption = "New Service Plan Entry"
+      Else
+          needId = Nz(Me!ClientServiceNeedID, 0)
+          fy = Nz(Me!FiscalYear, 0)
+  
+          Me.btnDelete.Enabled = True
+          Me.Caption = "Edit Service Plan Entry"
+      End If
+  
+      BuildCatalogCombo needId, fy
+  
+      Me.txtWeeklyCost.Locked = True
+      Me.txtAnnualEstCost.Locked = True
+      Me.txtFiscalYear.Locked = True
+      Exit Sub
+  
+  LoadFailed:
+      ' Emit to Immediate Window so the failing line is visible.
+      ' Resume Next keeps the form open instead of canceling the OpenForm.
+      Debug.Print "[frmClientServicePlanDetail.Form_Load] Error " & _
+                  Err.Number & " at line " & Erl & ": " & Err.Description
+      Resume Next
+  End Sub
+  
+  Private Sub BuildCatalogCombo(needId As Long, fy As Long)
+      If needId <= 0 Or fy <= 0 Then
+          Me.cboProviderServiceCatalogID.RowSource = ""
+          Exit Sub
+      End If
+  
+      Dim sql As String
+      sql = _
+          "SELECT psc.ProviderServiceCatalogID, " & _
+                 "p.ProviderName & ' ? $' & Format(psc.RatePerHour,'Fixed') & '/hr' AS DisplayLabel " & _
+          "FROM (tblProviderServiceCatalog AS psc " & _
+                "INNER JOIN tblProviders AS p ON p.ProviderID = psc.ProviderID) " & _
+               "INNER JOIN tblClientServiceNeeds AS csn " & _
+                  "ON  csn.ServiceID  = psc.ServiceID " & _
+                  "AND csn.FiscalYear = psc.FiscalYear " & _
+          "WHERE csn.ClientServiceNeedID = " & needId & _
+            " AND psc.FiscalYear = " & fy & " " & _
+          "ORDER BY p.ProviderName"
+  
+      Me.cboProviderServiceCatalogID.RowSourceType = "Table/Query"
+      Me.cboProviderServiceCatalogID.RowSource = sql
+      Me.cboProviderServiceCatalogID.Requery
+  End Sub
+  Private Sub Form_BeforeUpdate(Cancel As Integer)
+      If IsNull(Me!ProviderServiceCatalogID) Then
+          MsgBox "Please select a provider/rate.", vbExclamation, "Validation"
+          Me.cboProviderServiceCatalogID.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If IsNull(Me!HoursPerWeek) Or Me!HoursPerWeek <= 0 Then
+          MsgBox "Hours per week must be greater than zero.", vbExclamation, "Validation"
+          Me.txtHoursPerWeek.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If Me!HoursPerWeek > 168 Then
+          MsgBox "Hours per week cannot exceed 168 (hours in a week).", _
+                 vbExclamation, "Validation"
+          Me.txtHoursPerWeek.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If Len(Nz(Me!Status, "")) = 0 Then
+          ' (cboStatus is Locked since Status is macro-derived; no SetFocus here.)
+          MsgBox "Please choose a status.", vbExclamation, "Validation"
+          Cancel = True
+          Exit Sub
+      End If
+  
+      ' Same need + same provider/catalog row = duplicate plan entry.
+      Dim selfID As Long
+      selfID = Nz(Me!ClientServicePlanID, 0)
+      If DCount("*", "tblClientServicePlan", _
+                "ClientServiceNeedID=" & Me!ClientServiceNeedID & _
+                " AND ProviderServiceCatalogID=" & Me!ProviderServiceCatalogID & _
+                " AND ClientServicePlanID<>" & selfID) > 0 Then
+          MsgBox "A plan entry for this need and provider already exists.", _
+                 vbExclamation, "Duplicate"
+          Cancel = True
+      End If
+  
+      ' Budget-exceeded enforcement lives in tblClientServicePlan.BeforeChange data macro.
+      ' That macro RaiseError 1001 surfaces here as a data error caught by Form_Error.
+  End Sub
+  
+  Private Sub Form_AfterUpdate()
+      ' Tell the parent workspace that totals/list need to refresh. The
+      ' parent's lstClientServicePlan_DblClick also calls PopulateClientServicePlan
+      ' after we close, so this is belt-and-suspenders for the totals.
+      On Error Resume Next
+      Forms!frmBudgetServicePlan.NotifyPlanChanged
+      On Error GoTo 0
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Action buttons
+  ' ============================================================================
+  
+  Private Sub btnSave_Click()
+      On Error GoTo Failed
+      If Me.Dirty Then Me.Dirty = False    ' fires Form_BeforeUpdate
+      DoCmd.Close acForm, Me.name
+      Exit Sub
+  Failed:
+      ' Validation canceled the save ? leave the dialog open.
+  End Sub
+  
+  Private Sub btnCancel_Click()
+      On Error Resume Next
+      Me.Undo
+      DoCmd.Close acForm, Me.name, acSaveNo
+  End Sub
+  
+  Private Sub btnDelete_Click()
+      If Me.NewRecord Then Exit Sub
+  
+      If MsgBox("Delete this plan entry?", _
+                vbYesNo + vbQuestion + vbDefaultButton2, _
+                "Confirm Delete") = vbNo Then Exit Sub
+  
+      On Error GoTo Failed
+      RunCommand acCmdSelectRecord
+      RunCommand acCmdDeleteRecord
+      DoCmd.Close acForm, Me.name
+  
+      On Error Resume Next
+      Forms!frmBudgetServicePlan.NotifyPlanChanged
+      Exit Sub
+  
+  Failed:
+      MsgBox "Could not delete: " & Err.Description, vbCritical, "Delete Failed"
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Combo niceties
+  ' ============================================================================
+  
+  Private Sub cboProviderServiceCatalogID_AfterUpdate()
+      ' If the user picked a catalog row, the data macro will recompute
+      ' WeeklyCost and AnnualEstCost on save. We don't preview the values
+      ' here ? the locked controls stay blank until the requery ? but if
+      ' you want a live preview, this is where you'd compute and display it
+      ' (keeping the controls Locked so they're still macro-authoritative).
+  End Sub
+  
+  Private Sub cboProviderServiceCatalogID_NotInList(NewData As String, Response As Integer)
+      Response = acDataErrContinue
+      MsgBox "To add a provider or rate, use the Provider Detail form's catalog list.", _
+             vbInformation, "Add Provider/Rate Elsewhere"
+  End Sub
+  
+  
+  Private Sub Form_Error(DataErr As Integer, Response As Integer)
+      If DataErr = 1001 Then
+          MsgBox "Cannot approve: this plan would exceed the client's annual budget.", _
+                 vbExclamation, "Budget Exceeded"
+          Response = acDataErrContinue
+      End If
+  End Sub

@@ -1,0 +1,389 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmBudgetServicePlan"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  ' ============================================================================
+  '  This form replaces the previous two-subform layout
+  '  (sfrmClientServiceNeeds + sfrmClientServicePlan) with two list boxes:
+  '
+  '     lstClientServiceNeeds   (master list)
+  '        ColumnCount   = 5
+  '        ColumnWidths  = "0;3120;1320;1320;3120"     ' PK hidden
+  '        ColumnHeads   = True
+  '        BoundColumn   = 1
+  '        Tied to: frmClientServiceNeedDetail
+  '
+  '     lstClientServicePlan    (cascades from selected need)
+  '        ColumnCount   = 6
+  '        ColumnWidths  = "0;3120;1320;1560;1560;1560" ' PK hidden
+  '        ColumnHeads   = True
+  '        BoundColumn   = 1
+  '        Tied to: frmClientServicePlanDetail
+  '
+  '  When the user picks a row in lstClientServiceNeeds (AfterUpdate),
+  '  the plan list rebuilds for that need. Until a need is picked, the
+  '  plan list is empty (and Add-from-plan is disabled).
+  ' ============================================================================
+  
+  
+  Private Sub PopulateClientServiceNeeds()
+      If IsNull(Me.txtClientID) Or IsNull(Me.txtFiscalYear) Then
+          Me.lstClientServiceNeeds.RowSource = ""
+          Exit Sub
+      End If
+  
+      Dim baseSql As String
+      baseSql = _
+          "SELECT n.ClientServiceNeedID AS ID, " & _
+                 "s.ServiceName AS [Service], " & _
+                 "n.HoursPerWeek AS [Hrs/Wk], " & _
+                 "n.Priority AS Priority, " & _
+                 "n.Notes AS Notes " & _
+          "FROM tblClientServiceNeeds AS n " & _
+               "INNER JOIN tblServices AS s ON s.ServiceID = n.ServiceID " & _
+          "WHERE n.ClientID=" & Me.txtClientID & _
+            " AND n.FiscalYear=" & Me.txtFiscalYear
+  
+      Me.lstClientServiceNeeds.RowSource = basListHelpers.BuildAddableRowSource( _
+          dataSelect:=baseSql, _
+          addLabel:="(Add new service need...)", _
+          dataColCount:=5)
+      Me.lstClientServiceNeeds.Requery
+  End Sub
+  
+  Private Sub PopulateClientServicePlan()
+      Dim selectedNeedID As Variant
+      selectedNeedID = Me.lstClientServiceNeeds.Value
+  
+      ' No need selected, or "<Add new need...>" highlighted ?  empty plan list.
+      If IsNull(selectedNeedID) Then
+          Me.lstClientServicePlan.RowSource = ""
+          Exit Sub
+      End If
+      If CLng(selectedNeedID) = basListHelpers.ADD_NEW_ID Then
+          Me.lstClientServicePlan.RowSource = ""
+          Exit Sub
+      End If
+  
+      Dim baseSql As String
+      baseSql = _
+          "SELECT cp.ClientServicePlanID AS ID, " & _
+                 "p.ProviderName AS Provider, " & _
+                 "cp.HoursPerWeek AS [Hrs/Wk], " & _
+                 "Format(cp.WeeklyCost,'$#,##0.00') AS [Weekly $], " & _
+                 "Format(cp.AnnualEstCost,'$#,##0.00') AS [Annual $], " & _
+                 "cp.Status AS Status " & _
+          "FROM (tblClientServicePlan AS cp " & _
+                "INNER JOIN tblProviderServiceCatalog AS psc " & _
+                  "ON psc.ProviderServiceCatalogID = cp.ProviderServiceCatalogID) " & _
+                "INNER JOIN tblProviders AS p ON p.ProviderID = psc.ProviderID " & _
+          "WHERE cp.ClientServiceNeedID=" & CLng(selectedNeedID)
+  
+      Me.lstClientServicePlan.RowSource = basListHelpers.BuildAddableRowSource( _
+          dataSelect:=baseSql, _
+          addLabel:="(Add new plan entry...)", _
+          dataColCount:=6)
+      Me.lstClientServicePlan.Requery
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Listbox events
+  ' ============================================================================
+  
+  Private Sub lstClientServiceNeeds_AfterUpdate()
+      ' Selecting a different need cascades into the plan list.
+      PopulateClientServicePlan
+  End Sub
+  
+  Private Sub lstClientServiceNeeds_DblClick(Cancel As Integer)
+      Dim ctx As String
+      ctx = basListHelpers.BuildContextArgs( _
+                  "ClientID", Me.txtClientID, _
+                  "FiscalYear", Me.txtFiscalYear)
+  
+      basListHelpers.OpenDetailFromList Me.lstClientServiceNeeds, _
+                                        "frmClientServiceNeedDetail", _
+                                        ctx
+      ' Need set may have changed; the plan list cascades off it.
+      PopulateClientServicePlan
+      RefreshTotals
+  End Sub
+  Private Sub lstClientServicePlan_DblClick(Cancel As Integer)
+      On Error GoTo DblClickError
+  
+      Dim selectedNeedID As Variant
+      selectedNeedID = Me.lstClientServiceNeeds.Value
+  
+      ' Guard: can't add/edit a plan entry if no need is selected (or the
+      ' synthetic "Add new need" sentinel is highlighted).
+      If IsNull(selectedNeedID) Or _
+         CLng(Nz(selectedNeedID, basListHelpers.ADD_NEW_ID)) = basListHelpers.ADD_NEW_ID Then
+  
+          If Not IsNull(Me.lstClientServicePlan.Value) Then
+              If CLng(Me.lstClientServicePlan.Value) = basListHelpers.ADD_NEW_ID Then
+                  MsgBox "Please select a service need first.", vbInformation, "No Need Selected"
+              End If
+          End If
+          Exit Sub
+      End If
+  
+      Dim ctx As String
+      ctx = basListHelpers.BuildContextArgs( _
+                  "ClientServiceNeedID", CLng(selectedNeedID), _
+                  "FiscalYear", Me.txtFiscalYear)
+  
+      basListHelpers.OpenDetailFromList Me.lstClientServicePlan, _
+                                        "frmClientServicePlanDetail", _
+                                        ctx
+      RefreshTotals
+      Exit Sub
+  
+  DblClickError:
+      If Err.Number = 2501 Then
+          ' Form_Load in frmClientServicePlanDetail threw an unhandled error.
+          ' Check Immediate Window (Ctrl+G in VBA editor) for details.
+          MsgBox "The plan detail form failed to open." & vbCrLf & _
+                 "Open the VBA editor and check the Immediate Window (Ctrl+G) for the error.", _
+                 vbExclamation, "Form Open Error (2501)"
+      Else
+          Err.Raise Err.Number, Err.Source, Err.Description
+      End If
+  End Sub
+  Private Sub Form_Current()
+      ' Editable bound field
+      Me.txtAnnualBudget.Locked = False
+      Me.txtAnnualBudget.Enabled = True
+      Me.txtAnnualBudget.BorderStyle = 1
+      Me.txtAnnualBudget.TabStop = True
+  
+      ' Non-editable display/calculated fields
+      Me.txtClientName.Locked = True
+      Me.txtClientName.Enabled = True
+      Me.txtClientName.BorderStyle = 0
+      Me.txtClientName.TabStop = False
+  
+      Me.txtTotalPlanned.Locked = True
+      Me.txtTotalPlanned.Enabled = True
+      Me.txtTotalPlanned.BorderStyle = 0
+      Me.txtTotalPlanned.TabStop = False
+  
+      Me.txtRemaining.Locked = True
+      Me.txtRemaining.Enabled = True
+      Me.txtRemaining.BorderStyle = 0
+      Me.txtRemaining.TabStop = False
+  
+      ' Hidden FK
+      Me.txtClientID.Locked = True
+  
+      ' FiscalYear is editable in Add mode, non-editable in Edit mode (it's the key)
+      If Me.NewRecord Then
+          Me.txtFiscalYear.Locked = False
+          Me.txtFiscalYear.Enabled = True
+          Me.txtFiscalYear.BorderStyle = 1
+          Me.txtFiscalYear.TabStop = True
+      Else
+          Me.txtFiscalYear.Locked = True
+          Me.txtFiscalYear.Enabled = True
+          Me.txtFiscalYear.BorderStyle = 0
+          Me.txtFiscalYear.TabStop = False
+      End If
+  
+      ' ClientName is unbound - populate from tblClients via DLookup.
+      If Not IsNull(Me.txtClientID) Then
+          Me.txtClientName = Nz(DLookup("[FirstName] & ' ' & [LastName]", _
+                                        "tblClients", _
+                                        "ClientID=" & Me.txtClientID), "")
+      Else
+          Me.txtClientName = ""
+      End If
+  
+      ' Button state
+      Me.btnSave.Enabled = False
+      Me.btnClose.Caption = "Close"
+      On Error Resume Next
+      Me.btnDelete.Enabled = Not Me.NewRecord
+      On Error GoTo 0
+  
+      PopulateClientServiceNeeds
+      Me.lstClientServicePlan.RowSource = ""
+      RefreshTotals
+  End Sub
+  Private Sub Form_Open(Cancel As Integer)
+      Dim args As Variant
+      args = Me.OpenArgs
+  
+      If basListHelpers.IsAddMode(args) Then
+          Me.DataEntry = True
+      ElseIf IsNumeric(Nz(args, "")) Then
+          Me.Filter = "ClientBudgetID=" & CLng(args)
+          Me.FilterOn = True
+      End If
+  End Sub
+  Private Sub Form_Load()
+      If basListHelpers.IsAddMode(Me.OpenArgs) Then
+          Dim cid As Long, fy As Long
+          cid = basListHelpers.GetContextLong(Me.OpenArgs, "ClientID")
+          fy = basListHelpers.GetContextLong(Me.OpenArgs, "FiscalYear")
+          If cid > 0 Then Me!ClientID = cid
+          If fy > 0 Then Me!FiscalYear = fy
+          ' ClientName is unbound and gets populated in Form_Current via DLookup
+          ' on Me.ClientID, so no explicit assignment here.
+      End If
+  
+      PopulateClientServiceNeeds
+      RefreshTotals
+  End Sub
+  
+  Private Sub RefreshTotals()
+      Dim totalPlanned As Currency
+      Dim budget As Currency
+      Dim remaining As Currency
+  
+      budget = Nz(Me.txtAnnualBudget, 0)
+  
+      totalPlanned = Nz(DSum("AnnualEstCost", "tblClientServicePlan", _
+          "ClientServiceNeedID IN (SELECT ClientServiceNeedID FROM tblClientServiceNeeds " & _
+          "WHERE ClientID=" & Me.txtClientID & " AND FiscalYear=" & Me.txtFiscalYear & ")"), 0)
+  
+      remaining = budget - totalPlanned
+  
+      Me.txtTotalPlanned = Format(totalPlanned, "$#,##0.00")
+      Me.txtRemaining = Format(remaining, "$#,##0.00")
+  
+      If remaining < 0 Then
+          Me.txtRemaining.ForeColor = RGB(192, 0, 0)
+          Me.txtRemaining.FontBold = True
+      ElseIf remaining < budget * 0.1 Then
+          Me.txtRemaining.ForeColor = RGB(192, 96, 0)
+          Me.txtRemaining.FontBold = False
+      Else
+          Me.txtRemaining.ForeColor = RGB(0, 96, 0)
+          Me.txtRemaining.FontBold = False
+      End If
+  End Sub
+  
+  ' Called by the plan detail popup form after it commits a change,
+  ' so this form's running totals stay in sync.
+  Public Sub NotifyPlanChanged()
+      RefreshTotals
+      PopulateClientServicePlan
+  End Sub
+  Private Sub btnSave_Click()
+      On Error GoTo Failed
+      If Me.Dirty Then Me.Dirty = False    ' fires Form_BeforeUpdate
+      Me.btnSave.Enabled = False
+      Me.btnClose.Caption = "Close"
+      Exit Sub
+  Failed:
+      ' Validation canceled the save - leave the form open with current button state.
+  End Sub
+  Private Sub btnCancel_Click()
+      ' Legacy button - btnClose now handles dynamic Cancel behavior.
+      ' Kept here in case btnCancel still exists on the form.
+      If Me.Dirty Then Me.Undo
+  End Sub
+  Private Sub btnClose_Click()
+      ' When the caption is "Cancel" the form is dirty - undo first, then close.
+      If Me.Dirty Then Me.Undo
+      DoCmd.Close acForm, Me.name
+  End Sub
+  
+  Private Sub Form_Dirty(Cancel As Integer)
+      Me.btnSave.Enabled = True
+      Me.btnClose.Caption = "Cancel"
+  End Sub
+  
+  Private Sub Form_Undo(Cancel As Integer)
+      Me.btnSave.Enabled = False
+      Me.btnClose.Caption = "Close"
+  End Sub
+  
+  Private Sub Form_BeforeUpdate(Cancel As Integer)
+      If IsNull(Me!AnnualBudget) Or Me!AnnualBudget <= 0 Then
+          MsgBox "Annual Budget must be greater than zero.", vbExclamation, "Validation"
+          Me.txtAnnualBudget.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If IsNull(Me!FiscalYear) Then
+          MsgBox "Fiscal Year is required.", vbExclamation, "Validation"
+          Me.txtFiscalYear.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If IsNull(Me!ClientID) Then
+          MsgBox "Client is required.", vbExclamation, "Validation"
+          Cancel = True
+          Exit Sub
+      End If
+  
+      Dim selfID As Long
+      selfID = Nz(Me!ClientBudgetID, 0)
+      If DCount("*", "tblClientBudgets", _
+                "ClientID=" & Me!ClientID & _
+                " AND FiscalYear=" & Me!FiscalYear & _
+                " AND ClientBudgetID<>" & selfID) > 0 Then
+          MsgBox "A budget for this client and fiscal year already exists.", _
+                 vbExclamation, "Duplicate"
+          Me.txtFiscalYear.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  End Sub
+  
+  
+  Private Sub txtFiscalYear_AfterUpdate()
+      PopulateClientServiceNeeds
+      Me.lstClientServicePlan.RowSource = ""
+      RefreshTotals
+  End Sub
+  
+  Private Sub btnDelete_Click()
+      If Me.NewRecord Then Exit Sub
+  
+      Dim PlanCount As Long
+      PlanCount = DCount("*", "tblClientServicePlan", _
+                         "FiscalYear=" & Me!FiscalYear & _
+                         " AND ClientServiceNeedID IN " & _
+                         "(SELECT ClientServiceNeedID FROM tblClientServiceNeeds " & _
+                         " WHERE ClientID=" & Me!ClientID & ")")
+  
+      Dim msg As String
+      msg = "Delete this budget?"
+      If PlanCount > 0 Then
+          msg = msg & vbCrLf & vbCrLf & _
+                "Note: " & PlanCount & " service plan entries exist for this client and FY. " & _
+                "Service plans will remain but their budget reference will be gone."
+      End If
+  
+      If MsgBox(msg, vbYesNo + vbQuestion + vbDefaultButton2, "Confirm Delete") = vbNo Then Exit Sub
+  
+      On Error GoTo Failed
+      RunCommand acCmdSelectRecord
+      RunCommand acCmdDeleteRecord
+      DoCmd.Close acForm, Me.name
+      Exit Sub
+  
+  Failed:
+      MsgBox "Could not delete: " & Err.Description, vbCritical, "Delete Failed"
+  End Sub
+  
+  
+  Private Sub Form_AfterUpdate()
+      ' After saving a budget, refresh the parent frmClientDetail's lstClientBudgets
+      ' so the new/edited AnnualBudget value shows there too.
+      On Error Resume Next
+      Forms!frmClientDetail.PopulateClientBudgets
+      On Error GoTo 0
+  End Sub

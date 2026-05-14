@@ -1,0 +1,67 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Macro"
+Name: "mcrErrorHandler"
+Definition: |
+  Version =196611
+  PublishOption =1
+  ColumnsShown =0
+  Begin
+      MacroName ="LogAndContinue"
+      Action ="SetTempVar"
+      Argument ="LastError"
+      Argument ="[MacroError].[Number]"
+  End
+  Begin
+      Action ="MsgBox"
+      Argument ="\"A non-critical error occurred: \" & [MacroError].[Description]"
+      Argument ="0"
+      Argument ="4"
+  End
+  Begin
+      Action ="ClearMacroError"
+  End
+  Begin
+      MacroName ="LogAndStop"
+      Action ="SetTempVar"
+      Argument ="LastError"
+      Argument ="[MacroError].[Number]"
+  End
+  Begin
+      Action ="MsgBox"
+      Argument ="\"Error: \" & [MacroError].[Description] & \" (Error #\" & [MacroError].[Number]"
+          " & \")\""
+      Argument ="-1"
+      Argument ="1"
+  End
+  Begin
+      Action ="StopMacro"
+  End
+  Begin
+      Comment ="_AXL:<?xml version=\"1.0\" encoding=\"UTF-16\" standalone=\"no\"?>\015\012<UserI"
+          "nterfaceMacro MinimumClientDesignVersion=\"14.0.0000.0000\" xmlns=\"http://schem"
+          "as.microsoft.com/office/accessservices/2009/11/application\"><Statements/><Sub N"
+          "ame=\"LogAndContinue\"><Stateme"
+  End
+  Begin
+      Comment ="_AXL:nts><Action Name=\"SetTempVar\"><Argument Name=\"Name\">LastError</Argument"
+          "><Argument Name=\"Expression\">[MacroError].[Number]</Argument></Action><Action "
+          "Name=\"MessageBox\"><Argument Name=\"Message\">\"A non-critical error occurred: "
+          "\" &amp; [MacroError].[De"
+  End
+  Begin
+      Comment ="_AXL:scription]</Argument><Argument Name=\"Beep\">No</Argument><Argument Name=\""
+          "Type\">Information</Argument></Action><Action Name=\"ClearMacroError\"/></Statem"
+          "ents></Sub><Sub Name=\"LogAndStop\"><Statements><Action Name=\"SetTempVar\"><Arg"
+          "ument Name=\"Name\">LastE"
+  End
+  Begin
+      Comment ="_AXL:rror</Argument><Argument Name=\"Expression\">[MacroError].[Number]</Argumen"
+          "t></Action><Action Name=\"MessageBox\"><Argument Name=\"Message\">\"Error: \" &a"
+          "mp; [MacroError].[Description] &amp; \" (Error #\" &amp; [MacroError].[Number] &"
+          "amp; \")\"</Argument><Arg"
+  End
+  Begin
+      Comment ="_AXL:ument Name=\"Type\">Critical</Argument></Action><Action Name=\"StopMacro\"/"
+          "></Statements></Sub></UserInterfaceMacro>"
+  End
+  

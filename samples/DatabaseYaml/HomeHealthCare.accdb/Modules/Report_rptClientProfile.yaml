@@ -1,0 +1,60 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_rptClientProfile"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_ClientID As Long
+  Private m_DetailCount As Long
+  Private Sub Report_Open(Cancel As Integer)
+      If Not IsNull(Me.OpenArgs) Then
+          If IsNumeric(Me.OpenArgs) Then
+              m_ClientID = CLng(Me.OpenArgs)
+              Me.RecordSource = "SELECT * FROM tblClients WHERE ClientID = " & m_ClientID
+              Exit Sub
+          End If
+      End If
+  
+      DoCmd.OpenForm "frmReportParam_Client", , , , , acDialog
+  
+      If Not IsLoaded("frmReportParam_Client") Then
+          Cancel = True
+          Exit Sub
+      End If
+  
+      m_ClientID = Forms!frmReportParam_Client!cboClient
+      Me.RecordSource = "SELECT * FROM tblClients WHERE ClientID = " & m_ClientID
+      DoCmd.Close acForm, "frmReportParam_Client"
+  End Sub
+  
+  
+  Private Sub Report_NoData(Cancel As Integer)
+      MsgBox "No data found for this client.", vbInformation
+      Cancel = True
+  End Sub
+  
+  Private Sub Report_Page()
+      ' Draw a horizontal line across the page footer — migration stress test
+      Me.Line (0, Me.ScaleHeight - 200)-(Me.ScaleWidth, Me.ScaleHeight - 200)
+  End Sub
+  
+  Private Sub Detail_Print(Cancel As Integer, PrintCount As Integer)
+      m_DetailCount = m_DetailCount + 1
+  End Sub
+  
+  Private Function IsLoaded(ByVal strFormName As String) As Boolean
+      Dim frm As Access.Form
+      For Each frm In Application.Forms
+          If frm.name = strFormName Then
+              IsLoaded = True
+              Exit Function
+          End If
+      Next
+      IsLoaded = False
+  End Function

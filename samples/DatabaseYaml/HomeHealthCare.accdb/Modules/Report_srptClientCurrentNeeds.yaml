@@ -1,0 +1,23 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_srptClientCurrentNeeds"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private Sub Detail_Format(Cancel As Integer, FormatCount As Integer)
+      ' Color-code priority: red=1, orange=2-3, white=4+
+      Select Case Nz(Me.txtPriority, 99)
+          Case 1
+              Me.Section(0).BackColor = 255  ' Red
+          Case 2, 3
+              Me.Section(0).BackColor = 33023  ' Orange
+          Case Else
+              Me.Section(0).BackColor = 16777215  ' White
+      End Select
+  End Sub

@@ -1,0 +1,419 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmClientDetail"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_IsDirty As Boolean
+  Private Sub PopulateClientServiceNeeds()
+      If Me.NewRecord Or IsNull(Me.ClientID) Then
+          Me.lstClientServiceNeeds.RowSource = ""
+          Exit Sub
+      End If
+  
+      Dim fy As Integer
+      fy = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+  
+      Dim baseSql As String
+      baseSql = _
+          "SELECT n.ClientServiceNeedID AS ID, " & _
+                 "n.FiscalYear AS FY, " & _
+                 "s.ServiceName AS [Service], " & _
+                 "n.HoursPerWeek AS [Hrs/Wk], " & _
+                 "n.Priority AS Priority " & _
+          "FROM tblClientServiceNeeds AS n " & _
+               "INNER JOIN tblServices AS s ON s.ServiceID = n.ServiceID " & _
+          "WHERE n.ClientID=" & Me.ClientID & _
+            " AND n.FiscalYear=" & fy
+  
+      Me.lstClientServiceNeeds.RowSource = basListHelpers.BuildAddableRowSource( _
+          dataSelect:=baseSql, _
+          addLabel:="(Add new...)", _
+          dataColCount:=5)
+      Me.lstClientServiceNeeds.Requery
+  End Sub
+  Private Sub PopulateClientBudgets()
+      If Me.NewRecord Or IsNull(Me.ClientID) Then
+          Me.lstClientBudgets.RowSource = ""
+          Exit Sub
+      End If
+  
+      ' Plain single-table SELECT with its own ORDER BY - Jet handles this fine.
+      ' The helper handles the Add-row prepending + ColumnHeads in code, no UNION.
+      Dim sql As String
+      sql = _
+          "SELECT b.ClientBudgetID AS ID, " & _
+                 "b.FiscalYear AS FY, " & _
+                 "Format(b.AnnualBudget,'$#,##0.00') AS [Annual Budget], " & _
+                 "b.Notes AS Notes " & _
+          "FROM tblClientBudgets AS b " & _
+          "WHERE b.ClientID=" & Me.ClientID & " " & _
+          "ORDER BY b.FiscalYear DESC"
+  
+      basListHelpers.PopulateAddableListBoxFromAdo Me.lstClientBudgets, sql, "(Add new...)"
+  End Sub
+  Private Sub Form_Dirty(Cancel As Integer)
+      m_IsDirty = True
+      Me.btnSave.Enabled = True
+  End Sub
+  
+  ' ============================================================================
+  '  Double-click handlers: route through the shared OpenDetailFromList helper.
+  ' ============================================================================
+  
+  Private Sub lstClientServiceNeeds_DblClick(Cancel As Integer)
+      ' For a NEW need we need to give the detail form the client + FY context
+      ' (it'll pre-fill the FK columns on the new record).
+      Dim ctx As String
+      ctx = basListHelpers.BuildContextArgs( _
+                  "ClientID", Me.ClientID, _
+                  "FiscalYear", Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear()))
+  
+      basListHelpers.OpenDetailFromList Me.lstClientServiceNeeds, _
+                                        "frmClientServiceNeedDetail", _
+                                        ctx
+  End Sub
+  Private Sub lstClientBudgets_DblClick(Cancel As Integer)
+      ' For Add mode, pass only ClientID and let the user choose the fiscal year
+      ' (avoids defaulting to a FY the client already has a budget for, which
+      ' would silently fail the unique Client+FY index on save).
+      ' For Edit mode, OpenArgs is the PK and FY comes from the loaded record.
+      Dim ctx As String
+      ctx = basListHelpers.BuildContextArgs("ClientID", Me.ClientID)
+  
+      basListHelpers.OpenDetailFromList Me.lstClientBudgets, _
+                                        "frmBudgetServicePlan", _
+                                        ctx
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Existing form logic (preserved)
+  ' ============================================================================
+  
+  Private Sub cboFilterFiscalYear_AfterUpdate()
+      PopulateClientServiceNeeds
+      UpdateCopyButtonState
+  End Sub
+  Private Sub Form_Load()
+      If IsNull(Me.OpenArgs) Then Exit Sub
+  
+      If UCase(Me.OpenArgs) = "ADD" Then
+          DoCmd.GoToRecord , , acNewRec
+      ElseIf IsNumeric(Me.OpenArgs) Then
+          ' Restrict to the requested client so the user can't navigate elsewhere.
+          Me.Filter = "ClientID=" & CLng(Me.OpenArgs)
+          Me.FilterOn = True
+      End If
+  End Sub
+  Private Sub Form_Current()
+      ' Default the filter combo to the current fiscal year on first display.
+      ' (Form_Load was the original hook, but the assignment didn't stick there.
+      ' Form_Current re-fires on every record positioning, which is the more
+      ' reliable hook for "default an unbound control on display.")
+      If IsNull(Me.cboFilterFiscalYear) Then
+          Me.cboFilterFiscalYear = basUtilities.GetCurrentFiscalYear()
+      End If
+  
+      If Me.NewRecord Then
+          Me.Caption = "New Client"
+      Else
+          Me.Caption = Nz(Me.txtFirstName, "") & " " & Nz(Me.txtLastName, "") & " - Client Detail"
+      End If
+  
+      ' Update the "Copy from prior FY" button label and visibility based on
+      ' whether prior-year data exists for this client.
+      UpdateCopyButtonState
+  
+      ' Status bar
+      On Error Resume Next
+      With Me.RecordsetClone
+          If Not (.BOF And .EOF) Then .MoveLast
+          Me.lblRecordNav.Caption = "Record " & Me.CurrentRecord & " of " & .RecordCount
+      End With
+      On Error GoTo 0
+  
+      m_IsDirty = False
+  
+      PopulateClientServiceNeeds
+      PopulateClientBudgets
+  
+      On Error Resume Next
+      If Me.ActiveControl Is Me.btnSave Then Me.txtFirstName.SetFocus
+      Me.btnSave.Enabled = False
+  End Sub
+  Private Sub Form_BeforeUpdate(Cancel As Integer)
+      ' Tag-driven validation loop
+      Dim ctl As Control
+      For Each ctl In Me.Controls
+          If ctl.Tag = "Required" Then
+              If Len(Nz(ctl.Value, "")) = 0 Then
+                  MsgBox ctl.name & " is required.", vbExclamation, "Validation"
+                  ctl.SetFocus
+                  Cancel = True
+                  Exit For
+              End If
+          End If
+      Next ctl
+  End Sub
+  
+  
+  Private Sub Form_Undo(Cancel As Integer)
+      m_IsDirty = False
+      Me.btnSave.Enabled = False
+  End Sub
+  
+  Private Sub Form_Delete(Cancel As Integer)
+      If MsgBox("Are you sure you want to delete this client?", _
+                vbYesNo + vbQuestion, "Confirm Delete") = vbNo Then
+          Cancel = True
+          Exit Sub
+      End If
+      ' Check for child records
+      If DCount("*", "tblClientBudgets", "ClientID=" & Me.ClientID) > 0 Then
+          MsgBox "Cannot delete this client because they have budget records. " & _
+                 "Please delete the budget records first.", vbExclamation, "Delete Blocked"
+          Cancel = True
+      End If
+  End Sub
+  Private Sub txtLastName_BeforeUpdate(Cancel As Integer)
+      ' Use .Text (in-progress edit), not .Value (locked during BeforeUpdate).
+      ' Assigning to .Value here triggers Access error 2107 on save.
+      Dim s As String
+      s = StrConv(Trim(Nz(Me.txtLastName.Text, "")), vbProperCase)
+      If s <> Me.txtLastName.Text Then
+          Me.txtLastName.Text = s
+      End If
+  End Sub
+  Private Sub txtFirstName_BeforeUpdate(Cancel As Integer)
+      ' Use .Text (in-progress edit), not .Value (locked during BeforeUpdate).
+      ' Prior version had a typo - referenced Me.txtLastName everywhere.
+      Dim s As String
+      s = StrConv(Trim(Nz(Me.txtFirstName.Text, "")), vbProperCase)
+      If s <> Me.txtFirstName.Text Then
+          Me.txtFirstName.Text = s
+      End If
+  End Sub
+  
+  
+  Private Sub txtEmail_BeforeUpdate(Cancel As Integer)
+      If Not IsNull(Me.txtEmail) Then
+          If Not Me.txtEmail Like "*@*.*" Then
+              MsgBox "Please enter a valid email address.", vbExclamation, "Invalid Email"
+              Cancel = True
+          End If
+      End If
+  End Sub
+  
+  Private Sub txtPhone_AfterUpdate()
+      If Not IsNull(Me.txtPhone) Then
+          Me.txtPhone = FormatPhone(Me.txtPhone)
+      End If
+  End Sub
+  
+  Private Sub txtSSNLast4_Exit(Cancel As Integer)
+      Dim s As String
+      s = Nz(Me.txtSSNLast4, "")
+      If Len(s) > 0 Then
+          If Len(s) <> 4 Or Not IsNumeric(s) Then
+              MsgBox "SSN must be exactly 4 digits.", vbExclamation, "Validation"
+              Cancel = True
+          End If
+      End If
+  End Sub
+  
+  Private Sub cboStateCode_AfterUpdate()
+      If IsNull(Me.cboStateCode) Then Exit Sub
+  
+      Dim sql As String
+      sql = "SELECT City FROM tblClients " & _
+            "WHERE StateCode=" & SqlQuote(Me.cboStateCode) & " AND City Is Not Null " & _
+            "GROUP BY City"
+  
+      Dim rs As DAO.Recordset
+      Set rs = CurrentDb.OpenRecordset(sql, dbOpenSnapshot)
+      If Not (rs.BOF And rs.EOF) Then
+          rs.MoveLast
+          If rs.RecordCount = 1 Then
+              rs.MoveFirst
+              Me.txtCity = rs!City
+          End If
+      End If
+      rs.Close
+      Set rs = Nothing
+  End Sub
+  
+  Private Sub cboStateCode_NotInList(NewData As String, Response As Integer)
+      Response = acDataErrContinue
+      MsgBox "Please select a valid state.", vbExclamation
+  End Sub
+  Private Sub txtDateOfBirth_AfterUpdate()
+      Me.txtDateOfBirth.Requery
+      ' txtAge has ControlSource "=CalcAge([DateOfBirth])" and auto-updates.
+      ' Assignment from VBA was removed because calculated controls are read-only.
+  End Sub
+  
+  Private Sub txtDateOfBirth_BeforeUpdate(Cancel As Integer)
+      If Not IsNull(Me.txtDateOfBirth) Then
+          If Me.txtDateOfBirth > DateAdd("yyyy", -18, Date) Then
+              MsgBox "Client must be at least 18 years old.", vbExclamation, "Validation"
+              Cancel = True
+          End If
+      End If
+  End Sub
+  
+  Private Sub chkIsActive_AfterUpdate()
+      If Me.chkIsActive = False Then
+          If MsgBox("Are you sure you want to deactivate this client?", _
+                    vbYesNo + vbQuestion, "Confirm Deactivation") = vbNo Then
+              Me.chkIsActive = True
+              Exit Sub
+          End If
+          ' Check for active plan entries
+          Dim activePlans As Long
+          activePlans = DCount("*", "tblClientServicePlan", _
+              "Status='Approved' AND ClientServiceNeedID IN " & _
+              "(SELECT ClientServiceNeedID FROM tblClientServiceNeeds WHERE ClientID=" & Me.ClientID & ")")
+          If activePlans > 0 Then
+              MsgBox "Warning: This client has " & activePlans & " active service plan entries. " & _
+                     "These will be orphaned if the client is deactivated.", vbExclamation, "Warning"
+          End If
+      End If
+  End Sub
+  
+  Private Sub btnSave_Click()
+      If Me.Dirty Then Me.Dirty = False
+  End Sub
+  
+  Private Sub btnCopyFromPriorFY_Click()
+      ' Deep-copies all service needs (and their associated plan rows) for this
+      ' client from the most recent populated prior FY into the FY currently
+      ' selected in cboFilterFiscalYear. Replace-all semantics ? a single
+      ' up-front prompt covers any existing target-year data.
+  
+      Dim targetFY As Long
+      targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+  
+      Dim srcVar As Variant
+      srcVar = basDataOperations.MostRecentPopulatedFY( _
+                  "tblClientServiceNeeds", _
+                  "ClientID=" & Me.ClientID, _
+                  targetFY)
+  
+      If IsNull(srcVar) Then
+          MsgBox "No prior fiscal year has service needs to copy.", _
+                 vbInformation, "Nothing to Copy"
+          Exit Sub
+      End If
+  
+      Dim sourceFY As Integer
+      sourceFY = CInt(srcVar)
+  
+      Dim srcNeedCount As Long
+      srcNeedCount = DCount("*", "tblClientServiceNeeds", _
+                            "ClientID=" & Me.ClientID & " AND FiscalYear=" & sourceFY)
+  
+      Dim tgtNeedCount As Long, tgtPlanCount As Long
+      tgtNeedCount = DCount("*", "tblClientServiceNeeds", _
+                            "ClientID=" & Me.ClientID & " AND FiscalYear=" & targetFY)
+      tgtPlanCount = DCount("*", "tblClientServicePlan", _
+                            "ClientServiceNeedID IN (SELECT ClientServiceNeedID " & _
+                            "FROM tblClientServiceNeeds WHERE ClientID=" & Me.ClientID & _
+                            " AND FiscalYear=" & targetFY & ")")
+  
+      Dim msg As String
+      msg = "Copy " & srcNeedCount & " service need(s) (and their plan rows) " & _
+            "from FY" & sourceFY & " into FY" & targetFY & "?"
+      If tgtNeedCount > 0 Or tgtPlanCount > 0 Then
+          msg = msg & vbCrLf & vbCrLf & _
+                "FY" & targetFY & " currently has " & tgtNeedCount & " need(s) and " & _
+                tgtPlanCount & " plan row(s) for this client. They will be replaced."
+      End If
+  
+      If MsgBox(msg, vbQuestion + vbOKCancel + vbDefaultButton1, _
+                "Copy from FY" & sourceFY) <> vbOK Then
+          Exit Sub
+      End If
+  
+      On Error GoTo Failed
+      Dim needsCopied As Long, plansCopied As Long, plansSkipped As Long
+  
+      needsCopied = basDataOperations.CopyClientNeedsAndPlans( _
+                          Me.ClientID, sourceFY, CInt(targetFY), _
+                          overwrite:=True, _
+                          plansCopied:=plansCopied, _
+                          plansSkipped:=plansSkipped)
+  
+      Dim summary As String
+      summary = needsCopied & " service need(s) copied." & vbCrLf & _
+                plansCopied & " plan row(s) copied."
+      If plansSkipped > 0 Then
+          summary = summary & vbCrLf & vbCrLf & _
+                    plansSkipped & " plan row(s) were skipped because the matching " & _
+                    "provider does not offer the service in FY" & targetFY & "." & vbCrLf & _
+                    "Run 'Copy from prior FY' on those providers' catalogs first, " & _
+                    "then re-run this copy."
+      End If
+      MsgBox summary, vbInformation, "Copy Complete"
+  
+      PopulateClientServiceNeeds
+      PopulateClientBudgets
+      UpdateCopyButtonState
+      Exit Sub
+  
+  Failed:
+      Select Case Err.Number
+          Case basDataOperations.ERR_CANCELED
+              ' silent ? user backed out of the inner overwrite prompt
+          Case basDataOperations.ERR_SAME_FY
+              MsgBox Err.Description, vbExclamation, "Invalid Fiscal Years"
+          Case Else
+              MsgBox "Error copying needs and plans: " & Err.Description, vbCritical
+      End Select
+  End Sub
+  
+  ' ----------------------------------------------------------------------------
+  '  Refreshes btnCopyFromPriorFY's label and visibility based on the currently
+  '  selected target FY (cboFilterFiscalYear) and what prior-year data exists
+  '  for this client. Called from Form_Current and cboFilterFiscalYear_AfterUpdate.
+  ' ----------------------------------------------------------------------------
+  Private Sub UpdateCopyButtonState()
+      On Error Resume Next   ' button may not exist yet during form load
+      If Me.NewRecord Or IsNull(Me.ClientID) Then
+          Me.btnCopyFromPriorFY.Visible = False
+          Exit Sub
+      End If
+  
+      Dim targetFY As Long
+      targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())
+  
+      Dim srcVar As Variant
+      srcVar = basDataOperations.MostRecentPopulatedFY( _
+                  "tblClientServiceNeeds", _
+                  "ClientID=" & Me.ClientID, _
+                  targetFY)
+  
+      If IsNull(srcVar) Then
+          Me.btnCopyFromPriorFY.Visible = False
+      Else
+          Me.btnCopyFromPriorFY.Caption = "Copy from FY" & CLng(srcVar)
+          Me.btnCopyFromPriorFY.Visible = True
+      End If
+  End Sub
+  Private Sub btnPrint_Click()
+      DoCmd.OpenReport "rptClientProfile", acViewPreview, , , , Me.ClientID
+  End Sub
+  
+  
+  
+  
+  
+  Private Sub btnClose_Click()
+      DoCmd.Close acForm, Me.name
+  End Sub

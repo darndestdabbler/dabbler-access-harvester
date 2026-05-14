@@ -1,0 +1,89 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_rptServicePlansByClient"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_ProviderID As Long
+  Private m_FiscalYear As Integer
+  
+  Private Sub Report_Open(Cancel As Integer)
+      DoCmd.OpenForm "frmReportParam_ProviderFY", , , , , acDialog
+  
+      If Not IsLoaded("frmReportParam_ProviderFY") Then
+          Cancel = True
+          Exit Sub
+      End If
+  
+      m_ProviderID = Forms!frmReportParam_ProviderFY!cboProvider
+      m_FiscalYear = Forms!frmReportParam_ProviderFY!cboFiscalYear
+      
+      Me.RecordSource = GetSql(m_ProviderID, m_FiscalYear)
+      
+      DoCmd.Close acForm, "frmReportParam_ProviderFY"
+  End Sub
+  
+  Private Function GetSql(ByVal ProviderID As Long, ByVal FiscalYear As Long) As String
+      Dim sql As String
+      sql = "SELECT "
+      sql = sql & "    p.ProviderID, "
+      sql = sql & "    p.ProviderName, "
+      sql = sql & "    s.ServiceID, "
+      sql = sql & "    s.ServiceName, "
+      sql = sql & "    csp.FiscalYear, "
+      sql = sql & "    psc.RatePerHour, "
+      sql = sql & "    csp.HoursPerWeek AS WeeklyHours, "
+      sql = sql & "    csp.WeeklyCost, "
+      sql = sql & "    csp.AnnualEstCost, "
+      sql = sql & "    c.ClientID, "
+      sql = sql & "    Trim(Nz ([LastName], " & Chr(34) & Chr(34) & ") & " & Chr(34) & ", " & Chr(34) & " & Nz ([FirstName], " & Chr(34) & Chr(34) & ")) AS ClientName "
+      sql = sql & "FROM "
+      sql = sql & "    tblServices AS s "
+      sql = sql & "    INNER JOIN ( "
+      sql = sql & "        tblProviders AS p "
+      sql = sql & "        INNER JOIN ( "
+      sql = sql & "            ( "
+      sql = sql & "                tblClients AS c "
+      sql = sql & "                INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID "
+      sql = sql & "            ) "
+      sql = sql & "            INNER JOIN ( "
+      sql = sql & "                tblProviderServiceCatalog AS psc "
+      sql = sql & "                INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID "
+      sql = sql & "            ) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID "
+      sql = sql & "        ) ON p.ProviderID = psc.ProviderID "
+      sql = sql & "    ) ON (s.ServiceID = csn.ServiceID) "
+      sql = sql & "    AND (s.ServiceID = psc.ServiceID) "
+      sql = sql & "WHERE "
+      sql = sql & "    p.ProviderID = " & ProviderID & " "
+      sql = sql & "    AND psc.FiscalYear = " & FiscalYear & " "
+      sql = sql & "    AND csp.Status <> 'Cancelled' "
+      sql = sql & "ORDER BY c.LastName, c.FirstName" & ";"
+      
+      GetSql = sql
+  End Function
+  
+  
+  Private Sub Report_NoData(Cancel As Integer)
+      MsgBox "No plan data found for this provider and fiscal year.", vbInformation
+      Cancel = True
+  End Sub
+  
+  
+  
+  
+  Private Function IsLoaded(ByVal strFormName As String) As Boolean
+      Dim frm As Access.Form
+      For Each frm In Application.Forms
+          If frm.name = strFormName Then
+              IsLoaded = True
+              Exit Function
+          End If
+      Next
+      IsLoaded = False
+  End Function

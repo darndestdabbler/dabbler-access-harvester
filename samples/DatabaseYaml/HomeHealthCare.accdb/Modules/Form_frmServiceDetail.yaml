@@ -1,0 +1,146 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmServiceDetail"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  ' ============================================================================
+  '  frmServiceDetail
+  ' ----------------------------------------------------------------------------
+  '  Detail form for a single tblServices row.
+  '  Opened from frmServiceList (Add or Edit, modeless) and from the various
+  '  cboServiceID_NotInList handlers (Add only, modal via acDialog).
+  '
+  '  Controls (prefixed naming):
+  '     txtServiceID         (PK)
+  '     txtServiceCode       (required, unique)
+  '     txtServiceName       (required)
+  '     cboServiceCategory   (combo with inline row source ? not set in code)
+  '     txtDescription
+  '     chkActive            (default True)
+  '     btnSave / btnClose / btnDelete
+  ' ============================================================================
+  
+  
+  Private Sub Form_BeforeUpdate(Cancel As Integer)
+      If Len(Nz(Me!ServiceCode, "")) = 0 Then
+          MsgBox "Service Code is required.", vbExclamation, "Validation"
+          Me.txtServiceCode.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If Len(Nz(Me!ServiceName, "")) = 0 Then
+          MsgBox "Service Name is required.", vbExclamation, "Validation"
+          Me.txtServiceName.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If Len(Nz(Me!ServiceCategory, "")) = 0 Then
+          MsgBox "Please select a service category.", vbExclamation, "Validation"
+          Me.cboServiceCategory.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      ' Duplicate ServiceCode check (any other row).
+      Dim selfID As Long
+      selfID = Nz(Me!ServiceID, 0)
+      If DCount("*", "tblServices", _
+                "ServiceCode='" & Replace(Me!ServiceCode, "'", "''") & "'" & _
+                " AND ServiceID<>" & selfID) > 0 Then
+          MsgBox "Another service already has the code '" & Me!ServiceCode & "'.", _
+                 vbExclamation, "Duplicate Code"
+          Me.txtServiceCode.SetFocus
+          Cancel = True
+      End If
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Action buttons
+  ' ============================================================================
+  
+  Private Sub btnSave_Click()
+      On Error GoTo Failed
+      If Me.Dirty Then Me.Dirty = False    ' fires Form_BeforeUpdate
+      DoCmd.Close acForm, Me.name
+      Exit Sub
+  Failed:
+      ' Validation canceled the save ? leave the form open.
+  End Sub
+  
+  Private Sub btnClose_Click()
+      DoCmd.Close acForm, Me.name, acSavePrompt
+  End Sub
+  
+  Private Sub btnDelete_Click()
+      If Me.NewRecord Then Exit Sub
+  
+      ' Block delete if any related rows reference this service.
+      Dim usedInLimits As Long, usedInCatalog As Long, usedInNeeds As Long, total As Long
+      usedInLimits = DCount("*", "tblServiceRateLimits", "ServiceID=" & Me!ServiceID)
+      usedInCatalog = DCount("*", "tblProviderServiceCatalog", "ServiceID=" & Me!ServiceID)
+      usedInNeeds = DCount("*", "tblClientServiceNeeds", "ServiceID=" & Me!ServiceID)
+      total = usedInLimits + usedInCatalog + usedInNeeds
+  
+      If total > 0 Then
+          MsgBox "Cannot delete this service." & vbCrLf & vbCrLf & _
+                 usedInLimits & " rate limit row(s)" & vbCrLf & _
+                 usedInCatalog & " provider catalog row(s)" & vbCrLf & _
+                 usedInNeeds & " client need row(s)" & vbCrLf & vbCrLf & _
+                 "reference it. Consider unchecking 'Active' instead.", _
+                 vbExclamation, "Service In Use"
+          Exit Sub
+      End If
+  
+      If MsgBox("Delete this service?", _
+                vbYesNo + vbQuestion + vbDefaultButton2, _
+                "Confirm Delete") = vbNo Then Exit Sub
+  
+      On Error GoTo Failed
+      RunCommand acCmdSelectRecord
+      RunCommand acCmdDeleteRecord
+      DoCmd.Close acForm, Me.name
+      Exit Sub
+  
+  Failed:
+      MsgBox "Could not delete: " & Err.Description, vbCritical, "Delete Failed"
+  End Sub
+  
+  
+  Private Sub Form_Current()
+      ' Window caption
+      Me.Caption = Nz(Me.txtServiceName, "New Service") & " - Service Detail"
+  
+      ' PK display: locked but visible (not grayed)
+      Me.txtServiceID.Locked = True
+      Me.txtServiceID.Enabled = True
+      Me.txtServiceID.BorderStyle = 0
+      Me.txtServiceID.TabStop = False
+  
+      ' Button state: clean record => Save disabled; Delete enabled only on existing
+      Me.btnSave.Enabled = False
+      On Error Resume Next
+      Me.btnDelete.Enabled = Not Me.NewRecord
+      On Error GoTo 0
+  End Sub
+  
+  Private Sub Form_Dirty(Cancel As Integer)
+      On Error Resume Next
+      Me.btnSave.Enabled = True
+      On Error GoTo 0
+  End Sub
+  
+  Private Sub Form_Undo(Cancel As Integer)
+      On Error Resume Next
+      Me.btnSave.Enabled = False
+      On Error GoTo 0
+  End Sub

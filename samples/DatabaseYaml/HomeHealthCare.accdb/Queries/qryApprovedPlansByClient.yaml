@@ -1,0 +1,28 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryApprovedPlansByClient"
+QueryType: "Select"
+SQL: |
+  SELECT tblClientServiceNeeds.ClientID, tblClientServicePlan.FiscalYear, tblClientServicePlan.AnnualEstCost, tblClientServicePlan.ClientServicePlanID
+  FROM tblClientServicePlan INNER JOIN tblClientServiceNeeds ON tblClientServicePlan.ClientServiceNeedID = tblClientServiceNeeds.ClientServiceNeedID
+  WHERE tblClientServicePlan.Status = 'Approved';
+  
+Properties:
+  DateCreated: "5/11/2026 2:58:19 PM"
+  LastUpdated: "5/11/2026 2:58:19 PM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "60"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  PublishToWeb: "1"

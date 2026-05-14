@@ -1,0 +1,54 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Macro"
+Name: "AutoKeys"
+Definition: |
+  Version =196611
+  PublishOption =1
+  ColumnsShown =0
+  Begin
+      MacroName ="^s"
+      Condition ="[Screen].[ActiveForm].[Dirty]"
+      Action ="RunCommand"
+      Argument ="97"
+  End
+  Begin
+      MacroName ="^f"
+      Action ="OpenForm"
+      Argument ="frmClientSearch"
+      Argument ="0"
+      Argument =""
+      Argument =""
+      Argument ="-1"
+      Argument ="0"
+  End
+  Begin
+      MacroName ="{F5}"
+      Action ="Requery"
+  End
+  Begin
+      MacroName ="^p"
+      Action ="RunCommand"
+      Argument ="54"
+  End
+  Begin
+      Comment ="_AXL:<?xml version=\"1.0\" encoding=\"UTF-16\" standalone=\"no\"?>\015\012<UserI"
+          "nterfaceMacro MinimumClientDesignVersion=\"14.0.0000.0000\" xmlns=\"http://schem"
+          "as.microsoft.com/office/accessservices/2009/11/application\"><Statements/><Sub N"
+          "ame=\"^s\"><Statements><Conditi"
+  End
+  Begin
+      Comment ="_AXL:onalBlock><If><Condition>[Screen].[ActiveForm].[Dirty]</Condition><Statemen"
+          "ts><Action Name=\"SaveRecord\"/></Statements></If></ConditionalBlock></Statement"
+          "s></Sub><Sub Name=\"^f\"><Statements><Action Name=\"OpenForm\"><Argument Name=\""
+          "FormName\">frmClientS"
+  End
+  Begin
+      Comment ="_AXL:earch</Argument></Action></Statements></Sub><Sub Name=\"{F5}\"><Statements>"
+          "<Action Name=\"Requery\"/></Statements></Sub><Sub Name=\"^p\"><Statements><Actio"
+          "n Name=\"RunMenuCommand\"><Argument Name=\"Command\">PrintPreview</Argument></Ac"
+          "tion></Statements></Sub"
+  End
+  Begin
+      Comment ="_AXL:></UserInterfaceMacro>"
+  End
+  

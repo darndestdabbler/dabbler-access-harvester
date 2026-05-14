@@ -1,0 +1,305 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "basListHelpers"
+ModuleType: "Standard"
+Definition: |
+  Option Compare Database
+  Option Explicit
+  
+  ' ============================================================================
+  '  basListHelpers
+  ' ----------------------------------------------------------------------------
+  '  Reusable helpers for the "list-box-instead-of-datasheet-subform" pattern.
+  '
+  '  Each list box that participates in this pattern follows these conventions:
+  '
+  '    - Column 1 is the primary key. It is hidden (ColumnWidth = 0) and is
+  '      the BoundColumn (so .Value returns the PK).
+  '    - Columns 2..N are the visible display columns.
+  '    - ColumnHeads = True; column captions come from the data SELECT's
+  '      column aliases (because the data SELECT is the FIRST select in the
+  '      UNION ALL).
+  '    - A synthetic "<Add new ...>" row is UNION ALL'd onto the data SELECT
+  '      with PK = ADD_NEW_ID (-1). It sorts to the top because ORDER BY 1
+  '      (the PK) puts -1 ahead of any real autonumber PK.
+  '
+  '  When the user double-clicks a row:
+  '
+  '    - If the bound value is ADD_NEW_ID, the detail form opens with
+  '      OpenArgs = "ADD"  (or "ADD|ClientID=123|FiscalYear=2025" if the
+  '      caller passes context). This signals the detail form to enter
+  '      Add mode and disable its Delete button.
+  '    - Otherwise the detail form opens with OpenArgs = "<numericID>",
+  '      meaning Edit mode for that record.
+  '
+  '  The detail form is opened acDialog so the parent form blocks until
+  '  the user closes it; we then Requery the list box.
+  ' ============================================================================
+  
+  ' Sentinel PK value for the synthetic "Add New" row.
+  Public Const ADD_NEW_ID As Long = -1
+  
+  ' A 1-row "DUAL" derivation for the synthetic Add-New SELECT.
+  ' MSysObjects is always present and always non-empty in an Access database.
+  Private Const DUAL_FROM As String = " FROM (SELECT TOP 1 1 AS X FROM MSysObjects) AS dual "
+  
+  
+  ' ----------------------------------------------------------------------------
+  ' Builds the synthetic SELECT that becomes the "<Add new ...>" row.
+  '   addLabel       e.g. "<Add new service need...>"
+  '   dataColCount   total column count in the data SELECT (must match)
+  '
+  ' Column 1 emits ADD_NEW_ID (the bound PK).
+  ' Column 2 emits addLabel (what the user sees).
+  ' Columns 3..N emit Null.
+  '
+  ' No column aliases are emitted; the union picks up its column captions
+  ' from the data SELECT (the FIRST select in the UNION ALL).
+  ' ----------------------------------------------------------------------------
+  Public Function BuildAddRowSelect(addLabel As String, dataColCount As Long) As String
+      Dim parts() As String
+      Dim i As Long
+  
+      If dataColCount < 2 Then
+          Err.Raise vbObjectError + 2001, "BuildAddRowSelect", _
+                    "dataColCount must be at least 2 (PK + display)."
+      End If
+  
+      ReDim parts(0 To dataColCount - 1)
+      parts(0) = CStr(ADD_NEW_ID)
+      parts(1) = "'" & Replace(addLabel, "'", "''") & "'"
+      For i = 2 To dataColCount - 1
+          parts(i) = "Null"
+      Next i
+  
+      BuildAddRowSelect = "SELECT " & Join(parts, ", ") & DUAL_FROM
+  End Function
+  
+  
+  ' ----------------------------------------------------------------------------
+  ' Wraps a data SELECT with a synthetic Add-New row (UNION ALL).
+  '   dataSelect     The user's normal SELECT, including FROM/WHERE.
+  '                  MUST include explicit aliases on the columns ? those
+  '                  aliases become the listbox column headers.
+  '                  MUST NOT include ORDER BY (pass that via orderBy).
+  '                  Column 1 of the SELECT MUST be the numeric PK.
+  '   addLabel       What the synthetic row's display column shows.
+  '   dataColCount   Number of columns the SELECT returns.
+  '   orderBy        Optional ORDER BY clause (default: "1" = PK; -1 sorts
+  '                  first ahead of positive autonumber PKs).
+  ' ----------------------------------------------------------------------------
+  Public Function BuildAddableRowSource(dataSelect As String, _
+                                         addLabel As String, _
+                                         dataColCount As Long, _
+                                         Optional orderBy As String = "1") As String
+      Dim sql As String
+      sql = "(" & dataSelect & ") UNION ALL (" & _
+            BuildAddRowSelect(addLabel, dataColCount) & ")"
+      If Len(orderBy) > 0 Then sql = sql & " ORDER BY " & orderBy
+      BuildAddableRowSource = sql
+  End Function
+  
+  
+  ' ----------------------------------------------------------------------------
+  ' Standard double-click handler for a list box that follows the
+  ' "PK in column 1 + Add-New synthetic row" convention.
+  '
+  '   lst              The list box the user double-clicked.
+  '   detailFormName   The popup detail form to open.
+  '   contextOpenArgs  Optional pipe-delimited "key=value|key=value" pairs
+  '                    to append to the OpenArgs in Add mode (e.g. to give
+  '                    the detail form the parent ClientID/FiscalYear so
+  '                    it can populate FK columns on the new record).
+  '                    Ignored in Edit mode.
+  '
+  ' Opens the detail form acDialog (modal) so this Sub blocks until the
+  ' user closes it; then Requery's the list box.
+  ' ----------------------------------------------------------------------------
+  Public Sub OpenDetailFromList(lst As Access.ListBox, _
+                                 detailFormName As String, _
+                                 Optional contextOpenArgs As String = "")
+      Dim selVal As Variant
+      selVal = lst.Value
+      If IsNull(selVal) Then Exit Sub
+  
+      Dim args As String
+      If CLng(selVal) = ADD_NEW_ID Then
+          args = "ADD"
+          If Len(contextOpenArgs) > 0 Then args = args & "|" & contextOpenArgs
+      Else
+          args = CStr(CLng(selVal))
+      End If
+  
+      DoCmd.OpenForm detailFormName, acNormal, , , , acDialog, args
+  
+      ' Modal closed; refresh the list to reflect any inserts/edits/deletes.
+      lst.Requery
+  End Sub
+  
+  
+  ' ----------------------------------------------------------------------------
+  ' Builds an "ADD|key1=val1|key2=val2..." OpenArgs string.
+  ' Pass alternating key, value, key, value, ... in pairs.
+  ' If no pairs are passed, returns "ADD".
+  '
+  '   BuildAddOpenArgs("ClientID", 42, "FiscalYear", 2025)
+  '     -->  "ClientID=42|FiscalYear=2025"
+  '
+  ' (Caller typically passes the result to OpenDetailFromList's
+  '  contextOpenArgs parameter, which prepends "ADD|".)
+  ' ----------------------------------------------------------------------------
+  Public Function BuildContextArgs(ParamArray pairs() As Variant) As String
+      Dim n As Long
+      n = UBound(pairs) - LBound(pairs) + 1
+      If n = 0 Then Exit Function
+      If n Mod 2 <> 0 Then
+          Err.Raise vbObjectError + 2002, "BuildContextArgs", _
+                    "Pairs must come in key,value couples (got " & n & " items)."
+      End If
+  
+      Dim parts() As String
+      ReDim parts(0 To (n \ 2) - 1)
+      Dim i As Long, j As Long
+      j = 0
+      For i = LBound(pairs) To UBound(pairs) Step 2
+          parts(j) = CStr(pairs(i)) & "=" & CStr(pairs(i + 1))
+          j = j + 1
+      Next i
+      BuildContextArgs = Join(parts, "|")
+  End Function
+  
+  
+  ' ----------------------------------------------------------------------------
+  '  OpenArgs parsing helpers, for use by popup detail forms.
+  '
+  '  A popup detail form's Form_Load typically does:
+  '
+  '     If basListHelpers.IsAddMode(Me.OpenArgs) Then
+  '         DoCmd.GoToRecord , , acNewRec
+  '         Me!ClientID    = basListHelpers.GetContextLong(Me.OpenArgs, "ClientID")
+  '         Me!FiscalYear  = basListHelpers.GetContextLong(Me.OpenArgs, "FiscalYear")
+  '         Me.btnDelete.Enabled = False
+  '     ElseIf IsNumeric(Nz(Me.OpenArgs, "")) Then
+  '         Dim rs As DAO.Recordset
+  '         Set rs = Me.RecordsetClone
+  '         rs.FindFirst "<PKfield>=" & CLng(Me.OpenArgs)
+  '         If Not rs.NoMatch Then Me.Bookmark = rs.Bookmark
+  '     End If
+  ' ----------------------------------------------------------------------------
+  
+  ' Returns True iff the OpenArgs string indicates Add mode (starts with "ADD").
+  Public Function IsAddMode(args As Variant) As Boolean
+      Dim s As String
+      s = Nz(args, "")
+      IsAddMode = (Left$(s, 3) = "ADD")
+  End Function
+  
+  ' Looks up a key in an "ADD|key1=val1|key2=val2..." OpenArgs string.
+  ' Returns the value as a String, or "" if the key isn't present.
+  Public Function GetContextString(args As Variant, key As String) As String
+      Dim s As String
+      s = Nz(args, "")
+      If Len(s) = 0 Then Exit Function
+  
+      Dim parts() As String
+      parts = Split(s, "|")
+  
+      Dim i As Long
+      Dim prefix As String
+      prefix = key & "="
+      For i = LBound(parts) To UBound(parts)
+          If Left$(parts(i), Len(prefix)) = prefix Then
+              GetContextString = Mid$(parts(i), Len(prefix) + 1)
+              Exit Function
+          End If
+      Next i
+  End Function
+  
+  ' Same as GetContextString but coerces to Long. Returns 0 if missing/blank.
+  Public Function GetContextLong(args As Variant, key As String) As Long
+      Dim raw As String
+      raw = GetContextString(args, key)
+      If Len(raw) = 0 Then Exit Function
+      If IsNumeric(raw) Then GetContextLong = CLng(raw)
+  End Function
+  Public Sub PopulateAddableListBoxFromAdo(lst As Access.ListBox, _
+                                             sql As String, _
+                                             addLabel As String)
+      ' Populates a list box via ADO + ListBox.AddItem (Value List row source type).
+      '
+      ' Use this instead of BuildAddableRowSource when you need a sort order Jet's
+      ' UNION-ORDER-BY parser won't reliably deliver, expect more rows than fit in
+      ' a RowSource string (~32 KB ceiling), or want column-by-column control.
+      '
+      '   lst        ListBox to populate. RowSourceType MUST be "Value List".
+      '              ColumnCount must match the number of columns the SQL returns.
+      '              ColumnHeads = True is supported (the first AddItem call below
+      '              becomes the header row).
+      '   sql        Data SELECT. Should include its own ORDER BY (no UNION; no
+      '              synthetic add row in the SQL - this routine prepends it).
+      '              Column 1 should be the bound PK (matches helper convention).
+      '   addLabel   Text shown in column 2 of the synthetic Add row. Column 1
+      '              gets ADD_NEW_ID (-1) per convention.
+      '
+      ' IMPORTANT - Access ListBox.AddItem treats BOTH ";" and the locale list
+      ' separator (often ",") as column delimiters, and Access ListBox does NOT
+      ' have a SeparatorCharacters property to control that (only ComboBox does).
+      ' This routine therefore strips both ";" and "," from value text before
+      ' joining. The cosmetic cost is that currency formatting like "$32,000.00"
+      ' renders as "$32000.00". If a caller wants comma-grouped numbers, they'd
+      ' need to switch back to BuildAddableRowSource (Table/Query row source).
+  
+      Dim rs As ADODB.Recordset
+      Set rs = New ADODB.Recordset
+      rs.Open sql, CurrentProject.Connection, adOpenStatic, adLockReadOnly
+  
+      lst.RowSource = ""
+  
+      Dim fldCount As Long
+      fldCount = rs.Fields.count
+      If fldCount < 2 Then
+          Err.Raise vbObjectError + 2003, "PopulateAddableListBoxFromAdo", _
+                    "SQL must return at least 2 columns (PK + display)."
+      End If
+  
+      Dim parts() As String
+      ReDim parts(fldCount - 1)
+      Dim j As Long
+  
+      ' Header row.
+      For j = 0 To fldCount - 1
+          parts(j) = SanitizeForValueList(rs.Fields(j).name)
+      Next j
+      lst.AddItem Join(parts, ";")
+  
+      ' Synthetic Add row.
+      parts(0) = CStr(ADD_NEW_ID)
+      parts(1) = SanitizeForValueList(addLabel)
+      For j = 2 To fldCount - 1
+          parts(j) = ""
+      Next j
+      lst.AddItem Join(parts, ";")
+  
+      ' Data rows.
+      Do While Not rs.EOF
+          For j = 0 To fldCount - 1
+              parts(j) = SanitizeForValueList(CStr(Nz(rs.Fields(j).Value, "")))
+          Next j
+          lst.AddItem Join(parts, ";")
+          rs.MoveNext
+      Loop
+  
+      rs.Close
+      Set rs = Nothing
+  End Sub
+  
+  
+  ' Strips characters that Access ListBox.AddItem (with Value List row source)
+  ' treats as column separators - "," and ";" specifically. Used by the AddItem
+  ' code path; the BuildAddableRowSource code path is unaffected.
+  Private Function SanitizeForValueList(ByVal s As String) As String
+      Dim out As String
+      out = Replace(s, ",", "")
+      out = Replace(out, ";", "")
+      SanitizeForValueList = out
+  End Function

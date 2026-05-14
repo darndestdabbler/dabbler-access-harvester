@@ -1,0 +1,756 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Table"
+Name: "tblClients"
+Connect: ""
+SourceTableName: ""
+Attributes: "0"
+DDL: |
+  CREATE TABLE [tblClients] (
+      [ClientID] COUNTER,
+      [FirstName] TEXT(50) NOT NULL,
+      [LastName] TEXT(50) NOT NULL,
+      [DateOfBirth] DATETIME NOT NULL,
+      [SSNLast4] TEXT(4),
+      [Gender] TEXT(1) DEFAULT "X",
+      [Address1] TEXT(100),
+      [Address2] TEXT(100),
+      [City] TEXT(50),
+      [StateCode] TEXT(2),
+      [ZipCode] TEXT(10),
+      [Phone] TEXT(20),
+      [Email] TEXT(100),
+      [EmergencyContactName] TEXT(100),
+      [EmergencyContactPhone] TEXT(20),
+      [EnrollmentDate] DATETIME NOT NULL DEFAULT Date(),
+      [IsActive] BIT DEFAULT True,
+      [Notes] LONGTEXT,
+      CONSTRAINT [PrimaryKey] PRIMARY KEY ([ClientID]),
+      CONSTRAINT [rel_State_Client] FOREIGN KEY ([StateCode]) REFERENCES [tlkpStates] ([StateCode]) ON UPDATE CASCADE
+  );
+Properties:
+  Name: "tblClients"
+  Updatable: "True"
+  DateCreated: "3/28/2026 11:13:38 AM"
+  LastUpdated: "5/13/2026 4:48:39 PM"
+  Connect: ""
+  Attributes: "0"
+  SourceTableName: ""
+  RecordCount: "12"
+  ValidationRule: "[EnrollmentDate] >= [DateOfBirth]"
+  ValidationText: "Enrollment date cannot be before the client's date of birth."
+  ConflictTable: null  # SKIPPED: Cannot perform this operation.
+  ReplicaFilter: null  # SKIPPED: Cannot perform this operation.
+  Orientation: "0"
+  OrderByOn: "False"
+  DefaultView: "2"
+  DisplayViewsOnSharePointSite: "1"
+  TotalsRow: "False"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  HideNewField: "False"
+  BackTint: "100"
+  BackShade: "100"
+  ThemeFontIndex: "-1"
+  AlternateBackThemeColorIndex: "-1"
+  AlternateBackTint: "100"
+  AlternateBackShade: "100"
+  ReadOnlyWhenDisconnected: "False"
+  DatasheetGridlinesThemeColorIndex: "-1"
+  DatasheetForeThemeColorIndex: "-1"
+  PublishToWeb: "1"
+Fields:
+  - Name: "ClientID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "17"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "ClientID"
+      OrdinalPosition: "0"
+      Size: "4"
+      SourceField: "ClientID"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "1"
+      ColumnHidden: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "FirstName"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "FirstName"
+      OrdinalPosition: "1"
+      Size: "50"
+      SourceField: "FirstName"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: "Is Not Null"
+      ValidationText: "First name is required."
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "LastName"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "LastName"
+      OrdinalPosition: "2"
+      Size: "50"
+      SourceField: "LastName"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: "Is Not Null"
+      ValidationText: "Last name is required."
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "DateOfBirth"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "8"
+      Name: "DateOfBirth"
+      OrdinalPosition: "3"
+      Size: "8"
+      SourceField: "DateOfBirth"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: "<Date()"
+      ValidationText: "Date of birth must be in the past."
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "Short Date"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ShowDatePicker: "1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "SSNLast4"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "SSNLast4"
+      OrdinalPosition: "4"
+      Size: "4"
+      SourceField: "SSNLast4"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      InputMask: "0000"
+      Format: "@@@@"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Gender"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "Gender"
+      OrdinalPosition: "5"
+      Size: "1"
+      SourceField: "Gender"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: "\"X\""
+      ValidationRule: "In (\"M\",\"F\",\"X\")"
+      ValidationText: "Gender must be M, F, or X."
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Address1"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "Address1"
+      OrdinalPosition: "6"
+      Size: "100"
+      SourceField: "Address1"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Address2"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "Address2"
+      OrdinalPosition: "7"
+      Size: "100"
+      SourceField: "Address2"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "City"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "City"
+      OrdinalPosition: "8"
+      Size: "50"
+      SourceField: "City"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "StateCode"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "StateCode"
+      OrdinalPosition: "9"
+      Size: "2"
+      SourceField: "StateCode"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ZipCode"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "ZipCode"
+      OrdinalPosition: "10"
+      Size: "10"
+      SourceField: "ZipCode"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      InputMask: "00000\\-9999;;_"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Phone"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "Phone"
+      OrdinalPosition: "11"
+      Size: "20"
+      SourceField: "Phone"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      InputMask: "!\\(999\") \"000\\-0000;;_"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Email"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "Email"
+      OrdinalPosition: "12"
+      Size: "100"
+      SourceField: "Email"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: "Is Null Or Like \"*@*.*\""
+      ValidationText: "Please enter a valid email address."
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "EmergencyContactName"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "EmergencyContactName"
+      OrdinalPosition: "13"
+      Size: "100"
+      SourceField: "EmergencyContactName"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "EmergencyContactPhone"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "EmergencyContactPhone"
+      OrdinalPosition: "14"
+      Size: "20"
+      SourceField: "EmergencyContactPhone"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "2160"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "EnrollmentDate"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "8"
+      Name: "EnrollmentDate"
+      OrdinalPosition: "15"
+      Size: "8"
+      SourceField: "EnrollmentDate"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: "Date()"
+      ValidationRule: "<=Date()"
+      ValidationText: "Enrollment date cannot be in the future."
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "Short Date"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ShowDatePicker: "1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "IsActive"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "1"
+      Name: "IsActive"
+      OrdinalPosition: "16"
+      Size: "1"
+      SourceField: "IsActive"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: "True"
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "106"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Notes"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "12"
+      Name: "Notes"
+      OrdinalPosition: "17"
+      Size: "0"
+      SourceField: "Notes"
+      SourceTable: "tblClients"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextFormat: "0"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+Indexes:
+  - Name: "PrimaryKey"
+    Primary: "True"
+    Unique: "True"
+    Required: "True"
+    Foreign: "False"
+    Fields: "ClientID"
+    Properties:
+      Name: "PrimaryKey"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "True"
+      Foreign: "False"
+      Required: "True"
+      IgnoreNulls: "False"
+      DistinctCount: "12"
+  - Name: "rel_State_Client"
+    Primary: "False"
+    Unique: "False"
+    Required: "False"
+    Foreign: "True"
+    Fields: "StateCode"
+    Properties:
+      Name: "rel_State_Client"
+      Unique: "False"
+      Clustered: "False"
+      Primary: "False"
+      Foreign: "True"
+      Required: "False"
+      IgnoreNulls: "False"
+      DistinctCount: "4"
+DataMacros: null  # No data macros defined.
