@@ -32,41 +32,38 @@ moderate
 - Notes for next-session calibration: Session 1's audit surfaced a strategic question (Option A vs B vs C) that the human must adjudicate before Session 2 can start. Until that adjudication happens, the Session 2 plan below is provisional. If the human picks Option B (recommended in audit-findings.md §4), Session 2 scope grows from "one-line RecordSource promotion" to "write FormMetadataExtractor + ReportMetadataExtractor + extend SyntheticMetadataExtractorIntegrationTests" — still mechanical, still Sonnet-appropriate, but more keystrokes.
 
 **Next-session orchestrator recommendation (Session 2):**
-Claude Code Sonnet 4.6 @ effort=medium (conditional on Option A or B selection).
-Rationale: under either option, Session 2 is mechanical code editing — under Option A a one-line promotion, under Option B writing two extractor classes that follow the verbatim `TableMetadataExtractor` pattern. A mid-tier orchestrator handles both cleanly. Under Option C (hybrid) the same recommendation applies. If the human picks "stop and re-scope" (audit-findings.md §4 implicit Option D), no orchestrator runs until a refreshed Session 2 spec is in place.
+Claude Code Sonnet 4.6 @ effort=medium.
+Rationale: Option B (chosen 2026-05-14) is mechanical pattern application — writing two extractor classes that follow the verbatim `TableMetadataExtractor` precedent plus extending one integration test. Mid-tier orchestrator handles this cleanly at a fraction of premium-tier cost.
 
 ---
 
-## Session 2: Close the Confirmed Gaps
+## Session 2: FormMetadataExtractor + ReportMetadataExtractor
 
-> **Conditional on human adjudication of the strategic question raised in
-> Session 1's `audit-findings.md` §4.** The routing below is robust to either
-> Option A (narrow RecordSource promotion in `SaveAsTextTranslator` per the
-> original spec) or Option B (write `FormMetadataExtractor` /
-> `ReportMetadataExtractor` following the `TableMetadataExtractor` pattern,
-> which the audit recommends). Under Option B Session 2's scope grows but the
-> routing pattern is unchanged — the mechanical-edit work is just longer.
+> **Scope locked at end of Session 1 (2026-05-14).** Human adjudicated
+> **Option B** from `audit-findings.md` §4: apply the
+> `TableMetadataExtractor` pattern to forms and reports rather than the
+> original spec's narrow `SaveAsTextTranslator` patch. `PageSetup` decoding
+> is deferred per the caveat in the recommendation.
 
 ### Recommended orchestrator
 Claude Code Sonnet 4.6 @ effort=medium
 
 ### Rationale
-Either option resolves to mechanical code editing — Option A is a one-line
-promotion; Option B applies the verbatim `TableMetadataExtractor` pattern
-that already exists two files away in the same project. A mid-tier model
-handles either at a fraction of the orchestrator's own token cost.
+Mechanical pattern application — the `TableMetadataExtractor` precedent is
+two files away in the same project, and the typed records
+(`FormMetadata`, `ReportMetadata`, `AccessControl`, `GroupLevel`) are
+already designed. Mid-tier orchestrator handles this cleanly at low cost.
 
 ### Estimated routed cost
 low
 
 | Step | Action | Routing Decision |
 |------|--------|------------------|
-| 1 | Verify prior session committed | direct (`git status`) |
-| 2 | Read Session 1 findings + confirm human's Option choice | direct |
-| 3 (Option A) | Implement RecordSource promotion in `SaveAsTextTranslator.BuildPayload` | direct (mechanical edit) |
-| 3 (Option B) | Implement `FormMetadataExtractor.cs` (RecordSource/Filter/OrderBy promotion + DefaultView decoding + Children deserialisation into typed `AccessControl` tree) | direct (mechanical edit) |
-| 4 (Option B only) | Implement `ReportMetadataExtractor.cs` (above + structured `GroupLevels` from `GroupLevel<N>Header`/`Footer` sections, KeepTogether decoding; best-effort `PageSetup` from PrtMip/PrtDevMode) | direct (mechanical edit) |
-| 5 (Option B only) | Extend `SyntheticMetadataExtractorIntegrationTests` to validate Forms and Reports categories against `09-report-grouping-events.expected.json` | direct (mechanical edit) |
+| 1 | Verify prior session committed (incl. residual closeout flips from Session 1) | direct (`git status`) |
+| 2 | Read `audit-findings.md` for typed-schema contracts + `TableMetadataExtractor` precedent | direct |
+| 3 | Implement `AccessHarvester.Access/FormMetadataExtractor.cs` (RecordSource/Filter/OrderBy promotion + DefaultView decoding + Children deserialisation into typed `AccessControl` tree) | direct (mechanical edit) |
+| 4 | Implement `AccessHarvester.Access/ReportMetadataExtractor.cs` (everything in step 3 plus structured `GroupLevels` from `GroupLevel<N>Header/Footer` sections + KeepTogether decoding; PageSetup stubbed to null per deferral) | direct (mechanical edit) |
+| 5 | Extend `SyntheticMetadataExtractorIntegrationTests` to validate Forms and Reports categories against `09-report-grouping-events.expected.json` (add `AssertForms` / `AssertReports` comparators; un-hard-code the category filter) | direct (mechanical edit) |
 | 6 | Code review | `route(task_type="code-review")` |
 | 7 | dotnet build && dotnet test | build+test |
 | 8 | End-of-session cross-provider verification | `route(task_type="session-verification")` |
