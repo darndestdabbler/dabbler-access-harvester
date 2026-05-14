@@ -1,0 +1,31 @@
+{
+  "status": "in-progress",
+  "summary": "Session 1 of 2: Added table-level ValidationRule/ValidationText, per-field InputMask/Format/DisplayControl, and explicit relationship bool flags (EnforceReferentialIntegrity/CascadeUpdate/CascadeDelete). Updated TableField record, TableMetadataExtractor.ReadFields(), and added 4 new unit tests. DDL reconstruction deferred to Session 2. VERIFIED (round 2, gpt-5-4).",
+  "files_changed": [
+    "AccessHarvester.Core/Extraction/TableExporter.cs",
+    "AccessHarvester.Core/Extraction/RelationshipExporter.cs",
+    "AccessHarvester.Access/TableMetadata.cs",
+    "AccessHarvester.Access/TableMetadataExtractor.cs",
+    "tests/AccessHarvester.Tests/TableMetadataExtractorTests.cs",
+    "docs/session-sets/table-extractor-coverage/ai-assignment.md",
+    "docs/session-sets/table-extractor-coverage/activity-log.json",
+    "docs/session-sets/table-extractor-coverage/session-state.json",
+    "docs/session-sets/table-extractor-coverage/disposition.json",
+    "docs/session-sets/table-extractor-coverage/session-reviews/session-001.md",
+    "docs/session-sets/table-extractor-coverage/session-reviews/session-001-round2.md",
+    "docs/session-sets/table-extractor-coverage/code-review-session-001.md"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "effort": "medium",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 is testing + DDL reconstruction + YAML comparison — structured tasks that Sonnet at medium effort handles cost-effectively."
+    }
+  },
+  "blockers": []
+}

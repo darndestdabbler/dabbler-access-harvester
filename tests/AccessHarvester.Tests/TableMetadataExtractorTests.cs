@@ -19,6 +19,8 @@ public class TableMetadataExtractorTests
       "RecordCount": 42,
       "SourceTableName": "",
       "Connect": "",
+      "ValidationRule": "[Balance] >= 0",
+      "ValidationText": "Balance cannot be negative.",
       "Fields": [
         {
           "Name": "CustomerId",
@@ -46,7 +48,10 @@ public class TableMetadataExtractorTests
           "ValidationText": "Name required",
           "Attributes": 2,
           "OrdinalPosition": 1,
-          "ForeignName": null
+          "ForeignName": null,
+          "InputMask": "LLLL",
+          "Format": "@@@@",
+          "DisplayControl": 109
         }
       ],
       "Indexes": [
@@ -199,6 +204,8 @@ public class TableMetadataExtractorTests
         Assert.False(meta.Properties.ContainsKey("Type"));
         Assert.False(meta.Properties.ContainsKey("Connect"));
         Assert.False(meta.Properties.ContainsKey("SourceTableName"));
+        Assert.False(meta.Properties.ContainsKey("ValidationRule"));
+        Assert.False(meta.Properties.ContainsKey("ValidationText"));
         Assert.False(meta.Properties.ContainsKey("Fields"));
         Assert.False(meta.Properties.ContainsKey("Indexes"));
         // Untyped raw values stay in the bag.
@@ -211,5 +218,55 @@ public class TableMetadataExtractorTests
     public void Extract_MissingName_Throws()
     {
         Assert.Throws<System.ArgumentException>(() => TableMetadataExtractor.Extract("""{ "Type": "Table" }"""));
+    }
+
+    [Fact]
+    public void Extract_TableLevelValidationRuleAndTextAreLifted()
+    {
+        var meta = TableMetadataExtractor.Extract(CustomersTableJson);
+
+        Assert.Equal("[Balance] >= 0", meta.ValidationRule);
+        Assert.Equal("Balance cannot be negative.", meta.ValidationText);
+    }
+
+    [Fact]
+    public void Extract_FieldDisplayMetadataIsLifted()
+    {
+        var meta = TableMetadataExtractor.Extract(CustomersTableJson);
+
+        var name = meta.Fields!.Single(f => f.Name == "Name");
+        Assert.Equal("LLLL", name.InputMask);
+        Assert.Equal("@@@@", name.Format);
+        Assert.Equal(109, name.DisplayControl);
+    }
+
+    [Fact]
+    public void Extract_FieldWithNoDisplayMetadata_PropertiesAreNull()
+    {
+        var meta = TableMetadataExtractor.Extract(CustomersTableJson);
+
+        var id = meta.Fields!.Single(f => f.Name == "CustomerId");
+        Assert.Null(id.InputMask);
+        Assert.Null(id.Format);
+        Assert.Null(id.DisplayControl);
+    }
+
+    [Fact]
+    public void Extract_TableLevelValidationRuleAbsent_IsNull()
+    {
+        const string raw = """
+        {
+          "Name": "Simple",
+          "Type": "Table",
+          "Attributes": 0,
+          "Fields": [],
+          "Indexes": []
+        }
+        """;
+
+        var meta = TableMetadataExtractor.Extract(raw);
+
+        Assert.Null(meta.ValidationRule);
+        Assert.Null(meta.ValidationText);
     }
 }
