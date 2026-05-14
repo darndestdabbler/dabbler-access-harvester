@@ -147,58 +147,134 @@ or "Gap Z is confirmed; fix in Session 2 is: [approach]." Verification VERIFIED.
 
 ---
 
-### Session 2 of 3: Close the Confirmed Gaps
+### Session 2 of 3: FormMetadataExtractor + ReportMetadataExtractor
+
+> **Scope locked at end of Session 1.** Per `audit-findings.md` §4, the human
+> adjudicated **Option B** (2026-05-14): apply the
+> `AccessHarvester.Access/TableMetadataExtractor.cs` pattern to forms and
+> reports. The earlier Option A framing (one-line `RecordSource` promotion in
+> `SaveAsTextTranslator.BuildPayload`) was retired because the audit found
+> the prior spike's premise wrong — the YAML baseline does not promote
+> `RecordSource` either, so the real gap is between the current `AccessNode`
+> `ir/` JSON and the already-designed `FormMetadata` / `ReportMetadata`
+> typed records that have no extractor yet.
 
 **Steps:**
-1. Verify prior session committed.
-2. Read Session 1's findings (`audit-findings.md`) to get the confirmed
-   gap list and proposed fix approaches.
-3. Implement RecordSource promotion — likely a one-line addition in
-   `SaveAsTextTranslator.BuildPayload` that extracts `RecordSource` from the parsed
-   node's Properties and adds it as a named field on the output payload, OR a new
-   micro-enricher that runs first in the chain.
-4. Implement any confirmed GroupLevel / report section gap fix.
-5. Implement any confirmed embedded macro correlation gap fix — verify that
-   `MacroActionsEnricher` is applied to embedded macros on form events, and that
-   the output correlates the action list with the event name.
-6. Route code review.
-7. `dotnet build && dotnet test`.
-8. Route session verification.
+1. Verify prior session committed (`git status` against the session-set folder
+   and the prior set's residual closeout flips — bundle if present).
+2. Read Session 1's `audit-findings.md` to refresh the gap list, the typed
+   record contracts (`FormMetadata`, `ReportMetadata`, `AccessControl`,
+   `GroupLevel`, `LabelInfo`, `GeometryInches`), and the
+   `TableMetadataExtractor` precedent.
+3. Add `AccessHarvester.Access/FormMetadataExtractor.cs`:
+   - `public static FormMetadata Extract(JsonElement irRoot)` mirroring
+     `TableMetadataExtractor.Extract`.
+   - Promote `RecordSource`, `Filter`, `OrderBy` out of the Properties bag
+     (remove the keys after lift — exact-value-lift rule per
+     `FormMetadata.cs`).
+   - Decode `DefaultView` numeric → label (0 → "Single Form",
+     1 → "Continuous Forms", 2 → "Datasheet", 3 → "PivotTable",
+     4 → "PivotChart", 5 → "Split Form"); leave the raw numeric in
+     Properties (decoded-lift rule).
+   - Deserialize `Children` recursively into `IReadOnlyList<AccessControl>`,
+     promoting per-node `Name` (remove from per-node Properties).
+   - Read `NonDefaultProperties` and `GeometryIn` if present (already
+     emitted by `PropertyDecoder` / `GeometryEnricher`).
+   - Read `Label` if present (emitted by `LabelResolver`). The JSON enricher
+     writes lowercase `{ source, text }`; the typed `LabelInfo` record uses
+     PascalCase `{ Source, Text }` — extractor maps the case.
+   - **Do NOT** put `Procedures` on `FormMetadata` (per `FormMetadata.cs`
+     lines 122-129 the typed schema deliberately does not re-model it;
+     consumers read it from the underlying `ir/` JSON).
+4. Add `AccessHarvester.Access/ReportMetadataExtractor.cs`:
+   - Everything `FormMetadataExtractor` does (shared shape for shared fields).
+   - Plus: build `IReadOnlyList<GroupLevel>` by inspecting the report's
+     `GroupLevel<N>Header` / `GroupLevel<N>Footer` section nodes in `Children`
+     (set `HasHeader` / `HasFooter` based on section presence) and the
+     report's grouping properties (GroupOn / GroupingMode / GroupInterval /
+     SortOrder / KeepTogether — read a real fixture's parser output to
+     confirm where each lives in the AccessNode tree).
+   - `PageSetup` decoding from `PrtMip` / `PrtDevMode` binary blobs is
+     **deferred** per the human's caveat. Stub to `null` and document the
+     deferral in a comment + the change-log; a follow-on session can pick
+     it up. The typed schema already documents `PageSetup` as
+     best-effort / nullable so this is contract-compliant.
+5. Extend `tests/AccessHarvester.Tests/SyntheticMetadataExtractorIntegrationTests.cs`:
+   - Add `"Forms"` and `"Reports"` to the validated category list (currently
+     hard-coded to `Queries` / `Tables` / `Relationships` only).
+   - Implement `AssertForms` and `AssertReports` comparators that walk the
+     `09-report-grouping-events.expected.json` `Forms[]` / `Reports[]`
+     sections and validate against `FormMetadataExtractor.Extract` /
+     `ReportMetadataExtractor.Extract` output.
+6. Route code review on the two new extractor files + the test extension.
+7. `dotnet build && dotnet test` (sequential per `lessons-learned.md`).
+8. Route session verification (cross-provider, `task_type="session-verification"`).
 
 **Creates:**
+- `AccessHarvester.Access/FormMetadataExtractor.cs`
+- `AccessHarvester.Access/ReportMetadataExtractor.cs`
 - `docs/session-sets/structured-form-report-extractor/session-reviews/session-002.md`
 
 **Touches:**
-- `AccessHarvester.Core/Translation/SaveAsTextTranslator.cs` (RecordSource promotion)
-- `AccessHarvester.Core/Enrichment/*.cs` (if GroupLevel or macro correlation fixes needed)
+- `tests/AccessHarvester.Tests/SyntheticMetadataExtractorIntegrationTests.cs`
+  (un-hard-code the category filter; add Forms/Reports comparators)
+- `docs/session-sets/structured-form-report-extractor/disposition.json` (update)
 
-**Ends with:** All gaps from Session 1's findings list are either fixed or explicitly
-deferred with rationale. `dotnet test` green. Verification VERIFIED.
+**Ends with:** The two new extractors produce typed records matching the
+`09-report-grouping-events.expected.json` aspirational fixture's `Forms[]`
+and `Reports[]` sections. `dotnet test` green. Verification VERIFIED.
 
-**Progress keys:** `session-2/record-source-promotion`, `session-2/grouplevel-fix`,
-`session-2/macro-correlation-fix`
+**Progress keys:** `session-2/form-metadata-extractor`,
+`session-2/report-metadata-extractor`, `session-2/integration-tests-extended`
 
 ---
 
-### Session 3 of 3: Tests and ir/ Schema Documentation
+### Session 3 of 3: Hermetic Tests + Typed-Schema Documentation
+
+> **Scope locked at end of Session 1.** Aligned with Option B from
+> `audit-findings.md` §4 — Session 3 documents the **typed
+> `FormMetadata` / `ReportMetadata` schema** as the public contract for
+> downstream AI consumers (not the intermediate `AccessNode` `ir/` JSON,
+> which is a harvester implementation detail).
 
 **Steps:**
 1. Verify prior session committed.
-2. Write hermetic unit tests for: RecordSource extraction from a form fixture;
-   GroupLevel field extraction from a report fixture (if applicable);
-   MacroActions correlation with an event that has an embedded macro.
+2. Write hermetic unit tests for the two new extractors:
+   - `FormMetadataExtractorTests`:
+     - `RecordSource` / `Filter` / `OrderBy` promotion when present and when
+       absent (and that the keys are removed from `Properties` after lift).
+     - `DefaultView` decoding for every numeric code (0..5).
+     - `Name` promotion on `AccessControl`.
+     - `Properties` bag passes-through unknown keys faithfully.
+   - `ReportMetadataExtractorTests`:
+     - All `FormMetadataExtractor` tests above (shared shape).
+     - `GroupLevels` construction: zero levels, single level with header
+       only / footer only / both, multi-level with mixed header/footer
+       presence.
+     - `KeepTogether` decoding.
+     - `PageSetup` stub returns `null` (deferred) — explicit test pins the
+       deferral so a future session that implements it has a visible
+       contract change.
 3. Write `docs/ir-schema-forms-reports.md`:
-   - Top-level structure for a form ir/ JSON (Type, Properties, Children)
-   - Control nodes: how to find them (in Children of Section nodes), what Type
-     values map to what control types, what properties are standard vs. optional
-   - Event handler fields: where they live in Properties, how to detect
-     "[Event Procedure]" vs "[Embedded Macro]" vs embedded macro name, where
-     `MacroActions` live in the tree
-   - Report-specific: Section nodes (Detail, PageHeader, GroupHeader_N etc.),
-     GroupLevel properties
-   - RecordSource: the first-class field added in Session 2
-   - VBA signatures: where `Procedures` array lives (from `VbaSignatureEnricher`)
-   - Geometry: where `GeometryIn` lives (from `GeometryEnricher`)
+   - The **typed `FormMetadata` / `ReportMetadata` schema is the public
+     contract.** Document each typed field: what it represents, where it
+     sources from in the underlying `AccessNode` `ir/`, what convention
+     applies (only-emit-what-Access-wrote, provenance `{ source, ... }`,
+     etc.).
+   - Document `AccessControl` (Type, Name, Properties, Children, GeometryIn,
+     Label, NonDefaultProperties), `LabelInfo` (Source, Text),
+     `GeometryInches` (X / Y / W / H sparse), `GroupLevel` (Level, GroupOn,
+     GroupingMode, GroupInterval, SortOrder, HasHeader, HasFooter,
+     KeepTogether), `PageSetup` + `Margins` (note: deferred decoding,
+     currently always null).
+   - Briefly describe the `AccessNode` `ir/` JSON as the harvester's
+     intermediate output and point readers at the enrichers
+     (`GeometryEnricher`, `LabelResolver`, `MacroActionsEnricher`,
+     `VbaSignatureEnricher`, `PropertyDecoder`, `TextCapacityEnricher`)
+     for fields not re-modeled on the typed records (e.g., `Procedures`,
+     `EventMacros`).
+   - Worked example: a small Form and a small Report, showing both the raw
+     `ir/` JSON and the resulting typed records side by side.
 4. Route documentation review.
 5. `dotnet build && dotnet test`.
 6. Route session verification.
@@ -206,26 +282,38 @@ deferred with rationale. `dotnet test` green. Verification VERIFIED.
 
 **Creates:**
 - `docs/ir-schema-forms-reports.md`
+- `tests/AccessHarvester.Tests/FormMetadataExtractorTests.cs`
+- `tests/AccessHarvester.Tests/ReportMetadataExtractorTests.cs`
 - `docs/session-sets/structured-form-report-extractor/change-log.md`
 - `docs/session-sets/structured-form-report-extractor/next-session-set-recommendation.md`
 - `docs/session-sets/structured-form-report-extractor/session-reviews/session-003.md`
 
 **Touches:**
-- `tests/AccessHarvester.Tests/` (new tests)
+- `docs/session-sets/structured-form-report-extractor/disposition.json` (update — close-out status)
 
-**Ends with:** New unit tests pass. `docs/ir-schema-forms-reports.md` is complete
-enough that a downstream AI can use it as a reference for interpreting form/report
-ir/ JSON. Verification VERIFIED.
+**Ends with:** New unit tests pass. `docs/ir-schema-forms-reports.md` is
+complete enough that a downstream AI can use the typed
+`FormMetadata` / `ReportMetadata` records as the canonical contract for
+form/report metadata. Verification VERIFIED.
 
-**Progress keys:** `session-3/unit-tests`, `session-3/ir-schema-docs`
+**Progress keys:** `session-3/unit-tests`, `session-3/typed-schema-docs`
 
 ---
 
 ## Deliverables
 
-1. Confirmed audit of ir/ output vs. YAML baseline (Session 1 findings)
-2. RecordSource promotion fix + any GroupLevel / macro-correlation fixes
-3. Hermetic unit tests for all fixes
-4. `docs/ir-schema-forms-reports.md` — ir/ schema reference for downstream AI
-5. `change-log.md`
-6. `next-session-set-recommendation.md`
+1. Confirmed audit of ir/ output vs. YAML baseline + typed-schema target
+   (Session 1 — `audit-findings.md`)
+2. `FormMetadataExtractor` + `ReportMetadataExtractor` producing typed
+   `FormMetadata` / `ReportMetadata` records, exercised against the
+   `09-report-grouping-events.expected.json` aspirational fixture via
+   `SyntheticMetadataExtractorIntegrationTests` (Session 2)
+3. Hermetic unit tests for both extractors (Session 3)
+4. `docs/ir-schema-forms-reports.md` — typed-schema reference for downstream AI (Session 3)
+5. `change-log.md` (Session 3)
+6. `next-session-set-recommendation.md` (Session 3)
+
+**Explicitly deferred:** `PageSetup` decoding from `PrtMip` / `PrtDevMode`
+binary blobs. The typed schema documents this as best-effort / nullable;
+Session 2 stubs to `null` and a future session can address it without
+breaking the contract.

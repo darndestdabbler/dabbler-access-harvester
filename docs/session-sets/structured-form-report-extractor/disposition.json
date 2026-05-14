@@ -23,10 +23,8 @@
     "effort": "medium",
     "reason": {
       "code": "continue-current-trajectory",
-      "specifics": "Session 2 orchestrator choice (Sonnet 4.6 medium) holds under either Option A (narrow ir/ patch per the original spec) or Option B (write Form/ReportMetadataExtractor following table-extractor-coverage). Both are mechanical code editing well-suited to Sonnet. The procedural blocker on STARTING Session 2 (listed in blockers[]) is the human adjudication of Option A/B/C from audit-findings.md §4 — independent of the orchestrator choice."
+      "specifics": "Session 2 implements Option B (chosen 2026-05-14): write AccessHarvester.Access/FormMetadataExtractor.cs and ReportMetadataExtractor.cs following the TableMetadataExtractor precedent, plus extend SyntheticMetadataExtractorIntegrationTests to cover Forms and Reports against 09-report-grouping-events.expected.json. PageSetup decoding deferred (typed schema documents it as best-effort/nullable). Sonnet 4.6 at medium effort handles the mechanical pattern application cleanly. See spec.md Session 2 (refreshed) and ai-assignment.md for the per-step routing plan."
     }
   },
-  "blockers": [
-    "Human adjudication required on strategic question: Option A (narrow RecordSource promotion in SaveAsTextTranslator per the original spec) vs Option B (write FormMetadataExtractor + ReportMetadataExtractor following the table-extractor-coverage TableMetadataExtractor pattern) vs Option C (hybrid). Audit recommends Option B; see audit-findings.md §4 for the full framing."
-  ]
+  "blockers": []
 }
