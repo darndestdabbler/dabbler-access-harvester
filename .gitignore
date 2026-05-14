@@ -21,6 +21,10 @@ ai_router/router-metrics.jsonl
 # open, producing byte-level changes even on read-only access.
 samples/NorthwindDevEdition.accdb
 
+# Northwind-derived YAML extracts — regenerated locally; not committed
+samples/DatabaseYaml/NorthwindDevEdition.accdb/
+samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml
+
 # .NET build artifacts (will appear in later sessions)
 **/bin/
 **/obj/
