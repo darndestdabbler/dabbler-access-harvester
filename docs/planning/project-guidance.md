@@ -139,9 +139,10 @@ Testing follows this order of preference:
    `.accdb` fixtures. These exercise the full pipeline on inputs whose
    expected output is checked in. Use `[SkippableFact]` so non-Windows
    runs skip cleanly.
-4. **End-to-end tests** against larger committed sample DBs (e.g.,
-   `samples/NorthwindDevEdition.accdb`) for confidence on real-world
-   inputs.
+4. **End-to-end tests** against the canonical fixtures
+   (`samples/HomeHealthCare.accdb` primary,
+   `samples/NorthwindDevEdition.accdb` secondary) for confidence on
+   real-world inputs.
 5. **Cross-provider AI verification** at end of session — the last
    line of defense before commit.
 
@@ -156,6 +157,23 @@ When guidance appears in multiple places, apply it in this order:
 
 If those sources conflict in a meaningful way, stop and confirm with
 the human before proceeding.
+
+---
+
+## Canonical Test Fixtures
+
+| Fixture | Role | Committed? |
+|---|---|---|
+| `samples/HomeHealthCare.accdb` | **Primary** — unbound forms, ADODB, validation-only data macros, Hungarian naming | Yes (YAML mirror in `samples/DatabaseYaml/HomeHealthCare.accdb/`) |
+| `samples/NorthwindDevEdition.accdb` | **Secondary/reference** — bound split forms, subforms, audit data macros, AutoExec startup | Binary gitignored; YAML regenerated locally |
+
+See `docs/homehealthcare-northwind-comparison.md` for the authoritative
+fixture-selection rationale and structural comparison.
+
+**Excluded fixtures:** `samples/MiniComplex.accdb` and
+`samples/ProjectBoard.accdb` are excluded from automated test coverage
+pending an error-audit pass. They may be used in narrow, explicitly-scoped
+experiments only.
 
 ---
 
