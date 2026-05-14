@@ -58,7 +58,7 @@ moderate
 | 9 | Generate change-log and next-session-set recommendation | Route (summarization) |
 
 ### Actuals (filled after the session)
-- Orchestrator used: TBD
-- Total routed cost: TBD
-- Deviations from recommendation: TBD
-- Notes for next-session calibration: TBD
+- Orchestrator used: Claude Code claude-opus-4-7 @ effort=high
+- Total routed cost: ~$0.36 this session (code-review $0.19 incl. gemini-pro auto-verify, session-verification $0.17 via gpt-5-4; change-log $0.0005 gemini-flash; next-session-set $0.005 gemini-pro). Set total $0.67 across both sessions.
+- Deviations from recommendation: Orchestrator was Opus 4.7 (not the recommended Sonnet) because the human-selected agent for this session was Claude Code at default model; per the convention, in-conversation work was favored over routing to Opus when the orchestrator already matched the routing target. All code edits were direct, per Delegation Discipline. Code review (Sonnet via router) flagged four medium+ issues (TEXT(0)/BINARY(0) on null Size; child-table lookup Ordinal→OrdinalIgnoreCase; double-negative `enforced` rename; fragile line-ending assertion) — all applied + two missing test cases added (multi-column PK and FK).
+- Notes for next-session calibration: Set complete. Final session verification VERIFIED on round 1 (no terse-verdict regression — the trailing JSON schema instruction held). The pre-existing 45 SymbolDb test failures (kb fixture files not generated locally) are out of scope and confirmed identical on main pre-session. Next session set per the routed recommendation: `structured-form-report-extractor`.

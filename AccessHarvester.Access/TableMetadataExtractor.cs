@@ -35,6 +35,7 @@ public static class TableMetadataExtractor
         "SourceTableName",
         "ValidationRule",
         "ValidationText",
+        "Ddl",
         "Fields",
         "Indexes",
     };
@@ -71,6 +72,7 @@ public static class TableMetadataExtractor
             Indexes = indexes,
             ValidationRule = ReadString(root, "ValidationRule"),
             ValidationText = ReadString(root, "ValidationText"),
+            Ddl = ReadString(root, "Ddl"),
             Properties = BuildPropertiesBag(root),
         };
     }

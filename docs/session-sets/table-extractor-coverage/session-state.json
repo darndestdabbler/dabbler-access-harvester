@@ -1,17 +1,17 @@
 {
   "schemaVersion": 2,
   "sessionSetName": "table-extractor-coverage",
-  "currentSession": 1,
+  "currentSession": 2,
   "totalSessions": 2,
   "status": "in-progress",
   "lifecycleState": "work_in_progress",
-  "startedAt": "2026-05-14T06:26:50.344813-04:00",
+  "startedAt": "2026-05-14T07:09:59.218519-04:00",
   "completedAt": null,
   "verificationVerdict": null,
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
+    "model": "claude-opus-4-7",
     "effort": "high"
   }
 }
