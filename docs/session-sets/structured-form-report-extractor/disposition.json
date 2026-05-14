@@ -22,8 +22,8 @@
     "model": "claude-opus-4-7",
     "effort": "high",
     "reason": {
-      "code": "synthesis-heavy",
-      "specifics": "Session 3 authors hermetic unit tests for FormMetadataExtractor and ReportMetadataExtractor (GroupLevels edge cases, DefaultView decoding for both enumerations, RecordSource/Filter/OrderBy promotion correctness, AccessControl recursion, LabelInfo case mapping, PageSetup deferral pin) PLUS docs/ir-schema-forms-reports.md (typed schema as the public contract for downstream AI, worked example with raw ir/ JSON and typed records side by side). Premium-tier orchestrator is the right call per the routed recommendation (gemini-pro via route(analysis), 2026-05-14) — synthesis precision on both test generation and prose generation justifies Opus at effort=high. See spec.md Session 3 and ai-assignment.md for per-step routing."
+      "code": "continue-current-trajectory",
+      "specifics": "Session 3 (final) is synthesis-heavy: hermetic unit tests for FormMetadataExtractor and ReportMetadataExtractor (GroupLevels edge cases, DefaultView decoding for both enumerations, RecordSource/Filter/OrderBy promotion correctness, AccessControl recursion, LabelInfo case mapping, PageSetup deferral pin) PLUS docs/ir-schema-forms-reports.md (typed schema as the public contract for downstream AI, worked example with raw ir/ JSON and typed records side by side). Premium-tier orchestrator is the right call per the routed recommendation (gemini-pro via route(analysis), 2026-05-14) — synthesis precision on both test generation and prose generation justifies Opus at effort=high. See spec.md Session 3 and ai-assignment.md for per-step routing."
     }
   },
   "blockers": []
