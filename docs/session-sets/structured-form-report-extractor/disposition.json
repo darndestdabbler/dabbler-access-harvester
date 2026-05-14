@@ -1,29 +1,29 @@
 {
   "status": "in-progress",
-  "summary": "Session 1 of 3: read-only audit of current AccessNode ir/ schema for Forms and Reports vs YAML baseline vs aspirational FormMetadata/ReportMetadata typed records in AccessHarvester.Access. Findings: spec premise materially miscalibrated (the prior spike's table had RecordSource-promotion-in-YAML wrong; real gap is vs typed-metadata target). Surfaced strategic question (Option A narrow patch vs Option B write Form/ReportMetadataExtractor following TableMetadataExtractor pattern) for human adjudication before Session 2. Round 1 ISSUES_FOUND (3 Minor: ai-assignment.md placeholders, Session 2 plan still assumed Option A, audit-findings.md §5 Procedures contract inconsistency); all three fixed in-session; Round 2 VERIFIED (gpt-5-4).",
+  "summary": "Session 2 of 3: Option B implementation — wrote AccessHarvester.Access/FormMetadataExtractor.cs, ReportMetadataExtractor.cs, and the shared AccessHarvester.Access/AccessObjectReader.cs (internal helpers) following the established TableMetadataExtractor precedent. Extended SyntheticMetadataExtractorIntegrationTests to validate Forms and Reports categories against the 09-report-grouping-events.expected.json aspirational fixture via loose-match AssertForms/AssertReports/AssertGroupLevels comparators. PageSetup decoding from PrtMip/PrtDevMode and per-level GroupingMode/Interval/SortOrder/KeepTogether decoding deferred per spec/audit-findings (no real-fixture evidence yet; the typed schema documents both as best-effort/nullable). Step 6 code review (Sonnet → gemini-pro VERIFIED) surfaced 2 real bugs fixed in-session: Reports DefaultView wrong label table (forms enumeration applied to reports — added separate ReportMetadataExtractor.DefaultViewLabels with 0=Report View, 1=Print Preview, 2=Layout View), and GroupLevel<N> keys not removed from Properties bag after exact-value lift (refactored BuildGroupLevels to thread a consumed-keys HashSet that augments PromotedRootKeys before BuildPromotedPropertiesBag runs). Step 8 Round 1 ISSUES_FOUND 1 Major (AssertForms/AssertReports unconditionally compared scalar fields via ReadOptionalString, treating missing fixture keys as expected-null) — fixed in-session via new AssertIfFixturePresent helper mirroring AssertGroupLevels's conditional pattern; Round 2 VERIFIED (gpt-5-4).",
   "files_changed": [
+    "AccessHarvester.Access/FormMetadataExtractor.cs",
+    "AccessHarvester.Access/ReportMetadataExtractor.cs",
+    "AccessHarvester.Access/AccessObjectReader.cs",
+    "tests/AccessHarvester.Tests/SyntheticMetadataExtractorIntegrationTests.cs",
     "docs/session-sets/structured-form-report-extractor/ai-assignment.md",
-    "docs/session-sets/structured-form-report-extractor/audit-findings.md",
-    "docs/session-sets/structured-form-report-extractor/spec.md",
     "docs/session-sets/structured-form-report-extractor/activity-log.json",
     "docs/session-sets/structured-form-report-extractor/session-state.json",
     "docs/session-sets/structured-form-report-extractor/session-events.jsonl",
-    "docs/session-sets/structured-form-report-extractor/session-reviews/session-001.md",
-    "docs/session-sets/structured-form-report-extractor/issue-logs/session-001.json",
-    "docs/session-sets/structured-form-report-extractor/disposition.json",
-    "docs/session-sets/table-extractor-coverage/session-state.json",
-    "docs/session-sets/table-extractor-coverage/session-events.jsonl"
+    "docs/session-sets/structured-form-report-extractor/session-reviews/session-002.md",
+    "docs/session-sets/structured-form-report-extractor/issue-logs/session-002.json",
+    "docs/session-sets/structured-form-report-extractor/disposition.json"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
   "next_orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium",
+    "model": "claude-opus-4-7",
+    "effort": "high",
     "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 2 implements Option B (chosen 2026-05-14): write AccessHarvester.Access/FormMetadataExtractor.cs and ReportMetadataExtractor.cs following the TableMetadataExtractor precedent, plus extend SyntheticMetadataExtractorIntegrationTests to cover Forms and Reports against 09-report-grouping-events.expected.json. PageSetup decoding deferred (typed schema documents it as best-effort/nullable). Sonnet 4.6 at medium effort handles the mechanical pattern application cleanly. See spec.md Session 2 (refreshed) and ai-assignment.md for the per-step routing plan."
+      "code": "synthesis-heavy",
+      "specifics": "Session 3 authors hermetic unit tests for FormMetadataExtractor and ReportMetadataExtractor (GroupLevels edge cases, DefaultView decoding for both enumerations, RecordSource/Filter/OrderBy promotion correctness, AccessControl recursion, LabelInfo case mapping, PageSetup deferral pin) PLUS docs/ir-schema-forms-reports.md (typed schema as the public contract for downstream AI, worked example with raw ir/ JSON and typed records side by side). Premium-tier orchestrator is the right call per the routed recommendation (gemini-pro via route(analysis), 2026-05-14) — synthesis precision on both test generation and prose generation justifies Opus at effort=high. See spec.md Session 3 and ai-assignment.md for per-step routing."
     }
   },
   "blockers": []

@@ -69,14 +69,14 @@ low
 | 8 | End-of-session cross-provider verification | `route(task_type="session-verification")` |
 
 ### Actuals (filled after the session)
-- Orchestrator used:
-- Total routed cost:
-- Deviations from recommendation:
-- Notes for next-session calibration:
+- Orchestrator used: claude-code / claude-opus-4-7 / effort=high (one tier above the Sonnet/medium recommendation; human launched on the Opus orchestrator).
+- Total routed cost: ~$0.52 across 4 routed calls — `route(code-review)` Sonnet ($0.237) auto-verified by Gemini Pro (verifier cost included), `route(session-verification)` gpt-5-4 Round 1 ($0.223) and Round 2 ($0.059), `route(analysis)` for next-orchestrator recommendation Gemini Pro ($0.002).
+- Deviations from recommendation: orchestrator was Opus rather than Sonnet (human-driven launch, not a calibration miss). Step 6 code review correctly went through the router (Sonnet via task_type_overrides) per Delegation Discipline — the mechanical-correspondence convention applies. Step 8 mandatory cross-provider verification took 2 rounds; Round 1 surfaced one Major (loose-match scalar comparison was unconditional, treating omitted fixture keys as expected-null), fix applied in-session via `AssertIfFixturePresent` helper, Round 2 VERIFIED. The Step 6 review also surfaced two real bugs (Reports DefaultView wrong label table; GroupLevel<N> keys not removed from Properties after lift) both fixed before Step 7 build+test ran.
+- Notes for next-session calibration: Pattern application went smoothly — Sonnet's code review caught both real bugs at low cost ($0.24); the cross-provider verifier added a third (also real). The routed-rigor pipeline is paying for itself on this kind of work. Session 3 is synthesis-heavy (novel hermetic unit tests + new typed-schema doc from scratch) — Opus orchestrator is the right call per the routed recommendation and the prior session-set's pattern.
 
 **Next-session orchestrator recommendation (Session 3):**
 Claude Code Claude Opus 4.7 @ effort=high
-Rationale: Synthesis-heavy session (novel hermetic unit tests + new ir/ schema doc from scratch) benefits from premium-tier reasoning.
+Rationale (routed via `route(task_type="analysis")` → gemini-pro, 2026-05-14): Session 3 requires generating numerous, detail-oriented unit tests and clear technical documentation with a worked example, demanding a high-capability model to ensure precision and correctness across both coding and prose generation.
 
 ---
 

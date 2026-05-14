@@ -97,6 +97,137 @@
           "costUsd": 0.0941
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/code-review",
+      "dateTime": "2026-05-14T18:08:08.428199-04:00",
+      "description": "Cross-provider code review on FormMetadataExtractor + ReportMetadataExtractor + AccessObjectReader + SyntheticMetadataExtractorIntegrationTests extension",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 27427,
+          "outputTokens": 10344,
+          "costUsd": 0.237441
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/verify-prior-session",
+      "dateTime": "2026-05-14T18:10:18.715772-04:00",
+      "description": "Verified Session 1 committed (commit 3f3cdf0 + bbac4e3 + 4e1ffc7). Pre-existing modifications to samples/HomeHealthCare.accdb + samples/MiniComplex.accdb noted as out of session-set scope.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/read-audit-and-precedent",
+      "dateTime": "2026-05-14T18:10:18.715772-04:00",
+      "description": "Re-read audit-findings.md, ai-assignment.md, FormMetadata/ReportMetadata/AccessObjectCommon typed contracts, TableMetadataExtractor + QueryMetadataExtractor precedent patterns, AccessTextParser + GeometryEnricher + LabelResolver + PropertyDecoder enricher outputs, and 09-report-grouping-events.expected.json aspirational fixture.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/form-metadata-extractor",
+      "dateTime": "2026-05-14T18:10:18.716752-04:00",
+      "description": "Created AccessHarvester.Access/FormMetadataExtractor.cs (94 lines) following TableMetadataExtractor precedent. Exact-value lifts of RecordSource/Filter/OrderBy with removal from Properties bag; DefaultView decoded with raw retained; Children recursively built into AccessControl tree via AccessObjectReader helper. ModuleName left null (deferred \u2014 would parse Attribute VB_Name from VbaCode in a future session). Procedures intentionally not modeled per FormMetadata.cs L122-129.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/report-metadata-extractor",
+      "dateTime": "2026-05-14T18:10:18.716752-04:00",
+      "description": "Created AccessHarvester.Access/ReportMetadataExtractor.cs (135 lines) + shared AccessHarvester.Access/AccessObjectReader.cs (helpers). Mirrors FormMetadataExtractor for shared fields plus GroupLevels construction: scans Children for GroupLevel<N>Header/Footer sections (HasHeader/HasFooter) and root Properties for GroupLevel<N> field expressions (GroupOn). PageSetup stubbed null (deferred per spec). Per-level GroupingMode/Interval/SortOrder/KeepTogether left null (deferred \u2014 no real-fixture evidence to confirm raw shape; Session 3 hermetic unit tests can fabricate inputs).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/integration-tests-extended",
+      "dateTime": "2026-05-14T18:10:18.717752-04:00",
+      "description": "Extended SyntheticMetadataExtractorIntegrationTests with Forms + Reports added to validated category list; AssertForms/AssertReports follow the existing loose-match pattern (index by Name, verify scalar fields, walk named controls recursively). Added ReadNamedActualCategory helper that derives the form/report name from the .ir.json file name. AssertGroupLevels comparator wired in for report-side validation against the 09-report-grouping-events.expected.json fixture.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-05-14T18:10:32.154843-04:00",
+      "description": "dotnet build clean (4 NU1903 transitive-dep warnings, 0 errors). dotnet test: 1219 active tests passing across AccessHarvester.Tests (350P/2S \u2014 2 SkippableFact integration tests skipped because Access COM not present in this run), AccessHarvester.Pipeline.Tests (355P), AccessHarvester.Vba.Resolver.Tests (400P), AccessHarvester.Sql.Grammar.Tests (85P), AccessHarvester.Integration (14P). 45 pre-existing AccessHarvester.SymbolDb.Tests failures driven by missing tmp/comprehension-ir/AccessMetaData/NorthwindDevEdition/ Northwind comprehension-ir fixture (documented baseline matching main). No new regressions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/apply-review-fixes",
+      "dateTime": "2026-05-14T18:10:32.156220-04:00",
+      "description": "Applied two real bugs (Critical/Major) and one minor surfaced by Step 6 Sonnet code-review (gemini-pro verifier VERIFIED): (1) Reports DefaultView codes are a separate enumeration from Forms \u2014 added ReportMetadataExtractor.DefaultViewLabels (0=Report View, 1=Print Preview, 2=Layout View) so a report rptFoo with DefaultView=\"1\" no longer decodes as \"Continuous Forms\"; (2) GroupLevel<N> keys are exact-value lifts and must be removed from the Properties bag after promotion \u2014 refactored BuildGroupLevels to collect consumed keys into a HashSet that augments PromotedRootKeys before BuildPromotedPropertiesBag runs; (3) removed dead ReadInt helper from AccessObjectReader. Added inline NOTE on BuildGroupLevels documenting the unverified-yet GroupLevel<N>-as-flat-key assumption from the audit recommendation; the SkippableFact integration test will fail loudly against a live Access extract if the key shape is actually nested. Re-built clean.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/session-verification",
+      "dateTime": "2026-05-14T18:14:21.920247-04:00",
+      "description": "Cross-provider session-verification routed to gpt-5-4. Raw output saved to session-reviews/session-002.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 29160,
+          "outputTokens": 10006,
+          "costUsd": 0.22299
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/session-verification-r2",
+      "dateTime": "2026-05-14T18:16:05.057283-04:00",
+      "description": "Round 2 cross-provider session-verification routed to gpt-5-4 after fixing Round 1 Major issue (AssertForms/AssertReports unconditional scalar comparison). Raw output saved to session-reviews/session-002.round-2.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16529,
+          "outputTokens": 1158,
+          "costUsd": 0.058692499999999995
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 11,
+      "stepKey": "session-2/next-orc-recommendation",
+      "dateTime": "2026-05-14T18:17:16.658338-04:00",
+      "description": "Routed analysis for Session 3 next-orchestrator recommendation.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 871,
+          "outputTokens": 53,
+          "costUsd": 0.00161875
+        }
+      ]
     }
   ]
 }
