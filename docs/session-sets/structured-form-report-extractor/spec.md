@@ -125,7 +125,9 @@ sufficient fixtures for the audit without re-running the extractor — check tho
    coverage table from `gap-analysis-and-strategy.md`. Ask: which fields in the YAML
    are present in the ir/ JSON, which are absent, and which are present under a
    different key/structure?
-6. Write a findings summary as `session-reviews/session-001.md` covering:
+6. Write a findings summary as `audit-findings.md` (at the session-set root —
+   NOT under `session-reviews/`, which is owned by `log.save_session_review()`
+   per `lessons-learned.md`) covering:
    - Current ir/ schema for forms (what fields exist at form level and control level)
    - Current ir/ schema for reports (sections, GroupLevel, events)
    - Specific gaps confirmed (e.g. RecordSource not first-class, GroupLevel shape)
@@ -133,7 +135,7 @@ sufficient fixtures for the audit without re-running the extractor — check tho
 7. Route session verification.
 
 **Creates:**
-- `docs/session-sets/structured-form-report-extractor/session-reviews/session-001.md`
+- `docs/session-sets/structured-form-report-extractor/audit-findings.md`
 
 **Touches:** (read-only audit; no code changes)
 
@@ -149,7 +151,7 @@ or "Gap Z is confirmed; fix in Session 2 is: [approach]." Verification VERIFIED.
 
 **Steps:**
 1. Verify prior session committed.
-2. Read Session 1's findings (`session-reviews/session-001.md`) to get the confirmed
+2. Read Session 1's findings (`audit-findings.md`) to get the confirmed
    gap list and proposed fix approaches.
 3. Implement RecordSource promotion — likely a one-line addition in
    `SaveAsTextTranslator.BuildPayload` that extracts `RecordSource` from the parsed
