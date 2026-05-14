@@ -1,0 +1,34 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmSwitchboard"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private Sub Form_Open(Cancel As Integer)
+      Me.Caption = "Home Health Care Services Tracking — v1.0"
+      ' Check if fiscal years are configured
+      If DCount("*", "tlkpFiscalYears", "IsCurrent=True") = 0 Then
+          MsgBox "Warning: No current fiscal year is set in the Fiscal Years lookup table." & vbCrLf & _
+                 "Some features may not work correctly.", vbExclamation, "Configuration Warning"
+      End If
+  End Sub
+  
+  Private Sub Form_Timer()
+      Me.lblStatusBar.Caption = "  " & Format(Now(), "mmmm d, yyyy h:nn AM/PM") & _
+                                "  |  User: " & Environ("USERNAME")
+  End Sub
+  
+  Private Sub btnCompactRepair_Click()
+      On Error Resume Next
+      CommandBars.ExecuteMso "DatabaseCompact"
+      If Err.Number <> 0 Then
+          MsgBox "Compact and Repair is not available in this context.", vbInformation
+      End If
+      On Error GoTo 0
+  End Sub

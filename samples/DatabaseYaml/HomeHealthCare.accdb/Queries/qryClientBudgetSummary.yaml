@@ -1,0 +1,28 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryClientBudgetSummary"
+QueryType: "Select"
+SQL: |
+  SELECT c.ClientID, c.LastName & ", " & c.FirstName AS ClientName, cb.FiscalYear, cb.AnnualBudget, Nz((SELECT SUM(csp2.AnnualEstCost) FROM tblClientServicePlan AS csp2 INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID WHERE csn2.ClientID = c.ClientID AND csp2.FiscalYear = cb.FiscalYear),0) AS TotalPlannedCost, [cb].[AnnualBudget]-Nz((SELECT SUM(csp3.AnnualEstCost) FROM tblClientServicePlan AS csp3 INNER JOIN tblClientServiceNeeds AS csn3 ON csp3.ClientServiceNeedID = csn3.ClientServiceNeedID WHERE csn3.ClientID = c.ClientID AND csp3.FiscalYear = cb.FiscalYear),0) AS RemainingBudget
+  FROM tblClients AS c INNER JOIN tblClientBudgets AS cb ON c.ClientID = cb.ClientID;
+  
+Properties:
+  DateCreated: "3/28/2026 11:13:40 AM"
+  LastUpdated: "5/12/2026 6:55:02 PM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "60"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  RecordsetType: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  TotalsRow: "False"

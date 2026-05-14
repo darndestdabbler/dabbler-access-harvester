@@ -1,0 +1,498 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Table"
+Name: "tblClientServicePlan"
+Connect: ""
+SourceTableName: ""
+Attributes: "0"
+DDL: |
+  CREATE TABLE [tblClientServicePlan] (
+      [ClientServicePlanID] COUNTER,
+      [ClientServiceNeedID] LONG NOT NULL,
+      [ProviderServiceCatalogID] LONG NOT NULL,
+      [FiscalYear] SHORT NOT NULL,
+      [HoursPerWeek] DOUBLE,
+      [WeeklyCost] CURRENCY,
+      [AnnualEstCost] CURRENCY,
+      [ApprovalDate] DATETIME,
+      [ApprovedBy] TEXT(50),
+      [Status] TEXT(20) DEFAULT "Pending",
+      [Notes] LONGTEXT,
+      CONSTRAINT [PrimaryKey] PRIMARY KEY ([ClientServicePlanID]),
+      CONSTRAINT [rel_Catalog_Plan] FOREIGN KEY ([ProviderServiceCatalogID]) REFERENCES [tblProviderServiceCatalog] ([ProviderServiceCatalogID]) ON UPDATE CASCADE,
+      CONSTRAINT [rel_Need_Plan] FOREIGN KEY ([ClientServiceNeedID]) REFERENCES [tblClientServiceNeeds] ([ClientServiceNeedID]) ON UPDATE CASCADE
+  );
+Properties:
+  Name: "tblClientServicePlan"
+  Updatable: "True"
+  DateCreated: "3/28/2026 11:13:39 AM"
+  LastUpdated: "5/13/2026 4:48:39 PM"
+  Connect: ""
+  Attributes: "0"
+  SourceTableName: ""
+  RecordCount: "52"
+  ValidationRule: ""
+  ValidationText: ""
+  ConflictTable: null  # SKIPPED: Cannot perform this operation.
+  ReplicaFilter: null  # SKIPPED: Cannot perform this operation.
+  Orientation: "0"
+  OrderByOn: "False"
+  DefaultView: "2"
+  DisplayViewsOnSharePointSite: "1"
+  TotalsRow: "False"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  HideNewField: "False"
+  BackTint: "100"
+  BackShade: "100"
+  ThemeFontIndex: "-1"
+  AlternateBackThemeColorIndex: "-1"
+  AlternateBackTint: "100"
+  AlternateBackShade: "100"
+  ReadOnlyWhenDisconnected: "False"
+  DatasheetGridlinesThemeColorIndex: "-1"
+  DatasheetForeThemeColorIndex: "-1"
+  FCMinWriteVer: "14.0.0000.0000"
+  FCMinDesignVer: "14.0.0000.0000"
+  PublishToWeb: "1"
+Fields:
+  - Name: "ClientServicePlanID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "17"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "ClientServicePlanID"
+      OrdinalPosition: "0"
+      Size: "4"
+      SourceField: "ClientServicePlanID"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ClientServiceNeedID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "ClientServiceNeedID"
+      OrdinalPosition: "1"
+      Size: "4"
+      SourceField: "ClientServiceNeedID"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      DisplayControl: "109"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ProviderServiceCatalogID"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "4"
+      Name: "ProviderServiceCatalogID"
+      OrdinalPosition: "2"
+      Size: "4"
+      SourceField: "ProviderServiceCatalogID"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      DisplayControl: "109"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "FiscalYear"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "3"
+      Name: "FiscalYear"
+      OrdinalPosition: "3"
+      Size: "2"
+      SourceField: "FiscalYear"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "True"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      DisplayControl: "109"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "HoursPerWeek"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "7"
+      Name: "HoursPerWeek"
+      OrdinalPosition: "6"
+      Size: "8"
+      SourceField: "HoursPerWeek"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ">0"
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "Fixed"
+      DecimalPlaces: "2"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "WeeklyCost"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "5"
+      Name: "WeeklyCost"
+      OrdinalPosition: "7"
+      Size: "8"
+      SourceField: "WeeklyCost"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "$#,##0.00;($#,##0.00)"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "AnnualEstCost"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "5"
+      Name: "AnnualEstCost"
+      OrdinalPosition: "8"
+      Size: "8"
+      SourceField: "AnnualEstCost"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "$#,##0.00;($#,##0.00)"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DecimalPlaces: "255"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ApprovalDate"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "1"
+      CollatingOrder: "1024"
+      Type: "8"
+      Name: "ApprovalDate"
+      OrdinalPosition: "9"
+      Size: "8"
+      SourceField: "ApprovalDate"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "0"
+      Scale: "0"
+      Format: "Short Date"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ShowDatePicker: "1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "ApprovedBy"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "ApprovedBy"
+      OrdinalPosition: "10"
+      Size: "50"
+      SourceField: "ApprovedBy"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Status"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "10"
+      Name: "Status"
+      OrdinalPosition: "11"
+      Size: "20"
+      SourceField: "Status"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: "\"Pending\""
+      ValidationRule: "In (\"Pending\",\"Approved\",\"Cancelled\")"
+      ValidationText: "Status must be Pending, Approved, or Cancelled."
+      Required: "False"
+      AllowZeroLength: "True"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      DisplayControl: "109"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+  - Name: "Notes"
+    Properties:
+      Value: null  # SKIPPED: Invalid operation.
+      Attributes: "2"
+      CollatingOrder: "1033"
+      Type: "12"
+      Name: "Notes"
+      OrdinalPosition: "12"
+      Size: "0"
+      SourceField: "Notes"
+      SourceTable: "tblClientServicePlan"
+      ValidateOnSet: null  # SKIPPED: Invalid operation.
+      DataUpdatable: "False"
+      ForeignName: null  # SKIPPED: Invalid operation.
+      DefaultValue: ""
+      ValidationRule: ""
+      ValidationText: ""
+      Required: "False"
+      AllowZeroLength: "False"
+      AppendOnly: "False"
+      Expression: ""
+      FieldSize: null  # SKIPPED: Property can be set only when the Field is part of a Recordset object's Fields collection.
+      OriginalValue: null  # SKIPPED: Operation is not supported for this type of object.
+      VisibleValue: null  # SKIPPED: Operation is not supported for this type of object.
+      Precision: "1033"
+      Scale: "0"
+      ColumnWidth: "-1"
+      ColumnOrder: "0"
+      ColumnHidden: "False"
+      IMEMode: "0"
+      IMESentenceMode: "3"
+      UnicodeCompression: "False"
+      TextFormat: "0"
+      TextAlign: "0"
+      AggregateType: "-1"
+      ResultType: "0"
+      CurrencyLCID: "0"
+Indexes:
+  - Name: "PrimaryKey"
+    Primary: "True"
+    Unique: "True"
+    Required: "True"
+    Foreign: "False"
+    Fields: "ClientServicePlanID"
+    Properties:
+      Name: "PrimaryKey"
+      Unique: "True"
+      Clustered: "False"
+      Primary: "True"
+      Foreign: "False"
+      Required: "True"
+      IgnoreNulls: "False"
+      DistinctCount: "52"
+  - Name: "rel_Catalog_Plan"
+    Primary: "False"
+    Unique: "False"
+    Required: "False"
+    Foreign: "True"
+    Fields: "ProviderServiceCatalogID"
+    Properties:
+      Name: "rel_Catalog_Plan"
+      Unique: "False"
+      Clustered: "False"
+      Primary: "False"
+      Foreign: "True"
+      Required: "False"
+      IgnoreNulls: "False"
+      DistinctCount: "14"
+  - Name: "rel_Need_Plan"
+    Primary: "False"
+    Unique: "False"
+    Required: "False"
+    Foreign: "True"
+    Fields: "ClientServiceNeedID"
+    Properties:
+      Name: "rel_Need_Plan"
+      Unique: "False"
+      Clustered: "False"
+      Primary: "False"
+      Foreign: "True"
+      Required: "False"
+      IgnoreNulls: "False"
+      DistinctCount: "52"
+DataMacros: |
+  <?xml version="1.0" encoding="UTF-16" standalone="no"?>
+  <DataMacros xmlns="http://schemas.microsoft.com/office/accessservices/2009/11/application"><DataMacro Event="BeforeChange"><Statements><Action Name="SetLocalVar"><Argument Name="Name">CurrentProviderServiceCatalogID</Argument><Argument Name="Value">[tblClientServicePlan].[ProviderServiceCatalogID]</Argument></Action><LookUpRecord><Data><Reference>tblProviderServiceCatalog</Reference><WhereCondition>[tblProviderServiceCatalog].[ProviderServiceCatalogID]=[CurrentProviderServiceCatalogID]</WhereCondition></Data><Statements><Action Name="SetLocalVar"><Argument Name="Name">RatePerHourFromCatalog</Argument><Argument Name="Value">[tblProviderServiceCatalog].[RatePerHour]</Argument></Action></Statements></LookUpRecord><ConditionalBlock><If><Condition>Not IsNull([RatePerHourFromCatalog])</Condition><Statements><Action Name="SetField"><Argument Name="Field">WeeklyCost</Argument><Argument Name="Value">[HoursPerWeek]*[RatePerHourFromCatalog]</Argument></Action><Action Name="SetField"><Argument Name="Field">AnnualEstCost</Argument><Argument Name="Value">[HoursPerWeek]*[RatePerHourFromCatalog]*52</Argument></Action></Statements></If></ConditionalBlock><ConditionalBlock><If><Condition>[Status]="Cancelled"</Condition><Statements/></If><ElseIf><Condition>[ApprovalDate] Is Not Null</Condition><Statements><Action Name="SetField"><Argument Name="Field">Status</Argument><Argument Name="Value">"Approved"</Argument></Action></Statements></ElseIf><Else><Statements><Action Name="SetField"><Argument Name="Field">Status</Argument><Argument Name="Value">"Pending"</Argument></Action></Statements></Else></ConditionalBlock><ConditionalBlock><If><Condition>[Status]="Approved"</Condition><Statements><Action Name="SetLocalVar"><Argument Name="Name">ClientID</Argument><Argument Name="Value">DLookUp("ClientID","tblClientServiceNeeds","ClientServiceNeedID=" &amp; [ClientServiceNeedID])</Argument></Action><Action Name="SetLocalVar"><Argument Name="Name">Budget</Argument><Argument Name="Value">Nz(DLookUp("AnnualBudget","tblClientBudgets","ClientID=" &amp; [ClientID] &amp; " AND FiscalYear=" &amp; [FiscalYear]),0)</Argument></Action><Action Name="SetLocalVar"><Argument Name="Name">OtherApproved</Argument><Argument Name="Value">Nz(DSum("AnnualEstCost","qryApprovedPlansByClient","ClientID=" &amp; [ClientID] &amp; " AND FiscalYear=" &amp; [FiscalYear] &amp; " AND ClientServicePlanID&lt;&gt;" &amp; Nz([ClientServicePlanID],0)),0)</Argument></Action><Action Name="SetLocalVar"><Argument Name="Name">TotalCost</Argument><Argument Name="Value">[OtherApproved]+[AnnualEstCost]</Argument></Action><ConditionalBlock><If><Condition>[TotalCost]&gt;Nz([Budget],0) And Nz([Budget],0)&gt;0</Condition><Statements><Action Name="RaiseError"><Argument Name="Number">1001</Argument><Argument Name="Description">"Cannot approve: this plan would exceed the client's annual budget."</Argument></Action></Statements></If></ConditionalBlock></Statements></If></ConditionalBlock></Statements></DataMacro></DataMacros>

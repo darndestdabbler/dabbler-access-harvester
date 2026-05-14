@@ -1,0 +1,97 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_rptProviderServiceStatistics"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_FiscalYear As Long
+  
+  Private Sub Report_Open(Cancel As Integer)
+      DoCmd.OpenForm "frmReportParam_FY", , , , , acDialog
+  
+      If Not IsLoaded("frmReportParam_FY") Then
+          Cancel = True
+          Exit Sub
+      End If
+  
+      m_FiscalYear = Forms!frmReportParam_FY!cboFiscalYear
+          
+      Me.RecordSource = GetSql(m_FiscalYear)
+      
+      DoCmd.Close acForm, "frmReportParam_FY"
+  End Sub
+  
+  
+  Private Function GetSql(FiscalYear As Long) As String
+  
+      Dim sql As String
+      
+      sql = "SELECT "
+      sql = sql & "    p.ProviderID, "
+      sql = sql & "    p.ProviderName, "
+      sql = sql & "    csp.FiscalYear, "
+      sql = sql & "    sub.UniqueClientCount AS Clients, "
+      sql = sql & "    Sum(csp.HoursPerWeek * 52) AS Hours, "
+      sql = sql & "    Sum(csp.AnnualEstCost) AS TotalCost, "
+      sql = sql & "    FormatCurrency(Sum(csp.AnnualEstCost) / sub.UniqueClientCount) AS AvgPerClient "
+      sql = sql & "FROM "
+      sql = sql & "    (tblProviders AS p "
+      sql = sql & "    INNER JOIN ( "
+      sql = sql & "        tblProviderServiceCatalog AS psc "
+      sql = sql & "        INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID "
+      sql = sql & "    ) ON p.ProviderID = psc.ProviderID) "
+      sql = sql & "    INNER JOIN ( "
+      sql = sql & "        SELECT "
+      sql = sql & "            Dist.ProviderID, "
+      sql = sql & "            Count(Dist.ClientID) AS UniqueClientCount "
+      sql = sql & "        FROM ( "
+      sql = sql & "            SELECT DISTINCT "
+      sql = sql & "                psc2.ProviderID, "
+      sql = sql & "                csn2.ClientID "
+      sql = sql & "            FROM "
+      sql = sql & "                tblProviderServiceCatalog AS psc2 "
+      sql = sql & "                INNER JOIN ( "
+      sql = sql & "                    tblClientServicePlan AS csp2 "
+      sql = sql & "                    INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID "
+      sql = sql & "                ) ON psc2.ProviderServiceCatalogID = csp2.ProviderServiceCatalogID "
+      sql = sql & "            WHERE csp2.FiscalYear = " & FiscalYear & " AND csp2.Status <> 'Cancelled' "
+      sql = sql & "        ) AS Dist "
+      sql = sql & "        GROUP BY Dist.ProviderID "
+      sql = sql & "    ) AS sub ON p.ProviderID = sub.ProviderID "
+      sql = sql & "WHERE "
+      sql = sql & "    csp.FiscalYear = " & FiscalYear & " "
+      sql = sql & "    AND csp.Status <> 'Cancelled' "
+      sql = sql & "GROUP BY "
+      sql = sql & "    p.ProviderID, "
+      sql = sql & "    p.ProviderName, "
+      sql = sql & "    csp.FiscalYear, "
+      sql = sql & "    sub.UniqueClientCount;"
+  
+      GetSql = sql
+  
+  End Function
+  
+  
+  
+  Private Sub Report_NoData(Cancel As Integer)
+      MsgBox "No provider statistics found for this fiscal year.", vbInformation
+      Cancel = True
+  End Sub
+  
+  
+  Private Function IsLoaded(ByVal strFormName As String) As Boolean
+      Dim frm As Access.Form
+      For Each frm In Application.Forms
+          If frm.name = strFormName Then
+              IsLoaded = True
+              Exit Function
+          End If
+      Next
+      IsLoaded = False
+  End Function

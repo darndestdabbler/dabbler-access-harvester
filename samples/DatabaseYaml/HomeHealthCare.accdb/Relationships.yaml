@@ -1,0 +1,84 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ExtractedAt: "2026-05-13 20:18:35"
+Count: 10
+Relationships:
+  - Name: "rel_Catalog_Plan"
+    Table: "tblProviderServiceCatalog"
+    ForeignTable: "tblClientServicePlan"
+    Fields: "ProviderServiceCatalogID -> ProviderServiceCatalogID"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_Client_Budgets"
+    Table: "tblClients"
+    ForeignTable: "tblClientBudgets"
+    Fields: "ClientID -> ClientID"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_Client_ServiceNeeds"
+    Table: "tblClients"
+    ForeignTable: "tblClientServiceNeeds"
+    Fields: "ClientID -> ClientID"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_Need_Plan"
+    Table: "tblClientServiceNeeds"
+    ForeignTable: "tblClientServicePlan"
+    Fields: "ClientServiceNeedID -> ClientServiceNeedID"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_Provider_Catalog"
+    Table: "tblProviders"
+    ForeignTable: "tblProviderServiceCatalog"
+    Fields: "ProviderID -> ProviderID"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_Service_ProviderCatalog"
+    Table: "tblServices"
+    ForeignTable: "tblProviderServiceCatalog"
+    Fields: "ServiceID -> ServiceID"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_Service_RateLimits"
+    Table: "tblServices"
+    ForeignTable: "tblServiceRateLimits"
+    Fields: "ServiceID -> ServiceID"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_Service_ServiceNeeds"
+    Table: "tblServices"
+    ForeignTable: "tblClientServiceNeeds"
+    Fields: "ServiceID -> ServiceID"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_State_Client"
+    Table: "tlkpStates"
+    ForeignTable: "tblClients"
+    Fields: "StateCode -> StateCode"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false
+  - Name: "rel_State_Provider"
+    Table: "tlkpStates"
+    ForeignTable: "tblProviders"
+    Fields: "StateCode -> StateCode"
+    EnforceReferentialIntegrity: true
+    CascadeUpdate: true
+    CascadeDelete: false
+    Inherited: false

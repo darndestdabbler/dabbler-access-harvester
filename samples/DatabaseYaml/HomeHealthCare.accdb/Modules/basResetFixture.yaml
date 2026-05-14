@@ -1,0 +1,736 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "basResetFixture"
+ModuleType: "Standard"
+Definition: |
+  Option Compare Database
+  Option Explicit
+  
+  ' basResetFixture
+  ' ----------------
+  ' Wipes and reseeds the transactional tables in HomeHealthCare.accdb to a
+  ' known UAT starting state. See docs/uat-seed-design.md for the contract.
+  '
+  ' Usage (from the Access Immediate Window):
+  '
+  '     ResetForUAT
+  '
+  ' Prerequisite: the BeforeChange data macro on tblClientServicePlan must
+  ' preserve an explicit Status="Cancelled" (see docs/uat-seed-design.md §0).
+  ' Without that fix, the one cancelled plan in the seed will be auto-rewritten
+  ' to Pending and the verification block at the end of ResetForUAT will warn.
+  
+  Private Const APPR_FY24 As Date = #9/15/2024#
+  Private Const APPR_FY25 As Date = #8/20/2025#
+  Private Const SUPERVISOR As String = "Sandra Supervisor"
+  
+  ' --------------------------------------------------------------------------
+  ' Public entry point
+  ' --------------------------------------------------------------------------
+  
+  Public Sub ResetForUAT()
+      Dim db As DAO.Database
+      Dim t0 As Double
+      Dim step As String
+  
+      On Error GoTo eh
+      Set db = CurrentDb
+      t0 = Timer
+  
+      Debug.Print String(60, "-")
+      Debug.Print "ResetForUAT starting at " & Format(Now, "hh:nn:ss")
+  
+      step = "DeleteTransactionalTables"
+      DeleteTransactionalTables db
+  
+      ' Note: AutoNumber seeds are NOT reset. Jet rejects
+      ' ALTER COLUMN ... COUNTER on PKs that participate in any Relation,
+      ' which describes every transactional PK in this schema. The seed
+      ' still produces stable explicit PKs (1..N) for fixture rows; only
+      ' newly-added-during-UAT rows get whatever the historical counter
+      ' is at, which is harmless for testing.
+  
+      step = "EnsureFiscalYears"
+      EnsureFiscalYears db
+  
+      step = "SeedServices"
+      SeedServices db
+      step = "SeedServiceRateLimits"
+      SeedServiceRateLimits db
+      step = "SeedProviders"
+      SeedProviders db
+      step = "SeedProviderServiceCatalog"
+      SeedProviderServiceCatalog db
+      step = "SeedClients"
+      SeedClients db
+      step = "SeedClientBudgets"
+      SeedClientBudgets db
+      step = "SeedClientServiceNeeds"
+      SeedClientServiceNeeds db
+      step = "SeedClientServicePlans"
+      SeedClientServicePlans db
+  
+      step = "Verify"
+      Verify db
+  
+      Debug.Print "ResetForUAT done in " & Format(Timer - t0, "0.0") & "s"
+      Debug.Print String(60, "-")
+  
+      MsgBox "UAT seed complete (" & Format(Timer - t0, "0.0") & "s)." & vbCrLf & _
+             "See Immediate Window for row counts.", vbInformation, "ResetForUAT"
+      Exit Sub
+  
+  eh:
+      Debug.Print "ResetForUAT FAILED at step: " & step
+      Debug.Print "  Error " & Err.Number & ": " & Err.Description
+      MsgBox "ResetForUAT failed at step '" & step & "':" & vbCrLf & _
+             Err.Number & " - " & Err.Description, vbCritical, "ResetForUAT"
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 1 - delete transactional rows in reverse-FK order
+  ' --------------------------------------------------------------------------
+  
+  Private Sub DeleteTransactionalTables(ByVal db As DAO.Database)
+      Debug.Print "  Deleting transactional rows..."
+      db.Execute "DELETE FROM tblClientServicePlan", dbFailOnError
+      db.Execute "DELETE FROM tblClientServiceNeeds", dbFailOnError
+      db.Execute "DELETE FROM tblClientBudgets", dbFailOnError
+      db.Execute "DELETE FROM tblProviderServiceCatalog", dbFailOnError
+      db.Execute "DELETE FROM tblServiceRateLimits", dbFailOnError
+      db.Execute "DELETE FROM tblClients", dbFailOnError
+      db.Execute "DELETE FROM tblProviders", dbFailOnError
+      db.Execute "DELETE FROM tblServices", dbFailOnError
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 2 - UPSERT fiscal years (idempotent)
+  ' --------------------------------------------------------------------------
+  
+  Private Sub EnsureFiscalYears(ByVal db As DAO.Database)
+      Debug.Print "  Ensuring fiscal year rows..."
+      UpsertFiscalYear db, 2024, #7/1/2024#, #6/30/2025#, False
+      UpsertFiscalYear db, 2025, #7/1/2025#, #6/30/2026#, True
+      UpsertFiscalYear db, 2026, #7/1/2026#, #6/30/2027#, False
+  End Sub
+  
+  Private Sub UpsertFiscalYear(ByVal db As DAO.Database, _
+                                ByVal fy As Integer, _
+                                ByVal startDt As Date, _
+                                ByVal endDt As Date, _
+                                ByVal isCurrent As Boolean)
+      Dim n As Long
+      n = DCount("*", "tlkpFiscalYears", "FiscalYear=" & fy)
+      If n > 0 Then
+          db.Execute "UPDATE tlkpFiscalYears SET StartDate=" & DateLit(startDt) & _
+                     ", EndDate=" & DateLit(endDt) & _
+                     ", IsCurrent=" & BoolLit(isCurrent) & _
+                     " WHERE FiscalYear=" & fy, dbFailOnError
+      Else
+          db.Execute "INSERT INTO tlkpFiscalYears (FiscalYear, StartDate, EndDate, IsCurrent) VALUES (" & _
+                     fy & ", " & DateLit(startDt) & ", " & DateLit(endDt) & ", " & _
+                     BoolLit(isCurrent) & ")", dbFailOnError
+      End If
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 3a - Services (12 rows)
+  ' --------------------------------------------------------------------------
+  
+  Private Sub SeedServices(ByVal db As DAO.Database)
+      Debug.Print "  Seeding 12 services..."
+      InsService db, 1, "SN-RN", "Skilled Nursing - RN visit", "Skilled Nursing", True
+      InsService db, 2, "SN-LPN", "Skilled Nursing - LPN visit", "Skilled Nursing", True
+      InsService db, 3, "PT", "Physical Therapy", "Therapy", True
+      InsService db, 4, "OT", "Occupational Therapy", "Therapy", True
+      InsService db, 5, "ST", "Speech Therapy", "Therapy", True
+      InsService db, 6, "PC-PERS", "Personal Care - bathing/dressing", "Personal Care", True
+      InsService db, 7, "PC-MEAL", "Personal Care - meal prep", "Personal Care", True
+      InsService db, 8, "HMK", "Homemaking", "Homemaking", True
+      InsService db, 9, "COMP", "Companion", "Companion", True
+      InsService db, 10, "RESP", "Respite", "Respite", True
+      InsService db, 11, "MSW", "Medical Social Work", "Skilled Nursing", True
+      InsService db, 12, "RETD", "Retired Service Code", "Skilled Nursing", False
+  End Sub
+  
+  Private Sub InsService(ByVal db As DAO.Database, _
+                         ByVal id As Long, ByVal code As String, ByVal name As String, _
+                         ByVal cat As String, ByVal active As Boolean)
+      db.Execute "INSERT INTO tblServices (ServiceID, ServiceCode, ServiceName, ServiceCategory, IsActive) VALUES (" & _
+                 id & ", " & SqlStr(code) & ", " & SqlStr(name) & ", " & SqlStr(cat) & ", " & BoolLit(active) & ")", _
+                 dbFailOnError
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 3b - Service rate limits (22 rows)
+  ' Services 1-11 each get FY2024 + FY2025 caps. Service 12 (RETD) has none.
+  ' --------------------------------------------------------------------------
+  
+  Private Sub SeedServiceRateLimits(ByVal db As DAO.Database)
+      Debug.Print "  Seeding 22 service rate limits..."
+      InsRateLimit db, 1, 1, 2024, 120#
+      InsRateLimit db, 2, 1, 2025, 126#
+      InsRateLimit db, 3, 2, 2024, 80#
+      InsRateLimit db, 4, 2, 2025, 84#
+      InsRateLimit db, 5, 3, 2024, 110#
+      InsRateLimit db, 6, 3, 2025, 115.5
+      InsRateLimit db, 7, 4, 2024, 110#
+      InsRateLimit db, 8, 4, 2025, 115.5
+      InsRateLimit db, 9, 5, 2024, 115#
+      InsRateLimit db, 10, 5, 2025, 120.75
+      InsRateLimit db, 11, 6, 2024, 35#
+      InsRateLimit db, 12, 6, 2025, 36.75
+      InsRateLimit db, 13, 7, 2024, 32#
+      InsRateLimit db, 14, 7, 2025, 33.6
+      InsRateLimit db, 15, 8, 2024, 30#
+      InsRateLimit db, 16, 8, 2025, 31.5
+      InsRateLimit db, 17, 9, 2024, 28#
+      InsRateLimit db, 18, 9, 2025, 29.4
+      InsRateLimit db, 19, 10, 2024, 40#
+      InsRateLimit db, 20, 10, 2025, 42#
+      InsRateLimit db, 21, 11, 2024, 95#
+      InsRateLimit db, 22, 11, 2025, 99.75
+  End Sub
+  
+  Private Sub InsRateLimit(ByVal db As DAO.Database, _
+                           ByVal id As Long, ByVal svcId As Long, ByVal fy As Integer, _
+                           ByVal maxRate As Currency)
+      db.Execute "INSERT INTO tblServiceRateLimits (ServiceRateLimitID, ServiceID, FiscalYear, MaxRatePerHour) VALUES (" & _
+                 id & ", " & svcId & ", " & fy & ", " & maxRate & ")", dbFailOnError
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 3c - Providers (6 rows)
+  ' --------------------------------------------------------------------------
+  
+  Private Sub SeedProviders(ByVal db As DAO.Database)
+      Debug.Print "  Seeding 6 providers..."
+      InsProvider db, 1, "Acme Home Care", "NY", "Albany", True, #12/31/2027#
+      InsProvider db, 2, "BrightPath Health Services", "NY", "Buffalo", True, #12/31/2027#
+      InsProvider db, 3, "CareCircle Inc", "MA", "Springfield", True, #12/31/2027#
+      InsProvider db, 4, "DependableCare LLC", "NJ", "Newark", True, #12/31/2027#
+      InsProvider db, 5, "EvergreenCare Partners", "NY", "Albany", False, #6/30/2024#
+      InsProvider db, 6, "FirstChoiceCare", "CT", "New Haven", True, #12/31/2027#
+  End Sub
+  
+  
+  Private Sub InsProvider(ByVal db As DAO.Database, _
+                          ByVal id As Long, ByVal name As String, _
+                          ByVal StateCode As String, ByVal City As String, _
+                          ByVal active As Boolean, ByVal licExp As Date)
+      Dim contactFirst As String, contactLast As String
+      contactFirst = Choose(id, "Adam", "Beth", "Carlos", "Diana", "Edward", "Fiona")
+      contactLast = "Manager"
+      db.Execute "INSERT INTO tblProviders (ProviderID, ProviderName, ContactFirstName, ContactLastName, " & _
+                 "Phone, Email, Address1, City, StateCode, ZipCode, LicenseNumber, LicenseExpDate, IsActive) VALUES (" & _
+                 id & ", " & SqlStr(name) & ", " & SqlStr(contactFirst) & ", " & SqlStr(contactLast) & ", " & _
+                 SqlStr("(555) 200-" & Format(id * 100, "0000")) & ", " & _
+                 SqlStr(LCase(Replace(name, " ", "")) & "@example.com") & ", " & _
+                 SqlStr(id * 100 & " Provider Way") & ", " & SqlStr(City) & ", " & _
+                 SqlStr(StateCode) & ", " & SqlStr("10000") & ", " & _
+                 SqlStr("LIC-" & Format(id, "0000")) & ", " & DateLit(licExp) & ", " & _
+                 BoolLit(active) & ")", dbFailOnError
+  End Sub
+  
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 3d - Provider service catalog (53 rows)
+  ' All rates designed to be <= the matching service rate limit cap.
+  ' Evergreen (P5) S1 FY24 is at the cap exactly ($120.00) for edge testing.
+  ' --------------------------------------------------------------------------
+  
+  Private Sub SeedProviderServiceCatalog(ByVal db As DAO.Database)
+      Debug.Print "  Seeding 53 catalog rows..."
+  
+      ' Provider 1 Acme - 8 services, both FYs, ~3% below cap
+      InsCatalog db, 1, 1, 1, 2024, 116#                   ' SN-RN
+      InsCatalog db, 2, 1, 1, 2025, 122#
+      InsCatalog db, 3, 1, 2, 2024, 78#                    ' SN-LPN
+      InsCatalog db, 4, 1, 2, 2025, 82#
+      InsCatalog db, 5, 1, 3, 2024, 107#                   ' PT
+      InsCatalog db, 6, 1, 3, 2025, 112#
+      InsCatalog db, 7, 1, 4, 2024, 107#                   ' OT
+      InsCatalog db, 8, 1, 4, 2025, 112#
+      InsCatalog db, 9, 1, 5, 2024, 112#                   ' ST
+      InsCatalog db, 10, 1, 5, 2025, 117#
+      InsCatalog db, 11, 1, 6, 2024, 34#                   ' PC-PERS
+      InsCatalog db, 12, 1, 6, 2025, 36#
+      InsCatalog db, 13, 1, 7, 2024, 31#                   ' PC-MEAL
+      InsCatalog db, 14, 1, 7, 2025, 32#
+      InsCatalog db, 15, 1, 11, 2024, 92#                  ' MSW
+      InsCatalog db, 16, 1, 11, 2025, 96#
+  
+      ' Provider 2 BrightPath - 9 services, both FYs, ~10% below cap
+      InsCatalog db, 17, 2, 1, 2024, 108#                  ' SN-RN
+      InsCatalog db, 18, 2, 1, 2025, 113#
+      InsCatalog db, 19, 2, 2, 2024, 72#                   ' SN-LPN
+      InsCatalog db, 20, 2, 2, 2025, 76#
+      InsCatalog db, 21, 2, 3, 2024, 99#                   ' PT
+      InsCatalog db, 22, 2, 3, 2025, 104#
+      InsCatalog db, 23, 2, 4, 2024, 99#                   ' OT
+      InsCatalog db, 24, 2, 4, 2025, 104#
+      InsCatalog db, 25, 2, 6, 2024, 32#                   ' PC-PERS
+      InsCatalog db, 26, 2, 6, 2025, 33#
+      InsCatalog db, 27, 2, 7, 2024, 29#                   ' PC-MEAL
+      InsCatalog db, 28, 2, 7, 2025, 30#
+      InsCatalog db, 29, 2, 8, 2024, 27#                   ' HMK
+      InsCatalog db, 30, 2, 8, 2025, 28#
+      InsCatalog db, 31, 2, 9, 2024, 25#                   ' COMP
+      InsCatalog db, 32, 2, 9, 2025, 26#
+      InsCatalog db, 33, 2, 10, 2024, 36#                  ' RESP
+      InsCatalog db, 34, 2, 10, 2025, 38#
+  
+      ' Provider 3 CareCircle - 9 services, FY24 only (FY25 will be filled by user testing the Copy button)
+      InsCatalog db, 35, 3, 3, 2024, 93#                   ' PT
+      InsCatalog db, 36, 3, 4, 2024, 93#                   ' OT
+      InsCatalog db, 37, 3, 5, 2024, 98#                   ' ST
+      InsCatalog db, 38, 3, 6, 2024, 30#                   ' PC-PERS
+      InsCatalog db, 39, 3, 7, 2024, 27#                   ' PC-MEAL
+      InsCatalog db, 40, 3, 8, 2024, 25#                   ' HMK
+      InsCatalog db, 41, 3, 9, 2024, 24#                   ' COMP
+      InsCatalog db, 42, 3, 10, 2024, 34#                  ' RESP
+      InsCatalog db, 43, 3, 11, 2024, 80#                  ' MSW
+  
+      ' Provider 4 Dependable - 5 services, FY25 only
+      InsCatalog db, 44, 4, 1, 2025, 111#                  ' SN-RN
+      InsCatalog db, 45, 4, 2, 2025, 74#                   ' SN-LPN
+      InsCatalog db, 46, 4, 3, 2025, 102#                  ' PT
+      InsCatalog db, 47, 4, 6, 2025, 32#                   ' PC-PERS
+      InsCatalog db, 48, 4, 7, 2025, 30#                   ' PC-MEAL
+  
+      ' Provider 5 Evergreen - 5 services, FY24 only, AT CAP on SN-RN
+      InsCatalog db, 49, 5, 1, 2024, 120#                  ' SN-RN at cap exactly
+      InsCatalog db, 50, 5, 2, 2024, 78#                   ' SN-LPN
+      InsCatalog db, 51, 5, 6, 2024, 34#                   ' PC-PERS
+      InsCatalog db, 52, 5, 7, 2024, 30#                   ' PC-MEAL
+      InsCatalog db, 53, 5, 8, 2024, 28#                   ' HMK
+  
+      ' Provider 6 FirstChoice - intentionally no catalog rows (empty-state test)
+  End Sub
+  
+  Private Sub InsCatalog(ByVal db As DAO.Database, _
+                         ByVal id As Long, ByVal provId As Long, ByVal svcId As Long, _
+                         ByVal fy As Integer, ByVal rate As Currency)
+      db.Execute "INSERT INTO tblProviderServiceCatalog (ProviderServiceCatalogID, ProviderID, ServiceID, FiscalYear, RatePerHour) VALUES (" & _
+                 id & ", " & provId & ", " & svcId & ", " & fy & ", " & rate & ")", dbFailOnError
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 3e - Clients (12 rows)
+  ' EnrollmentDate is always >= DateOfBirth (table rule).
+  ' Genders alternate F/M roughly.
+  ' --------------------------------------------------------------------------
+  
+  Private Sub SeedClients(ByVal db As DAO.Database)
+      Debug.Print "  Seeding 12 clients..."
+      InsClient db, 1, "Alice", "Anderson", #4/12/1955#, #9/1/2023#, "F", "NY", "Albany", True
+      InsClient db, 2, "Bob", "Becker", #11/8/1942#, #3/15/2022#, "M", "NY", "Albany", True
+      InsClient db, 3, "Clara", "Chen", #7/22/1962#, #1/10/2024#, "F", "NJ", "Newark", True
+      InsClient db, 4, "Daniel", "Diaz", #2/14/1950#, #6/1/2023#, "M", "NY", "Albany", True
+      InsClient db, 5, "Eleanor", "Evans", #9/3/1948#, #11/20/2023#, "F", "NY", "Albany", True
+      InsClient db, 6, "Frank", "Foster", #5/30/1944#, #8/12/2022#, "M", "MA", "Boston", False
+      InsClient db, 7, "Grace", "Garcia", #12/19/1958#, #3/5/2023#, "F", "NJ", "Jersey City", True
+      InsClient db, 8, "Henry", "Hill", #8/25/1953#, #2/28/2024#, "M", "NY", "Buffalo", True
+      InsClient db, 9, "Iris", "Ivanov", #6/14/1961#, #8/15/2025#, "F", "NY", "Buffalo", True
+      InsClient db, 10, "James", "Jones", #1/11/1937#, #5/22/2022#, "M", "CT", "Hartford", True
+      InsClient db, 11, "Karen", "Khan", #10/7/1950#, #7/18/2023#, "F", "NY", "Buffalo", True
+      InsClient db, 12, "Liam", "Lopez", #3/29/1959#, #12/1/2023#, "M", "NY", "Buffalo", True
+  End Sub
+  
+  
+  Private Sub InsClient(ByVal db As DAO.Database, _
+                        ByVal id As Long, ByVal first As String, ByVal last As String, _
+                        ByVal dob As Date, ByVal enroll As Date, _
+                        ByVal Gender As String, ByVal StateCode As String, _
+                        ByVal City As String, ByVal active As Boolean)
+      Dim ssn As String
+      ssn = Format(1000 + id * 7, "0000")
+      db.Execute "INSERT INTO tblClients (ClientID, FirstName, LastName, DateOfBirth, SSNLast4, " & _
+                 "Gender, Address1, City, StateCode, ZipCode, Phone, Email, EmergencyContactName, " & _
+                 "EmergencyContactPhone, EnrollmentDate, IsActive) VALUES (" & _
+                 id & ", " & SqlStr(first) & ", " & SqlStr(last) & ", " & DateLit(dob) & ", " & _
+                 SqlStr(ssn) & ", " & SqlStr(Gender) & ", " & _
+                 SqlStr(id * 100 & " Main St") & ", " & SqlStr(City) & ", " & _
+                 SqlStr(StateCode) & ", " & SqlStr("10000") & ", " & _
+                 SqlStr("(555) 010-" & Format(id * 100, "0000")) & ", " & _
+                 SqlStr(LCase(first) & "." & LCase(last) & "@example.com") & ", " & _
+                 SqlStr(first & " EmergencyContact") & ", " & SqlStr("(555) 020-0000") & ", " & _
+                 DateLit(enroll) & ", " & BoolLit(active) & ")", dbFailOnError
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 3f - Client budgets (21 rows)
+  ' Skipped cells: C6 FY25, C9 FY24, C10 FY25 (intentional gaps - see design doc)
+  ' --------------------------------------------------------------------------
+  
+  Private Sub SeedClientBudgets(ByVal db As DAO.Database)
+      Debug.Print "  Seeding 21 client budgets..."
+      InsBudget db, 1, 1, 2024, 30000
+      InsBudget db, 2, 1, 2025, 32000
+      InsBudget db, 3, 2, 2024, 45000
+      InsBudget db, 4, 2, 2025, 47500
+      InsBudget db, 5, 3, 2024, 20000
+      InsBudget db, 6, 3, 2025, 22000
+      InsBudget db, 7, 4, 2024, 28000
+      InsBudget db, 8, 4, 2025, 30000
+      InsBudget db, 9, 5, 2024, 25000
+      InsBudget db, 10, 5, 2025, 27000
+      InsBudget db, 11, 6, 2024, 18000                     ' C6 has no FY25 budget
+      InsBudget db, 12, 7, 2024, 35000
+      InsBudget db, 13, 7, 2025, 38000
+      InsBudget db, 14, 8, 2024, 22000
+      InsBudget db, 15, 8, 2025, 24000
+      InsBudget db, 16, 9, 2025, 20000                     ' C9 has no FY24 budget (newly enrolled)
+      InsBudget db, 17, 10, 2024, 26000                    ' C10 has no FY25 budget (gap test)
+      InsBudget db, 18, 11, 2024, 32000
+      InsBudget db, 19, 11, 2025, 34000
+      InsBudget db, 20, 12, 2024, 40000
+      InsBudget db, 21, 12, 2025, 42000
+  End Sub
+  
+  Private Sub InsBudget(ByVal db As DAO.Database, _
+                        ByVal id As Long, ByVal ClientID As Long, _
+                        ByVal fy As Integer, ByVal annual As Currency)
+      db.Execute "INSERT INTO tblClientBudgets (ClientBudgetID, ClientID, FiscalYear, AnnualBudget) VALUES (" & _
+                 id & ", " & ClientID & ", " & fy & ", " & annual & ")", dbFailOnError
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 3g - Client service needs (62 rows)
+  ' --------------------------------------------------------------------------
+  
+  Private Sub SeedClientServiceNeeds(ByVal db As DAO.Database)
+      Debug.Print "  Seeding 62 client service needs..."
+  
+      ' Client 1 Alice FY24 (3 needs)
+      InsNeed db, 1, 1, 1, 2024, 3, "Mon,Wed,Fri", #9:00:00 AM#, #10:00:00 AM#, 2#         ' SN-RN
+      InsNeed db, 2, 1, 3, 2024, 4, "Tue,Thu", #2:00:00 PM#, #3:00:00 PM#, 1#              ' PT
+      InsNeed db, 3, 1, 6, 2024, 2, "Daily", Null, Null, 5#                                ' PC-PERS (no time)
+  
+      ' Client 1 Alice FY25 (3 needs)
+      InsNeed db, 4, 1, 1, 2025, 3, "Mon,Wed,Fri", #9:00:00 AM#, #10:00:00 AM#, 2#
+      InsNeed db, 5, 1, 3, 2025, 4, "Tue,Thu", #2:00:00 PM#, #3:00:00 PM#, 1#
+      InsNeed db, 6, 1, 6, 2025, 2, "Daily", Null, Null, 5#
+  
+      ' Client 2 Bob FY24 (5 needs - 4 approved-able + 1 for the cancelled plan)
+      InsNeed db, 7, 2, 1, 2024, 1, "Mon,Wed,Fri", #8:00:00 AM#, #9:00:00 AM#, 3#          ' SN-RN
+      InsNeed db, 8, 2, 2, 2024, 2, "Tue,Thu", #10:00:00 AM#, #11:00:00 AM#, 2#            ' SN-LPN
+      InsNeed db, 9, 2, 3, 2024, 3, "Wed", #1:00:00 PM#, #2:00:00 PM#, 1#                  ' PT
+      InsNeed db, 10, 2, 6, 2024, 2, "Daily", Null, Null, 4#                               ' PC-PERS
+      InsNeed db, 11, 2, 9, 2024, 5, "As needed", Null, Null, 2#                           ' COMP - the cancelled plan
+  
+      ' Client 2 Bob FY25 (4 needs)
+      InsNeed db, 12, 2, 1, 2025, 1, "Mon,Wed,Fri", #8:00:00 AM#, #9:00:00 AM#, 3#
+      InsNeed db, 13, 2, 2, 2025, 2, "Tue,Thu", #10:00:00 AM#, #11:00:00 AM#, 2#
+      InsNeed db, 14, 2, 3, 2025, 3, "Wed", #1:00:00 PM#, #2:00:00 PM#, 1#
+      InsNeed db, 15, 2, 6, 2025, 2, "Daily", Null, Null, 4#
+  
+      ' Client 3 Clara FY24 (2 needs)
+      InsNeed db, 16, 3, 3, 2024, 3, "Tue,Thu", #11:00:00 AM#, #12:00:00 PM#, 1#           ' PT
+      InsNeed db, 17, 3, 6, 2024, 2, "Mon,Wed,Fri", Null, Null, 3#                         ' PC-PERS
+  
+      ' Client 3 Clara FY25 (3 needs)
+      InsNeed db, 18, 3, 3, 2025, 3, "Tue,Thu", #11:00:00 AM#, #12:00:00 PM#, 1#
+      InsNeed db, 19, 3, 6, 2025, 2, "Mon,Wed,Fri", Null, Null, 3#
+      InsNeed db, 20, 3, 8, 2025, 4, "Mon,Fri", Null, Null, 2#                             ' HMK
+  
+      ' Client 4 Daniel FY24 (3 needs)
+      InsNeed db, 21, 4, 1, 2024, 1, "Mon-Fri", #7:00:00 AM#, #8:00:00 AM#, 4#             ' SN-RN
+      InsNeed db, 22, 4, 3, 2024, 3, "Mon,Wed", #2:00:00 PM#, #3:00:00 PM#, 1#             ' PT
+      InsNeed db, 23, 4, 6, 2024, 2, "Daily", Null, Null, 3#                               ' PC-PERS
+  
+      ' Client 4 Daniel FY25 (3 needs - the budget overrun case)
+      InsNeed db, 24, 4, 1, 2025, 1, "Mon-Fri", #7:00:00 AM#, #8:00:00 AM#, 4#             ' SN-RN
+      InsNeed db, 25, 4, 3, 2025, 3, "Mon,Wed", #2:00:00 PM#, #3:00:00 PM#, 1#             ' PT
+      InsNeed db, 26, 4, 6, 2025, 2, "Daily", Null, Null, 3#                               ' PC-PERS - the over-budget pending plan
+  
+      ' Client 5 Eleanor FY24 (2 needs)
+      InsNeed db, 27, 5, 1, 2024, 2, "Mon,Wed,Fri", #9:30:00 AM#, #10:30:00 AM#, 2#        ' SN-RN
+      InsNeed db, 28, 5, 6, 2024, 3, "Daily", Null, Null, 4#                               ' PC-PERS
+  
+      ' Client 5 Eleanor FY25 (3 needs - one is unmet, no plan)
+      InsNeed db, 29, 5, 1, 2025, 2, "Mon,Wed,Fri", #9:30:00 AM#, #10:30:00 AM#, 2#
+      InsNeed db, 30, 5, 6, 2025, 3, "Daily", Null, Null, 4#
+      InsNeed db, 31, 5, 8, 2025, 5, "Tue", Null, Null, 3#                                 ' HMK - DELIBERATELY UNMET (no plan)
+  
+      ' Client 6 Frank FY24 (2 needs - inactive client, FY24 only)
+      InsNeed db, 32, 6, 1, 2024, 1, "Mon,Wed,Fri", #8:30:00 AM#, #9:30:00 AM#, 2#         ' SN-RN
+      InsNeed db, 33, 6, 6, 2024, 2, "Daily", Null, Null, 3#                               ' PC-PERS
+  
+      ' Client 7 Grace FY24 (3 needs)
+      InsNeed db, 34, 7, 1, 2024, 1, "Mon,Wed,Fri", #10:00:00 AM#, #11:00:00 AM#, 3#       ' SN-RN
+      InsNeed db, 35, 7, 3, 2024, 3, "Tue,Thu", #1:00:00 PM#, #2:00:00 PM#, 1#             ' PT
+      InsNeed db, 36, 7, 6, 2024, 2, "Daily", Null, Null, 4#                               ' PC-PERS
+  
+      ' Client 7 Grace FY25 (3 needs)
+      InsNeed db, 37, 7, 1, 2025, 1, "Mon,Wed,Fri", #10:00:00 AM#, #11:00:00 AM#, 3#
+      InsNeed db, 38, 7, 3, 2025, 3, "Tue,Thu", #1:00:00 PM#, #2:00:00 PM#, 1#
+      InsNeed db, 39, 7, 6, 2025, 2, "Daily", Null, Null, 4#
+  
+      ' Client 8 Henry FY24 (2 needs)
+      InsNeed db, 40, 8, 1, 2024, 2, "Mon,Wed", #11:00:00 AM#, #12:00:00 PM#, 2#           ' SN-RN
+      InsNeed db, 41, 8, 6, 2024, 3, "Daily", Null, Null, 3#                               ' PC-PERS
+  
+      ' Client 8 Henry FY25 (2 needs)
+      InsNeed db, 42, 8, 1, 2025, 2, "Mon,Wed", #11:00:00 AM#, #12:00:00 PM#, 2#
+      InsNeed db, 43, 8, 6, 2025, 3, "Daily", Null, Null, 3#
+  
+      ' Client 9 Iris FY25 only (2 needs - newly enrolled)
+      InsNeed db, 44, 9, 1, 2025, 2, "Mon,Wed,Fri", #9:00:00 AM#, #10:00:00 AM#, 2#        ' SN-RN
+      InsNeed db, 45, 9, 6, 2025, 3, "Daily", Null, Null, 3#                               ' PC-PERS
+  
+      ' Client 10 James FY24 (3 needs)
+      InsNeed db, 46, 10, 1, 2024, 1, "Mon,Wed,Fri", #8:00:00 AM#, #9:00:00 AM#, 3#        ' SN-RN
+      InsNeed db, 47, 10, 6, 2024, 2, "Daily", Null, Null, 4#                              ' PC-PERS
+      InsNeed db, 48, 10, 8, 2024, 4, "Mon,Fri", Null, Null, 2#                            ' HMK
+  
+      ' Client 10 James FY25 (2 needs - but no FY25 budget, so no plans)
+      InsNeed db, 49, 10, 1, 2025, 1, "Mon,Wed,Fri", #8:00:00 AM#, #9:00:00 AM#, 3#
+      InsNeed db, 50, 10, 6, 2025, 2, "Daily", Null, Null, 4#
+  
+      ' Client 11 Karen FY24 (2 needs)
+      InsNeed db, 51, 11, 3, 2024, 3, "Mon", #10:00:00 AM#, #11:00:00 AM#, 1#              ' PT
+      InsNeed db, 52, 11, 6, 2024, 2, "Daily", Null, Null, 3#                              ' PC-PERS
+  
+      ' Client 11 Karen FY25 (4 needs - DUPLICATE PT for duplicate-detection test)
+      InsNeed db, 53, 11, 3, 2025, 3, "Mon", #10:00:00 AM#, #11:00:00 AM#, 1#              ' PT (first)
+      InsNeed db, 54, 11, 3, 2025, 4, "Thu", #2:00:00 PM#, #3:00:00 PM#, 1#                ' PT (DUPLICATE Service+FY)
+      InsNeed db, 55, 11, 6, 2025, 2, "Daily", Null, Null, 3#                              ' PC-PERS
+      InsNeed db, 56, 11, 8, 2025, 5, "Wed", Null, Null, 2#                                ' HMK (the pending plan)
+  
+      ' Client 12 Liam FY24 (3 needs)
+      InsNeed db, 57, 12, 1, 2024, 1, "Mon,Wed,Fri", #9:00:00 AM#, #10:00:00 AM#, 3#       ' SN-RN
+      InsNeed db, 58, 12, 3, 2024, 3, "Tue,Thu", #1:00:00 PM#, #2:00:00 PM#, 1#            ' PT
+      InsNeed db, 59, 12, 6, 2024, 2, "Daily", Null, Null, 4#                              ' PC-PERS
+  
+      ' Client 12 Liam FY25 (3 needs)
+      InsNeed db, 60, 12, 1, 2025, 1, "Mon,Wed,Fri", #9:00:00 AM#, #10:00:00 AM#, 3#
+      InsNeed db, 61, 12, 3, 2025, 3, "Tue,Thu", #1:00:00 PM#, #2:00:00 PM#, 1#
+      InsNeed db, 62, 12, 6, 2025, 2, "Daily", Null, Null, 4#
+  End Sub
+  
+  Private Sub InsNeed(ByVal db As DAO.Database, _
+                      ByVal id As Long, ByVal ClientID As Long, ByVal svcId As Long, _
+                      ByVal fy As Integer, ByVal Priority As Integer, _
+                      ByVal days As String, ByVal startTime As Variant, _
+                      ByVal endTime As Variant, ByVal Hours As Double)
+      db.Execute "INSERT INTO tblClientServiceNeeds (ClientServiceNeedID, ClientID, ServiceID, FiscalYear, " & _
+                 "Priority, DaysOfWeek, PreferredTimeStart, PreferredTimeEnd, HoursPerWeek) VALUES (" & _
+                 id & ", " & ClientID & ", " & svcId & ", " & fy & ", " & Priority & ", " & _
+                 SqlStr(days) & ", " & TimeLit(startTime) & ", " & TimeLit(endTime) & ", " & Hours & ")", _
+                 dbFailOnError
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 3h - Client service plans (52 rows)
+  ' WeeklyCost and AnnualEstCost are derived by the BeforeChange data macro
+  ' from RatePerHour x HoursPerWeek (x52 for annual). Status is derived from
+  ' ApprovalDate Is Not Null (Approved) vs Null (Pending), EXCEPT for the one
+  ' Cancelled plan which requires the macro fix in design doc section 0.
+  '
+  ' Per-client+FY annualized totals are designed so all approved plans fit
+  ' within budget. The Daniel/FY25 pending plan is the deliberate exception:
+  ' approving it would push over budget by ~$160 and trip dmValidateBudgetOnApproval.
+  ' --------------------------------------------------------------------------
+  
+  Private Sub SeedClientServicePlans(ByVal db As DAO.Database)
+      Debug.Print "  Seeding 52 client service plans..."
+  
+      ' --- Client 1 Alice ---
+      ' FY24 budget $30,000 - 3 approved totaling $26,468
+      InsPlanApproved db, 1, 1, 1, 2024, 2#         ' need 1 -> Acme/SN-RN/24 ($116): 2hr -> $12,064
+      InsPlanApproved db, 2, 2, 5, 2024, 1#         ' need 2 -> Acme/PT/24 ($107): 1hr -> $5,564
+      InsPlanApproved db, 3, 3, 11, 2024, 5#        ' need 3 -> Acme/PC-PERS/24 ($34): 5hr -> $8,840
+      ' FY25 budget $32,000 - 2 approved totaling $17,628 + 1 pending $1,872
+      InsPlanApproved db, 4, 4, 2, 2025, 2#         ' need 4 -> Acme/SN-RN/25 ($122): 2hr -> $12,688
+      InsPlanApproved db, 5, 5, 6, 2025, 0.5        ' need 5 -> Acme/PT/25 ($112): 0.5hr -> $2,912
+      InsPlanPending db, 6, 6, 12, 2025, 1#         ' need 6 -> Acme/PC-PERS/25 ($36): pending
+  
+      ' --- Client 2 Bob ---
+      ' FY24 budget $45,000 - 4 approved totaling ~$36,608
+      InsPlanApproved db, 7, 7, 1, 2024, 3#         ' need 7 -> Acme/SN-RN/24: 3hr -> $18,096
+      InsPlanApproved db, 8, 8, 3, 2024, 2#         ' need 8 -> Acme/SN-LPN/24 ($78): 2hr -> $8,112
+      InsPlanApproved db, 9, 9, 5, 2024, 1#         ' need 9 -> Acme/PT/24: 1hr -> $5,564
+      InsPlanApproved db, 10, 10, 11, 2024, 3#      ' need 10 -> Acme/PC-PERS/24: 3hr -> $5,304
+      ' FY24 cancelled plan (REQUIRES MACRO FIX TO PRESERVE)
+      InsPlanCancelled db, 11, 11, 31, 2024, 2#     ' need 11 -> BrightPath/COMP/24 ($25): 2hr (would be $2,600)
+  
+      ' FY25 budget $47,500 - 3 approved totaling ~$36,608 + 1 pending
+      InsPlanApproved db, 12, 12, 2, 2025, 3#       ' need 12 -> Acme/SN-RN/25: 3hr -> $19,032
+      InsPlanApproved db, 13, 13, 4, 2025, 2#       ' need 13 -> Acme/SN-LPN/25 ($82): 2hr -> $8,528
+      InsPlanApproved db, 14, 14, 6, 2025, 1#       ' need 14 -> Acme/PT/25: 1hr -> $5,824
+      InsPlanPending db, 15, 15, 12, 2025, 2#       ' need 15 -> Acme/PC-PERS/25: 2hr pending
+  
+      ' --- Client 3 Clara ---
+      ' FY24 budget $20,000 - 1 approved
+      InsPlanApproved db, 16, 16, 21, 2024, 1#      ' need 16 -> BrightPath/PT/24 ($99): 1hr -> $5,148
+      ' FY25 budget $22,000 - 1 approved + 1 pending
+      InsPlanApproved db, 17, 18, 22, 2025, 1#      ' need 18 -> BrightPath/PT/25 ($104): 1hr -> $5,408
+      InsPlanPending db, 18, 19, 26, 2025, 2#       ' need 19 -> BrightPath/PC-PERS/25 ($33): pending
+  
+      ' --- Client 4 Daniel (THE BUDGET OVERRUN CASE) ---
+      ' FY24 budget $28,000 - 3 approved totaling $24,856
+      InsPlanApproved db, 19, 21, 1, 2024, 2#       ' need 21 -> Acme/SN-RN/24: 2hr -> $12,064
+      InsPlanApproved db, 20, 22, 5, 2024, 1#       ' need 22 -> Acme/PT/24: 1hr -> $5,564
+      InsPlanApproved db, 21, 23, 11, 2024, 4#      ' need 23 -> Acme/PC-PERS/24: 4hr -> $7,072
+      ' FY25 budget $30,000 - 2 approved totaling EXACTLY $28,288 + 1 pending of $1,872 = $30,160 (over by $160)
+      InsPlanApproved db, 22, 24, 2, 2025, 4#       ' need 24 -> Acme/SN-RN/25 ($122): 4hr -> $25,376
+      InsPlanApproved db, 23, 25, 6, 2025, 0.5      ' need 25 -> Acme/PT/25 ($112): 0.5hr -> $2,912
+      InsPlanPending db, 24, 26, 12, 2025, 1#       ' need 26 -> Acme/PC-PERS/25 ($36): 1hr -> $1,872
+                                                    ' Approving would push total to $30,160 > $30,000.
+  
+      ' --- Client 5 Eleanor (has unmet need #31 in FY25) ---
+      ' FY24 budget $25,000 - 1 approved
+      InsPlanApproved db, 25, 27, 1, 2024, 2#       ' need 27 -> Acme/SN-RN/24: 2hr -> $12,064
+      ' FY25 budget $27,000 - 1 approved (need 31 has NO plan - unmet)
+      InsPlanApproved db, 26, 29, 2, 2025, 2#       ' need 29 -> Acme/SN-RN/25: 2hr -> $12,688
+  
+      ' --- Client 6 Frank (inactive, FY24 only) ---
+      ' FY24 budget $18,000 - 2 approved
+      InsPlanApproved db, 27, 32, 1, 2024, 2#       ' need 32 -> Acme/SN-RN/24: 2hr -> $12,064
+      InsPlanApproved db, 28, 33, 11, 2024, 3#      ' need 33 -> Acme/PC-PERS/24: 3hr -> $5,304
+  
+      ' --- Client 7 Grace ---
+      ' FY24 budget $35,000 - 3 approved
+      InsPlanApproved db, 29, 34, 1, 2024, 3#       ' need 34 -> Acme/SN-RN/24: 3hr -> $18,096
+      InsPlanApproved db, 30, 35, 21, 2024, 1#      ' need 35 -> BrightPath/PT/24: 1hr -> $5,148
+      InsPlanApproved db, 31, 36, 25, 2024, 4#      ' need 36 -> BrightPath/PC-PERS/24 ($32): 4hr -> $6,656
+      ' FY25 budget $38,000 - 2 approved + 1 pending
+      InsPlanApproved db, 32, 37, 2, 2025, 3#       ' need 37 -> Acme/SN-RN/25: 3hr -> $19,032
+      InsPlanApproved db, 33, 38, 22, 2025, 1#      ' need 38 -> BrightPath/PT/25: 1hr -> $5,408
+      InsPlanPending db, 34, 39, 12, 2025, 4#       ' need 39 -> Acme/PC-PERS/25: 4hr pending
+  
+      ' --- Client 8 Henry ---
+      ' FY24 budget $22,000 - 1 approved
+      InsPlanApproved db, 35, 40, 1, 2024, 2#       ' need 40 -> Acme/SN-RN/24: 2hr -> $12,064
+      ' FY25 budget $24,000 - 1 approved + 1 pending
+      InsPlanApproved db, 36, 42, 2, 2025, 2#       ' need 42 -> Acme/SN-RN/25: 2hr -> $12,688
+      InsPlanPending db, 37, 43, 12, 2025, 3#       ' need 43 -> Acme/PC-PERS/25: 3hr pending
+  
+      ' --- Client 9 Iris (newly enrolled, all pending) ---
+      ' FY25 budget $20,000 - 0 approved + 2 pending
+      InsPlanPending db, 38, 44, 2, 2025, 2#        ' need 44 -> Acme/SN-RN/25: pending
+      InsPlanPending db, 39, 45, 12, 2025, 3#       ' need 45 -> Acme/PC-PERS/25: pending
+  
+      ' --- Client 10 James (FY25 has needs but no budget so no plans) ---
+      ' FY24 budget $26,000 - 2 approved
+      InsPlanApproved db, 40, 46, 1, 2024, 3#       ' need 46 -> Acme/SN-RN/24: 3hr -> $18,096
+      InsPlanApproved db, 41, 47, 11, 2024, 4#      ' need 47 -> Acme/PC-PERS/24: 4hr -> $7,072
+  
+      ' --- Client 11 Karen (duplicate PT need in FY25) ---
+      ' FY24 budget $32,000 - 2 approved
+      InsPlanApproved db, 42, 51, 21, 2024, 1#      ' need 51 -> BrightPath/PT/24: 1hr -> $5,148
+      InsPlanApproved db, 43, 52, 25, 2024, 3#      ' need 52 -> BrightPath/PC-PERS/24: 3hr -> $4,992
+      ' FY25 budget $34,000 - 2 approved (covering both PT needs) + 1 pending
+      InsPlanApproved db, 44, 53, 22, 2025, 1#      ' need 53 -> BrightPath/PT/25: 1hr -> $5,408
+      InsPlanApproved db, 45, 54, 22, 2025, 1#      ' need 54 (duplicate PT) -> BrightPath/PT/25: 1hr -> $5,408
+      InsPlanPending db, 46, 56, 30, 2025, 2#       ' need 56 -> BrightPath/HMK/25 ($28): pending
+  
+      ' --- Client 12 Liam (all approved, clean reporting case) ---
+      ' FY24 budget $40,000 - 3 approved
+      InsPlanApproved db, 47, 57, 1, 2024, 3#       ' need 57 -> Acme/SN-RN/24: 3hr -> $18,096
+      InsPlanApproved db, 48, 58, 5, 2024, 1#       ' need 58 -> Acme/PT/24: 1hr -> $5,564
+      InsPlanApproved db, 49, 59, 11, 2024, 4#      ' need 59 -> Acme/PC-PERS/24: 4hr -> $7,072
+      ' FY25 budget $42,000 - 3 approved
+      InsPlanApproved db, 50, 60, 2, 2025, 3#       ' need 60 -> Acme/SN-RN/25: 3hr -> $19,032
+      InsPlanApproved db, 51, 61, 6, 2025, 1#       ' need 61 -> Acme/PT/25: 1hr -> $5,824
+      InsPlanApproved db, 52, 62, 12, 2025, 4#      ' need 62 -> Acme/PC-PERS/25: 4hr -> $7,488
+  End Sub
+  
+  Private Sub InsPlanApproved(ByVal db As DAO.Database, _
+                              ByVal id As Long, ByVal needId As Long, _
+                              ByVal catId As Long, ByVal fy As Integer, _
+                              ByVal Hours As Double)
+      Dim apprDt As Date
+      apprDt = IIf(fy = 2024, APPR_FY24, APPR_FY25)
+      db.Execute "INSERT INTO tblClientServicePlan (ClientServicePlanID, ClientServiceNeedID, " & _
+                 "ProviderServiceCatalogID, FiscalYear, HoursPerWeek, ApprovalDate, ApprovedBy) VALUES (" & _
+                 id & ", " & needId & ", " & catId & ", " & fy & ", " & Hours & ", " & _
+                 DateLit(apprDt) & ", " & SqlStr(SUPERVISOR) & ")", dbFailOnError
+  End Sub
+  
+  Private Sub InsPlanPending(ByVal db As DAO.Database, _
+                             ByVal id As Long, ByVal needId As Long, _
+                             ByVal catId As Long, ByVal fy As Integer, _
+                             ByVal Hours As Double)
+      db.Execute "INSERT INTO tblClientServicePlan (ClientServicePlanID, ClientServiceNeedID, " & _
+                 "ProviderServiceCatalogID, FiscalYear, HoursPerWeek) VALUES (" & _
+                 id & ", " & needId & ", " & catId & ", " & fy & ", " & Hours & ")", dbFailOnError
+  End Sub
+  
+  Private Sub InsPlanCancelled(ByVal db As DAO.Database, _
+                               ByVal id As Long, ByVal needId As Long, _
+                               ByVal catId As Long, ByVal fy As Integer, _
+                               ByVal Hours As Double)
+      ' Requires the BeforeChange data macro on tblClientServicePlan to preserve
+      ' an explicit Status="Cancelled" (see docs/uat-seed-design.md section 0).
+      ' Without that fix, the macro will rewrite this row's Status to "Pending".
+      db.Execute "INSERT INTO tblClientServicePlan (ClientServicePlanID, ClientServiceNeedID, " & _
+                 "ProviderServiceCatalogID, FiscalYear, HoursPerWeek, Status) VALUES (" & _
+                 id & ", " & needId & ", " & catId & ", " & fy & ", " & Hours & ", " & _
+                 SqlStr("Cancelled") & ")", dbFailOnError
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Phase 4 - Verification (counts + cancelled-status sanity check)
+  ' --------------------------------------------------------------------------
+  
+  Private Sub Verify(ByVal db As DAO.Database)
+      Debug.Print "  Verification:"
+      Debug.Print "    Services:           " & DCount("*", "tblServices") & " (expected 12)"
+      Debug.Print "    Service rate limits: " & DCount("*", "tblServiceRateLimits") & " (expected 22)"
+      Debug.Print "    Providers:           " & DCount("*", "tblProviders") & " (expected 6)"
+      Debug.Print "    Catalog rows:       " & DCount("*", "tblProviderServiceCatalog") & " (expected 53)"
+      Debug.Print "    Clients:            " & DCount("*", "tblClients") & " (expected 12)"
+      Debug.Print "    Budgets:            " & DCount("*", "tblClientBudgets") & " (expected 21)"
+      Debug.Print "    Needs:              " & DCount("*", "tblClientServiceNeeds") & " (expected 62)"
+      Debug.Print "    Plans:              " & DCount("*", "tblClientServicePlan") & " (expected 52)"
+  
+      Dim cancelled As Long, approved As Long, pending As Long
+      cancelled = DCount("*", "tblClientServicePlan", "Status='Cancelled'")
+      approved = DCount("*", "tblClientServicePlan", "Status='Approved'")
+      pending = DCount("*", "tblClientServicePlan", "Status='Pending'")
+  
+      Debug.Print "    Plans Approved:     " & approved & " (expected 42)"
+      Debug.Print "    Plans Pending:      " & pending & " (expected 9)"
+      Debug.Print "    Plans Cancelled:    " & cancelled & " (expected 1)"
+  
+      If cancelled = 0 Then
+          Debug.Print "    *** WARNING: 0 cancelled plans found, expected 1."
+          Debug.Print "    *** The BeforeChange data macro on tblClientServicePlan likely"
+          Debug.Print "    *** has not been patched to preserve Status='Cancelled'."
+          Debug.Print "    *** See docs/uat-seed-design.md section 0 for the macro fix."
+      End If
+  End Sub
+  
+  ' --------------------------------------------------------------------------
+  ' Helpers
+  ' --------------------------------------------------------------------------
+  
+  Private Function SqlStr(ByVal s As Variant) As String
+      If IsNull(s) Or Len(CStr(s)) = 0 Then
+          SqlStr = "Null"
+      Else
+          SqlStr = "'" & Replace(CStr(s), "'", "''") & "'"
+      End If
+  End Function
+  
+  Private Function DateLit(ByVal d As Variant) As String
+      If IsNull(d) Then
+          DateLit = "Null"
+      Else
+          DateLit = "#" & Format(CDate(d), "yyyy-mm-dd") & "#"
+      End If
+  End Function
+  
+  Private Function TimeLit(ByVal t As Variant) As String
+      If IsNull(t) Then
+          TimeLit = "Null"
+      Else
+          TimeLit = "#" & Format(CDate(t), "hh:nn:ss") & "#"
+      End If
+  End Function
+  
+  Private Function BoolLit(ByVal b As Boolean) As String
+      BoolLit = IIf(b, "True", "False")
+  End Function

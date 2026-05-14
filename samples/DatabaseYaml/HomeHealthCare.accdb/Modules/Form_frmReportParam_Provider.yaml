@@ -1,0 +1,32 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmReportParam_Provider"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_Cancelled As Boolean
+  
+  Public Property Get cancelled() As Boolean
+      cancelled = m_Cancelled
+  End Property
+  
+  
+  Private Sub btnOK_Click()
+          If IsNull(Me.cboProvider) Then
+          MsgBox "Please select a provider.", vbExclamation
+          Me.cboProvider.SetFocus
+          Exit Sub
+      End If
+      Me.Visible = False
+  End Sub
+  
+  Private Sub btnCancel_Click()
+      m_Cancelled = True
+      DoCmd.Close acForm, Me.name
+  End Sub

@@ -1,0 +1,30 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryServicePlansByService"
+QueryType: "Select"
+SQL: |
+  SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblClientServicePlan.FiscalYear, tblClientServicePlan.HoursPerWeek AS WeeklyHours, tblClientServicePlan.WeeklyCost, tblClientServicePlan.AnnualEstCost, tblProviderServiceCatalog.RatePerHour, tblServices.ServiceID, tblServices.ServiceName, tblClients.ClientID, Trim(Nz([LastName],"") & ", " & Nz([FirstName],"")) AS ClientName
+  FROM tblServices INNER JOIN (tblProviders INNER JOIN ((tblClients INNER JOIN tblClientServiceNeeds ON tblClients.ClientID = tblClientServiceNeeds.ClientID) INNER JOIN (tblProviderServiceCatalog INNER JOIN tblClientServicePlan ON tblProviderServiceCatalog.ProviderServiceCatalogID = tblClientServicePlan.ProviderServiceCatalogID) ON tblClientServiceNeeds.ClientServiceNeedID = tblClientServicePlan.ClientServiceNeedID) ON tblProviders.ProviderID = tblProviderServiceCatalog.ProviderID) ON (tblServices.ServiceID = tblClientServiceNeeds.ServiceID) AND (tblServices.ServiceID = tblProviderServiceCatalog.ServiceID)
+  WHERE (((tblClientServicePlan.Status)<>"Cancelled"));
+  
+Properties:
+  DateCreated: "5/13/2026 6:22:46 AM"
+  LastUpdated: "5/13/2026 4:50:14 PM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "0"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  RecordsetType: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  TotalsRow: "False"
+  PublishToWeb: "1"

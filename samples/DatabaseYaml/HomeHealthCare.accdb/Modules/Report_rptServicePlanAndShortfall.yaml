@@ -1,0 +1,50 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_rptServicePlanAndShortfall"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_ClientID As Long
+  Private m_FiscalYear As Integer
+  Private m_RunningBudget As Currency
+  Private Sub Report_Open(Cancel As Integer)
+      DoCmd.OpenForm "frmReportParam_ClientFY", , , , , acDialog
+  
+      If Not IsLoaded("frmReportParam_ClientFY") Then
+          Cancel = True
+          Exit Sub
+      End If
+  
+      m_ClientID = Forms!frmReportParam_ClientFY!cboClient
+      m_FiscalYear = Forms!frmReportParam_ClientFY!cboFiscalYear
+      Me.RecordSource = "SELECT * FROM tblClients WHERE ClientID = " & m_ClientID
+      DoCmd.Close acForm, "frmReportParam_ClientFY"
+  
+      TempVars!repCID = m_ClientID
+      TempVars!repFY = m_FiscalYear
+  
+      Me.lstTotals.RowSource = basUtilities.GetRptClientServicePlanAndShortFallTotals(m_ClientID, m_FiscalYear)
+  End Sub
+  
+  
+  
+  Private Sub Report_NoData(Cancel As Integer)
+      MsgBox "No data found for this client and fiscal year.", vbInformation
+      Cancel = True
+  End Sub
+  Private Function IsLoaded(ByVal strFormName As String) As Boolean
+      Dim frm As Access.Form
+      For Each frm In Application.Forms
+          If frm.name = strFormName Then
+              IsLoaded = True
+              Exit Function
+          End If
+      Next
+      IsLoaded = False
+  End Function

@@ -1,0 +1,31 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryProviderServiceStatistics"
+QueryType: "Select"
+SQL: |
+  SELECT p.ProviderID, p.ProviderName, csp.FiscalYear, sub.UniqueClientCount AS Clients, Sum(csp.HoursPerWeek * 52) AS Hours, Sum(csp.AnnualEstCost) AS TotalCost, FormatCurrency (Sum(csp.AnnualEstCost) / sub.UniqueClientCount) AS AvgPerClient
+  FROM (tblProviders AS p INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID) INNER JOIN (SELECT Dist.ProviderID, Count(Dist.ClientID) AS UniqueClientCount FROM (SELECT DISTINCT psc2.ProviderID, csn2.ClientID FROM tblProviderServiceCatalog AS psc2 INNER JOIN (tblClientServicePlan AS csp2 INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID) ON psc2.ProviderServiceCatalogID = csp2.ProviderServiceCatalogID WHERE csp2.Status <> 'Cancelled')  AS Dist GROUP BY Dist.ProviderID)  AS sub ON p.ProviderID = sub.ProviderID
+  WHERE csp.Status <> 'Cancelled'
+  GROUP BY p.ProviderID, p.ProviderName, csp.FiscalYear, sub.UniqueClientCount;
+  
+Properties:
+  DateCreated: "5/13/2026 5:15:29 AM"
+  LastUpdated: "5/13/2026 4:50:10 PM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "0"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  RecordsetType: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  TotalsRow: "False"
+  PublishToWeb: "1"

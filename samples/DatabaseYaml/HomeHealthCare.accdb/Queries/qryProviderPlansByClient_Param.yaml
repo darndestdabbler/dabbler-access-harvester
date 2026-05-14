@@ -1,0 +1,31 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Query"
+Name: "qryProviderPlansByClient_Param"
+QueryType: "Select"
+SQL: |
+  PARAMETERS [Enter Provider ID:] Long, [Enter Fiscal Year:] Long;
+  SELECT c.LastName & ", " & c.FirstName AS ClientName, s.ServiceName, csp.HoursPerWeek, csp.WeeklyCost
+  FROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID
+  WHERE (((psc.ProviderID)=[Enter Provider ID:]) AND ((csp.FiscalYear)=[Enter Fiscal Year:]))
+  ORDER BY c.LastName, c.FirstName, s.ServiceName;
+  
+Properties:
+  DateCreated: "3/28/2026 11:13:40 AM"
+  LastUpdated: "5/4/2026 7:34:48 AM"
+  Updatable: "True"
+  Connect: ""
+  ReturnsRecords: "True"
+  ODBCTimeout: "60"
+  RecordsAffected: "0"
+  MaxRecords: "0"
+  StillExecuting: null  # SKIPPED: Operation is not supported for this type of object.
+  CacheSize: null  # SKIPPED: Operation is not supported for this type of object.
+  Prepare: null  # SKIPPED: Operation is not supported for this type of object.
+  RecordLocks: "0"
+  RecordsetType: "0"
+  OrderByOn: "False"
+  Orientation: "0"
+  DefaultView: "2"
+  FilterOnLoad: "False"
+  OrderByOnLoad: "True"
+  TotalsRow: "False"

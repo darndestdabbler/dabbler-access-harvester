@@ -1,0 +1,125 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmClientSearch"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  Private Sub PopulateClientList(Optional whereClauseSql As String = "")
+      Dim baseSql As String
+      baseSql = _
+          "SELECT ClientID AS ID, " & _
+                 "FirstName & ' ' & LastName AS [Client Name], " & _
+                 "Phone, " & _
+                 "City, " & _
+                 "StateCode AS State, " & _
+                 "IsActive AS Active " & _
+          "FROM tblClients " & whereClauseSql
+  
+      Me.lstClientList.RowSource = basListHelpers.BuildAddableRowSource( _
+          dataSelect:=baseSql, _
+          addLabel:="(Add new client...)", _
+          dataColCount:=6, _
+          orderBy:="2")          ' by Client Name; "(Add new..." sorts before letters
+      Me.lstClientList.Requery
+  End Sub
+  
+  
+  Private Sub lstClientList_DblClick(Cancel As Integer)
+      basListHelpers.OpenDetailFromList Me.lstClientList, "frmClientDetail"
+  End Sub
+  
+  
+  Private Sub btnAddNew_Click()
+      DoCmd.OpenForm "frmClientDetail", acNormal, , , acFormAdd
+      Me.lstClientList.Requery
+  End Sub
+  
+  
+  Private Sub Form_Activate()
+      Me.lstClientList.Requery
+  End Sub
+  
+  
+  Private Sub txtFilterName_KeyPress(KeyAscii As Integer)
+      If KeyAscii = 13 Then
+          KeyAscii = 0
+          btnSearch_Click
+      End If
+  End Sub
+  
+  Private Sub cboFilterState_AfterUpdate()
+      ' Cascading dropdown: rebuild city list for selected state
+      If IsNull(Me.cboFilterState) Then
+          Me.cboFilterCity.RowSource = ""
+      Else
+          Me.cboFilterCity.RowSource = _
+              "SELECT DISTINCT City FROM tblClients " & _
+              "WHERE StateCode=" & SqlQuote(Me.cboFilterState) & " AND City Is Not Null " & _
+              "ORDER BY City"
+      End If
+      Me.cboFilterCity = Null
+      Me.cboFilterCity.Requery
+  End Sub
+  
+  Private Sub cboFilterState_DblClick(Cancel As Integer)
+      Me.cboFilterState = Null
+      Me.cboFilterCity.RowSource = ""
+      Me.cboFilterCity = Null
+      Me.cboFilterCity.Requery
+  End Sub
+  
+  Private Sub cboFilterCity_NotInList(NewData As String, Response As Integer)
+      Response = acDataErrContinue
+      MsgBox "Please select a city from the list.", vbExclamation
+  End Sub
+  
+  
+  Private Sub btnSearch_Click()
+      Dim where() As String
+      Dim i As Integer
+  
+      i = -1
+      If Not IsNull(Me.txtFilterName) And Me.txtFilterName <> "" Then
+          i = i + 1
+          ReDim Preserve where(i)
+          where(i) = "FirstName LIKE " & SqlQuote(Me.txtFilterName, "*", "*") & _
+              " OR LastName LIKE " & SqlQuote(Me.txtFilterName, "*", "*")
+      End If
+      If Not IsNull(Me.cboFilterState) Then
+          i = i + 1
+          ReDim Preserve where(i)
+          where(i) = "StateCode=" & SqlQuote(Me.cboFilterState)
+      End If
+      If Not IsNull(Me.cboFilterCity) Then
+          i = i + 1
+          ReDim Preserve where(i)
+          where(i) = "City=" & SqlQuote(Me.cboFilterCity)
+      End If
+      If Not IsNull(Me.cboFilterStatus) Then
+          i = i + 1
+          ReDim Preserve where(i)
+          Select Case Me.cboFilterStatus
+              Case "Active"
+                  where(i) = "IsActive=True"
+              Case "Inactive"
+                  where(i) = "IsActive=False"
+          End Select
+      End If
+  
+      PopulateClientList basUtilities.whereClause(where)
+  End Sub
+  
+  
+  Private Sub btnClear_Click()
+      Me.txtFilterName = Null
+      Me.cboFilterState = Null
+      Me.cboFilterCity = Null
+      Me.cboFilterCity.RowSource = ""
+      Me.cboFilterStatus = "Active"
+      PopulateClientList "WHERE IsActive=True"
+  End Sub

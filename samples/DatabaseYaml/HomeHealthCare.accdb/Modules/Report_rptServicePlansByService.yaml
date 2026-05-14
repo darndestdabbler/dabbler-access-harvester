@@ -1,0 +1,49 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Report_rptServicePlansByService"
+ModuleType: "ReportCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  Private m_ProviderID As Long
+  Private m_FiscalYear As Integer
+  
+  Private Sub Report_Open(Cancel As Integer)
+      DoCmd.OpenForm "frmReportParam_ProviderFY", , , , , acDialog
+  
+      If Not IsLoaded("frmReportParam_ProviderFY") Then
+          Cancel = True
+          Exit Sub
+      End If
+  
+      m_ProviderID = Forms!frmReportParam_ProviderFY!cboProvider
+      m_FiscalYear = Forms!frmReportParam_ProviderFY!cboFiscalYear
+      Me.RecordSource = "SELECT ProviderName, FiscalYear, ServiceName, ClientName, WeeklyHours, AnnualEstCost " & _
+          "FROM qryServicePlansByService " & _
+          "WHERE ProviderID = " & m_ProviderID & " AND FiscalYear = " & m_FiscalYear & _
+          " ORDER BY ServiceName, ClientName"
+      DoCmd.Close acForm, "frmReportParam_ProviderFY"
+  End Sub
+  
+  Private Sub Report_NoData(Cancel As Integer)
+      MsgBox "No plan data found for this provider and fiscal year.", vbInformation
+      Cancel = True
+  End Sub
+  
+  
+  
+  Private Function IsLoaded(ByVal strFormName As String) As Boolean
+      Dim frm As Access.Form
+      For Each frm In Application.Forms
+          If frm.name = strFormName Then
+              IsLoaded = True
+              Exit Function
+          End If
+      Next
+      IsLoaded = False
+  End Function

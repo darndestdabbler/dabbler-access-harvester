@@ -1,0 +1,162 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Macro"
+Name: "mcrValidation"
+Definition: |
+  Version =196611
+  PublishOption =1
+  ColumnsShown =0
+  Begin
+      MacroName ="ValidateEmail"
+      Condition ="IsNull([TempVars]![InputValue]) Or [TempVars]![InputValue]=\"\""
+      Action ="SetTempVar"
+      Argument ="InputValid"
+      Argument ="True"
+  End
+  Begin
+      Condition ="..."
+      Action ="StopMacro"
+  End
+  Begin
+      Action ="SetLocalVar"
+      Argument ="__*L0_"
+      Argument ="InStr([TempVars]![InputValue],\"@\")=0 Or InStr([TempVars]![InputValue],\".\")=0"
+  End
+  Begin
+      Action ="SetLocalVar"
+      Argument ="__*L0C_"
+      Argument ="[LocalVars]![__*L0_]"
+  End
+  Begin
+      Condition ="[LocalVars]![__*L0C_]"
+      Action ="SetTempVar"
+      Argument ="InputValid"
+      Argument ="False"
+  End
+  Begin
+      Condition ="..."
+      Action ="MsgBox"
+      Argument ="Please enter a valid email address."
+      Argument ="-1"
+      Argument ="3"
+  End
+  Begin
+      Action ="SetLocalVar"
+      Argument ="__*L0C_"
+      Argument ="(Not [LocalVars]![__*L0_])"
+  End
+  Begin
+      Condition ="[LocalVars]![__*L0C_]"
+      Action ="SetTempVar"
+      Argument ="InputValid"
+      Argument ="True"
+  End
+  Begin
+      Action ="SetLocalVar"
+      Argument ="__*L0C_"
+      Argument ="False"
+  End
+  Begin
+      MacroName ="ValidatePhone"
+      Condition ="IsNull([TempVars]![InputValue]) Or [TempVars]![InputValue]=\"\""
+      Action ="SetTempVar"
+      Argument ="InputValid"
+      Argument ="True"
+  End
+  Begin
+      Condition ="..."
+      Action ="StopMacro"
+  End
+  Begin
+      Action ="SetLocalVar"
+      Argument ="__*L0_"
+      Argument ="Len(Replace(Replace(Replace(Replace([TempVars]![InputValue],\"(\",\"\"),\")\",\""
+          "\"),\"-\",\"\"),\" \",\"\"))<10"
+  End
+  Begin
+      Action ="SetLocalVar"
+      Argument ="__*L0C_"
+      Argument ="[LocalVars]![__*L0_]"
+  End
+  Begin
+      Condition ="[LocalVars]![__*L0C_]"
+      Action ="SetTempVar"
+      Argument ="InputValid"
+      Argument ="False"
+  End
+  Begin
+      Condition ="..."
+      Action ="MsgBox"
+      Argument ="Phone number must have at least 10 digits."
+      Argument ="-1"
+      Argument ="3"
+  End
+  Begin
+      Action ="SetLocalVar"
+      Argument ="__*L0C_"
+      Argument ="(Not [LocalVars]![__*L0_])"
+  End
+  Begin
+      Condition ="[LocalVars]![__*L0C_]"
+      Action ="SetTempVar"
+      Argument ="InputValid"
+      Argument ="True"
+  End
+  Begin
+      Action ="SetLocalVar"
+      Argument ="__*L0C_"
+      Argument ="False"
+  End
+  Begin
+      Comment ="_AXL:<?xml version=\"1.0\" encoding=\"UTF-16\" standalone=\"no\"?>\015\012<UserI"
+          "nterfaceMacro MinimumClientDesignVersion=\"14.0.0000.0000\" xmlns=\"http://schem"
+          "as.microsoft.com/office/accessservices/2009/11/application\"><Statements/><Sub N"
+          "ame=\"ValidateEmail\"><Statemen"
+  End
+  Begin
+      Comment ="_AXL:ts><ConditionalBlock><If><Condition>IsNull([TempVars]![InputValue]) Or [Tem"
+          "pVars]![InputValue]=\"\"</Condition><Statements><Action Name=\"SetTempVar\"><Arg"
+          "ument Name=\"Name\">InputValid</Argument><Argument Name=\"Expression\">True</Arg"
+          "ument></Action><Actio"
+  End
+  Begin
+      Comment ="_AXL:n Name=\"StopMacro\"/></Statements></If></ConditionalBlock><ConditionalBloc"
+          "k><If><Condition>InStr([TempVars]![InputValue],\"@\")=0 Or InStr([TempVars]![Inp"
+          "utValue],\".\")=0</Condition><Statements><Action Name=\"SetTempVar\"><Argument N"
+          "ame=\"Name\">InputValid"
+  End
+  Begin
+      Comment ="_AXL:</Argument><Argument Name=\"Expression\">False</Argument></Action><Action N"
+          "ame=\"MessageBox\"><Argument Name=\"Message\">Please enter a valid email address"
+          ".</Argument><Argument Name=\"Type\">Warning!</Argument></Action></Statements></I"
+          "f><Else><Statements><"
+  End
+  Begin
+      Comment ="_AXL:Action Name=\"SetTempVar\"><Argument Name=\"Name\">InputValid</Argument><Ar"
+          "gument Name=\"Expression\">True</Argument></Action></Statements></Else></Conditi"
+          "onalBlock></Statements></Sub><Sub Name=\"ValidatePhone\"><Statements><Conditiona"
+          "lBlock><If><Condition"
+  End
+  Begin
+      Comment ="_AXL:>IsNull([TempVars]![InputValue]) Or [TempVars]![InputValue]=\"\"</Condition"
+          "><Statements><Action Name=\"SetTempVar\"><Argument Name=\"Name\">InputValid</Arg"
+          "ument><Argument Name=\"Expression\">True</Argument></Action><Action Name=\"StopM"
+          "acro\"/></Statements></"
+  End
+  Begin
+      Comment ="_AXL:If></ConditionalBlock><ConditionalBlock><If><Condition>Len(Replace(Replace("
+          "Replace(Replace([TempVars]![InputValue],\"(\",\"\"),\")\",\"\"),\"-\",\"\"),\" \""
+          ",\"\"))&lt;10</Condition><Statements><Action Name=\"SetTempVar\"><Argument Name="
+          "\"Name\">InputValid</Argument><A"
+  End
+  Begin
+      Comment ="_AXL:rgument Name=\"Expression\">False</Argument></Action><Action Name=\"Message"
+          "Box\"><Argument Name=\"Message\">Phone number must have at least 10 digits.</Arg"
+          "ument><Argument Name=\"Type\">Warning!</Argument></Action></Statements></If><Els"
+          "e><Statements><Action"
+  End
+  Begin
+      Comment ="_AXL: Name=\"SetTempVar\"><Argument Name=\"Name\">InputValid</Argument><Argument"
+          " Name=\"Expression\">True</Argument></Action></Statements></Else></ConditionalBl"
+          "ock></Statements></Sub></UserInterfaceMacro>"
+  End
+  

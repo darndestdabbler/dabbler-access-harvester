@@ -1,0 +1,197 @@
+Database: "C:\\Users\\denmi\\source\\repos\\dabbler-homehealthcare-accessdb\\HomeHealthCare.accdb"
+ObjectType: "Module"
+Name: "Form_frmClientServiceNeedDetail"
+ModuleType: "FormCodeBehind"
+Definition: |
+  Attribute VB_GlobalNameSpace = False
+  Attribute VB_Creatable = True
+  Attribute VB_PredeclaredId = True
+  Attribute VB_Exposed = False
+  Option Compare Database
+  Option Explicit
+  
+  ' ============================================================================
+  '  frmClientServiceNeedDetail
+  ' ----------------------------------------------------------------------------
+  '  Popup detail form for a single tblClientServiceNeeds row.
+  '  Opened acDialog from any list box that lists service needs.
+  '
+  '  RecordSource:  tblClientServiceNeeds
+  '  PopUp:         True
+  '  Modal:         True            (caller also passes acDialog)
+  '  BorderStyle:   3  (Dialog)
+  '
+  '  OpenArgs convention:
+  '     "ADD|ClientID=123|FiscalYear=2025"   ? Add mode with parent context
+  '     "<numericID>"                         ? Edit mode for that ID
+  '
+  '  Controls (prefixed naming):
+  '     txtClientServiceNeedID    (PK)
+  '     txtClientID               (locked ? set from context in Add mode)
+  '     cboServiceID              (combo ? row source set in Form_Load)
+  '     txtFiscalYear             (locked ? set from context in Add mode)
+  '     txtPriority               (default 1; range 1-5)
+  '     txtDaysOfWeek
+  '     txtPreferredTimeStart
+  '     txtPreferredTimeEnd
+  '     txtHoursPerWeek           (>0 and <=168)
+  '     txtNotes
+  '     btnSave / btnCancel / btnDelete
+  '
+  '  Note: the "PreferredTimeStart < PreferredTimeEnd" constraint is enforced
+  '  at the table level via a Validation Rule. Access surfaces the table's
+  '  Validation Text on save ? no form-level check needed.
+  ' ============================================================================
+  
+  
+  Private Sub Form_Open(Cancel As Integer)
+      Dim args As Variant
+      args = Me.OpenArgs
+  
+      If basListHelpers.IsAddMode(args) Then
+          Me.DataEntry = True
+      ElseIf IsNumeric(Nz(args, "")) Then
+          Me.Filter = "ClientServiceNeedID=" & CLng(args)
+          Me.FilterOn = True
+      End If
+  End Sub
+  
+  Private Sub Form_Load()
+      ' Service combo. Row source set in code (no design-view row source).
+      Me.cboServiceID.RowSource = _
+          "SELECT ServiceID, ServiceName FROM tblServices " & _
+          "WHERE IsActive=True ORDER BY ServiceName"
+      Me.cboServiceID.ColumnCount = 2
+      Me.cboServiceID.ColumnWidths = "0;2.5 in"
+      Me.cboServiceID.BoundColumn = 1
+  
+      If basListHelpers.IsAddMode(Me.OpenArgs) Then
+          Dim cid As Long, fy As Long
+          cid = basListHelpers.GetContextLong(Me.OpenArgs, "ClientID")
+          fy = basListHelpers.GetContextLong(Me.OpenArgs, "FiscalYear")
+  
+          If cid > 0 Then Me!ClientID = cid
+          If fy > 0 Then Me!FiscalYear = fy
+          If IsNull(Me!Priority) Then Me!Priority = 1
+  
+          Me.btnDelete.Enabled = False
+          Me.Caption = "New Service Need"
+      Else
+          Me.btnDelete.Enabled = True
+          Me.Caption = "Edit Service Need"
+      End If
+  
+      ' Identity columns are not user-editable in this dialog.
+      Me.txtClientID.Locked = True
+      Me.txtFiscalYear.Locked = True
+  End Sub
+  Private Sub Form_BeforeUpdate(Cancel As Integer)
+      If IsNull(Me!ServiceID) Then
+          MsgBox "Please select a service.", vbExclamation, "Validation"
+          Me.cboServiceID.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If IsNull(Me!HoursPerWeek) Or Me!HoursPerWeek <= 0 Then
+          MsgBox "Hours per week must be greater than zero.", _
+                 vbExclamation, "Validation"
+          Me.txtHoursPerWeek.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If Me!HoursPerWeek > 168 Then
+          MsgBox "Hours per week cannot exceed 168.", _
+                 vbExclamation, "Validation"
+          Me.txtHoursPerWeek.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      If Nz(Me!Priority, 0) < 1 Or Nz(Me!Priority, 0) > 5 Then
+          MsgBox "Priority must be between 1 and 5.", _
+                 vbExclamation, "Validation"
+          Me.txtPriority.SetFocus
+          Cancel = True
+          Exit Sub
+      End If
+  
+      ' Note: PreferredTimeStart < PreferredTimeEnd is enforced by the
+      ' table validation rule. We let Access surface that one.
+  
+      ' Duplicate check (same client + service + FY).
+      Dim selfID As Long
+      selfID = Nz(Me!ClientServiceNeedID, 0)
+      If DCount("*", "tblClientServiceNeeds", _
+                "ClientID=" & Me!ClientID & _
+                " AND ServiceID=" & Me!ServiceID & _
+                " AND FiscalYear=" & Me!FiscalYear & _
+                " AND ClientServiceNeedID<>" & selfID) > 0 Then
+          MsgBox "A need for this service in this fiscal year already " & _
+                 "exists for this client.", _
+                 vbExclamation, "Duplicate"
+          Cancel = True
+      End If
+  End Sub
+  Private Sub btnSave_Click()
+      On Error GoTo Failed
+      If Me.Dirty Then Me.Dirty = False    ' fires Form_BeforeUpdate (and table rules)
+      DoCmd.Close acForm, Me.name
+      Exit Sub
+  Failed:
+      ' Validation canceled the save (form-level BeforeUpdate or table rule).
+      ' Surface the error so the user sees why the save was blocked.
+      MsgBox Err.Description, vbExclamation, "Validation"
+  End Sub
+  
+  Private Sub btnCancel_Click()
+      On Error Resume Next
+      Me.Undo
+      DoCmd.Close acForm, Me.name, acSaveNo
+  End Sub
+  
+  Private Sub btnDelete_Click()
+      If Me.NewRecord Then Exit Sub
+  
+      ' Block delete if any plan rows reference this need.
+      Dim inUse As Long
+      inUse = DCount("*", "tblClientServicePlan", _
+                     "ClientServiceNeedID=" & Me!ClientServiceNeedID)
+      If inUse > 0 Then
+          MsgBox "Cannot delete this need." & vbCrLf & vbCrLf & _
+                 inUse & " service plan row(s) reference it. " & _
+                 "Remove or reassign those plans first.", _
+                 vbExclamation, "Need In Use"
+          Exit Sub
+      End If
+  
+      If MsgBox("Delete this service need?", _
+                vbYesNo + vbQuestion + vbDefaultButton2, _
+                "Confirm Delete") = vbNo Then Exit Sub
+  
+      On Error GoTo Failed
+      RunCommand acCmdSelectRecord
+      RunCommand acCmdDeleteRecord
+      DoCmd.Close acForm, Me.name
+      Exit Sub
+  
+  Failed:
+      MsgBox "Could not delete: " & Err.Description, vbCritical, "Delete Failed"
+  End Sub
+  
+  
+  ' ============================================================================
+  '  Combo niceties
+  ' ============================================================================
+  
+  Private Sub cboServiceID_NotInList(NewData As String, Response As Integer)
+      If MsgBox("Service '" & NewData & "' is not in the list." & vbCrLf & _
+                "Add it now?", vbYesNo + vbQuestion, "Add Service?") = vbYes Then
+          Response = acDataErrAdded
+          DoCmd.OpenForm "frmServiceDetail", , , , acFormAdd, acDialog
+          Me.cboServiceID.Requery
+      Else
+          Response = acDataErrContinue
+      End If
+  End Sub
