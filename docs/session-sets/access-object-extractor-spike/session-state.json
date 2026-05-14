@@ -3,10 +3,10 @@
   "sessionSetName": "access-object-extractor-spike",
   "currentSession": 1,
   "totalSessions": 1,
-  "status": "in-progress",
-  "lifecycleState": "work_in_progress",
+  "status": "complete",
+  "lifecycleState": "closed",
   "startedAt": "2026-05-14T05:11:00.864898-04:00",
-  "completedAt": null,
+  "completedAt": "2026-05-14T05:27:01.597777-04:00",
   "verificationVerdict": null,
   "orchestrator": {
     "engine": "claude-code",
