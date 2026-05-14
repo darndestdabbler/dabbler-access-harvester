@@ -130,6 +130,16 @@ public sealed record TableMetadata
     public string? ValidationText { get; init; }
 
     /// <summary>
+    /// The reconstructed JET-flavored <c>CREATE TABLE</c> statement for this
+    /// table, built from the field, index, and relation metadata at extraction
+    /// time. Provided as a convenience for AI consumers that prefer reading
+    /// schema as SQL rather than re-deriving it from the structural collections.
+    /// Null when the raw exporter did not emit a DDL string (older fixtures /
+    /// hand-crafted JSON without the field).
+    /// </summary>
+    public string? Ddl { get; init; }
+
+    /// <summary>
     /// The raw property bag from the <c>kb/Tables/</c> JSON, with exact-value
     /// lifts removed (<see cref="Connect"/>, <see cref="SourceTableName"/>,
     /// <see cref="ValidationRule"/>, <see cref="ValidationText"/>) but

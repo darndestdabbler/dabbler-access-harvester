@@ -252,6 +252,34 @@ public class TableMetadataExtractorTests
     }
 
     [Fact]
+    public void Extract_DdlIsLiftedFromRawJsonAndStrippedFromPropertiesBag()
+    {
+        const string raw = """
+        {
+          "Name": "T",
+          "Type": "Table",
+          "Attributes": 0,
+          "Ddl": "CREATE TABLE [T] (\n    [Id] COUNTER\n);",
+          "Fields": [],
+          "Indexes": []
+        }
+        """;
+
+        var meta = TableMetadataExtractor.Extract(raw);
+
+        Assert.Equal("CREATE TABLE [T] (\n    [Id] COUNTER\n);", meta.Ddl);
+        Assert.NotNull(meta.Properties);
+        Assert.False(meta.Properties!.ContainsKey("Ddl"));
+    }
+
+    [Fact]
+    public void Extract_DdlAbsent_IsNull()
+    {
+        var meta = TableMetadataExtractor.Extract(CustomersTableJson);
+        Assert.Null(meta.Ddl);
+    }
+
+    [Fact]
     public void Extract_TableLevelValidationRuleAbsent_IsNull()
     {
         const string raw = """
