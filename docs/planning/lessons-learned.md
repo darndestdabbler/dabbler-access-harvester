@@ -959,6 +959,25 @@ reference; if it proves out twice in *this* repo, propose promotion to
   in-IDE-orchestrator pivot), promote to a Convention in
   `project-guidance.md` under Token-Window Budget Overrides.
 
+## Write Absent-Case Tests Symmetrically Across All Promoted Fields, Not Just The Primary One
+
+- **Context:** Hermetic unit tests for extractors that lift multiple fields out of a raw
+  property bag into typed fields (e.g., `RecordSource`, `Filter`, `OrderBy` on
+  `FormMetadataExtractor`). First hit in `structured-form-report-extractor` Session 3
+  (2026-05-15): verifier (gpt-5-4 Round 1) flagged that `Filter` absent and `OrderBy`
+  absent had no explicit tests, only `RecordSource` absent.
+- **Failure or friction:** The spec said "present/absent" for the promotion group, but
+  the absent-case tests were only written for the primary field (`RecordSource`). The
+  extractor could silently return a stale value for `Filter` or `OrderBy` with no test
+  to catch it. Fixing required two additional tests per extractor (four total) and a
+  re-verification round.
+- **Lesson:** When writing promotion tests, pair a "present" AND an "absent" test for
+  **every** promoted field — not just the one that motivated the test file. This applies
+  equally to reports, forms, tables, and any future extractor that lifts fields.
+- **Action for future sessions:** Before marking extractor unit tests complete, scan the
+  list of promoted fields and verify that each one has an explicit absent/null test.
+  A promotion group with N fields should have at least N absent-case tests.
+
 ## Don't Name A Spec Deliverable `session-reviews/session-NNN.md` For Non-Verifier Content
 
 - **Context:** Spike/analysis session sets where the primary deliverable is a written
