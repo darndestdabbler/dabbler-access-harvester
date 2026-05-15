@@ -1,0 +1,32 @@
+{
+  "status": "complete",
+  "summary": "Session set complete (3 of 3). Session 1 (Sonnet 4.6 orchestrator): rewrote ReportMetadataExtractor.BuildGroupLevels to source per-level metadata from `GroupLevel <N>` (space-separated) child nodes — replacing the prior incorrect flat-Properties root-key scan; added AccessObjectReader.ReadModuleName for `Attribute VB_Name` extraction; wired ModuleName into FormMetadataExtractor and ReportMetadataExtractor; added decode tables for GroupingMode (0-9), SortOrder (0-1), KeepTogether (0-2); rewrote ReportMetadataExtractorTests to the new IR shape and flipped deferred-null pins to decoded assertions; added ModuleName tests on both records. Session 2 (Sonnet 4.6): added integration test coverage in SyntheticMetadataExtractorIntegrationTests for the GroupOn-from-GroupOnCol round-trip plus decoded per-level metadata. Session 3 (Opus 4.7): updated docs/ir-schema-forms-reports.md — removed all `Always null — decoding deferred` notices for ModuleName/GroupingMode/SortOrder/KeepTogether/GroupInterval; rewrote the GroupLevel section with an IR JSON Source block and a property-name quirk note (`GroupOn` = mode code, `GroupOnCol` = expression); updated worked examples (frmPatients with ModuleName populated; rptByRegion with decoded per-level fields and the new child-node shape); generated change-log.md and next-session-set-recommendation.md. All three sessions VERIFIED cross-provider on first round.",
+  "files_changed": [
+    "AccessHarvester.Access/AccessObjectReader.cs",
+    "AccessHarvester.Access/FormMetadataExtractor.cs",
+    "AccessHarvester.Access/ReportMetadataExtractor.cs",
+    "tests/AccessHarvester.Tests/FormMetadataExtractorTests.cs",
+    "tests/AccessHarvester.Tests/ReportMetadataExtractorTests.cs",
+    "tests/AccessHarvester.Tests/SyntheticMetadataExtractorIntegrationTests.cs",
+    "docs/ir-schema-forms-reports.md",
+    "docs/session-sets/form-report-code-and-grouping/spec.md",
+    "docs/session-sets/form-report-code-and-grouping/ai-assignment.md",
+    "docs/session-sets/form-report-code-and-grouping/activity-log.json",
+    "docs/session-sets/form-report-code-and-grouping/session-state.json",
+    "docs/session-sets/form-report-code-and-grouping/session-events.jsonl",
+    "docs/session-sets/form-report-code-and-grouping/change-log.md",
+    "docs/session-sets/form-report-code-and-grouping/next-session-set-recommendation.md",
+    "docs/session-sets/form-report-code-and-grouping/disposition.json",
+    "docs/session-sets/form-report-code-and-grouping/session-reviews/session-001.md",
+    "docs/session-sets/form-report-code-and-grouping/session-reviews/session-001-code-review.md",
+    "docs/session-sets/form-report-code-and-grouping/session-reviews/session-002.md",
+    "docs/session-sets/form-report-code-and-grouping/session-reviews/session-003.md"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_session_set": {
+    "slug": "generalization-validation-on-non-northwind",
+    "summary": "Deviation from harvester-plan Phase 8 (cancelled) to strategy.md Phase 3c: validate harvester output + workflow-package shape on MiniComplex.accdb / HomeHealthCare.accdb to answer Open Validation #2 — does the package strategy generalize beyond Northwind? Full reasoning in next-session-set-recommendation.md."
+  },
+  "blockers": []
+}
