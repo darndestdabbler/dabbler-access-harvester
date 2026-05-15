@@ -245,6 +245,14 @@ public class SyntheticMetadataExtractorIntegrationTests
                 Assert.Equal(headerNode.GetValue<bool>(), actual!.HasHeader);
             if (expected.TryGetPropertyValue("HasFooter", out var footerNode) && footerNode is not null)
                 Assert.Equal(footerNode.GetValue<bool>(), actual!.HasFooter);
+            if (expected.TryGetPropertyValue("GroupingMode", out var groupingModeNode) && groupingModeNode is not null)
+                Assert.Equal(groupingModeNode.GetValue<string>(), actual!.GroupingMode);
+            if (expected.TryGetPropertyValue("SortOrder", out var sortOrderNode) && sortOrderNode is not null)
+                Assert.Equal(sortOrderNode.GetValue<string>(), actual!.SortOrder);
+            if (expected.TryGetPropertyValue("KeepTogether", out var keepTogetherNode) && keepTogetherNode is not null)
+                Assert.Equal(keepTogetherNode.GetValue<string>(), actual!.KeepTogether);
+            if (expected.TryGetPropertyValue("GroupInterval", out var groupIntervalNode) && groupIntervalNode is not null)
+                Assert.Equal(groupIntervalNode.GetValue<int>(), actual!.GroupInterval);
         }
     }
 
