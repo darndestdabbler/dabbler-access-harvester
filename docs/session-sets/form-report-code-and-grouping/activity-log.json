@@ -1,0 +1,95 @@
+{
+  "sessionSetName": "form-report-code-and-grouping",
+  "createdDate": "2026-05-15T05:00:00.000000+00:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 0,
+      "stepKey": "session-1/ai-assignment-authored",
+      "dateTime": "2026-05-15T01:00:00.000000-04:00",
+      "description": "Authored spec.md (3-session plan: GroupLevel source fix + ModuleName in Session 1, integration test in Session 2, docs update in Session 3). Authored ai-assignment.md via route(task_type=analysis). Key pre-session finding: AccessTextParser produces 'GroupLevel 0' (space-separated) child nodes for GroupLevel configuration, not flat Properties keys — current extractor reads wrong source.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0154
+        }
+      ]
+    }
+    ,
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/verify-prior-session",
+      "dateTime": "2026-05-15T01:05:00.000000-04:00",
+      "description": "Verified structured-form-report-extractor set committed (commits 87f57bc + 288e0fe).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/grouplevels-fix",
+      "dateTime": "2026-05-15T01:10:00.000000-04:00",
+      "description": "Rewrote ReportMetadataExtractor.BuildGroupLevels: replaced flat-Properties GroupLevel<N> key approach with scan of 'GroupLevel N' (space-separated) child nodes for per-level metadata (GroupOnCol->GroupOn, GroupOn code->GroupingMode, SortOrder, KeepTogether, GroupInterval). Added GroupLevelConfigRegex. Added decoding tables for GroupingMode (0=EachValue..9=Interval), SortOrder (0=Ascending, 1=Descending), KeepTogether (0=None, 1=WholeGroup, 2=WithFirstDetail). Config nodes filtered out of meta.Children (code-review finding: they bled into Children alongside design-band sections). Removed consumedGroupLevelKeys. Updated GroupLevel tests to use 'GroupLevel 0' child nodes; added decoding tests for all codes; added config-node-exclusion test.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/module-name",
+      "dateTime": "2026-05-15T01:15:00.000000-04:00",
+      "description": "Added AccessObjectReader.ReadModuleName: scans first 10 lines of VbaCode for Attribute VB_Name = '...' line, returns quoted value or null. Wired into FormMetadataExtractor and ReportMetadataExtractor. Replaced deferred-null ModuleName tests with extraction tests (VB_Name present, absent, VbaCode absent) in both test files.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-05-15T01:20:00.000000-04:00",
+      "description": "dotnet build clean (0 errors). dotnet test AccessHarvester.Tests: 436 active passing, 2 SkippableFact skipped. No regressions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/code-review",
+      "dateTime": "2026-05-15T01:25:00.000000-04:00",
+      "description": "Routed code review (sonnet, complexity_hint=55). ISSUES_FOUND: 1 real bug — GroupLevel config nodes bled into meta.Children; fixed by filtering Type-matching GroupLevelConfigRegex nodes before assigning Children. Minor: added 10-line comment to ReadModuleName. Verifier (gemini-pro): VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.1419
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/session-verification",
+      "dateTime": "2026-05-15T01:30:00.000000-04:00",
+      "description": "Cross-provider session verification routed to gpt-5-4. VERIFIED on first round. Raw output saved to session-reviews/session-001.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.1173
+        }
+      ]
+    }
+  ]
+}
