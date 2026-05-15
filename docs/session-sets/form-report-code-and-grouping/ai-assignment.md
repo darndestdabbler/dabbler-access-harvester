@@ -26,3 +26,21 @@
 - **Recommended engine**: `claude-code`
 - **Recommended model**: `claude-3.5-sonnet-20240620` (Sonnet 4.6)
 - **Rationale**: The orchestrator is performing well on C# edits and there is no specified need for a change in capability.
+
+---
+
+## Session 3 actuals (filled after completion, 2026-05-15)
+
+- **Orchestrator used:** claude-code / claude-opus-4-7 @ effort=high (deviation from recommendation: Opus instead of Sonnet 4.6).
+- **Why the deviation:** human directed this set with Opus-as-orchestrator for the docs-only synthesis pass. The schema-doc update + verification benefited from Opus's stronger grasp of the implementation diff in-conversation, which let the doc edits stay precise without an extra routed code-read.
+- **Routed calls (Session 3):**
+  - Doc review via `route(task_type="documentation")` -> gemini-flash, $0.0020.
+  - Cross-provider verification via `route(task_type="session-verification")` -> gpt-5-4, $0.1147. Verdict: VERIFIED on first round.
+  - Change-log generation via `route(task_type="summarization", max_tier=1)` -> gemini-flash, $0.0005.
+  - Next-session-set recommendation via `route(task_type="analysis")` -> gemini-pro, $0.0287.
+- **Total routed cost (Session 3):** ~$0.146 (canonical, from `router-metrics.jsonl`).
+- **Notes for next-session-set calibration:** Opus-as-orchestrator handled the schema-doc edits in-conversation per the "When the orchestrator's model matches the routing target" convention — but the recommended target was gemini-flash, so this is more about the work being mechanical enough that in-conversation editing was the cheapest path. Future docs-only sessions can default to Sonnet-as-orchestrator and route the actual doc edit to gemini-flash with no quality loss.
+
+**This is the final session of the set; no next-session orchestrator recommendation
+is generated.** The cross-set next-session-set recommendation lives at
+`next-session-set-recommendation.md`.

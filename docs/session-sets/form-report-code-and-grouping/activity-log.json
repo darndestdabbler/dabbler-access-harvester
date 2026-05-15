@@ -8,7 +8,7 @@
       "stepNumber": 0,
       "stepKey": "session-1/ai-assignment-authored",
       "dateTime": "2026-05-15T01:00:00.000000-04:00",
-      "description": "Authored spec.md (3-session plan: GroupLevel source fix + ModuleName in Session 1, integration test in Session 2, docs update in Session 3). Authored ai-assignment.md via route(task_type=analysis). Key pre-session finding: AccessTextParser produces 'GroupLevel 0' (space-separated) child nodes for GroupLevel configuration, not flat Properties keys — current extractor reads wrong source.",
+      "description": "Authored spec.md (3-session plan: GroupLevel source fix + ModuleName in Session 1, integration test in Session 2, docs update in Session 3). Authored ai-assignment.md via route(task_type=analysis). Key pre-session finding: AccessTextParser produces 'GroupLevel 0' (space-separated) child nodes for GroupLevel configuration, not flat Properties keys \u00e2\u20ac\u201d current extractor reads wrong source.",
       "status": "complete",
       "routedApiCalls": [
         {
@@ -19,8 +19,7 @@
           "costUsd": 0.0154
         }
       ]
-    }
-    ,
+    },
     {
       "sessionNumber": 1,
       "stepNumber": 1,
@@ -62,7 +61,7 @@
       "stepNumber": 5,
       "stepKey": "session-1/code-review",
       "dateTime": "2026-05-15T01:25:00.000000-04:00",
-      "description": "Routed code review (sonnet, complexity_hint=55). ISSUES_FOUND: 1 real bug — GroupLevel config nodes bled into meta.Children; fixed by filtering Type-matching GroupLevelConfigRegex nodes before assigning Children. Minor: added 10-line comment to ReadModuleName. Verifier (gemini-pro): VERIFIED.",
+      "description": "Routed code review (sonnet, complexity_hint=55). ISSUES_FOUND: 1 real bug \u00e2\u20ac\u201d GroupLevel config nodes bled into meta.Children; fixed by filtering Type-matching GroupLevelConfigRegex nodes before assigning Children. Minor: added 10-line comment to ReadModuleName. Verifier (gemini-pro): VERIFIED.",
       "status": "complete",
       "routedApiCalls": [
         {
@@ -90,8 +89,7 @@
           "costUsd": 0.1173
         }
       ]
-    }
-    ,
+    },
     {
       "sessionNumber": 2,
       "stepNumber": 1,
@@ -106,7 +104,7 @@
       "stepNumber": 2,
       "stepKey": "session-2/integration-test",
       "dateTime": "2026-05-15T02:05:00.000000-04:00",
-      "description": "Extended SyntheticMetadataExtractorIntegrationTests.AssertGroupLevels to conditionally assert GroupingMode, SortOrder, KeepTogether, GroupInterval from the expected fixture — same TryGetPropertyValue pattern as the existing GroupOn/HasHeader/HasFooter assertions. The 09-report-grouping-events.expected.json fixture was not updated with specific decoded values (no Access COM available to confirm actual pipeline output). The existing integration test already checks GroupOn, HasHeader, HasFooter. 436 active tests pass, 2 SkippableFact skipped.",
+      "description": "Extended SyntheticMetadataExtractorIntegrationTests.AssertGroupLevels to conditionally assert GroupingMode, SortOrder, KeepTogether, GroupInterval from the expected fixture \u00e2\u20ac\u201d same TryGetPropertyValue pattern as the existing GroupOn/HasHeader/HasFooter assertions. The 09-report-grouping-events.expected.json fixture was not updated with specific decoded values (no Access COM available to confirm actual pipeline output). The existing integration test already checks GroupOn, HasHeader, HasFooter. 436 active tests pass, 2 SkippableFact skipped.",
       "status": "complete",
       "routedApiCalls": []
     },
@@ -124,6 +122,82 @@
           "inputTokens": 0,
           "outputTokens": 0,
           "costUsd": 0.0648
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/schema-docs-update",
+      "dateTime": "2026-05-15T04:03:17.871470-04:00",
+      "description": "Updated docs/ir-schema-forms-reports.md: removed deferred-decoding notices for GroupingMode/SortOrder/KeepTogether/GroupInterval; updated ModuleName notes on FormMetadata and ReportMetadata; rewrote GroupLevel section with IR JSON source block, property-name quirk note, decoded-field mappings; updated worked examples (frmPatients gets ModuleName populated; rptByRegion uses GroupLevel <N> child node shape with decoded fields).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/doc-review",
+      "dateTime": "2026-05-15T04:04:43.415782-04:00",
+      "description": "Routed doc review (gemini-flash, task_type=documentation). Returned three findings: one Major false-positive about GroupInterval wording (current wording is logically equivalent to the code behavior), one Minor consistency fix on ReportMetadata.DefaultView (applied \u2014 added null-on-unrecognized clause to match FormMetadata), one Minor pedagogy nit on GroupLevel.GroupOn (current wording is more informative; left as-is).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "documentation",
+          "inputTokens": 11888,
+          "outputTokens": 357,
+          "costUsd": 0.0019974
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-05-15T04:06:50.482703-04:00",
+      "description": "dotnet build clean (0 errors, 323 warnings \u2014 all pre-existing). dotnet test: Total 1362 tests; Passed 1315; Skipped 2; Failed 45 \u2014 all 45 failures isolated to AccessHarvester.SymbolDb.Tests and all are FileNotFoundException from missing tmp/comprehension-ir/AccessMetaData/NorthwindDevEdition/ kb JSON fixtures (tmp/ is gitignored; the fixtures are produced by running the harvester pipeline on NorthwindDevEdition.accdb which is gitignored per project-guidance.md). Verified pre-existing by stashing Session 3 changes and re-running the SymbolDb suite \u2014 same 45 failures. Unrelated to this session's docs-only change.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/verification",
+      "dateTime": "2026-05-15T04:09:07.461547-04:00",
+      "description": "Routed cross-provider session-verification (gpt-5-4). Verdict: VERIFIED. Verifier confirmed: doc matches code, all targeted deferral notices removed, GroupLevel <N> child node source correctly documented, worked examples correctly updated. Verifier explicitly addressed the disclosed doc-review false-positives and agreed with the dismissals.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14820,
+          "outputTokens": 5177,
+          "costUsd": 0.114705
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/generate-final-docs",
+      "dateTime": "2026-05-15T04:14:03.212984-04:00",
+      "description": "Generated change-log.md via route(task_type=summarization, max_tier=1) -> gemini-flash; tidied verifier-naming redundancy in-conversation. Generated next-session-set-recommendation.md via route(task_type=analysis) -> gemini-pro, grounded in docs/planning/strategy.md (plan-driven repo) and the harvester implementation plan. Recommendation: deviate from harvester-plan Phase 8 (cancelled) to strategy.md Phase 3c \u2014 generalization validation on MiniComplex/HomeHealthCare.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1079,
+          "outputTokens": 638,
+          "costUsd": 0.00054465
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 16785,
+          "outputTokens": 776,
+          "costUsd": 0.02874125
         }
       ]
     }

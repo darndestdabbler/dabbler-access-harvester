@@ -41,7 +41,7 @@ from the IR JSON is re-modeled on the typed records.** See the
 | Field | Type | Notes |
 |---|---|---|
 | `Name` | `string` (required) | The form name as Access stores it (e.g. `frmPatients`). Derived from the source file name; not present in the IR JSON itself. |
-| `ModuleName` | `string?` | The VBA class-module name backing this form (typically `Form_<Name>`). **Currently null** — a future session will parse `Attribute VB_Name` from `VbaCode`. |
+| `ModuleName` | `string?` | The VBA class-module name backing this form (typically `Form_<Name>`). Populated by parsing the first `Attribute VB_Name = "..."` line out of `VbaCode` (scans the first 10 lines). Null when `VbaCode` is null (no code-behind) or when the attribute line is absent. |
 | `RecordSource` | `string?` | The bound data source: a table name, a saved query name, or a SQL string. Null for unbound forms. Exact-value lift from `Properties["RecordSource"]`. |
 | `Filter` | `string?` | JET SQL `WHERE`-fragment (no `WHERE` keyword). Null when not set. Exact-value lift from `Properties["Filter"]`. |
 | `OrderBy` | `string?` | JET SQL `ORDER BY`-fragment (no keywords). Null when not set. Exact-value lift from `Properties["OrderBy"]`. |
@@ -64,15 +64,15 @@ and adds two report-specific fields:
 | Field | Type | Notes |
 |---|---|---|
 | `Name` | `string` (required) | The report name (e.g. `rptWeeklyActivity`). |
-| `ModuleName` | `string?` | **Currently null** (same deferral as forms). |
+| `ModuleName` | `string?` | The VBA class-module name backing this report (typically `Report_<Name>`). Same extraction rule as `FormMetadata.ModuleName`: parsed from the first `Attribute VB_Name = "..."` line in `VbaCode` (first 10 lines scanned); null when absent or when there is no code-behind. |
 | `RecordSource` | `string?` | Bound data source. Same as `FormMetadata`. |
 | `Filter` | `string?` | Same as `FormMetadata`. |
 | `OrderBy` | `string?` | Top-level report sort. Per-group sorts live in `GroupLevels`. |
-| `DefaultView` | `string?` | Report-specific codes: `"Report View"` (0), `"Print Preview"` (1), `"Layout View"` (2). **Different enumeration from forms.** |
-| `Properties` | `IReadOnlyDictionary<string, JsonElement>?` | Same as `FormMetadata`, plus `GroupLevel<N>` flat-key properties are removed when promoted into `GroupLevels`. |
+| `DefaultView` | `string?` | Decoded label. Report-specific codes: `"Report View"` (0), `"Print Preview"` (1), `"Layout View"` (2). Null if absent or unrecognized code. Raw numeric code is retained in `Properties["DefaultView"]`. **Different enumeration from forms.** |
+| `Properties` | `IReadOnlyDictionary<string, JsonElement>?` | Same as `FormMetadata`. `GroupLevel <N>` configuration nodes do not appear here — they live in the IR JSON's `Children` array as separate nodes and are consumed by `GroupLevels` (see below). |
 | `GeometryIn` | `GeometryInches?` | Same as `FormMetadata`. |
 | `NonDefaultProperties` | `IReadOnlyList<string>?` | Same as `FormMetadata`. |
-| `Children` | `IReadOnlyList<AccessControl>?` | Report design tree: `PageHeader`, `GroupLevel0Header`, `Detail`, `GroupLevel0Footer`, `PageFooter`, etc. |
+| `Children` | `IReadOnlyList<AccessControl>?` | Report design tree: `PageHeader`, `GroupLevel0Header`, `Detail`, `GroupLevel0Footer`, `PageFooter`, etc. The `GroupLevel <N>` configuration nodes (space-separated, e.g. `"GroupLevel 0"`) that carry per-level grouping metadata are **filtered out** of this list — they are not design bands and are consumed by `GroupLevels`. |
 | `GroupLevels` | `IReadOnlyList<GroupLevel>?` | Grouping / sorting metadata. Null when the report has no groups. See `GroupLevel`. |
 | `PageSetup` | `PageSetup?` | **Always null — decoding deferred.** See `PageSetup`. |
 | `VbaCode` | `string?` | Same as `FormMetadata`. |
@@ -130,16 +130,48 @@ the rest are null and should be omitted from serialized output.
 
 `AccessHarvester.Access.GroupLevel` — C# `sealed record` (on `ReportMetadata` only)
 
+### IR JSON source
+
+Per-level grouping metadata lives on a `GroupLevel <N>` child node in the report root's
+`Children` array (space-separated `Type` — e.g. `"GroupLevel 0"`). The
+`AccessTextParser` produces this node from Access's SaveAsText `Begin GroupLevel N`
+blocks. Example raw IR fragment:
+
+```json
+{
+  "Type": "GroupLevel 0",
+  "Properties": {
+    "GroupOn":        "0",            // grouping mode CODE
+    "GroupOnCol":     "[DistrictID]", // grouping field expression
+    "SortOrder":      "0",
+    "KeepTogether":   "0",
+    "GroupInterval":  "1"
+  }
+}
+```
+
+The separate `GroupLevel<N>Header` / `GroupLevel<N>Footer` nodes (no space, e.g.
+`"GroupLevel0Header"`) are design-band sections and remain in `ReportMetadata.Children`;
+they contribute `HasHeader` / `HasFooter` only.
+
+> **Property-name quirk.** In SaveAsText, the property literally named `GroupOn` is the
+> *mode code* (0–9), and `GroupOnCol` is the *grouping field expression*. The typed
+> `GroupLevel` record reverses this for clarity: `GroupOn` is the human-readable
+> expression (lifted from `Properties["GroupOnCol"]`), and `GroupingMode` is the decoded
+> label (from `Properties["GroupOn"]`).
+
+### Fields
+
 | Field | Type | Notes |
 |---|---|---|
 | `Level` | `int` (required) | Zero-based group level. 0 = outermost group (first in the `GroupLevels` list). |
-| `GroupOn` | `string?` | The field name or expression the group is keyed on (e.g. `CustomerName`, `=Year([OrderDate])`). Lifted from the root `Properties["GroupLevel<N>"]` key; that key is removed from `Properties` after promotion. Null if no `GroupLevel<N>` property exists. |
+| `GroupOn` | `string?` | The field name or expression the group is keyed on (e.g. `[DistrictID]`, `=Year([OrderDate])`). Lifted from `Properties["GroupOnCol"]` on the `GroupLevel <N>` child node. Null when the property is absent or the level has only a section node. |
 | `HasHeader` | `bool?` | True when a `GroupLevel<N>Header` section node exists in `Children`. |
 | `HasFooter` | `bool?` | True when a `GroupLevel<N>Footer` section node exists in `Children`. |
-| `GroupingMode` | `string?` | **Always null — decoding deferred.** Will decode Access's numeric `GroupOn<N>` property to `EachValue`, `Prefix`, `Year`, `Quarter`, `Month`, `Week`, `Day`, `Hour`, `Minute`, or `Interval`. |
-| `GroupInterval` | `int?` | **Always null — decoding deferred.** Interval value for `Prefix` / `Interval` grouping modes. |
-| `SortOrder` | `string?` | **Always null — decoding deferred.** Will decode to `Ascending` or `Descending`. |
-| `KeepTogether` | `string?` | **Always null — decoding deferred.** Will decode Access's keep-together flag to `WholeGroup`, `WithFirstDetail`, or `None`. |
+| `GroupingMode` | `string?` | Decoded from the mode CODE in `Properties["GroupOn"]` on the `GroupLevel <N>` child node. Mapping: `0`→`EachValue`, `1`→`Prefix`, `2`→`Year`, `3`→`Quarter`, `4`→`Month`, `5`→`Week`, `6`→`Day`, `7`→`Hour`, `8`→`Minute`, `9`→`Interval`. Null when the property is absent or the code is unrecognized. |
+| `GroupInterval` | `int?` | Interval value for `Prefix` / `Interval` grouping modes (prefix character count or interval units). Parsed as `int` from `Properties["GroupInterval"]` on the `GroupLevel <N>` child node. Null when absent or unparseable. |
+| `SortOrder` | `string?` | Decoded from `Properties["SortOrder"]` on the `GroupLevel <N>` child node: `0`→`Ascending`, `1`→`Descending`. Null when absent or unrecognized. |
+| `KeepTogether` | `string?` | Decoded from `Properties["KeepTogether"]` on the `GroupLevel <N>` child node: `0`→`None`, `1`→`WholeGroup`, `2`→`WithFirstDetail`. Null when absent or unrecognized. |
 
 ---
 
@@ -192,6 +224,7 @@ surfaced on the typed records. Consumers that need them should read the IR JSON 
   },
   "GeometryIn": { "W": 6.5 },
   "NonDefaultProperties": ["AllowEdits"],
+  "VbaCode": "Attribute VB_Name = \"Form_frmPatients\"\r\nOption Compare Database\r\nOption Explicit\r\n\r\nPrivate Sub Form_Load()\r\n    ' ...\r\nEnd Sub\r\n",
   "Children": [
     {
       "Type": "Section",
@@ -218,7 +251,7 @@ surfaced on the typed records. Consumers that need them should read the IR JSON 
 
 ```
 Name:          "frmPatients"
-ModuleName:    null   (deferred)
+ModuleName:    "Form_frmPatients"   ← parsed from Attribute VB_Name in VbaCode
 RecordSource:  "tblPatients"   ← exact-value lift; key removed from Properties
 Filter:        null
 OrderBy:       null
@@ -227,7 +260,7 @@ Properties:    { "DefaultView": "0", "Caption": "Patient Record",
                  "AllowEdits": "True", "Width": "9360" }
 GeometryIn:    { W: 6.5 }
 NonDefaultProperties: ["AllowEdits"]
-VbaCode:       null
+VbaCode:       "Attribute VB_Name = \"Form_frmPatients\"\r\n..."
 Children:
   [0] AccessControl
       Type:    "Section"        ← form body section; Name "Detail" identifies the band
@@ -255,15 +288,24 @@ Children:
   "Type": "Report",
   "Properties": {
     "RecordSource": "qrySalesByRegion",
-    "DefaultView": "1",
-    "GroupLevel0": "Region"
+    "DefaultView": "1"
   },
   "Children": [
-    { "Type": "PageHeader",       "Properties": { "Name": "PageHeader" } },
-    { "Type": "GroupLevel0Header","Properties": { "Name": "GroupLevel0Header" } },
-    { "Type": "Detail",           "Properties": { "Name": "Detail" } },
-    { "Type": "GroupLevel0Footer","Properties": { "Name": "GroupLevel0Footer" } },
-    { "Type": "PageFooter",       "Properties": { "Name": "PageFooter" } }
+    { "Type": "PageHeader",        "Properties": { "Name": "PageHeader" } },
+    {
+      "Type": "GroupLevel 0",
+      "Properties": {
+        "GroupOn":       "2",
+        "GroupOnCol":    "=Year([OrderDate])",
+        "SortOrder":     "0",
+        "KeepTogether":  "1",
+        "GroupInterval": "1"
+      }
+    },
+    { "Type": "GroupLevel0Header", "Properties": { "Name": "GroupLevel0Header" } },
+    { "Type": "Detail",            "Properties": { "Name": "Detail" } },
+    { "Type": "GroupLevel0Footer", "Properties": { "Name": "GroupLevel0Footer" } },
+    { "Type": "PageFooter",        "Properties": { "Name": "PageFooter" } }
   ]
 }
 ```
@@ -272,27 +314,29 @@ Children:
 
 ```
 Name:          "rptByRegion"
-ModuleName:    null
+ModuleName:    null   ← (no VbaCode in this example; would be "Report_rptByRegion" otherwise)
 RecordSource:  "qrySalesByRegion"   ← exact-value lift
 Filter:        null
 OrderBy:       null
 DefaultView:   "Print Preview"       ← report-specific code 1
 Properties:    { "DefaultView": "1" }
-               (GroupLevel0 removed after promotion to GroupLevels;
-                RecordSource removed after exact-value lift)
+               (RecordSource removed after exact-value lift;
+                the "GroupLevel 0" config node lives in Children — not Properties —
+                and is filtered out of the typed Children list)
 GeometryIn:    null
 GroupLevels:
   [0] GroupLevel
       Level:        0
-      GroupOn:      "Region"       ← lifted from Properties["GroupLevel0"]
-      HasHeader:    true           ← GroupLevel0Header section found in Children
-      HasFooter:    true           ← GroupLevel0Footer section found in Children
-      GroupingMode: null   (deferred)
-      GroupInterval:null   (deferred)
-      SortOrder:    null   (deferred)
-      KeepTogether: null   (deferred)
+      GroupOn:      "=Year([OrderDate])"  ← lifted from "GroupLevel 0" child's GroupOnCol
+      HasHeader:    true                  ← GroupLevel0Header section found in Children
+      HasFooter:    true                  ← GroupLevel0Footer section found in Children
+      GroupingMode: "Year"                ← decoded from GroupOn code "2"
+      GroupInterval: 1                    ← parsed from GroupInterval "1"
+      SortOrder:    "Ascending"           ← decoded from SortOrder code "0"
+      KeepTogether: "WholeGroup"          ← decoded from KeepTogether code "1"
 PageSetup:     null   (deferred)
 Children:
   [ PageHeader, GroupLevel0Header, Detail, GroupLevel0Footer, PageFooter sections ]
+  (the "GroupLevel 0" config node is filtered out — it is metadata, not a design band)
 VbaCode:       null
 ```
