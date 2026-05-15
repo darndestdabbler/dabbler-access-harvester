@@ -996,3 +996,38 @@ reference; if it proves out twice in *this* repo, propose promotion to
   deliverable at the session-set root level (alongside `spec.md`), not under
   `session-reviews/`. The `session-reviews/` directory is reserved for
   `log.save_session_review()` output.
+
+## Write `disposition.json` Before The Final Session's Closeout Commit, Not After
+
+- **Context:** Final-session closeout (Step 8). First hit in
+  `form-report-code-and-grouping` Session 3 (2026-05-15).
+- **Failure or friction:** The orchestrator generated `change-log.md` and
+  `next-session-set-recommendation.md`, made the Session 3 closeout commit,
+  pushed, and then called `mark_session_complete()` — which failed the
+  `disposition_present` closeout gate with `CloseoutGateFailure`. The fix
+  required writing `disposition.json`, staging it, making a second
+  follow-up commit (`Session 3 closeout: add disposition.json`), and
+  pushing again. The disposition file is a meta-file that summarizes the
+  set's completion, lists files changed, and identifies the next session
+  set — it logically belongs with the rest of the closeout artifacts in
+  the same commit, not in a tail-commit that exists only to satisfy the
+  gate.
+- **Lesson:** `mark_session_complete()` enforces two checks before
+  flipping `session-state.json` to `complete`: (1) `disposition.json`
+  must exist; (2) the working tree must be clean (no uncommitted
+  changes in the session-set scope). Writing `disposition.json` AFTER
+  the closeout commit forces a second commit. The workflow doc's Step
+  8 doesn't currently list `disposition.json` as a generated artifact,
+  so an orchestrator following the doc verbatim hits the gate on the
+  first set they close out.
+- **Action for future sessions:** On the final session, generate
+  `disposition.json` as part of the "Step 8 closeout artifacts" group,
+  alongside `change-log.md` and `next-session-set-recommendation.md`,
+  BEFORE staging the closeout commit. The file should include
+  `status: "complete"`, a summary string, a `files_changed[]` list, a
+  `next_session_set: {slug, summary}` block, and `blockers: []`. See
+  `docs/session-sets/structured-form-report-extractor/disposition.json`
+  for the canonical shape. If a second session set's last session hits
+  this same failure mode, propose promoting this rule to a Convention
+  in `project-guidance.md` and updating `docs/ai-led-session-workflow.md`
+  Step 8 to list `disposition.json` explicitly.
