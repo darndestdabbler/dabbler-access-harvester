@@ -1,0 +1,26 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "tests/AccessHarvester.CharacterizationTests/AddAClient/Session2FalsificationTests.cs",
+    "summary": "FormatPhone test hardcoded the exact output mask while the package said FormatPhone body was not read.",
+    "status": "fixed",
+    "fix_action": "Read basUtilities::FormatPhone, upgraded package rule to confirmed with exact mask documented (10-digit -> (NNN) NNN-NNNN; null -> empty; otherwise raw), aligned the test stub to match the source exactly (null -> string.Empty, not null), removed the now-resolved ambiguity-log entry on FormatPhone mask."
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "docs/session-sets/generalization-validation-on-non-northwind/generalization-findings.md",
+    "summary": "OpenArgs claim overstated by including pipe-delimited BuildContextArgs payloads not exercised by Add a Client.",
+    "status": "fixed",
+    "fix_action": "Narrowed the OpenArgs pattern-divergence finding to ADD/numeric-PK only (the variants this workflow actually exercises) and noted the pipe-delimited variant is sibling-workflow only, not this set's finding."
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "docs/session-sets/generalization-validation-on-non-northwind/packages/add-a-client.md",
+    "summary": "Narrative counts five Session-2 invariant additions but Section 4 had four bullets (deactivation bundled cancel+warn).",
+    "status": "fixed",
+    "fix_action": "Split the deactivation invariant into two bullets: cancel-reversibility and confirm-with-warning. Section 4 now has five Session-2 falsification entries aligned with the change-log/findings narrative."
+  }
+]
