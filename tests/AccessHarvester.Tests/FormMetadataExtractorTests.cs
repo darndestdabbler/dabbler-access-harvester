@@ -380,12 +380,34 @@ public class FormMetadataExtractorTests
         Assert.Null(meta.VbaCode);
     }
 
-    // ── ModuleName is always null (deferred) ──────────────────────────────────
+    // ── ModuleName extraction from Attribute VB_Name ─────────────────────────
 
     [Fact]
-    public void Extract_ModuleName_IsNullDeferredForSession3()
+    public void Extract_ModuleName_ExtractedFromVbName()
+    {
+        const string vbaCode = "Attribute VB_Name = \"Form_frmPatients\"\r\nOption Compare Database";
+        string irJson = $$"""{ "Type": "Form", "Properties": {}, "VbaCode": "{{vbaCode.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n")}}" }""";
+
+        var meta = FormMetadataExtractor.Extract("frmPatients", irJson);
+
+        Assert.Equal("Form_frmPatients", meta.ModuleName);
+    }
+
+    [Fact]
+    public void Extract_ModuleName_IsNullWhenVbaCodeAbsent()
     {
         const string irJson = """{ "Type": "Form", "Properties": {} }""";
+
+        var meta = FormMetadataExtractor.Extract("frm", irJson);
+
+        Assert.Null(meta.ModuleName);
+    }
+
+    [Fact]
+    public void Extract_ModuleName_IsNullWhenVbNameLineAbsent()
+    {
+        // VbaCode present but no Attribute VB_Name line (e.g. synthetic/legacy code).
+        const string irJson = """{ "Type": "Form", "Properties": {}, "VbaCode": "Option Compare Database\r\nOption Explicit" }""";
 
         var meta = FormMetadataExtractor.Extract("frm", irJson);
 

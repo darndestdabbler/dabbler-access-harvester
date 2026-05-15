@@ -1,4 +1,6 @@
+using System.IO;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace AccessHarvester.Access;
 
@@ -146,6 +148,35 @@ internal static class AccessObjectReader
     {
         if (!obj.TryGetProperty(key, out var v) || v.ValueKind == JsonValueKind.Null) return null;
         return v.ValueKind == JsonValueKind.Number && v.TryGetDouble(out double d) ? d : null;
+    }
+
+    // Matches: Attribute VB_Name = "Form_frmPatients"  (leading whitespace allowed)
+    private static readonly Regex VbNameRegex = new(
+        @"^\s*Attribute\s+VB_Name\s*=\s*""(?<name>[^""]+)""",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    /// <summary>
+    /// Extracts the VBA class-module name from the <c>Attribute VB_Name = "..."</c>
+    /// line near the top of a form or report's <c>VbaCode</c> string.
+    /// Returns null when <paramref name="vbaCode"/> is null or the attribute is absent.
+    /// </summary>
+    internal static string? ReadModuleName(string? vbaCode)
+    {
+        if (vbaCode is null) return null;
+        // Attribute VB_Name always appears within the first few lines of a VBA module
+        // (before Option Compare, Option Explicit, or any procedure declarations).
+        // Scanning 10 lines is sufficient for all known Access SaveAsText output shapes.
+        using var reader = new StringReader(vbaCode);
+        int linesScanned = 0;
+        while (linesScanned < 10)
+        {
+            var line = reader.ReadLine();
+            if (line is null) break;
+            var match = VbNameRegex.Match(line);
+            if (match.Success) return match.Groups["name"].Value;
+            linesScanned++;
+        }
+        return null;
     }
 
     internal static string? DecodeDefaultView(

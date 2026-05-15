@@ -78,10 +78,11 @@ public static class FormMetadataExtractor
 
         var rawProperties = AccessObjectReader.GetObject(root, "Properties");
 
+        var vbaCode = AccessObjectReader.ReadString(root, "VbaCode");
         return new FormMetadata
         {
             Name = name,
-            ModuleName = null,
+            ModuleName = AccessObjectReader.ReadModuleName(vbaCode),
             RecordSource = AccessObjectReader.ReadString(rawProperties, "RecordSource"),
             Filter = AccessObjectReader.ReadString(rawProperties, "Filter"),
             OrderBy = AccessObjectReader.ReadString(rawProperties, "OrderBy"),
@@ -90,7 +91,7 @@ public static class FormMetadataExtractor
             GeometryIn = AccessObjectReader.ReadGeometry(root),
             NonDefaultProperties = AccessObjectReader.ReadStringArray(root, "NonDefaultProperties"),
             Children = AccessObjectReader.ReadChildren(root),
-            VbaCode = AccessObjectReader.ReadString(root, "VbaCode"),
+            VbaCode = vbaCode,
         };
     }
 }

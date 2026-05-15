@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -11,39 +13,32 @@ namespace AccessHarvester.Access;
 /// </summary>
 /// <remarks>
 /// Mirrors <see cref="FormMetadataExtractor"/> for the shared form/report
-/// fields (name, bound data source, filter / order, property bag, design
-/// tree, code-behind) and adds the two report-only deliverables:
+/// fields (name, module, bound data source, filter / order, property bag,
+/// design tree, code-behind) and adds the two report-only deliverables:
 /// <see cref="ReportMetadata.GroupLevels"/> and
 /// <see cref="ReportMetadata.PageSetup"/>.
 /// <para>
-/// <b>GroupLevels.</b> Built by intersecting two evidence sources in the
-/// IR JSON:
+/// <b>GroupLevels.</b> Built by scanning the IR JSON's <c>Children</c> array
+/// for two node types:
 /// <list type="number">
-///   <item>Sections in the report root's <c>Children</c> array whose
-///   <c>Type</c> matches <c>GroupLevel&lt;N&gt;Header</c> or
-///   <c>GroupLevel&lt;N&gt;Footer</c> — these set
+///   <item>Nodes with <c>Type</c> matching <c>GroupLevel N</c> (space-separated,
+///   e.g. <c>"GroupLevel 0"</c>) — these are the configuration nodes produced
+///   by <c>AccessTextParser</c> from Access's <c>Begin GroupLevel N</c> blocks.
+///   They carry the grouping expression in <c>Properties["GroupOnCol"]</c>,
+///   the grouping mode code in <c>Properties["GroupOn"]</c>, and the sort /
+///   keep-together / interval values.</item>
+///   <item>Nodes with <c>Type</c> matching <c>GroupLevel&lt;N&gt;Header</c> or
+///   <c>GroupLevel&lt;N&gt;Footer</c> (no space, e.g. <c>"GroupLevel0Header"</c>)
+///   — these are the design-band section nodes. They set
 ///   <see cref="GroupLevel.HasHeader"/> / <see cref="GroupLevel.HasFooter"/>.</item>
-///   <item>The root <c>Properties</c> key <c>GroupLevel&lt;N&gt;</c> — the
-///   field name or expression Access groups on, lifted into
-///   <see cref="GroupLevel.GroupOn"/>.</item>
 /// </list>
-/// Each unique <c>N</c> observed in either source yields one
-/// <see cref="GroupLevel"/>; the result is ordered by level number ascending
-/// (outermost first, matching <see cref="GroupLevel.Level"/>'s 0 = outermost
-/// convention). The per-level mode / interval / sort-order / keep-together
-/// fields (<see cref="GroupLevel.GroupingMode"/>,
-/// <see cref="GroupLevel.GroupInterval"/>, <see cref="GroupLevel.SortOrder"/>,
-/// <see cref="GroupLevel.KeepTogether"/>) need a decoding table for Access's
-/// numeric codes (e.g. <c>GroupOn0 = "0"</c> → <c>EachValue</c>); the table
-/// and a real-fixture confirmation of the raw shape are out of scope for
-/// this session — they remain null and a follow-on session can fill them
-/// without breaking the contract.
+/// Each unique level index observed in either source yields one
+/// <see cref="GroupLevel"/>; the result is ordered by level ascending
+/// (outermost first).
 /// </para>
 /// <para>
 /// <b>PageSetup.</b> Decoding the <c>PrtMip</c> / <c>PrtDevMode</c> binary
-/// blobs is deferred per the spec (the typed schema documents
-/// <see cref="ReportMetadata.PageSetup"/> as best-effort / nullable). This
-/// extractor returns <c>null</c>.
+/// blobs is deferred per the spec. This extractor returns <c>null</c>.
 /// </para>
 /// </remarks>
 public static class ReportMetadataExtractor
@@ -61,13 +56,44 @@ public static class ReportMetadataExtractor
         ["2"] = "Layout View",
     };
 
+    // Matches section bands: GroupLevel0Header, GroupLevel0Footer, GroupLevel1Header, ...
     internal static readonly Regex GroupLevelSectionRegex = new(
         @"^GroupLevel(?<n>\d+)(?<role>Header|Footer)$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
-    internal static readonly Regex GroupLevelPropertyRegex = new(
-        @"^GroupLevel(?<n>\d+)$",
+    // Matches configuration nodes: "GroupLevel 0", "GroupLevel 1", ...
+    // Note the space — this is how AccessTextParser emits "Begin GroupLevel 0".
+    internal static readonly Regex GroupLevelConfigRegex = new(
+        @"^GroupLevel (?<n>\d+)$",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    // GroupOn (mode code) → label
+    internal static readonly Dictionary<string, string> GroupingModeLabels = new(StringComparer.Ordinal)
+    {
+        ["0"] = "EachValue",
+        ["1"] = "Prefix",
+        ["2"] = "Year",
+        ["3"] = "Quarter",
+        ["4"] = "Month",
+        ["5"] = "Week",
+        ["6"] = "Day",
+        ["7"] = "Hour",
+        ["8"] = "Minute",
+        ["9"] = "Interval",
+    };
+
+    internal static readonly Dictionary<string, string> SortOrderLabels = new(StringComparer.Ordinal)
+    {
+        ["0"] = "Ascending",
+        ["1"] = "Descending",
+    };
+
+    internal static readonly Dictionary<string, string> KeepTogetherLabels = new(StringComparer.Ordinal)
+    {
+        ["0"] = "None",
+        ["1"] = "WholeGroup",
+        ["2"] = "WithFirstDetail",
+    };
 
     public static ReportMetadata Extract(string name, string irJson)
     {
@@ -85,104 +111,105 @@ public static class ReportMetadataExtractor
                 nameof(root));
 
         var rawProperties = AccessObjectReader.GetObject(root, "Properties");
-        var consumedGroupLevelKeys = new HashSet<string>(StringComparer.Ordinal);
-        var groupLevels = BuildGroupLevels(root, rawProperties, consumedGroupLevelKeys);
+        var vbaCode = AccessObjectReader.ReadString(root, "VbaCode");
 
-        HashSet<string> promotedKeys;
-        if (consumedGroupLevelKeys.Count == 0)
-        {
-            promotedKeys = FormMetadataExtractor.PromotedRootKeys;
-        }
-        else
-        {
-            promotedKeys = new HashSet<string>(FormMetadataExtractor.PromotedRootKeys, StringComparer.Ordinal);
-            foreach (var k in consumedGroupLevelKeys) promotedKeys.Add(k);
-        }
+        // Read and filter: "GroupLevel N" config nodes are metadata consumed by
+        // BuildGroupLevels; they must not appear in Children alongside design-band sections.
+        var allChildren = AccessObjectReader.ReadChildren(root);
+        var designChildren = allChildren is null ? null
+            : allChildren.Where(c => !GroupLevelConfigRegex.IsMatch(c.Type)).ToList() is { Count: > 0 } filtered
+                ? (IReadOnlyList<AccessControl>)filtered
+                : null;
 
         return new ReportMetadata
         {
             Name = name,
-            ModuleName = null,
+            ModuleName = AccessObjectReader.ReadModuleName(vbaCode),
             RecordSource = AccessObjectReader.ReadString(rawProperties, "RecordSource"),
             Filter = AccessObjectReader.ReadString(rawProperties, "Filter"),
             OrderBy = AccessObjectReader.ReadString(rawProperties, "OrderBy"),
             DefaultView = AccessObjectReader.DecodeDefaultView(rawProperties, DefaultViewLabels),
-            Properties = AccessObjectReader.BuildPromotedPropertiesBag(rawProperties, promotedKeys),
+            Properties = AccessObjectReader.BuildPromotedPropertiesBag(rawProperties, FormMetadataExtractor.PromotedRootKeys),
             GeometryIn = AccessObjectReader.ReadGeometry(root),
             NonDefaultProperties = AccessObjectReader.ReadStringArray(root, "NonDefaultProperties"),
-            Children = AccessObjectReader.ReadChildren(root),
-            GroupLevels = groupLevels,
+            Children = designChildren,
+            GroupLevels = BuildGroupLevels(root),
             PageSetup = null,
-            VbaCode = AccessObjectReader.ReadString(root, "VbaCode"),
+            VbaCode = vbaCode,
         };
     }
 
-    // NOTE: Assumes the report's root Properties bag carries the group-on
-    // expression under a flat key literally named "GroupLevel0" / "GroupLevel1" /
-    // etc. (per the Session 1 audit recommendation). SaveAsText's alternative is
-    // nested `Begin GroupLevel <N>` sub-blocks under the report root, which
-    // AccessTextParser would translate into a different shape. No committed real
-    // grouped-report IR JSON exists yet to confirm which form Access emits;
-    // Session 3's hermetic unit tests cover both interpretations via fabricated
-    // input and the SkippableFact integration test will fail loudly if the
-    // assumption is wrong against a live extract.
-    private static IReadOnlyList<GroupLevel>? BuildGroupLevels(
-        JsonElement root,
-        JsonElement? rawProperties,
-        HashSet<string> consumedGroupLevelKeys)
+    private static IReadOnlyList<GroupLevel>? BuildGroupLevels(JsonElement root)
     {
-        var levels = new SortedDictionary<int, (bool HasHeader, bool HasFooter)>();
+        if (!root.TryGetProperty("Children", out var children) || children.ValueKind != JsonValueKind.Array)
+            return null;
 
-        if (root.TryGetProperty("Children", out var children) && children.ValueKind == JsonValueKind.Array)
+        // Configuration nodes carry the grouping expression and per-level metadata.
+        var configs = new Dictionary<int, (string? GroupOnCol, string? GroupOnCode, string? SortOrder, string? KeepTogether, string? GroupInterval)>();
+        // Section nodes carry HasHeader / HasFooter.
+        var sections = new Dictionary<int, (bool HasHeader, bool HasFooter)>();
+
+        foreach (var child in children.EnumerateArray())
         {
-            foreach (var child in children.EnumerateArray())
+            if (child.ValueKind != JsonValueKind.Object) continue;
+            if (!child.TryGetProperty("Type", out var typeEl) || typeEl.ValueKind != JsonValueKind.String) continue;
+            var typeName = typeEl.GetString() ?? string.Empty;
+
+            // Configuration node: "GroupLevel 0", "GroupLevel 1", ...
+            var configMatch = GroupLevelConfigRegex.Match(typeName);
+            if (configMatch.Success)
             {
-                if (child.ValueKind != JsonValueKind.Object) continue;
-                if (!child.TryGetProperty("Type", out var typeEl) || typeEl.ValueKind != JsonValueKind.String) continue;
-                var match = GroupLevelSectionRegex.Match(typeEl.GetString() ?? string.Empty);
-                if (!match.Success) continue;
-                if (!int.TryParse(match.Groups["n"].Value, System.Globalization.NumberStyles.Integer,
-                        System.Globalization.CultureInfo.InvariantCulture, out int n))
-                    continue;
-                bool isHeader = match.Groups["role"].Value == "Header";
-                levels.TryGetValue(n, out var state);
-                levels[n] = isHeader ? (true, state.HasFooter) : (state.HasHeader, true);
+                if (!int.TryParse(configMatch.Groups["n"].Value, NumberStyles.Integer,
+                        CultureInfo.InvariantCulture, out int n)) continue;
+                var props = AccessObjectReader.GetObject(child, "Properties");
+                configs[n] = (
+                    GroupOnCol: AccessObjectReader.ReadString(props, "GroupOnCol"),
+                    GroupOnCode: AccessObjectReader.ReadString(props, "GroupOn"),
+                    SortOrder: AccessObjectReader.ReadString(props, "SortOrder"),
+                    KeepTogether: AccessObjectReader.ReadString(props, "KeepTogether"),
+                    GroupInterval: AccessObjectReader.ReadString(props, "GroupInterval")
+                );
+                continue;
             }
+
+            // Section node: "GroupLevel0Header", "GroupLevel0Footer"
+            var sectionMatch = GroupLevelSectionRegex.Match(typeName);
+            if (!sectionMatch.Success) continue;
+            if (!int.TryParse(sectionMatch.Groups["n"].Value, NumberStyles.Integer,
+                    CultureInfo.InvariantCulture, out int sn)) continue;
+            bool isHeader = sectionMatch.Groups["role"].Value == "Header";
+            sections.TryGetValue(sn, out var state);
+            sections[sn] = isHeader ? (true, state.HasFooter) : (state.HasHeader, true);
         }
 
-        var groupOnByLevel = new Dictionary<int, string>();
-        if (rawProperties is not null)
-        {
-            foreach (var prop in rawProperties.Value.EnumerateObject())
-            {
-                var match = GroupLevelPropertyRegex.Match(prop.Name);
-                if (!match.Success) continue;
-                if (!int.TryParse(match.Groups["n"].Value, System.Globalization.NumberStyles.Integer,
-                        System.Globalization.CultureInfo.InvariantCulture, out int n))
-                    continue;
-                var groupOn = prop.Value.ValueKind == JsonValueKind.String ? prop.Value.GetString() : null;
-                if (!string.IsNullOrEmpty(groupOn))
-                {
-                    groupOnByLevel[n] = groupOn!;
-                    if (!levels.ContainsKey(n)) levels[n] = (false, false);
-                    consumedGroupLevelKeys.Add(prop.Name);
-                }
-            }
-        }
+        // Union of levels seen in either source, ordered ascending.
+        var allLevels = new SortedSet<int>(configs.Keys);
+        foreach (var k in sections.Keys) allLevels.Add(k);
+        if (allLevels.Count == 0) return null;
 
-        if (levels.Count == 0) return null;
-
-        var result = new List<GroupLevel>(levels.Count);
-        foreach (var (n, state) in levels)
+        var result = new List<GroupLevel>(allLevels.Count);
+        foreach (var n in allLevels)
         {
+            configs.TryGetValue(n, out var cfg);
+            sections.TryGetValue(n, out var sec);
+
             result.Add(new GroupLevel
             {
                 Level = n,
-                GroupOn = groupOnByLevel.TryGetValue(n, out var groupOn) ? groupOn : null,
-                HasHeader = state.HasHeader,
-                HasFooter = state.HasFooter,
+                GroupOn = cfg.GroupOnCol,
+                GroupingMode = DecodeLabel(cfg.GroupOnCode, GroupingModeLabels),
+                SortOrder = DecodeLabel(cfg.SortOrder, SortOrderLabels),
+                KeepTogether = DecodeLabel(cfg.KeepTogether, KeepTogetherLabels),
+                GroupInterval = cfg.GroupInterval is not null
+                    && int.TryParse(cfg.GroupInterval, NumberStyles.Integer,
+                        CultureInfo.InvariantCulture, out int gi) ? gi : null,
+                HasHeader = sec.HasHeader,
+                HasFooter = sec.HasFooter,
             });
         }
         return result;
     }
+
+    private static string? DecodeLabel(string? code, Dictionary<string, string> table)
+        => code is not null && table.TryGetValue(code, out var label) ? label : null;
 }
