@@ -1,30 +1,32 @@
 {
-  "status": "in-progress",
-  "summary": "Session 2 of 3: Option B implementation — wrote AccessHarvester.Access/FormMetadataExtractor.cs, ReportMetadataExtractor.cs, and the shared AccessHarvester.Access/AccessObjectReader.cs (internal helpers) following the established TableMetadataExtractor precedent. Extended SyntheticMetadataExtractorIntegrationTests to validate Forms and Reports categories against the 09-report-grouping-events.expected.json aspirational fixture via loose-match AssertForms/AssertReports/AssertGroupLevels comparators. PageSetup decoding from PrtMip/PrtDevMode and per-level GroupingMode/Interval/SortOrder/KeepTogether decoding deferred per spec/audit-findings (no real-fixture evidence yet; the typed schema documents both as best-effort/nullable). Step 6 code review (Sonnet → gemini-pro VERIFIED) surfaced 2 real bugs fixed in-session: Reports DefaultView wrong label table (forms enumeration applied to reports — added separate ReportMetadataExtractor.DefaultViewLabels with 0=Report View, 1=Print Preview, 2=Layout View), and GroupLevel<N> keys not removed from Properties bag after exact-value lift (refactored BuildGroupLevels to thread a consumed-keys HashSet that augments PromotedRootKeys before BuildPromotedPropertiesBag runs). Step 8 Round 1 ISSUES_FOUND 1 Major (AssertForms/AssertReports unconditionally compared scalar fields via ReadOptionalString, treating missing fixture keys as expected-null) — fixed in-session via new AssertIfFixturePresent helper mirroring AssertGroupLevels's conditional pattern; Round 2 VERIFIED (gpt-5-4).",
+  "status": "complete",
+  "summary": "Session set complete (3 of 3). Session 3 delivered: (1) FormMetadataExtractorTests.cs (29 tests) and ReportMetadataExtractorTests.cs (27 tests) — hermetic unit tests covering all spec-required cases including Filter/OrderBy absent-case coverage, DefaultView decoding per extractor (form vs report enumerations), GroupLevels construction matrix, all deferred-null pins; (2) VbaCode test JSON-escaping bug fixed (CR/LF must be escaped to \\r\\n before JSON interpolation); (3) docs/ir-schema-forms-reports.md — typed-schema public-contract reference for downstream AI; (4) docs/session-sets/structured-form-report-extractor/change-log.md and next-session-set-recommendation.md. 414 active tests passing, 2 SkippableFact skipped (Access COM). Session verification: gpt-5-4 Round 1 ISSUES_FOUND (Filter/OrderBy absent-case tests missing; AccessControl.Type doc over-corrected Section vs Detail), fixed, Round 2 VERIFIED.",
   "files_changed": [
     "AccessHarvester.Access/FormMetadataExtractor.cs",
     "AccessHarvester.Access/ReportMetadataExtractor.cs",
     "AccessHarvester.Access/AccessObjectReader.cs",
+    "tests/AccessHarvester.Tests/FormMetadataExtractorTests.cs",
+    "tests/AccessHarvester.Tests/ReportMetadataExtractorTests.cs",
     "tests/AccessHarvester.Tests/SyntheticMetadataExtractorIntegrationTests.cs",
+    "docs/ir-schema-forms-reports.md",
+    "docs/session-sets/structured-form-report-extractor/change-log.md",
+    "docs/session-sets/structured-form-report-extractor/next-session-set-recommendation.md",
     "docs/session-sets/structured-form-report-extractor/ai-assignment.md",
     "docs/session-sets/structured-form-report-extractor/activity-log.json",
     "docs/session-sets/structured-form-report-extractor/session-state.json",
     "docs/session-sets/structured-form-report-extractor/session-events.jsonl",
     "docs/session-sets/structured-form-report-extractor/session-reviews/session-002.md",
+    "docs/session-sets/structured-form-report-extractor/session-reviews/session-003.md",
+    "docs/session-sets/structured-form-report-extractor/session-reviews/session-003.round-2.md",
     "docs/session-sets/structured-form-report-extractor/issue-logs/session-002.json",
-    "docs/session-sets/structured-form-report-extractor/disposition.json"
+    "docs/session-sets/structured-form-report-extractor/disposition.json",
+    "docs/session-sets/structured-form-report-extractor/audit-findings.md"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 3 (final) is synthesis-heavy: hermetic unit tests for FormMetadataExtractor and ReportMetadataExtractor (GroupLevels edge cases, DefaultView decoding for both enumerations, RecordSource/Filter/OrderBy promotion correctness, AccessControl recursion, LabelInfo case mapping, PageSetup deferral pin) PLUS docs/ir-schema-forms-reports.md (typed schema as the public contract for downstream AI, worked example with raw ir/ JSON and typed records side by side). Premium-tier orchestrator is the right call per the routed recommendation (gemini-pro via route(analysis), 2026-05-14) — synthesis precision on both test generation and prose generation justifies Opus at effort=high. See spec.md Session 3 and ai-assignment.md for per-step routing."
-    }
+  "next_session_set": {
+    "slug": "form-report-code-and-grouping",
+    "summary": "Populate ModuleName on FormMetadata/ReportMetadata (parse Attribute VB_Name from VbaCode), decode GroupLevel per-level metadata (GroupingMode/GroupInterval/SortOrder/KeepTogether — needs real-fixture confirmation first), update ir-schema-forms-reports.md. See next-session-set-recommendation.md for full breakdown."
   },
   "blockers": []
 }
