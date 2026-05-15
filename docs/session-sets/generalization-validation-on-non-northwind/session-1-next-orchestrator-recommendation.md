@@ -1,0 +1,5 @@
+**Next-session orchestrator recommendation (Session 2):** Anthropic (Claude Code / Max), high effort.
+
+The session-2 spec explicitly requires an independent review conducted by "The OTHER orchestrator from Session 1." Since Session 1 was orchestrated by OpenAI/Codex, Session 2 must be orchestrated by Anthropic. The effort is high, as the session includes a full semantic review of the Session 1 package and tests against source artifacts, authoring new falsification tests for missed invariants, and authoring the final generalization-findings report with its strategic verdict.
+
+This session is the capstone for the set, and its primary deliverable is the `generalization-findings.md` report. The orchestrator must synthesize the results of the peer review into a clear verdict (`generalizes-cleanly`, `revise-and-retry`, or `pivot`) and provide the supporting evidence, which requires strong analytical and writing capabilities.

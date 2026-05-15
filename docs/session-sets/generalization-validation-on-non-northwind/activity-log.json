@@ -1,0 +1,130 @@
+{
+  "sessionSetName": "generalization-validation-on-non-northwind",
+  "createdDate": "2026-05-15T04:58:46.139279-04:00",
+  "totalSessions": 2,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-05-15T04:59:37.333458-04:00",
+      "description": "Routed Session 1 ai-assignment.md authoring and wrote the result to disk.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1958,
+          "outputTokens": 1362,
+          "costUsd": 0.0160675
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/required-reading",
+      "dateTime": "2026-05-15T05:07:20.986458-04:00",
+      "description": "Completed required reading for the repo workflow docs plus strategy, HHC-vs-Northwind comparison, the Add-an-Order baseline package, and the workflow-package template.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/prior-session-committed-check",
+      "dateTime": "2026-05-15T05:07:20.986458-04:00",
+      "description": "Verified there was no uncommitted prior-session work in docs/session-sets/workflow-package-pilot/, docs/session-sets/form-report-code-and-grouping/, or tests/AccessHarvester.CharacterizationTests/.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/harvester-pipeline-or-fallback",
+      "dateTime": "2026-05-15T05:07:20.987461-04:00",
+      "description": "Ran the live harvester pipeline against samples/HomeHealthCare.accdb and produced raw/kb/ir output under tmp/generalization-validation-on-non-northwind/AccessMetaData/HomeHealthCare/.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/inventory",
+      "dateTime": "2026-05-15T05:07:20.987461-04:00",
+      "description": "Authored inventory.md capturing the Add-a-Client forms, helper modules, queries/tables, behavior-bearing procedures, Northwind analogues, and harvester coverage notes.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/package-draft",
+      "dateTime": "2026-05-15T05:07:20.988461-04:00",
+      "description": "Authored packages/add-a-client.md in the seven-section template, including the HHC-specific OpenArgs/listbox divergences and the corrected note that tblClients has no data macro.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/characterization-tests",
+      "dateTime": "2026-05-15T05:07:20.988461-04:00",
+      "description": "Added the AddAClient characterization suite covering client defaults/save gating, field validation and normalization, and delete/deactivate lifecycle policy.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/harvester-coverage-notes",
+      "dateTime": "2026-05-15T05:07:20.989464-04:00",
+      "description": "Recorded harvester coverage notes inline in inventory.md, including that live extraction succeeded cleanly and that tblClients validation is form-plus-table-rule based rather than data-macro based.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-05-15T05:07:20.989464-04:00",
+      "description": "dotnet build succeeded. dotnet test initially failed on a pre-existing missing tmp/comprehension-ir Northwind fixture; regenerated the canonical Northwind fixture into tmp/comprehension-ir via the harvester pipeline, then re-ran dotnet test to a fully green pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-05-15T05:11:21.339249-04:00",
+      "description": "Cross-provider session-verification routed via query(\"gemini-pro\", task_type=\"session-verification\") because the router override is calibrated for Claude, not this Codex/OpenAI session. Round 1 verdict: VERIFIED. Saved raw output to session-reviews/session-001.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 35030,
+          "outputTokens": 734,
+          "costUsd": 0.0511275
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-05-15T05:12:45.782956-04:00",
+      "description": "Routed Session 2 orchestrator recommendation via gemini-pro; wrote session-1-next-orchestrator-recommendation.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 5229,
+          "outputTokens": 193,
+          "costUsd": 0.00846625
+        }
+      ]
+    }
+  ]
+}
