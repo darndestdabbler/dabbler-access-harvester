@@ -91,5 +91,41 @@
         }
       ]
     }
+    ,
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/verify-prior-session",
+      "dateTime": "2026-05-15T02:00:00.000000-04:00",
+      "description": "Verified Session 1 committed (commit b8d6469). Clean working tree.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/integration-test",
+      "dateTime": "2026-05-15T02:05:00.000000-04:00",
+      "description": "Extended SyntheticMetadataExtractorIntegrationTests.AssertGroupLevels to conditionally assert GroupingMode, SortOrder, KeepTogether, GroupInterval from the expected fixture — same TryGetPropertyValue pattern as the existing GroupOn/HasHeader/HasFooter assertions. The 09-report-grouping-events.expected.json fixture was not updated with specific decoded values (no Access COM available to confirm actual pipeline output). The existing integration test already checks GroupOn, HasHeader, HasFooter. 436 active tests pass, 2 SkippableFact skipped.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/session-verification",
+      "dateTime": "2026-05-15T02:10:00.000000-04:00",
+      "description": "Cross-provider session verification routed to gpt-5-4. VERIFIED first round. Raw output saved to session-reviews/session-002.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0648
+        }
+      ]
+    }
   ]
 }
