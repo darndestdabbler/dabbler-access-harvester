@@ -997,7 +997,110 @@ reference; if it proves out twice in *this* repo, propose promotion to
   `session-reviews/`. The `session-reviews/` directory is reserved for
   `log.save_session_review()` output.
 
+## Post-Fix Sweep All Narrative Artifacts When A Rule's Confidence Tag Changes
+
+- **Context:** Workflow-package sessions where a per-rule
+  confidence tag (`inferred` vs `confirmed`) or an open-questions
+  entry changes between a draft and a fix round. First hit in
+  `generalization-validation-on-non-northwind` Session 2 Rounds
+  1-3 (2026-05-15).
+- **Failure or friction:** Round 1 cross-provider verification
+  found that the `Add a Client` falsification test hardcoded the
+  exact `FormatPhone` output mask while the package said the mask
+  was only `inferred`. The orchestrator read
+  `basUtilities::FormatPhone`, upgraded the package's rule to
+  `confirmed`, aligned the test, and removed the
+  now-resolved ambiguity-log entry — but did not sweep
+  `generalization-findings.md`, which still had multiple stale
+  references describing the mask as `inferred / not read / open
+  question`. Round 2 flagged those as a Minor inconsistency. The
+  orchestrator fixed them, but in doing so accidentally changed a
+  count cell from "two questions in Session 1; Session 2 added two"
+  to "Session 2 added one more" — without noticing that Session 1
+  had actually left three open questions (the `mcrValidation`
+  question was still in the package). Round 3 flagged that as
+  another Minor inconsistency. Three verification rounds and ~$0.27
+  of routed cost to converge on a one-line fix that should have
+  been a single sweep.
+- **Lesson:** When a rule's confidence tag, confidence reasoning,
+  or open-questions list changes, the artifacts that **narrate**
+  that rule's state — generalization findings, change logs,
+  template-fit summary tables, count cells in narrative prose —
+  must be swept for stale language at the same time the rule
+  itself is updated. The natural site of post-fix drift is the
+  narrative summary, not the rule itself.
+- **Action for future sessions:** Maintain a small post-fix
+  checklist when changing a per-rule confidence tag or
+  resolving an ambiguity-log entry:
+  1. Update the rule (package Section 3) and any test that
+     references it.
+  2. Grep the *related narrative artifacts* for stale tokens:
+     `inferred`, `not read`, `open question`, `not yet`,
+     `Session 2 did not`. Anywhere those tokens appear adjacent
+     to the changed rule, update the surrounding language.
+  3. Re-count any count cells in summary tables (e.g., "N
+     questions", "N invariants", "N rules") so the cross-artifact
+     totals match.
+  4. Only then run the next cross-provider verification round.
+  
+  If a second session set hits this same multi-round-drift pattern
+  on a confidence-tag change, promote to a Convention in
+  `project-guidance.md` and update the verifier prompt template to
+  ask explicitly about confidence-tag/narrative consistency.
+
+## Falsification Tests Must Not Assert Behavior The Package Says It Did Not Verify
+
+- **Context:** Path-b-probe pattern (AI translates a source
+  procedure into a stub workflow, AI writes characterization
+  tests, translation is discarded). First hit in
+  `generalization-validation-on-non-northwind` Session 2 Round 1
+  (2026-05-15).
+- **Failure or friction:** Session 2 authored
+  `FormatPhone_NormalizesToCanonicalShapeOnAfterUpdate()` which
+  hardcoded the exact output mask `"(555) 123-4567"`, fallback
+  behavior for non-10-digit input, and a `null -> null` return.
+  But the package's phone-normalization rule explicitly said
+  "Confidence: confirmed (that normalization happens); inferred
+  (the exact output mask — Session 2 did not read `FormatPhone`'s
+  body)." The test was asserting more than the package claimed to
+  have verified — it was, in effect, asserting its own stub's
+  shape rather than the source's behavior. The Round 1 verifier
+  correctly flagged this as a Major finding.
+- **Lesson:** Anti-coupling and evidence are two faces of the same
+  rule: a falsification test pins what the package says is
+  *confirmed*, not what the test author *thinks* the source
+  probably does. A test that asserts more specific behavior than
+  the package claims to know is a stub-tautology — it verifies
+  the test's own implementation, not a workflow invariant. Two
+  valid resolutions: (a) tighten the test to the verified
+  portion only, (b) read the referenced source body, upgrade the
+  package to `confirmed`, and keep the specific assertion.
+- **Action for future sessions:** Before adding a falsification
+  test against a workflow-package rule, check the rule's
+  confidence tag. If the tag is `confirmed`, the test can assert
+  the full specific shape the rule names. If the tag is
+  `inferred`, the test must assert only what is `confirmed` —
+  either restructure the test, or upgrade the package by reading
+  the referenced source before writing the test. Cross-provider
+  peer review reliably catches this; treat the convention as a
+  pre-review checklist item to avoid spending verification rounds
+  on it.
+  
+  If a second session set hits this same pattern, promote to a
+  Convention in `project-guidance.md` under workflow-package
+  authoring (next to the existing anti-coupling guidance from
+  `workflow-package-pilot`).
+
 ## Write `disposition.json` Before The Final Session's Closeout Commit, Not After
+
+> **Promoted to `project-guidance.md` → Conventions → Workflow
+> Expectations** on 2026-05-15 (after `generalization-validation-on-non-northwind`
+> Sessions 1-2, second-context confirmation — proactive application
+> rather than a second failure-mode hit). Retained here as the
+> action-detail reference; the rule itself is now a Convention. The
+> companion workflow-doc update lists `disposition.json` explicitly
+> as a Step 8 closeout artifact so future orchestrators don't have
+> to discover this from lessons-learned.
 
 - **Context:** Final-session closeout (Step 8). First hit in
   `form-report-code-and-grouping` Session 3 (2026-05-15).

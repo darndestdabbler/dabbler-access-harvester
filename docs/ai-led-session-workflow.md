@@ -841,6 +841,17 @@ result = route(
 Append the recommendation to `ai-assignment.md` and surface it in
 the printout + Pushover body.
 
+**Last session only — generate `disposition.json` before committing.**
+This is a closeout artifact that `mark_session_complete()` enforces
+via its `disposition_present` gate; writing it after the closeout
+commit forces a second commit. Include `status: "complete"`, a
+summary string, a `files_changed[]` list, a
+`next_session_set: {slug, summary}` block, and `blockers: []`. See
+`docs/session-sets/structured-form-report-extractor/disposition.json`
+for the canonical shape, and `docs/planning/project-guidance.md` →
+Conventions → Workflow Expectations → "Write `disposition.json`
+before the final session's closeout commit" for the rationale.
+
 **Last session only — generate the change log before committing.** It
 must land in the same commit as the final session's code so the
 session set is marked complete in a single push. Use

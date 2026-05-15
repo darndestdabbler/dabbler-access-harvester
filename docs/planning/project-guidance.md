@@ -453,6 +453,28 @@ experiments only.
   `lessons-learned.md` → "Probe Output Value Earlier; Don't Sink
   Token Budget Into Unvalidated Substrates".
 
+- **Write `disposition.json` before the final session's closeout
+  commit.** `mark_session_complete()` enforces a `disposition_present`
+  closeout gate plus a clean-working-tree gate; writing
+  `disposition.json` AFTER the closeout commit forces a second commit.
+  On the final session, generate `disposition.json` as part of the
+  Step 8 closeout artifacts — alongside `change-log.md` and
+  `next-session-set-recommendation.md` — BEFORE staging the closeout
+  commit. The file should include `status: "complete"`, a summary
+  string, a `files_changed[]` list, a `next_session_set: {slug, summary}`
+  block, and `blockers: []`. See
+  `docs/session-sets/structured-form-report-extractor/disposition.json`
+  for the canonical shape. Confirmed in two contexts:
+  `form-report-code-and-grouping` Session 3 (the original failure
+  mode: a tail commit was needed to satisfy the gate) and
+  `generalization-validation-on-non-northwind` Sessions 1-2 (proactive
+  application — Session 1 wrote disposition.json in-progress, Session
+  2 updated it before the closeout commit; gate never fired).
+  Action-detail reference is preserved in `lessons-learned.md` →
+  "Write `disposition.json` Before The Final Session's Closeout
+  Commit, Not After". The workflow doc's Step 8 also lists
+  `disposition.json` explicitly as a generated artifact.
+
 - **Verify the prior session actually committed and pushed before
   starting a new one.** External tooling reads `session-state.json`
   for in-progress detection (correct), but the orchestrator picking
