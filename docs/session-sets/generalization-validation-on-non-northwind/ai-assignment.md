@@ -136,3 +136,17 @@ Invoke the `session-verification` task. The router will delegate this to the alt
 The session-2 spec explicitly requires an independent review conducted by "The OTHER orchestrator from Session 1." Since Session 1 was orchestrated by OpenAI/Codex, Session 2 must be orchestrated by Anthropic. The effort is high, as the session includes a full semantic review of the Session 1 package and tests against source artifacts, authoring new falsification tests for missed invariants, and authoring the final generalization-findings report with its strategic verdict.
 
 This session is the capstone for the set, and its primary deliverable is the `generalization-findings.md` report. The orchestrator must synthesize the results of the peer review into a clear verdict (`generalizes-cleanly`, `revise-and-retry`, or `pivot`) and provide the supporting evidence, which requires strong analytical and writing capabilities.
+
+## Session 2 Actuals
+
+- **Orchestrator used:** Claude Code (Opus 4.7), effort=high. Matches the recommendation.
+- **Total routed cost for Session 2:** $0.4800 (gpt-5-4 cross-provider session-verification across four rounds — Round 1 $0.2108 / Round 2 $0.1307 / Round 3 $0.1252 / Round 4 $0.0134).
+- **Total set-level routed cost:** $0.5557 (Session 1 $0.0757 routed via gemini-pro for ai-assignment + verification + recommendation; Session 2 $0.4800 routed via gpt-5-4 for cross-provider verification).
+- **Verification path:** the default-cross-provider override (`session-verification` -> `gpt-5-4` for the Claude orchestrator) routed correctly; no manual `query()` was needed in Session 2.
+- **Verdict:** `generalizes-cleanly` (Round 4 VERIFIED after three rounds of progressively narrower fixes).
+- **Cost-vs-target:** target was $0.20-$0.40 across the set; actual $0.5557 (~40% over). Driver: three verification iterations on Round 1's Major + 2 Minor findings, not a runaway re-pass. Each round's fix list was nominal scope. The narrative for next set: budget ~3 verification rounds for synthesis-heavy capstone sessions when the orchestrator is doing a peer review (Session 1 cost $0.0757 vs. Session 2 cost $0.4800 — the peer-review session was the cost driver in the same proportion as `workflow-package-pilot` Session 3 was).
+- **Notes for future calibration:** the FormatPhone-test overspec finding in Round 1 was a real defect (anti-coupling stance asserted in package but contradicted by the test's hardcoded mask). The Round 2 stale-references finding and Round 3 count-mismatch finding were both downstream consequences of the Round 1 fix being applied to the package + test but not propagated to the findings narrative. Lesson worth flagging at Step 9: when a fix upgrades a rule's confidence tag, the artifacts that *describe* the rule (findings, change-log) must be swept for stale "inferred / not read / open question" references — those references are the natural site of post-fix drift.
+
+## Deviations from spec
+
+None. Spec's Session 2 plan was executed in order. Stop rules did not fire (verified explicitly in the Round 1 review). Bundled the form-report-code-and-grouping orphan session-state files into this set's closeout commit per the human's instruction at Step 0.

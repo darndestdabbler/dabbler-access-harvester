@@ -125,6 +125,173 @@
           "costUsd": 0.00846625
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/required-reading",
+      "dateTime": "2026-05-15T05:39:56.452573-04:00",
+      "description": "Read session-1 deliverables (inventory, package, characterization tests, session-001 review), Add-an-Order baseline package, HHC/Northwind comparison context, plus YAML/IR sources for Form_frmClientDetail, frmClientSearch, and tblClients.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/prior-session-committed-check",
+      "dateTime": "2026-05-15T05:39:56.453551-04:00",
+      "description": "Verified Session 1 of this set committed (commits 02ad8d9 and 1717f2e). Surfaced orphan uncommitted files from a prior set (form-report-code-and-grouping session-state/events) and sample binary drift. User authorized bundling the form-report state files and ignoring the .accdb timestamp drift.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/package-review",
+      "dateTime": "2026-05-15T05:39:56.453551-04:00",
+      "description": "Independent semantic review of packages/add-a-client.md against the YAML/IR source. Findings: four missing invariants (phone normalization via FormatPhone, state-driven city auto-fill via cboStateCode_AfterUpdate, future-enrollment-date <=Date() gating, deactivation cancel restoring active=True), plus an inferred-vs-confirmed split on FormatPhone exact mask.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/test-review",
+      "dateTime": "2026-05-15T05:39:56.454372-04:00",
+      "description": "Independent review of AddAClient characterization tests. Tests are anti-coupled cleanly (stub workflows, not Access mechanics) but had coverage gaps matching the missing invariants identified in the package review.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/falsification-tests",
+      "dateTime": "2026-05-15T05:39:56.454372-04:00",
+      "description": "Authored Session2FalsificationTests.cs with nine falsification tests: future-enrollment gating, phone normalization determinism, three state-city auto-fill cases (exact-one, multi, none), deactivation-cancel reversibility, deactivation-confirm-with-warning, deactivation-confirm-clean, and tightened CanDelete check over multiple positive-budget counts.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/package-refinement",
+      "dateTime": "2026-05-15T05:39:56.455649-04:00",
+      "description": "Updated packages/add-a-client.md: added three new business rules (phone normalization, state-city auto-fill, deactivation-confirm-rollback), five new invariant->test entries, two new ambiguity-log questions (FormatPhone exact mask, state-city auto-fill intent), and tightened operationalization prose with the table-level EnrollmentDate <=Date() rule plus a deactivation-pattern note.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/generalization-findings",
+      "dateTime": "2026-05-15T05:39:56.456649-04:00",
+      "description": "Authored generalization-findings.md with verdict generalizes-cleanly, section-by-section template-fit analysis (all seven sections clean), five pattern-divergence findings (listbox-cascade, OpenArgs, no-data-macro enforcement, mixed DAO+ADODB, Hungarian naming), three low-priority harvester-coverage extensions for a future set, and a recommended-next-move pointing at Phase 3a (Blazor update workflows) per strategy.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/change-log",
+      "dateTime": "2026-05-15T05:39:56.456649-04:00",
+      "description": "Authored change-log.md in-conversation per the in-conversation summarization convention. Verdict is the headline.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/next-session-set-recommendation",
+      "dateTime": "2026-05-15T05:39:56.457648-04:00",
+      "description": "Authored next-session-set-recommendation.md: primary recommendation is Phase 3a (Blazor update workflows) per strategy.md; secondary optional recommendation is one or two more HHC packages (Add a Service Need, Copy from Prior FY) before fully committing to 3a. Plan-driven repo: no deviation from strategy.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/disposition",
+      "dateTime": "2026-05-15T05:39:56.458652-04:00",
+      "description": "Authored disposition.json before the closeout commit per the lesson from form-report-code-and-grouping Session 3 (the disposition_present closeout gate).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 11,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-05-15T05:39:56.458652-04:00",
+      "description": "dotnet build clean (0 errors, 323 warnings). dotnet test --no-build green: 1848 passed, 2 skipped (Access-COM gated), 0 failed. Characterization tests: 131 passed (122 from Session 1 + 9 new Session 2 falsification tests).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 12,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-05-15T05:43:28.493999-04:00",
+      "description": "Cross-provider session-verification routed via route(task_type='session-verification', complexity_hint=70). Model: gpt-5-4. Saved raw output to session-reviews/session-002.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20461,
+          "outputTokens": 10643,
+          "costUsd": 0.21079749999999997
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 13,
+      "stepKey": "session-2/verification-round-2",
+      "dateTime": "2026-05-15T05:47:51.679343-04:00",
+      "description": "Round 2 cross-provider session-verification after fixing the Round 1 Major (FormatPhone test overspecified) and two Minor findings. Model: gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 22940,
+          "outputTokens": 4889,
+          "costUsd": 0.130685
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 14,
+      "stepKey": "session-2/verification-round-3",
+      "dateTime": "2026-05-15T05:50:57.558370-04:00",
+      "description": "Round 3 cross-provider session-verification after fixing the Round 2 Minor finding (stale FormatPhone references in generalization-findings.md). Model: gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9675,
+          "outputTokens": 6731,
+          "costUsd": 0.1251525
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 15,
+      "stepKey": "session-2/verification-round-4",
+      "dateTime": "2026-05-15T05:51:57.115274-04:00",
+      "description": "Round 4 verification after fixing the Round 3 Section 7 count mismatch. Model: gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4338,
+          "outputTokens": 171,
+          "costUsd": 0.01341
+        }
+      ]
     }
   ]
 }
