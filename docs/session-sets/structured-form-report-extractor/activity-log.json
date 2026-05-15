@@ -228,6 +228,94 @@
           "costUsd": 0.00161875
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/verify-prior-session",
+      "dateTime": "2026-05-15T00:00:00.000000-04:00",
+      "description": "Verified Session 2 committed (commits 3b75974 + 1f90f55). Test files FormMetadataExtractorTests.cs and ReportMetadataExtractorTests.cs present as untracked new files.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/unit-tests",
+      "dateTime": "2026-05-15T00:05:00.000000-04:00",
+      "description": "FormMetadataExtractorTests.cs (27 tests) and ReportMetadataExtractorTests.cs (24 tests) confirmed complete and passing. Fixed one bug in Extract_VbaCode_PassedThrough: the test was embedding literal CR/LF chars into the JSON string (invalid JSON); added .Replace('\\r','\\\\r').Replace('\\n','\\\\n') to produce valid JSON escape sequences. 410 active tests pass (2 SkippableFact skipped — Access COM not present).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/typed-schema-docs",
+      "dateTime": "2026-05-15T00:10:00.000000-04:00",
+      "description": "Wrote docs/ir-schema-forms-reports.md documenting the typed FormMetadata/ReportMetadata/AccessControl/LabelInfo/GeometryInches/GroupLevel/PageSetup/Margins public contract with pipeline overview, per-field tables (name, type, notes), Fields-Not-Re-Modeled section, and two worked examples (form + grouped report).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-05-15T00:20:00.000000-04:00",
+      "description": "dotnet test: 414 active tests passing (410 from prior + 4 new absent-case tests for Filter/OrderBy on both Form and Report), 2 SkippableFact skipped (Access COM). 0 errors, 0 new failures.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/doc-review",
+      "dateTime": "2026-05-15T00:15:00.000000-04:00",
+      "description": "Routed documentation review on ir-schema-forms-reports.md (sonnet, code-review, complexity_hint=50). ISSUES_FOUND: 2 — (1) Major: Children note said 'Section (Detail)' but Detail section has Type='Detail', not 'Section'; fixed AccessControl.Type list to remove the ambiguity; (2) Minor: Label eligible-types list used 'etc.' — expanded to full list (ListBox, OptionButton, ToggleButton, Subform, Subreport). Both fixed. Verifier (gemini-pro): VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 15792,
+          "outputTokens": 7393,
+          "costUsd": 0.158271
+        }
+      ]
+    }
+    ,
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/session-verification",
+      "dateTime": "2026-05-15T00:25:00.000000-04:00",
+      "description": "Round 1 cross-provider session-verification routed to gpt-5-4. ISSUES_FOUND: 2 — (1) Major: Filter/OrderBy absent-case tests missing in both form and report test files; (2) Minor: AccessControl.Type doc over-corrected 'Section vs Detail' — Type is pass-through from IR; form body section has Type='Section' with Name='Detail', not Type='Detail'. Raw output saved to session-reviews/session-003.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 22754,
+          "outputTokens": 8475,
+          "costUsd": 0.1840
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/session-verification-r2",
+      "dateTime": "2026-05-15T00:30:00.000000-04:00",
+      "description": "Applied Round 1 fixes: added Extract_FilterAbsent_IsNull + Extract_OrderByAbsent_IsNull to both FormMetadataExtractorTests and ReportMetadataExtractorTests (414 tests now pass); updated AccessControl.Type doc to say Type is pass-through and clarify Section/Detail encoding for form body sections; fixed worked example to use Type='Section' for form body. Round 2 verification routed to gpt-5-4: VERIFIED. Raw output saved to session-reviews/session-003.round-2.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0268
+        }
+      ]
     }
   ]
 }
