@@ -30,7 +30,7 @@
   ],
   "verification_method": "api",
   "verification_verdict": "VERIFIED",
-  "next_session_orchestrator": {
+  "next_orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
     "model": "claude-opus-4-7",
