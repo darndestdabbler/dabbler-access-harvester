@@ -354,6 +354,92 @@
           "costUsd": 0.007005000000000001
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/smoke-test",
+      "dateTime": "2026-05-17T12:52:10.656493-04:00",
+      "description": "Route smoke-test analysis of frmOrderDetails against the migration map (smoke-test-frmOrderDetails.md)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 10796,
+          "outputTokens": 1860,
+          "costUsd": 0.032095
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/map-amendments",
+      "dateTime": "2026-05-17T12:53:20.856842-04:00",
+      "description": "Direct amendments to docs/cross-repo/access-to-platform-migration-map.md addressing 6 smoke-test gaps (3 Major: Calculated Controls / Cross-form references / UDF in ControlSource; 3 Minor: ComboBox RowSource Types / Button Intent / StatusBarText). Added 7 rows to Form table, 1 row to Subform table; refined Form Open-gaps note to reflect new rows.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-05-17T12:54:16.118347-04:00",
+      "description": "dotnet build (0 errors, 323 pre-existing warnings) + dotnet test (all 1708 tests passing, 2 SkippableFact skipped, 0 failed).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/verify-round-1",
+      "dateTime": "2026-05-17T12:56:33.145075-04:00",
+      "description": "Cross-provider session verification round 1",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 8134,
+          "outputTokens": 5165,
+          "costUsd": 0.09781000000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/next-session-set-recommendation",
+      "dateTime": "2026-05-17T12:59:40.934581-04:00",
+      "description": "Route next-session-set recommendation (last session of set)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1368,
+          "outputTokens": 329,
+          "costUsd": 0.004999999999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/change-log",
+      "dateTime": "2026-05-17T13:00:47.708586-04:00",
+      "description": "Generate change-log.md via route(summarization, max_tier=1)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1742,
+          "outputTokens": 1050,
+          "costUsd": 0.0008912999999999999
+        }
+      ]
     }
   ]
 }
