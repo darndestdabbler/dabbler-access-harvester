@@ -24,7 +24,7 @@ from pathlib import Path
 
 from ai_router import route
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_PATH = REPO_ROOT / "AccessHarvester.Core" / "Ir" / "ModalDetailFormSchema.json"
 SAMPLE_PATH = REPO_ROOT / "AccessHarvester.Core" / "Ir" / "samples" / "frmBudgetServicePlan.ir.yaml"
 SYNTHESIS_PATH = REPO_ROOT / "docs" / "lowdefy-evaluation" / "synthesis.md"

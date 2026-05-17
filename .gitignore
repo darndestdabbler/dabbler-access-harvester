@@ -33,6 +33,13 @@ samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml
 # not part of the repo state.
 *.lscache
 
+# Stray output directory `dotnet run --project tools/AccessHarvester.IrCodegen`
+# creates when invoked with a relative output path that resolves against the
+# csproj directory instead of the repo root. The intended output target is
+# `output-tests/blazor-add-an-order/Ui/Pages/Generated/`; the nested copy
+# under the tool itself is always wrong.
+tools/AccessHarvester.IrCodegen/output-tests/
+
 # IDE/editor metadata
 .vs/
 .vscode/

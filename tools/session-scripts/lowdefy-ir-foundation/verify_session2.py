@@ -12,7 +12,7 @@ from pathlib import Path
 from ai_router import route
 from ai_router.session_log import SessionLog
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SESSION_SET = REPO_ROOT / "docs" / "session-sets" / "lowdefy-ir-foundation"
 
 
