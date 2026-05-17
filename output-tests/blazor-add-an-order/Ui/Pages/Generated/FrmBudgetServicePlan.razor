@@ -1,0 +1,55 @@
+@namespace BlazorAddAnOrder.Ui.Pages.Generated
+@inherits FrmBudgetServicePlanBase
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">FY-Budgeted Service Plan</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.subtitle1" Class="mt-2">FY-Budgeted Service Plan</MudText>
+        <MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText>FY-Budgeted Service Plan</MudText>
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText>Client</MudText>
+                <MudTextField T="string" Label="Client" Value='@(System.Convert.ToString(loadPlan?["ClientName"]))' ReadOnly="true" />
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText>FY</MudText>
+                <MudTextField T="string" Label="Fiscal Year" Value='@(System.Convert.ToString(loadPlan?["FiscalYear"]))' ValueChanged='@((string __v) => loadPlan!["FiscalYear"] = __v)' OnBlur="OnFiscalYearChanged" />
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText>Budgeted</MudText>
+                <MudTextField T="string" Label="Annual Budget" Value='@(System.Convert.ToString(loadPlan?["AnnualBudget"]))' ValueChanged='@((string __v) => loadPlan!["AnnualBudget"] = __v)' />
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText>Planned</MudText>
+                <MudTextField T="string" Label="Total Planned" Value='@(System.Convert.ToString(loadPlan?["TotalPlanned"]))' ReadOnly="true" />
+            </MudStack>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText>Remaining</MudText>
+                <MudTextField T="string" Label="Remaining" Value='@(System.Convert.ToString((System.Convert.ToDouble(loadPlan?["AnnualBudget"]) - System.Convert.ToDouble(loadPlan?["TotalPlanned"]))))' ReadOnly="true" />
+            </MudStack>
+            <MudDivider />
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudText>Client Needs</MudText>
+                <MudSelect T="object" Label="Client Need" Value='@(loadPlan?["NeedID"])' ValueChanged='@((object __v) => loadPlan!["NeedID"] = __v)'>
+                    @if (loadNeedsForClient != null)
+                    {
+                        @foreach (var __row in loadNeedsForClient)
+                        {
+                            <MudSelectItem T="object" Value='@(__row["NeedID"])'>@__row["NeedName"]</MudSelectItem>
+                        }
+                    }
+                </MudSelect>
+            </MudStack>
+            <MudDivider />
+            <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
+                <MudButton OnClick="OnSave" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
+                <MudButton OnClick="OnDelete" Variant="Variant.Filled" Color="Color.Primary">Delete</MudButton>
+                <MudButton OnClick="OnCancel" Variant="Variant.Filled" Color="Color.Primary">Close</MudButton>
+            </MudStack>
+        </MudStack>
+    </DialogContent>
+</MudDialog>
