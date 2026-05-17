@@ -54,6 +54,49 @@
       "description": "Applied the six commit-blocker review findings: (5+10) readOnly property added to TextBox/ComboBox/CheckBox + two-way binding semantics documented in schema description; (3) binding standardized on _request operator form in sample; (9) RefreshRequest action added to catalog; (11) event composition order documented + at-least-one-of-actions/tryCatch enforced via anyOf; (12) needId parameter added to savePlan in sample; (13) lazy parameter-eval semantics documented on request def. Sample re-validates against the schema.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/route-session-verification-round-1",
+      "dateTime": "2026-05-17T08:55:00-04:00",
+      "description": "Routed mandatory end-of-session verification (workflow Step 6). Verifier: gpt-5-4 (cross-provider; orchestrator is Anthropic). Verdict: ISSUES_FOUND, 4 findings (3 Major, 1 Minor): (1) schema omitted spec-required `operators` section; (2) `layout` root not enforced as container; (3) writable bindings accept non-assignable expressions; (4) sample used `onLoad` instead of spec-required `onInit`. Raw review at session-reviews/session-001.md (round 1).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 10982,
+          "outputTokens": 12037,
+          "costUsd": 0.20801
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/apply-verifier-fixes",
+      "dateTime": "2026-05-17T09:00:00-04:00",
+      "description": "Applied all four verifier findings as orchestrator errors (workflow Step 7, resolution = accept-finding): (1) added top-level `operators` section + `_op` reference operator in expression catalog; (2) introduced `$defs/containerBlock` and re-pointed `layout` at it so leaf controls cannot be the root; (3) added if/then on TextBox/ComboBox/CheckBox so non-readOnly bindings must be a direct `_request` operator; (4) renamed `onLoad` -> `onInit` in sample. Issue log saved at issue-logs/session-001.json.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/route-session-verification-round-2",
+      "dateTime": "2026-05-17T09:05:00-04:00",
+      "description": "Routed round-2 verification at complexity_hint=85 per the workflow's Major-finding rule. Verifier: gpt-5-4 again (sticky provider). Verdict: VERIFIED, 0 issues. Round-2 review appended to session-reviews/session-001.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11317,
+          "outputTokens": 9647,
+          "costUsd": 0.1729975
+        }
+      ]
     }
   ]
 }

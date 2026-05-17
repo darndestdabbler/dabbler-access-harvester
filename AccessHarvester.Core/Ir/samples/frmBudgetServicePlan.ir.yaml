@@ -57,7 +57,7 @@ requests:
       budgetId: { _state: budgetId }
 
 events:
-  onLoad:
+  onInit:
     actions:
       - type: Request
         params:
