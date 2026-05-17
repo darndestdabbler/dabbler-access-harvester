@@ -1134,3 +1134,62 @@ reference; if it proves out twice in *this* repo, propose promotion to
   this same failure mode, propose promoting this rule to a Convention
   in `project-guidance.md` and updating `docs/ai-led-session-workflow.md`
   Step 8 to list `disposition.json` explicitly.
+
+## Pre-Verification Sweep For Cross-Session Decision Drift
+
+- **Context:** Multi-session sets where Session N's deliverables
+  reference open-question resolutions or decisions adjudicated in
+  Session 1 (or any earlier session). First hit in
+  `remaining-work-planner` Session 3 (2026-05-17).
+- **Failure or friction:** Session 3 of `remaining-work-planner`
+  authored a strategy.md Phase 4 update whose "Done when" paragraph
+  still required golden output for **three** canonical fixtures
+  (Northwind + HomeHealthCare + MiniComplex), while Session 1's Open
+  Question 1 had resolved MiniComplex OUT of Phase 4 weeks earlier
+  (recorded in `gap-audit.md`, the `disposition.json` →
+  `post_close_resolutions`, and carried correctly into
+  `remaining-work-tree.md` and the new ROADMAP.md). The orchestrator
+  authored the strategy.md edit without grepping for the old
+  three-fixture language; cross-provider verification (gpt-5-4 R1)
+  caught it as a Major finding. Fix was trivial (one-paragraph edit),
+  but R1 cost $0.187 and ~5 minutes of orchestrator time that a
+  zero-cost grep would have prevented.
+- **Lesson:** When a new session's artifacts reference resolutions
+  adjudicated in a prior session (open questions, candidate-for-
+  unfreezing decisions, scope decisions, fixture-inclusion calls),
+  the orchestrator's natural authoring mode draws on the **prior**
+  language ("three canonical fixtures" was the pre-Q1 phrasing
+  throughout the codebase). The narrative-sweep failure mode that
+  the existing "Post-Fix Sweep All Narrative Artifacts" lesson covers
+  is intra-session (R1 → R2 drift after a fix); this is the
+  cross-session variant. The mitigation pattern is the same — grep
+  before verification — but the trigger is different (writing new
+  artifacts that reference past decisions, not fixing R1 findings).
+- **Action for future sessions:** Before the first cross-provider
+  verification call on any session that produces artifacts
+  referencing prior-session decisions, run a grep pass on the new
+  artifacts for the pre-resolution language. For
+  `remaining-work-planner` Session 3, that would have been:
+
+  ```bash
+  grep -nE "three.*fixture|MiniComplex" \
+    docs/planning/strategy.md \
+    docs/session-sets/ROADMAP.md \
+    docs/session-sets/remaining-work-planner/change-log.md
+  ```
+
+  The grep target is the *old* phrasing the decisions superseded,
+  not the new phrasing. For the sets this orchestrator touches in
+  the near term: Session 1 Open Questions resolved
+  (MiniComplex OUT, macros/property-sheet hybrid inventory-driven,
+  packaging self-contained binary) imply
+  grep targets like `three.*fixture`, `\\bMiniComplex\\b` (outside
+  excluded-fixture context), `dotnet.tool` (out as primary), and
+  similar. Cost: zero. Cost of skipping: an R1 retry round.
+
+  If a second session set hits this same pattern (an R1 Major or
+  Minor traced to stale pre-resolution language in a new artifact),
+  promote this lesson to a Convention in
+  `docs/planning/project-guidance.md` and consider whether the
+  workflow doc's Step 6 verification setup deserves a "pre-verify
+  grep checklist" sub-bullet.
