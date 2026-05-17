@@ -225,6 +225,230 @@ the workflow's conditional rules.
 
 ---
 
+## 8. CRUD scaffolding templates (added 2026-05-17)
+
+> **Topical shift from sections 1–7.** Sections 1–7 are about the
+> shared session-set / AI-router workflow. This section is about the
+> `crud-scaffolding` set's `dotnet new` templates (`dabbler-crud-service`
+> and `dabbler-crud-page`), which are CRUD-codegen tooling separate
+> from the workflow itself. The feedback is grouped here because it
+> still concerns dabbler-platform's downstream consumers; if it grows,
+> consider splitting it into its own document.
+
+### Context
+
+On 2026-05-17 the harvester repo started Phase 3a
+(`blazor-update-workflows`, hand-authored extension of the
+`blazor-add-an-order` pilot host) and paused mid-implementation
+when the orchestrator noticed `crud-scaffolding` had shipped two
+production templates on 2026-05-16. The human convened a cross-
+provider strategic review with two in-IDE orchestrators that
+have file-system access to both repos: Gemini 3.1 Pro and GPT-5.5.
+
+Both reviewers' raw reports are preserved at
+`docs/strategic-reviews/2026-05-17-platform-tooling-fit/`. Both
+reviewers independently reached identical conclusions on the
+items below. The harvester pilot will not consume these templates
+in this repo (Phase 3a is deferred to a future migration repo per
+`docs/planning/strategy.md` → Revisions → 2026-05-17), but the
+review surfaced concrete recommendations that improve the
+templates for *any* downstream consumer.
+
+### Issue 8a — Applicability note
+
+### Issue
+
+The `dotnet new dabbler-crud-service` + `dotnet new dabbler-crud-page`
+templates ship without an explicit note about what they are and are
+not for. A consumer encountering them might reasonably assume they
+are the recommended pattern for any "build a list-and-edit page"
+work, including workflow-driven update flows with state machines,
+transition gates, and inventory reallocation.
+
+The templates are actually scoped to **single-entity CRUD/admin
+slices** — flat tables where "list, filter, edit, save" is the
+dominant shape. They do not (and should not) model lifecycle
+transitions, domain commands, multi-entity orchestration, or
+report-preview side effects. Both reviewers framed it identically:
+"misapplied, not useless."
+
+The harvester's first attempted consumer (`Update an Order` from
+`workflow-package-pilot/packages/update-an-order.md`) is exactly
+the kind of workflow these templates should NOT be used for —
+`New → Invoiced → Shipped → Paid → Closed` state machine, line-
+item allocation rebalancing on edit, status-conditional field
+locks, inventory reallocation before delete.
+
+### Recommendation
+
+Add an explicit applicability note near the top of
+`docs/scaffolding-templates/README.md`:
+
+> **What these templates are for:** single-entity CRUD/admin
+> slices — entities where "list, filter, edit, save" is the
+> dominant shape. Examples: suppliers, shippers, payment methods,
+> lookup tables, simple maintenance screens.
+>
+> **What they are NOT for:** workflow-driven flows with status
+> state machines, transition gates, multi-entity orchestration,
+> or domain-specific commands. Author those by hand with a domain
+> service + explicit page composition. The CRUD scaffolder can
+> still support the entity-maintenance surface adjacent to a
+> workflow (e.g., a `Shippers` admin page next to a workflow-
+> driven `Update an Order` page), just not the workflow itself.
+
+The note should reference the strategic-review reports at
+`dabbler-access-harvester/docs/strategic-reviews/2026-05-17-platform-tooling-fit/`
+as the source for the boundary.
+
+### Why this helps platform too
+
+Saves the next consumer the same pause-and-review cycle the
+harvester pilot just spent. Also reduces the temptation to
+reshape the templates around workflow-driven use cases — both
+reviewers explicitly warned against that ("would turn a useful
+platform utility into a half-migration framework"). Keeping the
+boundary visible from the README is the cheapest defense.
+
+---
+
+### Issue 8b — Doc accuracy drift
+
+### Issue
+
+The platform's `FEEDBACK_REMEDIATION_SUMMARY.md` (referenced by
+GPT-5.5 in its review) calls out documentation claims that still
+need correction even after the critical-runtime gaps were fixed.
+Three specific items GPT-5.5 flagged:
+
+1. `AddSupplierScaffolding()` usage vs. direct DI wiring — both
+   options appear in different places; one source-of-truth needed
+   so consumers know which one is canonical.
+2. Navigation menu entry status — the page-template docs imply
+   a menu entry is generated; the actual deliverable defers menu
+   wiring to Granularity 3.
+3. Playwright / manual-verification wording — `CRUD_SCAFFOLDING_FINAL_SUMMARY.md`
+   refers to Playwright tests in some places and manual route
+   verification in others; the actual state is the latter.
+
+### Recommendation
+
+Reconcile the docs against the actual deliverables. The
+remediation summary already names these as open items — closing
+them takes a single doc-review pass, not new code.
+
+### Why this helps platform too
+
+Doc-vs-deliverable drift produces verifier false positives in
+any future session set that touches the templates' docs, and
+sets up an avoidable correction round for the next consumer.
+
+---
+
+### Issue 8c — Defer Granularity 3 until real usage pressure
+
+### Issue
+
+The CRUD scaffolding's `non-mvp-roadmap.md` lists Granularity 3
+(DI automation, navigation menu registration, policy registration,
+test scaffolding) as the next planned investment, plus reflection-
+driven discovery (a `dotnet tool` variant introspecting `DbContext`),
+schema-drift support, OData variants, and multi-entity (master-
+detail) generation.
+
+Both reviewers independently recommended **not** building any of
+those until the existing single-entity templates have been used
+successfully on at least a couple of real entities by an actual
+consumer. The Access migration arc just demonstrated that the
+templates' current scope was a non-fit for the workload that
+came up next; building more automation around a tool whose first
+real-world miss was an applicability mismatch is the wrong move.
+
+### Recommendation
+
+Keep the existing roadmap entries (don't delete; they remain
+valid candidates), but add a guard at the top of
+`non-mvp-roadmap.md`:
+
+> **Reauthorization gate:** Items in this roadmap are deferred
+> until the existing MVP templates have been used on at least
+> 2-3 real entities by a downstream consumer. The first consumer
+> to surface Granularity-3 / reflection / schema-drift /
+> master-detail need cases will provide concrete evidence about
+> which gap matters most. Building automation pre-evidence risks
+> investing in the wrong gap.
+
+### Why this helps platform too
+
+Same principle as the harvester's own "Probe Output Value Earlier"
+convention — substrate built ahead of a real consumer can be
+substrate for the wrong shape. The CRUD scaffolder is at the same
+inflection: it has shipped, but it has not been used at scale by
+a real consumer yet.
+
+---
+
+### Issue 8d — Optional: recipes, not machinery
+
+### Issue
+
+The templates are end-of-the-line code generation. There is no
+documented pattern for "extend a generated CRUD list/detail page
+with extra domain actions" — which is exactly the bridge a
+workflow consumer needs to use CRUD templates for the entity-
+maintenance surfaces and hand-author the workflow surface on top.
+
+Both reviewers flagged this as a *low-cost* platform improvement:
+documentation showing how to extend the generated code with extra
+domain actions and an extension hook pattern (e.g., partial
+classes, an `IExtendedActions<T>` interface the page can render).
+This is recipe work — describing the pattern — not new
+machinery.
+
+### Recommendation
+
+Add a `docs/scaffolding-templates/recipes/` subdirectory with at
+least one worked example: "Adding a workflow action to a CRUD
+detail page." Show the boilerplate consumers can copy verbatim:
+the partial class, the DI registration, the button group, the
+controller endpoint, the API client method. Make it explicit that
+the recipe is for adjacent domain actions, NOT for replacing the
+hand-authored workflow page wholesale.
+
+This is the kind of feedback that would have made the harvester's
+2026-05-17 strategic review unnecessary — if the recipe had
+existed, the orchestrator could have inventoried the platform's
+docs and seen "CRUD scaffolder + recipe for adjacent actions" as
+a hybrid path. Even if no consumer ever uses it, the recipe
+clarifies what the scaffolder is and is not for in a way that
+prose alone doesn't.
+
+### Why this helps platform too
+
+Recipes are cheap to write, hard to write wrong (they're concrete
+code patterns, not architecture), and they communicate scope
+intent better than any prose statement. Two reviewers
+independently recommended this pattern; the cost is one
+afternoon of documentation work.
+
+---
+
+### What the harvester repo will adopt from Issue 8 changes
+
+Nothing. The harvester repo is not consuming the CRUD scaffolder
+in any planned work (Phase 3 candidates 3a, 3b, 3e, 3f, 3g are
+all deferred to a future migration repo per the 2026-05-17
+strategy reset). The recommendations in section 8 are for the
+benefit of dabbler-platform's other downstream consumers — most
+notably the future migration repo when it scopes up.
+
+If the future migration repo opens, expect feedback flow to
+flip: that repo will be a *consumer* of these templates and will
+generate fresh applicability evidence. This section can be
+updated then with concrete usage actuals.
+
+---
+
 ## What the harvester repo will adopt once the above lands
 
 For reference, so platform knows which changes are load-bearing for at
@@ -241,16 +465,30 @@ least one downstream consumer:
 | Rules #16 / #17 / #18 |  | ✅ (audit for UI assumptions) |
 | VS Code extension |  | ✅ (command gating + settings flag) |
 | Per-spec config block | ✅ (with explicit defaults) |  |
+| CRUD scaffolder (section 8) |  | ❌ (not consuming; recommendations are for other downstream consumers) |
 
 ---
 
 ## Summary
 
-The enhancements are good. The portability gaps are small and
-mechanical: confirm command-level gating in the extension, split the
-authoring guide into core + addendum *files*, audit Rules #16-18 for
-implicit UI assumptions, make Step 8's next-set recommendation
-plan-aware, document the spec-config defaults, and gate the backfill
-template on the flags. None of these changes hurt platform; all of them
-mean the next sibling repo (and the one after that) can pull updates
-without forking.
+The enhancements (sections 1–7) are good. The portability gaps are
+small and mechanical: confirm command-level gating in the extension,
+split the authoring guide into core + addendum *files*, audit Rules
+#16-18 for implicit UI assumptions, make Step 8's next-set
+recommendation plan-aware, document the spec-config defaults, and
+gate the backfill template on the flags. None of these changes hurt
+platform; all of them mean the next sibling repo (and the one after
+that) can pull updates without forking.
+
+Section 8 (added 2026-05-17) is a different kind of feedback: a
+post-hoc applicability audit of the `crud-scaffolding` set's
+`dotnet new` templates, surfaced when the harvester's Phase 3a
+implementation attempt paused mid-implementation to ask whether the
+templates were the right tool for the workload. The applicability
+note, doc-accuracy reconciliation, Granularity-3 reauthorization
+gate, and the optional recipe-pattern documentation are
+recommendations both reviewers in the strategic-review pair (Gemini
+3.1 Pro and GPT-5.5) reached independently. The harvester is not a
+consumer of those templates, so the section 8 row in the table
+above is marked "not adopting" — but the next downstream consumer
+will benefit from the recommendations being in place.
