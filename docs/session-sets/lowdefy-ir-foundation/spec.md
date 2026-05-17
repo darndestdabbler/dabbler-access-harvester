@@ -99,8 +99,19 @@ modal is enough for validation; leave other forms for later.
 Build a code generator that reads `ModalDetailForm` IR files and emits a
 Blazor component pair (`.razor` and `.razor.cs` code-behind).
 
-**Approach:** T4 template (`.tt` file) or C# Source Generator. Recommend T4
-for quick iteration; Source Generator for runtime integration later.
+**Approach:** T4 template (`.tt` file), C# Source Generator, **or a
+standalone .NET console executable that walks the IR and writes the
+output files.** Recommend the standalone console exe for this slice
+(easier .NET 10 + System.Text.Json plumbing, closer to a future Source
+Generator port than a `.tt` template, and avoids the build-tool
+dependency on `dotnet-t4`).
+
+> **Spec amendment (Session 2 of 2, 2026-05-17):** the original spec
+> listed only T4 or Source Generator. The console-exe option was added
+> after the orchestrator's pre-Session-2 decision prompt; the actual
+> deliverable lives at [`tools/AccessHarvester.IrCodegen/`](../../../tools/AccessHarvester.IrCodegen/),
+> which is a console exe. T4 / Source Generator remain valid follow-up
+> targets when a production codegen path is built.
 
 **Generator input:** one IR file (ModalDetailForm schema).
 **Generator output:** one `.razor` + one `.razor.cs` pair that:
@@ -228,8 +239,9 @@ architectural synthesis.
 - Git commit
 
 ### Session 2
-- `tools/ModalDetailFormGenerator.tt` — T4 template (or Source Generator
-  equivalent)
+- `tools/AccessHarvester.IrCodegen/` — standalone .NET console exe (per
+  the Session 2 spec amendment; replaces the originally-specced
+  `tools/ModalDetailFormGenerator.tt` T4 template)
 - Generated sample output (`.razor` + `.razor.cs` files in `tmp/`)
 - `docs/session-sets/lowdefy-ir-foundation/generator-validation-notes.md`
 - `docs/session-sets/lowdefy-ir-foundation/schema-refinements.md`

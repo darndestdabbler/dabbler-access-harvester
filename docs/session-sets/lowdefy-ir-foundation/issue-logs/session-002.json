@@ -1,0 +1,22 @@
+[
+  {
+    "issueNumber": 1,
+    "severity": "Major",
+    "category": "Completeness",
+    "location": "tools/AccessHarvester.IrCodegen/",
+    "summary": "Generator landed as console exe rather than T4 template or C# Source Generator.",
+    "resolution": "reverify-reshaped",
+    "cause": "context-gap",
+    "resolutionNotes": "User explicitly chose the console-exe approach via in-session decision prompt (AskUserQuestion). Spec amended to record the choice; round-1 verifier did not see the amendment. Round-2 verification runs with the amended spec in the prompt."
+  },
+  {
+    "issueNumber": 2,
+    "severity": "Minor",
+    "category": "False Positive",
+    "location": "docs/session-sets/lowdefy-ir-foundation/generator-validation-notes.md",
+    "summary": "Validation notes overstated coverage of Step 4 findings; trailing await Task.CompletedTask issue (Step 4 Finding 10) was missing from refinements log.",
+    "resolution": "accept-finding",
+    "cause": "orchestrator-error",
+    "resolutionNotes": "Added SR-P to schema-refinements.md and reworded the relevant blurb in generator-validation-notes.md to match reality."
+  }
+]
