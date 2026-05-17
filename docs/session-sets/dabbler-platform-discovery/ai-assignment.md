@@ -46,13 +46,13 @@ This assignment directs the AI orchestrator for each session in the `dabbler-pla
 | 2.1 | Generate migration-relevance map, cross-referencing Access constructs and platform components. | `task_type="analysis"` |
 | 2.2 | Document the `dabbler-pdf` public API boundary. | `task_type="documentation"` |
 | 2.3 | Verify session outputs for logical consistency and correctness. | `task_type="session-verification"` |
-| 2.4 | Generate change-log for committed artifacts. | `task_type="summarization"` |
+| 2.4 | Generate change-log for committed artifacts. | `task_type="summarization"` (last session only — Session 2 does NOT generate a change log) |
 
 **Actuals (filled after the session)**
-- **Actual orchestrator:**
-- **Actual routed cost:**
-- **Session outcome:**
-- **Key observations:**
+- **Actual orchestrator:** `anthropic/claude-opus-4-7` at `effort=high` — followed Session 1's routed next-orc recommendation; the spec's original recommendation (Sonnet 4.6 at medium) was again departed from because Session 1's three-round verification history made Opus's stronger spec-interpretation grounding the lower-risk choice for Feature 3's cross-reference work.
+- **Actual routed cost:** ~$0.74 across 5 calls (Feature 3 migration map gemini-pro, Feature 4 PDF boundary gemini-pro + auto-verify gpt-5-4-mini, round-1 verify gpt-5-4, round-2 verify gpt-5-4; next-orc gemini-pro). See cost report.
+- **Session outcome:** VERIFIED on round 2. Round 1 surfaced 1 Major (currency-header convention for `dabbler-pdf-overview.md`). Orchestrator disagreed (per-artifact pin is more honest; Session 1 driver already split into platform/pdf header variants as precedent), surfaced to human, human routed third opinion to Codex GPT-5 — which sided with the verifier (spec text is controlling); hybrid fix applied (standard `../dabbler-platform` header + body note recording the dabbler-pdf SHA/date and NuGet pin). `record_adjudication` logged context-gap/accept-finding. Round 2 returned VERIFIED with zero issues.
+- **Key observations:** (1) `task_type="documentation"` invokes the router's auto-verification path (gpt-5-4-mini); `result.content` contains both the generated doc AND an appended `**Verification (model, provider):** VERDICT\nIssue 1...` block. The current driver saves `result.content` verbatim, so the appendix landed in the file and had to be manually stripped. Future driver work should split on the `---\n**Verification (` boundary before saving narrative outputs. (2) Auto-verification for `documentation` produced three useful findings (overstated `PdfPageRenderer` claim from partial source; thin surface table; over-strong `THIRD-PARTY-NOTICES.txt` wording) — addressing them before Step 6 verification made the cross-provider round cleaner. (3) Spec's literal Feature 5 template is controlling per Codex tiebreaker; the per-artifact pin precedent baked into the Session 1 driver did not survive adjudication. Future cross-repo specs should clarify the snapshot-pin convention upfront if per-artifact pins are intended.
 
 *See Session 3 for the next orchestrator recommendation.*
 
@@ -60,8 +60,8 @@ This assignment directs the AI orchestrator for each session in the `dabbler-pla
 
 ## Session 3 of 3: Smoke-Test + Buffer
 
-- **Recommended orchestrator:** `anthropic/claude-sonnet-4-6` at `effort=medium`
-- **Rationale:** The final session focuses on validation and refinement by applying the generated maps to a concrete example. This requires strong reasoning within a narrow scope, making a mid-tier model a cost-effective choice for validating prior work and addressing any verifier-flagged issues.
+- **Recommended orchestrator:** `anthropic/claude-sonnet-4-6` at `effort=low` (routed via `task_type=analysis` after Session 2 closeout — gemini-pro)
+- **Rationale (routed):** "This session's tasks are validation and cleanup, not novel synthesis, making a cost-effective model the appropriate choice per the spec's original guidance." Session 2's verify pass closed cleanly on round 2 with one Major adjudication that is fully resolved on disk; Session 3 will not face the same volume of spec-interpretation pressure that justified Opus for Sessions 1-2. Sonnet at low effort is the right calibration for: (a) hand-walking one Northwind form through the migration map and noting any gaps, (b) generating the change-log, and (c) generating disposition.json. Authoring the next-session-set recommendation will route through `task_type=analysis` per the spec.
 - **Estimated routed cost:** low
 
 **Per-step Routing Decision table**
