@@ -77,8 +77,14 @@ Create `AccessHarvester.Vba.Grammar/AccessHarvester.Vba.Grammar.csproj` with ANT
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 3-4: Verification Harness Design + Skeleton
 
 - Read Phase 0.2 of the plan and `docs/test-cases/README.md`.

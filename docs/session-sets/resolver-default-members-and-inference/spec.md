@@ -81,8 +81,14 @@ Once resolution is complete, invert the reference→declaration map: `GetReferen
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4-5: Default-Member Registry (Synthesis)
 
 - Read Phase 3.5 + the Access object model surfaces in plan Appendix A + fixtures `02`, `03`, `11`.

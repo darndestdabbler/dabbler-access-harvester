@@ -141,8 +141,7 @@ Single synthesis session for the set (per the tree's synthesis count = 1): the c
 
 ---
 
-## Session Plan
-
+## Sessions
 ### Session 1 of 4-5: End-to-End Test Consolidation
 
 - Audit unit + integration coverage from #1–#17. Identify gaps.

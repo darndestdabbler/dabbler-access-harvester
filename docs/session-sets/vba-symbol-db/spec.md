@@ -350,8 +350,7 @@ Models are notoriously poor at self-confidence calibration. The Confidence colum
 
 ---
 
-## Session Plan
-
+## Sessions
 > Seven sessions. The orchestrator running each session must elaborate the
 > bullet hints below — including the mandatory Step 6 (build + test) and
 > Step 8 (cross-provider verification) per `docs/ai-led-session-workflow.md`.

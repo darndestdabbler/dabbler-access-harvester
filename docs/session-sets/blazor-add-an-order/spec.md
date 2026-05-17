@@ -188,8 +188,7 @@ Use best judgment — these are starting points, not constraints.
 
 ---
 
-## Session Plan
-
+## Sessions
 > Three sessions. Mostly in-IDE per cost-consciousness; routed cost
 > is one cross-provider session-verification per session plus the
 > usual `ai-assignment.md` analysis routes when applicable. Total
