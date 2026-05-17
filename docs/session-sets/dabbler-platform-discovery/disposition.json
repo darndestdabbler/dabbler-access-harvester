@@ -28,7 +28,10 @@
     "provider": "anthropic",
     "model": "claude-opus-4-7",
     "effort": "high",
-    "reason": "Routed via task_type=analysis (gemini-pro): given Session 1 required a high-effort Opus run and multiple verification rounds to satisfy the spec, using the same orchestrator for Session 2's complex analysis task minimizes the risk of similar churn and rework.",
+    "reason": {
+      "code": "continuity-after-multi-round-verify",
+      "specifics": "Routed via task_type=analysis (gemini-pro): given Session 1 required a high-effort Opus run and three verification rounds to satisfy the spec, using the same orchestrator for Session 2's analysis tasks (Feature 3 migration-relevance cross-reference + Feature 4 PDF boundary doc) minimizes the risk of similar churn and rework. The spec's own routing notes recommend Sonnet 4.6 at medium across all three sessions; the routed analysis here departs upward citing the round-1-to-round-3 history."
+    },
     "summary": "Session 2 of 3: Migration map (Feature 3) cross-referencing Access construct kinds against the platform component inventory, plus a short dabbler-pdf boundary doc (Feature 4). Two new Markdown files under docs/cross-repo/ with currency headers."
   },
   "blockers": []
