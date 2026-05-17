@@ -1,0 +1,62 @@
+{
+  "sessionNumber": 2,
+  "rounds": [
+    {
+      "round": 1,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md (`SqlFormReference` / `member-not-found-at-segment-<N>`)",
+          "summary": "The narrative styled `member-not-found-at-segment-<N>` like a stable lookup-backed entry even though it is a dynamic family/prefix case and its listed next steps are GenericSuggestedNextSteps fallback rather than a verbatim lookup value.",
+          "fix": "Rewrote the subsection title to 'Dynamic-prefix family: member-not-found-at-segment-<N>', led with an explicit bold paragraph stating it is not a stable lookup-backed entry, renamed the steps section to 'Suggested-next-steps (generic fallback, not a verbatim lookup entry)', and added an in-section disclaimer.",
+          "status": "fixed"
+        },
+        {
+          "severity": "Major",
+          "location": "docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md (`DynamicSqlSite` / `unknown-expression`)",
+          "summary": "Prose said the analyzer recognises `Replace` and `IIf`, but the verbatim suggested-next-steps recommended adding support for them. Confirmed by reading `DynamicSqlAnalyzer.cs`: peering inside builtins like Replace() is a documented deferred-gap; Replace/IIf are NOT recognised today.",
+          "fix": "Rewrote 'Why the producer could not finish' to state the analyzer only recognises string concatenation via & / +, string literals, and observed variable assignments; function calls (including Replace, IIf, Format, String$), arithmetic, and New expressions are treated as unknown holes per the analyzer's own deferred-gap comment. Updated 'Downstream-AI interpretation' to mention Replace/IIf as builtins the analyzer ought to peer into, matching the verbatim suggested-next-steps recommendation.",
+          "status": "fixed"
+        },
+        {
+          "severity": "Minor",
+          "location": "docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md (`FunctionClassification` section)",
+          "summary": "Section collapsed five (Source, Reason) pairs into a single cross-reference rather than providing one paragraph per pair as the spec required.",
+          "fix": "Added five short FunctionClassification subentries — one per reason code — each cross-referencing Resolver for the construct/interpretation detail and pinning the verbatim suggested-next-steps. The Cross-cutting consumer guidance about Resolver+FunctionClassification double-emission was strengthened to call out the deduplication-is-consumer-side semantic.",
+          "status": "fixed"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Minor",
+          "location": "docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md (opening Authority block + closing Stability commitment)",
+          "summary": "Two global framing spots still described `SuggestedNextStepsLookup` as the full source-of-truth for the documented reason set, conflicting with the document's now-explicit dynamic-prefix exception (`member-not-found-at-segment-<N>`).",
+          "fix": "Rewrote the opening Authority block to split authority into two parts: SuggestedNextStepsLookup for stable lookup-backed reasons; MemberNotFoundAtSegment(int) factory for the dynamic-prefix exception. Rewrote the closing Stability commitment to distinguish stable-reason additions (land in the lookup) from new dynamic-prefix families (clearly-flagged family subsection following the existing pattern). Post-Fix Sweep miss; the cross-cutting bullet was caught in R3 as residual drift.",
+          "status": "fixed"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Minor",
+          "location": "docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md (Cross-cutting consumer guidance)",
+          "summary": "The first Cross-cutting bullet still overgeneralised 'reason code reaching SuggestedNextStepsLookup' as the trigger for narrative growth, conflicting with the explicit dynamic-prefix-family exception path.",
+          "fix": "Rewrote the bullet to distinguish stable lookup-backed reasons (grow via lookup additions plus per-pair entry here) from intentional dynamic-prefix families (clearly-flagged family subsection even though they are not lookup keys and may continue to use GenericSuggestedNextSteps). Tests re-run after the fix — all 5 ParseSuccessReport tests still pass.",
+          "status": "fixed"
+        }
+      ]
+    }
+  ],
+  "final_disposition": "All R1 + R2 + R3 findings resolved in-session. The R1 retry budget (max 2 retries = max 3 rounds) was used in full. The session ships VERIFIED-after-fix; R2 prose explicitly says the R1 Majors are resolved with no new substantive drift, and R3 prose says R2's edits are clean with only one residual cross-cutting bullet — fixed in-line. No deferred Critical/Major issues remain at commit time. Pattern matches Session 1's disposition (R1 4M+1m, R2 1M+1m, R3 1m, in-session resolution)."
+}

@@ -1,45 +1,41 @@
 {
-  "status": "in-progress",
-  "session_number": 1,
+  "status": "complete",
+  "session_number": 2,
   "total_sessions": 2,
-  "summary": "Session 1 of 2 complete (Phase 4 GAP #1 setup). Elaborated the planner-authored stub spec into a full execution plan; ran the property-sheet inventory pass and pinned the (d) fold-in verdict; implemented the YAML-mirror-driven first-pass report generator; committed per-fixture interim-golden JSONs at samples/parse-success-reports/<fixture>.parse-success-report.json. Diff gate is live from Session 1 with UPDATE_PARSE_SUCCESS_REPORTS=1 as the regeneration toggle. Surfaces two findings for human attention before Session 2 starts: (1) high VBA parseFailed rate driven by form/report code-behind Attribute headers the Vba.g4 grammar does not accept (genuine Phase 4 parser-scope gap, strategy-level decision per stub stop-rules), (2) property-sheet bucket coverage uses a Jet-SQL wrapping heuristic with a synthetic placeholder operand for criteria-style values (documented in report unresolvedItems.note). Cross-provider verification: 3 rounds against gpt-5-4 with all findings (R1 4M+1m, R2 1M+1m, R3 1m) resolved in-session; issue log preserved at issue-logs/session-001.json.",
+  "summary": "Session 2 of 2 (last session of set; Phase 4 Criterion #1 GAP #1). Reconfirmed Session 1's diff gate against committed golden (HHC + Northwind both byte-equal). Authored unresolved-reason-narrative.md covering all reasons emitted by UnresolvedItemAggregator.SuggestedNextStepsLookup: 5 Resolver + 6 stable SqlFormReference + 1 dynamic-prefix family (member-not-found-at-segment-<N>) + 3 DynamicSqlSite + 2 NavigationTarget + 5 per-pair FunctionClassification entries. Extracted ParseSuccessReportDiff helper (byte-identical message text to Session 1's inline body); ParseSuccessReportTests now delegates to it; added ParseSuccessReportDiffTests sentinel exercising the same builder. Cross-provider verification: 3 rounds against gpt-5-4 with all narrative findings (R1 2M+1m, R2 1m, R3 1m) resolved in-session; code/tests passed R1 clean. Session ships VERIFIED-after-fix per Session 1 disposition pattern. Closeout artifacts: change-log.md (gemini-flash summarization, max_tier=1), next-session-set-recommendation.md (gemini-pro analysis), ai-assignment.md actuals appended, disposition.json (this file) written before closeout commit per Convention. SET COMPLETE.",
   "files_changed": [
-    ".gitignore",
     "docs/session-sets/harvester-finish-canonical-parse-success-report/activity-log.json",
     "docs/session-sets/harvester-finish-canonical-parse-success-report/ai-assignment.md",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/change-log.md",
     "docs/session-sets/harvester-finish-canonical-parse-success-report/disposition.json",
-    "docs/session-sets/harvester-finish-canonical-parse-success-report/issue-logs/session-001.json",
-    "docs/session-sets/harvester-finish-canonical-parse-success-report/property-sheet-inventory.md",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/issue-logs/session-002.json",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/next-session-set-recommendation.md",
     "docs/session-sets/harvester-finish-canonical-parse-success-report/session-events.jsonl",
-    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-001-round2.md",
-    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-001-round3.md",
-    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-001.md",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-002-prompt.md",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-002-r2-prompt.md",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-002-r3-prompt.md",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-002-round2.md",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-002-round3.md",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/session-reviews/session-002.md",
     "docs/session-sets/harvester-finish-canonical-parse-success-report/session-state.json",
-    "docs/session-sets/harvester-finish-canonical-parse-success-report/spec.md",
-    "samples/parse-success-reports/HomeHealthCare.accdb.parse-success-report.json",
-    "samples/parse-success-reports/NorthwindDevEdition.accdb.parse-success-report.json",
-    "tests/AccessHarvester.Pipeline.Tests/AccessHarvester.Pipeline.Tests.csproj",
-    "tests/AccessHarvester.Pipeline.Tests/ParseSuccessReport/ParseSuccessReportGenerator.cs",
-    "tests/AccessHarvester.Pipeline.Tests/ParseSuccessReport/ParseSuccessReportModel.cs",
+    "docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md",
+    "tests/AccessHarvester.Pipeline.Tests/ParseSuccessReport/ParseSuccessReportDiff.cs",
+    "tests/AccessHarvester.Pipeline.Tests/ParseSuccessReport/ParseSuccessReportDiffTests.cs",
     "tests/AccessHarvester.Pipeline.Tests/ParseSuccessReport/ParseSuccessReportTests.cs",
-    "tools/hfcpsr_session1_ai_assignment.py",
-    "tools/hfcpsr_session1_verify.py",
-    "tools/hfcpsr_session1_verify_r2.py",
-    "tools/hfcpsr_session1_verify_r3.py",
-    "tools/parse_success_inventory.py"
+    "tools/hfcpsr_session2_closeout.py",
+    "tools/hfcpsr_session2_log_steps.py",
+    "tools/hfcpsr_session2_register.py",
+    "tools/hfcpsr_session2_verify.py",
+    "tools/hfcpsr_session2_verify_r2.py",
+    "tools/hfcpsr_session2_verify_r3.py"
   ],
   "verification_method": "api",
   "verification_verdict": "VERIFIED",
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 2 mixes mechanical test wiring (sentinel diff test) with synthesis (per-reason narrative). Routed analysis from Session 1 close named Claude Opus 4.7 @ effort=medium; in-conversation Opus for synthesis is appropriate per the 'orchestrator-model-matches-routing-target' Convention."
-    }
+  "set_status": "complete",
+  "next_session_set": {
+    "slug": "harvester-finish-canonical-golden-output",
+    "summary": "F2 in the Phase 4 plan. Prerequisite satisfied (this set completes F1's parse-counts gate, which F2's golden manifest counts reconcile against). Spec exists as a stub; Session 1 of that set will elaborate it. Recommended orchestrator: Claude Opus 4.7 @ effort=high, mirroring this set's Session 1 resourcing for the analogous spec-elaboration task. Cost band per the plan: ~$0.40-$0.80 across 4 sessions. See next-session-set-recommendation.md for the full authority chain."
   },
   "blockers": [],
-  "post_close_notes": "Two human-attention items raised in the session-complete notification body: (a) VBA Attribute-statement grammar gap (strategy-level), (b) property-sheet wrapping heuristic limit (Session 2 may refine if appetite). Session 2 inherits the live diff gate; no test-mode flip required. The unresolvedItems section's 'not-measured' status is intentional and stays in place until harvester-finish-canonical-golden-output wires the live aggregator."
+  "post_close_notes": "Two human-attention items remain Phase 4 strategy-level (NOT folded into Phase 4 closure work): (a) VBA Attribute-statement grammar gap surfaced by Session 1's report (HHC 29/32, Northwind 52/66 parseFailed driven by form/report code-behind `Attribute VB_GlobalNameSpace = ...` lines); strategy-level decision whether to extend the grammar or scope the gap as accepted. (b) Property-sheet wrapping heuristic limit, also surfaced in Session 1 — the synthetic-operand workaround is documented in the report's unresolvedItems.note; not a blocker but a candidate for refinement if appetite. Both items were raised in Session 1's notification; no new human-attention items from Session 2. Step 9 reorganization review runs after notify per workflow."
 }

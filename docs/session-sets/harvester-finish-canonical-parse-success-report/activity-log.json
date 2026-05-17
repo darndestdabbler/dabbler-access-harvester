@@ -70,6 +70,127 @@
           "costUsd": 0.100395
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/diff-gate-reconfirmed",
+      "dateTime": "2026-05-17T19:08:50.102097-04:00",
+      "description": "Re-ran dotnet test ParseSuccessReportTests (default mode, no UPDATE_PARSE_SUCCESS_REPORTS); HomeHealthCare + Northwind both pass byte-equality against committed golden.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/per-reason-narrative",
+      "dateTime": "2026-05-17T19:08:50.102097-04:00",
+      "description": "Authored unresolved-reason-narrative.md in-conversation (orchestrator-model-matches-routing-target Convention). Covers all reasons emitted by UnresolvedItemAggregator.SuggestedNextStepsLookup: 5 Resolver, 6 stable + 1 dynamic SqlFormReference family, 3 DynamicSqlSite, 2 NavigationTarget, plus FunctionClassification (same reason codes as Resolver).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/sentinel-test",
+      "dateTime": "2026-05-17T19:08:50.102097-04:00",
+      "description": "Extracted ParseSuccessReportDiff helper from ParseSuccessReportTests; refactored AssertOrUpdate to delegate (diff message byte-identical). Added ParseSuccessReportDiffTests with 3 assertions: byte-equal returns null, mutated-count produces actionable message (fixture name, line number, both snippets, regeneration hint), Snippet escapes embedded newlines.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-05-17T19:08:50.102097-04:00",
+      "description": "Sequential dotnet build && dotnet test on AccessHarvester.sln. Build: 0 errors, 323 pre-existing warnings (no new). Test suite: Pipeline.Tests 360 passed (357 prior + 3 new sentinel), full suite 1853 passed + 2 skipped (COM-gated). No regressions.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/verify",
+      "dateTime": "2026-05-17T19:12:24.730701-04:00",
+      "description": "Cross-provider session-verification routed (round 1)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 10510,
+          "outputTokens": 10819,
+          "costUsd": 0.18856
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/verify-round2",
+      "dateTime": "2026-05-17T19:16:55.889383-04:00",
+      "description": "Cross-provider session-verification round 2 (complexity_hint=85, post R1 narrative fixes)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9806,
+          "outputTokens": 5487,
+          "costUsd": 0.10682
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify-round3",
+      "dateTime": "2026-05-17T19:19:23.850405-04:00",
+      "description": "Cross-provider session-verification round 3 (final retry; post R2 global-framing fixes)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 8944,
+          "outputTokens": 7045,
+          "costUsd": 0.128035
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/next-session-set-recommendation",
+      "dateTime": "2026-05-17T19:22:25.258964-04:00",
+      "description": "Routed analysis: next-session-set recommendation (plan-driven: confirm F2 harvester-finish-canonical-golden-output)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 5620,
+          "outputTokens": 756,
+          "costUsd": 0.014585
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/change-log",
+      "dateTime": "2026-05-17T19:22:32.669230-04:00",
+      "description": "Routed summarization: change-log.md (max_tier=1, narrative prose)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 6073,
+          "outputTokens": 1583,
+          "costUsd": 0.00186075
+        }
+      ]
     }
   ]
 }

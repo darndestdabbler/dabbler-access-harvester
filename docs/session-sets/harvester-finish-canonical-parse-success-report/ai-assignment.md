@@ -47,5 +47,21 @@
 | 2.3  | Generate final reports, commit all artifacts, and author closeout documents.        | Claude 3.5 Sonnet      | Procedural tasks. Can be delegated to a fast, cost-effective model.            |
 | 2.4  | Cross-provider verification of test logic, narrative, and final committed artifacts. | GPT-4o                 | Final quality gate for the session set's deliverables.                       |
 
-- **Actuals:** Not started.
-- **Next-session orchestrator recommendation:** N/A (final session of the set; the cross-set handoff to `harvester-finish-canonical-golden-output` is authored at Session 2 closeout per Step 8).
+### Actuals (filled after the session — 2026-05-17)
+
+- **Orchestrator used:** Claude Opus 4.7 (1M context) @ effort=high (not effort=medium as the routed Session 1 recommendation suggested — see deviations).
+- **Total routed cost:** ~$0.44
+  - `session-verification` round 1 (gpt-5-4): $0.1886
+  - `session-verification` round 2 (gpt-5-4, complexity_hint=85): $0.1068
+  - `session-verification` round 3 (gpt-5-4, complexity_hint=85): $0.1280
+  - `analysis` (gemini-pro, next-session-set recommendation): $0.0146
+  - `summarization` (gemini-flash, change-log; `max_tier=1` per Convention): $0.0019
+- **Deviations from recommendation:**
+  - **Effort level.** Session 1's routed analysis recommended Opus @ effort=medium; the orchestrator ran at effort=high (no human-driven maxout — the start-up was registered as effort=high on the engine side; a future calibration round can decide whether to honor the medium recommendation downward). No observable quality difference; cost was driven by the 3 verification rounds, not orchestrator effort.
+  - **Verification rounds.** Session 2 also took the full 3-round retry budget (R1 2M+1m → R2 1m → R3 1m), all on narrative drift. Pattern matches Session 1 (R1 4M+1m → R2 1M+1m → R3 1m). The narrative was a substantial synthesis doc (~720 lines pre-fix, ~830 lines post-fix), so a single round was unlikely to suffice; future synthesis-heavy sessions should budget for 3 rounds.
+- **Notes for next-session calibration:**
+  - The narrative's authority-framing slipped through Post-Fix Sweep twice (R2 caught Authority + Stability commitment; R3 caught Cross-cutting bullet). For future narrative-rule edits, sweep the *introduction*, *authority*, and *closing/stability* blocks together, not just the body — that's where global-framing language tends to lag the body fix.
+  - The `ParseSuccessReportDiff` helper refactor was clean enough that the verifier never flagged any code-side issue; this validates the "extract helper, both production gate + sentinel consume same builder" pattern for future diff-gate sentinels.
+  - The plan-driven next-set recommendation flow worked smoothly via `route(task_type="analysis")` with the ROADMAP excerpt + remaining-work-tree as context; gemini-pro handled it at $0.0146 with no escalation.
+
+**Next-session orchestrator recommendation:** N/A (final session of the set; the cross-set handoff to `harvester-finish-canonical-golden-output` is in [`next-session-set-recommendation.md`](next-session-set-recommendation.md) — Claude Opus 4.7 @ effort=high recommended for that set's spec-elaboration Session 1, mirroring this set's Session 1 resourcing.)

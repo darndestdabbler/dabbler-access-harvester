@@ -13,7 +13,9 @@ namespace AccessHarvester.Pipeline.Tests.ParseSuccessReport;
 // forward the same gate without changing the test contract.
 public sealed class ParseSuccessReportTests
 {
-    private const string UpdateEnvVar = "UPDATE_PARSE_SUCCESS_REPORTS";
+    // The diff-message text is built by ParseSuccessReportDiff so the
+    // Session 2 sentinel test can exercise the same builder.
+    private const string UpdateEnvVar = ParseSuccessReportDiff.UpdateEnvVar;
 
     [Fact]
     public void HomeHealthCare_parse_success_report_matches_committed_golden()
@@ -69,40 +71,9 @@ public sealed class ParseSuccessReportTests
         }
 
         var committed = File.ReadAllText(outPath, new System.Text.UTF8Encoding(false));
-        if (!string.Equals(committed, generatedJson, StringComparison.Ordinal))
-        {
-            // Surface the first divergence so the failure message is
-            // actionable. The full diff is recoverable by re-running
-            // with UPDATE_PARSE_SUCCESS_REPORTS=1 and inspecting git.
-            var divergence = FindFirstDivergence(committed, generatedJson);
-            throw new Xunit.Sdk.XunitException(
-                $"{fixtureName}: generated parse-success report does not match committed golden at {outPath}.\n"
-                + $"First divergence at offset {divergence.Offset} (line {divergence.Line}): \n"
-                + $"  committed: <<{Snippet(committed, divergence.Offset)}>>\n"
-                + $"  generated: <<{Snippet(generatedJson, divergence.Offset)}>>\n"
-                + $"Re-run with `{UpdateEnvVar}=1 dotnet test --filter ParseSuccessReportTests` to regenerate, then commit the diff.");
-        }
-    }
-
-    private record struct Divergence(int Offset, int Line);
-
-    private static Divergence FindFirstDivergence(string a, string b)
-    {
-        int min = Math.Min(a.Length, b.Length);
-        int line = 1;
-        for (int i = 0; i < min; i++)
-        {
-            if (a[i] != b[i]) return new Divergence(i, line);
-            if (a[i] == '\n') line++;
-        }
-        return new Divergence(min, line);
-    }
-
-    private static string Snippet(string s, int offset)
-    {
-        int start = Math.Max(0, offset - 20);
-        int end = Math.Min(s.Length, offset + 40);
-        return s.Substring(start, end - start).Replace("\n", "\\n");
+        var diff = ParseSuccessReportDiff.Build(committed, generatedJson, fixtureName, outPath);
+        if (diff is not null)
+            throw new Xunit.Sdk.XunitException(diff);
     }
 
     private static readonly JsonSerializerOptions SerializerOptions = new()
