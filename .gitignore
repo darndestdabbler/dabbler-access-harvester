@@ -29,6 +29,10 @@ samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml
 **/bin/
 **/obj/
 
+# Visual Studio language-service cache (per-csproj). Regenerated on demand;
+# not part of the repo state.
+*.lscache
+
 # IDE/editor metadata
 .vs/
 .vscode/
