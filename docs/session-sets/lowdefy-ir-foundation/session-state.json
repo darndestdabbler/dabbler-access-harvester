@@ -1,0 +1,17 @@
+{
+  "sessionSet": "docs\\session-sets\\lowdefy-ir-foundation",
+  "currentSession": 1,
+  "totalSessions": 2,
+  "status": "in-progress",
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "medium"
+  },
+  "startedAt": "2026-05-17T07:11:35.923710Z",
+  "completedAt": null,
+  "lifecycleState": "in-progress",
+  "verdict": null,
+  "notes": "Session 1 first attempt (Haiku, commit 41694a3) was reverted: schema and sample were mutually inconsistent, and the spec-mandated routed analysis + cross-provider review calls were skipped. Redo by Opus 4.7 orchestrator following the ai-assignment routing plan."
+}
