@@ -6,11 +6,15 @@
 > `docs/session-sets/` are the operational answer to this strategy;
 > this document is the strategic frame they sit inside.
 > **Status:** Approved direction as of 2026-04-30; revised
-> 2026-04-30 with Phase 1 and Phase 2 actuals (both phases landed
-> the same day they were specced — see Revisions at the bottom).
-> **Landing window:** The original target was one week for Phase 1
-> alone; Phases 1 AND 2 both landed within one day, well ahead of
-> plan. Phase 3 is now concretely scoped with selection pending.
+> 2026-04-30 (Phase 1 + Phase 2 actuals) and 2026-05-17 (Phase 3
+> reset based on cross-provider strategic review; Access-to-Blazor
+> application work in this repo declared complete; finish line for
+> the mechanical harvester named in Phase 4). See Revisions.
+> **Landing window:** Phases 1 + 2 landed within one day on
+> 2026-04-30. Phase 3 candidates 3a / 3b / 3e / 3f / 3g are deferred
+> to a future migration repo per the 2026-05-17 review; 3c landed
+> 2026-05-15. The repo's remaining work is now Phase 4 (mechanical
+> harvester finish line) only.
 
 ---
 
@@ -383,82 +387,170 @@ it. This nuance is documented in the pilot's change log.
 **Stop rules:** Rule #1 fired and was resolved as Option D
 (documented above). No other stop rules triggered.
 
-### Phase 3 — Next-Set Selection (concretely scoped, selection pending)
+### Phase 3 — Next-Set Selection (RESOLVED 2026-05-17)
 
-Phase 2's success — both letter and Option-D-nuanced — opens a
-small set of well-defined next moves rather than a binary
-scale/pivot decision. The next-set author picks from this list
-against the master plan / open backlog (or against the human's
-direction if they want to nominate directly).
+Phase 2's success — both letter and Option-D-nuanced — opened a
+menu of next moves. The 2026-05-17 cross-provider strategic
+review (Gemini 3.1 Pro + GPT-5.5; see
+`docs/strategic-reviews/2026-05-17-platform-tooling-fit/`) resolved
+the menu. Both reviewers independently concluded that Phases 1
+and 2 had already proved what they needed to prove, and that
+further Access-to-Blazor *application implementation* work
+belongs in a future migration repo rather than continuing here.
+The harvester repo should shift from "start the next promising
+session" to "finish or freeze."
+
+The candidate statuses below reflect that resolution.
 
 **3a. Implement the three remaining pilot workflows in Blazor.**
-Spec a follow-up set (suggested slug
-`blazor-update-workflows`) that ships Update an Order, Update a
-Product, and Update an Employee against the same Blazor host
-established in Phase 2. Reuses everything already built:
-namespace structure, HttpClient boundary, EF Core + SQLite
-persistence, MudBlazor patterns, the characterization-test wiring.
-Per the workflow-package handoff: "Once Add an Order ships, the
-three update workflows reuse most of its infrastructure." Likely
-the cheapest / highest-value next move if the team wants Northwind
-to feel like a real working application end-to-end.
+**DEFERRED (2026-05-17) to the future migration repo.** Session
+1 of `blazor-update-workflows` started on 2026-05-17 and was
+paused mid-Step-4a when the orchestrator noticed
+`../dabbler-platform/crud-scaffolding` had shipped CRUD templates
+two days earlier (after this strategy doc's last revision). The
+cross-provider review concluded that the platform's CRUD
+templates are correctly scoped to single-entity admin slices and
+*not* a fit for workflow-driven update flows; further hand-
+authored Blazor work in this repo would dilute the harvester's
+scope. The partial Session 1 work (persistence extensions,
+`ShipperEntity`, `IShipperCatalog`) was dropped from the stash
+on 2026-05-17. The spec at `docs/session-sets/blazor-update-
+workflows/spec.md` is preserved as input the future migration
+repo can adapt; this repo will not execute the set.
 
-**3b. Add UAT and E2E coverage to the Blazor pilot.** Phase 2
-explicitly deferred UAT/E2E (`requiresUAT: false`,
-`requiresE2E: false`); the spec flagged this as an explicit
-deviation from the When-UAT-Is-Required heuristic and noted it
-should be revisited at the Step 9 review. The spec's own
-`What "Success" Looks Like` section says the human can hand-test
-the slice; UAT/E2E formalizes that. Pairs naturally with 3a — a
-single later set can add UAT to all four workflows once they're
-shipped, or each workflow's set can add its own UAT inline.
+**3b. Add UAT and E2E coverage to the Blazor pilot.**
+**DEFERRED to the future migration repo.** UAT/E2E is the right
+gate for Blazor application work; with 3a deferred, 3b deferred
+naturally with it.
 
 **3c. Validate generalization on a non-Northwind database.**
-Run the workflow-package shape against one or two workflows from
-`MiniComplex.accdb` or `HomeHealthCare.accdb`. Tests open
-validation #2 (does the package shape generalize?). If it
-generalizes cleanly, the Hybrid strategy holds for any Access
-app; if it doesn't, the package template needs revision before
-scaling beyond Northwind. Probably worth doing before 3a if
-generalization risk is a concern; probably worth doing after 3a
-if proving the full Northwind end-to-end is the higher priority.
+**COMPLETE 2026-05-15.** `generalization-validation-on-non-
+northwind` shipped the HHC `Add a Client` package + falsification
+tests; verdict `generalizes-cleanly` resolves Open Validation
+#2. See that set's `change-log.md` and `generalization-findings.md`.
 
-**3d. Resolve open questions with a domain reviewer.** The four
-packages collectively carry 18 explicit open questions (see the
-handoff document's Section 4.1). Most are not blockers; some are
-genuine ambiguities about business intent that only a domain
-expert can settle. A short session set could batch these
-questions, surface them to a domain reviewer, and update the
-packages with the resolutions.
+**3d. Resolve open questions with a domain reviewer.**
+**STILL OPEN** but lower priority. The 18 open questions from
+Phase 1 are not blocking; resolution naturally happens when the
+future migration repo consumes the packages and a domain
+reviewer adjudicates per-question.
 
-**3e. Substitute the custom Blazor component library.** When
-the in-progress Blazor library lands, run a small set to swap
-generic MudBlazor for the library's components in Phase 2's
-Add an Order slice. Tests open validation #4 (does the library
-support all the patterns the packages need?). Probably best to
-do this AFTER 3a so the library swap covers all four workflows
-in one pass.
+**3e. Substitute the custom Blazor component library.**
+**DEFERRED to the future migration repo.** The 2026-05-17
+strategic review concluded that swapping component libraries in
+this repo's pilot host is not the right place to test platform-
+library fit. The future migration repo should consume the
+platform fresh.
 
-**3f. Revisit shared workflow code.** Phase 2's Option D
-resolution leaves invariant logic duplicated between the
-characterization tests and the Blazor service layer. If the
-duplication becomes a maintenance pain point as 3a adds more
-workflows, a small set could promote the workflow models to a
-shared library both projects reference. Lower priority unless
-duplication actually hurts.
+**3f. Revisit shared workflow code.** **DEFERRED to the future
+migration repo.** With 3a deferred, the Option D duplication
+question doesn't recur in this repo.
 
 **3g. Harden the layer boundary to a real two-process
-deployment.** Phase 2's HTTP boundary is in-process for testing
-convenience; the spec acknowledged this as a later refactor.
-This is real engineering work (separate hosts, deployment
-configuration, possibly auth between them) and is probably the
-LAST item on this list — only worth doing once the application
-is otherwise close to production-shaped.
+deployment.** **DEFERRED to the future migration repo.** Layer
+hardening only matters when application work continues.
 
-**Sequencing recommendation (advisory, not binding):** 3a → 3b
-(or 3c) → 3e → 3d → 3f → 3g. The first three are about proving
-the strategy at scale; the last three are about hardening once
-proof is established.
+**Net Phase 3 outcome:** 3c shipped (one open validation
+resolved); 3a / 3b / 3e / 3f / 3g deferred to the future
+migration repo; 3d remains open as advisory. The harvester
+pilot host at `output-tests/blazor-add-an-order/` is preserved
+as-is for the future migration repo to reference, but no
+further code will land in it from this repo.
+
+### Phase 4 — Mechanical Harvester Finish Line (ACTIVE 2026-05-17)
+
+> Introduced 2026-05-17 per the cross-provider strategic review.
+> Both reviewers (Gemini 3.1 Pro and GPT-5.5) recommended
+> explicitly naming a finish line for the harvester proper
+> distinct from the deferred-to-future-migration-repo Blazor
+> application work.
+
+**Goal:** the mechanical harvester (parser, extractor, enrichers,
+output schemas, CLI) can produce stable, documented output for
+the canonical fixtures with parser/extraction tests green and
+explicit `UnresolvedItem` records for constructs it cannot
+process.
+
+**Active session set:** `remaining-work-planner` (revised
+2026-05-17 — scoped to the harvester CLI; explicitly excludes
+migration-app implementation work). When the planner runs, it
+audits the remaining mechanical-harvester gaps and lays out the
+specific session sets needed to close them. See
+`docs/session-sets/remaining-work-planner/spec.md`.
+
+**Out of scope for this repo:**
+
+- New Blazor application slices or workflows.
+- Component-library swaps in the pilot host.
+- Cross-repo discovery work beyond refreshing the existing
+  `docs/cross-repo/` snapshot when the future migration repo
+  actively consumes it.
+- Production IR generators beyond the `lowdefy-ir-foundation`
+  probe (reclassified to "probe complete; production generator
+  not authorized" — see Frozen list below).
+
+**Done when:** the harvester's `output-tests/` (or equivalent)
+contains golden output for at least the three canonical fixtures
+(`NorthwindDevEdition.accdb`, `HomeHealthCare.accdb`,
+`MiniComplex.accdb`); the parser surfaces explicit
+`UnresolvedItem` records for any construct it cannot handle; the
+CLI is documented; and the test suite is green for the
+mechanical pipeline (parser, resolver, enrichers, IR
+serialization).
+
+### Frozen Unless Reauthorized (2026-05-17)
+
+The following work-streams are explicitly frozen as of the
+2026-05-17 strategic review. Reauthorization requires either
+the future migration repo's needs to surface them, or an
+explicit human decision to reopen.
+
+- **Production IR generator** beyond
+  `tools/AccessHarvester.IrCodegen/` probe scope. Probe verdict
+  recorded; runtime usefulness not yet demonstrated by a
+  consuming workflow.
+- **Further `dabbler-platform-discovery` refreshes** beyond the
+  existing dated snapshot at platform commit `aa77020e1ca0`
+  (2026-05-16). Refresh only when the future migration repo
+  actually consumes the platform.
+- **CRUD-scaffolder expansion to cover workflow-driven flows.**
+  Both reviewers explicitly recommended against reshaping the
+  platform's CRUD templates around Access migration. The
+  recommendation lives in
+  `docs/strategic-reviews/2026-05-17-platform-tooling-fit/`.
+- **Additional Northwind workflows in this repo beyond
+  `blazor-add-an-order`.** The four-workflow pilot proved the
+  package shape; running more workflows here is incremental
+  scale proof, not new strategic ground.
+- **Old stale enrichment sessions** — none currently in
+  flight after the 2026-05-17 housekeeping pass; any reopen
+  requires a fresh spec scoped to a specific harvester gap.
+
+### Recommendations for the future migration repo
+
+Captured here as input for whichever orchestrator scopes that
+repo. Authoritative source is
+`docs/strategic-reviews/2026-05-17-platform-tooling-fit/`.
+
+- **Inherit the workflow-package shape** from Phase 1's four
+  packages and `_template.md`.
+- **Consume `docs/cross-repo/access-to-platform-migration-map.md`**
+  fresh — the snapshot is dated 2026-05-16; verify against
+  current platform source before relying on specific component
+  names.
+- **Use the platform's CRUD templates tactically** for the
+  single-entity admin/lookup surfaces (shippers, payment
+  methods, simple product/employee maintenance). Hand-author
+  workflow-driven pages and domain services for the lifecycle
+  flows.
+- **Inherit the Option D pattern** from
+  `output-tests/blazor-add-an-order/` — parallel domain
+  services that honor the same invariants as the
+  characterization tests; unmodified test files in the
+  harvester repo as the validation gate.
+- **Add UAT + E2E coverage from the start** rather than
+  deferring as Phase 2 did. The deferral was acceptable for the
+  pilot; the migration repo should not inherit it.
 
 ---
 
@@ -515,29 +607,32 @@ stay; components that don't, freeze.
 
 ## Open Validations — Status
 
-Updated post-Phase 2. Items #1, #3, #5, #6, #7, #8, #9 are
-resolved; #2, #4, #10 remain open and map to specific Phase 3
-candidates.
+Updated post-Phase 3-reset (2026-05-17). Items #1, #2, #3, #5,
+#6, #7 (partial), #8, #9 are resolved. Items #4 and #10 are
+re-classified from OPEN to DEFERRED-TO-FUTURE-MIGRATION-REPO —
+they remain valid questions but will be answered by that repo's
+work rather than additional sessions here.
 
 | # | Question | Status | Resolution / next opportunity |
 |---|---|---|---|
 | 1 | Does the workflow-package shape disambiguate enough for AI-driven Blazor implementation? | **RESOLVED — yes, with one nuance** | Phase 2 shipped Add an Order end-to-end with all 111 characterization tests passing unmodified. Nuance: the "shared workflow code" interpretation didn't hold (private sealed test types blocked it); the "invariant correspondence" interpretation did (Blazor service layer authors parallel domain logic that honors the same invariants). See Phase 2 above. |
-| 2 | Does the package shape generalize to non-Northwind databases? | OPEN | Phase 3c — `MiniComplex` and `HomeHealthCare` validation |
+| 2 | Does the package shape generalize to non-Northwind databases? | **RESOLVED 2026-05-15 — yes** | `generalization-validation-on-non-northwind` shipped the HHC `Add a Client` package + falsification tests; verdict `generalizes-cleanly`. See that set's `generalization-findings.md`. |
 | 3 | Is four-workflow pilot diversity enough, or do we need more variety (queries, macros, reports)? | **RESOLVED — yes, for Northwind** | Cross-workflow audit confirmed the four packages form an internally coherent dataset. Diversity for non-Northwind databases is a separate question (#2). |
-| 4 | Will the Blazor library support all the patterns these packages need? | OPEN | Phase 3e — substitute the library when it lands, see what gaps surface |
+| 4 | Will the Blazor library support all the patterns these packages need? | **DEFERRED to future migration repo** | Phase 3e deferred per 2026-05-17 strategic review. The platform's CRUD scaffolding shipped 2026-05-16 with single-entity scope; library-pattern fit for workflow-driven flows will be tested by the future migration repo, not by additional Phase-3 sessions here. |
 | 5 | Should source operationalization use UAT DSL or structured prose? | **RESOLVED — hybrid** | Phase 1 used structured prose for all four (default per Decision 1). Audit found prose works for 3 of 4; Update an Order's state machine would benefit from UAT DSL. Recommendation for next set: prose for most workflows, DSL for state-machine workflows. |
 | 6 | Should component/role hints be generic-now or library-specific? | **RESOLVED — generic was right** | Phase 1 used generic-now (default per Decision 2). The hints worked fine for Phase 2 with MudBlazor. Library-specific upgrade is part of Phase 3e. |
 | 7 | Does the Hybrid procedure-level decision hold for non-event-handler procedures (queries, macros, class-module methods)? | **PARTIALLY RESOLVED** | The four pilot workflows exercised event handlers, save validators, calculation logic, state machines, and cascading-effect rules. They did NOT exercise macros, queries-as-first-class workflows, or report-bound logic. Hybrid holds for what was tested; report/macro/query-heavy workflows still untested. |
 | 8 | Does the in-IDE orchestrator pair (Codex + Claude) hold up for package authoring, not just translation? | **RESOLVED — yes** | Phase 1 Sessions 2-3 (Codex drafted Add an Order; Claude peer-reviewed) produced a clean package + falsification tests. Pattern works for synthesis tasks beyond translation. |
 | 9 | What's the actual per-package authoring time? | **RESOLVED — close to estimate** | Add an Order: 2 sessions (draft + peer review); the three update workflows: 1 session each; setup/audit/handoff: 1 session each. Total 7 sessions matched the spec exactly. |
-| 10 | At what Northwind workflow count does the package-authoring overhead exceed the build savings? | OPEN | Needs at least one full app's worth of data; only knowable late in Phase 3a |
+| 10 | At what Northwind workflow count does the package-authoring overhead exceed the build savings? | **DEFERRED to future migration repo** | The scale calibration only matters once full-application implementation is underway. The future migration repo's first one or two workflows will surface the right answer; running additional Phase-3a workflows in this repo for the sole purpose of answering this validation isn't worth the scope cost (per the 2026-05-17 strategic review). |
 
-**Net:** the strategic foundation is much firmer than it was 24
-hours ago. The package shape is empirically proven on the richest
-behavioral surface (Phase 2). The remaining open validations are
-about generalization (#2), tooling integration (#4), and scale
-calibration (#10) — all important, none gating the next concrete
-step.
+**Net (post-2026-05-17 reset):** Validations #1, #2, #3, #5, #6,
+#7 (partial), #8, and #9 are resolved. Validations #4 and #10
+are formally deferred to the future migration repo; that repo's
+work will answer them in passing. No open validation now gates
+work in this repo. The harvester's remaining objective is the
+mechanical finish line (Phase 4) — not additional pilot
+extension.
 
 ---
 
@@ -747,3 +842,114 @@ lands. If the next selected work happens to be 3a (the three
 update workflows in Blazor), this doc gets updated with that
 actuals block. If it's 3c (non-Northwind generalization), the
 resolution of open validation #2 lands. Etc.
+
+### 2026-05-17 — Phase 3 reset; Phase 4 finish line declared
+
+Three Phase-3 candidates and one new probe set landed (or
+attempted) since the 2026-04-30 revision. The 2026-05-17
+cross-provider strategic review (Gemini 3.1 Pro + GPT-5.5) then
+adjudicated the remaining menu and recommended an explicit
+stop-or-finish reset rather than continuing to start new
+candidates by default. This revision lands that reset.
+
+**Sets that landed between 2026-04-30 and 2026-05-17:**
+
+- **`generalization-validation-on-non-northwind`** — COMPLETE
+  2026-05-15. 2 sessions. Shipped the HHC `Add a Client` package
+  + falsification tests; verdict `generalizes-cleanly`. Resolved
+  Open Validation #2. Was originally Phase 3c.
+- **`lowdefy-ir-foundation`** — COMPLETE 2026-05-17. 2 sessions.
+  Probed Lowdefy-as-IR shape; produced a ModalDetailForm JSON
+  Schema, a hand-authored Northwind sample, and a standalone
+  `tools/AccessHarvester.IrCodegen/` console-exe slice generator
+  whose generated Blazor pair compiled clean into the pilot
+  csproj. Probe verdict only — production generator not
+  authorized (see Frozen list above).
+- **`dabbler-platform-discovery`** — COMPLETE 2026-05-17. 3
+  sessions. Produced four authoritative cross-repo docs at
+  `docs/cross-repo/` pinned to platform commit `aa77020e1ca0`
+  (2026-05-16). Treat as a dated snapshot; re-check current
+  platform source before relying on specific component names.
+
+**`blazor-update-workflows` (Phase 3a) — paused and dropped:**
+
+- Session 1 started 2026-05-17 with Claude Opus 4.7 @ effort=high.
+  Mid-Step-4a the orchestrator noticed that
+  `../dabbler-platform/crud-scaffolding` had shipped two CRUD
+  templates (`dabbler-crud-service`, `dabbler-crud-page`) on
+  2026-05-16 — after this strategy doc's last revision. The
+  orchestrator stopped and surfaced the inventory miss before
+  continuing.
+- Cross-provider strategic review (Codex / GPT-5.5 and Gemini
+  3.1 Pro, both driven by the human via in-IDE access to both
+  repos) concluded that the platform CRUD templates are
+  correctly scoped to single-entity admin slices and **not** a
+  fit for workflow-driven update flows. Both reviewers
+  independently recommended deferring further Blazor application
+  work in this repo to the future migration repo.
+- The partial Session 1 work (persistence extensions for
+  Invoice/Shipping/Payment fields on the Order entity, a new
+  `ShipperEntity`, an `IShipperCatalog` interface) was dropped
+  from the stash on 2026-05-17. The spec at
+  `docs/session-sets/blazor-update-workflows/spec.md` is
+  preserved as input the future migration repo can adapt.
+- Net cost of the aborted session: $0.40 (the routed
+  `ai-assignment.md` analysis call, which per the orchestrator-
+  matches-target convention should have been done in-conversation
+  — noted as a deviation for the next Step 9 review).
+
+**Strategic-review outputs preserved:**
+`docs/strategic-reviews/2026-05-17-platform-tooling-fit/`
+contains the raw Gemini 3.1 Pro and GPT-5.5 recommendations
+plus an index `README.md`. Both reviews + the index are the
+audit trail for this revision.
+
+**Updates landed in this revision:**
+
+- **Header status line:** updated to reference the 2026-05-17
+  Phase 3 reset and the Phase 4 finish-line declaration.
+- **Phase 3 section:** each candidate (3a-3g) updated with its
+  current status. 3c marked COMPLETE; 3a / 3b / 3e / 3f / 3g
+  marked DEFERRED to future migration repo; 3d remains open as
+  advisory.
+- **Phase 4 (new):** "Mechanical Harvester Finish Line"
+  introduced as the active phase. Names the
+  `remaining-work-planner` set as the executable next step
+  once its spec is revised. Defines "done" for the harvester
+  proper.
+- **Frozen Unless Reauthorized (new):** explicit list of
+  work-streams frozen as of 2026-05-17. Production IR
+  generator, further platform-discovery refreshes, CRUD-
+  scaffolder expansion around Access migration, additional
+  Northwind workflows in this repo, old stale enrichment
+  sessions.
+- **Recommendations for the future migration repo (new):**
+  captured as a forward pointer so whichever orchestrator
+  scopes that repo can inherit the workflow-package shape, the
+  Option D pattern, and tactical use of the platform's CRUD
+  templates.
+- **Open Validations table:** #2 marked RESOLVED 2026-05-15;
+  #4 and #10 marked DEFERRED to future migration repo. Net
+  comment rewritten — no open validation now gates work in
+  this repo.
+
+**No content was deleted** from the prior revision. The Phase 1
+and Phase 2 sections, the inflections, the definitions, the
+contributions table, and the cost posture all remain intact;
+this revision is additive plus per-candidate status updates.
+
+**Concurrent housekeeping commit:** this revision lands with
+- `enrichment-functions-navigation-review/session-state.json`
+  flipped to `complete` (the change-log was committed on
+  2026-04-28; only the state file was stale);
+- `lowdefy-ir-foundation/change-log.md` authored from the rich
+  notes already in that set's `session-state.json`;
+- `remaining-work-planner/spec.md` revised to scope the planner
+  to mechanical harvester gaps only;
+- the two strategic-review reports filed under
+  `docs/strategic-reviews/2026-05-17-platform-tooling-fit/`.
+
+Next planned revision: when the revised `remaining-work-planner`
+ships its gap audit and concrete session-set sequence. That set
+is meta-planning; this strategy doc gets updated with the
+named sequence once the planner produces it.
