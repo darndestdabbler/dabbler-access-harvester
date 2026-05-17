@@ -284,10 +284,10 @@ Routed pages composing the security-admin surface. All five are listed under "Ad
 
 ##### `RoleAssignmentPage`
 
-- **Source:** `src/Libs/Dabbler.Security.Blazor/Pages/Admin/RoleAssignmentPage.razor` (route: `/admin/roles/assign`).
-- **Purpose:** Assign and remove roles from users (per package README).
+- **Source:** `src/Libs/Dabbler.Security.Blazor/Pages/Admin/RoleAssignmentPage.razor` (route: `/admin/users/{UserId:int}/roles` — note: the package README's "Admin pages" table abbreviates this as `/admin/roles/assign`, but the file's `@page` directive is the route the router actually matches).
+- **Purpose:** Assign and remove roles from a specific user (per package README).
 - **Required parameters:**
-  - `UserId` : `int` — route segment; the user whose role assignments are being edited.
+  - `UserId` : `int` — route segment from `{UserId:int}`; the user whose role assignments are being edited.
 - **Optional parameters:** none.
 - **Stability tag:** `stable`.
 - **Common usage context:** Reached from `UserEditPage` or `UserListPage` as the role-assignment workflow. Replaces the Access "Assign Roles" dialog.
