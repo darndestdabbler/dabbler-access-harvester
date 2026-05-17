@@ -1,0 +1,38 @@
+[
+  {
+    "issueNumber": 1,
+    "severity": "Major",
+    "category": "Completeness",
+    "location": "AccessHarvester.Core/Ir/ModalDetailFormSchema.json",
+    "summary": "Schema omitted the spec-required `operators` section for named reusable operator trees.",
+    "resolution": "fixed",
+    "resolutionNotes": "Added top-level `operators` property (object mapping name -> expression) and an `_op` reference operator to the expression catalog. References resolve at codegen time."
+  },
+  {
+    "issueNumber": 2,
+    "severity": "Major",
+    "category": "Correctness",
+    "location": "AccessHarvester.Core/Ir/ModalDetailFormSchema.json#/properties/layout",
+    "summary": "Root `layout` was not enforced as a container despite description saying so.",
+    "resolution": "fixed",
+    "resolutionNotes": "Added `$defs/containerBlock` (oneOf restricted to Section/Row/Column/Group) and pointed `layout` at it. Leaf controls at the root now fail validation."
+  },
+  {
+    "issueNumber": 3,
+    "severity": "Major",
+    "category": "Correctness",
+    "location": "AccessHarvester.Core/Ir/ModalDetailFormSchema.json#/$defs/controls",
+    "summary": "Writable bindings accepted non-assignable expressions, contradicting two-way binding semantics.",
+    "resolution": "fixed",
+    "resolutionNotes": "Added if/then on TextBox/ComboBox/CheckBox: if readOnly is not true, binding MUST be an object with `_request`. Computed expressions are now only valid on readOnly: true controls."
+  },
+  {
+    "issueNumber": 4,
+    "severity": "Minor",
+    "category": "Correctness",
+    "location": "AccessHarvester.Core/Ir/samples/frmBudgetServicePlan.ir.yaml#/events/onLoad",
+    "summary": "Sample used `onLoad` but the spec called for `onInit`.",
+    "resolution": "fixed",
+    "resolutionNotes": "Renamed `onLoad:` to `onInit:` in the sample. Sample re-validates against the schema."
+  }
+]

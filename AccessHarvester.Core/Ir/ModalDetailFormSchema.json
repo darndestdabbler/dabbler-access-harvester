@@ -66,8 +66,18 @@
       }
     },
     "layout": {
-      "description": "The root layout block that defines the form's UI structure. This must be a single container block.",
-      "$ref": "#/$defs/block"
+      "description": "The root layout block that defines the form's UI structure. This MUST be a container block (Section / Row / Column / Group). Leaf controls are only valid as descendants of a container.",
+      "$ref": "#/$defs/containerBlock"
+    },
+    "operators": {
+      "description": "Named, reusable operator/expression trees. Each entry maps a name to an expression. Referenced from other expressions via the `_op` operator with the name as its argument. The Operators section is optional; inline expressions remain valid elsewhere in the IR.",
+      "type": "object",
+      "propertyNames": {
+        "pattern": "^[a-zA-Z0-9_]+$"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/expression"
+      }
     }
   },
   "required": [
@@ -779,6 +789,18 @@
               "required": [
                 "_isnull"
               ]
+            },
+            {
+              "properties": {
+                "_op": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9_]+$",
+                  "description": "References a named operator tree by name from the IR's top-level `operators` section."
+                }
+              },
+              "required": [
+                "_op"
+              ]
             }
           ],
           "unevaluatedProperties": false
@@ -868,7 +890,29 @@
         },
         "required": [
           "binding"
-        ]
+        ],
+        "if": {
+          "properties": {
+            "readOnly": {
+              "const": true
+            }
+          },
+          "required": [
+            "readOnly"
+          ]
+        },
+        "then": {},
+        "else": {
+          "properties": {
+            "binding": {
+              "type": "object",
+              "required": [
+                "_request"
+              ],
+              "description": "Writable controls (readOnly != true) must bind directly to a request output via `_request: 'requestName.column'`. Computed expressions are not assignable; for computed values set `readOnly: true`."
+            }
+          }
+        }
       },
       "label": {
         "properties": {
@@ -917,7 +961,29 @@
           "optionsRequest",
           "valueField",
           "textField"
-        ]
+        ],
+        "if": {
+          "properties": {
+            "readOnly": {
+              "const": true
+            }
+          },
+          "required": [
+            "readOnly"
+          ]
+        },
+        "then": {},
+        "else": {
+          "properties": {
+            "binding": {
+              "type": "object",
+              "required": [
+                "_request"
+              ],
+              "description": "Writable controls (readOnly != true) must bind directly to a request output via `_request: 'requestName.column'`. Computed expressions are not assignable; for computed values set `readOnly: true`."
+            }
+          }
+        }
       },
       "checkBox": {
         "properties": {
@@ -941,7 +1007,29 @@
         },
         "required": [
           "binding"
-        ]
+        ],
+        "if": {
+          "properties": {
+            "readOnly": {
+              "const": true
+            }
+          },
+          "required": [
+            "readOnly"
+          ]
+        },
+        "then": {},
+        "else": {
+          "properties": {
+            "binding": {
+              "type": "object",
+              "required": [
+                "_request"
+              ],
+              "description": "Writable controls (readOnly != true) must bind directly to a request output via `_request: 'requestName.column'`. Computed expressions are not assignable; for computed values set `readOnly: true`."
+            }
+          }
+        }
       },
       "button": {
         "properties": {
@@ -1046,6 +1134,42 @@
           "blocks"
         ]
       }
+    },
+    "containerBlock": {
+      "description": "A container layout block (Section, Row, Column, or Group). The root `layout` must be a container; leaf controls (TextBox, Button, etc.) are only valid nested inside a container.",
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/containers/section"
+        },
+        {
+          "$ref": "#/$defs/containers/row"
+        },
+        {
+          "$ref": "#/$defs/containers/column"
+        },
+        {
+          "$ref": "#/$defs/containers/group"
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "visible": {
+          "$ref": "#/$defs/expression",
+          "default": true
+        },
+        "enabled": {
+          "$ref": "#/$defs/expression",
+          "default": true
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "unevaluatedProperties": false
     }
   }
 }
