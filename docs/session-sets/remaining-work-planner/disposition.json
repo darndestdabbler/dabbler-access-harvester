@@ -1,53 +1,25 @@
 {
-  "status": "session_complete",
-  "session_number": 1,
+  "status": "complete",
+  "session_number": 3,
   "total_sessions": 3,
-  "summary": "Session 1 of 3 remaining-work-planner: Phase 4 gap audit complete. Audited the mechanical-harvester pipeline against the 7 Phase 4 'Done' criteria from docs/planning/strategy.md → Phase 4 (Mechanical Harvester Finish Line). Authored gap-audit.md (in-conversation by Claude Opus 4.7 @ effort=high per the orchestrator-matches-target convention) classifying each criterion: COVERED (#2 schema finality), GAP small or fold-in (#1 canonical-parse-success-report, #4 cli-e2e-test-audit, #5 unresolved-items-report, #6 operations-and-interpretation-docs, #7 cli-packaging), GAP central (#3 canonical-golden-output). All five Frozen-Unless-Reauthorized items from the 2026-05-17 strategic review remain frozen. ai-assignment.md authored in-conversation as well. 6 named gaps total; rough sequencing 6 follow-on session sets over 10-14 sessions at ~$1.00-$1.40 routed cost to close Phase 4. Three open questions for the human surfaced (MiniComplex inclusion, macros/property-sheet boundary, packaging shape) — Session 2 should not start until at least the first two have resolutions. Cross-provider verification with gpt-5-4: round 1 ISSUES_FOUND (1 Major classification-consistency + 2 Minor over-deferral / over-prescription); round 2 ISSUES_FOUND (1 Minor stale-cross-reference introduced by R1 fixes); round 3 VERIFIED clean. Total routed cost $0.337 (over the $0.05-$0.20 spec target by ~70% due to two retry rounds; both findings were legitimate). Calibration note for next session: pre-fix narrative-sweep before re-verification would have caught Round 2's finding at zero cost. Build/test N/A — no code touched in this meta-planning session.",
+  "summary": "Session set complete (3 of 3). The mechanical-harvester finish line (strategy.md Phase 4) now has a named, sequenced execution plan. Session 3 delivered: (1) docs/session-sets/ROADMAP.md — top-level pointer for every session set in the project, with status icons, parallel-eligibility advisory, and document-maintenance rules; (2) docs/planning/strategy.md updated — Phase 4 section gets the planned-sequence actuals (F1 → F5 ordering, ~$1.00–$3.20 routed-cost rollup, ROADMAP link) plus a 2026-05-17 (same-day) Revisions entry; (3) this set's change-log and disposition. Authored in-conversation by Claude Opus 4.7 @ effort=medium per Session 2's routed recommendation. Faithful translation of remaining-work-tree.md for Phase 4 rows; no creative re-sequencing. Also: human-flagged review of four sets for possible cancellation — confirmed three already in appropriate closed states (complete with buffer sessions unused; retired/superseded; complete) and one remaining 'deferred' to future migration repo; outcome 'leave all four as-is.' Build/test: N/A (meta-planning set, no code touched). Cross-provider session-verification verdict recorded below.",
   "files_changed": [
-    "docs/session-sets/remaining-work-planner/spec.md (revised 2026-05-17 in prior commit 138a319)",
+    "docs/session-sets/ROADMAP.md",
+    "docs/session-sets/remaining-work-planner/change-log.md",
+    "docs/session-sets/remaining-work-planner/disposition.json",
     "docs/session-sets/remaining-work-planner/ai-assignment.md",
-    "docs/session-sets/remaining-work-planner/gap-audit.md",
     "docs/session-sets/remaining-work-planner/activity-log.json",
     "docs/session-sets/remaining-work-planner/session-state.json",
     "docs/session-sets/remaining-work-planner/session-events.jsonl",
-    "docs/session-sets/remaining-work-planner/session-reviews/session-001.md",
-    "docs/session-sets/remaining-work-planner/issue-logs/session-001.json",
-    "docs/session-sets/remaining-work-planner/disposition.json"
+    "docs/session-sets/remaining-work-planner/session-reviews/session-003.md",
+    "docs/planning/strategy.md"
   ],
   "verification_method": "api",
-  "verification_verdict": "VERIFIED",
-  "verification_rounds": 3,
-  "next_orchestrator": {
-    "session_number": 2,
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Stub-spec authoring against the gap audit benefits from inheriting Session 1's pipeline-state context; an Opus continuation preserves that synthesis without forcing a re-read pass. The work involves drafting ~6 stub specs at acceptance-criteria level (no implementation details, per the R1 Minor #3 anti-coupling lesson) plus a remaining-work-tree.md index. That is the same synthesis-heavy meta-planning shape as Session 1. Switch to Sonnet only if Session 1's gap audit is judged simple enough to stub mechanically — unlikely given the central canonical-golden-output gap's medium-band cost and the need to coordinate it against the per-Phase-4-criterion structure."
-    },
-    "summary": "Session 2 of 3: Plan The Remaining Work. For each of the 6 in-scope GAPs from gap-audit.md, author a stub spec.md at docs/session-sets/<harvester-finish-*>/. Author remaining-work-tree.md as the row-per-set index. Author tree-amendments.md if any gaps fold into existing sets rather than warranting new ones. Pre-req: the human must resolve at least Open Question 1 (MiniComplex inclusion) and Open Question 2 (macros/property-sheet boundary) before Session 2 starts; Open Question 3 (packaging shape) can resolve at stub-authoring step. Honor the Session-1-vs-Session-2 boundary discipline: stubs author at acceptance-criteria level, not implementation prescription."
+  "verification_verdict": "PENDING_AT_DISPOSITION_TIME",
+  "next_session_set": {
+    "slug": "harvester-finish-canonical-parse-success-report",
+    "summary": "Phase 4 F1 (Criterion #1 gate). 2 sessions, small cost band, no new prereqs (uses existing parser + UnresolvedItemAggregator). Establishes the parse-coverage gate every other Phase 4 set diffs against. Parallel-eligible with F3's 'black-box CLI tests' feature from the start if window-budget burning justifies a second branch. See ROADMAP.md → Phase 4 and remaining-work-tree.md for full prereq context."
   },
   "blockers": [],
-  "post_close_resolutions": [
-    {
-      "question": "Open Question 1: MiniComplex.accdb in scope for Phase 4 canonical-fixture coverage?",
-      "resolved_at": "2026-05-17",
-      "resolved_by": "human",
-      "resolution": "OUT. MiniComplex isn't tested thoroughly enough to rely on. Canonical-fixture list narrows to two: NorthwindDevEdition.accdb + HomeHealthCare.accdb."
-    },
-    {
-      "question": "Open Question 2: macros and property-sheet entries in scope for the canonical-parse-success report (GAP #1)?",
-      "resolved_at": "2026-05-17",
-      "resolved_by": "human, after cross-provider recommendation (Gemini Pro + GPT-5.4)",
-      "resolution": "HYBRID, inventory-driven. (a) VBA + (b) Jet SQL + (c) macros are definitely in. (d) property-sheet expressions get an early inventory pass in Session 2's GAP #1 stub spec; if small/bounded, fold in; if long-tail, exclude from Phase 4 gating with UnresolvedItem records emitted for non-mechanically-decodable cases. Gemini said wide; GPT-5.4 said mid; human selected hybrid synthesis. Raw recommendations at docs/session-sets/remaining-work-planner/q2-q3-recommendations/."
-    },
-    {
-      "question": "Open Question 3: packaging shape for GAP #7 (cli-packaging)?",
-      "resolved_at": "2026-05-17",
-      "resolved_by": "human, after cross-provider recommendation (Gemini Pro + GPT-5.4)",
-      "resolution": "Self-contained binary release (`dotnet publish --self-contained`) for Windows as primary. dotnet tool may be added later as optional secondary if a consumer asks. Embedded NuGet deferred until an in-process host repo emerges. Both reviewers independently recommended self-contained binary for the AI-tooling-agent consumer profile."
-    }
-  ]
+  "post_close_notes": "After this set commits and verifies, the project moves from 'closed-out housekeeping + planning' to 'executing Phase 4.' F1 has no human-resolution prerequisites; F2 onwards inherit F1's parse-success counts. The five Phase 4 stub specs sit at acceptance-criteria level by design — each set's own Session 1 elaborates implementation shape per the Session-1-vs-Session-2 boundary discipline carried forward from this set."
 }

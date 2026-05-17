@@ -471,12 +471,41 @@ the canonical fixtures with parser/extraction tests green and
 explicit `UnresolvedItem` records for constructs it cannot
 process.
 
-**Active session set:** `remaining-work-planner` (revised
-2026-05-17 — scoped to the harvester CLI; explicitly excludes
-migration-app implementation work). When the planner runs, it
-audits the remaining mechanical-harvester gaps and lays out the
-specific session sets needed to close them. See
-`docs/session-sets/remaining-work-planner/spec.md`.
+**Planned-sequence actuals (planner shipped 2026-05-17):**
+`remaining-work-planner` (revised 2026-05-17 — scoped to the
+harvester CLI; explicitly excludes migration-app implementation
+work) audited the remaining mechanical-harvester gaps against the
+seven Phase 4 criteria and produced a named sequence of follow-on
+session sets. The full plan lives at
+[`docs/session-sets/ROADMAP.md`](../session-sets/ROADMAP.md);
+the per-feature prerequisite analysis lives at
+[`docs/session-sets/remaining-work-planner/remaining-work-tree.md`](../session-sets/remaining-work-planner/remaining-work-tree.md).
+
+Phase 4 closes in **5 session sets, 13 sessions total**, at a
+routed-cost rollup of **~$1.00–$3.20**:
+
+1. [`harvester-finish-canonical-parse-success-report`](../session-sets/harvester-finish-canonical-parse-success-report/spec.md)
+   (F1, 2 sessions, small) — Criterion #1 gate.
+2. [`harvester-finish-canonical-golden-output`](../session-sets/harvester-finish-canonical-golden-output/spec.md)
+   (F2, 4 sessions, medium) — Criteria #3 + #5 (UnresolvedItems
+   wiring folded in). Central deliverable.
+3. [`harvester-finish-cli-e2e-test-audit`](../session-sets/harvester-finish-cli-e2e-test-audit/spec.md)
+   (F3, 2 sessions, small) — Criterion #4 gate.
+4. [`harvester-finish-operations-and-interpretation-docs`](../session-sets/harvester-finish-operations-and-interpretation-docs/spec.md)
+   (F4, 3 sessions, small-to-medium) — Criterion #6
+   (downstream-AI-consumer-facing portion).
+5. [`harvester-finish-cli-packaging`](../session-sets/harvester-finish-cli-packaging/spec.md)
+   (F5, 2 sessions, small) — Criterion #7. Final Phase 4 gate.
+
+Criterion #2 (schema finality) is **COVERED** by the already-shipped
+[`schema-finalization-and-docs`](../session-sets/schema-finalization-and-docs/change-log.md);
+no F-set is needed. The five Frozen items below were each re-examined
+by the gap audit and confirmed frozen — no Phase 4 candidate required
+reauthorization.
+
+F1 and F3's "black-box CLI tests" feature are parallel-eligible from
+the start; F3 and F4 are parallel-eligible after F2 closes. See the
+ROADMAP's "Phase 4" section for the parallelism advisory.
 
 **Out of scope for this repo:**
 
@@ -490,13 +519,17 @@ specific session sets needed to close them. See
   not authorized" — see Frozen list below).
 
 **Done when:** the harvester's `output-tests/` (or equivalent)
-contains golden output for at least the three canonical fixtures
-(`NorthwindDevEdition.accdb`, `HomeHealthCare.accdb`,
-`MiniComplex.accdb`); the parser surfaces explicit
-`UnresolvedItem` records for any construct it cannot handle; the
-CLI is documented; and the test suite is green for the
-mechanical pipeline (parser, resolver, enrichers, IR
-serialization).
+contains golden output for the two canonical fixtures
+(`NorthwindDevEdition.accdb`, `HomeHealthCare.accdb`);
+the parser surfaces explicit `UnresolvedItem` records for any
+construct it cannot handle; the CLI is documented; and the test
+suite is green for the mechanical pipeline (parser, resolver,
+enrichers, IR serialization). `MiniComplex.accdb` was resolved
+out of Phase 4 by `remaining-work-planner` Session 1 Open Question
+1 (the fixture is excluded from automated coverage pending an
+error-audit pass per `project-guidance.md` → Canonical Test
+Fixtures); it can stay in `samples/` for ad-hoc inspection but is
+not a Phase 4 gate.
 
 ### Frozen Unless Reauthorized (2026-05-17)
 
@@ -949,7 +982,56 @@ this revision is additive plus per-candidate status updates.
 - the two strategic-review reports filed under
   `docs/strategic-reviews/2026-05-17-platform-tooling-fit/`.
 
-Next planned revision: when the revised `remaining-work-planner`
-ships its gap audit and concrete session-set sequence. That set
-is meta-planning; this strategy doc gets updated with the
-named sequence once the planner produces it.
+Next planned revision: see the 2026-05-17 (planner-shipped)
+revision entry below.
+
+### 2026-05-17 (same-day) — `remaining-work-planner` shipped Phase 4 sequence
+
+The `remaining-work-planner` set completed all three sessions
+(gap audit → stub specs + tree → ROADMAP) and produced a named,
+sequenced execution plan for Phase 4. This revision lands the
+planner's output into the Phase 4 section above.
+
+**Outputs the planner produced:**
+
+- [`docs/session-sets/remaining-work-planner/gap-audit.md`](../session-sets/remaining-work-planner/gap-audit.md)
+  — criterion-by-criterion classification (1 COVERED, 5 GAPs
+  small/fold-in, 1 GAP central, 5 frozen items confirmed
+  frozen). Three open questions surfaced and resolved within
+  Session 1's close (MiniComplex out; macros/property-sheet
+  hybrid inventory-driven; packaging shape self-contained
+  binary primary).
+- Five stub specs at
+  `docs/session-sets/harvester-finish-*/spec.md` (F1–F5),
+  authored at acceptance-criteria level per the
+  Session-1-vs-Session-2 boundary discipline.
+- [`docs/session-sets/remaining-work-planner/remaining-work-tree.md`](../session-sets/remaining-work-planner/remaining-work-tree.md)
+  — row-per-set index + per-feature prerequisite table + GAP #5
+  fold-in rationale. Authoritative for Phase 4 dependencies and
+  execution order.
+- [`docs/session-sets/ROADMAP.md`](../session-sets/ROADMAP.md)
+  — top-level pointer for every session set in the project
+  (already-complete, Phase 4 planned, deferred/cancelled/retired).
+  The artifact a fresh orchestrator reads first to know what to
+  start.
+
+**Phase 4 section updated above** with the planned-sequence
+actuals: F1 → F5 ordering, the parallel-eligibility advisory, the
+~$1.00–$3.20 routed-cost rollup, and the link to the ROADMAP.
+
+**Frozen list unchanged.** The audit considered each frozen item
+against Phase 4 needs and confirmed all five should remain frozen.
+No reauthorization recommended.
+
+**No content was deleted** from prior revisions. The 2026-05-17
+(initial) Phase 3 reset entry above remains intact; this entry is
+additive and updates only the Phase 4 section's planned-sequence
+block.
+
+Next planned revision: when the first Phase 4 set (F1) ships.
+
+### Next planned revision
+
+When the first Phase 4 set ships (F1
+`harvester-finish-canonical-parse-success-report`), update Phase
+4 with its actuals and tick the F1 row on the ROADMAP.

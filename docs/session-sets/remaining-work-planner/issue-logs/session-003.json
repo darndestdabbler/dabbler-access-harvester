@@ -1,0 +1,37 @@
+{
+  "sessionNumber": 3,
+  "round": 1,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": "s3-r1-major-1",
+      "severity": "Major",
+      "location": "docs/planning/strategy.md — Phase 4 \"Done when\" paragraph",
+      "summary": "Phase 4 'Done when' still required golden output for three canonical fixtures including MiniComplex, contradicting Session 1's Open Question 1 resolution (MiniComplex OUT) carried into remaining-work-tree.md and ROADMAP.md.",
+      "fix_applied": "Updated the 'Done when' paragraph to require golden output for the two canonical fixtures (NorthwindDevEdition + HomeHealthCare) and added an explicit note that MiniComplex was resolved out of Phase 4 by the planner's Open Question 1, pointing at project-guidance.md → Canonical Test Fixtures.",
+      "status": "fixed"
+    },
+    {
+      "id": "s3-r1-minor-1",
+      "severity": "Minor",
+      "location": "docs/session-sets/remaining-work-planner/change-log.md — Session 2 narrative",
+      "summary": "Session 2 narrative said '3 rounds, gpt-5-4, $0.673' but the actuals from activity-log are R1 $0.2710 + R2 $0.2422 + R3 $0.1590 = $0.6722 (which rounds to $0.672). The +$0.009 next-orc routed call produced the $0.681 table total.",
+      "fix_applied": "Changed $0.673 → $0.672 in the Session 2 narrative line. Cost table total $0.681 is correct and unchanged.",
+      "status": "fixed"
+    },
+    {
+      "id": "s3-r1-minor-2",
+      "severity": "Minor",
+      "location": "docs/session-sets/ROADMAP.md — Frozen-list note under 'Deferred / cancelled / retired'",
+      "summary": "ROADMAP said 'the three sets in strategy.md Frozen list' but listed four work-streams and omitted the fifth (old stale enrichment sessions). The Frozen list actually has five items, all confirmed frozen by the gap audit.",
+      "fix_applied": "Rewrote the note to refer to 'frozen work-streams' (not 'sets'), enumerate all five items, and state explicitly that the gap audit re-examined each and recommended keeping all five frozen.",
+      "status": "fixed"
+    }
+  ],
+  "post_fix_sweep": {
+    "miniComplex_references_checked": "Verified no stale 'three canonical fixtures' or 'three fixtures' references remain in ROADMAP.md or strategy.md outside the new explanatory text. gap-audit.md, spec.md, and other session-1/2 content correctly say MiniComplex is OUT; those are not in this session's edit scope.",
+    "cost_references_checked": "Verified no stale $0.673 references remain in change-log.md. ai-assignment.md (Session 2) uses the precise $0.6813 total which is consistent.",
+    "frozen_list_count_checked": "Verified ROADMAP now refers to 'frozen work-streams' and enumerates five items, matching strategy.md's Frozen list."
+  }
+}

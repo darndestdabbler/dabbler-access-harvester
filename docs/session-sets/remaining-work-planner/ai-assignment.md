@@ -242,15 +242,73 @@ Budget: ~$0.10–$0.30 if the no-retry case holds; ~$0.30–$0.60 if
 Session 3 also hits the meta-planning-set two-retry pattern that
 calibration note #1 calls out.
 
-### Actuals
-- (filled after Session 3)
+### Actuals (filled after the session)
+- Orchestrator used: claude-code claude-opus-4-7 @ effort=medium
+  (matched the routed gemini-pro recommendation exactly).
+- Total routed cost: **$0.300** across 2 routed calls.
+  - R1 verification: $0.1870 (gpt-5-4, 15803 input + 9834 output)
+  - R2 verification: $0.1131 (gpt-5-4, 10784 input + 5740 output)
+  - **Within the $0.10–$0.30 no-retry-case budget at the upper bound.
+    The $0.30–$0.60 two-retry budget projected in the Estimated
+    routed cost section did not fire — Session 3 needed only one
+    re-verification round, not two.**
+- Verification verdict: **VERIFIED** (Round 2). R1 found 1 Major + 2
+  Minor (Phase 4 'Done when' fixture-count drift; Session 2 cost
+  narrative $0.673 vs $0.672 actual; ROADMAP Frozen-list count "three
+  sets" vs five work-streams). R2 confirmed all three fixed with no
+  new R2-introduced inconsistencies. Issue log at
+  `issue-logs/session-003.json`.
+- Deviations from recommendation:
+  1. None on orchestrator choice or effort — Opus @ medium worked as
+     the routed recommendation predicted. The "treat
+     `remaining-work-tree.md` as authoritative" calibration was
+     applied; the verifier explicitly confirmed the ROADMAP's Phase
+     4 section is a faithful translation.
+  2. Cost came in at $0.300 vs. the $0.10-$0.30 no-retry projection's
+     upper bound. The Session 2 calibration note #1 ("meta-planning
+     sets typically require 2-3 verification rounds; budget
+     accordingly") predicted 2 rounds for Session 3 was plausible
+     given the narrower surface; that prediction held.
+  3. **The R1 retry was not a meta-planning-set internal-consistency
+     hit.** R1's findings were drift between Session 3's NEW outputs
+     and previously-decided-but-not-re-applied facts (MiniComplex
+     OUT from Session 1; cost narrative not matching ai-assignment.md;
+     Frozen-list count off by one). This is a different failure
+     class from Session 1's classification-consistency or Session 2's
+     cross-stub-coherence findings — it is *narrative-sweep against
+     prior decisions*. The "Post-Fix Sweep All Narrative Artifacts"
+     lesson was preventive here (the orchestrator did sweep before
+     re-verification, finding no further hits) but did not prevent
+     R1.
+- Notes for next-set calibration (the F1-F5 sets start fresh):
+  1. **The three-session pattern (R1 ISSUES_FOUND → R2 ISSUES_FOUND
+     → R3 VERIFIED) did NOT recur in Session 3.** Session 1 and
+     Session 2 both hit the pattern; Session 3 hit R1 ISSUES_FOUND →
+     R2 VERIFIED. The lesson learned: Session 3's narrower synthesis
+     surface (single pointer doc, faithful translation rather than
+     stub-spec coherence policing) was the structural reason for the
+     shorter retry cycle — confirming Gemini Pro's "reduce effort
+     from high to medium" calibration was correct. The promotion-to-
+     Convention candidacy ("meta-planning sets typically require 2-3
+     verification rounds") **does not promote** based on Session 3,
+     because Session 3 broke the pattern.
+  2. **Author cross-decision drift checks proactively.** When a
+     session's artifacts reference Session-1-Q1/Q2/Q3 resolutions,
+     proactively grep for the resolution language in NEW artifacts
+     before the first verification round. Session 3's R1 Major
+     (MiniComplex three-vs-two) would have been caught by a
+     `grep "three.*fixture\|MiniComplex" docs/planning/strategy.md`
+     before the first route() call. Cost of the grep: zero. Cost of
+     missing it: $0.19 R1 verification + ~5 min orchestrator time.
+     Action-detail reference candidate for lessons-learned.md.
 
 ---
 
-**Next-session orchestrator recommendation (Session 3):**
-claude-code claude-opus-4-7 @ effort=medium
-Rationale: per the routed gemini-pro analysis above, medium effort
-matches Session 3's narrower synthesis surface (single document,
-no cross-stub consistency) and the calibration delta is to instruct
-Session 3 explicitly to treat `remaining-work-tree.md` as the
-authoritative input rather than re-interpreting it.
+**No next-session orchestrator recommendation** — this is the last
+session of the set. The next-session-set recommendation (which F-set
+to start) appears in [`disposition.json`](disposition.json) →
+`next_session_set` and in the
+[`change-log.md`](change-log.md) → "Next session set" closing
+section. The recommendation is **F1
+`harvester-finish-canonical-parse-success-report`** with optional
+parallel start of F3's first feature.
