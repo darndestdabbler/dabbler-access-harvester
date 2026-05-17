@@ -63,6 +63,9 @@
       "type": "object",
       "additionalProperties": {
         "$ref": "#/$defs/event"
+      },
+      "propertyNames": {
+        "pattern": "^on[A-Z][a-zA-Z0-9]*$"
       }
     },
     "layout": {
@@ -104,6 +107,16 @@
           "additionalProperties": {
             "$ref": "#/$defs/expression"
           }
+        },
+        "cardinality": {
+          "type": "string",
+          "enum": [
+            "single",
+            "list",
+            "command"
+          ],
+          "default": "single",
+          "description": "Result cardinality.  -> Dictionary<string, object?>?;  -> List<Dictionary<string, object?>>?;  -> fire-and-return, no result row. Default is  for backward compatibility with pre-SR-A IR files."
         }
       },
       "required": [
@@ -200,6 +213,10 @@
                       },
                       "message": {
                         "type": "string"
+                      },
+                      "field": {
+                        "type": "string",
+                        "description": "Optional block id of the layout control this rule applies to. When present, the generator emits a per-field error; when absent, the rule is a global form-level guard."
                       }
                     },
                     "required": [
@@ -801,6 +818,365 @@
               "required": [
                 "_op"
               ]
+            },
+            {
+              "properties": {
+                "_concat": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2
+                }
+              },
+              "required": [
+                "_concat"
+              ]
+            },
+            {
+              "properties": {
+                "_trim": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_trim"
+              ]
+            },
+            {
+              "properties": {
+                "_left": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_left"
+              ]
+            },
+            {
+              "properties": {
+                "_right": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_right"
+              ]
+            },
+            {
+              "properties": {
+                "_mid": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_mid"
+              ]
+            },
+            {
+              "properties": {
+                "_len": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_len"
+              ]
+            },
+            {
+              "properties": {
+                "_instr": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_instr"
+              ]
+            },
+            {
+              "properties": {
+                "_ucase": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_ucase"
+              ]
+            },
+            {
+              "properties": {
+                "_lcase": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_lcase"
+              ]
+            },
+            {
+              "properties": {
+                "_replace": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_replace"
+              ]
+            },
+            {
+              "properties": {
+                "_now": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 0,
+                  "maxItems": 0
+                }
+              },
+              "required": [
+                "_now"
+              ]
+            },
+            {
+              "properties": {
+                "_date": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 0,
+                  "maxItems": 0
+                }
+              },
+              "required": [
+                "_date"
+              ]
+            },
+            {
+              "properties": {
+                "_dateadd": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_dateadd"
+              ]
+            },
+            {
+              "properties": {
+                "_datediff": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_datediff"
+              ]
+            },
+            {
+              "properties": {
+                "_datepart": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_datepart"
+              ]
+            },
+            {
+              "properties": {
+                "_cstr": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_cstr"
+              ]
+            },
+            {
+              "properties": {
+                "_cint": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_cint"
+              ]
+            },
+            {
+              "properties": {
+                "_cdate": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_cdate"
+              ]
+            },
+            {
+              "properties": {
+                "_cdbl": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_cdbl"
+              ]
+            },
+            {
+              "properties": {
+                "_ccur": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_ccur"
+              ]
+            },
+            {
+              "properties": {
+                "_like": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_like"
+              ]
+            },
+            {
+              "properties": {
+                "_dmin": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_dmin"
+              ]
+            },
+            {
+              "properties": {
+                "_dmax": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_dmax"
+              ]
+            },
+            {
+              "properties": {
+                "_davg": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_davg"
+              ]
             }
           ],
           "unevaluatedProperties": false
@@ -886,6 +1262,18 @@
             "type": "boolean",
             "default": false,
             "description": "If true, the control is display-only. The generator emits a one-way binding (no @bind-Value, no write-back). If false (default), the binding is two-way: editing the control mutates the in-memory result row of the referenced request."
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "string",
+              "int",
+              "decimal",
+              "date",
+              "bool"
+            ],
+            "default": "string",
+            "description": "Logical value type of the bound field. Determines which MudBlazor control class the generator dispatches (MudTextField, MudNumericField, MudDatePicker, MudCheckBox). Defaults to string for backward compatibility."
           }
         },
         "required": [
@@ -954,6 +1342,18 @@
             "type": "boolean",
             "default": false,
             "description": "If true, the control is display-only. The generator emits a one-way binding (no @bind-Value, no write-back). If false (default), the binding is two-way: editing the control mutates the in-memory result row of the referenced request."
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "string",
+              "int",
+              "decimal",
+              "date",
+              "bool"
+            ],
+            "default": "string",
+            "description": "Logical value type of the bound field. Determines which MudBlazor control class the generator dispatches (MudTextField, MudNumericField, MudDatePicker, MudCheckBox). Defaults to string for backward compatibility."
           }
         },
         "required": [
@@ -1003,6 +1403,18 @@
             "type": "boolean",
             "default": false,
             "description": "If true, the control is display-only. The generator emits a one-way binding (no @bind-Value, no write-back). If false (default), the binding is two-way: editing the control mutates the in-memory result row of the referenced request."
+          },
+          "dataType": {
+            "type": "string",
+            "enum": [
+              "string",
+              "int",
+              "decimal",
+              "date",
+              "bool"
+            ],
+            "default": "string",
+            "description": "Logical value type of the bound field. Determines which MudBlazor control class the generator dispatches (MudTextField, MudNumericField, MudDatePicker, MudCheckBox). Defaults to string for backward compatibility."
           }
         },
         "required": [

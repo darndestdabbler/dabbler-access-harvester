@@ -17,6 +17,61 @@
 
 ---
 
+## Post-set cleanup pass (2026-05-17)
+
+The user requested a cleanup pass on this set before moving on to
+[`dabbler-platform-discovery`](../dabbler-platform-discovery/). The
+platform-independent refinements below were landed; platform-shape-
+dependent items (SR-2, SR-4, SR-5, SR-E, SR-N) remain deferred until
+after platform discovery so the IR is not designed against the wrong
+target.
+
+**Resolved in this pass:**
+
+| ID | Resolution |
+|---|---|
+| SR-1 | Schema: optional `field` on Validate rule items. Generator: emits `SetFieldError(fieldId, message)` when present + virtual stub method on the partial class. |
+| SR-3 | Schema: 24 new operators added (`_concat`, `_trim`, `_left`, `_right`, `_mid`, `_len`, `_instr`, `_ucase`, `_lcase`, `_replace`, `_now`, `_date`, `_dateadd`, `_datediff`, `_datepart`, `_cstr`, `_cint`, `_cdate`, `_cdbl`, `_ccur`, `_like`, `_dmin`, `_dmax`, `_davg`). Generator: C# emits for all 24. `_like` and domain aggregates emit `/* TODO */` placeholders; date operators dispatch through three helper methods (`DateAddAccess`, `DateDiffAccess`, `DatePartAccess`) emitted on the partial class. |
+| SR-A (+ SR-M) | Schema: explicit `cardinality: single \| list \| command` on each request def. Generator: dispatches on cardinality, declares the right row type (single -> `Dictionary<,>`, list -> `List<Dictionary<,>>`, command -> no row field), and routes to one of three runner stubs (`ExecuteRequestAsync` / `ExecuteRequestListAsync` / `ExecuteCommandAsync`). The `IsListRequest` heuristic is no longer load-bearing. |
+| SR-F | Generator: state field declarations now include initializers from the IR's `state.<key>: <value>`. |
+| SR-G | Schema: `events` now has `propertyNames: { pattern: "^on[A-Z][a-zA-Z0-9]*$" }`. The generator's PascalCase mapping is now schema-anchored. |
+| SR-H | Generator: blocks with `visible` (other than literal `true`) emit an `@if (Convert.ToBoolean(<expr>))` wrap. Writable controls with `enabled` (other than literal `true`) emit a `Disabled='@(!Convert.ToBoolean(<expr>))'` attribute. |
+| SR-I | Generator: top-level `operators` section is now emitted as one `protected object? Op<Name>()` instance method per entry on the partial class; `_op` operator references compile to a method call instead of the prior `default!` TODO. |
+| SR-K | Generator: events declaring `debounce.delayMs` now emit a `// TODO: debounce Nms` comment at the top of the handler body so the gap is visible. |
+| SR-L | Generator: Section blocks with a `title` matching `metadata.title` are suppressed (the title is already rendered in `<TitleContent>` for `modalType: modal`). |
+| SR-O | Schema: optional `dataType: string \| int \| decimal \| date \| bool` on `textBox`, `comboBox`, and `checkBox`. Generator: `EmitTextBox` dispatches to `MudTextField` (string), `MudNumericField<T>` (int / decimal), and `MudDatePicker` (date). `EmitComboBox` and `EmitCheckBox` accept the property for forward-compat with a future typed-DTO emitter but currently dispatch a fixed `T` (`object` and `bool` respectively); dispatching ComboBox by item-value type and CheckBox by anything other than bool waits for typed-DTO scaffolding. |
+| SR-P | Generator: events whose action sequence does not contain `Request` / `RefreshRequest` / `Confirm` now emit `protected Task X() { ...; return Task.CompletedTask; }` rather than `protected async Task X() { ...; await Task.CompletedTask; }`. |
+
+**Sample exercises:** the updated
+[`frmBudgetServicePlan.ir.yaml`](../../../AccessHarvester.Core/Ir/samples/frmBudgetServicePlan.ir.yaml)
+now declares explicit `cardinality` on every request, `dataType` on
+`txtFiscalYear` (int) and `txtAnnualBudget` (decimal), a `field` anchor
+on two Validate rules, and a small top-level `operators` section
+(`isBudgetExceeded`). Pilot csproj rebuilds clean.
+
+**Still deferred (platform-shape-dependent — wait for
+`dabbler-platform-discovery`):**
+
+- **SR-2** per-call parameter overrides on `Request` action
+- **SR-4** `OpenModal` / `SetFocus` / `ResetForm` actions
+- **SR-N** `onValueChanged` → `OnBlur` semantic confirmation
+- **SR-E** runtime escape-hatch surface formalization
+
+**Confirmed no-action:**
+
+- **SR-5** flat `_state` adequate for ModalDetailForm; revisit only
+  when a WizardDetailForm type is introduced.
+- **SR-6** ListBox scope decision already correct in the closed catalog.
+- **SR-7** `modalType` is rendering intent, documented in the schema.
+- **SR-B** documentation-only; operator coercion is now visible in
+  the generator's emit and in this log.
+- **SR-C** writable-binding constraint is now load-bearing for the
+  generator's writeback emit; keep enforced.
+- **SR-D** ListBox absence was the right call.
+- **SR-J** boolean-context coercion was applied defensively in Session 2.
+
+---
+
 ## Carryover from Session 1 Step 3 cross-provider review (Sonnet 4.6)
 
 These were marked "Backlog for `schema-refinements.md`" in
@@ -191,11 +246,12 @@ initial value.
 The schema currently imposes **no** pattern constraint on event keys
 (`events` is `{type: object, additionalProperties: {$ref: event}}`
 with no `propertyNames` clause). The generator assumes keys follow
-`^on[a-z][a-zA-Z0-9]*$` and PascalCases them to derive C# method
-names (`onSave` → `OnSave`). A key that violated this assumption
-(e.g., `save-record` or `1stOpen`) would produce an invalid C#
-identifier. **Recommended:** add `propertyNames: { pattern:
-"^on[a-z][a-zA-Z0-9]*$" }` to the `events` definition, and document
+the `on<UpperLetter><alpha-num...>` convention (`onSave`, `onInit`,
+`onFiscalYearChanged`) and PascalCases them to derive C# method names
+(`onSave` → `OnSave`). A key that violated this assumption (e.g.,
+`save-record` or `1stOpen`) would produce an invalid C# identifier.
+**Recommended:** add `propertyNames: { pattern:
+"^on[A-Z][a-zA-Z0-9]*$" }` to the `events` definition, and document
 the PascalCase mapping in the description.
 
 ### SR-H (Major): `visible` / `enabled` block properties silently dropped
@@ -315,6 +371,25 @@ intent, but the semantic shift is undocumented in the schema.
 Optionally: split into `onValueChanged` (per keystroke) and
 `onBlur` (focus exit) in a future revision if forms want both.
 
+### SR-Q (Minor): Date-helper interval handling is approximate
+
+**Schema location:** generator's `DateAddAccess` / `DateDiffAccess` /
+`DatePartAccess` helper emits.
+
+Surfaced by the post-cleanup verifier (gpt-5-4) auditing the Opus
+review: the date helpers conflate Access's `"w"` (weekday ordinal) and
+`"ww"` (calendar week number). `DatePartAccess` has no case for `"w"`
+or `"ww"` and falls through to the day default. `DateDiffAccess`
+treats both `"w"` and `"ww"` identically (divide-by-7). `"y"` (day of
+year) is missing. The interval handling is a defensible MVP that
+won't surprise anyone on the standard intervals (`yyyy`/`m`/`d`/`h`/`n`/`s`)
+but is wrong on the unusual ones.
+
+**Recommended:** When typed DTOs land, replace the static helpers with
+a richer date utility that honors all Access interval codes. Until
+then, the helpers are flagged as a known approximation. The schema
+itself does not need a change; the gap is in the generator's emit.
+
 ### SR-P (Minor): Trailing `await Task.CompletedTask` in every emitted handler
 
 **Schema location:** generator behavior; emitted `.razor.cs` event
@@ -353,16 +428,15 @@ SR-3 for the typed-DTO future.
 
 ## Priority for the next session
 
+All Major items from the original priority table were landed in the
+cleanup pass; the remaining open items are platform-shape dependent and
+should wait until
+[`dabbler-platform-discovery`](../dabbler-platform-discovery/) completes:
+
 | Item | Severity | Trigger to act |
 |---|---|---|
-| SR-H: emit `@if (visible)` and `Disabled` from block properties | Major | Before any conditional-visibility IR is authored |
-| SR-I: implement `operators` section + `_op` codegen | Major | Before any IR uses `_op` |
-| SR-A: explicit request cardinality (incl. SR-M command) | Major | Before Session 3's first form sample |
-| SR-3: operator catalog (string + date + coercion subset) | Major | Before Session 3's first form sample |
-| SR-1: optional `field` on Validate rules | Major | When second ModalDetailForm sample lands |
-| SR-J: boolean coercion in `_iif`/`_and`/`_or`/`_not` | Major | Fixed defensively this session; promote to typed-DTO follow-up |
-| SR-F: state initial-value emission | Minor | When first form needs a non-default state |
-| SR-G: pattern-constrain event keys | Minor | Anytime |
-| SR-O: `dataType` on writable controls | Minor | When typed DTOs land |
-| SR-K, L, N: debounce / redundant title / onBlur mapping | Minor | When use case materializes |
-| Others | Minor | When their use case materializes |
+| SR-2: per-call parameter overrides on `Request` action | Major | After platform discovery, when a flow demands it |
+| SR-4: `OpenModal` / `SetFocus` / `ResetForm` actions | Major | After platform discovery — platform's dialog/focus API drives these shapes |
+| SR-N: `onValueChanged` → `OnBlur` semantic confirmation | Minor | After platform discovery — platform's event model drives the right mapping |
+| SR-E: runtime escape-hatch surface formalization | Minor | After platform discovery — the runtime library shape settles `ExecuteRequestAsync` and friends |
+| SR-5: nested `_state` paths | Minor | When a WizardDetailForm type is introduced |

@@ -6,7 +6,6 @@
         <MudText Typo="Typo.h6">FY-Budgeted Service Plan</MudText>
     </TitleContent>
     <DialogContent>
-        <MudText Typo="Typo.subtitle1" Class="mt-2">FY-Budgeted Service Plan</MudText>
         <MudStack>
             <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
                 <MudText>FY-Budgeted Service Plan</MudText>
@@ -17,11 +16,11 @@
             </MudStack>
             <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
                 <MudText>FY</MudText>
-                <MudTextField T="string" Label="Fiscal Year" Value='@(System.Convert.ToString(loadPlan?["FiscalYear"]))' ValueChanged='@((string __v) => loadPlan!["FiscalYear"] = __v)' OnBlur="OnFiscalYearChanged" />
+                <MudNumericField T="int" Label="Fiscal Year" Value='@(System.Convert.ToInt32(loadPlan?["FiscalYear"]))' ValueChanged='@((int __v) => loadPlan!["FiscalYear"] = __v)' OnBlur="OnFiscalYearChanged" />
             </MudStack>
             <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
                 <MudText>Budgeted</MudText>
-                <MudTextField T="string" Label="Annual Budget" Value='@(System.Convert.ToString(loadPlan?["AnnualBudget"]))' ValueChanged='@((string __v) => loadPlan!["AnnualBudget"] = __v)' />
+                <MudNumericField T="decimal" Label="Annual Budget" Value='@(System.Convert.ToDecimal(loadPlan?["AnnualBudget"]))' ValueChanged='@((decimal __v) => loadPlan!["AnnualBudget"] = __v)' />
             </MudStack>
             <MudStack Row="true" AlignItems="AlignItems.Center" Class="mb-2">
                 <MudText>Planned</MudText>
