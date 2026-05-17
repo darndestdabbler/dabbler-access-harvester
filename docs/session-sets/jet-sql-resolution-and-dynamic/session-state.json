@@ -1,9 +1,10 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "jet-sql-resolution-and-dynamic",
-  "currentSession": 3,
+  "currentSession": 4,
   "totalSessions": 4,
   "status": "complete",
+  "lifecycleState": "closed",
   "startedAt": "2026-04-27T14:37:17.192309-04:00",
   "completedAt": "2026-04-27T14:53:36.523963-04:00",
   "verificationVerdict": "VERIFIED",
@@ -12,5 +13,6 @@
     "provider": "anthropic",
     "model": "claude-sonnet-4-6",
     "effort": "medium"
-  }
+  },
+  "completedSessions": [1,2,3,4]
 }
