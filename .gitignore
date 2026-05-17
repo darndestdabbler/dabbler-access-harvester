@@ -58,6 +58,11 @@ Thumbs.db
 tmp/
 /session*.py
 
+# Property-sheet inventory script outputs — regenerate on demand via
+# `python tools/parse_success_inventory.py`; the committed verdict is
+# `docs/session-sets/harvester-finish-canonical-parse-success-report/property-sheet-inventory.md`.
+tools/_inventory_out/
+
 # VS Code extension build artifacts — rebuild via `vsce package` per
 # tools/vscode-session-sets/README.md
 *.vsix

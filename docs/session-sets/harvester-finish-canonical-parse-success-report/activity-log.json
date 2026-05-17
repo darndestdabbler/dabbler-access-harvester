@@ -1,0 +1,75 @@
+{
+  "sessionSetName": "harvester-finish-canonical-parse-success-report",
+  "createdDate": "2026-05-17T18:14:44.932313-04:00",
+  "totalSessions": 2,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/ai-assignment-routed",
+      "dateTime": "2026-05-17T18:24:42.823294-04:00",
+      "description": "Authored ai-assignment.md via route(task_type='analysis')",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3022,
+          "outputTokens": 770,
+          "costUsd": 0.0114775
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/verify",
+      "dateTime": "2026-05-17T18:38:11.035600-04:00",
+      "description": "Cross-provider session-verification routed",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 15995,
+          "outputTokens": 9488,
+          "costUsd": 0.1823075
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/verify-round2",
+      "dateTime": "2026-05-17T18:46:34.125620-04:00",
+      "description": "Cross-provider session-verification round 2 routed (complexity_hint=85)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 17105,
+          "outputTokens": 9276,
+          "costUsd": 0.18190249999999997
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/verify-round3",
+      "dateTime": "2026-05-17T18:51:06.245110-04:00",
+      "description": "Cross-provider session-verification round 3 routed (final retry)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16470,
+          "outputTokens": 3948,
+          "costUsd": 0.100395
+        }
+      ]
+    }
+  ]
+}

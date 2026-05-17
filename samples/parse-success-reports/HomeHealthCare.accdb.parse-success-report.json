@@ -1,0 +1,51 @@
+{
+  "fixture": "HomeHealthCare.accdb",
+  "schemaVersion": 1,
+  "generator": "AccessHarvester.Pipeline.Tests.ParseSuccessReport",
+  "yamlMirror": "samples/DatabaseYaml/HomeHealthCare.accdb",
+  "summary": {
+    "vbaModules": {
+      "totalModules": 32,
+      "totalProcedures": 235,
+      "parseOk": 3,
+      "parseFailed": 29,
+      "errorTokenCount": 0
+    },
+    "jetSqlQueries": {
+      "totalQueries": 22,
+      "parseOk": 22,
+      "parseFailed": 0
+    },
+    "macros": {
+      "totalMacroObjects": 4,
+      "totalMacroEntries": 66,
+      "actionLines": 39
+    },
+    "propertySheet": {
+      "validationRules": {
+        "total": 19,
+        "parsedOk": 13,
+        "parseFailed": 6
+      },
+      "defaultValues": {
+        "total": 12,
+        "parsedOk": 12,
+        "parseFailed": 0
+      },
+      "formFilters": {
+        "total": 0,
+        "parsedOk": 0,
+        "parseFailed": 0
+      },
+      "formOrderBys": {
+        "total": 0,
+        "parsedOk": 0,
+        "parseFailed": 0
+      }
+    }
+  },
+  "unresolvedItems": {
+    "status": "not-measured",
+    "note": "Session 1 first-pass: parser-coverage signal is in `summary`. Full UnresolvedItemAggregator output (resolver / dynamic-SQL / navigation / function-classification) requires the live enrichment pipeline and is wired by harvester-finish-canonical-golden-output. `totalCount` and `bySourceAndReason` are intentionally omitted (not zero) to signal that no measurement has occurred. Property-sheet bucket coverage uses a Jet-SQL wrapping heuristic with a synthetic placeholder operand inserted for Access-criteria forms (`Is Not Null`, `In (...)`, etc.); see ParseSuccessReportGenerator.ParseAsJetWhere for details."
+  }
+}

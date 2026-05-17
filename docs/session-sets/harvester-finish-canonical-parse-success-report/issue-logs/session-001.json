@@ -1,0 +1,83 @@
+{
+  "sessionNumber": 1,
+  "rounds": [
+    {
+      "round": 1,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "spec.md + ParseSuccessReportGenerator.cs + samples/parse-success-reports/*.json",
+          "summary": "unresolvedItems hardcoded to totalCount=0 / empty list reads as 'measured zero' rather than 'not measured'.",
+          "fix": "Replaced with a status discriminator: { status: 'not-measured', note: ... } with totalCount and bySourceAndReason omitted via JsonIgnore(WhenWritingNull).",
+          "status": "fixed"
+        },
+        {
+          "severity": "Major",
+          "location": "ParseSuccessReportGenerator.cs",
+          "summary": "ValidationRule + DefaultValue routed through SELECT-1-FROM-t-WHERE Jet SQL wrapper without a placeholder operand for Access criteria forms.",
+          "fix": "Added NormaliseCriteria helper that detects criteria-style values (leading Is/Like/In/Between/Not/operator) and prepends a synthetic 'x ' operand before SQL-wrapping.",
+          "status": "fixed"
+        },
+        {
+          "severity": "Major",
+          "location": "ParseSuccessReportGenerator.cs + tools/parse_success_inventory.py",
+          "summary": "Property-sheet scopes mismatched between the inventory tool (all *.yaml recursive) and the generator (Tables/Forms/Reports only); inventory counts did not reconcile with report counts.",
+          "fix": "Generator now walks the whole fixture mirror recursively with the same shared regex; both sides reconcile end-to-end.",
+          "status": "fixed"
+        },
+        {
+          "severity": "Major",
+          "location": "ParseSuccessReportGenerator.cs",
+          "summary": "Macro section reported actionsParsed / actionsUnresolved as if semantic enrichment ran, but only structurally counted Action= lines.",
+          "fix": "Renamed actionsParsed -> actionLines; dropped actionsUnresolved; spec and JSON shape updated to match.",
+          "status": "fixed"
+        },
+        {
+          "severity": "Minor",
+          "location": "ParseSuccessReportTests.cs",
+          "summary": "UPDATE_PARSE_SUCCESS_REPORTS env var documented in spec but not wired; tests always overwrote committed golden.",
+          "fix": "AssertOrUpdate now honors UPDATE_PARSE_SUCCESS_REPORTS=1 (writes) vs default (asserts byte-equal with FindFirstDivergence error path).",
+          "status": "fixed"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "ParseSuccessReportGenerator.cs + tools/parse_success_inventory.py",
+          "summary": "Shared property-field regex used [^\"]* which silently skipped YAML quoted scalars containing escaped inner quotes (`In (\\\"M\\\",\\\"F\\\",\\\"X\\\")`).",
+          "fix": "Updated both regexes to standard escaped-string body `(?:[^\"\\\\]|\\\\.)*`. Net effect on counts: HHC ValidationRule 15->19, HHC DefaultValue 8->12, Northwind DefaultValue 15->16, Northwind Filter 8->12. Both regexes regenerate the same totals end-to-end.",
+          "status": "fixed"
+        },
+        {
+          "severity": "Minor",
+          "location": "spec.md + ParseSuccessReportGenerator.cs comments",
+          "summary": "Doc drift after the R1 fixes: residual references to pre-fix behavior (write-and-pass mode, empty-list unresolvedItems, aggregator wiring).",
+          "fix": "Updated Session 1 step 5 / step 6 / step 7 prose; updated Session 2 step 1 / Touches / progress-keys; updated determinism-rules text in spec; updated generator file header.",
+          "status": "fixed"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Minor",
+          "location": "spec.md + ParseSuccessReportGenerator.cs",
+          "summary": "Residual doc drift after R2 fix: three named spots (generator file-header 'empty list' phrasing, spec determinism rules 'render as null', spec Session 1 step 5 'aggregator wiring').",
+          "fix": "Updated all three spots inline; comments and spec text now consistently describe the live `unresolvedItems.status = 'not-measured'` contract with omission-not-null semantics.",
+          "status": "fixed"
+        }
+      ]
+    }
+  ],
+  "final_disposition": "All R1 + R2 + R3 findings resolved in-session. The R1 retry budget (max 2 retries = max 3 rounds) was used in full. The session ships VERIFIED-after-fix; the final round's prose analysis explicitly says the R2 Major (regex / reconciliation) is fully addressed and that R3's remaining concern was Minor doc drift, which is now closed. The verifier-failure-escalation ladder did not need to be invoked — gpt-5-4 returned actionable findings each round and the fixes converged. No deferred Critical/Major issues remain at commit time."
+}
