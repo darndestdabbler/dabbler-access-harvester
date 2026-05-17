@@ -1,0 +1,246 @@
+# frmBudgetServicePlan -- ModalDetailForm IR sample
+# Source: HomeHealthCare.accdb / Forms / frmBudgetServicePlan
+# Translates the "budget header" portion of the form (the parent
+# ClientBudget record being edited).
+#
+# Scope notes:
+#   - The source form also has two ListBoxes (lstClientServiceNeeds,
+#     lstClientServicePlan) implementing an inline master-detail. ListBox
+#     is not in the ModalDetailForm control catalog because list-of-children
+#     is the MasterDetailListPage type's job per the May 2026 synthesis.
+#     The header portion alone is a faithful ModalDetailForm; the detail
+#     list piece is deferred to a future MasterDetailListPage sample.
+#   - Source form has Modal: "False" / PopUp: "False" in Access metadata,
+#     but the spec describes intent as the "edit budget service plan modal"
+#     and a migration would render it as a MudDialog. modalType: "modal"
+#     captures that intent; the page/drawer alternatives are equally
+#     allowed by the schema.
+#   - All bindings use the `_request` operator form. The schema does allow
+#     literal-string shorthand via the expression branch, but the Session 1
+#     review (Finding 3) recommended canonical `_request` for clarity and
+#     to keep the T4 generator's expression visitor on a single code path.
+
+pageType: ModalDetailForm
+id: frmBudgetServicePlan
+
+metadata:
+  title: "FY-Budgeted Service Plan"
+  modalType: modal
+
+state:
+  budgetId: null          # set by caller via OpenArgs equivalent before onLoad fires
+  isDirty: false          # toggled by onValueChanged actions on bound controls
+
+requests:
+  loadPlan:
+    queryName: qryBudgetServicePlanByID
+    parameters:
+      budgetId: { _state: budgetId }
+
+  loadNeedsForClient:
+    queryName: qryNeedsByClient
+    parameters:
+      clientId: { _request: "loadPlan.ClientID" }
+
+  savePlan:
+    queryName: cmdUpdateBudgetServicePlan
+    parameters:
+      budgetId:     { _state: budgetId }
+      fiscalYear:   { _request: "loadPlan.FiscalYear" }
+      annualBudget: { _request: "loadPlan.AnnualBudget" }
+      clientId:     { _request: "loadPlan.ClientID" }
+      needId:       { _request: "loadPlan.NeedID" }
+
+  deletePlan:
+    queryName: cmdDeleteBudgetServicePlan
+    parameters:
+      budgetId: { _state: budgetId }
+
+events:
+  onLoad:
+    actions:
+      - type: Request
+        params:
+          requestName: loadPlan
+      - type: Request
+        params:
+          requestName: loadNeedsForClient
+
+  onSave:
+    tryCatch:
+      tryActions:
+        - type: Validate
+          params:
+            rules:
+              - expression:
+                  _not:
+                    - _isnull:
+                        - _request: "loadPlan.FiscalYear"
+                message: "Fiscal year is required."
+              - expression:
+                  _gt:
+                    - _request: "loadPlan.AnnualBudget"
+                    - 0
+                message: "Annual budget must be greater than zero."
+              - expression:
+                  _not:
+                    - _isnull:
+                        - _request: "loadPlan.ClientID"
+                message: "Client must be selected."
+        - type: Request
+          params:
+            requestName: savePlan
+        - type: SetState
+          params:
+            key: isDirty
+            value: false
+        - type: CloseModal
+          params:
+            result: { _const: "saved" }
+      catchActions:
+        - type: ShowError
+          params:
+            message: "Failed to save the budget service plan. Please try again."
+
+  onCancel:
+    actions:
+      - type: Confirm
+        params:
+          message: "Discard unsaved changes?"
+          onConfirm:
+            - type: CloseModal
+              params:
+                result: { _const: "cancelled" }
+          # onCancel omitted: user stays on the form, no actions needed.
+
+  onDelete:
+    actions:
+      - type: Confirm
+        params:
+          message: "Permanently delete this budget service plan? This cannot be undone."
+          onConfirm:
+            - type: Request
+              params:
+                requestName: deletePlan
+            - type: CloseModal
+              params:
+                result: { _const: "deleted" }
+
+  onFiscalYearChanged:
+    actions:
+      - type: SetState
+        params:
+          key: isDirty
+          value: true
+
+layout:
+  id: rootSection
+  type: Section
+  title: "FY-Budgeted Service Plan"
+  blocks:
+    - id: headerRow
+      type: Row
+      blocks:
+        - id: lblAppTitle
+          type: Label
+          text: "FY-Budgeted Service Plan"
+
+    - id: clientRow
+      type: Row
+      blocks:
+        - id: lblClient
+          type: Label
+          text: "Client"
+        - id: txtClientName
+          type: TextBox
+          label: "Client"
+          binding: { _request: "loadPlan.ClientName" }
+          readOnly: true
+
+    - id: fyRow
+      type: Row
+      blocks:
+        - id: lblFY
+          type: Label
+          text: "FY"
+        - id: txtFiscalYear
+          type: TextBox
+          label: "Fiscal Year"
+          binding: { _request: "loadPlan.FiscalYear" }
+          onValueChanged: onFiscalYearChanged
+
+    - id: budgetedRow
+      type: Row
+      blocks:
+        - id: lblBudgeted
+          type: Label
+          text: "Budgeted"
+        - id: txtAnnualBudget
+          type: TextBox
+          label: "Annual Budget"
+          binding: { _request: "loadPlan.AnnualBudget" }
+
+    - id: plannedRow
+      type: Row
+      blocks:
+        - id: lblPlanned
+          type: Label
+          text: "Planned"
+        - id: txtTotalPlanned
+          type: TextBox
+          label: "Total Planned"
+          binding: { _request: "loadPlan.TotalPlanned" }
+          readOnly: true
+
+    - id: remainingRow
+      type: Row
+      blocks:
+        - id: lblRemaining
+          type: Label
+          text: "Remaining"
+        - id: txtRemaining
+          type: TextBox
+          label: "Remaining"
+          binding:
+            _sub:
+              - _request: "loadPlan.AnnualBudget"
+              - _request: "loadPlan.TotalPlanned"
+          readOnly: true
+
+    - id: divider1
+      type: Line
+      orientation: horizontal
+
+    - id: needsRow
+      type: Row
+      blocks:
+        - id: lblClientNeeds
+          type: Label
+          text: "Client Needs"
+        - id: cboClientNeed
+          type: ComboBox
+          label: "Client Need"
+          binding: { _request: "loadPlan.NeedID" }
+          optionsRequest: loadNeedsForClient
+          valueField: NeedID
+          textField: NeedName
+
+    - id: divider2
+      type: Line
+      orientation: horizontal
+
+    - id: actionsRow
+      type: Row
+      blocks:
+        - id: btnSave
+          type: Button
+          text: "Save"
+          onClick: onSave
+        - id: btnDelete
+          type: Button
+          text: "Delete"
+          onClick: onDelete
+        - id: btnClose
+          type: Button
+          text: "Close"
+          onClick: onCancel

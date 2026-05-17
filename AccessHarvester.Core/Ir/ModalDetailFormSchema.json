@@ -1,0 +1,1051 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ModalDetailForm IR",
+  "description": "Schema for a first-class Intermediate Representation of an Access Modal Detail Form, intended for code generation into a Blazor component.\n\nBinding semantics: bindings on writable controls (`readOnly: false`) are two-way. Editing the control mutates the in-memory result row of the referenced request. The generator materializes request results as mutable DTO objects.\n\nScope: A ModalDetailForm does not include a ListBox or DataGrid control; child-list display and editing is the responsibility of `MasterDetailListPage`. Reports (LinkMasterFields, GroupLevel, page headers) are the responsibility of the separate `Report` IR.",
+  "type": "object",
+  "properties": {
+    "pageType": {
+      "description": "The first-class type discriminator for this IR file.",
+      "type": "string",
+      "const": "ModalDetailForm"
+    },
+    "id": {
+      "description": "A unique identifier for this form, typically derived from the source Access object name.",
+      "type": "string"
+    },
+    "metadata": {
+      "description": "High-level metadata about the form.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "description": "The title of the form, used for window captions or page headers.",
+          "type": "string"
+        },
+        "modalType": {
+          "description": "Determines how the form is presented in Blazor (page, modal/MudDialog, or drawer). This is the rendering INTENT for codegen, not a mechanical transcription of the source Access form's Modal/PopUp flags.",
+          "type": "string",
+          "enum": [
+            "page",
+            "modal",
+            "drawer"
+          ]
+        }
+      },
+      "required": [
+        "title",
+        "modalType"
+      ],
+      "additionalProperties": false
+    },
+    "state": {
+      "description": "A dictionary of page-level state variables and their initial values. Can be read via the `_state` operator and modified with the `SetState` action.",
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "null",
+          "object",
+          "array"
+        ]
+      }
+    },
+    "requests": {
+      "description": "A dictionary of named data requests (queries and commands). These are referenced by name from layout bindings and actions.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/request"
+      }
+    },
+    "events": {
+      "description": "A dictionary of named event handlers, mapping UI events or lifecycle hooks to sequences of actions.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/event"
+      }
+    },
+    "layout": {
+      "description": "The root layout block that defines the form's UI structure. This must be a single container block.",
+      "$ref": "#/$defs/block"
+    }
+  },
+  "required": [
+    "pageType",
+    "id",
+    "metadata",
+    "requests",
+    "events",
+    "layout"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "request": {
+      "description": "Defines a data request, which references a named query or command external to this IR file. Parameters are evaluated lazily at the moment the `Request` action fires, against the current in-memory state and request-result snapshots at that instant.",
+      "type": "object",
+      "properties": {
+        "queryName": {
+          "description": "The name of the external query or command to execute.",
+          "type": "string"
+        },
+        "parameters": {
+          "description": "A dictionary of parameters to pass to the query. Values can be static or dynamic expressions.",
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/expression"
+          }
+        }
+      },
+      "required": [
+        "queryName"
+      ],
+      "additionalProperties": false
+    },
+    "event": {
+      "description": "Defines an ordered sequence of actions triggered by an event, with optional hygiene wrappers. Execution composition order: (1) if `debounce` is present, the debounce delay gates the entire event; (2) the try body executes -- if `tryCatch.tryActions` is present it is the try body, otherwise the top-level `actions` array is the try body; (3) on error during the try body, `tryCatch.catchActions` runs. An event MUST declare at least one of `actions` or `tryCatch`.",
+      "type": "object",
+      "properties": {
+        "actions": {
+          "description": "The primary sequence of actions to execute.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/action"
+          }
+        },
+        "tryCatch": {
+          "description": "Wraps the action sequence in a try/catch block.",
+          "type": "object",
+          "properties": {
+            "tryActions": {
+              "description": "The actions to execute within the 'try' block. If omitted, the top-level 'actions' are used.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/action"
+              }
+            },
+            "catchActions": {
+              "description": "The actions to execute if an error occurs in the 'try' block.",
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/action"
+              }
+            }
+          },
+          "required": [
+            "catchActions"
+          ],
+          "additionalProperties": false
+        },
+        "debounce": {
+          "description": "Debounces the event, ensuring the actions are not executed until a certain time has passed without the event firing again.",
+          "type": "object",
+          "properties": {
+            "delayMs": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "delayMs"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": [
+            "actions"
+          ]
+        },
+        {
+          "required": [
+            "tryCatch"
+          ]
+        }
+      ]
+    },
+    "action": {
+      "description": "A single operation to be performed as part of an event sequence.",
+      "type": "object",
+      "discriminator": {
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "properties": {
+            "type": {
+              "const": "Validate"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "rules": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "expression": {
+                        "$ref": "#/$defs/expression"
+                      },
+                      "message": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "expression",
+                      "message"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "rules"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "params"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "Request"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "requestName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "requestName"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "params"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "SetState"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "value": {
+                  "$ref": "#/$defs/expression"
+                }
+              },
+              "required": [
+                "key",
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "params"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "CallMethod"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "methodName": {
+                  "type": "string"
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  }
+                }
+              },
+              "required": [
+                "methodName"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "params"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "CloseModal"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "result": {
+                  "$ref": "#/$defs/expression"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "ShowError"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "params"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "Navigate"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "url": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "url"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "params"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "Confirm"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "onConfirm": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/action"
+                  }
+                },
+                "onCancel": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/action"
+                  }
+                }
+              },
+              "required": [
+                "message",
+                "onConfirm"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "params"
+          ]
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "RefreshRequest"
+            },
+            "params": {
+              "type": "object",
+              "properties": {
+                "requestName": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "requestName"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "type",
+            "params"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "expression": {
+      "description": "Represents a value, which can be a literal, a reference to state or data, or a computed expression using an operator.",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "maxProperties": 1,
+          "propertyNames": {
+            "pattern": "^_[a-zA-Z]+$"
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "_const": {}
+              },
+              "required": [
+                "_const"
+              ]
+            },
+            {
+              "properties": {
+                "_state": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9_]+$"
+                }
+              },
+              "required": [
+                "_state"
+              ]
+            },
+            {
+              "properties": {
+                "_request": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9_]+\\.[a-zA-Z0-9_]+$"
+                }
+              },
+              "required": [
+                "_request"
+              ]
+            },
+            {
+              "properties": {
+                "_nz": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_nz"
+              ]
+            },
+            {
+              "properties": {
+                "_iif": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_iif"
+              ]
+            },
+            {
+              "properties": {
+                "_dlookup": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_dlookup"
+              ]
+            },
+            {
+              "properties": {
+                "_dcount": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_dcount"
+              ]
+            },
+            {
+              "properties": {
+                "_dsum": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 3
+                }
+              },
+              "required": [
+                "_dsum"
+              ]
+            },
+            {
+              "properties": {
+                "_format": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_format"
+              ]
+            },
+            {
+              "properties": {
+                "_add": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2
+                }
+              },
+              "required": [
+                "_add"
+              ]
+            },
+            {
+              "properties": {
+                "_sub": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_sub"
+              ]
+            },
+            {
+              "properties": {
+                "_mul": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2
+                }
+              },
+              "required": [
+                "_mul"
+              ]
+            },
+            {
+              "properties": {
+                "_div": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_div"
+              ]
+            },
+            {
+              "properties": {
+                "_mod": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_mod"
+              ]
+            },
+            {
+              "properties": {
+                "_eq": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_eq"
+              ]
+            },
+            {
+              "properties": {
+                "_ne": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_ne"
+              ]
+            },
+            {
+              "properties": {
+                "_lt": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_lt"
+              ]
+            },
+            {
+              "properties": {
+                "_le": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_le"
+              ]
+            },
+            {
+              "properties": {
+                "_gt": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_gt"
+              ]
+            },
+            {
+              "properties": {
+                "_ge": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "required": [
+                "_ge"
+              ]
+            },
+            {
+              "properties": {
+                "_and": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2
+                }
+              },
+              "required": [
+                "_and"
+              ]
+            },
+            {
+              "properties": {
+                "_or": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 2
+                }
+              },
+              "required": [
+                "_or"
+              ]
+            },
+            {
+              "properties": {
+                "_not": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_not"
+              ]
+            },
+            {
+              "properties": {
+                "_isnull": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/expression"
+                  },
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              },
+              "required": [
+                "_isnull"
+              ]
+            }
+          ],
+          "unevaluatedProperties": false
+        }
+      ]
+    },
+    "block": {
+      "description": "A UI element in the layout. NOTE: Cross-file reuse via `_ref` is handled by a pre-processor; this schema validates the fully resolved IR.",
+      "type": "object",
+      "discriminator": {
+        "propertyName": "type"
+      },
+      "oneOf": [
+        {
+          "$ref": "#/$defs/controls/textBox"
+        },
+        {
+          "$ref": "#/$defs/controls/label"
+        },
+        {
+          "$ref": "#/$defs/controls/comboBox"
+        },
+        {
+          "$ref": "#/$defs/controls/checkBox"
+        },
+        {
+          "$ref": "#/$defs/controls/button"
+        },
+        {
+          "$ref": "#/$defs/controls/line"
+        },
+        {
+          "$ref": "#/$defs/containers/section"
+        },
+        {
+          "$ref": "#/$defs/containers/row"
+        },
+        {
+          "$ref": "#/$defs/containers/column"
+        },
+        {
+          "$ref": "#/$defs/containers/group"
+        }
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "visible": {
+          "$ref": "#/$defs/expression",
+          "default": true
+        },
+        "enabled": {
+          "$ref": "#/$defs/expression",
+          "default": true
+        }
+      },
+      "required": [
+        "id",
+        "type"
+      ],
+      "unevaluatedProperties": false
+    },
+    "controls": {
+      "textBox": {
+        "properties": {
+          "type": {
+            "const": "TextBox"
+          },
+          "label": {
+            "type": "string"
+          },
+          "placeholder": {
+            "type": "string"
+          },
+          "binding": {
+            "$ref": "#/$defs/expression"
+          },
+          "onValueChanged": {
+            "type": "string"
+          },
+          "readOnly": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the control is display-only. The generator emits a one-way binding (no @bind-Value, no write-back). If false (default), the binding is two-way: editing the control mutates the in-memory result row of the referenced request."
+          }
+        },
+        "required": [
+          "binding"
+        ]
+      },
+      "label": {
+        "properties": {
+          "type": {
+            "const": "Label"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "comboBox": {
+        "properties": {
+          "type": {
+            "const": "ComboBox"
+          },
+          "label": {
+            "type": "string"
+          },
+          "binding": {
+            "$ref": "#/$defs/expression"
+          },
+          "optionsRequest": {
+            "type": "string"
+          },
+          "valueField": {
+            "type": "string"
+          },
+          "textField": {
+            "type": "string"
+          },
+          "onValueChanged": {
+            "type": "string"
+          },
+          "readOnly": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the control is display-only. The generator emits a one-way binding (no @bind-Value, no write-back). If false (default), the binding is two-way: editing the control mutates the in-memory result row of the referenced request."
+          }
+        },
+        "required": [
+          "binding",
+          "optionsRequest",
+          "valueField",
+          "textField"
+        ]
+      },
+      "checkBox": {
+        "properties": {
+          "type": {
+            "const": "CheckBox"
+          },
+          "label": {
+            "type": "string"
+          },
+          "binding": {
+            "$ref": "#/$defs/expression"
+          },
+          "onValueChanged": {
+            "type": "string"
+          },
+          "readOnly": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, the control is display-only. The generator emits a one-way binding (no @bind-Value, no write-back). If false (default), the binding is two-way: editing the control mutates the in-memory result row of the referenced request."
+          }
+        },
+        "required": [
+          "binding"
+        ]
+      },
+      "button": {
+        "properties": {
+          "type": {
+            "const": "Button"
+          },
+          "text": {
+            "type": "string"
+          },
+          "onClick": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "onClick"
+        ]
+      },
+      "line": {
+        "properties": {
+          "type": {
+            "const": "Line"
+          },
+          "orientation": {
+            "enum": [
+              "horizontal",
+              "vertical"
+            ],
+            "default": "horizontal"
+          }
+        }
+      }
+    },
+    "containers": {
+      "section": {
+        "properties": {
+          "type": {
+            "const": "Section"
+          },
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/block"
+            }
+          }
+        },
+        "required": [
+          "blocks"
+        ]
+      },
+      "row": {
+        "properties": {
+          "type": {
+            "const": "Row"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/block"
+            }
+          }
+        },
+        "required": [
+          "blocks"
+        ]
+      },
+      "column": {
+        "properties": {
+          "type": {
+            "const": "Column"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/block"
+            }
+          }
+        },
+        "required": [
+          "blocks"
+        ]
+      },
+      "group": {
+        "properties": {
+          "type": {
+            "const": "Group"
+          },
+          "title": {
+            "type": "string"
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/block"
+            }
+          }
+        },
+        "required": [
+          "blocks"
+        ]
+      }
+    }
+  }
+}
