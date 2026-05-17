@@ -81,8 +81,14 @@ Immutable AST node hierarchy: `Module`, `Procedure`, `Statement` variants, `Expr
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4-5: Error-Recovery Strategy (Synthesis)
 
 - Read Phase 2.2 of the plan + the parse-failure log + sample malformed-VBA fixtures from the corpus.

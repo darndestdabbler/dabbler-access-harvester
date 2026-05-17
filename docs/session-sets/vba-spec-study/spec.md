@@ -74,8 +74,14 @@ Produce `docs/spec-coverage/hazard-list.md` — a living document of edge cases 
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 3-4: MS-VBAL Summary
 
 - Read MS-VBAL spec (or a prepared local copy/excerpt) topic by topic.

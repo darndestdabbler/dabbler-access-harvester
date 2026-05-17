@@ -79,8 +79,14 @@ Use `test-builder/` to author ≥7 `.accdb` fixtures committed under `tests/Acce
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 5-6: Form + Report Metadata Schema (Synthesis)
 
 - Read Phase 4.1–4.2 + the existing tier output for `FormDef`/`ReportDef` from `accessexportertemp1-import`.

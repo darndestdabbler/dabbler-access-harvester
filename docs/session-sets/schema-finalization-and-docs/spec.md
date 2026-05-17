@@ -95,8 +95,7 @@ Per Phase 7.4, generate human-readable documentation alongside JSON: per-databas
 
 ---
 
-## Session Plan
-
+## Sessions
 ### Session 1 of 3: Schema v0→v1 Review Pass (Synthesis)
 
 **Steps:**

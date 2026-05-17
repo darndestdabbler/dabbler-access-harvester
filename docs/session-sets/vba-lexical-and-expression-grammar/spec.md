@@ -68,8 +68,14 @@ Test-case anchors: `02-clsCustomerForm.cls` (bang, member chains), `03-modUtilit
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4: Lexical Grammar
 
 - Read the relevant `vba-spec-study` outputs (summary §lexical, coverage matrix lexical rows, hazard list lexical entries) plus `01`, `07` fixtures.

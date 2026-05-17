@@ -81,8 +81,14 @@ Output: `AccessHarvester.Pipeline/Enrichment/FormComponentSpec.cs`.
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4: Query Abstraction Structure (Synthesis)
 
 - Read Phase 6.1 + fixture `04`'s `expected.json` + #12/#13 SQL AST output.

@@ -312,8 +312,7 @@ reduced scope per workflow.
 
 ---
 
-## Session Plan
-
+## Sessions
 > Seven sessions. Mostly in-IDE per the cost-consciousness
 > constraint; routed cost limited to one cross-provider
 > session-verification per session. Total expected routed cost:

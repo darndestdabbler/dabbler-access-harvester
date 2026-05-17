@@ -269,10 +269,7 @@ shipping code paths.
 - The Session Set Configuration block.
 - A Project Overview / scope section (what this set will and will not
   do).
-- A Session Plan: each session has a Title, ordered Steps, a Creates
-  list (new files / artifacts), a Touches list (existing files
-  modified), an "Ends with" line (the verifiable end-state), and
-  Progress keys (markers the orchestrator updates).
+- A `## Sessions` block (canonical L2 heading per [spec-md-schema.md](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/spec-md-schema.md)): each session is a `### Session K of N: <verb>` heading with ordered Steps, a Creates list (new files / artifacts), a Touches list (existing files modified), an "Ends with" line (the verifiable end-state), and Progress keys (markers the orchestrator updates).
 - An end-of-set deliverables list.
 
 **Conditional on the configuration block:**
@@ -336,7 +333,7 @@ uatScope: none
 
 ---
 
-## Session Plan
+## Sessions
 
 ### Session 1 of N: <Title>
 

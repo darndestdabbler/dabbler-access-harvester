@@ -98,8 +98,14 @@ Output: `AccessHarvester.Pipeline/Enrichment/RowSourceSpec.cs`.
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4-5: Event Handler Taxonomy (Synthesis)
 
 - Read Phase 6.3 + fixtures `01`, `02`, `09`, `12` for handler patterns.

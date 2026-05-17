@@ -63,8 +63,14 @@ Scope kinds: `ProjectScope`, `ModuleScope` (one per module — standard, class, 
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 3-4: Declaration Model (Synthesis)
 
 - Read Phase 3.1 of the plan + the 6 anchor fixtures' modules.

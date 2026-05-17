@@ -278,8 +278,14 @@ mandatory.
 
 ---
 
-## Session Plan
+## Session Set Configuration
 
+```yaml
+requiresUAT: false
+requiresE2E: false
+```
+
+## Sessions
 ### Session 1 of 4: Harvester-Import Retrospective
 
 **Inputs:** the completed `accessexportertemp1-import` session set's
