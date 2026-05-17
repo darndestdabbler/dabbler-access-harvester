@@ -34,16 +34,19 @@ state:
 requests:
   loadPlan:
     queryName: qryBudgetServicePlanByID
+    cardinality: single
     parameters:
       budgetId: { _state: budgetId }
 
   loadNeedsForClient:
     queryName: qryNeedsByClient
+    cardinality: list
     parameters:
       clientId: { _request: "loadPlan.ClientID" }
 
   savePlan:
     queryName: cmdUpdateBudgetServicePlan
+    cardinality: command
     parameters:
       budgetId:     { _state: budgetId }
       fiscalYear:   { _request: "loadPlan.FiscalYear" }
@@ -53,8 +56,18 @@ requests:
 
   deletePlan:
     queryName: cmdDeleteBudgetServicePlan
+    cardinality: command
     parameters:
       budgetId: { _state: budgetId }
+
+# SR-I: top-level operators section. Referenced from any expression via
+# `{ _op: "<name>" }`. The generator emits each as a `protected object?
+# Op<Name>()` method on the partial class.
+operators:
+  isBudgetExceeded:
+    _gt:
+      - _request: "loadPlan.TotalPlanned"
+      - _request: "loadPlan.AnnualBudget"
 
 events:
   onInit:
@@ -72,12 +85,14 @@ events:
         - type: Validate
           params:
             rules:
-              - expression:
+              - field: txtFiscalYear
+                expression:
                   _not:
                     - _isnull:
                         - _request: "loadPlan.FiscalYear"
                 message: "Fiscal year is required."
-              - expression:
+              - field: txtAnnualBudget
+                expression:
                   _gt:
                     - _request: "loadPlan.AnnualBudget"
                     - 0
@@ -166,6 +181,7 @@ layout:
         - id: txtFiscalYear
           type: TextBox
           label: "Fiscal Year"
+          dataType: int
           binding: { _request: "loadPlan.FiscalYear" }
           onValueChanged: onFiscalYearChanged
 
@@ -178,6 +194,7 @@ layout:
         - id: txtAnnualBudget
           type: TextBox
           label: "Annual Budget"
+          dataType: decimal
           binding: { _request: "loadPlan.AnnualBudget" }
 
     - id: plannedRow
