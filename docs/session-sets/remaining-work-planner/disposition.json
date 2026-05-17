@@ -1,0 +1,45 @@
+{
+  "status": "session_complete",
+  "session_number": 1,
+  "total_sessions": 3,
+  "summary": "Session 1 of 3 remaining-work-planner: Phase 4 gap audit complete. Audited the mechanical-harvester pipeline against the 7 Phase 4 'Done' criteria from docs/planning/strategy.md → Phase 4 (Mechanical Harvester Finish Line). Authored gap-audit.md (in-conversation by Claude Opus 4.7 @ effort=high per the orchestrator-matches-target convention) classifying each criterion: COVERED (#2 schema finality), GAP small or fold-in (#1 canonical-parse-success-report, #4 cli-e2e-test-audit, #5 unresolved-items-report, #6 operations-and-interpretation-docs, #7 cli-packaging), GAP central (#3 canonical-golden-output). All five Frozen-Unless-Reauthorized items from the 2026-05-17 strategic review remain frozen. ai-assignment.md authored in-conversation as well. 6 named gaps total; rough sequencing 6 follow-on session sets over 10-14 sessions at ~$1.00-$1.40 routed cost to close Phase 4. Three open questions for the human surfaced (MiniComplex inclusion, macros/property-sheet boundary, packaging shape) — Session 2 should not start until at least the first two have resolutions. Cross-provider verification with gpt-5-4: round 1 ISSUES_FOUND (1 Major classification-consistency + 2 Minor over-deferral / over-prescription); round 2 ISSUES_FOUND (1 Minor stale-cross-reference introduced by R1 fixes); round 3 VERIFIED clean. Total routed cost $0.337 (over the $0.05-$0.20 spec target by ~70% due to two retry rounds; both findings were legitimate). Calibration note for next session: pre-fix narrative-sweep before re-verification would have caught Round 2's finding at zero cost. Build/test N/A — no code touched in this meta-planning session.",
+  "files_changed": [
+    "docs/session-sets/remaining-work-planner/spec.md (revised 2026-05-17 in prior commit 138a319)",
+    "docs/session-sets/remaining-work-planner/ai-assignment.md",
+    "docs/session-sets/remaining-work-planner/gap-audit.md",
+    "docs/session-sets/remaining-work-planner/activity-log.json",
+    "docs/session-sets/remaining-work-planner/session-state.json",
+    "docs/session-sets/remaining-work-planner/session-events.jsonl",
+    "docs/session-sets/remaining-work-planner/session-reviews/session-001.md",
+    "docs/session-sets/remaining-work-planner/issue-logs/session-001.json",
+    "docs/session-sets/remaining-work-planner/disposition.json"
+  ],
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "verification_rounds": 3,
+  "next_orchestrator": {
+    "session_number": 2,
+    "engine": "claude-code",
+    "model": "claude-opus-4-7",
+    "effort": "high",
+    "rationale": {
+      "code": "synthesis_continuation",
+      "specifics": "Stub-spec authoring against the gap audit benefits from inheriting Session 1's pipeline-state context; an Opus continuation preserves that synthesis without forcing a re-read pass. The work involves drafting ~6 stub specs at acceptance-criteria level (no implementation details, per the R1 Minor #3 anti-coupling lesson) plus a remaining-work-tree.md index. That is the same synthesis-heavy meta-planning shape as Session 1. Switch to Sonnet only if Session 1's gap audit is judged simple enough to stub mechanically — unlikely given the central canonical-golden-output gap's medium-band cost and the need to coordinate it against the per-Phase-4-criterion structure."
+    },
+    "summary": "Session 2 of 3: Plan The Remaining Work. For each of the 6 in-scope GAPs from gap-audit.md, author a stub spec.md at docs/session-sets/<harvester-finish-*>/. Author remaining-work-tree.md as the row-per-set index. Author tree-amendments.md if any gaps fold into existing sets rather than warranting new ones. Pre-req: the human must resolve at least Open Question 1 (MiniComplex inclusion) and Open Question 2 (macros/property-sheet boundary) before Session 2 starts; Open Question 3 (packaging shape) can resolve at stub-authoring step. Honor the Session-1-vs-Session-2 boundary discipline: stubs author at acceptance-criteria level, not implementation prescription."
+  },
+  "blockers": [
+    {
+      "type": "human_input_required",
+      "description": "Open Question 1: is MiniComplex.accdb in scope for Phase 4 canonical-fixture coverage? Strategy.md lists it; project-guidance.md excludes it from automated test coverage pending error-audit. Blocks scoping of GAP #3 canonical-golden-output."
+    },
+    {
+      "type": "human_input_required",
+      "description": "Open Question 2: are macros and property-sheet entries in scope for the canonical-parse-success report (GAP #1)? Open Validation #7 in strategy.md is partially resolved. Blocks scoping of GAP #1."
+    },
+    {
+      "type": "human_input_preferred_not_required",
+      "description": "Open Question 3: packaging shape preference (dotnet tool / self-contained binary / embedded-NuGet)? If no human preference, Session 2 picks at stub-authoring step. Does NOT block Session 2 start; only shapes GAP #7's stub."
+    }
+  ]
+}
