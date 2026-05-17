@@ -20,10 +20,11 @@
   "next_orchestrator": {
     "session_number": 2,
     "engine": "claude-code",
+    "provider": "anthropic",
     "model": "claude-opus-4-7",
     "effort": "high",
-    "rationale": {
-      "code": "synthesis_continuation",
+    "reason": {
+      "code": "continue-current-trajectory",
       "specifics": "Stub-spec authoring against the gap audit benefits from inheriting Session 1's pipeline-state context; an Opus continuation preserves that synthesis without forcing a re-read pass. The work involves drafting ~6 stub specs at acceptance-criteria level (no implementation details, per the R1 Minor #3 anti-coupling lesson) plus a remaining-work-tree.md index. That is the same synthesis-heavy meta-planning shape as Session 1. Switch to Sonnet only if Session 1's gap audit is judged simple enough to stub mechanically — unlikely given the central canonical-golden-output gap's medium-band cost and the need to coordinate it against the per-Phase-4-criterion structure."
     },
     "summary": "Session 2 of 3: Plan The Remaining Work. For each of the 6 in-scope GAPs from gap-audit.md, author a stub spec.md at docs/session-sets/<harvester-finish-*>/. Author remaining-work-tree.md as the row-per-set index. Author tree-amendments.md if any gaps fold into existing sets rather than warranting new ones. Pre-req: the human must resolve at least Open Question 1 (MiniComplex inclusion) and Open Question 2 (macros/property-sheet boundary) before Session 2 starts; Open Question 3 (packaging shape) can resolve at stub-authoring step. Honor the Session-1-vs-Session-2 boundary discipline: stubs author at acceptance-criteria level, not implementation prescription."
