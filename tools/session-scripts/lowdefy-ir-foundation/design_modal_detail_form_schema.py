@@ -22,7 +22,7 @@ from pathlib import Path
 
 from ai_router import route
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_OUT = REPO_ROOT / "AccessHarvester.Core" / "Ir" / "ModalDetailFormSchema.json"
 SESSION_SET = "docs/session-sets/lowdefy-ir-foundation"
 
