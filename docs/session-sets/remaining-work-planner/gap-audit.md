@@ -163,39 +163,38 @@ Plus the meta-planning sets (`vba-spec-study`,
 - **Scope:** Phase 4 says "every documented construct in the
   canonical fixtures." Today, the grammar-validation set ran
   against a corpus, but a *canonical-fixture-specific* parse-
-  success report (one for `NorthwindDevEdition.accdb`, one for
-  `HomeHealthCare.accdb`, one for `MiniComplex.accdb`) is not
+  success report (one for `NorthwindDevEdition.accdb` and one
+  for `HomeHealthCare.accdb`; MiniComplex is OUT per Q1) is not
   committed as a per-fixture artifact. The harness from the
   migration plan's Phase 0.2 exists implicitly in the test
   suites but does not produce a checked-in,
   diff-against-on-regression report per fixture. Without that
   artifact, "canonical-fixture parse coverage" is a claim, not
   a test gate.
+- **Construct coverage (resolved 2026-05-17 via Q2):**
+  - **In scope (definite):** (a) VBA constructs in
+    `.bas`/`.cls`/`.frm` modules, (b) Jet SQL in saved queries,
+    (c) macros (`MacroActionsEnricher` surface).
+  - **Inventory-driven (d):** property-sheet expressions
+    (validation-rule expressions, default-value expressions,
+    format strings, input masks). The stub-spec must include an
+    early inventory pass that enumerates expression-bearing
+    property-sheet fields in Northwind + HHC. **If the inventory
+    reveals a small/bounded set** (rough threshold: < ~15 unique
+    expressions per fixture, simple shapes routable through
+    existing parsers), **(d) folds into Phase 4 too**. **If
+    long-tail/unbounded**, **(d) is excluded from Phase 4
+    gating** but `UnresolvedItem` records are still emitted for
+    anything property-sheet-related that can't decode
+    mechanically — so the harvester ships with explicit gaps
+    rather than silent ones.
 - **Dependency:** none new — uses existing parser + canonical
   fixtures + existing test infrastructure.
-- **Cost band:** **small** (1–2 sessions). Largely
-  test/infrastructure plus a committed report shape.
+- **Cost band:** **small** (1–2 sessions) if (d) excludes per
+  the inventory verdict; **small-to-medium** (2–3 sessions) if
+  (d) joins.
 - **Recommendation:** in scope. This is the gate that closes
   criterion 1 in a verifiable way.
-
-**AMBIGUOUS — Macro/property-sheet coverage.**
-- **Question:** the migration plan calls for "documented VBA /
-  Jet SQL / property-sheet construct" coverage. The harvester
-  has `MacroActionsEnricher` and `PropertyDecoder` shipped in
-  Core, but Open Validation #7 in strategy.md is "partially
-  resolved" — the four pilot workflows did not exercise macros,
-  queries-as-first-class workflows, or report-bound logic. For
-  Phase 4 specifically, do the canonical fixtures' macros and
-  property-sheet entries get the same "parses or emits
-  UnresolvedItem" guarantee, or is property-sheet behavior
-  outside the canonical-fixture coverage gate?
-- **Recommendation:** treat as in-scope by default; flag to the
-  human at the gap-audit handoff. If the human decides
-  macros/property-sheet are in scope, the
-  `canonical-parse-success-report` GAP above should explicitly
-  include them. If not, document the boundary in Phase 4 (i.e.,
-  "documented constructs" means VBA + Jet SQL, not macros or
-  property-sheet entries).
 
 ---
 
@@ -281,21 +280,21 @@ documented in `v1-adr.md`.
 - **Recommendation:** in scope; the most important Phase 4 gap.
   Without this, Phase 4 has no end-to-end gate.
 
-**AMBIGUOUS — Excluded fixtures (`ProjectBoard`, `MiniComplex`).**
+**RESOLVED 2026-05-17 (human decision) — MiniComplex is OUT.**
 - `project-guidance.md` says: "`samples/MiniComplex.accdb` and
   `samples/ProjectBoard.accdb` are excluded from automated test
   coverage pending an error-audit pass."
-- The audit needs the human to confirm: for Phase 4's
-  "canonical fixtures" criterion, is MiniComplex in or out?
-  Strategy.md lists `NorthwindDevEdition`, `HomeHealthCare`,
-  `MiniComplex` as the three canonicals; project-guidance.md
-  excludes MiniComplex from automated test coverage.
-- **Recommendation:** ask the human. If MiniComplex is out for
-  Phase 4 too, narrow the canonical-fixture list to two
-  (`NorthwindDevEdition` + `HomeHealthCare`). If in, the
-  error-audit pass MiniComplex is waiting on becomes a
-  prerequisite gap (`harvester-finish/minicomplex-error-audit`,
-  small set, blocks #3 GAP above for MiniComplex specifically).
+- Human resolution: "MiniComplex isn't tested thoroughly
+  enough. It may have some very limited value in testing, but
+  it should not be relied upon." → MiniComplex is **NOT** part
+  of Phase 4 canonical-fixture coverage. The canonical-fixture
+  list for Phase 4 narrows to **two**: `NorthwindDevEdition.accdb`
+  + `HomeHealthCare.accdb`.
+- **Implication for GAP #3 (canonical-golden-output):**
+  scope produces golden output for 2 fixtures, not 3. No
+  `minicomplex-error-audit` prerequisite is needed. MiniComplex
+  can stay in `samples/` for ad-hoc inspection but is not a
+  gate.
 
 ---
 
@@ -473,18 +472,27 @@ downstream consumer.**
     reproducibly.
   - Install steps are documented in the README and (when GAP #6
     closes) the operations doc.
-- **Distribution-shape decision is deferred to Session 2** —
-  `dotnet tool` global install, self-contained binary release,
-  and embedded-NuGet are all viable shapes. Session 2's stub
-  spec picks one with human input (see Open Question 3) and
-  defines the exact mechanics there. Session 1 only commits to
-  "Phase 4 needs an installable distribution shape."
+- **Distribution shape (resolved 2026-05-17 via Q3):**
+  **self-contained binary release** (`dotnet publish
+  --self-contained`) for Windows is the **primary** target.
+  Both reviewers (Gemini Pro and GPT-5.4) independently
+  recommended this for the AI-tooling-agent consumer profile:
+  "download pinned artifact, unzip, execute" with no .NET
+  runtime prerequisite. Aligns with the existing Windows-only
+  constraint of the COM-based extractor (so the runtime
+  prerequisite question doesn't introduce new platform
+  fragmentation). A `dotnet tool` channel may be added later
+  as an **optional secondary** if a consumer specifically asks
+  — but it's not the Phase 4 gate artifact. Embedded NuGet is
+  explicitly deferred until an in-process host repo emerges
+  that wants library reuse.
 - **Dependency:** depends on the Cli being feature-stable —
   which it functionally is, but GAP #4's e2e test coverage
   should land first to reduce ship-with-bugs risk.
-- **Cost band:** **small** (1–2 sessions). Most distribution
-  shapes are well-trodden in .NET tooling; the bulk of the
-  work is choosing the shape and validating reproducibility.
+- **Cost band:** **small** (1–2 sessions). Self-contained
+  publish is well-trodden in .NET tooling; the bulk of the
+  work is choosing the runtime identifier, validating
+  reproducibility, and documenting the install steps.
 - **Recommendation:** in scope. Final gate for Phase 4 (the
   "done when installable by a downstream consumer" test).
 
@@ -582,39 +590,50 @@ under subscription windows per the outsource-last pattern.
 
 ---
 
-## Open questions for the human (resolve before Session 2)
+## Open questions for the human — all resolved 2026-05-17
 
-Three genuine scope/boundary questions only the human can
-adjudicate. Two earlier candidate questions (originally listed
-as #3 `generate-docs` purpose and #5 documentation-directory
-home) have been resolved in-audit on the cross-provider
-verifier's recommendation and demoted: `generate-docs` is
-in scope for criterion #4 by default (see GAP #4 wording);
-documentation home is a Session 2 tidying call (see Criterion
-6's "Doc directory tidying" note).
+The three open questions originally surfaced at Session 1 close
+have all been resolved. Two earlier candidate questions
+(originally listed as #3 `generate-docs` purpose and #5
+documentation-directory home) were resolved in-audit on the
+cross-provider verifier's recommendation and demoted:
+`generate-docs` is in scope for criterion #4 by default (see
+GAP #4 wording); documentation home is a Session 2 tidying
+call (see Criterion 6's "Doc directory tidying" note).
 
-1. **Is `MiniComplex.accdb` in scope for Phase 4 canonical-
-   fixture coverage?** Strategy.md lists it as canonical;
-   `project-guidance.md` excludes it from automated test
-   coverage pending an error-audit pass. If excluded, narrow
-   the canonical list to two. If included, the
-   `minicomplex-error-audit` becomes a prerequisite for
-   the canonical-golden-output gap.
+1. **~~Is `MiniComplex.accdb` in scope?~~ RESOLVED 2026-05-17
+   — OUT.** Human decision: MiniComplex is not thoroughly
+   tested and should not be relied upon. Canonical-fixture
+   list for Phase 4 narrows to two: `NorthwindDevEdition.accdb`
+   + `HomeHealthCare.accdb`. See criterion #3's "RESOLVED"
+   entry above.
 
-2. **Are macros and property-sheet entries in scope for the
-   canonical-parse-success report (GAP #1)?** Open Validation
-   #7 in strategy.md is "partially resolved" with macros not
-   exercised. For Phase 4's "documented constructs in canonical
-   fixtures" criterion, define the boundary explicitly.
+2. **~~Are macros and property-sheet entries in scope for the
+   canonical-parse-success report (GAP #1)?~~ RESOLVED
+   2026-05-17 — HYBRID, inventory-driven.** The human deferred
+   the call to cross-provider recommendation (Gemini Pro +
+   GPT-5.4). Gemini said "wide" (a+b+c+d); GPT-5.4 said "mid"
+   (a+b+c only). Both recommended an inventory step first.
+   Human selected hybrid synthesis: **(a)+(b)+(c) definitely
+   in Phase 4; (d) inventory-driven** — Session 2's stub spec
+   for GAP #1 includes an early inventory pass that enumerates
+   property-sheet expression-bearing fields in Northwind + HHC,
+   then folds (d) in if the set is small/bounded or excludes
+   it from gating if long-tail (with `UnresolvedItem` records
+   still emitted for anything that can't decode mechanically).
+   Raw recommendations preserved at
+   `q2-q3-recommendations/{gemini-pro,gpt-5-4}.md`.
 
-3. **Packaging shape — `dotnet tool`, self-contained binary
-   release, or embedded-NuGet?** The audit defers the choice
-   to Session 2, but the human's preference (if any) shapes
-   Session 2's stub spec for `cli-packaging`. If the human has
-   no preference, Session 2 picks based on downstream-consumer
-   convenience (likely `dotnet tool` given the consumer
-   already needs the .NET runtime, but Session 2 owns the
-   decision).
+3. **~~Packaging shape?~~ RESOLVED 2026-05-17 — SELF-CONTAINED
+   BINARY (primary).** The human deferred to cross-provider
+   recommendation; both Gemini Pro and GPT-5.4 independently
+   recommended `dotnet publish --self-contained` (Windows
+   target) for the AI-tooling-agent consumer profile. The
+   `dotnet tool` channel may be added later as an optional
+   secondary if a consumer specifically asks; embedded NuGet
+   is deferred until an in-process host repo emerges. See GAP
+   #7's updated scope entry above. Raw recommendations
+   preserved at `q2-q3-recommendations/{gemini-pro,gpt-5-4}.md`.
 
 Once the human resolves these, Session 2 (Plan The Remaining
 Work) can author the stub specs at

@@ -29,18 +29,25 @@
     },
     "summary": "Session 2 of 3: Plan The Remaining Work. For each of the 6 in-scope GAPs from gap-audit.md, author a stub spec.md at docs/session-sets/<harvester-finish-*>/. Author remaining-work-tree.md as the row-per-set index. Author tree-amendments.md if any gaps fold into existing sets rather than warranting new ones. Pre-req: the human must resolve at least Open Question 1 (MiniComplex inclusion) and Open Question 2 (macros/property-sheet boundary) before Session 2 starts; Open Question 3 (packaging shape) can resolve at stub-authoring step. Honor the Session-1-vs-Session-2 boundary discipline: stubs author at acceptance-criteria level, not implementation prescription."
   },
-  "blockers": [
+  "blockers": [],
+  "post_close_resolutions": [
     {
-      "type": "human_input_required",
-      "description": "Open Question 1: is MiniComplex.accdb in scope for Phase 4 canonical-fixture coverage? Strategy.md lists it; project-guidance.md excludes it from automated test coverage pending error-audit. Blocks scoping of GAP #3 canonical-golden-output."
+      "question": "Open Question 1: MiniComplex.accdb in scope for Phase 4 canonical-fixture coverage?",
+      "resolved_at": "2026-05-17",
+      "resolved_by": "human",
+      "resolution": "OUT. MiniComplex isn't tested thoroughly enough to rely on. Canonical-fixture list narrows to two: NorthwindDevEdition.accdb + HomeHealthCare.accdb."
     },
     {
-      "type": "human_input_required",
-      "description": "Open Question 2: are macros and property-sheet entries in scope for the canonical-parse-success report (GAP #1)? Open Validation #7 in strategy.md is partially resolved. Blocks scoping of GAP #1."
+      "question": "Open Question 2: macros and property-sheet entries in scope for the canonical-parse-success report (GAP #1)?",
+      "resolved_at": "2026-05-17",
+      "resolved_by": "human, after cross-provider recommendation (Gemini Pro + GPT-5.4)",
+      "resolution": "HYBRID, inventory-driven. (a) VBA + (b) Jet SQL + (c) macros are definitely in. (d) property-sheet expressions get an early inventory pass in Session 2's GAP #1 stub spec; if small/bounded, fold in; if long-tail, exclude from Phase 4 gating with UnresolvedItem records emitted for non-mechanically-decodable cases. Gemini said wide; GPT-5.4 said mid; human selected hybrid synthesis. Raw recommendations at docs/session-sets/remaining-work-planner/q2-q3-recommendations/."
     },
     {
-      "type": "human_input_preferred_not_required",
-      "description": "Open Question 3: packaging shape preference (dotnet tool / self-contained binary / embedded-NuGet)? If no human preference, Session 2 picks at stub-authoring step. Does NOT block Session 2 start; only shapes GAP #7's stub."
+      "question": "Open Question 3: packaging shape for GAP #7 (cli-packaging)?",
+      "resolved_at": "2026-05-17",
+      "resolved_by": "human, after cross-provider recommendation (Gemini Pro + GPT-5.4)",
+      "resolution": "Self-contained binary release (`dotnet publish --self-contained`) for Windows as primary. dotnet tool may be added later as optional secondary if a consumer asks. Embedded NuGet deferred until an in-process host repo emerges. Both reviewers independently recommended self-contained binary for the AI-tooling-agent consumer profile."
     }
   ]
 }
