@@ -2,5 +2,58 @@
   "sessionSetName": "lowdefy-ir-foundation",
   "createdDate": "2026-05-17T03:11:35.921393-04:00",
   "totalSessions": 2,
-  "entries": []
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/route-schema-design",
+      "dateTime": "2026-05-17T08:00:00-04:00",
+      "description": "Routed analysis call to design ModalDetailFormSchema.json (strict JSON Schema 2020-12 with closed operator + action + control catalogs, Block/Request separation, page/modal/drawer modal types, try/catch/debounce hygiene). Written to AccessHarvester.Core/Ir/ModalDetailFormSchema.json; orchestrator-side mechanical fixes (additionalProperties->unevaluatedProperties on three oneOf-bearing defs; removed dead baseControl branch; simplified binding to a single $ref expression) applied so the schema validates the sample mechanically.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 7117,
+          "outputTokens": 5107,
+          "costUsd": 0.05996625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/hand-author-sample",
+      "dateTime": "2026-05-17T08:05:00-04:00",
+      "description": "Hand-authored AccessHarvester.Core/Ir/samples/frmBudgetServicePlan.ir.yaml: budget-header portion of the source form (the ClientBudget record). ListBoxes deferred to MasterDetailListPage type per synthesis. Sample mechanically validates against the schema via jsonschema Draft 2020-12.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/route-cross-provider-review",
+      "dateTime": "2026-05-17T08:30:00-04:00",
+      "description": "Routed code-review of the schema + sample. Verdict: ISSUES_FOUND, 13 findings (1 Critical, 6 Major, 5 Minor, 1 documentation). Review at session-reviews/session-001-step-03-cross-provider-review.md. Six findings tagged as commit blockers; seven deferred to the schema-refinements.md backlog Session 2 will produce.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "code-review",
+          "inputTokens": 12118,
+          "outputTokens": 10886,
+          "costUsd": 0.199644
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/apply-review-fixes",
+      "dateTime": "2026-05-17T08:35:00-04:00",
+      "description": "Applied the six commit-blocker review findings: (5+10) readOnly property added to TextBox/ComboBox/CheckBox + two-way binding semantics documented in schema description; (3) binding standardized on _request operator form in sample; (9) RefreshRequest action added to catalog; (11) event composition order documented + at-least-one-of-actions/tryCatch enforced via anyOf; (12) needId parameter added to savePlan in sample; (13) lazy parameter-eval semantics documented on request def. Sample re-validates against the schema.",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
 }

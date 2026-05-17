@@ -86,8 +86,10 @@ into the new ModalDetailForm schema.
 - Operators: any computed visibilities or validation rules (e.g., IIf,
   DLookup for need-availability checks).
 
-**Output:** `tmp/ir-samples/frmBudgetServicePlan.ir.yaml` — hand-authored
-IR file conforming to the ModalDetailFormSchema.
+**Output:** `AccessHarvester.Core/Ir/samples/frmBudgetServicePlan.ir.yaml` —
+hand-authored IR file conforming to the ModalDetailFormSchema. (Originally
+specced as `tmp/ir-samples/...`, but `tmp/` is gitignored; samples must live
+next to the schema to be committed.)
 
 **Anti-scope:** Do not hand-author the full Add-an-Order workflow. One
 modal is enough for validation; leave other forms for later.
@@ -222,7 +224,7 @@ architectural synthesis.
 
 ### Session 1
 - `AccessHarvester.Core/Ir/ModalDetailFormSchema.json` — JSON Schema
-- `tmp/ir-samples/frmBudgetServicePlan.ir.yaml` — hand-authored IR sample
+- `AccessHarvester.Core/Ir/samples/frmBudgetServicePlan.ir.yaml` — hand-authored IR sample
 - Git commit
 
 ### Session 2

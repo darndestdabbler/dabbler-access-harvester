@@ -1,17 +1,18 @@
 {
-  "sessionSet": "docs\\session-sets\\lowdefy-ir-foundation",
+  "schemaVersion": 2,
+  "sessionSetName": "lowdefy-ir-foundation",
   "currentSession": 1,
   "totalSessions": 2,
   "status": "in-progress",
+  "lifecycleState": "in-progress",
+  "startedAt": "2026-05-17T07:11:35.923710Z",
+  "completedAt": null,
+  "verificationVerdict": null,
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
     "model": "claude-opus-4-7",
     "effort": "medium"
   },
-  "startedAt": "2026-05-17T07:11:35.923710Z",
-  "completedAt": null,
-  "lifecycleState": "in-progress",
-  "verdict": null,
-  "notes": "Session 1 first attempt (Haiku, commit 41694a3) was reverted: schema and sample were mutually inconsistent, and the spec-mandated routed analysis + cross-provider review calls were skipped. Redo by Opus 4.7 orchestrator following the ai-assignment routing plan."
+  "notes": "Session 1 first attempt (Haiku, commit 41694a3) was reverted: schema and sample were mutually inconsistent, and the spec-mandated routed analysis + cross-provider review calls were both skipped. Redone by Opus 4.7 orchestrator: Step 1 routed to Gemini Pro (analysis, $0.06), Step 2 hand-authored, Step 3 routed to Sonnet 4.6 (code-review, $0.20, verdict ISSUES_FOUND with 13 findings). All 6 commit-blocker findings applied to schema and sample. Schema mechanically validates the sample (jsonschema Draft 2020-12). 7 deferred findings remain in the cross-provider review document, to be consolidated into docs/session-sets/lowdefy-ir-foundation/schema-refinements.md by Session 2."
 }
