@@ -134,6 +134,57 @@
       "description": "Updated ai-assignment.md actuals; authored disposition.json (per-session shape with next_orchestrator + blockers); committed + pushed.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 11,
+      "stepKey": "session-2/verify-round2",
+      "dateTime": "2026-05-17T15:26:11.328314-04:00",
+      "description": "Cross-provider session-verification (Round 2) via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20332,
+          "outputTokens": 12755,
+          "costUsd": 0.242155
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 12,
+      "stepKey": "session-2/verify-round3",
+      "dateTime": "2026-05-17T15:30:15.356325-04:00",
+      "description": "Cross-provider session-verification (Round 3) via gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 8219,
+          "outputTokens": 9227,
+          "costUsd": 0.1589525
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 13,
+      "stepKey": "session-2/next-orc-recommendation",
+      "dateTime": "2026-05-17T15:31:54.929658-04:00",
+      "description": "Routed next-orchestrator recommendation via Gemini Pro (cross-provider)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 5110,
+          "outputTokens": 276,
+          "costUsd": 0.0091475
+        }
+      ]
     }
   ]
 }

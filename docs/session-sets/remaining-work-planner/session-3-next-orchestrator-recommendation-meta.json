@@ -1,0 +1,9 @@
+{
+  "model_name": "gemini-pro",
+  "input_tokens": 5110,
+  "output_tokens": 276,
+  "cost_usd": 0.0091475,
+  "task_type": "analysis",
+  "session_set": "docs\\session-sets\\remaining-work-planner",
+  "session_number": 2
+}

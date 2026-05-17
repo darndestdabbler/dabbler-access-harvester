@@ -1,0 +1,10 @@
+{
+  "model_name": "gpt-5-4",
+  "input_tokens": 8219,
+  "output_tokens": 9227,
+  "cost_usd": 0.1589525,
+  "task_type": "session-verification",
+  "session_set": "docs\\session-sets\\remaining-work-planner",
+  "session_number": 2,
+  "round": 3
+}
