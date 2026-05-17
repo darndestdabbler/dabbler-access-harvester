@@ -325,3 +325,75 @@ Net result: the session output is strong, disciplined, and largely aligned with 
   ]
 }
 ```
+
+---
+
+# Verification Round 3
+
+Reviewing the Session 1 artifacts against the spec and the Step 3.5 assignment schema, this session is close, but I do not think it is fully clean yet.
+
+On **spec compliance**, both expected deliverables exist and are in the correct location under `docs/cross-repo/`:
+
+- `docs/cross-repo/dabbler-platform-components.md`
+- `docs/cross-repo/dabbler-platform-report-rdf-schema.md`
+
+Feature 1 is substantively present: the components doc is grouped by category, gives source paths, purposes, required and optional parameters, and common usage contexts. Feature 2 is also substantively present: the RDF schema doc describes the top-level object, section-by-section fields, validation expectations, and provides synthetic examples plus a full synthetic end-to-end example. So at the file/output level, Session 1 did produce what the spec asked for.
+
+On **currency headers**, both deliverables include the required snapshot/regeneration block. They also add `Captured on`, which is harmless and useful. I see no issue there.
+
+On **boundary discipline**, the schema doc is notably good. In `docs/cross-repo/dabbler-platform-report-rdf-schema.md`, the opening citation note explicitly says the JSON examples are synthetic and not copied from sibling-repo sample files, and it points readers to real examples in `../dabbler-platform/` without reproducing them. That is exactly the right handling of the spec’s “no copying of platform source code into this repo” boundary. The inventory doc also generally behaves as documentation rather than mirroring source, and it cites source file paths for component claims.
+
+The main content-grounding problem I found is in `docs/cross-repo/dabbler-platform-components.md`, section **Security UI → Admin pages → `RoleAssignmentPage`**. That entry says:
+
+- route: `/admin/roles/assign`
+- required parameter: `UserId : int` — “route segment”
+
+Those two claims cannot both be true as written. A route segment parameter requires a route template containing something like `/{userId}`. Since the documented route contains no route parameter, either the route is wrong or the claim that `UserId` is a required route segment is wrong. This is a concrete accuracy problem in a section that is supposed to be source-grounded.
+
+On **schema doc fidelity**, `docs/cross-repo/dabbler-platform-report-rdf-schema.md` is the strongest artifact in the set. It covers:
+
+- root object structure
+- metadata
+- data sources
+- parameters, including nested `validation`
+- fields
+- sorting
+- grouping
+- bands
+- elements
+- styles
+- expressions
+- validation and cross-reference integrity rules
+- an explicit “Generation contract for AI consumers”
+
+Within the material provided here, I did not find an internal contradiction in that file comparable to the `RoleAssignmentPage` issue above. It appears materially aligned with the Session 1 requirement to give downstream agents enough fidelity to generate a valid `report.rdf.json`.
+
+On **inventory completeness and stability tagging**, the doc does a good job separating actual migration targets from support/test-only material. The `Stubs and testing` section correctly marks those surfaces as not migration targets, which is important and consistent with the spec’s intent. The one structural weakness is in `docs/cross-repo/dabbler-platform-components.md`, section **Application shell (compatibility)**: the section preface says every component in that section is `deprecated`, but several individual entries do not repeat an explicit `Stability tag:` line. Because the deliverable is intended to be structured and reusable by downstream agents, that inconsistency weakens machine-readability even though the human meaning is clear.
+
+On **`ai-assignment.md` schema compliance**, the file mostly matches the requested session-block structure: each session has Recommended orchestrator, Rationale, Estimated routed cost, a routing table, and Actuals. Session 1 also includes a Next-session recommendation, and Session 3 correctly does not. However, `ai-assignment.md`, section **Session 2 of 3**, is missing the explicit Next-session recommendation that your verification prompt says Sessions 1 and 2 should each carry. The sentence “See Session 3 for the next orchestrator recommendation” is not equivalent to actually providing that recommendation inside the Session 2 block.
+
+```json
+{
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Major",
+      "location": "docs/cross-repo/dabbler-platform-components.md — Security UI > Admin pages > RoleAssignmentPage",
+      "summary": "The documented route `/admin/roles/assign` conflicts with the claim that `UserId : int` is a required route-segment parameter.",
+      "fix": "Re-check `../dabbler-platform/src/Libs/Dabbler.Security.Blazor/Pages/Admin/RoleAssignmentPage.razor` and correct either the route template or the parameter description; only describe `UserId` as a required route segment if the route actually contains a segment placeholder."
+    },
+    {
+      "severity": "Minor",
+      "location": "docs/cross-repo/dabbler-platform-components.md — Application shell (compatibility)",
+      "summary": "Several compat components inherit deprecation from a section-level note instead of carrying an explicit per-component `Stability tag:` line, reducing structural consistency.",
+      "fix": "Add an explicit `Stability tag: deprecated` line to `DabblerShell`, `DabblerNavigationPanel`, `DabblerTabbedWorkspace`, and `DabblerTopMenuBar` so every component entry has a uniform, self-contained stability annotation."
+    },
+    {
+      "severity": "Minor",
+      "location": "ai-assignment.md — Session 2 of 3",
+      "summary": "The Session 2 block does not include the explicit Next-session orchestrator recommendation required by the stated Step 3.5 schema.",
+      "fix": "Add a `Next-session orchestrator recommendation (Session 3)` subsection under Session 2 with engine/model/effort and rationale, mirroring the Session 1 pattern."
+    }
+  ]
+}
+```

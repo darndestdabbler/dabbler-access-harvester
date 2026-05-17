@@ -225,6 +225,23 @@
           "costUsd": 0.015215
         }
       ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/verify-round-3",
+      "dateTime": "2026-05-17T12:08:18.560666-04:00",
+      "description": "Cross-provider session verification round 3",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20267,
+          "outputTokens": 7970,
+          "costUsd": 0.1702175
+        }
+      ]
     }
   ]
 }

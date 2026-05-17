@@ -25,9 +25,10 @@
   "next_orchestrator": {
     "session_number": 2,
     "engine": "claude-code",
+    "provider": "anthropic",
     "model": "claude-opus-4-7",
     "effort": "high",
-    "rationale": "Routed via task_type=analysis (gemini-pro): given Session 1 required a high-effort Opus run and multiple verification rounds to satisfy the spec, using the same orchestrator for Session 2's complex analysis task minimizes the risk of similar churn and rework.",
+    "reason": "Routed via task_type=analysis (gemini-pro): given Session 1 required a high-effort Opus run and multiple verification rounds to satisfy the spec, using the same orchestrator for Session 2's complex analysis task minimizes the risk of similar churn and rework.",
     "summary": "Session 2 of 3: Migration map (Feature 3) cross-referencing Access construct kinds against the platform component inventory, plus a short dabbler-pdf boundary doc (Feature 4). Two new Markdown files under docs/cross-repo/ with currency headers."
   },
   "blockers": []
