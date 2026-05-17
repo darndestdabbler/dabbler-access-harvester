@@ -35,7 +35,10 @@
     "provider": "anthropic",
     "model": "claude-opus-4-7",
     "effort": "medium",
-    "reason": "Session 2 mixes mechanical test wiring (sentinel diff test) with synthesis (per-reason narrative). Routed analysis from Session 1 close named Claude Opus 4.7 @ effort=medium; in-conversation Opus for synthesis is appropriate per the 'orchestrator-model-matches-routing-target' Convention."
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 mixes mechanical test wiring (sentinel diff test) with synthesis (per-reason narrative). Routed analysis from Session 1 close named Claude Opus 4.7 @ effort=medium; in-conversation Opus for synthesis is appropriate per the 'orchestrator-model-matches-routing-target' Convention."
+    }
   },
   "blockers": [],
   "post_close_notes": "Two human-attention items raised in the session-complete notification body: (a) VBA Attribute-statement grammar gap (strategy-level), (b) property-sheet wrapping heuristic limit (Session 2 may refine if appetite). Session 2 inherits the live diff gate; no test-mode flip required. The unresolvedItems section's 'not-measured' status is intentional and stays in place until harvester-finish-canonical-golden-output wires the live aggregator."
