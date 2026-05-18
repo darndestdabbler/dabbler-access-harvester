@@ -37,7 +37,11 @@ public sealed class CliDeterminismTests
     [Fact]
     public void GenerateDocs_TwoInvocations_ProduceIdenticalSchemaSummary()
     {
-        string manifest = Path.Combine(RepoPaths.Examples(), "minimal-form.json");
+        // northwind-output.json is the manifest-shaped example (other
+        // examples/ entries are per-form IR records, not valid manifest
+        // inputs). See CliGenerateDocsTests for the same fixture-choice
+        // rationale.
+        string manifest = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
         Assert.True(File.Exists(manifest), $"Example manifest missing: {manifest}");
 
         string outDir1 = Path.Combine(Path.GetTempPath(), $"ah-int-{Guid.NewGuid():N}");
@@ -50,8 +54,8 @@ public sealed class CliDeterminismTests
             Assert.Equal(0, first.ExitCode);
             Assert.Equal(0, second.ExitCode);
 
-            string file1 = Path.Combine(outDir1, "minimal", "schema-summary.md");
-            string file2 = Path.Combine(outDir2, "minimal", "schema-summary.md");
+            string file1 = Path.Combine(outDir1, "northwinddevedition", "schema-summary.md");
+            string file2 = Path.Combine(outDir2, "northwinddevedition", "schema-summary.md");
             Assert.True(File.Exists(file1), $"First-run schema summary missing at {file1}");
             Assert.True(File.Exists(file2), $"Second-run schema summary missing at {file2}");
 

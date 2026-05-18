@@ -79,6 +79,13 @@ public sealed class ParseSuccessReportTests
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         WriteIndented = true,
+        // Pin the indented-write newline to LF. With WriteIndented=true
+        // the default NewLine is Environment.NewLine — CRLF on Windows,
+        // LF on Linux/macOS — which would make the committed golden
+        // platform-specific. The downstream AI consumer reads the file
+        // as bytes; LF is the canonical choice and matches the .gitattributes
+        // eol=lf rule on *.json.
+        NewLine = "\n",
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         // Prevent over-escaping of `<`, `>`, `&` in surrounding-text
         // samples; the report is consumed as a file, not embedded in

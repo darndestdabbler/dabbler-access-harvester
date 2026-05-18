@@ -1,0 +1,23 @@
+# Force LF line endings on text fixture files so byte-level
+# comparison tests pass identically on Windows and Linux. Without
+# this, Windows git's autocrlf converts committed LF to CRLF at
+# checkout, and the fixture-comparison tests (ParseSuccessReportTests,
+# any future committed-golden tests) fail because the generator emits
+# LF and the test compares against the CRLF-converted file on disk.
+#
+# Scoped to text fixture file types only. Native Windows artifacts
+# (*.csproj, *.ps1, *.cmd, etc.) keep their default behavior.
+*.json   text eol=lf
+*.md     text eol=lf
+*.bas    text eol=lf
+*.yaml   text eol=lf
+*.yml    text eol=lf
+
+# C# source: LF everywhere. C# raw string literals (`"""..."""`)
+# preserve source-file line endings rather than normalizing to LF
+# (per the C# 11 design decision). Tests that compare raw-string
+# inputs against the expected `"...\n"` shape fail on Windows
+# checkouts where autocrlf converts committed LF to CRLF. Pinning
+# *.cs to LF makes those tests deterministic across platforms.
+# Confirmed against VbaModuleBodyLoaderTests on 2026-05-18.
+*.cs     text eol=lf
