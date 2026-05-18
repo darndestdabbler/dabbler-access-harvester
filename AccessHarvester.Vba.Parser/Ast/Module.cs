@@ -4,10 +4,19 @@ namespace AccessHarvester.Vba.Parser.Ast;
 
 // The top-level node. A VBA module (.bas, .cls, form/report module) is
 // a list of module items. Per ast-shape.md §4.
+//
+// `Header` carries the typed `Attribute VB_*` / `VERSION` / `BEGIN..END`
+// metadata stripped from Access-exported module text by
+// `VbaModuleBodyLoader.LoadAndParse`. Null when the source carried no
+// header or the caller went through `VbaParserPipeline.Parse` directly
+// (the raw escape hatch for grammar / hand-built tests).
 public sealed record Module(
     Provenance Provenance,
     IReadOnlyList<ModuleItem> Items)
-    : VbaSyntaxNode(Provenance);
+    : VbaSyntaxNode(Provenance)
+{
+    public ModuleHeaderMetadata? Header { get; init; }
+}
 
 // One unit at module-statement position. Mirrors grammar moduleItem
 // alternatives, with the trivial NEWLINE alt absorbed by the builder

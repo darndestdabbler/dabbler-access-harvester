@@ -1,12 +1,17 @@
 {
   "schemaVersion": 2,
   "sessionSetName": "vba-attribute-header-strip",
-  "currentSession": null,
-  "totalSessions": null,
-  "status": "not-started",
-  "lifecycleState": null,
-  "startedAt": null,
+  "currentSession": 1,
+  "totalSessions": 1,
+  "status": "in-progress",
+  "lifecycleState": "work_in_progress",
+  "startedAt": "2026-05-17T21:23:59.371669-04:00",
   "completedAt": null,
   "verificationVerdict": null,
-  "orchestrator": null
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "high"
+  }
 }

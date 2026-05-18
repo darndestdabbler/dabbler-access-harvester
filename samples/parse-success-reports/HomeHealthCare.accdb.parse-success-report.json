@@ -7,8 +7,8 @@
     "vbaModules": {
       "totalModules": 32,
       "totalProcedures": 235,
-      "parseOk": 3,
-      "parseFailed": 29,
+      "parseOk": 30,
+      "parseFailed": 2,
       "errorTokenCount": 0
     },
     "jetSqlQueries": {

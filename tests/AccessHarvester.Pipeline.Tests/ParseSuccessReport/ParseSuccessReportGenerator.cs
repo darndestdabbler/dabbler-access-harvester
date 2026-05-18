@@ -104,7 +104,16 @@ public static class ParseSuccessReportGenerator
 
             totalProcedures += ProcedureHeader.Matches(body).Count;
 
-            var result = VbaParserPipeline.Parse(body,
+            // Strip the canonical leading header block before parsing.
+            // We deliberately do NOT call BuildAst here — the report is
+            // a diagnostic-severity count, and forcing AST construction
+            // over every YAML mirror would surface unrelated
+            // recovery-time AstBuilder fragility that is out of this
+            // session set's scope (see
+            // docs/session-sets/vba-attribute-header-strip/audit.md
+            // "Follow-up findings").
+            var (strippedBody, _) = VbaModuleBodyLoader.Load(body);
+            var result = VbaParserPipeline.Parse(strippedBody,
                 new VbaParseOptions(RequestedMode: VbaParseMode.Recovering));
 
             // Error-severity diagnostics indicate a real parse failure;

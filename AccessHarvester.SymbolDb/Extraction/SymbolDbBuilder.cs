@@ -82,10 +82,10 @@ public sealed class SymbolDbBuilder
         {
             if (deferredFqns.Contains(raw.Fqn)) continue;
 
-            var parseResult = VbaParserPipeline.Parse(
+            var (ast, parseResult) = VbaModuleBodyLoader.LoadAndParse(
                 raw.Source,
-                new ParseOptions(ParseMode.Recovering, LossyFallbackErrorThreshold: 100, SourcePath: raw.SourcePath));
-            var ast = parseResult.BuildAst(raw.SourcePath);
+                new ParseOptions(ParseMode.Recovering, LossyFallbackErrorThreshold: 100, SourcePath: raw.SourcePath),
+                raw.SourcePath);
             var visitor = new ScopeBuildingVisitor();
             var moduleScope = visitor.BuildModuleScope(project, ast, raw.Fqn, ToModuleKind(raw.Kind));
 

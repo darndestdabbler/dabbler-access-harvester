@@ -1,0 +1,42 @@
+{
+  "status": "complete",
+  "session_number": 1,
+  "total_sessions": 1,
+  "summary": "Session 1 of 1 (one-session set; Phase 4 F1.5). Introduced `VbaModuleBodyLoader` (`Load` + `LoadAndParse`) under `AccessHarvester.Vba.Parser/` that strips the canonical leading VBA module-header block (VERSION/BEGIN..END/Attribute VB_* coupled per R1 fix) and captures it as typed `ModuleHeaderMetadata` attached to a new init-only `Header` property on the `Module` AST. Routed the two production VBA-parsing call sites through the loader: `SymbolDbBuilder` (LoadAndParse) and `ParseSuccessReportGenerator` (two-step Load + Parse — workaround for the pre-existing AstBuilder NRE documented in audit.md Follow-up Finding 1). Regenerated parse-success-report goldens: HHC parseOk 3 → 30 / 32 (94%); Northwind 14 → 61 / 66 (92%); both hit the spec's Stop-Rule thresholds (HHC ≥30; NW ≥60). Loader unit tests (15/15) + end-to-end regression test on a previously-failing HHC code-behind module (Form_frmReportParam_FY); full suite 1869 passed, 2 skipped. Cross-provider verification ran 3 rounds against gpt-5-4: R1 found 1 Major (VERSION/BEGIN coupling) + 1 Minor (audit.md P2 description), both fixed; R2 raised an out-of-scope AstBuilder NRE due to dropped OOS disclaimer; R3 with reshaped context returned VERIFIED. Closeout artifacts: change-log.md (gemini-flash summarization, max_tier=1), next-session-set-recommendation.md (gemini-pro analysis), ai-assignment.md actuals appended, this disposition.json written before the closeout commit per Convention. SET COMPLETE.",
+  "files_changed": [
+    "AccessHarvester.Vba.Parser/Ast/Module.cs",
+    "AccessHarvester.Vba.Parser/Ast/ModuleHeaderMetadata.cs",
+    "AccessHarvester.Vba.Parser/VbaModuleBodyLoader.cs",
+    "AccessHarvester.SymbolDb/Extraction/SymbolDbBuilder.cs",
+    "tests/AccessHarvester.Vba.Parser.Tests/VbaModuleBodyLoaderTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/ParseSuccessReport/ParseSuccessReportGenerator.cs",
+    "tests/AccessHarvester.Pipeline.Tests/VbaAttributeHeaderStripRegressionTests.cs",
+    "samples/parse-success-reports/HomeHealthCare.accdb.parse-success-report.json",
+    "samples/parse-success-reports/NorthwindDevEdition.accdb.parse-success-report.json",
+    "docs/session-sets/vba-attribute-header-strip/activity-log.json",
+    "docs/session-sets/vba-attribute-header-strip/ai-assignment.md",
+    "docs/session-sets/vba-attribute-header-strip/audit.md",
+    "docs/session-sets/vba-attribute-header-strip/change-log.md",
+    "docs/session-sets/vba-attribute-header-strip/disposition.json",
+    "docs/session-sets/vba-attribute-header-strip/next-session-set-recommendation.md",
+    "docs/session-sets/vba-attribute-header-strip/session-events.jsonl",
+    "docs/session-sets/vba-attribute-header-strip/session-state.json",
+    "docs/session-sets/vba-attribute-header-strip/session-reviews/session-001.md",
+    "docs/session-sets/vba-attribute-header-strip/session-reviews/session-001-r2.md",
+    "docs/session-sets/vba-attribute-header-strip/session-reviews/session-001-r3.md",
+    "tools/vahs_session1_assignment.py",
+    "tools/vahs_session1_verify.py",
+    "tools/vahs_session1_verify_r2.py",
+    "tools/vahs_session1_verify_r3.py",
+    "tools/vahs_session1_closeout.py"
+  ],
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "set_status": "complete",
+  "next_session_set": {
+    "slug": "harvester-finish-canonical-golden-output",
+    "summary": "F2 in the Phase 4 plan. Prerequisites satisfied (F1 complete + this set ships the regenerated parse-success-report goldens that F2's per-object IR counts reconcile against). Spec exists as a stub; Session 1 of F2 will elaborate it. Recommended orchestrator for F2 Session 1: Claude Opus 4.7 @ effort=high (spec-elaboration / synthesis-heavy first session). Two deviation candidates surfaced by this set's audit: (1) a small `vba-astbuilder-recovery-guards` set before F2 to fix the pre-existing AstBuilder NRE that F2 will likely re-trigger, and (2) the 7 still-parseFailed modules across HHC + Northwind (real grammar gaps, not header issues). See next-session-set-recommendation.md for the full sequencing discussion."
+  },
+  "blockers": [],
+  "post_close_notes": "Three human-attention items remain Phase 4 strategy-level (raised in the closeout notification, NOT folded into this set's work): (a) AstBuilder NRE on header-stripped HHC modules (audit.md Follow-up Finding 1) — sequencing question for whether to insert a micro-set before F2. (b) 7 still-parseFailed modules across HHC + Northwind after the strip — real grammar gaps, candidates for a future grammar-extension session. (c) Workflow-doc vs. seek-AI-consensus-memory conflict surfaced on R2 — the orchestrator asked the human for verifier-disagreement adjudication per workflow Step 7, but the new feedback memory directs AI-consensus first. Step 9 reorganization review will propose aligning the workflow doc with the memory. Step 9 review runs after notify per workflow."
+}
