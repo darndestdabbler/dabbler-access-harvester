@@ -1276,3 +1276,60 @@ reference; if it proves out twice in *this* repo, propose promotion to
   `docs/planning/project-guidance.md` → Conventions → Testing
   Conventions, naming `ParseSuccessReportDiff` /
   `ParseSuccessReportDiffTests` as the reference shape.
+
+### Regenerate Committed Example Files Alongside The Schema Set That Produces Them
+
+- **Context:** Session 3 of
+  `harvester-finish-operations-and-interpretation-docs` (2026-05-18).
+  The set's spec listed `examples/*.json` as the consumer-facing
+  examples gallery the interpretation guide's §9 would point at. The
+  three files (`examples/minimal-form.json`,
+  `examples/complex-form.json`, `examples/northwind-output.json`) had
+  been authored against the pre-import AccessExporterTemp1 schema and
+  never regenerated when the canonical-golden-output set normalised
+  the harvester output to the current
+  `{ Type, Properties, Children, ... }` per-fixture multi-file corpus
+  shape.
+- **Failure or friction:** The downstream-AI probe (Session 3 step 3)
+  surfaced the schema mismatch as the spec's "Out-of-date examples"
+  stop rule trip. Resolution required: a WIP commit at the stop
+  point, a round of user adjudication, an in-session regeneration
+  (workflow deviation from the spec-prescribed tree-amendment to
+  `schema-finalization-and-docs`), two additional probe rounds to
+  surface gap candidates against the regenerated examples, two
+  rounds of guide edits to address the gaps, and a separate
+  follow-up tree-amendment session
+  (`schema-finalization-and-docs-tree-amendment-001`) recommended
+  to formalise the provenance of the in-session regen. Direct cost:
+  ~$0.18 in extra probe rounds plus orchestrator time across the
+  detour. The schema mismatch had been latent since the
+  canonical-golden-output set landed; it surfaced only when a
+  downstream docs set actually exercised the example files.
+- **Lesson:** Committed example files (anything under `examples/`,
+  `samples/GoldenOutput/`, fixture corpora, or similar) are part of
+  the schema contract. When a session set produces a new schema or
+  modifies a schema-touching corpus, the same set must regenerate
+  every committed example file that references the schema — not as a
+  later-session amendment. The cost of the regenerate-now step is
+  trivial (file copies plus a build / golden-pin run); the cost of
+  rediscovering the staleness later is a multi-round detour and a
+  procedural-debt amendment. The reverse case — leaving examples
+  pointing at the old schema "for backward reference" — is also
+  wrong; the consumer-facing examples must match the current
+  contract.
+- **Action for future sessions:** When authoring or reviewing a spec
+  that produces a new schema or touches a corpus consumed by
+  examples, add a "regenerate `examples/` and `samples/GoldenOutput/`
+  entries that reference this schema" step to the same set's
+  Sessions list. When picking up a docs set that consumes existing
+  example files, sanity-check the example file shape against the
+  current canonical golden corpus *before* the downstream-AI probe
+  runs — a quick `diff` of one form file from `examples/` against
+  one form file from `samples/GoldenOutput/<fixture>/ir/Forms/` is a
+  five-second check that prevents a stop-rule trip. If a second
+  context in this repo confirms the staleness pattern, propose
+  promotion to a Convention in
+  `docs/planning/project-guidance.md` → Conventions → Workflow
+  Expectations: "When a session set produces or modifies a schema,
+  regenerate every committed example referencing that schema in the
+  same set's commit."
