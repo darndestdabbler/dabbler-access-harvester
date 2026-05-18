@@ -997,56 +997,81 @@ reference; if it proves out twice in *this* repo, propose promotion to
   `session-reviews/`. The `session-reviews/` directory is reserved for
   `log.save_session_review()` output.
 
-## Post-Fix Sweep All Narrative Artifacts When A Rule's Confidence Tag Changes
+## Post-Fix Sweep All Narrative Artifacts When A Rule Or Contract Changes
 
-- **Context:** Workflow-package sessions where a per-rule
-  confidence tag (`inferred` vs `confirmed`) or an open-questions
-  entry changes between a draft and a fix round. First hit in
+> **Promoted to `project-guidance.md` → Conventions → Workflow
+> Expectations** on 2026-05-17 (after
+> `harvester-finish-canonical-parse-success-report` Session 2,
+> second-context confirmation — the same multi-round-drift failure
+> mode replayed in a different trigger family: a rule-authority
+> framing change rather than a confidence-tag change). Retained here
+> as the action-detail reference; the rule itself is now a Convention.
+> The original promotion-trigger language asked specifically for a
+> second confidence-tag-change hit. The Step 9 reorganization review
+> accepted the looser reading "same failure mode in a related trigger
+> family" because the abstract pattern (narrative summary blocks lag
+> body fixes) and the mitigation (grep / sweep before re-verifying)
+> are identical across triggers.
+
+- **Original context (confidence-tag changes):** Workflow-package
+  sessions where a per-rule confidence tag (`inferred` vs
+  `confirmed`) or an open-questions entry changes between a draft
+  and a fix round. First hit in
   `generalization-validation-on-non-northwind` Session 2 Rounds
   1-3 (2026-05-15).
-- **Failure or friction:** Round 1 cross-provider verification
-  found that the `Add a Client` falsification test hardcoded the
-  exact `FormatPhone` output mask while the package said the mask
-  was only `inferred`. The orchestrator read
-  `basUtilities::FormatPhone`, upgraded the package's rule to
-  `confirmed`, aligned the test, and removed the
-  now-resolved ambiguity-log entry — but did not sweep
-  `generalization-findings.md`, which still had multiple stale
-  references describing the mask as `inferred / not read / open
-  question`. Round 2 flagged those as a Minor inconsistency. The
-  orchestrator fixed them, but in doing so accidentally changed a
-  count cell from "two questions in Session 1; Session 2 added two"
-  to "Session 2 added one more" — without noticing that Session 1
-  had actually left three open questions (the `mcrValidation`
-  question was still in the package). Round 3 flagged that as
-  another Minor inconsistency. Three verification rounds and ~$0.27
-  of routed cost to converge on a one-line fix that should have
-  been a single sweep.
-- **Lesson:** When a rule's confidence tag, confidence reasoning,
-  or open-questions list changes, the artifacts that **narrate**
-  that rule's state — generalization findings, change logs,
-  template-fit summary tables, count cells in narrative prose —
-  must be swept for stale language at the same time the rule
-  itself is updated. The natural site of post-fix drift is the
-  narrative summary, not the rule itself.
+- **Second-context confirmation (rule-authority framing changes):**
+  `harvester-finish-canonical-parse-success-report` Session 2 Rounds
+  1-3 (2026-05-17) authoring `unresolved-reason-narrative.md`. R1
+  fixed the body (Major: rewrote the `member-not-found-at-segment-<N>`
+  framing from "stable entry" to "dynamic-prefix family"; Major:
+  reconciled the `unknown-expression` analyzer-support claim with the
+  verbatim suggested-next-steps; Minor: added per-pair
+  FunctionClassification entries). R2 caught residual stale framing
+  in the opening *Authority* block + the closing *Stability
+  commitment* block that still described `SuggestedNextStepsLookup`
+  as the full source-of-truth (Minor). R3 caught the *Cross-cutting
+  consumer guidance* bullet that still said "narrative growth =
+  reason reaching the lookup" (Minor). Three rounds and ~$0.42 of
+  verification cost to converge on edits the body fixes implied.
+- **Failure or friction:** R1 cross-provider verification fixes the
+  body. R2 / R3 catch *narrative summaries* — intros, authority
+  declarations, stability statements, cross-cutting consumer
+  guidance — that still carry pre-fix framing because the
+  orchestrator's natural editing motion targets the body but not the
+  framing/summary blocks. The pattern repeats independent of trigger
+  family: confidence-tags and rule-authority framing both produce
+  the same multi-round drift if the orchestrator does not
+  proactively sweep the narrative summary blocks.
+- **Lesson:** When a rule, contract, confidence tag, or authority
+  framing changes, the artifacts that **narrate** that rule's state
+  — generalization findings, change logs, template-fit summary
+  tables, intro/authority/stability blocks, cross-cutting guidance,
+  count cells in prose — must be swept for stale language at the
+  same time the rule itself is updated. The natural site of post-fix
+  drift is the *frame* of the narrative (header / authority / closer
+  / cross-cutting), not the body. Future fix passes should grep the
+  frame blocks specifically, in addition to the body.
 - **Action for future sessions:** Maintain a small post-fix
-  checklist when changing a per-rule confidence tag or
-  resolving an ambiguity-log entry:
-  1. Update the rule (package Section 3) and any test that
-     references it.
-  2. Grep the *related narrative artifacts* for stale tokens:
-     `inferred`, `not read`, `open question`, `not yet`,
-     `Session 2 did not`. Anywhere those tokens appear adjacent
-     to the changed rule, update the surrounding language.
+  checklist whenever a rule, contract, or framing is changed:
+  1. Update the rule (package Section 3, per-reason entry, etc.) and
+     any test that references it.
+  2. Grep the *related narrative artifacts* for stale tokens. For
+     confidence-tag changes: `inferred`, `not read`, `open question`,
+     `not yet`, `Session 2 did not`. For rule/authority changes:
+     opening-block phrases like "source of truth", "authority",
+     "the lookup", "the closed set"; closing-block phrases like
+     "stability commitment", "the reason set above"; cross-cutting
+     phrases like "trigger is", "match on Reason exactly". Any
+     residue adjacent to the changed rule gets rewritten in the same
+     pass.
   3. Re-count any count cells in summary tables (e.g., "N
      questions", "N invariants", "N rules") so the cross-artifact
      totals match.
   4. Only then run the next cross-provider verification round.
   
-  If a second session set hits this same multi-round-drift pattern
-  on a confidence-tag change, promote to a Convention in
-  `project-guidance.md` and update the verifier prompt template to
-  ask explicitly about confidence-tag/narrative consistency.
+  The convention text in `project-guidance.md` captures the rule
+  itself; this entry holds the verbose action checklist + the two
+  confirmation contexts that drove promotion.
 
 ## Falsification Tests Must Not Assert Behavior The Package Says It Did Not Verify
 
@@ -1193,3 +1218,61 @@ reference; if it proves out twice in *this* repo, propose promotion to
   `docs/planning/project-guidance.md` and consider whether the
   workflow doc's Step 6 verification setup deserves a "pre-verify
   grep checklist" sub-bullet.
+
+## Diff-Gate Sentinel Tests: Extract The Failure-Message Builder Into A Helper Both The Gate And The Sentinel Consume
+
+- **Context:** Authoring a sentinel test for a diff-gate that fails
+  when a generated artifact disagrees with a committed golden. The
+  diff-gate emits a human-readable failure message at gate-fail
+  time; the sentinel test exists to confirm that message stays
+  human-readable as the gate evolves. First hit in
+  `harvester-finish-canonical-parse-success-report` Session 2
+  (2026-05-17) for `ParseSuccessReportTests` (HHC + Northwind
+  per-fixture parse-success reports).
+- **Failure or friction:** The natural shape of a sentinel test is
+  to reconstruct the diff-message in the test itself and assert on
+  it — but that means the sentinel is exercising a *parallel*
+  implementation of the message text, not the message text the
+  production gate actually emits. If the production gate's message
+  drifts (a refactor changes a phrase, a CI log harvester picks up
+  a different format string), the sentinel silently passes against
+  the stale parallel implementation. The R1 verifier explicitly
+  flagged this risk in this set's planning phase: "the sentinel
+  test cover the same message a human sees when the gate fails —
+  not a parallel reimplementation."
+- **Lesson:** Extract the diff-message builder into a small helper
+  class (`ParseSuccessReportDiff.Build(committed, generated, fixtureName, outPath)
+  -> string?` here) that both the production gate and the sentinel
+  test consume. Convention: `Build` returns `null` on equality and
+  the assembled failure-message string on mismatch; the production
+  gate throws on non-null; the sentinel test asserts substrings on
+  the non-null result. The helper class can be `internal` to the
+  test project so it does not leak into product surface. Byte-
+  identical text to the gate's prior inline message is the
+  correctness criterion for the refactor itself.
+- **Action for future sessions:** When authoring a new diff-gate
+  sentinel test:
+  1. Extract the diff-message builder into a helper before writing
+     the sentinel. Don't write the sentinel against an inline
+     message-builder in the production gate.
+  2. Have the production gate delegate to the helper. The
+     production-gate refactor should be byte-identical to the prior
+     inline message-emission (verify by a single `dotnet test`
+     pass against the committed golden, then by adding a
+     hand-built mutation case to the sentinel that asserts the
+     non-null path).
+  3. The sentinel covers three shapes at minimum: (a) byte-equal
+     returns `null`, (b) a single-character mutation produces a
+     message that contains the fixture name, line number, both
+     snippets, and the regeneration affordance, (c) any internal
+     helpers (e.g., a snippet escaper) round-trip cleanly.
+  4. Keep the helper class `internal static` in the test project
+     unless the production code itself needs to call it; the
+     sentinel testing affordance is a *test-project* concern, not
+     a product surface.
+
+  If a second diff-gate sentinel test in this repo follows this
+  pattern, promote to a Convention in
+  `docs/planning/project-guidance.md` → Conventions → Testing
+  Conventions, naming `ParseSuccessReportDiff` /
+  `ParseSuccessReportDiffTests` as the reference shape.

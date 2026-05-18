@@ -503,6 +503,28 @@ experiments only.
   `lessons-learned.md` → "Verify The Prior Session Actually
   Committed And Pushed Before Starting A New One".
 
+- **Post-fix sweep narrative summary blocks, not just the body, when
+  a rule or contract changes.** When R1 cross-provider verification
+  fixes a rule, contract, confidence tag, or authority framing in a
+  narrative document, the orchestrator's natural editing motion
+  targets the body; *intro / authority / stability / cross-cutting*
+  blocks frequently lag and produce R2 / R3 Minor findings on stale
+  framing. Before re-verifying, explicitly grep the frame blocks for
+  pre-fix tokens (for confidence-tag changes: `inferred`, `not read`,
+  `open question`; for rule/authority changes: "source of truth",
+  "authority", "the lookup", "the closed set", "stability commitment",
+  "trigger is"). Update any residue adjacent to the changed rule in
+  the same pass that updates the body. Confirmed in two contexts:
+  `generalization-validation-on-non-northwind` Session 2 (2026-05-15,
+  confidence-tag change drove the original drift) and
+  `harvester-finish-canonical-parse-success-report` Session 2
+  (2026-05-17, rule-authority framing change drove a three-round
+  drift where R2 caught Authority + Stability blocks and R3 caught
+  the Cross-cutting bullet). The two triggers are different but the
+  failure mode and mitigation are identical. Action-detail reference
+  is preserved in `lessons-learned.md` → "Post-Fix Sweep All
+  Narrative Artifacts When A Rule Or Contract Changes".
+
 ### Token-Window Budget Overrides
 
 The human has recurring token allotments across three orchestrator providers with
