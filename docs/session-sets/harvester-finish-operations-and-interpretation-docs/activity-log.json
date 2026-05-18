@@ -148,6 +148,50 @@
           "costUsd": 0.00573875
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/pointer-page",
+      "dateTime": "2026-05-18T08:50:03.959764-04:00",
+      "description": "Authored docs/README.md (the docs-index pointer page) in-conversation. Lists every doc in docs/ and its subdirectories with a one-line what-it-is/who-reads-it. Per Session 1 decision, the page lands at docs/README.md (consumer-discoverable from repo root).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/readme-link",
+      "dateTime": "2026-05-18T08:50:03.959764-04:00",
+      "description": "Updated top-level README.md to add a link to the interpretation guide and to the new docs/README.md index, surfacing both for a fresh consumer landing on the repo root.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/downstream-ai-probe",
+      "dateTime": "2026-05-18T08:50:03.959764-04:00",
+      "description": "Downstream-AI probe per spec step 3. Routed via query(gpt-5-4, task_type=analysis) -> 429 fallback to query(gemini-pro). Prompt: full interpretation-guide.md + examples/northwind-output.json + structured-verdict JSON block. Verdict INSUFFICIENT, but the cause is stale examples/*.json (legacy pre-canonical-golden-output schema) rather than guide defect. Raw response persisted to probe-raw/downstream-ai-probe-gemini-pro.txt before any print side effect.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 16361,
+          "outputTokens": 2254,
+          "costUsd": 0.043
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/stop-rule-trip",
+      "dateTime": "2026-05-18T08:50:03.959764-04:00",
+      "description": "Spec stop rule \"Out-of-date examples\" tripped by the probe finding. Human adjudicated: honour the stop rule, do not close out Session 3 until examples/*.json is regenerated against the current canonical schema via tree-amendment to schema-finalization-and-docs. downstream-ai-probe.md authored documenting the verdict, root cause, and resume conditions. Session-state.json remains at status=in-progress; mark_session_complete() NOT called; end-of-session verification NOT run; disposition.json / change-log.md / next-session-set-recommendation.md NOT produced.",
+      "status": "blocked",
+      "routedApiCalls": []
     }
   ]
 }

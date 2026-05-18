@@ -121,3 +121,49 @@ rather than gpt-5-4 — the "different provider than the orchestrator"
 constraint flips compared with Sessions 1 and 2. The Session 3 spec
 also includes a downstream-AI probe that needs the same constraint
 honoured (don't ask Gemini to probe Gemini's output).
+
+### Actuals (Session 3 — PARTIAL; STOPPED at probe)
+
+- **Orchestrator used:** Claude Code (Claude Opus 4.7) @ effort=high
+  — deviation from the Gemini Pro recommendation. Human took over
+  mid-session after a Gemini Pro attempt got confused (wrote two
+  scratch Python files referencing a non-existent
+  `register_session_start` helper signature and a non-existent
+  `gemini-3.1-pro` model). The user explicitly asked Claude to finish
+  the set; Gemini's two scratch files were deleted (uncommitted).
+- **Total routed cost (this partial session):** ~$0.043
+  (downstream-AI probe via `gemini-pro` after `gpt-5-4` returned
+  sustained HTTP 429s — third consecutive session in this set hitting
+  that condition, exactly as Session 2's caveat warned).
+- **Deviations from recommendation:**
+  - Orchestrator engine changed from Gemini CLI to Claude Code per
+    human direction.
+  - Cross-provider downstream-AI probe fell back from `gpt-5-4` to
+    `gemini-pro` after 429s. This is acceptable cross-provider
+    coverage for a Claude orchestrator (gemini-pro is a different
+    provider than Anthropic) but means the probe was not, strictly,
+    "fresh" relative to Sessions 1 and 2 (both used `gemini-pro` for
+    earlier routed work).
+  - **Session was STOPPED mid-way.** The probe surfaced a real
+    blocker: `examples/*.json` predates the canonical-golden-output
+    set and uses a legacy `{ Spec: { Sections, Controls, ... } }`
+    shape, while the canonical golden corpus uses the
+    `{ Type, Properties, Children, ... }` shape the guide
+    correctly documents. This is exactly the spec's "Out-of-date
+    examples" stop rule. Human adjudicated to honour the stop rule.
+    `mark_session_complete()` was NOT called;
+    `disposition.json` / `change-log.md` /
+    `next-session-set-recommendation.md` were NOT produced;
+    end-of-session verification was NOT run.
+- **Notes for next-session calibration:**
+  - `gpt-5-4` 429s are durable across at least three sessions now.
+    Future sessions should plan on a non-OpenAI cross-provider verifier
+    from the outset.
+  - The next operational step is a tree-amendment to
+    `schema-finalization-and-docs` to regenerate `examples/*.json`
+    against the current canonical schema. Session 3 resumes from the
+    probe step (re-run the probe against the regenerated example,
+    then continue with the closeout artefacts) once that amendment
+    lands. The pointer page, top-level README link, and probe artefact
+    produced in this partial session are committed and do not need to
+    be re-done.

@@ -89,8 +89,13 @@ Runs `extract`, then `translate`, then enrichment, producing `raw/`,
 
 ## Planning & Documentation
 
-For project goals, conventions, the session-set workflow, and history:
+The full docs index — every document in `docs/` with a one-line "what it
+is and who reads it" — lives at [docs/README.md](docs/README.md). For a
+downstream AI consumer interpreting harvester output, the entry point is
+[the Interpretation Guide](docs/harvester/interpretation-guide.md). For
+project goals, conventions, the session-set workflow, and history:
 
+- [Interpretation Guide](docs/harvester/interpretation-guide.md) — how a downstream AI consumer reads a harvester run output
 - [Project Status](docs/planning/project-status.md) — current status snapshot
 - [Project Guidance](docs/planning/project-guidance.md) — durable principles and conventions
 - [Lessons Learned](docs/planning/lessons-learned.md) — failure patterns and tactics

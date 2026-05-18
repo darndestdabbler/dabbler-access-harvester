@@ -1,0 +1,78 @@
+### 1. High-level interpretation
+
+The database is a sales and order management system for a business, likely a wholesaler, named "Northwind". It supports tracking customers, orders, employees, and sales performance by category.
+
+-   **Form:** `Customers` (`manifest.Forms[0]`). This form is used to view and edit customer information. I reached this conclusion by observing its `DataSource` is the `"Customers"` table and its `Controls` array lists text boxes for `CompanyName`, `ContactName`, and `ContactTitle`. It also includes a subform control named `fsubOrders`, indicating it displays orders related to the selected customer.
+-   **Query:** `qryEmployeeList` (`manifest.Queries[0]`). This query provides a formatted list of employees. I determined this from its `ReturnShape`, which shows it returns an `EmployeeID` and a computed `FullName` field (`[LastName] & ', ' & [FirstName]`). The `OrderBy` clause on `LastName` confirms its purpose as a sorted list suitable for user interface elements.
+-   **Module:** `modUtility` (`manifest.Modules[0]`). This is a standard module for utility functions. While the module's `Items` array is empty in the main body, the `UnresolvedItems` array (`manifest.UnresolvedItems[1]`) references a procedure named `CreateExcelExport` within `modUtility`, indicating its purpose is to house helper routines like data exports.
+
+### 2. Reading-order verification
+
+Following the guide's §3 recipe:
+
+1.  **Open `manifest.json`:** The provided `northwind-output.json` file is the manifest.
+2.  **Pick a form:** I select the `Orders` form, identified by `manifest.Forms[1].Spec.SourceFormName`.
+3.  **Trace a row-source dependency:** Within the `Orders` form's `Controls` array, the combo box `cboEmployee` has a `Binding.RowSource` property with the value `"qryEmployeeList"`. To find the structured dependency record, I will consult the manifest's `RowSourceSpecs` array.
+4.  **Join to `RowSourceSpecs`:** The guide states the joining key is `(SourceFormName, ControlName)`.
+    -   From the form, `SourceFormName` is `"Orders"`.
+    -   From the control, `ControlName` is `"cboEmployee"`.
+5.  **Locate the entry:** I scan the `manifest.RowSourceSpecs` array for an entry matching these keys. The second entry (`manifest.RowSourceSpecs[1]`) matches:
+    ```json
+    {
+      "SourceFormName": "Orders",
+      "ControlName": "cboEmployee",
+      ...
+    }
+    ```
+6.  **Interpret the entry:** This entry's `Kind` is `"TableOrQueryNamed"` and its `TargetName` is `"qryEmployeeList"`. This successfully traces the dependency from the `cboEmployee` control on the `Orders` form to the saved query `qryEmployeeList`. The guide would then direct me to `ir/Queries/qryEmployeeList.ir.json`, which in this snapshot file corresponds to the `manifest.Queries[0]` object.
+
+### 3. Gap detection
+
+| Gap Type | Field or Pattern | What the Guide Does Not Tell You | Blocks Interpretation? | Needed Addition |
+| :--- | :--- | :--- | :--- | :--- |
+| **Blocking** | Overall file structure (`manifest.json` vs. `ir/` dirs) | The guide's entire reading-order premise is based on a multi-file layout (`manifest.json` plus `ir/`, `kb/`, and `unresolved-items.json`). The example is a single, consolidated file. The guide does not explain this "snapshot" format or how to interpret it relative to the multi-file structure. | Yes | A paragraph explaining that a "snapshot" output consolidates all `ir/` content into the top-level arrays of the manifest for portability. It should state that `manifest.Forms[n]` in a snapshot is equivalent to the content of the corresponding `ir/Forms/<name>.ir.json` file. |
+| **Blocking** | Form/Report `ir/` structure (`Spec` object) | The guide's §5.1 describes a form's `ir/` record as having `Type`, `Properties`, and `Children` keys. The example file has a completely different structure, nesting the content under a `Spec` key with different fields like `DataSource`, `Sections`, and `Controls`. The guide does not mention the `Spec` object at all. | Yes | The guide's §5.1 and §5.2 must be rewritten or augmented to document the `Spec` object structure provided in the example, as it appears to be the primary representation. The relationship between the `Children` tree model and the `Spec` model must be clarified. |
+| **Non-blocking** | `NavigationGraph` top-level object | The manifest in the example contains a top-level `NavigationGraph` object. The guide's §4 (The DatabaseManifest envelope) does not list or describe this object. Its purpose and the meaning of its fields (`EntryPoints`, `Edges`, `UnresolvedTargets`) are unknown. | No | An entry in the manifest's top-level key list in §4 explaining the `NavigationGraph` object, its purpose of summarizing UI navigation flows, and a brief description of its sub-fields. |
+| **Non-blocking** | `UnresolvedItem` record shape | The guide's example `UnresolvedItem` in §6 contains `Severity`, `SurroundingText`, and `SuggestedNextSteps`. The records in the example JSON lack `Severity` and have a `ConstructDescription` field not mentioned in the guide. | No | The description of the `UnresolvedItem` record shape in §6 should be updated to match the example output, documenting the `ConstructDescription` field and clarifying that `Severity` may be optional. |
+| **Non-blocking** | `ParserOutput: null` field on Form objects | Each object in the `Forms` array contains a `ParserOutput: null` key-value pair. The guide never mentions this field. It is unclear what it is for or what a non-null value would contain. | No | A brief note in §5.1 mentioning the `ParserOutput` field, stating its purpose (e.g., for harvester-internal debugging) and confirming that it can typically be ignored by downstream consumers. |
+
+### 4. Overall verdict
+
+My verdict is **INSUFFICIENT**.
+
+The guide fails as a standalone entry point because its structural descriptions of the most important objects—forms and reports—are fundamentally contradicted by the provided example output. A consumer following the guide's description of a form record (`{ Type, Properties, Children, ... }`) would be unable to parse the example's `{ Spec: { ... } }` structure. Furthermore, the guide's core premise of a multi-file directory walk is misaligned with the single-file snapshot format of the example, creating immediate confusion about where to find data. While the conceptual overview is useful, these blocking structural discrepancies make it impossible to write a reliable consumer using only the guide.
+
+```json
+{
+  "verdict": "INSUFFICIENT",
+  "blocking_gaps": [
+    {
+      "field_or_pattern": "Overall file structure (manifest.json vs. ir/ dirs)",
+      "what_is_missing": "The guide exclusively describes a multi-file output structure, but the example is a single consolidated file. It does not explain what this 'snapshot' format is or how to read it.",
+      "needed_addition": "A paragraph explaining that a 'snapshot' output consolidates all ir/ content into the top-level arrays of the manifest for portability. It should state that `manifest.Forms[n]` in a snapshot is equivalent to the content of the corresponding `ir/Forms/<name>.ir.json` file."
+    },
+    {
+      "field_or_pattern": "Form/Report ir/ structure (the `Spec` object)",
+      "what_is_missing": "The guide describes form/report records with `Type`, `Properties`, and `Children` keys. The example file uses a completely different structure nested under a `Spec` key. The guide does not mention the `Spec` object or its schema.",
+      "needed_addition": "The guide's sections on Forms and Reports must be updated to document the `Spec` object structure as the primary representation, explaining its fields (`DataSource`, `Sections`, `Controls`, etc.) and how it relates to the conceptual control tree."
+    }
+  ],
+  "nonblocking_gaps": [
+    {
+      "field_or_pattern": "NavigationGraph top-level object",
+      "what_is_missing": "The example manifest contains a top-level `NavigationGraph` object that is not documented anywhere in the guide, specifically in the envelope description in §4.",
+      "needed_addition": "An entry in the manifest's top-level key list in §4 explaining the `NavigationGraph` object, its purpose of summarizing UI navigation flows, and a brief description of its sub-fields."
+    },
+    {
+      "field_or_pattern": "UnresolvedItem record shape",
+      "what_is_missing": "The fields in the `UnresolvedItems` array in the example (e.g., `ConstructDescription`) do not perfectly match the fields described and shown in the guide's example in §6 (e.g., `Severity`).",
+      "needed_addition": "The description of the `UnresolvedItem` record shape in §6 should be updated to match the actual example output, documenting all possible fields and clarifying which are optional."
+    },
+    {
+      "field_or_pattern": "`ParserOutput: null` field on Form objects",
+      "what_is_missing": "The guide does not mention the `ParserOutput` field that appears on Form objects in the example output.",
+      "needed_addition": "A brief note in §5.1 mentioning the `ParserOutput` field, stating its purpose (e.g., for harvester-internal debugging) and confirming that it can typically be ignored by downstream consumers."
+    }
+  ]
+}
+```
