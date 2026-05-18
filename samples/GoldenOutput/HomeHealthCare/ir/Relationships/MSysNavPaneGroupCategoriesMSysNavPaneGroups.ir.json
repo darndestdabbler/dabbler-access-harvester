@@ -1,0 +1,20 @@
+{
+  "Name": "MSysNavPaneGroupCategoriesMSysNavPaneGroups",
+  "Type": "Relationship",
+  "ParentTable": "MSysNavPaneGroupCategories",
+  "ChildTable": "MSysNavPaneGroups",
+  "Attributes": 4352,
+  "AttributesDecoded": [
+    "UpdateCascade",
+    "DeleteCascade"
+  ],
+  "EnforceReferentialIntegrity": true,
+  "CascadeUpdate": true,
+  "CascadeDelete": true,
+  "Fields": [
+    {
+      "ParentField": "Id",
+      "ChildField": "GroupCategoryID"
+    }
+  ]
+}

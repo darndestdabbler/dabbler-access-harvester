@@ -1,0 +1,30 @@
+{
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "\u003CNORMALIZED:HarvesterVersion\u003E",
+  "Database": {
+    "Name": "HomeHealthCare.accdb",
+    "FilePath": "\u003CNORMALIZED:Database.FilePath\u003E",
+    "ExportedAt": "\u003CNORMALIZED:Database.ExportedAt\u003E"
+  },
+  "Summary": {
+    "FormCount": 0,
+    "ReportCount": 0,
+    "QueryCount": 0,
+    "ModuleCount": 0,
+    "TableCount": 0,
+    "UnresolvedItemCount": 0
+  },
+  "Forms": [],
+  "Reports": [],
+  "Queries": [],
+  "Modules": [],
+  "Tables": [],
+  "Relationships": [],
+  "ValidationRules": [],
+  "RowSourceSpecs": [],
+  "FunctionClassifications": [],
+  "EventHandlerClassifications": [],
+  "UnresolvedItems": [],
+  "Diagnostics": []
+}

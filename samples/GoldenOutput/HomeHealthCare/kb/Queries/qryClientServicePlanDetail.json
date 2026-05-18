@@ -1,0 +1,10 @@
+{
+  "Name": "qryClientServicePlanDetail",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceCode, s.ServiceName, p.ProviderName, csp.HoursPerWeek, csp.WeeklyCost, csp.AnnualEstCost, csp.Status, csp.FiscalYear\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nORDER BY c.LastName, c.FirstName, s.ServiceName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

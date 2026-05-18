@@ -1,0 +1,10 @@
+{
+  "Name": "qryClientServicePlan_ByClient",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "PARAMETERS [Enter Client ID:] Long;\r\nSELECT csp.*, csn.ServiceID, s.ServiceName, p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csn.ClientID)=[Enter Client ID:]))\r\nORDER BY s.ServiceName, csp.FiscalYear;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

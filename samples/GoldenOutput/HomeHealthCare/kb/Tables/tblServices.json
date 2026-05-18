@@ -1,0 +1,143 @@
+{
+  "Name": "tblServices",
+  "Type": "Table",
+  "Attributes": 0,
+  "DateCreated": "2026-03-28T11:13:38.674",
+  "LastUpdated": "2026-05-13T16:48:39.043",
+  "RecordCount": 12,
+  "SourceTableName": "",
+  "Connect": "",
+  "ValidationRule": "",
+  "ValidationText": "",
+  "Ddl": "CREATE TABLE [tblServices] (\r\n    [ServiceID] COUNTER,\r\n    [ServiceCode] TEXT(10) NOT NULL,\r\n    [ServiceName] TEXT(100) NOT NULL,\r\n    [ServiceCategory] TEXT(50),\r\n    [Description] LONGTEXT,\r\n    [IsActive] BIT DEFAULT True,\r\n    CONSTRAINT [PrimaryKey] PRIMARY KEY ([ServiceID])\r\n);",
+  "Fields": [
+    {
+      "Name": "ServiceID",
+      "TypeCode": 4,
+      "TypeName": "Long",
+      "Size": 4,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": null,
+      "Attributes": 17,
+      "OrdinalPosition": 0,
+      "ForeignName": null
+    },
+    {
+      "Name": "ServiceCode",
+      "TypeCode": 10,
+      "TypeName": "Text",
+      "Size": 10,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 2,
+      "OrdinalPosition": 1,
+      "ForeignName": null
+    },
+    {
+      "Name": "ServiceName",
+      "TypeCode": 10,
+      "TypeName": "Text",
+      "Size": 100,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 2,
+      "OrdinalPosition": 2,
+      "ForeignName": null
+    },
+    {
+      "Name": "ServiceCategory",
+      "TypeCode": 10,
+      "TypeName": "Text",
+      "Size": 50,
+      "Required": false,
+      "AllowZeroLength": true,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 2,
+      "OrdinalPosition": 3,
+      "ForeignName": null
+    },
+    {
+      "Name": "Description",
+      "TypeCode": 12,
+      "TypeName": "Memo",
+      "Size": 0,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": null,
+      "Attributes": 2,
+      "OrdinalPosition": 4,
+      "ForeignName": null
+    },
+    {
+      "Name": "IsActive",
+      "TypeCode": 1,
+      "TypeName": "Boolean",
+      "Size": 1,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "True",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 106,
+      "Attributes": 1,
+      "OrdinalPosition": 5,
+      "ForeignName": null
+    }
+  ],
+  "Indexes": [
+    {
+      "Name": "PrimaryKey",
+      "Primary": true,
+      "Unique": true,
+      "Required": true,
+      "Fields": [
+        {
+          "Name": "ServiceID",
+          "Attributes": 0
+        }
+      ]
+    },
+    {
+      "Name": "UQ_ServiceCode",
+      "Primary": false,
+      "Unique": true,
+      "Required": false,
+      "Fields": [
+        {
+          "Name": "ServiceCode",
+          "Attributes": 0
+        }
+      ]
+    }
+  ]
+}

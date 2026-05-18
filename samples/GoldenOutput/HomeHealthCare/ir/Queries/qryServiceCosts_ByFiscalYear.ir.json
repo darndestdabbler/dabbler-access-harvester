@@ -1,0 +1,10 @@
+{
+  "Name": "qryServiceCosts_ByFiscalYear",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT csp.FiscalYear, s.ServiceCode, s.ServiceName, Count(csp.ClientServicePlanID) AS PlanCount, Sum(52*csp.HoursPerWeek) AS TotalHours, Sum(csp.AnnualEstCost) AS TotalCost, Avg(csp.WeeklyCost) AS AvgWeeklyCost, Sum(csp.AnnualEstCost/cfy.TotalCost) AS PctCost\r\nFROM tblServices AS s INNER JOIN ((tblClientServiceNeeds AS csn INNER JOIN qryCosts_ByFiscalYear AS cfy ON csn.FiscalYear = cfy.FiscalYear) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.Status)\u003C\u003E\u0022Cancelled\u0022))\r\nGROUP BY csp.FiscalYear, s.ServiceCode, s.ServiceName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

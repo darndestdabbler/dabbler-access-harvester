@@ -1,0 +1,10 @@
+{
+  "Name": "qryServicePlansByService",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblClientServicePlan.FiscalYear, tblClientServicePlan.HoursPerWeek AS WeeklyHours, tblClientServicePlan.WeeklyCost, tblClientServicePlan.AnnualEstCost, tblProviderServiceCatalog.RatePerHour, tblServices.ServiceID, tblServices.ServiceName, tblClients.ClientID, Trim(Nz([LastName],\u0022\u0022) \u0026 \u0022, \u0022 \u0026 Nz([FirstName],\u0022\u0022)) AS ClientName\r\nFROM tblServices INNER JOIN (tblProviders INNER JOIN ((tblClients INNER JOIN tblClientServiceNeeds ON tblClients.ClientID = tblClientServiceNeeds.ClientID) INNER JOIN (tblProviderServiceCatalog INNER JOIN tblClientServicePlan ON tblProviderServiceCatalog.ProviderServiceCatalogID = tblClientServicePlan.ProviderServiceCatalogID) ON tblClientServiceNeeds.ClientServiceNeedID = tblClientServicePlan.ClientServiceNeedID) ON tblProviders.ProviderID = tblProviderServiceCatalog.ProviderID) ON (tblServices.ServiceID = tblClientServiceNeeds.ServiceID) AND (tblServices.ServiceID = tblProviderServiceCatalog.ServiceID)\r\nWHERE (((tblClientServicePlan.Status)\u003C\u003E\u0022Cancelled\u0022));\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 0
+}

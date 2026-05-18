@@ -1,0 +1,272 @@
+{
+  "Type": "DocumentRoot",
+  "Properties": {
+    "Version": "196611",
+    "PublishOption": "1",
+    "ColumnsShown": "0"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "OpenClients",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmClientSearch",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "AddNewClient",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmClientDetail",
+          "0",
+          "",
+          "",
+          "0",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "OpenProviders",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmProviderSearch",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "AddNewProvider",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmProviderDetail",
+          "0",
+          "",
+          "",
+          "0",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "OpenServices",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmServiceList",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "AddNewService",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmServiceDetail",
+          "0",
+          "",
+          "",
+          "0",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "OpenServicePlan",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmServicePlanEntry",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "OpenReportMenu",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmReportMenu",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "OpenServiceRateLimits",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmServiceRateLimits",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "OpenCopyFiscalYearData",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmCopyFiscalYearData",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "OpenAbout",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmAbout",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro MinimumClientDesignVersion=\\\u002214.0.0000.0000\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements/\u003E\u003CSub Collapsed=\\\u0022true\\\u0022 Name=\\\u0022OpenCli"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:ents\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmClientSearch\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Collapsed=\\\u0022true\\\u0022 Name=\\\u0022AddNewClient\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmClientDetail\u003C/Argum"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:ent\u003E\u003CArgument Name=\\\u0022DataMode\\\u0022\u003EAdd\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Collapsed=\\\u0022true\\\u0022 Name=\\\u0022OpenProviders\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmProviderSearch\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Collapsed="
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\\\u0022true\\\u0022 Name=\\\u0022AddNewProvider\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmProviderDetail\u003C/Argument\u003E\u003CArgument Name=\\\u0022DataMode\\\u0022\u003EAdd\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Collapsed=\\\u0022true\\\u0022 Name=\\\u0022OpenServices\\\u0022\u003E\u003CStatements\u003E\u003CAction"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL: Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmServiceList\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022AddNewService\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmServiceDetail\u003C/Argument\u003E\u003CArgument Name=\\\u0022DataMode\\\u0022\u003EAdd\u003C/Argume"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:nt\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022OpenServicePlan\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmServicePlanEntry\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022OpenReportMenu\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgum"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:ent Name=\\\u0022FormName\\\u0022\u003EfrmReportMenu\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022OpenServiceRateLimits\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmServiceRateLimits\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Collapsed=\\\u0022true\\\u0022"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL: Name=\\\u0022OpenCopyFiscalYearData\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmCopyFiscalYearData\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Collapsed=\\\u0022true\\\u0022 Name=\\\u0022OpenAbout\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022Form"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:Name\\\u0022\u003EfrmAbout\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003C/UserInterfaceMacro\u003E"
+      },
+      "Children": [],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": null,
+  "Actions": [],
+  "InferredFunctionality": null
+}

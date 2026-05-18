@@ -1,0 +1,10 @@
+{
+  "Name": "qryBudgetUtilization",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, cb.FiscalYear, cb.AnnualBudget, GetBudgetUtilizationPct([c].[ClientID],[cb].[FiscalYear]) AS UtilizationPct\r\nFROM tblClients AS c INNER JOIN tblClientBudgets AS cb ON c.ClientID = cb.ClientID\r\nORDER BY cb.FiscalYear DESC , c.LastName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

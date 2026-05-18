@@ -244,6 +244,94 @@
           "costUsd": 0.0023012500000000003
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/pipeline-run-canonical-fixtures",
+      "dateTime": "2026-05-18T05:25:06.055729-04:00",
+      "description": "Ran Pipeline.Default().Run(...) for HomeHealthCare.accdb and NorthwindDevEdition.accdb into tmp/golden-staging/. All categories extracted/translated/enriched cleanly (HHC 86 ok / 0 failed, NW 197 ok / 0 failed).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/drift-survey",
+      "dateTime": "2026-05-18T05:25:06.056632-04:00",
+      "description": "Re-ran pipeline against same fixtures into second staging dirs and diffed. Only field that drifted: manifest.json -> Database.ExportedAt. All per-object IR (7 categories on both fixtures) byte-identical; unresolved-items.json empty array on both.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/golden-normalizer",
+      "dateTime": "2026-05-18T05:25:06.056632-04:00",
+      "description": "Landed tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs per Decision 4. Three entry points (NormalizeManifest, NormalizeUnresolvedItems, NormalizePerObjectIr). Manifest normalization replaces HarvesterVersion + Database.FilePath + Database.ExportedAt with placeholders; re-emits via JsonNode + same JsonSerializerOptions Pipeline.cs uses. Per-object IR is no-op (no observed drift).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/build-golden-corpus",
+      "dateTime": "2026-05-18T05:25:06.058935-04:00",
+      "description": "Built one-shot tmp/build-golden-corpus/BuildGoldenCorpus.exe (gitignored) that links GoldenNormalizer.cs and produces samples/GoldenOutput/<fixture>/. Confirmed idempotency: builder invoked against second staging run yields byte-identical golden corpus.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/inspect-for-surprises",
+      "dateTime": "2026-05-18T05:25:06.058935-04:00",
+      "description": "Inspected golden corpus. Total 17MB (under 100MB stop-rule). HHC 175 files, NW 397 files. No empty files, no JSON parse errors. Sample inspections of Form/Table/Query/Module/Macro IR show well-formed output. Manifest per-category arrays empty as expected (V1 \u2014 collection threading is follow-on per Session 2 spec). No Stop Rule triggers.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/build-and-test",
+      "dateTime": "2026-05-18T05:25:06.060423-04:00",
+      "description": "dotnet build -c Release: 0 errors. dotnet test -c Release: 1885 passed, 2 skipped (synthetic-DB fixtures absent), 0 failed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/verification",
+      "dateTime": "2026-05-18T05:25:06.060423-04:00",
+      "description": "Cross-provider session-verification via gpt-5-4. Verdict: VERIFIED with 0 issues.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": null,
+          "outputTokens": null,
+          "costUsd": 0.0698
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/next-session-recommendation",
+      "dateTime": "2026-05-18T05:26:07.512020-04:00",
+      "description": "Routed Session 4 orchestrator recommendation via analysis (model=gemini-pro, cost=$0.0022).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1130,
+          "outputTokens": 75,
+          "costUsd": 0.0021625
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,10 @@
+{
+  "Name": "qryProviderList",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblProviders.Phone, tblProviders.City, tblProviders.StateCode, tblProviders.IsActive\r\nFROM tblProviders\r\nORDER BY tblProviders.ProviderName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

@@ -1,0 +1,568 @@
+{
+  "Type": "Form",
+  "Properties": {
+    "Modal": "True",
+    "RecordSelectors": "False",
+    "NavigationButtons": "False",
+    "DividingLines": "True",
+    "AllowDesignChanges": "False",
+    "DefaultView": "0",
+    "ScrollBars": "0",
+    "TabularFamily": "0",
+    "BorderStyle": "0",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "Cycle": "2",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "5760",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "13",
+    "Right": "14700",
+    "Bottom": "10740",
+    "DatasheetGridlinesColor": "15263976",
+    "RecSrcDt": "0x9cb550f9ae83e640",
+    "GUID": "0x2f75c7bc31e71d469866040cab9b10a4",
+    "NameMap": "0x0acc0e550000000093443938d16f7f4d893240a12841e05f02000000c0f3024d ,\n0x6a89e640000000000000000072007000740043006c00690065006e0074005000 ,\n0x72006f00660069006c00650000000000000087021290d369bb4f8a28444b6bb2 ,\n0x0f5202000000899ee33d6a89e640000000000000000072007000740053006500 ,\n0x7200760069006300650050006c0061006e0041006e006400530068006f007200 ,\n0x7400660061006c006c00000000000000b096db26513c3945a52e752deb34c3cd ,\n0x02000000dbe269436f89e6400000000000000000720070007400500072006f00 ,\n0x7600690064006500720053006500720076006900630065004300610074006100 ,\n0x6c006f0067000000000000002ff7665825e49240b0991bde2d87206e02000000 ,\n0x0d8707416a89e640000000000000000072007000740053006500720076006900 ,\n0x6300650050006c0061006e0073004200790043006c00690065006e0074000000 ,\n0x000000003905046cce283c44a5b85f29663f1ac202000000c2204c436a89e640 ,\n0x0000000000000000720070007400530065007200760069006300650050006c00 ,\n0x61006e007300420079005300650072007600690063006500000000000000f340 ,\n0x673238150e45a972c948ba72e508020000000840f0386a89e640000000000000 ,\n0x0000720070007400500072006f00760069006400650072005300650072007600 ,\n0x6900630065005300740061007400690073007400690063007300000000000000 ,\n0x1378a93ee07334418a9170b4829429f802000000324251366a89e64000000000 ,\n0x00000000720070007400500072006f007600690064006500720043006f007300 ,\n0x74007300000000000000f18927b83caa864cb706cbe36df32a6c02000000cfcd ,\n0x383a6a89e6400000000000000000720070007400530065007200760069006300 ,\n0x650043006f007300740073000000000000000000000000000000000000000000 ,\n0x00000c000000050000000000000000000000000000000000",
+    "Caption": "Reports",
+    "DatasheetFontName": "Aptos",
+    "PrtMip": "0x6801000068010000680100006801000000000000201c0000e010000001000000 ,\n0x010000006801000000000000a10700000100000001000000",
+    "PrtDevMode": "0x003f83f3fd7f0000000000000000000070539c4215000000b0409c4215000000 ,\n0x010403069c00f00343bf000201000100ea0a6f08640001000101580202000100 ,\n0x5802030001004c6574746572007f00000000a6f19c01000000000000f67f0000 ,\n0x800d49989c010000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNames": "0x0800290048000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005753442d34353138316338662d323438612d343961312d61 ,\n0x3365302d63666435363464313538393600000000000000000000000000000000 ,\n0x00",
+    "FilterOnLoad": "0",
+    "ShowPageMargins": "0",
+    "DisplayOnSharePointSite": "1",
+    "DatasheetAlternateBackColor": "15921906",
+    "DatasheetGridlinesColor12": "0",
+    "FitToScreen": "1",
+    "DatasheetBackThemeColorIndex": "1",
+    "BorderThemeColorIndex": "3",
+    "ThemeFontIndex": "1",
+    "ForeThemeColorIndex": "0",
+    "AlternateBackThemeColorIndex": "1",
+    "AlternateBackShade": "95.0",
+    "PrtDevModeW": "0x00000000000000000000000000000000c091428c9c0100000000000000000000 ,\n0xb091428c9c010000230001000000000058031c869c0100006200000015000000 ,\n0x01040306dc00f00343bf000201000100ea0a6f08640001000101580202000100 ,\n0x5802030001004c00650074007400650072000000000000005001a6f19c010000 ,\n0x80000000000000000c000000000000009096428c9c0100002c03a6f19c010000 ,\n0x0300000000000000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNamesW": "0x0400250044000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005700530044002d0034003500310038003100630038006600 ,\n0x2d0032003400380061002d0034003900610031002d0061003300650030002d00 ,\n0x6300660064003500360034006400310035003800390036000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000",
+    "NoSaveCTIWhenDisabled": "1",
+    "LayoutCachedLeft": "720",
+    "LayoutCachedTop": "3096",
+    "LayoutCachedWidth": "5040",
+    "LayoutCachedHeight": "3599",
+    "WebImagePaddingLeft": "2",
+    "WebImagePaddingTop": "2",
+    "WebImagePaddingRight": "1",
+    "WebImagePaddingBottom": "1"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {
+        "LayoutCachedLeft": "720",
+        "LayoutCachedTop": "2448",
+        "LayoutCachedWidth": "5040",
+        "LayoutCachedHeight": "2951",
+        "WebImagePaddingLeft": "2",
+        "WebImagePaddingTop": "2",
+        "WebImagePaddingRight": "1",
+        "WebImagePaddingBottom": "1"
+      },
+      "Children": [
+        {
+          "Type": "Label",
+          "Properties": {
+            "BackStyle": "0",
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "BorderColor": "8355711",
+            "ForeColor": "6710886",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "0",
+            "BorderTint": "50.0",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "60.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null,
+          "TextCapacity": {
+            "unavailable": true,
+            "reason": "no geometry"
+          }
+        },
+        {
+          "Type": "CommandButton",
+          "Properties": {
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "FontWeight": "400",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0",
+            "UseTheme": "1",
+            "Shape": "1",
+            "Gradient": "12",
+            "BackColor": "14790982",
+            "BackThemeColorIndex": "4",
+            "BackTint": "60.0",
+            "BorderLineStyle": "0",
+            "BorderColor": "14790982",
+            "BorderThemeColorIndex": "4",
+            "BorderTint": "60.0",
+            "ThemeFontIndex": "1",
+            "HoverColor": "15453059",
+            "HoverThemeColorIndex": "4",
+            "HoverTint": "40.0",
+            "PressedColor": "6440976",
+            "PressedThemeColorIndex": "4",
+            "PressedShade": "75.0",
+            "HoverForeColor": "4210752",
+            "HoverForeThemeColorIndex": "0",
+            "HoverForeTint": "75.0",
+            "PressedForeColor": "4210752",
+            "PressedForeThemeColorIndex": "0",
+            "PressedForeTint": "75.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormHeader",
+          "Properties": {
+            "Height": "720",
+            "BackColor": "15783096",
+            "Name": "FormHeader",
+            "GUID": "0xe0a15a5ca68b694f915d66bb95ee5654",
+            "AutoHeight": "1",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "2",
+            "BackTint": "20.0"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "288",
+                    "Top": "144",
+                    "Width": "4320",
+                    "Height": "432",
+                    "FontSize": "14",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblTitle",
+                    "Caption": "Reports Menu",
+                    "GUID": "0x5093cbfb026f1e4d8d6b2a61596f1eb7",
+                    "LayoutCachedLeft": "288",
+                    "LayoutCachedTop": "144",
+                    "LayoutCachedWidth": "4608",
+                    "LayoutCachedHeight": "576",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.2,
+                    "Y": 0.1,
+                    "W": 3,
+                    "H": 0.3
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 30,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 14,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null,
+          "GeometryIn": {
+            "H": 0.5
+          }
+        },
+        {
+          "Type": "Section",
+          "Properties": {
+            "Height": "6768",
+            "Name": "Detail",
+            "GUID": "0x3548d2ceec580545a5fba5091fac8082",
+            "AutoHeight": "1",
+            "AlternateBackColor": "15921906",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1",
+            "LayoutCachedLeft": "720",
+            "LayoutCachedTop": "1368",
+            "LayoutCachedWidth": "5040",
+            "LayoutCachedHeight": "1871",
+            "WebImagePaddingLeft": "2",
+            "WebImagePaddingTop": "2",
+            "WebImagePaddingRight": "1",
+            "WebImagePaddingBottom": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {
+                "LayoutCachedLeft": "720",
+                "LayoutCachedTop": "720",
+                "LayoutCachedWidth": "5040",
+                "LayoutCachedHeight": "1223",
+                "WebImagePaddingLeft": "2",
+                "WebImagePaddingTop": "2",
+                "WebImagePaddingRight": "1",
+                "WebImagePaddingBottom": "1"
+              },
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "288",
+                    "Top": "288",
+                    "Width": "2880",
+                    "Height": "360",
+                    "FontSize": "9",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblClientReports",
+                    "Caption": "Client Reports",
+                    "GUID": "0xa5056ada738c4a4792443c224a77336d",
+                    "LayoutCachedLeft": "288",
+                    "LayoutCachedTop": "288",
+                    "LayoutCachedWidth": "3168",
+                    "LayoutCachedHeight": "648",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.2,
+                    "Y": 0.2,
+                    "W": 2,
+                    "H": 0.25
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 31,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 9,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                },
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "720",
+                    "Top": "720",
+                    "Width": "4320",
+                    "Height": "503",
+                    "Name": "btnClientProfile",
+                    "Caption": "Client Profile",
+                    "GUID": "0xff4ea7e7c3284246b7a945a8ca67dc23",
+                    "OnClickEmMacro": "Version =196611\nColumnsShown =0\nBegin\nAction =\u0022OpenReport\u0022\nArgument =\u0022rptClientProfile\u0022\nArgument =\u00225\u0022\nArgument =\u0022\u0022\nArgument =\u0022\u0022\nArgument =\u00220\u0022"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {
+                        "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro For=\\\u0022btnClientProfile\\\u0022 Event=\\\u0022OnClick\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenReport\\\u0022\u003E\u003CArgument Name="
+                      },
+                      "Children": [],
+                      "VbaCode": null
+                    },
+                    {
+                      "Type": "Begin",
+                      "Properties": {
+                        "Comment": "_AXL:\\\u0022ReportName\\\u0022\u003ErptClientProfile\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/UserInterfaceMacro\u003E"
+                      },
+                      "Children": [],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.5,
+                    "Y": 0.5,
+                    "W": 3,
+                    "H": 0.349
+                  },
+                  "EventMacros": {
+                    "OnClick": {
+                      "Actions": [
+                        {
+                          "Action": "OpenReport",
+                          "Arguments": {
+                            "ReportName": "rptClientProfile"
+                          },
+                          "Condition": null,
+                          "ConditionBranch": null,
+                          "Comment": null,
+                          "InferredFunctionality": null
+                        }
+                      ],
+                      "InferredFunctionality": null
+                    }
+                  }
+                }
+              ],
+              "VbaCode": null
+            },
+            {
+              "Type": "CommandButton",
+              "Properties": {
+                "OverlapFlags": "85",
+                "AccessKey": "32",
+                "Left": "720",
+                "Top": "1368",
+                "Width": "4320",
+                "Height": "503",
+                "TabIndex": "1",
+                "Name": "btnServicePlanShortfall",
+                "Caption": "Service Plan \u0026 Shortfall",
+                "GUID": "0x7acef75befe3d947bf357fe7aeb2ab37",
+                "UnicodeAccessKey": "32",
+                "OnClickEmMacro": "Version =196611\nColumnsShown =0\nBegin\nAction =\u0022OpenReport\u0022\nArgument =\u0022rptServicePlanAndShortfall\u0022\nArgument =\u00225\u0022\nArgument =\u0022\u0022\nArgument =\u0022\u0022\nArgument =\u00220\u0022"
+              },
+              "Children": [
+                {
+                  "Type": "Begin",
+                  "Properties": {
+                    "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro For=\\\u0022btnServicePlanShortfall\\\u0022 Event=\\\u0022OnClick\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenReport\\\u0022\u003E\u003CArgumen"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Begin",
+                  "Properties": {
+                    "Comment": "_AXL:t Name=\\\u0022ReportName\\\u0022\u003ErptServicePlanAndShortfall\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/UserInterfaceMacro\u003E"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null,
+              "GeometryIn": {
+                "X": 0.5,
+                "Y": 0.95,
+                "W": 3,
+                "H": 0.349
+              },
+              "EventMacros": {
+                "OnClick": {
+                  "Actions": [
+                    {
+                      "Action": "OpenReport",
+                      "Arguments": {
+                        "ReportName": "rptServicePlanAndShortfall"
+                      },
+                      "Condition": null,
+                      "ConditionBranch": null,
+                      "Comment": null,
+                      "InferredFunctionality": null
+                    }
+                  ],
+                  "InferredFunctionality": null
+                }
+              }
+            }
+          ],
+          "VbaCode": null,
+          "GeometryIn": {
+            "H": 4.7
+          }
+        },
+        {
+          "Type": "Label",
+          "Properties": {
+            "OverlapFlags": "85",
+            "Left": "288",
+            "Top": "2016",
+            "Width": "2880",
+            "Height": "360",
+            "FontSize": "9",
+            "FontWeight": "700",
+            "ForeColor": "0",
+            "Name": "lblProviderReports",
+            "Caption": "Provider Reports",
+            "GUID": "0x87bd4ca869709b4fb38cf2f94e71b57a",
+            "LayoutCachedLeft": "288",
+            "LayoutCachedTop": "2016",
+            "LayoutCachedWidth": "3168",
+            "LayoutCachedHeight": "2376",
+            "ForeThemeColorIndex": "-1"
+          },
+          "Children": [],
+          "VbaCode": null,
+          "GeometryIn": {
+            "X": 0.2,
+            "Y": 1.4,
+            "W": 2,
+            "H": 0.25
+          },
+          "TextCapacity": {
+            "charsPerLine": 31,
+            "visibleLines": 1,
+            "font": {
+              "name": "Aptos",
+              "size": 9,
+              "resolution": "inherited"
+            },
+            "metric": "avgWidth"
+          }
+        },
+        {
+          "Type": "CommandButton",
+          "Properties": {
+            "OverlapFlags": "85",
+            "Left": "720",
+            "Top": "2448",
+            "Width": "4320",
+            "Height": "503",
+            "TabIndex": "2",
+            "Name": "btnProviderCatalog",
+            "Caption": "Provider Service Catalog",
+            "GUID": "0xc46b4a061cf1564caa2ba7f15d0f2adc",
+            "OnClickEmMacro": "Version =196611\nColumnsShown =0\nBegin\nAction =\u0022OpenReport\u0022\nArgument =\u0022rptProviderServiceCatalog\u0022\nArgument =\u00225\u0022\nArgument =\u0022\u0022\nArgument =\u0022\u0022\nArgument =\u00220\u0022"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {
+                "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro For=\\\u0022btnProviderCatalog\\\u0022 Event=\\\u0022OnClick\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenReport\\\u0022\u003E\u003CArgument Nam"
+              },
+              "Children": [],
+              "VbaCode": null
+            },
+            {
+              "Type": "Begin",
+              "Properties": {
+                "Comment": "_AXL:e=\\\u0022ReportName\\\u0022\u003ErptProviderServiceCatalog\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/UserInterfaceMacro\u003E"
+              },
+              "Children": [],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null,
+          "GeometryIn": {
+            "X": 0.5,
+            "Y": 1.7,
+            "W": 3,
+            "H": 0.349
+          },
+          "EventMacros": {
+            "OnClick": {
+              "Actions": [
+                {
+                  "Action": "OpenReport",
+                  "Arguments": {
+                    "ReportName": "rptProviderServiceCatalog"
+                  },
+                  "Condition": null,
+                  "ConditionBranch": null,
+                  "Comment": null,
+                  "InferredFunctionality": null
+                }
+              ],
+              "InferredFunctionality": null
+            }
+          }
+        }
+      ],
+      "VbaCode": null
+    },
+    {
+      "Type": "CommandButton",
+      "Properties": {
+        "OverlapFlags": "85",
+        "Left": "720",
+        "Top": "3096",
+        "Width": "4320",
+        "Height": "503",
+        "TabIndex": "3",
+        "Name": "btnPlansByClient",
+        "Caption": "Plans by Client",
+        "GUID": "0x6ab2c03142943e47a59af8b87b6ddbd8",
+        "OnClickEmMacro": "Version =196611\nColumnsShown =0\nBegin\nAction =\u0022OpenReport\u0022\nArgument =\u0022rptServicePlansByClient\u0022\nArgument =\u00225\u0022\nArgument =\u0022\u0022\nArgument =\u0022\u0022\nArgument =\u00220\u0022"
+      },
+      "Children": [
+        {
+          "Type": "Begin",
+          "Properties": {
+            "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro For=\\\u0022btnPlansByClient\\\u0022 Event=\\\u0022OnClick\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenReport\\\u0022\u003E\u003CArgument Name="
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "Begin",
+          "Properties": {
+            "Comment": "_AXL:\\\u0022ReportName\\\u0022\u003ErptServicePlansByClient\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/UserInterfaceMacro\u003E"
+          },
+          "Children": [],
+          "VbaCode": null
+        }
+      ],
+      "VbaCode": null,
+      "GeometryIn": {
+        "X": 0.5,
+        "Y": 2.15,
+        "W": 3,
+        "H": 0.349
+      },
+      "EventMacros": {
+        "OnClick": {
+          "Actions": [
+            {
+              "Action": "OpenReport",
+              "Arguments": {
+                "ReportName": "rptServicePlansByClient"
+              },
+              "Condition": null,
+              "ConditionBranch": null,
+              "Comment": null,
+              "InferredFunctionality": null
+            }
+          ],
+          "InferredFunctionality": null
+        }
+      }
+    }
+  ],
+  "VbaCode": "CodeBehindForm\r\nAttribute VB_GlobalNameSpace = False\r\nAttribute VB_Creatable = True\r\nAttribute VB_PredeclaredId = True\r\nAttribute VB_Exposed = False\r\nOption Compare Database\r\n",
+  "GeometryIn": {
+    "W": 4
+  },
+  "NonDefaultProperties": [
+    "Modal",
+    "RecordSelectors",
+    "NavigationButtons",
+    "DividingLines",
+    "AllowDesignChanges"
+  ],
+  "Procedures": []
+}

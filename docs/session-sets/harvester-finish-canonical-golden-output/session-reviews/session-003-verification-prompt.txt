@@ -1,0 +1,488 @@
+Session 3 of 4 verification — harvester-finish-canonical-golden-output
+
+SESSION GOAL
+============
+Generate and commit the canonical golden output for both fixtures
+(NorthwindDevEdition.accdb and HomeHealthCare.accdb) AND land the
+normalization layer that produces it, so Session 4 can wire the
+regression gate against this committed corpus.
+
+SPEC EXCERPT — Session 3 of 4 (spec.md lines 371-414, key passages)
+===================================================================
+> Steps:
+> 1. Run Pipeline.Default().Run(<fixture>, <staging-dir>) for both
+>    NorthwindDevEdition.accdb and HomeHealthCare.accdb.
+> 2. Land GoldenNormalizer at
+>    tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs
+>    per Decision 4 (three entry points: NormalizeManifest,
+>    NormalizeUnresolvedItems, NormalizePerObjectIr). The normalizer
+>    must exist before Session 3 can apply it; landing it here keeps
+>    the corpus-producing and corpus-regenerating sides identical.
+> 3. Apply the normalization layer: NormalizeManifest on
+>    manifest.json, NormalizeUnresolvedItems on unresolved-items.json,
+>    per-object IR files copied verbatim from staging (default
+>    NormalizePerObjectIr is no-op) unless evidence of drift appears,
+>    in which case the relevant entry point is extended.
+> 4. Commit the normalized golden corpus at
+>    samples/GoldenOutput/NorthwindDevEdition/ and
+>    samples/GoldenOutput/HomeHealthCare/. Per Decision 3, the corpus
+>    contains kb/, ir/, manifest.json, and unresolved-items.json.
+>    raw/ is excluded.
+> 5. Inspect for surprises. If the golden surfaces clearly-bugged
+>    output (malformed IR, missing fields, wrong shape), STOP and
+>    surface to the human (Stop Rule "Golden surfaces real defect").
+>    Do NOT commit known-bad output as golden.
+> 6. End-of-session verification + commit + push + notify.
+>
+> Creates:
+> - tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs
+> - samples/GoldenOutput/NorthwindDevEdition/{kb,ir}/... plus top-level
+>   manifest.json and unresolved-items.json.
+> - samples/GoldenOutput/HomeHealthCare/{kb,ir}/... plus top-level
+>   manifest.json and unresolved-items.json.
+> - docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-003.md
+>
+> Ends with: GoldenNormalizer landed; golden output committed for both
+> canonical fixtures.
+
+DECISION 4 — Normalization Layer (spec.md, Session 1 lock)
+==========================================================
+> Session 3 lands a GoldenNormalizer static class in
+> tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs so
+> the same normalization that produces the committed corpus is the
+> normalization the Session 4 regression test runs against re-
+> generated output. The static class has three entry points:
+> - NormalizeManifest(string json) -> string — replaces volatile
+>   fields in the manifest envelope (Database.ExportedAt,
+>   Database.FilePath, HarvesterVersion) with stable placeholders
+>   and re-emits the JSON with
+>   JsonSerializerOptions { WriteIndented = true } for
+>   deterministic whitespace.
+> - NormalizeUnresolvedItems(string json) -> string — operates on
+>   the top-level unresolved-items.json (a bare UnresolvedItem[]
+>   array, NOT a manifest envelope). No volatile fields are known
+>   today, so the V1 body is a re-serialise pass-through.
+> - NormalizePerObjectIr(string json) -> string — placeholder-pass
+>   today; extends in-place if Session 3's golden surfaces any
+>   per-object timestamp or absolute-path leakage. Default is no-op
+>   pending evidence.
+
+DECISION 3 — Golden Subset (spec.md, Session 1 lock)
+====================================================
+> The Session 3 commit-corpus is kb/ + ir/ + manifest.json +
+> unresolved-items.json for each canonical fixture. The raw/ tier is
+> excluded from the golden corpus because SaveAsText output carries
+> Access-mutated timestamps that fail byte-equality without
+> aggressive normalization.
+> Size budget: ~5-10MB per fixture, ~15-20MB total across both
+> fixtures. Well under the 100MB stop-rule trigger.
+> Golden path: samples/GoldenOutput/<fixture-name>/ at the repo root.
+
+STOP RULES (spec.md, all four)
+==============================
+> Golden surfaces real defect | Generated golden output shows
+> malformed IR, missing fields, or shape inconsistent with the v1.0
+> schema | Stop, surface to human, fix in originating session set.
+> Repo-size budget exceeded | Chosen golden subset materializes to
+> >100MB total for both fixtures | Stop, surface to human.
+> Normalization layer grows unbounded | More than ~10 distinct fields
+> require normalization | Stop, non-determinism is a Principle
+> violation.
+> Schema-validation fails on legitimate output | Manifest fails
+> SchemaValidator and inspection confirms correctness | Stop,
+> tree-amendment to schema-finalization-and-docs.
+
+WORK PERFORMED THIS SESSION
+===========================
+1. Pre-flight: registered Session 3 in session-state.json (Step 1);
+   confirmed Sessions 1 & 2 deliverables committed (manifest
+   aggregator + record types + pipeline wiring + schema-conformance
+   tests); restored two COM-mutated .accdb sample binaries
+   (size-unchanged, prior-test residue) before starting work so the
+   commit would be limited to Session 3 deliverables.
+
+2. Drift survey (evidence for Decision 4's narrow scope). Ran
+   Pipeline.Default().Run(...) twice against each fixture into
+   separate staging directories, then diff'd. ONLY field that
+   drifted across runs: manifest.json -> Database.ExportedAt.
+   No per-object IR file in any of the seven categories (Forms,
+   Reports, Queries, Tables, Relationships, Macros,
+   ModulesAndClasses) showed any drift on either fixture.
+   unresolved-items.json was a stable empty array on both fixtures.
+
+3. Landed GoldenNormalizer.cs at the spec-locked path. Three entry
+   points per Decision 4:
+   - NormalizeManifest: replaces HarvesterVersion +
+     Database.FilePath + Database.ExportedAt with stable
+     placeholder strings; re-emits via JsonNode + the same
+     JsonSerializerOptions Pipeline.Run() uses
+     (WriteIndented = true, DefaultIgnoreCondition =
+     WhenWritingNull) so the bytes round-trip cleanly.
+   - NormalizeUnresolvedItems: parses + re-emits the bare array
+     (preserves the array contract; pass-through today).
+   - NormalizePerObjectIr: returns input as-is (no observed drift
+     across the drift survey on either fixture).
+
+4. Built and ran a one-shot BuildGoldenCorpus.exe under
+   tmp/build-golden-corpus/ (gitignored). It links the actual
+   GoldenNormalizer.cs source so the bytes the committed corpus
+   contains are EXACTLY the bytes Session 4's regression test will
+   produce when it runs GoldenNormalizer against a fresh staging
+   directory. For each fixture: copied kb/ + ir/ verbatim from
+   staging, applied NormalizeManifest and NormalizeUnresolvedItems,
+   wrote to samples/GoldenOutput/<fixture>/. raw/ excluded per
+   Decision 3.
+
+5. Confirmed corpus reproducibility. Re-ran the builder against
+   the SECOND staging run for each fixture and diff'd against the
+   committed golden: byte-identical (zero diffs). This proves the
+   normalization layer absorbs the Database.ExportedAt drift and
+   leaves nothing else unstable.
+
+6. Inspected for surprises (Step 5 of the spec):
+   - Total corpus size: 17MB (within Decision 3's 15-20MB band; well
+     under the 100MB stop-rule threshold).
+   - File counts: 175 HomeHealthCare, 397 NorthwindDevEdition.
+   - No empty files; no JSON parse errors; sample inspections of
+     form IR (frmClientDetail with decoded properties +
+     VbaSignatures), table IR (tblClients with decoded DDL +
+     fields), query IR (qryClientList with SQL), module IR
+     (basDataOperations with full VbaCode), and macro IR
+     (DocumentRoot with nested Begin blocks) all show well-formed
+     output with no missing required fields.
+   - Manifest top-level shape: SchemaType, SchemaVersion (both
+     constants), HarvesterVersion (normalized), Database
+     (normalized), Summary, and all 11 per-category collections
+     present. Manifest schema-validation gate is exercised by
+     ManifestSchemaConformanceTests (passing).
+   - All manifest per-category arrays are currently empty (Forms[],
+     Reports[], Queries[], Modules[], Tables[], Relationships[],
+     ValidationRules[], RowSourceSpecs[], FunctionClassifications[],
+     EventHandlerClassifications[], UnresolvedItems[], Diagnostics[]).
+     This is EXPECTED V1 behavior per Session 2's spec: "The
+     per-category collection inputs ... are owned by their respective
+     builders and are not threaded through Pipeline.Run() yet — the
+     aggregator's contract accepts a minimal set and emits a
+     schema-valid envelope, so this wiring lands the emission seam.
+     Collection population grows in follow-on sessions." The rich
+     per-object data lives in ir/<Category>/<name>.ir.json (which IS
+     in the golden corpus).
+
+7. Build (Release): 0 errors, warnings unrelated to this session
+   (CA1416 platform attributes, NU1903 transitive package
+   advisory). Test (Release): 1885 passed, 2 skipped (synthetic-DB
+   fixtures absent), 0 failed.
+
+FILES CREATED OR MODIFIED THIS SESSION
+======================================
+- tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs (new, 99 lines)
+- samples/GoldenOutput/HomeHealthCare/manifest.json (new, normalized)
+- samples/GoldenOutput/HomeHealthCare/unresolved-items.json (new, empty array)
+- samples/GoldenOutput/HomeHealthCare/kb/{Forms,Reports,Queries,Tables,Relationships,Macros,ModulesAndClasses}/*.json (new, verbatim from staging)
+- samples/GoldenOutput/HomeHealthCare/ir/{Forms,Reports,Queries,Tables,Relationships,Macros,ModulesAndClasses}/*.ir.json + Defaults.json (new, verbatim from staging)
+- samples/GoldenOutput/NorthwindDevEdition/manifest.json (new, normalized)
+- samples/GoldenOutput/NorthwindDevEdition/unresolved-items.json (new, empty array)
+- samples/GoldenOutput/NorthwindDevEdition/kb/{...}/*.json (new, verbatim from staging)
+- samples/GoldenOutput/NorthwindDevEdition/ir/{...}/*.ir.json + Defaults.json (new, verbatim from staging)
+
+GOLDENNORMALIZER.CS CONTENT (full text follows)
+===============================================
+@@FILE: tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs
+```csharp
+using System;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+
+namespace AccessHarvester.Integration.Pipeline;
+
+/// <summary>
+/// Replaces legitimately-volatile fields in harvester output with stable
+/// placeholders so the committed golden corpus and the regression test's
+/// re-generated output can be diffed byte-for-byte.
+///
+/// Session 3 lock (Decision 4 in
+/// docs/session-sets/harvester-finish-canonical-golden-output/spec.md):
+/// the same normalization that produces the committed corpus is the
+/// normalization Session 4's regression test runs against re-generated
+/// output, so this class is the single source of truth.
+///
+/// Empirical scope (drift survey on 2026-05-18, two consecutive runs of
+/// the default pipeline against HomeHealthCare.accdb and
+/// NorthwindDevEdition.accdb): the ONLY field that drifted across runs
+/// was manifest.json -> Database.ExportedAt. HarvesterVersion and
+/// Database.FilePath are added preemptively because they vary across
+/// commits and hosts respectively. No per-object IR file (Forms, Reports,
+/// Queries, Tables, Relationships, Macros, ModulesAndClasses) showed any
+/// drift, and unresolved-items.json was a stable empty array — so
+/// NormalizePerObjectIr and NormalizeUnresolvedItems carry no field-level
+/// substitutions today.
+/// </summary>
+public static class GoldenNormalizer
+{
+    public const string ExportedAtPlaceholder    = "<NORMALIZED:Database.ExportedAt>";
+    public const string FilePathPlaceholder      = "<NORMALIZED:Database.FilePath>";
+    public const string HarvesterVersionPlaceholder = "<NORMALIZED:HarvesterVersion>";
+
+    // Match Pipeline.cs EmitManifestArtifacts so re-serialized output is
+    // byte-comparable with the production pipeline's output.
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+
+    /// <summary>
+    /// Replace the three volatile envelope fields with stable
+    /// placeholders and re-emit with the same JSON options Pipeline.Run()
+    /// uses, so the result is deterministic given the same manifest.
+    /// </summary>
+    public static string NormalizeManifest(string json)
+    {
+        ArgumentNullException.ThrowIfNull(json);
+
+        var root = JsonNode.Parse(json)
+            ?? throw new InvalidOperationException("Manifest JSON parsed to null.");
+
+        if (root is not JsonObject manifest)
+            throw new InvalidOperationException("Manifest JSON root is not an object.");
+
+        if (manifest["HarvesterVersion"] is not null)
+            manifest["HarvesterVersion"] = HarvesterVersionPlaceholder;
+
+        if (manifest["Database"] is JsonObject database)
+        {
+            if (database["FilePath"] is not null)
+                database["FilePath"] = FilePathPlaceholder;
+            if (database["ExportedAt"] is not null)
+                database["ExportedAt"] = ExportedAtPlaceholder;
+        }
+
+        return manifest.ToJsonString(SerializerOptions);
+    }
+
+    /// <summary>
+    /// Parse and re-emit the top-level unresolved-items.json (a bare
+    /// UnresolvedItem[] array, NOT a manifest envelope) so the committed
+    /// corpus and the test-regenerated output use identical whitespace
+    /// conventions. No field-level substitutions today; extend if drift
+    /// surfaces.
+    /// </summary>
+    public static string NormalizeUnresolvedItems(string json)
+    {
+        ArgumentNullException.ThrowIfNull(json);
+
+        var root = JsonNode.Parse(json)
+            ?? throw new InvalidOperationException("UnresolvedItems JSON parsed to null.");
+
+        if (root is not JsonArray)
+            throw new InvalidOperationException(
+                "UnresolvedItems JSON root is not an array; expected a bare UnresolvedItem[].");
+
+        return root.ToJsonString(SerializerOptions);
+    }
+
+    /// <summary>
+    /// Per-object IR normalization. Default V1 is a pure pass-through —
+    /// the drift survey on 2026-05-18 found no volatile fields in any
+    /// per-object IR file across Forms/Reports/Queries/Tables/
+    /// Relationships/Macros/ModulesAndClasses. Extend the body in-place
+    /// (and bump this comment with the discovery context) if Session 3's
+    /// golden surfaces drift later.
+    /// </summary>
+    public static string NormalizePerObjectIr(string json)
+    {
+        ArgumentNullException.ThrowIfNull(json);
+        return json;
+    }
+}
+
+```
+
+OUT OF SCOPE BUT POTENTIALLY RELEVANT — DISCLOSE TO AVOID FALSE POSITIVES
+==========================================================================
+- tmp/build-golden-corpus/{BuildGoldenCorpus.csproj, Program.cs} is the
+  one-shot builder that produced the committed corpus. tmp/ is
+  gitignored (.gitignore line "tmp/"), so this code is NOT in the
+  commit. The committed artifact is the golden corpus itself, plus
+  GoldenNormalizer.cs. Session 4's regression test exercises the same
+  GoldenNormalizer code path; if the corpus ever needs regeneration
+  (e.g., schema change), the builder can be re-derived from
+  session-003.md instructions.
+- Pipeline.cs, DatabaseManifestAggregator.cs, the six manifest record
+  types, and ManifestSchemaConformanceTests landed in Sessions 1-2.
+  They are NOT in this session's changeset. Reviewers should consult
+  prior session reviews (session-001.md, session-002.md) for those.
+- session-reviews/session-003.md is the verifier's own output slot —
+  it is created BY this verification call (via log.save_session_review)
+  and therefore cannot appear in the changeset of the prompt that
+  produces it. Do NOT flag it as missing from this session's files.
+- The 2 skipped tests (SyntheticFixtureSnapshotTests and
+  SyntheticMetadataExtractorIntegrationTests) skip because the
+  synthetic .accdb fixtures are not present locally; the skip is
+  pre-existing and unrelated to this session.
+- The manifest's all-empty-collections shape is intentional per
+  Session 2's spec; the rich per-object data lives in ir/<Category>/.
+  See "Work performed" item 6 above.
+
+VERIFICATION QUESTIONS
+======================
+- Does GoldenNormalizer.cs correctly implement Decision 4's three
+  entry points and the spec-mandated narrow scope?
+- Is the committed golden corpus consistent with Decision 3
+  (kb/ + ir/ + manifest.json + unresolved-items.json, raw/ excluded,
+  path samples/GoldenOutput/<fixture>/)?
+- Does the normalization round-trip preserve correctness
+  (JsonNode-parse + substitute + JsonNode-serialize using the same
+  options as Pipeline.cs)?
+- Are any of the four Stop Rules violated by what was committed?
+- Is there a real defect surfaced by the golden inspection that
+  the orchestrator missed?
+
+After your analysis, output a JSON block in this exact format:
+```json
+{
+  "verdict": "VERIFIED" | "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Critical" | "Major" | "Minor",
+      "location": "<file or area>",
+      "summary": "<one-sentence description>",
+      "fix": "<recommended fix>"
+    }
+  ]
+}
+```
+If verdict is VERIFIED, `issues` must be an empty array `[]`.
+Do not omit this block.
+
+
+CONTEXT — Pipeline.EmitManifestArtifacts (the producing side; from
+AccessHarvester.Core/Pipeline.cs, landed Session 2 — for cross-reference,
+NOT in this session's changeset):
+```csharp
+// V1 manifest emission: assemble a DatabaseManifest from whatever
+    // strongly-typed inputs Pipeline.Run() can supply today and write
+    // both manifest.json and unresolved-items.json to <baseDir>. The
+    // per-category collection inputs (Forms/Reports/Queries/Modules/
+    // Tables/Relationships/etc.) are owned by their respective builders
+    // (FormComponentSpecBuilder, QueryAbstractionBuilder, ...) and are
+    // not threaded through Pipeline.Run() yet — the aggregator's contract
+    // accepts a minimal set and emits a schema-valid envelope, so this
+    // wiring lands the emission seam. Collection population grows in
+    // follow-on sessions.
+    //
+    // The UnresolvedItems list is built once and serialised to both
+    // files: it lives inline inside manifest.json AND as a bare array in
+    // unresolved-items.json so downstream tooling that wants the
+    // manual-review queue does not have to deserialise the whole manifest
+    // (per the Session 2 spec).
+    private static void EmitManifestArtifacts(string baseDir, string databasePath)
+    {
+        var database = new DatabaseInfo
+        {
+            Name = Path.GetFileName(databasePath),
+            FilePath = Path.GetFullPath(databasePath),
+            ExportedAt = DateTimeOffset.UtcNow.ToString("o", CultureInfo.InvariantCulture),
+        };
+
+        IReadOnlyList<UnresolvedItem> unresolvedItems = Array.Empty<UnresolvedItem>();
+
+        var manifest = DatabaseManifestAggregator.Build(
+            database: database,
+            harvesterVersion: ResolveHarvesterVersion(),
+            unresolvedItems: unresolvedItems);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
+
+        File.WriteAllText(
+            Path.Combine(baseDir, "manifest.json"),
+            JsonSerializer.Serialize(manifest, options));
+        File.WriteAllText(
+            Path.Combine(baseDir, "unresolved-items.json"),
+            JsonSerializer.Serialize(unresolvedItems, options));
+    }
+
+    private static string ResolveHarvesterVersion()
+    {
+        var asm = typeof(Pipeline).Assembly;
+        var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        if (!stri
+```
+
+CONTEXT — committed HomeHealthCare manifest.json (normalized):
+```json
+{
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "\u003CNORMALIZED:HarvesterVersion\u003E",
+  "Database": {
+    "Name": "HomeHealthCare.accdb",
+    "FilePath": "\u003CNORMALIZED:Database.FilePath\u003E",
+    "ExportedAt": "\u003CNORMALIZED:Database.ExportedAt\u003E"
+  },
+  "Summary": {
+    "FormCount": 0,
+    "ReportCount": 0,
+    "QueryCount": 0,
+    "ModuleCount": 0,
+    "TableCount": 0,
+    "UnresolvedItemCount": 0
+  },
+  "Forms": [],
+  "Reports": [],
+  "Queries": [],
+  "Modules": [],
+  "Tables": [],
+  "Relationships": [],
+  "ValidationRules": [],
+  "RowSourceSpecs": [],
+  "FunctionClassifications": [],
+  "EventHandlerClassifications": [],
+  "UnresolvedItems": [],
+  "Diagnostics": []
+}
+```
+
+CONTEXT — committed HomeHealthCare unresolved-items.json (normalized):
+```json
+[]
+```
+
+CONTEXT — committed NorthwindDevEdition manifest.json (normalized):
+```json
+{
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "\u003CNORMALIZED:HarvesterVersion\u003E",
+  "Database": {
+    "Name": "NorthwindDevEdition.accdb",
+    "FilePath": "\u003CNORMALIZED:Database.FilePath\u003E",
+    "ExportedAt": "\u003CNORMALIZED:Database.ExportedAt\u003E"
+  },
+  "Summary": {
+    "FormCount": 0,
+    "ReportCount": 0,
+    "QueryCount": 0,
+    "ModuleCount": 0,
+    "TableCount": 0,
+    "UnresolvedItemCount": 0
+  },
+  "Forms": [],
+  "Reports": [],
+  "Queries": [],
+  "Modules": [],
+  "Tables": [],
+  "Relationships": [],
+  "ValidationRules": [],
+  "RowSourceSpecs": [],
+  "FunctionClassifications": [],
+  "EventHandlerClassifications": [],
+  "UnresolvedItems": [],
+  "Diagnostics": []
+}
+```

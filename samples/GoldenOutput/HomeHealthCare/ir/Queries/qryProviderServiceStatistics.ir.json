@@ -1,0 +1,10 @@
+{
+  "Name": "qryProviderServiceStatistics",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT p.ProviderID, p.ProviderName, csp.FiscalYear, sub.UniqueClientCount AS Clients, Sum(csp.HoursPerWeek * 52) AS Hours, Sum(csp.AnnualEstCost) AS TotalCost, FormatCurrency (Sum(csp.AnnualEstCost) / sub.UniqueClientCount) AS AvgPerClient\r\nFROM (tblProviders AS p INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID) INNER JOIN (SELECT Dist.ProviderID, Count(Dist.ClientID) AS UniqueClientCount FROM (SELECT DISTINCT psc2.ProviderID, csn2.ClientID FROM tblProviderServiceCatalog AS psc2 INNER JOIN (tblClientServicePlan AS csp2 INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID) ON psc2.ProviderServiceCatalogID = csp2.ProviderServiceCatalogID WHERE csp2.Status \u003C\u003E \u0027Cancelled\u0027)  AS Dist GROUP BY Dist.ProviderID)  AS sub ON p.ProviderID = sub.ProviderID\r\nWHERE csp.Status \u003C\u003E \u0027Cancelled\u0027\r\nGROUP BY p.ProviderID, p.ProviderName, csp.FiscalYear, sub.UniqueClientCount;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 0
+}

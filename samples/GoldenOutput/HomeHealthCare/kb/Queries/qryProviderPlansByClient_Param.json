@@ -1,0 +1,10 @@
+{
+  "Name": "qryProviderPlansByClient_Param",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "PARAMETERS [Enter Provider ID:] Long, [Enter Fiscal Year:] Long;\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceName, csp.HoursPerWeek, csp.WeeklyCost\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((psc.ProviderID)=[Enter Provider ID:]) AND ((csp.FiscalYear)=[Enter Fiscal Year:]))\r\nORDER BY c.LastName, c.FirstName, s.ServiceName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

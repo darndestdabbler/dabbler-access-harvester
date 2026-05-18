@@ -1,0 +1,10 @@
+{
+  "Name": "qxtClientServiceCosts",
+  "Type": "Query",
+  "QueryTypeCode": 16,
+  "QueryTypeName": "MakeTable",
+  "Sql": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

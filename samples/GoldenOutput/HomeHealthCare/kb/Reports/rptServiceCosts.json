@@ -1,0 +1,487 @@
+{
+  "Type": "Report",
+  "Properties": {
+    "LayoutForPrint": "NotDefault",
+    "DividingLines": "NotDefault",
+    "AllowDesignChanges": "NotDefault",
+    "TabularFamily": "0",
+    "DateGrouping": "1",
+    "GrpKeepTogether": "1",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "11520",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "9",
+    "Right": "9165",
+    "Bottom": "8580",
+    "DatasheetGridlinesColor": "15263976",
+    "OnNoData": "[Event Procedure]",
+    "RecSrcDt": "0x95b588faae83e640",
+    "GUID": "0xf18927b83caa864cb706cbe36df32a6c",
+    "NameMap": "0x0acc0e5500000000bd8c02b81fac5f459db15f9fbdb5915000000000f005dd9f ,\n0x7489e64000000000000000007100720079005300650072007600690063006500 ,\n0x43006f007300740073005f0042007900460069007300630061006c0059006500 ,\n0x61007200000000000000ff7b3d6da10bb74d82460f84acd2d8d907000000bd8c ,\n0x02b81fac5f459db15f9fbdb5915053006500720076006900630065004e006100 ,\n0x6d0065000000000000000fe9d6c22a5c3542be21b74afb72888007000000bd8c ,\n0x02b81fac5f459db15f9fbdb5915054006f00740061006c0043006f0073007400 ,\n0x000000000000efb10f2360383e4f882dde4aba5400a107000000bd8c02b81fac ,\n0x5f459db15f9fbdb5915050006300740043006f00730074000000000000000000 ,\n0x00000000000000000000000000000c0000000500000000000000000000000000 ,\n0x00000000",
+    "RecordSource": "qryServiceCosts_ByFiscalYear",
+    "Caption": "Service Costs",
+    "OnOpen": "[Event Procedure]",
+    "DatasheetFontName": "Aptos",
+    "PrtMip": "0x6801000068010000680100006801000000000000201c0000e010000001000000 ,\n0x010000006801000000000000a10700000100000001000000",
+    "PrtDevMode": "0x003f83f3fd7f00000000000000000000e02f2ee129000000201d2ee129000000 ,\n0x010403069c00f003032d010001000100ea0a6f08640001000101580202000100 ,\n0x5802030001004c6574746572007f0000000074301802000000000000f67f0000 ,\n0x000efd1118020000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNames": "0x0800290048000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005753442d34353138316338662d323438612d343961312d61 ,\n0x3365302d63666435363464313538393600",
+    "FilterOnLoad": "0",
+    "FitToPage": "1",
+    "DisplayOnSharePointSite": "1",
+    "DatasheetAlternateBackColor": "15921906",
+    "DatasheetGridlinesColor12": "0",
+    "FitToScreen": "1",
+    "DatasheetBackThemeColorIndex": "1",
+    "BorderThemeColorIndex": "3",
+    "ThemeFontIndex": "1",
+    "ForeThemeColorIndex": "0",
+    "AlternateBackThemeColorIndex": "1",
+    "AlternateBackShade": "95.0",
+    "PrtDevModeW": "0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x5900200034003500300030002000730065007200690065007300290000000000 ,\n0x01040306dc00f003032d010001000100ea0a6f08640001000101580202000100 ,\n0x5802030001004c00650074007400650072000000000000005001743018020000 ,\n0x8000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNamesW": "0x0400250044000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005700530044002d0034003500310038003100630038006600 ,\n0x2d0032003400380061002d0034003900610031002d0061003300650030002d00 ,\n0x6300660064003500360034006400310035003800390036000000",
+    "NoSaveCTIWhenDisabled": "1"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {},
+      "Children": [
+        {
+          "Type": "Label",
+          "Properties": {
+            "BackStyle": "0",
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "BorderColor": "8355711",
+            "ForeColor": "6710886",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "0",
+            "BorderTint": "50.0",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "60.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "Line",
+          "Properties": {
+            "BorderLineStyle": "0",
+            "GridlineColor": "10921638",
+            "BorderThemeColorIndex": "0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "TextBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "FELineBreak": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "AsianLineBreak": "1",
+            "GridlineColor": "10921638",
+            "ShowDatePicker": "0",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ThemeFontIndex": "1",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormHeader",
+          "Properties": {
+            "KeepTogether": "NotDefault",
+            "Height": "540",
+            "BackColor": "-2147483606",
+            "Name": "ReportHeader",
+            "GUID": "0x6a42a9302372d64cb83c382aec5874a3",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "TextFontFamily": "34",
+                    "Top": "60",
+                    "Width": "5760",
+                    "Height": "413",
+                    "FontSize": "14",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblServiceCostAnalysis",
+                    "Caption": "Service Cost Analysis",
+                    "GUID": "0x55ea581338b0fe438f33d04b25b6e554",
+                    "LayoutCachedTop": "60",
+                    "LayoutCachedWidth": "5760",
+                    "LayoutCachedHeight": "473",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "PageHeader",
+          "Properties": {
+            "Height": "576",
+            "Name": "PageHeaderSection",
+            "GUID": "0xe443fd228f25844f8c447c9affae81f8",
+            "AutoHeight": "1",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "SpecialEffect": "5",
+                    "OldBorderStyle": "1",
+                    "BorderWidth": "3",
+                    "TextFontFamily": "34",
+                    "Width": "3600",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblService",
+                    "Caption": "Service",
+                    "GUID": "0x2452f5b0c41b454e8ae4c90ef99078e7",
+                    "LayoutCachedWidth": "3600",
+                    "LayoutCachedHeight": "360",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "SpecialEffect": "5",
+                    "OldBorderStyle": "1",
+                    "BorderWidth": "3",
+                    "TextFontFamily": "34",
+                    "Left": "3888",
+                    "Width": "2160",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblTotalCost",
+                    "Caption": "Total Cost",
+                    "GUID": "0x4db372a30bf82c45918771ce31d88eeb",
+                    "LayoutCachedLeft": "3888",
+                    "LayoutCachedWidth": "6048",
+                    "LayoutCachedHeight": "360",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "SpecialEffect": "5",
+                    "OldBorderStyle": "1",
+                    "BorderWidth": "3",
+                    "TextFontFamily": "34",
+                    "Left": "6336",
+                    "Width": "1440",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblPctOfTotal",
+                    "Caption": "% of Total",
+                    "GUID": "0x16821d4244ea0c4789029d21a9da68d2",
+                    "LayoutCachedLeft": "6336",
+                    "LayoutCachedWidth": "7776",
+                    "LayoutCachedHeight": "360",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "Section",
+          "Properties": {
+            "KeepTogether": "NotDefault",
+            "Height": "432",
+            "OnPrint": "[Event Procedure]",
+            "Name": "Detail",
+            "GUID": "0x773869654cd861458467730e66ed8a7b",
+            "AutoHeight": "1",
+            "AlternateBackColor": "15921906",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "OldBorderStyle": "0",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Width": "3600",
+                    "Height": "360",
+                    "Name": "txtServiceName",
+                    "ControlSource": "ServiceName",
+                    "GUID": "0x6cc6a499c0af6d42b09ff798fbff310f",
+                    "LayoutCachedWidth": "3600",
+                    "LayoutCachedHeight": "360"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "DecimalPlaces": "2",
+                    "OldBorderStyle": "0",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Left": "3888",
+                    "Width": "2160",
+                    "Height": "360",
+                    "TabIndex": "1",
+                    "Name": "txtTotalCost",
+                    "ControlSource": "TotalCost",
+                    "Format": "$#,##0.00",
+                    "GUID": "0x44fd6994e7e6264aac04140ec9226945",
+                    "LayoutCachedLeft": "3888",
+                    "LayoutCachedWidth": "6048",
+                    "LayoutCachedHeight": "360"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "OldBorderStyle": "0",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Left": "6336",
+                    "Height": "360",
+                    "TabIndex": "2",
+                    "Name": "txtPctOfTotal",
+                    "ControlSource": "PctCost",
+                    "Format": "Percent",
+                    "GUID": "0x84550cfa4380534aa8f356c63d8dcc20",
+                    "LayoutCachedLeft": "6336",
+                    "LayoutCachedWidth": "7776",
+                    "LayoutCachedHeight": "360"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "PageFooter",
+          "Properties": {
+            "Height": "420",
+            "Name": "PageFooterSection",
+            "GUID": "0xcbb870ddc42b994a8ec688478d2fa1a4",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "OldBorderStyle": "0",
+                    "TextAlign": "2",
+                    "TextFontFamily": "34",
+                    "BackStyle": "0",
+                    "IMESentenceMode": "3",
+                    "Left": "7800",
+                    "Top": "60",
+                    "Width": "3600",
+                    "Height": "315",
+                    "Name": "txtPageNumber",
+                    "ControlSource": "=\\\u0022Page \\\u0022 \u0026 [Page]",
+                    "GUID": "0xd84a0a7a5dfb7f49b0e095b96f4218e0",
+                    "LayoutCachedLeft": "7800",
+                    "LayoutCachedTop": "60",
+                    "LayoutCachedWidth": "11400",
+                    "LayoutCachedHeight": "375"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Enabled": "NotDefault",
+                    "Locked": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "TextAlign": "1",
+                    "TextFontFamily": "34",
+                    "BackStyle": "0",
+                    "IMESentenceMode": "3",
+                    "Top": "60",
+                    "Width": "4320",
+                    "Height": "315",
+                    "TabIndex": "1",
+                    "ForeColor": "4270094",
+                    "Name": "txtDateTime",
+                    "ControlSource": "=Date() \u0026 \\\u0022 \\\u0022 \u0026 Time()",
+                    "Format": "Short Date",
+                    "GUID": "0x7fcdaa01460a544c9c386423b556cb40",
+                    "LayoutCachedTop": "60",
+                    "LayoutCachedWidth": "4320",
+                    "LayoutCachedHeight": "375",
+                    "ForeThemeColorIndex": "2",
+                    "ForeTint": "100.0"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Line",
+                  "Properties": {
+                    "Width": "11520",
+                    "Name": "lnFooter",
+                    "GUID": "0x6dac03c21384e74ab6da1914e5f2e12b",
+                    "LayoutCachedWidth": "11520"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormFooter",
+          "Properties": {
+            "KeepTogether": "NotDefault",
+            "Height": "576",
+            "BackColor": "-2147483606",
+            "OnFormat": "[Event Procedure]",
+            "Name": "ReportFooter",
+            "GUID": "0xbdf0397613e92c46b26eee1fad614d6f",
+            "AutoHeight": "1",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "TextFontFamily": "34",
+                    "Top": "120",
+                    "Width": "2880",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblGrandTotal",
+                    "Caption": "Grand Total:",
+                    "GUID": "0x65172bf03b64b641b0a136fd1a77a8ee",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "2880",
+                    "LayoutCachedHeight": "480",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "RunningSum": "2",
+                    "OldBorderStyle": "0",
+                    "TextAlign": "3",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Left": "3888",
+                    "Top": "120",
+                    "Width": "2160",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "BackColor": "-2147483606",
+                    "Name": "txtGrandTotal",
+                    "ControlSource": "=FormatCurrency(Sum([TotalCost]))",
+                    "GUID": "0xaee2d3bb48cb4c449711698d65cdaa1b",
+                    "LayoutCachedLeft": "3888",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "6048",
+                    "LayoutCachedHeight": "480",
+                    "BackThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        }
+      ],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": "CodeBehindForm\r\nAttribute VB_GlobalNameSpace = False\r\nAttribute VB_Creatable = True\r\nAttribute VB_PredeclaredId = True\r\nAttribute VB_Exposed = False\r\nOption Compare Database\r\nOption Explicit\r\nPrivate m_FiscalYear As Integer\r\nPrivate m_GrandTotal As Currency\r\nPrivate Sub Report_Open(Cancel As Integer)\r\n    DoCmd.OpenForm \u0022frmReportParam_FY\u0022, , , , , acDialog\r\n    If Not IsLoaded(\u0022frmReportParam_FY\u0022) Then\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    m_FiscalYear = Forms!frmReportParam_FY!cboFiscalYear\r\n    Me.RecordSource = \u0022SELECT ServiceName, TotalCost, PctCost \u0022 \u0026 _\r\n        \u0022FROM qryServiceCosts_ByFiscalYear WHERE FiscalYear = \u0022 \u0026 m_FiscalYear \u0026 \u0022;\u0022\r\n    DoCmd.Close acForm, \u0022frmReportParam_FY\u0022\r\nEnd Sub\r\nPrivate Sub Report_NoData(Cancel As Integer)\r\n    MsgBox \u0022No service cost data found for this fiscal year.\u0022, vbInformation\r\n    Cancel = True\r\nEnd Sub\r\nPrivate Sub Detail_Print(Cancel As Integer, PrintCount As Integer)\r\n    \u0027 Two-pass report logic \u2014 migration stress test\r\n    \u0027If m_GrandTotal \u003E 0 Then\r\n    \u0027    Me.txtPctOfTotal = Format(Nz(Me.txtTotalCost, 0) / m_GrandTotal, \u00220.0%\u0022)\r\n    \u0027Else\r\n    \u0027    Me.txtPctOfTotal = \u00220.0%\u0022\r\n    \u0027End If\r\nEnd Sub\r\nPrivate Sub ReportFooter_Format(Cancel As Integer, FormatCount As Integer)\r\n    \u0027Me.txtGrandTotal = FormatCurrency(m_GrandTotal)\r\nEnd Sub\r\nPrivate Function IsLoaded(ByVal strFormName As String) As Boolean\r\n    Dim frm As Access.Form\r\n    For Each frm In Application.Forms\r\n        If frm.name = strFormName Then\r\n            IsLoaded = True\r\n            Exit Function\r\n        End If\r\n    Next\r\n    IsLoaded = False\r\nEnd Function\r\n"
+}

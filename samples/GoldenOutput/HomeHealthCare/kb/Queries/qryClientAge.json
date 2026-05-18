@@ -1,0 +1,10 @@
+{
+  "Name": "qryClientAge",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT tblClients.ClientID, LastName \u0026 \u0022, \u0022 \u0026 FirstName AS ClientName, tblClients.DateOfBirth, CalcAge([DateOfBirth]) AS Age\r\nFROM tblClients\r\nORDER BY tblClients.LastName, tblClients.FirstName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

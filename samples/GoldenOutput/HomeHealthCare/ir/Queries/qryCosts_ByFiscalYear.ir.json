@@ -1,0 +1,10 @@
+{
+  "Name": "qryCosts_ByFiscalYear",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT psc.FiscalYear, Sum(csp.AnnualEstCost) AS TotalCost\r\nFROM tblProviders AS p INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID\r\nWHERE (((csp.Status)\u003C\u003E\u0022Cancelled\u0022))\r\nGROUP BY psc.FiscalYear;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

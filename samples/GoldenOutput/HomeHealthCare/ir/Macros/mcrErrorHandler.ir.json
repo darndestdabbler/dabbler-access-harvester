@@ -1,0 +1,121 @@
+{
+  "Type": "DocumentRoot",
+  "Properties": {
+    "Version": "196611",
+    "PublishOption": "1",
+    "ColumnsShown": "0"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "LogAndContinue",
+        "Action": "SetTempVar",
+        "Argument": [
+          "LastError",
+          "[MacroError].[Number]"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "MsgBox",
+        "Argument": [
+          "\\\u0022A non-critical error occurred: \\\u0022 \u0026 [MacroError].[Description]",
+          "0",
+          "4"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "ClearMacroError"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "LogAndStop",
+        "Action": "SetTempVar",
+        "Argument": [
+          "LastError",
+          "[MacroError].[Number]"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "MsgBox",
+        "Argument": [
+          "\\\u0022Error: \\\u0022 \u0026 [MacroError].[Description] \u0026 \\\u0022 (Error #\\\u0022 \u0026 [MacroError].[Number] \u0026 \\\u0022)\\\u0022",
+          "-1",
+          "1"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "StopMacro"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro MinimumClientDesignVersion=\\\u002214.0.0000.0000\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements/\u003E\u003CSub Name=\\\u0022LogAndContinue\\\u0022\u003E\u003CStateme"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:nts\u003E\u003CAction Name=\\\u0022SetTempVar\\\u0022\u003E\u003CArgument Name=\\\u0022Name\\\u0022\u003ELastError\u003C/Argument\u003E\u003CArgument Name=\\\u0022Expression\\\u0022\u003E[MacroError].[Number]\u003C/Argument\u003E\u003C/Action\u003E\u003CAction Name=\\\u0022MessageBox\\\u0022\u003E\u003CArgument Name=\\\u0022Message\\\u0022\u003E\\\u0022A non-critical error occurred: \\\u0022 \u0026amp; [MacroError].[De"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:scription]\u003C/Argument\u003E\u003CArgument Name=\\\u0022Beep\\\u0022\u003ENo\u003C/Argument\u003E\u003CArgument Name=\\\u0022Type\\\u0022\u003EInformation\u003C/Argument\u003E\u003C/Action\u003E\u003CAction Name=\\\u0022ClearMacroError\\\u0022/\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022LogAndStop\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022SetTempVar\\\u0022\u003E\u003CArgument Name=\\\u0022Name\\\u0022\u003ELastE"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:rror\u003C/Argument\u003E\u003CArgument Name=\\\u0022Expression\\\u0022\u003E[MacroError].[Number]\u003C/Argument\u003E\u003C/Action\u003E\u003CAction Name=\\\u0022MessageBox\\\u0022\u003E\u003CArgument Name=\\\u0022Message\\\u0022\u003E\\\u0022Error: \\\u0022 \u0026amp; [MacroError].[Description] \u0026amp; \\\u0022 (Error #\\\u0022 \u0026amp; [MacroError].[Number] \u0026amp; \\\u0022)\\\u0022\u003C/Argument\u003E\u003CArg"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:ument Name=\\\u0022Type\\\u0022\u003ECritical\u003C/Argument\u003E\u003C/Action\u003E\u003CAction Name=\\\u0022StopMacro\\\u0022/\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003C/UserInterfaceMacro\u003E"
+      },
+      "Children": [],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": null,
+  "Actions": [],
+  "InferredFunctionality": null
+}

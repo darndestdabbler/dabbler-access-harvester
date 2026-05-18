@@ -1,0 +1,19 @@
+{
+  "Name": "rel_Client_ServiceNeeds",
+  "Type": "Relationship",
+  "ParentTable": "tblClients",
+  "ChildTable": "tblClientServiceNeeds",
+  "Attributes": 256,
+  "AttributesDecoded": [
+    "UpdateCascade"
+  ],
+  "EnforceReferentialIntegrity": true,
+  "CascadeUpdate": true,
+  "CascadeDelete": false,
+  "Fields": [
+    {
+      "ParentField": "ClientID",
+      "ChildField": "ClientID"
+    }
+  ]
+}

@@ -1,0 +1,423 @@
+{
+  "Type": "Report",
+  "Properties": {
+    "LayoutForPrint": "NotDefault",
+    "DividingLines": "NotDefault",
+    "AllowDesignChanges": "NotDefault",
+    "TabularFamily": "0",
+    "DateGrouping": "1",
+    "GrpKeepTogether": "1",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "12960",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "10",
+    "Right": "9165",
+    "Bottom": "8580",
+    "DatasheetGridlinesColor": "15263976",
+    "RecSrcDt": "0x6272cb366289e640",
+    "GUID": "0x9c45651d3aa98f42bd23e5e2d2afacd5",
+    "NameMap": "0x0acc0e55000000005dd645fcdf55024281e4df593984327a000000003f1a13a0 ,\n0x7489e640000000000000000071007200790043006c00690065006e0074005300 ,\n0x65007200760069006300650050006c0061006e00440065007400610069006c00 ,\n0x000000000000dd9825f40d365a4fbea8e1ac99febf88070000005dd645fcdf55 ,\n0x024281e4df593984327a43006c00690065006e00740049004400000000000000 ,\n0x164cbc26e29084429fc571c69cc248e5070000005dd645fcdf55024281e4df59 ,\n0x3984327a460069007300630061006c0059006500610072000000000000000000 ,\n0x0000000000000000000000000000070000000000000000000000000000000000 ,\n0x000053006500720076006900630065004e0061006d0065000000000000000000 ,\n0x0000000000000000000000000000070000000000000000000000000000000000 ,\n0x0000500072006f00760069006400650072004e0061006d006500000000000000 ,\n0x0000000000000000000000000000000007000000000000000000000000000000 ,\n0x0000000048006f007500720073005000650072005700650065006b0000000000 ,\n0x0000000000000000000000000000000000000700000000000000000000000000 ,\n0x0000000000005300740061007400750073000000000000000000000000000000 ,\n0x0000000000000000070000000000000000000000000000000000000041006e00 ,\n0x6e00750061006c0045007300740043006f007300740000000000000000000000 ,\n0x0000000000000000000000000c00000005000000000000000000000000000000 ,\n0x0000",
+    "RecordSource": "SELECT * FROM qryClientServicePlanDetail WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; ",
+    "Caption": "Service Plan Entries",
+    "DatasheetFontName": "Aptos",
+    "PrtMip": "0x6801000068010000680100006801000000000000201c0000e010000001000000 ,\n0x010000006801000000000000a10700000100000001000000",
+    "PrtDevMode": "0x003f83f3fd7f00000000000000000000e02f2ee129000000201d2ee129000000 ,\n0x010403069c00f003032d010001000100ea0a6f08640001000101580202000100 ,\n0x5802030001004c6574746572007f0000000074301802000000000000f67f0000 ,\n0x105bce1118020000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNames": "0x0800290048000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005753442d34353138316338662d323438612d343961312d61 ,\n0x3365302d63666435363464313538393600",
+    "FilterOnLoad": "0",
+    "FitToPage": "1",
+    "DisplayOnSharePointSite": "1",
+    "DatasheetAlternateBackColor": "15921906",
+    "DatasheetGridlinesColor12": "0",
+    "FitToScreen": "1",
+    "DatasheetBackThemeColorIndex": "1",
+    "BorderThemeColorIndex": "3",
+    "ThemeFontIndex": "1",
+    "ForeThemeColorIndex": "0",
+    "AlternateBackThemeColorIndex": "1",
+    "AlternateBackShade": "95.0",
+    "PrtDevModeW": "0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x5900200034003500300030002000730065007200690065007300290000000000 ,\n0x01040306dc00f003032d010001000100ea0a6f08640001000101580202000100 ,\n0x5802030001004c00650074007400650072000000000000005001743018020000 ,\n0x8000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNamesW": "0x0400250044000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005700530044002d0034003500310038003100630038006600 ,\n0x2d0032003400380061002d0034003900610031002d0061003300650030002d00 ,\n0x6300660064003500360034006400310035003800390036000000",
+    "NoSaveCTIWhenDisabled": "1"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {},
+      "Children": [
+        {
+          "Type": "Label",
+          "Properties": {
+            "BackStyle": "0",
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "BorderColor": "8355711",
+            "ForeColor": "6710886",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "0",
+            "BorderTint": "50.0",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "60.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "TextBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "FELineBreak": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "AsianLineBreak": "1",
+            "GridlineColor": "10921638",
+            "ShowDatePicker": "0",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ThemeFontIndex": "1",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormHeader",
+          "Properties": {
+            "KeepTogether": "NotDefault",
+            "Height": "360",
+            "BackColor": "-2147483606",
+            "Name": "ReportHeader",
+            "GUID": "0x6badb9b8b34cf94384620a47ff0f1fde",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "SpecialEffect": "5",
+                    "TextAlign": "2",
+                    "TextFontFamily": "34",
+                    "Width": "5160",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "BorderColor": "16777215",
+                    "ForeColor": "0",
+                    "Name": "lblService",
+                    "Caption": "Service",
+                    "GUID": "0xade74acba268924a8da56af52b9d6f10",
+                    "LayoutCachedWidth": "5160",
+                    "LayoutCachedHeight": "360",
+                    "BorderThemeColorIndex": "1",
+                    "BorderTint": "100.0",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "SpecialEffect": "5",
+                    "TextAlign": "2",
+                    "TextFontFamily": "34",
+                    "Left": "5340",
+                    "Width": "3120",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "BorderColor": "16777215",
+                    "ForeColor": "0",
+                    "Name": "lblProvider",
+                    "Caption": "Provider",
+                    "GUID": "0xf8c73c2f2c436a4d9509e67933c98bc9",
+                    "LayoutCachedLeft": "5340",
+                    "LayoutCachedWidth": "8460",
+                    "LayoutCachedHeight": "360",
+                    "BorderThemeColorIndex": "1",
+                    "BorderTint": "100.0",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "SpecialEffect": "5",
+                    "TextAlign": "2",
+                    "TextFontFamily": "34",
+                    "Left": "8643",
+                    "Width": "900",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "BorderColor": "16777215",
+                    "ForeColor": "0",
+                    "Name": "lblHrsWk",
+                    "Caption": "Hrs/Wk",
+                    "GUID": "0x06449c77febd6c479a8dfd9d91c2b27c",
+                    "LayoutCachedLeft": "8643",
+                    "LayoutCachedWidth": "9543",
+                    "LayoutCachedHeight": "360",
+                    "BorderThemeColorIndex": "1",
+                    "BorderTint": "100.0",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "SpecialEffect": "5",
+                    "TextAlign": "2",
+                    "TextFontFamily": "34",
+                    "Left": "9723",
+                    "Width": "1320",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "BorderColor": "16777215",
+                    "ForeColor": "0",
+                    "Name": "lblStatus",
+                    "Caption": "Status",
+                    "GUID": "0x97e82e6a5094f94e9e13c90dcff70db4",
+                    "LayoutCachedLeft": "9723",
+                    "LayoutCachedWidth": "11043",
+                    "LayoutCachedHeight": "360",
+                    "BorderThemeColorIndex": "1",
+                    "BorderTint": "100.0",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "SpecialEffect": "5",
+                    "TextAlign": "2",
+                    "TextFontFamily": "34",
+                    "Left": "11226",
+                    "Width": "1533",
+                    "Height": "360",
+                    "FontWeight": "700",
+                    "BorderColor": "16777215",
+                    "ForeColor": "0",
+                    "Name": "lblEstCost",
+                    "Caption": "Est. Cost",
+                    "GUID": "0x787867c3addb5e41a3d93a39a818d883",
+                    "LayoutCachedLeft": "11226",
+                    "LayoutCachedWidth": "12759",
+                    "LayoutCachedHeight": "360",
+                    "BorderThemeColorIndex": "1",
+                    "BorderTint": "100.0",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "PageHeader",
+          "Properties": {
+            "Height": "0",
+            "Name": "PageHeaderSection",
+            "GUID": "0x3044296015dab74a97509beba9abd90e",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "Section",
+          "Properties": {
+            "KeepTogether": "NotDefault",
+            "CanGrow": "NotDefault",
+            "CanShrink": "NotDefault",
+            "Height": "360",
+            "Name": "Detail",
+            "GUID": "0x68bb77bc7134b340a2d12c7527f8480c",
+            "AlternateBackColor": "15921906",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "CanGrow": "NotDefault",
+                    "CanShrink": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Width": "5160",
+                    "Height": "360",
+                    "Name": "txtServiceName",
+                    "ControlSource": "ServiceName",
+                    "GUID": "0xe9b28dd34c1e0841b616c732308ceb32",
+                    "LayoutCachedWidth": "5160",
+                    "LayoutCachedHeight": "360"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "CanGrow": "NotDefault",
+                    "CanShrink": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Left": "5340",
+                    "Width": "3120",
+                    "Height": "360",
+                    "TabIndex": "1",
+                    "Name": "txtProviderName",
+                    "ControlSource": "ProviderName",
+                    "GUID": "0x95adbce88253f64fb59fe0c263041ac7",
+                    "LayoutCachedLeft": "5340",
+                    "LayoutCachedWidth": "8460",
+                    "LayoutCachedHeight": "360"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "CanGrow": "NotDefault",
+                    "CanShrink": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Left": "8643",
+                    "Width": "897",
+                    "Height": "360",
+                    "TabIndex": "2",
+                    "Name": "txtWeeklyHours",
+                    "ControlSource": "HoursPerWeek",
+                    "GUID": "0x2481e8dbbbc1e54faab1f6f300ed8811",
+                    "LayoutCachedLeft": "8643",
+                    "LayoutCachedWidth": "9540",
+                    "LayoutCachedHeight": "360"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "CanGrow": "NotDefault",
+                    "CanShrink": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Left": "9723",
+                    "Width": "1320",
+                    "Height": "360",
+                    "TabIndex": "3",
+                    "Name": "txtStatus",
+                    "ControlSource": "Status",
+                    "GUID": "0xfb708656ae2f5b43a92fe1871a9a3a11",
+                    "LayoutCachedLeft": "9723",
+                    "LayoutCachedWidth": "11043",
+                    "LayoutCachedHeight": "360"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "CanGrow": "NotDefault",
+                    "CanShrink": "NotDefault",
+                    "DecimalPlaces": "2",
+                    "OldBorderStyle": "0",
+                    "TextFontFamily": "34",
+                    "IMESentenceMode": "3",
+                    "Left": "11226",
+                    "Width": "1533",
+                    "Height": "360",
+                    "TabIndex": "4",
+                    "Name": "txtAnnualEstCost",
+                    "ControlSource": "AnnualEstCost",
+                    "Format": "$#,##0.00",
+                    "GUID": "0x2bc4178f9e63134bb635da685ce0bc3a",
+                    "LayoutCachedLeft": "11226",
+                    "LayoutCachedWidth": "12759",
+                    "LayoutCachedHeight": "360"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "PageFooter",
+          "Properties": {
+            "Height": "0",
+            "Name": "PageFooterSection",
+            "GUID": "0x0fb28fdf0b79a74ebd09567af4505a94",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormFooter",
+          "Properties": {
+            "KeepTogether": "NotDefault",
+            "Height": "0",
+            "Name": "ReportFooter",
+            "GUID": "0x019458ad1e68194e82d77e05ad097580",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [],
+          "VbaCode": null
+        }
+      ],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": null
+}

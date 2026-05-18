@@ -1,0 +1,63 @@
+{
+  "Name": "tlkpStates",
+  "Type": "Table",
+  "Attributes": 0,
+  "DateCreated": "2026-03-28T11:13:38.227",
+  "LastUpdated": "2026-05-13T16:48:39.043",
+  "RecordCount": 56,
+  "SourceTableName": "",
+  "Connect": "",
+  "ValidationRule": "",
+  "ValidationText": "",
+  "Ddl": "CREATE TABLE [tlkpStates] (\r\n    [StateCode] TEXT(2) NOT NULL,\r\n    [StateName] TEXT(50) NOT NULL,\r\n    CONSTRAINT [PrimaryKey] PRIMARY KEY ([StateCode])\r\n);",
+  "Fields": [
+    {
+      "Name": "StateCode",
+      "TypeCode": 10,
+      "TypeName": "Text",
+      "Size": 2,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": null,
+      "Attributes": 2,
+      "OrdinalPosition": 0,
+      "ForeignName": null
+    },
+    {
+      "Name": "StateName",
+      "TypeCode": 10,
+      "TypeName": "Text",
+      "Size": 50,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": null,
+      "Attributes": 2,
+      "OrdinalPosition": 1,
+      "ForeignName": null
+    }
+  ],
+  "Indexes": [
+    {
+      "Name": "PrimaryKey",
+      "Primary": true,
+      "Unique": true,
+      "Required": true,
+      "Fields": [
+        {
+          "Name": "StateCode",
+          "Attributes": 0
+        }
+      ]
+    }
+  ]
+}

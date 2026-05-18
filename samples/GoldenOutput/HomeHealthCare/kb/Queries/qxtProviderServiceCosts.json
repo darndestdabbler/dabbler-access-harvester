@@ -1,0 +1,10 @@
+{
+  "Name": "qxtProviderServiceCosts",
+  "Type": "Query",
+  "QueryTypeCode": 16,
+  "QueryTypeName": "MakeTable",
+  "Sql": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

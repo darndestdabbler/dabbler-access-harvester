@@ -1,0 +1,63 @@
+{
+  "Name": "tlkpPlanStatuses",
+  "Type": "Table",
+  "Attributes": 0,
+  "DateCreated": "2026-03-28T11:13:38.337",
+  "LastUpdated": "2026-05-03T15:18:40.324",
+  "RecordCount": 2,
+  "SourceTableName": "",
+  "Connect": "",
+  "ValidationRule": "",
+  "ValidationText": "",
+  "Ddl": "CREATE TABLE [tlkpPlanStatuses] (\r\n    [StatusID] COUNTER,\r\n    [StatusName] TEXT(20) NOT NULL,\r\n    CONSTRAINT [PrimaryKey] PRIMARY KEY ([StatusID])\r\n);",
+  "Fields": [
+    {
+      "Name": "StatusID",
+      "TypeCode": 4,
+      "TypeName": "Long",
+      "Size": 4,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": null,
+      "Attributes": 17,
+      "OrdinalPosition": 0,
+      "ForeignName": null
+    },
+    {
+      "Name": "StatusName",
+      "TypeCode": 10,
+      "TypeName": "Text",
+      "Size": 20,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 2,
+      "OrdinalPosition": 1,
+      "ForeignName": null
+    }
+  ],
+  "Indexes": [
+    {
+      "Name": "PrimaryKey",
+      "Primary": true,
+      "Unique": true,
+      "Required": true,
+      "Fields": [
+        {
+          "Name": "StatusID",
+          "Attributes": 0
+        }
+      ]
+    }
+  ]
+}

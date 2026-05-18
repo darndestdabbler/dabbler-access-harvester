@@ -1,0 +1,10 @@
+{
+  "Name": "qryProviderServiceEffectiveFiscalYears",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT tblProviderServiceCatalog.ProviderID, tblProviderServiceCatalog.ServiceID, Min(tblProviderServiceCatalog.[FiscalYear]) AS MinFiscalYear, Max(tblProviderServiceCatalog.[FiscalYear]) AS MaxFiscalYear\r\nFROM tblProviderServiceCatalog\r\nGROUP BY tblProviderServiceCatalog.ProviderID, tblProviderServiceCatalog.ServiceID;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

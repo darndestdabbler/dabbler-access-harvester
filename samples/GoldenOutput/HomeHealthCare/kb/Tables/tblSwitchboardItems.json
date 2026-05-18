@@ -1,0 +1,131 @@
+{
+  "Name": "tblSwitchboardItems",
+  "Type": "Table",
+  "Attributes": 0,
+  "DateCreated": "2026-03-28T11:13:39.213",
+  "LastUpdated": "2026-05-03T15:18:40.249",
+  "RecordCount": 52,
+  "SourceTableName": "",
+  "Connect": "",
+  "ValidationRule": "",
+  "ValidationText": "",
+  "Ddl": "CREATE TABLE [tblSwitchboardItems] (\r\n    [SwitchboardID] COUNTER,\r\n    [ItemNumber] SHORT,\r\n    [ItemText] TEXT(255),\r\n    [Command] SHORT,\r\n    [Argument] TEXT(255),\r\n    [ParentID] LONG,\r\n    CONSTRAINT [PrimaryKey] PRIMARY KEY ([SwitchboardID])\r\n);",
+  "Fields": [
+    {
+      "Name": "SwitchboardID",
+      "TypeCode": 4,
+      "TypeName": "Long",
+      "Size": 4,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": null,
+      "Attributes": 17,
+      "OrdinalPosition": 0,
+      "ForeignName": null
+    },
+    {
+      "Name": "ItemNumber",
+      "TypeCode": 3,
+      "TypeName": "Integer",
+      "Size": 2,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 1,
+      "OrdinalPosition": 1,
+      "ForeignName": null
+    },
+    {
+      "Name": "ItemText",
+      "TypeCode": 10,
+      "TypeName": "Text",
+      "Size": 255,
+      "Required": false,
+      "AllowZeroLength": true,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 2,
+      "OrdinalPosition": 2,
+      "ForeignName": null
+    },
+    {
+      "Name": "Command",
+      "TypeCode": 3,
+      "TypeName": "Integer",
+      "Size": 2,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 1,
+      "OrdinalPosition": 3,
+      "ForeignName": null
+    },
+    {
+      "Name": "Argument",
+      "TypeCode": 10,
+      "TypeName": "Text",
+      "Size": 255,
+      "Required": false,
+      "AllowZeroLength": true,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 2,
+      "OrdinalPosition": 4,
+      "ForeignName": null
+    },
+    {
+      "Name": "ParentID",
+      "TypeCode": 4,
+      "TypeName": "Long",
+      "Size": 4,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 1,
+      "OrdinalPosition": 5,
+      "ForeignName": null
+    }
+  ],
+  "Indexes": [
+    {
+      "Name": "PrimaryKey",
+      "Primary": true,
+      "Unique": true,
+      "Required": true,
+      "Fields": [
+        {
+          "Name": "SwitchboardID",
+          "Attributes": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "Type": "DocumentRoot",
+  "Properties": {
+    "Version": "196611",
+    "PublishOption": "1",
+    "ColumnsShown": "0"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "^s",
+        "Condition": "[Screen].[ActiveForm].[Dirty]",
+        "Action": "RunCommand",
+        "Argument": "97"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "^f",
+        "Action": "OpenForm",
+        "Argument": [
+          "frmClientSearch",
+          "0",
+          "",
+          "",
+          "-1",
+          "0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "{F5}",
+        "Action": "Requery"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "^p",
+        "Action": "RunCommand",
+        "Argument": "54"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro MinimumClientDesignVersion=\\\u002214.0.0000.0000\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements/\u003E\u003CSub Name=\\\u0022^s\\\u0022\u003E\u003CStatements\u003E\u003CConditi"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:onalBlock\u003E\u003CIf\u003E\u003CCondition\u003E[Screen].[ActiveForm].[Dirty]\u003C/Condition\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022SaveRecord\\\u0022/\u003E\u003C/Statements\u003E\u003C/If\u003E\u003C/ConditionalBlock\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022^f\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022OpenForm\\\u0022\u003E\u003CArgument Name=\\\u0022FormName\\\u0022\u003EfrmClientS"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:earch\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022{F5}\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022Requery\\\u0022/\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022^p\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022RunMenuCommand\\\u0022\u003E\u003CArgument Name=\\\u0022Command\\\u0022\u003EPrintPreview\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Sub"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003E\u003C/UserInterfaceMacro\u003E"
+      },
+      "Children": [],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": null
+}

@@ -1,0 +1,19 @@
+{
+  "Name": "rel_State_Client",
+  "Type": "Relationship",
+  "ParentTable": "tlkpStates",
+  "ChildTable": "tblClients",
+  "Attributes": 256,
+  "AttributesDecoded": [
+    "UpdateCascade"
+  ],
+  "EnforceReferentialIntegrity": true,
+  "CascadeUpdate": true,
+  "CascadeDelete": false,
+  "Fields": [
+    {
+      "ParentField": "StateCode",
+      "ChildField": "StateCode"
+    }
+  ]
+}

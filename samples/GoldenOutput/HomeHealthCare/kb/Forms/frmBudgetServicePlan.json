@@ -1,0 +1,840 @@
+{
+  "Type": "Form",
+  "Properties": {
+    "RecordSelectors": "NotDefault",
+    "NavigationButtons": "NotDefault",
+    "DividingLines": "NotDefault",
+    "AllowDesignChanges": "NotDefault",
+    "DefaultView": "0",
+    "TabularFamily": "0",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "12960",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "24",
+    "Right": "9165",
+    "Bottom": "10740",
+    "DatasheetGridlinesColor": "15263976",
+    "RecSrcDt": "0x888124202588e640",
+    "OnDirty": "[Event Procedure]",
+    "GUID": "0xd040ab3c1ab5f240af240eb9dfb11e12",
+    "NameMap": "0x0acc0e55000000006efd0547457a194abae186bcdb0d6c3500000000d767306a ,\n0x3488e6400000000000000000740062006c0043006c00690065006e0074004200 ,\n0x750064006700650074007300000000000000d2d19c9ca437d946b82bbdacc127 ,\n0xc9dc00000000c6e421e38988e6400000000000000000740062006c0043006c00 ,\n0x690065006e007400730000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000630062000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000630000000000000086efc73f32f44a4a9716113c3d573548070000006efd ,\n0x0547457a194abae186bcdb0d6c3543006c00690065006e007400490044000000 ,\n0x000000004cb7529a6386d8458e700dd08f51a802070000006efd0547457a194a ,\n0xbae186bcdb0d6c3543006c00690065006e007400420075006400670065007400 ,\n0x49004400000000000000a85aae6fb4dd9e429c70ce6b37b647c8070000006efd ,\n0x0547457a194abae186bcdb0d6c35460069007300630061006c00590065006100 ,\n0x72000000000000007107028e96634442ba56e1e87a0ec7f5070000006efd0547 ,\n0x457a194abae186bcdb0d6c3541006e006e00750061006c004200750064006700 ,\n0x65007400000000000000000000000000000000000000000000000c0000000500 ,\n0x00000000000000000000000000000000",
+    "RecordSource": "SELECT cb.*, Trim(Nz([c.FirstName],\\\u0022\\\u0022) \u0026 \u0027 \u0027 \u0026 Nz([c.LastName],\\\u0022\\\u0022)) AS ClientName FROM tblClientBudgets AS cb INNER JOIN tblClients AS c ON cb.ClientID = c.ClientID; ",
+    "OnCurrent": "[Event Procedure]",
+    "BeforeUpdate": "[Event Procedure]",
+    "AfterUpdate": "[Event Procedure]",
+    "OnOpen": "[Event Procedure]",
+    "DatasheetFontName": "Aptos",
+    "PrtMip": "0x6801000068010000680100006801000000000000201c0000e010000001000000 ,\n0x010000006801000000000000a10700000100000001000000",
+    "PrtDevMode": "0x003f83f3fd7f00000000000000000000902f2ee129000000d01c2ee129000000 ,\n0x010403069c00f003532d800101000100ea0a6f08640001000101fcff02000100 ,\n0xb004030001004c6574746572007f0000000074301802000000000000f67f0000 ,\n0x107b350718020000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNames": "0x0800290048000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005753442d34353138316338662d323438612d343961312d61 ,\n0x3365302d63666435363464313538393600000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000",
+    "OnLoad": "[Event Procedure]",
+    "OnUndo": "[Event Procedure]",
+    "FilterOnLoad": "0",
+    "ShowPageMargins": "0",
+    "DisplayOnSharePointSite": "1",
+    "DatasheetAlternateBackColor": "15921906",
+    "DatasheetGridlinesColor12": "0",
+    "FitToScreen": "1",
+    "DatasheetBackThemeColorIndex": "1",
+    "BorderThemeColorIndex": "3",
+    "ThemeFontIndex": "1",
+    "ForeThemeColorIndex": "0",
+    "AlternateBackThemeColorIndex": "1",
+    "AlternateBackShade": "95.0",
+    "PrtDevModeW": "0x0000000000000000000000000000000040cd8411180200000000000000000000 ,\n0x30cd84111802000023000100000000005803a43c180200007000000029000000 ,\n0x01040306dc00f003532d800101000100ea0a6f08640001000101fcff02000100 ,\n0xb004030001004c00650074007400650072000000000000005001743018020000 ,\n0x8000000000000000720000000000000010d28411180200002c03743018020000 ,\n0x0300000000000000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNamesW": "0x0400250044000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005700530044002d0034003500310038003100630038006600 ,\n0x2d0032003400380061002d0034003900610031002d0061003300650030002d00 ,\n0x6300660064003500360034006400310035003800390036000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000000000",
+    "NoSaveCTIWhenDisabled": "1"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {},
+      "Children": [
+        {
+          "Type": "Label",
+          "Properties": {
+            "BackStyle": "0",
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "BorderColor": "8355711",
+            "ForeColor": "6710886",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "0",
+            "BorderTint": "50.0",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "60.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "Line",
+          "Properties": {
+            "BorderLineStyle": "0",
+            "GridlineColor": "10921638",
+            "BorderThemeColorIndex": "0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "CommandButton",
+          "Properties": {
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "FontWeight": "400",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0",
+            "UseTheme": "1",
+            "Shape": "1",
+            "Gradient": "12",
+            "BackColor": "14790982",
+            "BackThemeColorIndex": "4",
+            "BackTint": "60.0",
+            "BorderLineStyle": "0",
+            "BorderColor": "14790982",
+            "BorderThemeColorIndex": "4",
+            "BorderTint": "60.0",
+            "ThemeFontIndex": "1",
+            "HoverColor": "15453059",
+            "HoverThemeColorIndex": "4",
+            "HoverTint": "40.0",
+            "PressedColor": "6440976",
+            "PressedThemeColorIndex": "4",
+            "PressedShade": "75.0",
+            "HoverForeColor": "4210752",
+            "HoverForeThemeColorIndex": "0",
+            "HoverForeTint": "75.0",
+            "PressedForeColor": "4210752",
+            "PressedForeThemeColorIndex": "0",
+            "PressedForeTint": "75.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "TextBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "FELineBreak": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "AsianLineBreak": "1",
+            "GridlineColor": "10921638",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ThemeFontIndex": "1",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "ListBox",
+          "Properties": {
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "ForeColor": "4210752",
+            "BorderColor": "10921638",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "AllowValueListEdits": "1",
+            "InheritValueList": "1",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "ComboBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "2102279",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "AllowValueListEdits": "1",
+            "InheritValueList": "1",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ForeThemeColorIndex": "2",
+            "ForeShade": "50.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "Subform",
+          "Properties": {
+            "BorderLineStyle": "0",
+            "BorderColor": "10921638",
+            "GridlineColor": "10921638",
+            "BorderThemeColorIndex": "1",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0",
+            "BorderShade": "65.0",
+            "ShowPageHeaderAndPageFooter": "1"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormHeader",
+          "Properties": {
+            "Height": "1245",
+            "BackColor": "15783096",
+            "Name": "FormHeader",
+            "GUID": "0x34429a25d5d43a4aabd6c24e8440247d",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "2",
+            "BackTint": "20.0"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "TextAlign": "2",
+                    "Left": "1440",
+                    "Top": "120",
+                    "Width": "10080",
+                    "Height": "495",
+                    "FontSize": "18",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblAppTitle",
+                    "Caption": "FY-Budgeted Service Plan",
+                    "GUID": "0x44329e3f828c5d4cabec9710d41271f7",
+                    "LayoutCachedLeft": "1440",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "11520",
+                    "LayoutCachedHeight": "615",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "TextAlign": "2",
+                    "Left": "1440",
+                    "Top": "840",
+                    "Width": "3120",
+                    "Height": "300",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblClient",
+                    "Caption": "Client",
+                    "GUID": "0x0c842520eb27af46a3e3fbae3eff7a50",
+                    "LayoutCachedLeft": "1440",
+                    "LayoutCachedTop": "840",
+                    "LayoutCachedWidth": "4560",
+                    "LayoutCachedHeight": "1140",
+                    "ForeTint": "100.0"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "TextAlign": "2",
+                    "Left": "4800",
+                    "Top": "840",
+                    "Width": "1020",
+                    "Height": "300",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblFY",
+                    "Caption": "FY",
+                    "GUID": "0x41bb0212198af54a84950c96b67d6fd5",
+                    "LayoutCachedLeft": "4800",
+                    "LayoutCachedTop": "840",
+                    "LayoutCachedWidth": "5820",
+                    "LayoutCachedHeight": "1140",
+                    "ForeTint": "100.0"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "TextAlign": "2",
+                    "Left": "6120",
+                    "Top": "840",
+                    "Width": "1620",
+                    "Height": "300",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblBudgeted",
+                    "Caption": "Budgeted",
+                    "GUID": "0x5fc0be1e56c40b41843f4353860aabc6",
+                    "LayoutCachedLeft": "6120",
+                    "LayoutCachedTop": "840",
+                    "LayoutCachedWidth": "7740",
+                    "LayoutCachedHeight": "1140",
+                    "ForeTint": "100.0"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "TextAlign": "2",
+                    "Left": "9960",
+                    "Top": "840",
+                    "Width": "1560",
+                    "Height": "300",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblRemaining",
+                    "Caption": "Remaining",
+                    "GUID": "0xb1c23ce21ab8bb44bae0ee93c599b2e1",
+                    "LayoutCachedLeft": "9960",
+                    "LayoutCachedTop": "840",
+                    "LayoutCachedWidth": "11520",
+                    "LayoutCachedHeight": "1140",
+                    "ForeTint": "100.0"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "TextAlign": "2",
+                    "Left": "8040",
+                    "Top": "840",
+                    "Width": "1620",
+                    "Height": "300",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblPlanned",
+                    "Caption": "Planned",
+                    "GUID": "0xb4f2335fc098534c84dfd17d40dbd7ce",
+                    "LayoutCachedLeft": "8040",
+                    "LayoutCachedTop": "840",
+                    "LayoutCachedWidth": "9660",
+                    "LayoutCachedHeight": "1140",
+                    "ForeTint": "100.0"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Line",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "240",
+                    "Top": "720",
+                    "Width": "12480",
+                    "Name": "lnSeparator1",
+                    "GUID": "0x0a4212072f6ae140b78dcc15a6cd6155",
+                    "LayoutCachedLeft": "240",
+                    "LayoutCachedTop": "720",
+                    "LayoutCachedWidth": "12720",
+                    "LayoutCachedHeight": "720"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "Section",
+          "Properties": {
+            "CanGrow": "NotDefault",
+            "Height": "9780",
+            "Name": "Detail",
+            "GUID": "0x434311c342078840b4923230332f7dbb",
+            "AlternateBackColor": "15921906",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Visible": "NotDefault",
+                    "Locked": "NotDefault",
+                    "OverlapFlags": "93",
+                    "IMESentenceMode": "3",
+                    "Left": "12720",
+                    "Top": "60",
+                    "Width": "120",
+                    "Height": "315",
+                    "Name": "txtClientBudgetID",
+                    "ControlSource": "ClientBudgetID",
+                    "GUID": "0x6d0ceb4e157a024e832924f5fb5622a7",
+                    "LayoutCachedLeft": "12720",
+                    "LayoutCachedTop": "60",
+                    "LayoutCachedWidth": "12840",
+                    "LayoutCachedHeight": "375"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Locked": "NotDefault",
+                    "TabStop": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "OverlapFlags": "85",
+                    "TextAlign": "3",
+                    "IMESentenceMode": "3",
+                    "Left": "4800",
+                    "Top": "120",
+                    "Width": "1020",
+                    "Height": "315",
+                    "FontWeight": "700",
+                    "TabIndex": "1",
+                    "Name": "txtFiscalYear",
+                    "ControlSource": "FiscalYear",
+                    "AfterUpdate": "[Event Procedure]",
+                    "GUID": "0xf2415862b107d646b6fa72c2ff24461e",
+                    "LayoutCachedLeft": "4800",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "5820",
+                    "LayoutCachedHeight": "435"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "DecimalPlaces": "2",
+                    "OverlapFlags": "85",
+                    "TextAlign": "3",
+                    "IMESentenceMode": "3",
+                    "Left": "6120",
+                    "Top": "120",
+                    "Width": "1620",
+                    "Height": "315",
+                    "FontWeight": "700",
+                    "TabIndex": "2",
+                    "Name": "txtAnnualBudget",
+                    "ControlSource": "AnnualBudget",
+                    "Format": "$#,##0.00;($#,##0.00)",
+                    "GUID": "0xa82e161ed88f2443a7b272be89b5435e",
+                    "LayoutCachedLeft": "6120",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "7740",
+                    "LayoutCachedHeight": "435",
+                    "CurrencySymbol": "$"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Locked": "NotDefault",
+                    "TabStop": "NotDefault",
+                    "DecimalPlaces": "2",
+                    "OldBorderStyle": "0",
+                    "OverlapFlags": "85",
+                    "TextAlign": "3",
+                    "BackStyle": "0",
+                    "IMESentenceMode": "3",
+                    "Left": "9960",
+                    "Top": "120",
+                    "Width": "1560",
+                    "Height": "315",
+                    "FontWeight": "700",
+                    "TabIndex": "3",
+                    "Name": "txtRemaining",
+                    "Format": "$#,##0.00;($#,##0.00)",
+                    "GUID": "0xfb53f4c322992344b6b5b47078035d16",
+                    "LayoutCachedLeft": "9960",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "11520",
+                    "LayoutCachedHeight": "435",
+                    "CurrencySymbol": "$"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Locked": "NotDefault",
+                    "TabStop": "NotDefault",
+                    "DecimalPlaces": "2",
+                    "OldBorderStyle": "0",
+                    "OverlapFlags": "85",
+                    "TextAlign": "3",
+                    "BackStyle": "0",
+                    "IMESentenceMode": "3",
+                    "Left": "8040",
+                    "Top": "120",
+                    "Width": "1620",
+                    "Height": "315",
+                    "FontWeight": "700",
+                    "TabIndex": "4",
+                    "Name": "txtTotalPlanned",
+                    "Format": "$#,##0.00;($#,##0.00)",
+                    "GUID": "0xd114a32fee22d94e9bdca13dc9a9f9b7",
+                    "LayoutCachedLeft": "8040",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "9660",
+                    "LayoutCachedHeight": "435",
+                    "CurrencySymbol": "$"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "Line",
+                  "Properties": {
+                    "BorderWidth": "2",
+                    "OverlapFlags": "85",
+                    "Left": "240",
+                    "Top": "540",
+                    "Width": "12420",
+                    "BorderColor": "15783096",
+                    "Name": "lnSeparator2",
+                    "GUID": "0xa3ea54399baa5849bd6f63ec06e9aea6",
+                    "LayoutCachedLeft": "240",
+                    "LayoutCachedTop": "540",
+                    "LayoutCachedWidth": "12660",
+                    "LayoutCachedHeight": "540",
+                    "BorderThemeColorIndex": "2",
+                    "BorderTint": "20.0"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Locked": "NotDefault",
+                    "TabStop": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "1440",
+                    "Top": "120",
+                    "Width": "3120",
+                    "Height": "315",
+                    "FontWeight": "700",
+                    "TabIndex": "5",
+                    "Name": "txtClientName",
+                    "GUID": "0xf952b1a575489d4ca993c555e65b55f5",
+                    "LayoutCachedLeft": "1440",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "4560",
+                    "LayoutCachedHeight": "435"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Visible": "NotDefault",
+                    "Locked": "NotDefault",
+                    "OverlapFlags": "87",
+                    "IMESentenceMode": "3",
+                    "Left": "12600",
+                    "Top": "120",
+                    "Width": "120",
+                    "Height": "315",
+                    "TabIndex": "6",
+                    "Name": "txtClientID",
+                    "ControlSource": "ClientID",
+                    "GUID": "0xe0cd40418c290e44a99e53db7d78a59f",
+                    "LayoutCachedLeft": "12600",
+                    "LayoutCachedTop": "120",
+                    "LayoutCachedWidth": "12720",
+                    "LayoutCachedHeight": "435"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "ListBox",
+                  "Properties": {
+                    "ColumnHeads": "NotDefault",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "ColumnCount": "5",
+                    "Left": "240",
+                    "Top": "1500",
+                    "Width": "12480",
+                    "Height": "3480",
+                    "TabIndex": "7",
+                    "Name": "lstClientServiceNeeds",
+                    "RowSourceType": "Table/Query",
+                    "ColumnWidths": "0;4320;1080;1080;4320",
+                    "AfterUpdate": "[Event Procedure]",
+                    "OnDblClick": "[Event Procedure]",
+                    "GUID": "0x62a6bac43f719749a9828624d6685205",
+                    "LayoutCachedLeft": "240",
+                    "LayoutCachedTop": "1500",
+                    "LayoutCachedWidth": "12720",
+                    "LayoutCachedHeight": "4980"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "TextAlign": "2",
+                            "Left": "240",
+                            "Top": "1020",
+                            "Width": "12480",
+                            "Height": "390",
+                            "FontSize": "14",
+                            "FontWeight": "700",
+                            "ForeColor": "8544277",
+                            "Name": "lblClientNeeds",
+                            "Caption": "Client Needs",
+                            "GUID": "0xd5aa38f7294e4a4cbc63e7159a289dbb",
+                            "LayoutCachedLeft": "240",
+                            "LayoutCachedTop": "1020",
+                            "LayoutCachedWidth": "12720",
+                            "LayoutCachedHeight": "1410",
+                            "ForeThemeColorIndex": "4",
+                            "ForeTint": "100.0"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "ListBox",
+                  "Properties": {
+                    "ColumnHeads": "NotDefault",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "ColumnCount": "6",
+                    "Left": "240",
+                    "Top": "6060",
+                    "Width": "12480",
+                    "Height": "3480",
+                    "TabIndex": "8",
+                    "Name": "lstClientServicePlan",
+                    "RowSourceType": "Table/Query",
+                    "ColumnWidths": "0;4320;1440;1440;1440;1440",
+                    "OnDblClick": "[Event Procedure]",
+                    "GUID": "0xbafa3cffe32bf14fb7f146e386d7a700",
+                    "LayoutCachedLeft": "240",
+                    "LayoutCachedTop": "6060",
+                    "LayoutCachedWidth": "12720",
+                    "LayoutCachedHeight": "9540"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "TextAlign": "2",
+                            "Left": "240",
+                            "Top": "5580",
+                            "Width": "12480",
+                            "Height": "390",
+                            "FontSize": "14",
+                            "FontWeight": "700",
+                            "ForeColor": "8544277",
+                            "Name": "lblServicePlan",
+                            "Caption": "Service Plan",
+                            "GUID": "0x8a195a3cdabaef4ca82e21cd0accd127",
+                            "LayoutCachedLeft": "240",
+                            "LayoutCachedTop": "5580",
+                            "LayoutCachedWidth": "12720",
+                            "LayoutCachedHeight": "5970",
+                            "ForeThemeColorIndex": "4",
+                            "ForeTint": "100.0"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormFooter",
+          "Properties": {
+            "Height": "780",
+            "Name": "FormFooter",
+            "GUID": "0x12fc421eeb2f2a47b720d1d12745a5f2",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "Enabled": "NotDefault",
+                    "OverlapFlags": "85",
+                    "Left": "240",
+                    "Top": "192",
+                    "Height": "432",
+                    "Name": "btnSave",
+                    "Caption": "Save",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0xdc15f1d3b46c214ea1b39725fde12ee9",
+                    "LayoutCachedLeft": "240",
+                    "LayoutCachedTop": "192",
+                    "LayoutCachedWidth": "1680",
+                    "LayoutCachedHeight": "624",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "11280",
+                    "Top": "180",
+                    "Height": "432",
+                    "TabIndex": "1",
+                    "Name": "btnClose",
+                    "Caption": "Close",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0xf4de81ab17976e4c92de6e1e3b78c095",
+                    "LayoutCachedLeft": "11280",
+                    "LayoutCachedTop": "180",
+                    "LayoutCachedWidth": "12720",
+                    "LayoutCachedHeight": "612",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "1920",
+                    "Top": "180",
+                    "Height": "432",
+                    "TabIndex": "2",
+                    "Name": "btnDelete",
+                    "Caption": "Delete",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0x07d47237252b104ab03cfe1b9e46736c",
+                    "LayoutCachedLeft": "1920",
+                    "LayoutCachedTop": "180",
+                    "LayoutCachedWidth": "3360",
+                    "LayoutCachedHeight": "612",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        }
+      ],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": "CodeBehindForm\r\nAttribute VB_GlobalNameSpace = False\r\nAttribute VB_Creatable = True\r\nAttribute VB_PredeclaredId = True\r\nAttribute VB_Exposed = False\r\nOption Compare Database\r\nOption Explicit\r\n\u0027 ============================================================================\r\n\u0027  This form replaces the previous two-subform layout\r\n\u0027  (sfrmClientServiceNeeds \u002B sfrmClientServicePlan) with two list boxes:\r\n\u0027\r\n\u0027     lstClientServiceNeeds   (master list)\r\n\u0027        ColumnCount   = 5\r\n\u0027        ColumnWidths  = \u00220;3120;1320;1320;3120\u0022     \u0027 PK hidden\r\n\u0027        ColumnHeads   = True\r\n\u0027        BoundColumn   = 1\r\n\u0027        Tied to: frmClientServiceNeedDetail\r\n\u0027\r\n\u0027     lstClientServicePlan    (cascades from selected need)\r\n\u0027        ColumnCount   = 6\r\n\u0027        ColumnWidths  = \u00220;3120;1320;1560;1560;1560\u0022 \u0027 PK hidden\r\n\u0027        ColumnHeads   = True\r\n\u0027        BoundColumn   = 1\r\n\u0027        Tied to: frmClientServicePlanDetail\r\n\u0027\r\n\u0027  When the user picks a row in lstClientServiceNeeds (AfterUpdate),\r\n\u0027  the plan list rebuilds for that need. Until a need is picked, the\r\n\u0027  plan list is empty (and Add-from-plan is disabled).\r\n\u0027 ============================================================================\r\nPrivate Sub PopulateClientServiceNeeds()\r\n    If IsNull(Me.txtClientID) Or IsNull(Me.txtFiscalYear) Then\r\n        Me.lstClientServiceNeeds.RowSource = \u0022\u0022\r\n        Exit Sub\r\n    End If\r\n    Dim baseSql As String\r\n    baseSql = _\r\n        \u0022SELECT n.ClientServiceNeedID AS ID, \u0022 \u0026 _\r\n               \u0022s.ServiceName AS [Service], \u0022 \u0026 _\r\n               \u0022n.HoursPerWeek AS [Hrs/Wk], \u0022 \u0026 _\r\n               \u0022n.Priority AS Priority, \u0022 \u0026 _\r\n               \u0022n.Notes AS Notes \u0022 \u0026 _\r\n        \u0022FROM tblClientServiceNeeds AS n \u0022 \u0026 _\r\n             \u0022INNER JOIN tblServices AS s ON s.ServiceID = n.ServiceID \u0022 \u0026 _\r\n        \u0022WHERE n.ClientID=\u0022 \u0026 Me.txtClientID \u0026 _\r\n          \u0022 AND n.FiscalYear=\u0022 \u0026 Me.txtFiscalYear\r\n    Me.lstClientServiceNeeds.RowSource = basListHelpers.BuildAddableRowSource( _\r\n        dataSelect:=baseSql, _\r\n        addLabel:=\u0022(Add new service need...)\u0022, _\r\n        dataColCount:=5)\r\n    Me.lstClientServiceNeeds.Requery\r\nEnd Sub\r\nPrivate Sub PopulateClientServicePlan()\r\n    Dim selectedNeedID As Variant\r\n    selectedNeedID = Me.lstClientServiceNeeds.Value\r\n    \u0027 No need selected, or \u0022\u003CAdd new need...\u003E\u0022 highlighted ?  empty plan list.\r\n    If IsNull(selectedNeedID) Then\r\n        Me.lstClientServicePlan.RowSource = \u0022\u0022\r\n        Exit Sub\r\n    End If\r\n    If CLng(selectedNeedID) = basListHelpers.ADD_NEW_ID Then\r\n        Me.lstClientServicePlan.RowSource = \u0022\u0022\r\n        Exit Sub\r\n    End If\r\n    Dim baseSql As String\r\n    baseSql = _\r\n        \u0022SELECT cp.ClientServicePlanID AS ID, \u0022 \u0026 _\r\n               \u0022p.ProviderName AS Provider, \u0022 \u0026 _\r\n               \u0022cp.HoursPerWeek AS [Hrs/Wk], \u0022 \u0026 _\r\n               \u0022Format(cp.WeeklyCost,\u0027$#,##0.00\u0027) AS [Weekly $], \u0022 \u0026 _\r\n               \u0022Format(cp.AnnualEstCost,\u0027$#,##0.00\u0027) AS [Annual $], \u0022 \u0026 _\r\n               \u0022cp.Status AS Status \u0022 \u0026 _\r\n        \u0022FROM (tblClientServicePlan AS cp \u0022 \u0026 _\r\n              \u0022INNER JOIN tblProviderServiceCatalog AS psc \u0022 \u0026 _\r\n                \u0022ON psc.ProviderServiceCatalogID = cp.ProviderServiceCatalogID) \u0022 \u0026 _\r\n              \u0022INNER JOIN tblProviders AS p ON p.ProviderID = psc.ProviderID \u0022 \u0026 _\r\n        \u0022WHERE cp.ClientServiceNeedID=\u0022 \u0026 CLng(selectedNeedID)\r\n    Me.lstClientServicePlan.RowSource = basListHelpers.BuildAddableRowSource( _\r\n        dataSelect:=baseSql, _\r\n        addLabel:=\u0022(Add new plan entry...)\u0022, _\r\n        dataColCount:=6)\r\n    Me.lstClientServicePlan.Requery\r\nEnd Sub\r\n\u0027 ============================================================================\r\n\u0027  Listbox events\r\n\u0027 ============================================================================\r\nPrivate Sub lstClientServiceNeeds_AfterUpdate()\r\n    \u0027 Selecting a different need cascades into the plan list.\r\n    PopulateClientServicePlan\r\nEnd Sub\r\nPrivate Sub lstClientServiceNeeds_DblClick(Cancel As Integer)\r\n    Dim ctx As String\r\n    ctx = basListHelpers.BuildContextArgs( _\r\n                \u0022ClientID\u0022, Me.txtClientID, _\r\n                \u0022FiscalYear\u0022, Me.txtFiscalYear)\r\n    basListHelpers.OpenDetailFromList Me.lstClientServiceNeeds, _\r\n                                      \u0022frmClientServiceNeedDetail\u0022, _\r\n                                      ctx\r\n    \u0027 Need set may have changed; the plan list cascades off it.\r\n    PopulateClientServicePlan\r\n    RefreshTotals\r\nEnd Sub\r\nPrivate Sub lstClientServicePlan_DblClick(Cancel As Integer)\r\n    On Error GoTo DblClickError\r\n    Dim selectedNeedID As Variant\r\n    selectedNeedID = Me.lstClientServiceNeeds.Value\r\n    \u0027 Guard: can\u0027t add/edit a plan entry if no need is selected (or the\r\n    \u0027 synthetic \u0022Add new need\u0022 sentinel is highlighted).\r\n    If IsNull(selectedNeedID) Or _\r\n       CLng(Nz(selectedNeedID, basListHelpers.ADD_NEW_ID)) = basListHelpers.ADD_NEW_ID Then\r\n        If Not IsNull(Me.lstClientServicePlan.Value) Then\r\n            If CLng(Me.lstClientServicePlan.Value) = basListHelpers.ADD_NEW_ID Then\r\n                MsgBox \u0022Please select a service need first.\u0022, vbInformation, \u0022No Need Selected\u0022\r\n            End If\r\n        End If\r\n        Exit Sub\r\n    End If\r\n    Dim ctx As String\r\n    ctx = basListHelpers.BuildContextArgs( _\r\n                \u0022ClientServiceNeedID\u0022, CLng(selectedNeedID), _\r\n                \u0022FiscalYear\u0022, Me.txtFiscalYear)\r\n    basListHelpers.OpenDetailFromList Me.lstClientServicePlan, _\r\n                                      \u0022frmClientServicePlanDetail\u0022, _\r\n                                      ctx\r\n    RefreshTotals\r\n    Exit Sub\r\nDblClickError:\r\n    If Err.Number = 2501 Then\r\n        \u0027 Form_Load in frmClientServicePlanDetail threw an unhandled error.\r\n        \u0027 Check Immediate Window (Ctrl\u002BG in VBA editor) for details.\r\n        MsgBox \u0022The plan detail form failed to open.\u0022 \u0026 vbCrLf \u0026 _\r\n               \u0022Open the VBA editor and check the Immediate Window (Ctrl\u002BG) for the error.\u0022, _\r\n               vbExclamation, \u0022Form Open Error (2501)\u0022\r\n    Else\r\n        Err.Raise Err.Number, Err.Source, Err.Description\r\n    End If\r\nEnd Sub\r\nPrivate Sub Form_Current()\r\n    \u0027 Editable bound field\r\n    Me.txtAnnualBudget.Locked = False\r\n    Me.txtAnnualBudget.Enabled = True\r\n    Me.txtAnnualBudget.BorderStyle = 1\r\n    Me.txtAnnualBudget.TabStop = True\r\n    \u0027 Non-editable display/calculated fields\r\n    Me.txtClientName.Locked = True\r\n    Me.txtClientName.Enabled = True\r\n    Me.txtClientName.BorderStyle = 0\r\n    Me.txtClientName.TabStop = False\r\n    Me.txtTotalPlanned.Locked = True\r\n    Me.txtTotalPlanned.Enabled = True\r\n    Me.txtTotalPlanned.BorderStyle = 0\r\n    Me.txtTotalPlanned.TabStop = False\r\n    Me.txtRemaining.Locked = True\r\n    Me.txtRemaining.Enabled = True\r\n    Me.txtRemaining.BorderStyle = 0\r\n    Me.txtRemaining.TabStop = False\r\n    \u0027 Hidden FK\r\n    Me.txtClientID.Locked = True\r\n    \u0027 FiscalYear is editable in Add mode, non-editable in Edit mode (it\u0027s the key)\r\n    If Me.NewRecord Then\r\n        Me.txtFiscalYear.Locked = False\r\n        Me.txtFiscalYear.Enabled = True\r\n        Me.txtFiscalYear.BorderStyle = 1\r\n        Me.txtFiscalYear.TabStop = True\r\n    Else\r\n        Me.txtFiscalYear.Locked = True\r\n        Me.txtFiscalYear.Enabled = True\r\n        Me.txtFiscalYear.BorderStyle = 0\r\n        Me.txtFiscalYear.TabStop = False\r\n    End If\r\n    \u0027 ClientName is unbound - populate from tblClients via DLookup.\r\n    If Not IsNull(Me.txtClientID) Then\r\n        Me.txtClientName = Nz(DLookup(\u0022[FirstName] \u0026 \u0027 \u0027 \u0026 [LastName]\u0022, _\r\n                                      \u0022tblClients\u0022, _\r\n                                      \u0022ClientID=\u0022 \u0026 Me.txtClientID), \u0022\u0022)\r\n    Else\r\n        Me.txtClientName = \u0022\u0022\r\n    End If\r\n    \u0027 Button state\r\n    Me.btnSave.Enabled = False\r\n    Me.btnClose.Caption = \u0022Close\u0022\r\n    On Error Resume Next\r\n    Me.btnDelete.Enabled = Not Me.NewRecord\r\n    On Error GoTo 0\r\n    PopulateClientServiceNeeds\r\n    Me.lstClientServicePlan.RowSource = \u0022\u0022\r\n    RefreshTotals\r\nEnd Sub\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    Dim args As Variant\r\n    args = Me.OpenArgs\r\n    If basListHelpers.IsAddMode(args) Then\r\n        Me.DataEntry = True\r\n    ElseIf IsNumeric(Nz(args, \u0022\u0022)) Then\r\n        Me.Filter = \u0022ClientBudgetID=\u0022 \u0026 CLng(args)\r\n        Me.FilterOn = True\r\n    End If\r\nEnd Sub\r\nPrivate Sub Form_Load()\r\n    If basListHelpers.IsAddMode(Me.OpenArgs) Then\r\n        Dim cid As Long, fy As Long\r\n        cid = basListHelpers.GetContextLong(Me.OpenArgs, \u0022ClientID\u0022)\r\n        fy = basListHelpers.GetContextLong(Me.OpenArgs, \u0022FiscalYear\u0022)\r\n        If cid \u003E 0 Then Me!ClientID = cid\r\n        If fy \u003E 0 Then Me!FiscalYear = fy\r\n        \u0027 ClientName is unbound and gets populated in Form_Current via DLookup\r\n        \u0027 on Me.ClientID, so no explicit assignment here.\r\n    End If\r\n    PopulateClientServiceNeeds\r\n    RefreshTotals\r\nEnd Sub\r\nPrivate Sub RefreshTotals()\r\n    Dim totalPlanned As Currency\r\n    Dim budget As Currency\r\n    Dim remaining As Currency\r\n    budget = Nz(Me.txtAnnualBudget, 0)\r\n    totalPlanned = Nz(DSum(\u0022AnnualEstCost\u0022, \u0022tblClientServicePlan\u0022, _\r\n        \u0022ClientServiceNeedID IN (SELECT ClientServiceNeedID FROM tblClientServiceNeeds \u0022 \u0026 _\r\n        \u0022WHERE ClientID=\u0022 \u0026 Me.txtClientID \u0026 \u0022 AND FiscalYear=\u0022 \u0026 Me.txtFiscalYear \u0026 \u0022)\u0022), 0)\r\n    remaining = budget - totalPlanned\r\n    Me.txtTotalPlanned = Format(totalPlanned, \u0022$#,##0.00\u0022)\r\n    Me.txtRemaining = Format(remaining, \u0022$#,##0.00\u0022)\r\n    If remaining \u003C 0 Then\r\n        Me.txtRemaining.ForeColor = RGB(192, 0, 0)\r\n        Me.txtRemaining.FontBold = True\r\n    ElseIf remaining \u003C budget * 0.1 Then\r\n        Me.txtRemaining.ForeColor = RGB(192, 96, 0)\r\n        Me.txtRemaining.FontBold = False\r\n    Else\r\n        Me.txtRemaining.ForeColor = RGB(0, 96, 0)\r\n        Me.txtRemaining.FontBold = False\r\n    End If\r\nEnd Sub\r\n\u0027 Called by the plan detail popup form after it commits a change,\r\n\u0027 so this form\u0027s running totals stay in sync.\r\nPublic Sub NotifyPlanChanged()\r\n    RefreshTotals\r\n    PopulateClientServicePlan\r\nEnd Sub\r\nPrivate Sub btnSave_Click()\r\n    On Error GoTo Failed\r\n    If Me.Dirty Then Me.Dirty = False    \u0027 fires Form_BeforeUpdate\r\n    Me.btnSave.Enabled = False\r\n    Me.btnClose.Caption = \u0022Close\u0022\r\n    Exit Sub\r\nFailed:\r\n    \u0027 Validation canceled the save - leave the form open with current button state.\r\nEnd Sub\r\nPrivate Sub btnCancel_Click()\r\n    \u0027 Legacy button - btnClose now handles dynamic Cancel behavior.\r\n    \u0027 Kept here in case btnCancel still exists on the form.\r\n    If Me.Dirty Then Me.Undo\r\nEnd Sub\r\nPrivate Sub btnClose_Click()\r\n    \u0027 When the caption is \u0022Cancel\u0022 the form is dirty - undo first, then close.\r\n    If Me.Dirty Then Me.Undo\r\n    DoCmd.Close acForm, Me.name\r\nEnd Sub\r\nPrivate Sub Form_Dirty(Cancel As Integer)\r\n    Me.btnSave.Enabled = True\r\n    Me.btnClose.Caption = \u0022Cancel\u0022\r\nEnd Sub\r\nPrivate Sub Form_Undo(Cancel As Integer)\r\n    Me.btnSave.Enabled = False\r\n    Me.btnClose.Caption = \u0022Close\u0022\r\nEnd Sub\r\nPrivate Sub Form_BeforeUpdate(Cancel As Integer)\r\n    If IsNull(Me!AnnualBudget) Or Me!AnnualBudget \u003C= 0 Then\r\n        MsgBox \u0022Annual Budget must be greater than zero.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Me.txtAnnualBudget.SetFocus\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    If IsNull(Me!FiscalYear) Then\r\n        MsgBox \u0022Fiscal Year is required.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Me.txtFiscalYear.SetFocus\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    If IsNull(Me!ClientID) Then\r\n        MsgBox \u0022Client is required.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    Dim selfID As Long\r\n    selfID = Nz(Me!ClientBudgetID, 0)\r\n    If DCount(\u0022*\u0022, \u0022tblClientBudgets\u0022, _\r\n              \u0022ClientID=\u0022 \u0026 Me!ClientID \u0026 _\r\n              \u0022 AND FiscalYear=\u0022 \u0026 Me!FiscalYear \u0026 _\r\n              \u0022 AND ClientBudgetID\u003C\u003E\u0022 \u0026 selfID) \u003E 0 Then\r\n        MsgBox \u0022A budget for this client and fiscal year already exists.\u0022, _\r\n               vbExclamation, \u0022Duplicate\u0022\r\n        Me.txtFiscalYear.SetFocus\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\nEnd Sub\r\nPrivate Sub txtFiscalYear_AfterUpdate()\r\n    PopulateClientServiceNeeds\r\n    Me.lstClientServicePlan.RowSource = \u0022\u0022\r\n    RefreshTotals\r\nEnd Sub\r\nPrivate Sub btnDelete_Click()\r\n    If Me.NewRecord Then Exit Sub\r\n    Dim PlanCount As Long\r\n    PlanCount = DCount(\u0022*\u0022, \u0022tblClientServicePlan\u0022, _\r\n                       \u0022FiscalYear=\u0022 \u0026 Me!FiscalYear \u0026 _\r\n                       \u0022 AND ClientServiceNeedID IN \u0022 \u0026 _\r\n                       \u0022(SELECT ClientServiceNeedID FROM tblClientServiceNeeds \u0022 \u0026 _\r\n                       \u0022 WHERE ClientID=\u0022 \u0026 Me!ClientID \u0026 \u0022)\u0022)\r\n    Dim msg As String\r\n    msg = \u0022Delete this budget?\u0022\r\n    If PlanCount \u003E 0 Then\r\n        msg = msg \u0026 vbCrLf \u0026 vbCrLf \u0026 _\r\n              \u0022Note: \u0022 \u0026 PlanCount \u0026 \u0022 service plan entries exist for this client and FY. \u0022 \u0026 _\r\n              \u0022Service plans will remain but their budget reference will be gone.\u0022\r\n    End If\r\n    If MsgBox(msg, vbYesNo \u002B vbQuestion \u002B vbDefaultButton2, \u0022Confirm Delete\u0022) = vbNo Then Exit Sub\r\n    On Error GoTo Failed\r\n    RunCommand acCmdSelectRecord\r\n    RunCommand acCmdDeleteRecord\r\n    DoCmd.Close acForm, Me.name\r\n    Exit Sub\r\nFailed:\r\n    MsgBox \u0022Could not delete: \u0022 \u0026 Err.Description, vbCritical, \u0022Delete Failed\u0022\r\nEnd Sub\r\nPrivate Sub Form_AfterUpdate()\r\n    \u0027 After saving a budget, refresh the parent frmClientDetail\u0027s lstClientBudgets\r\n    \u0027 so the new/edited AnnualBudget value shows there too.\r\n    On Error Resume Next\r\n    Forms!frmClientDetail.PopulateClientBudgets\r\n    On Error GoTo 0\r\nEnd Sub\r\n"
+}

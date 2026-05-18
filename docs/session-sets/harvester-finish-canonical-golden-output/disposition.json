@@ -1,37 +1,36 @@
 {
   "status": "in-progress",
-  "session_number": 2,
+  "session_number": 3,
   "total_sessions": 4,
-  "summary": "Session 2 of 4 complete (pipeline wiring + UnresolvedItems emission). Added Core -> Pipeline ProjectReference and wired Pipeline.Run() to invoke DatabaseManifestAggregator.Build after Enrich() and emit manifest.json + unresolved-items.json at <baseDir>. Shared in-memory UnresolvedItem array serialised twice. HarvesterVersion sourced from AssemblyInformationalVersionAttribute. New ManifestSchemaConformanceTests closes Gap A from integration-testing-and-acceptance (one hermetic [Fact] for minimal aggregator output, one [SkippableFact] for the production pipeline-produced manifest). EndToEndPipelineTests updated to assert manifest + unresolved-items files. Four AccessHarvester.Tests files gained the CorePipeline alias to disambiguate the Pipeline class from the Pipeline namespace. Cross-provider verification: R1 gpt-5-4 returned ISSUES_FOUND with one Minor finding (session-002.md missing from changeset) that the orchestrator judged a context-gap; human chose option (d) second-opinion; R2 gemini-pro tiebreaker returned VERIFIED, agreeing with the dismissal. All 1885 tests pass, 2 skipped (synthetic-DB fixtures absent). Routed cost ~$0.13. Sessions 3-4 remain.",
+  "summary": "Session 3 of 4 complete (golden corpus generation + normalization layer). Landed tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs with three entry points (NormalizeManifest, NormalizeUnresolvedItems, NormalizePerObjectIr) per Decision 4. Ran Pipeline.Default().Run(...) against both canonical fixtures (HomeHealthCare.accdb and NorthwindDevEdition.accdb). Drift survey across two consecutive runs confirmed Decision 4's narrow scope: only Database.ExportedAt actually drifts; HarvesterVersion + Database.FilePath added defensively (vary across commits/hosts); per-object IR is byte-stable across all 7 categories on both fixtures, so NormalizePerObjectIr stays a no-op. Built a one-shot tmp/build-golden-corpus/ tool (gitignored) that links the actual GoldenNormalizer.cs source and produces samples/GoldenOutput/<fixture>/{kb,ir,manifest.json,unresolved-items.json}. raw/ excluded per Decision 3. Confirmed idempotency: builder against second staging run produces byte-identical golden. Total corpus 17MB (HHC 175 files, NW 397 files) — within Decision 3's 15-20MB band, well under the 100MB stop-rule. Inspected output for surprises: no malformed IR, no missing fields; the empty manifest collections are intentional V1 per Session 2's spec (per-category threading is follow-on; rich data lives in ir/<Category>/). Cross-provider verification: R1 gpt-5-4 returned VERIFIED with 0 issues in a single round. All 1885 tests pass, 2 skipped (synthetic-DB fixtures absent). Routed cost ~$0.072. Session 4 (regression gate + closeout) remains.",
   "files_changed": [
-    "AccessHarvester.Core/AccessHarvester.Core.csproj",
-    "AccessHarvester.Core/Pipeline.cs",
-    "tests/AccessHarvester.Integration/Pipeline/EndToEndPipelineTests.cs",
-    "tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs",
-    "tests/AccessHarvester.Tests/SyntheticDbIntegrationTests.cs",
-    "tests/AccessHarvester.Tests/SyntheticMetadataExtractorIntegrationTests.cs",
-    "tests/AccessHarvester.Tests/HomeHealthCareTableCoverageTests.cs",
-    "tests/AccessHarvester.Tests/SyntheticFixtureSnapshotTests.cs",
-    "docs/session-sets/harvester-finish-canonical-golden-output/spec.md",
+    "tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs",
+    "samples/GoldenOutput/HomeHealthCare/manifest.json",
+    "samples/GoldenOutput/HomeHealthCare/unresolved-items.json",
+    "samples/GoldenOutput/HomeHealthCare/kb/**",
+    "samples/GoldenOutput/HomeHealthCare/ir/**",
+    "samples/GoldenOutput/NorthwindDevEdition/manifest.json",
+    "samples/GoldenOutput/NorthwindDevEdition/unresolved-items.json",
+    "samples/GoldenOutput/NorthwindDevEdition/kb/**",
+    "samples/GoldenOutput/NorthwindDevEdition/ir/**",
     "docs/session-sets/harvester-finish-canonical-golden-output/ai-assignment.md",
     "docs/session-sets/harvester-finish-canonical-golden-output/disposition.json",
     "docs/session-sets/harvester-finish-canonical-golden-output/session-state.json",
     "docs/session-sets/harvester-finish-canonical-golden-output/activity-log.json",
     "docs/session-sets/harvester-finish-canonical-golden-output/session-events.jsonl",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002.md",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002-r2-tiebreaker.md",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002-verification-prompt.txt",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002-next-session-recommendation.md"
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-003.md",
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-003-verification-prompt.txt",
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-003-next-session-recommendation.md"
   ],
   "next_session_set": null,
   "next_orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-opus-4-7",
+    "model": "claude-sonnet-4-6",
     "effort": "high",
     "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Routed analysis (gemini-pro): Session 3 generates and commits the canonical golden corpus; the Stop Rule 'Golden surfaces real defect' requires careful inspection of produced output before commit. Continuing with Opus @ high keeps the inspection-and-judgement capacity high enough to catch malformed IR or unexpected schema drift before the golden is pinned, even though normalization-layer authoring itself is mechanical."
+      "code": "switch-for-cost",
+      "specifics": "Routed analysis (gemini-pro): Session 4's primary task is authoring a well-defined integration test (CanonicalGoldenRegressionTests.cs), a less complex and more mechanical task than Session 3's exploratory corpus generation. Sonnet provides sufficient capability for this implementation-focused work at substantially lower cost than Opus. Cross-provider session-verification goes to gemini-pro per the rule-based pairing for Sonnet output."
     }
   },
   "blockers": []

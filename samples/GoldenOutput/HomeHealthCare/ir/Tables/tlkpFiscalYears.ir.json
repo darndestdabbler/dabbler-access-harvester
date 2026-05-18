@@ -1,0 +1,97 @@
+{
+  "Name": "tlkpFiscalYears",
+  "Type": "Table",
+  "Attributes": 0,
+  "DateCreated": "2026-03-28T11:13:38.292",
+  "LastUpdated": "2026-05-03T15:18:40.288",
+  "RecordCount": 4,
+  "SourceTableName": "",
+  "Connect": "",
+  "ValidationRule": "",
+  "ValidationText": "",
+  "Ddl": "CREATE TABLE [tlkpFiscalYears] (\r\n    [FiscalYear] SHORT NOT NULL,\r\n    [StartDate] DATETIME NOT NULL,\r\n    [EndDate] DATETIME NOT NULL,\r\n    [IsCurrent] BIT DEFAULT False,\r\n    CONSTRAINT [PrimaryKey] PRIMARY KEY ([FiscalYear])\r\n);",
+  "Fields": [
+    {
+      "Name": "FiscalYear",
+      "TypeCode": 3,
+      "TypeName": "Integer",
+      "Size": 2,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 1,
+      "OrdinalPosition": 0,
+      "ForeignName": null
+    },
+    {
+      "Name": "StartDate",
+      "TypeCode": 8,
+      "TypeName": "DateTime",
+      "Size": 8,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": "Short Date",
+      "DisplayControl": null,
+      "Attributes": 1,
+      "OrdinalPosition": 1,
+      "ForeignName": null
+    },
+    {
+      "Name": "EndDate",
+      "TypeCode": 8,
+      "TypeName": "DateTime",
+      "Size": 8,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": "Short Date",
+      "DisplayControl": null,
+      "Attributes": 1,
+      "OrdinalPosition": 2,
+      "ForeignName": null
+    },
+    {
+      "Name": "IsCurrent",
+      "TypeCode": 1,
+      "TypeName": "Boolean",
+      "Size": 1,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "False",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 106,
+      "Attributes": 1,
+      "OrdinalPosition": 3,
+      "ForeignName": null
+    }
+  ],
+  "Indexes": [
+    {
+      "Name": "PrimaryKey",
+      "Primary": true,
+      "Unique": true,
+      "Required": true,
+      "Fields": [
+        {
+          "Name": "FiscalYear",
+          "Attributes": 0
+        }
+      ]
+    }
+  ]
+}

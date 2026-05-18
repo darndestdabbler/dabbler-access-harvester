@@ -1,0 +1,547 @@
+{
+  "Type": "Form",
+  "Properties": {
+    "RecordSelectors": "False",
+    "NavigationButtons": "False",
+    "DividingLines": "True",
+    "AllowDesignChanges": "False",
+    "DefaultView": "0",
+    "ScrollBars": "0",
+    "TabularFamily": "0",
+    "BorderStyle": "3",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "5040",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "7",
+    "Right": "9165",
+    "Bottom": "10740",
+    "DatasheetGridlinesColor": "15263976",
+    "RecSrcDt": "0x45813ef9ae83e640",
+    "GUID": "0xd1558f755fc9a248bb72a2007a606ec6",
+    "NameMap": "0x0acc0e550000000000789dbdbfb1b14a8f0a1f377089d7da00000000d895336a ,\n0x3488e6400000000000000000740062006c00500072006f007600690064006500 ,\n0x72007300000000000000f16b229c0ce0044cacc1529ec115b3f6070000000078 ,\n0x9dbdbfb1b14a8f0a1f377089d7da500072006f00760069006400650072004900 ,\n0x4400000000000000868ee96342f56543b2004f0e97cb04740700000000789dbd ,\n0xbfb1b14a8f0a1f377089d7da500072006f00760069006400650072004e006100 ,\n0x6d00650000000000000056de534e62364747a58c222c1fc364db00000000514b ,\n0x386a3488e640000000000000000074006c006b00700046006900730063006100 ,\n0x6c0059006500610072007300000000000000f002456205a5234c8b66a5e074b4 ,\n0xa96e0700000056de534e62364747a58c222c1fc364db46006900730063006100 ,\n0x6c00590065006100720000000000000000000000000000000000000000000000 ,\n0x0c000000050000000000000000000000000000000000",
+    "Caption": "Select Provider \u0026 Fiscal Year",
+    "DatasheetFontName": "Aptos",
+    "FilterOnLoad": "0",
+    "ShowPageMargins": "0",
+    "DisplayOnSharePointSite": "1",
+    "DatasheetAlternateBackColor": "15921906",
+    "DatasheetGridlinesColor12": "0",
+    "FitToScreen": "1",
+    "DatasheetBackThemeColorIndex": "1",
+    "BorderThemeColorIndex": "3",
+    "ThemeFontIndex": "1",
+    "ForeThemeColorIndex": "0",
+    "AlternateBackThemeColorIndex": "1",
+    "AlternateBackShade": "95.0",
+    "NoSaveCTIWhenDisabled": "1"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {},
+      "Children": [
+        {
+          "Type": "Label",
+          "Properties": {
+            "BackStyle": "0",
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "BorderColor": "8355711",
+            "ForeColor": "6710886",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "0",
+            "BorderTint": "50.0",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "60.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null,
+          "TextCapacity": {
+            "unavailable": true,
+            "reason": "no geometry"
+          }
+        },
+        {
+          "Type": "CommandButton",
+          "Properties": {
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "FontWeight": "400",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0",
+            "UseTheme": "1",
+            "Shape": "1",
+            "Gradient": "12",
+            "BackColor": "14790982",
+            "BackThemeColorIndex": "4",
+            "BackTint": "60.0",
+            "BorderLineStyle": "0",
+            "BorderColor": "14790982",
+            "BorderThemeColorIndex": "4",
+            "BorderTint": "60.0",
+            "ThemeFontIndex": "1",
+            "HoverColor": "15453059",
+            "HoverThemeColorIndex": "4",
+            "HoverTint": "40.0",
+            "PressedColor": "6440976",
+            "PressedThemeColorIndex": "4",
+            "PressedShade": "75.0",
+            "HoverForeColor": "4210752",
+            "HoverForeThemeColorIndex": "0",
+            "HoverForeTint": "75.0",
+            "PressedForeColor": "4210752",
+            "PressedForeThemeColorIndex": "0",
+            "PressedForeTint": "75.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "ComboBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "2102279",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "AllowValueListEdits": "1",
+            "InheritValueList": "1",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ForeThemeColorIndex": "2",
+            "ForeShade": "50.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null,
+          "NonDefaultProperties": [
+            "AddColon"
+          ],
+          "TextCapacity": {
+            "unavailable": true,
+            "reason": "no geometry"
+          }
+        },
+        {
+          "Type": "FormHeader",
+          "Properties": {
+            "Height": "576",
+            "BackColor": "15783096",
+            "Name": "FormHeader",
+            "GUID": "0x3779a7ca7402c74d8490d80ad434b8ea",
+            "AutoHeight": "1",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "2",
+            "BackTint": "20.0"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "288",
+                    "Top": "72",
+                    "Width": "4320",
+                    "Height": "432",
+                    "FontSize": "10",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblTitle",
+                    "Caption": "Select Provider \u0026 Fiscal Year",
+                    "GUID": "0x146ed366b7182342b802db7417ecc33b",
+                    "LayoutCachedLeft": "288",
+                    "LayoutCachedTop": "72",
+                    "LayoutCachedWidth": "4608",
+                    "LayoutCachedHeight": "504",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.2,
+                    "Y": 0.05,
+                    "W": 3,
+                    "H": 0.3
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 42,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 10,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null,
+          "GeometryIn": {
+            "H": 0.4
+          }
+        },
+        {
+          "Type": "Section",
+          "Properties": {
+            "Name": "Detail",
+            "GUID": "0x5dc523b61038e442a766619b8409f16e",
+            "AutoHeight": "1",
+            "AlternateBackColor": "15921906",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "288",
+                    "Top": "144",
+                    "Width": "1440",
+                    "Height": "360",
+                    "FontSize": "8",
+                    "ForeColor": "0",
+                    "Name": "lblProvider",
+                    "Caption": "Provider:",
+                    "GUID": "0x6aafe2b56a75c546a43ccf4ccc8d3d7a",
+                    "LayoutCachedLeft": "288",
+                    "LayoutCachedTop": "144",
+                    "LayoutCachedWidth": "1728",
+                    "LayoutCachedHeight": "504",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.2,
+                    "Y": 0.1,
+                    "W": 1,
+                    "H": 0.25
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 17,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 8,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                },
+                {
+                  "Type": "ComboBox",
+                  "Properties": {
+                    "LimitToList": "True",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "ColumnCount": "2",
+                    "ListWidth": "2880",
+                    "Left": "1872",
+                    "Top": "144",
+                    "Width": "2592",
+                    "Height": "360",
+                    "ColumnInfo": "\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u002210\\\u0022;\\\u0022200\\\u0022",
+                    "GUID": "0x3cc62d78d402044a9ef633f643a433d0",
+                    "Name": "cboProvider",
+                    "RowSourceType": "Table/Query",
+                    "RowSource": "SELECT ProviderID, ProviderName FROM tblProviders ORDER BY ProviderName; ",
+                    "ColumnWidths": "0;2880",
+                    "BaseInfo": "\\\u0022SELECT ProviderID, ProviderName FROM tblProviders ORDER BY ProviderName; \\\u0022;\\\u0022tblProviders\\\u0022;\\\u0022\\\u0022;\\\u0022ProviderID\\\u0022;\\\u0022ProviderName\\\u0022;\\\u0022PrimaryKey\\\u0022",
+                    "LayoutCachedLeft": "1872",
+                    "LayoutCachedTop": "144",
+                    "LayoutCachedWidth": "4464",
+                    "LayoutCachedHeight": "504"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 1.3,
+                    "Y": 0.1,
+                    "W": 1.8,
+                    "H": 0.25
+                  },
+                  "Label": {
+                    "source": "from-name",
+                    "text": "Cbo Provider"
+                  },
+                  "NonDefaultProperties": [
+                    "LimitToList"
+                  ],
+                  "TextCapacity": {
+                    "charsPerLine": 23,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 11,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "288",
+                    "Top": "720",
+                    "Width": "1440",
+                    "Height": "360",
+                    "FontSize": "8",
+                    "ForeColor": "0",
+                    "Name": "lblFiscalYear",
+                    "Caption": "Fiscal Year:",
+                    "GUID": "0xa9e3a632061b264b84f2e8e5025c0ae3",
+                    "LayoutCachedLeft": "288",
+                    "LayoutCachedTop": "720",
+                    "LayoutCachedWidth": "1728",
+                    "LayoutCachedHeight": "1080",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.2,
+                    "Y": 0.5,
+                    "W": 1,
+                    "H": 0.25
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 17,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 8,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                },
+                {
+                  "Type": "ComboBox",
+                  "Properties": {
+                    "LimitToList": "True",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "1872",
+                    "Top": "720",
+                    "Width": "2592",
+                    "Height": "360",
+                    "TabIndex": "1",
+                    "ColumnInfo": "\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u00223\\\u0022;\\\u00222\\\u0022",
+                    "GUID": "0xf33201dab87de149acef77a2a9510df4",
+                    "Name": "cboFiscalYear",
+                    "RowSourceType": "Table/Query",
+                    "RowSource": "SELECT FiscalYear FROM tlkpFiscalYears ORDER BY FiscalYear DESC; ",
+                    "LayoutCachedLeft": "1872",
+                    "LayoutCachedTop": "720",
+                    "LayoutCachedWidth": "4464",
+                    "LayoutCachedHeight": "1080"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 1.3,
+                    "Y": 0.5,
+                    "W": 1.8,
+                    "H": 0.25
+                  },
+                  "Label": {
+                    "source": "from-name",
+                    "text": "Cbo Fiscal Year"
+                  },
+                  "NonDefaultProperties": [
+                    "LimitToList"
+                  ],
+                  "TextCapacity": {
+                    "charsPerLine": 23,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 11,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormFooter",
+          "Properties": {
+            "Height": "720",
+            "Name": "FormFooter",
+            "GUID": "0x8746ca4b7c8a6642a469bd4c31b3789f",
+            "AutoHeight": "1",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "432",
+                    "Top": "72",
+                    "Width": "1728",
+                    "Height": "432",
+                    "Name": "btnOK",
+                    "Caption": "OK",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0x78da96d55280804998208c83c4195849",
+                    "LayoutCachedLeft": "432",
+                    "LayoutCachedTop": "72",
+                    "LayoutCachedWidth": "2160",
+                    "LayoutCachedHeight": "504",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.3,
+                    "Y": 0.05,
+                    "W": 1.2,
+                    "H": 0.3
+                  }
+                },
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "2592",
+                    "Top": "72",
+                    "Width": "1728",
+                    "Height": "432",
+                    "TabIndex": "1",
+                    "Name": "btnCancel",
+                    "Caption": "Cancel",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0xedade0963bb9dd459a7440b1bdb2317e",
+                    "LayoutCachedLeft": "2592",
+                    "LayoutCachedTop": "72",
+                    "LayoutCachedWidth": "4320",
+                    "LayoutCachedHeight": "504",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 1.8,
+                    "Y": 0.05,
+                    "W": 1.2,
+                    "H": 0.3
+                  }
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null,
+          "GeometryIn": {
+            "H": 0.5
+          }
+        }
+      ],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": "CodeBehindForm\r\nAttribute VB_GlobalNameSpace = False\r\nAttribute VB_Creatable = True\r\nAttribute VB_PredeclaredId = True\r\nAttribute VB_Exposed = False\r\nOption Compare Database\r\nOption Explicit\r\nPrivate m_Cancelled As Boolean\r\nPublic Property Get cancelled() As Boolean\r\n    cancelled = m_Cancelled\r\nEnd Property\r\nPrivate Sub btnOK_Click()\r\n        If IsNull(Me.cboProvider) Then\r\n        MsgBox \u0022Please select a provider.\u0022, vbExclamation\r\n        Me.cboProvider.SetFocus\r\n        Exit Sub\r\n    End If\r\n    If IsNull(Me.cboFiscalYear) Then\r\n        MsgBox \u0022Please select a fiscal year.\u0022, vbExclamation\r\n        Me.cboFiscalYear.SetFocus\r\n        Exit Sub\r\n    End If\r\n    Me.Visible = False\r\nEnd Sub\r\nPrivate Sub btnCancel_Click()\r\n    m_Cancelled = True\r\n    DoCmd.Close acForm, Me.name\r\nEnd Sub\r\n",
+  "GeometryIn": {
+    "W": 3.5
+  },
+  "NonDefaultProperties": [
+    "RecordSelectors",
+    "NavigationButtons",
+    "DividingLines",
+    "AllowDesignChanges"
+  ],
+  "Procedures": [
+    {
+      "Name": "cancelled",
+      "ProcedureType": "PropertyGet",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": "Boolean",
+      "Parameters": [],
+      "StartLine": 9,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "btnOK_Click",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 12,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "btnCancel_Click",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 25,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    }
+  ]
+}

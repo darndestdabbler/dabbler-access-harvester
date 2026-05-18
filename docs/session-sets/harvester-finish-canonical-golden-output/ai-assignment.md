@@ -109,11 +109,55 @@ committing the canonical golden corpus.
 - **Estimate:** $0.10 - $0.40
 - **Rationale:** AI effort is low, focused on assisting with normalization. The bulk of the session is human-led execution and review.
 
-### Actuals (filled after the session)
+### Actuals (filled after the session — 2026-05-18)
 
-- **Actual Cost:**
-- **Final Orchestrator:**
-- **Key Learnings:**
+- **Actual cost (routed): ~$0.0720**
+  - `session-verification` round 1 (gpt-5-4): $0.0698 (VERIFIED with 0 issues)
+  - `analysis` (gemini-pro, next-session recommendation): $0.0022
+- **Final orchestrator:** Claude Opus 4.7 (1M context) @ effort=high (as
+  Session 2 recommended). The deviation from this block's Session 1
+  estimate (`sonnet`) is the human orchestrator choice — Session 2's
+  routed analysis upgraded to Opus specifically for the "Inspect for
+  surprises" step.
+- **Key learnings / deviations:**
+  - Cost came in well under the $0.10-$0.40 estimate band. Single-round
+    verification (no R2/R3 needed); the in-conversation drift survey +
+    file inspection produced clean, well-formed corpus on first try.
+  - **Drift survey paid for itself.** Running the pipeline twice and
+    diffing each fixture proved Decision 4's scope was exactly right:
+    only `Database.ExportedAt` actually drifts. `HarvesterVersion` and
+    `Database.FilePath` were added defensively (vary across commits and
+    hosts respectively); `NormalizePerObjectIr` stays a true no-op
+    because no per-object IR file across all 7 categories on both
+    fixtures showed any drift. The survey took ~3 minutes; would have
+    saved much more than that if it had surfaced unexpected volatility.
+  - **One-shot tmp/ builder over committed tools/ subproject.** The
+    spec did not budget for a permanent `tools/build-golden-corpus/`
+    project. Built it under gitignored `tmp/` linking the actual
+    GoldenNormalizer.cs source via `<Compile Include>` so the
+    committed corpus uses byte-identical normalization to what
+    Session 4's regression test will produce. Trade-off: the next
+    re-generator has to re-derive the builder from session-003.md
+    rather than running an existing tool. Acceptable because
+    regeneration is rare (only on schema changes) and the builder is
+    ~50 lines.
+  - **All manifest collections empty is V1-expected.** The verifier
+    prompt explicitly disclosed this so it would not be flagged as a
+    Major. Per Session 2's spec, per-category collection threading
+    (Forms[], Reports[], Queries[], etc. into the manifest envelope)
+    is a follow-on; today the rich data lives in `ir/<Category>/`
+    files (which ARE in the golden corpus). The aggregator's contract
+    accepts a minimal set and emits a schema-valid envelope.
+
+**Next-session orchestrator recommendation (Session 4):**
+Sonnet @ effort=high. Rationale (routed via `analysis` to `gemini-pro`):
+"Session 4's primary task is authoring a well-defined integration test,
+a less complex and more mechanical task than Session 3's exploratory
+corpus generation. Sonnet provides sufficient capability for this
+implementation-focused work at a substantially lower cost than Opus."
+Reason code: `switch-for-cost`. Cross-provider session-verification
+goes to `gemini-pro` per the rule-based pairing for Sonnet output;
+adjudication-prompt routing for any Round 2 stays the same.
 
 ---
 

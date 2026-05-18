@@ -1,0 +1,304 @@
+{
+  "Name": "basListHelpers",
+  "Type": "Module",
+  "VbaCode": "Option Compare Database\r\nOption Explicit\r\n\r\n\u0027 ============================================================================\r\n\u0027  basListHelpers\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027  Reusable helpers for the \u0022list-box-instead-of-datasheet-subform\u0022 pattern.\r\n\u0027\r\n\u0027  Each list box that participates in this pattern follows these conventions:\r\n\u0027\r\n\u0027    - Column 1 is the primary key. It is hidden (ColumnWidth = 0) and is\r\n\u0027      the BoundColumn (so .Value returns the PK).\r\n\u0027    - Columns 2..N are the visible display columns.\r\n\u0027    - ColumnHeads = True; column captions come from the data SELECT\u0027s\r\n\u0027      column aliases (because the data SELECT is the FIRST select in the\r\n\u0027      UNION ALL).\r\n\u0027    - A synthetic \u0022\u003CAdd new ...\u003E\u0022 row is UNION ALL\u0027d onto the data SELECT\r\n\u0027      with PK = ADD_NEW_ID (-1). It sorts to the top because ORDER BY 1\r\n\u0027      (the PK) puts -1 ahead of any real autonumber PK.\r\n\u0027\r\n\u0027  When the user double-clicks a row:\r\n\u0027\r\n\u0027    - If the bound value is ADD_NEW_ID, the detail form opens with\r\n\u0027      OpenArgs = \u0022ADD\u0022  (or \u0022ADD|ClientID=123|FiscalYear=2025\u0022 if the\r\n\u0027      caller passes context). This signals the detail form to enter\r\n\u0027      Add mode and disable its Delete button.\r\n\u0027    - Otherwise the detail form opens with OpenArgs = \u0022\u003CnumericID\u003E\u0022,\r\n\u0027      meaning Edit mode for that record.\r\n\u0027\r\n\u0027  The detail form is opened acDialog so the parent form blocks until\r\n\u0027  the user closes it; we then Requery the list box.\r\n\u0027 ============================================================================\r\n\r\n\u0027 Sentinel PK value for the synthetic \u0022Add New\u0022 row.\r\nPublic Const ADD_NEW_ID As Long = -1\r\n\r\n\u0027 A 1-row \u0022DUAL\u0022 derivation for the synthetic Add-New SELECT.\r\n\u0027 MSysObjects is always present and always non-empty in an Access database.\r\nPrivate Const DUAL_FROM As String = \u0022 FROM (SELECT TOP 1 1 AS X FROM MSysObjects) AS dual \u0022\r\n\r\n\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027 Builds the synthetic SELECT that becomes the \u0022\u003CAdd new ...\u003E\u0022 row.\r\n\u0027   addLabel       e.g. \u0022\u003CAdd new service need...\u003E\u0022\r\n\u0027   dataColCount   total column count in the data SELECT (must match)\r\n\u0027\r\n\u0027 Column 1 emits ADD_NEW_ID (the bound PK).\r\n\u0027 Column 2 emits addLabel (what the user sees).\r\n\u0027 Columns 3..N emit Null.\r\n\u0027\r\n\u0027 No column aliases are emitted; the union picks up its column captions\r\n\u0027 from the data SELECT (the FIRST select in the UNION ALL).\r\n\u0027 ----------------------------------------------------------------------------\r\nPublic Function BuildAddRowSelect(addLabel As String, dataColCount As Long) As String\r\n    Dim parts() As String\r\n    Dim i As Long\r\n\r\n    If dataColCount \u003C 2 Then\r\n        Err.Raise vbObjectError \u002B 2001, \u0022BuildAddRowSelect\u0022, _\r\n                  \u0022dataColCount must be at least 2 (PK \u002B display).\u0022\r\n    End If\r\n\r\n    ReDim parts(0 To dataColCount - 1)\r\n    parts(0) = CStr(ADD_NEW_ID)\r\n    parts(1) = \u0022\u0027\u0022 \u0026 Replace(addLabel, \u0022\u0027\u0022, \u0022\u0027\u0027\u0022) \u0026 \u0022\u0027\u0022\r\n    For i = 2 To dataColCount - 1\r\n        parts(i) = \u0022Null\u0022\r\n    Next i\r\n\r\n    BuildAddRowSelect = \u0022SELECT \u0022 \u0026 Join(parts, \u0022, \u0022) \u0026 DUAL_FROM\r\nEnd Function\r\n\r\n\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027 Wraps a data SELECT with a synthetic Add-New row (UNION ALL).\r\n\u0027   dataSelect     The user\u0027s normal SELECT, including FROM/WHERE.\r\n\u0027                  MUST include explicit aliases on the columns ? those\r\n\u0027                  aliases become the listbox column headers.\r\n\u0027                  MUST NOT include ORDER BY (pass that via orderBy).\r\n\u0027                  Column 1 of the SELECT MUST be the numeric PK.\r\n\u0027   addLabel       What the synthetic row\u0027s display column shows.\r\n\u0027   dataColCount   Number of columns the SELECT returns.\r\n\u0027   orderBy        Optional ORDER BY clause (default: \u00221\u0022 = PK; -1 sorts\r\n\u0027                  first ahead of positive autonumber PKs).\r\n\u0027 ----------------------------------------------------------------------------\r\nPublic Function BuildAddableRowSource(dataSelect As String, _\r\n                                       addLabel As String, _\r\n                                       dataColCount As Long, _\r\n                                       Optional orderBy As String = \u00221\u0022) As String\r\n    Dim sql As String\r\n    sql = \u0022(\u0022 \u0026 dataSelect \u0026 \u0022) UNION ALL (\u0022 \u0026 _\r\n          BuildAddRowSelect(addLabel, dataColCount) \u0026 \u0022)\u0022\r\n    If Len(orderBy) \u003E 0 Then sql = sql \u0026 \u0022 ORDER BY \u0022 \u0026 orderBy\r\n    BuildAddableRowSource = sql\r\nEnd Function\r\n\r\n\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027 Standard double-click handler for a list box that follows the\r\n\u0027 \u0022PK in column 1 \u002B Add-New synthetic row\u0022 convention.\r\n\u0027\r\n\u0027   lst              The list box the user double-clicked.\r\n\u0027   detailFormName   The popup detail form to open.\r\n\u0027   contextOpenArgs  Optional pipe-delimited \u0022key=value|key=value\u0022 pairs\r\n\u0027                    to append to the OpenArgs in Add mode (e.g. to give\r\n\u0027                    the detail form the parent ClientID/FiscalYear so\r\n\u0027                    it can populate FK columns on the new record).\r\n\u0027                    Ignored in Edit mode.\r\n\u0027\r\n\u0027 Opens the detail form acDialog (modal) so this Sub blocks until the\r\n\u0027 user closes it; then Requery\u0027s the list box.\r\n\u0027 ----------------------------------------------------------------------------\r\nPublic Sub OpenDetailFromList(lst As Access.ListBox, _\r\n                               detailFormName As String, _\r\n                               Optional contextOpenArgs As String = \u0022\u0022)\r\n    Dim selVal As Variant\r\n    selVal = lst.Value\r\n    If IsNull(selVal) Then Exit Sub\r\n\r\n    Dim args As String\r\n    If CLng(selVal) = ADD_NEW_ID Then\r\n        args = \u0022ADD\u0022\r\n        If Len(contextOpenArgs) \u003E 0 Then args = args \u0026 \u0022|\u0022 \u0026 contextOpenArgs\r\n    Else\r\n        args = CStr(CLng(selVal))\r\n    End If\r\n\r\n    DoCmd.OpenForm detailFormName, acNormal, , , , acDialog, args\r\n\r\n    \u0027 Modal closed; refresh the list to reflect any inserts/edits/deletes.\r\n    lst.Requery\r\nEnd Sub\r\n\r\n\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027 Builds an \u0022ADD|key1=val1|key2=val2...\u0022 OpenArgs string.\r\n\u0027 Pass alternating key, value, key, value, ... in pairs.\r\n\u0027 If no pairs are passed, returns \u0022ADD\u0022.\r\n\u0027\r\n\u0027   BuildAddOpenArgs(\u0022ClientID\u0022, 42, \u0022FiscalYear\u0022, 2025)\r\n\u0027     --\u003E  \u0022ClientID=42|FiscalYear=2025\u0022\r\n\u0027\r\n\u0027 (Caller typically passes the result to OpenDetailFromList\u0027s\r\n\u0027  contextOpenArgs parameter, which prepends \u0022ADD|\u0022.)\r\n\u0027 ----------------------------------------------------------------------------\r\nPublic Function BuildContextArgs(ParamArray pairs() As Variant) As String\r\n    Dim n As Long\r\n    n = UBound(pairs) - LBound(pairs) \u002B 1\r\n    If n = 0 Then Exit Function\r\n    If n Mod 2 \u003C\u003E 0 Then\r\n        Err.Raise vbObjectError \u002B 2002, \u0022BuildContextArgs\u0022, _\r\n                  \u0022Pairs must come in key,value couples (got \u0022 \u0026 n \u0026 \u0022 items).\u0022\r\n    End If\r\n\r\n    Dim parts() As String\r\n    ReDim parts(0 To (n \\ 2) - 1)\r\n    Dim i As Long, j As Long\r\n    j = 0\r\n    For i = LBound(pairs) To UBound(pairs) Step 2\r\n        parts(j) = CStr(pairs(i)) \u0026 \u0022=\u0022 \u0026 CStr(pairs(i \u002B 1))\r\n        j = j \u002B 1\r\n    Next i\r\n    BuildContextArgs = Join(parts, \u0022|\u0022)\r\nEnd Function\r\n\r\n\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027  OpenArgs parsing helpers, for use by popup detail forms.\r\n\u0027\r\n\u0027  A popup detail form\u0027s Form_Load typically does:\r\n\u0027\r\n\u0027     If basListHelpers.IsAddMode(Me.OpenArgs) Then\r\n\u0027         DoCmd.GoToRecord , , acNewRec\r\n\u0027         Me!ClientID    = basListHelpers.GetContextLong(Me.OpenArgs, \u0022ClientID\u0022)\r\n\u0027         Me!FiscalYear  = basListHelpers.GetContextLong(Me.OpenArgs, \u0022FiscalYear\u0022)\r\n\u0027         Me.btnDelete.Enabled = False\r\n\u0027     ElseIf IsNumeric(Nz(Me.OpenArgs, \u0022\u0022)) Then\r\n\u0027         Dim rs As DAO.Recordset\r\n\u0027         Set rs = Me.RecordsetClone\r\n\u0027         rs.FindFirst \u0022\u003CPKfield\u003E=\u0022 \u0026 CLng(Me.OpenArgs)\r\n\u0027         If Not rs.NoMatch Then Me.Bookmark = rs.Bookmark\r\n\u0027     End If\r\n\u0027 ----------------------------------------------------------------------------\r\n\r\n\u0027 Returns True iff the OpenArgs string indicates Add mode (starts with \u0022ADD\u0022).\r\nPublic Function IsAddMode(args As Variant) As Boolean\r\n    Dim s As String\r\n    s = Nz(args, \u0022\u0022)\r\n    IsAddMode = (Left$(s, 3) = \u0022ADD\u0022)\r\nEnd Function\r\n\r\n\u0027 Looks up a key in an \u0022ADD|key1=val1|key2=val2...\u0022 OpenArgs string.\r\n\u0027 Returns the value as a String, or \u0022\u0022 if the key isn\u0027t present.\r\nPublic Function GetContextString(args As Variant, key As String) As String\r\n    Dim s As String\r\n    s = Nz(args, \u0022\u0022)\r\n    If Len(s) = 0 Then Exit Function\r\n\r\n    Dim parts() As String\r\n    parts = Split(s, \u0022|\u0022)\r\n\r\n    Dim i As Long\r\n    Dim prefix As String\r\n    prefix = key \u0026 \u0022=\u0022\r\n    For i = LBound(parts) To UBound(parts)\r\n        If Left$(parts(i), Len(prefix)) = prefix Then\r\n            GetContextString = Mid$(parts(i), Len(prefix) \u002B 1)\r\n            Exit Function\r\n        End If\r\n    Next i\r\nEnd Function\r\n\r\n\u0027 Same as GetContextString but coerces to Long. Returns 0 if missing/blank.\r\nPublic Function GetContextLong(args As Variant, key As String) As Long\r\n    Dim raw As String\r\n    raw = GetContextString(args, key)\r\n    If Len(raw) = 0 Then Exit Function\r\n    If IsNumeric(raw) Then GetContextLong = CLng(raw)\r\nEnd Function\r\nPublic Sub PopulateAddableListBoxFromAdo(lst As Access.ListBox, _\r\n                                           sql As String, _\r\n                                           addLabel As String)\r\n    \u0027 Populates a list box via ADO \u002B ListBox.AddItem (Value List row source type).\r\n    \u0027\r\n    \u0027 Use this instead of BuildAddableRowSource when you need a sort order Jet\u0027s\r\n    \u0027 UNION-ORDER-BY parser won\u0027t reliably deliver, expect more rows than fit in\r\n    \u0027 a RowSource string (~32 KB ceiling), or want column-by-column control.\r\n    \u0027\r\n    \u0027   lst        ListBox to populate. RowSourceType MUST be \u0022Value List\u0022.\r\n    \u0027              ColumnCount must match the number of columns the SQL returns.\r\n    \u0027              ColumnHeads = True is supported (the first AddItem call below\r\n    \u0027              becomes the header row).\r\n    \u0027   sql        Data SELECT. Should include its own ORDER BY (no UNION; no\r\n    \u0027              synthetic add row in the SQL - this routine prepends it).\r\n    \u0027              Column 1 should be the bound PK (matches helper convention).\r\n    \u0027   addLabel   Text shown in column 2 of the synthetic Add row. Column 1\r\n    \u0027              gets ADD_NEW_ID (-1) per convention.\r\n    \u0027\r\n    \u0027 IMPORTANT - Access ListBox.AddItem treats BOTH \u0022;\u0022 and the locale list\r\n    \u0027 separator (often \u0022,\u0022) as column delimiters, and Access ListBox does NOT\r\n    \u0027 have a SeparatorCharacters property to control that (only ComboBox does).\r\n    \u0027 This routine therefore strips both \u0022;\u0022 and \u0022,\u0022 from value text before\r\n    \u0027 joining. The cosmetic cost is that currency formatting like \u0022$32,000.00\u0022\r\n    \u0027 renders as \u0022$32000.00\u0022. If a caller wants comma-grouped numbers, they\u0027d\r\n    \u0027 need to switch back to BuildAddableRowSource (Table/Query row source).\r\n\r\n    Dim rs As ADODB.Recordset\r\n    Set rs = New ADODB.Recordset\r\n    rs.Open sql, CurrentProject.Connection, adOpenStatic, adLockReadOnly\r\n\r\n    lst.RowSource = \u0022\u0022\r\n\r\n    Dim fldCount As Long\r\n    fldCount = rs.Fields.count\r\n    If fldCount \u003C 2 Then\r\n        Err.Raise vbObjectError \u002B 2003, \u0022PopulateAddableListBoxFromAdo\u0022, _\r\n                  \u0022SQL must return at least 2 columns (PK \u002B display).\u0022\r\n    End If\r\n\r\n    Dim parts() As String\r\n    ReDim parts(fldCount - 1)\r\n    Dim j As Long\r\n\r\n    \u0027 Header row.\r\n    For j = 0 To fldCount - 1\r\n        parts(j) = SanitizeForValueList(rs.Fields(j).name)\r\n    Next j\r\n    lst.AddItem Join(parts, \u0022;\u0022)\r\n\r\n    \u0027 Synthetic Add row.\r\n    parts(0) = CStr(ADD_NEW_ID)\r\n    parts(1) = SanitizeForValueList(addLabel)\r\n    For j = 2 To fldCount - 1\r\n        parts(j) = \u0022\u0022\r\n    Next j\r\n    lst.AddItem Join(parts, \u0022;\u0022)\r\n\r\n    \u0027 Data rows.\r\n    Do While Not rs.EOF\r\n        For j = 0 To fldCount - 1\r\n            parts(j) = SanitizeForValueList(CStr(Nz(rs.Fields(j).Value, \u0022\u0022)))\r\n        Next j\r\n        lst.AddItem Join(parts, \u0022;\u0022)\r\n        rs.MoveNext\r\n    Loop\r\n\r\n    rs.Close\r\n    Set rs = Nothing\r\nEnd Sub\r\n\r\n\r\n\u0027 Strips characters that Access ListBox.AddItem (with Value List row source)\r\n\u0027 treats as column separators - \u0022,\u0022 and \u0022;\u0022 specifically. Used by the AddItem\r\n\u0027 code path; the BuildAddableRowSource code path is unaffected.\r\nPrivate Function SanitizeForValueList(ByVal s As String) As String\r\n    Dim out As String\r\n    out = Replace(s, \u0022,\u0022, \u0022\u0022)\r\n    out = Replace(out, \u0022;\u0022, \u0022\u0022)\r\n    SanitizeForValueList = out\r\nEnd Function",
+  "Procedures": [
+    {
+      "Name": "BuildAddRowSelect",
+      "ProcedureType": "Function",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": "String",
+      "Parameters": [
+        {
+          "Name": "addLabel",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "dataColCount",
+          "DataType": "Long",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 54,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "BuildAddableRowSource",
+      "ProcedureType": "Function",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": "String",
+      "Parameters": [
+        {
+          "Name": "dataSelect",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "addLabel",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "dataColCount",
+          "DataType": "Long",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "orderBy",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": true,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": "\u00221\u0022"
+        }
+      ],
+      "StartLine": 86,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "OpenDetailFromList",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "lst",
+          "DataType": "Access.ListBox",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "detailFormName",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "contextOpenArgs",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": true,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": "\u0022\u0022"
+        }
+      ],
+      "StartLine": 113,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "BuildContextArgs",
+      "ProcedureType": "Function",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": "String",
+      "Parameters": [
+        {
+          "Name": "pairs",
+          "DataType": "Variant",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": true,
+          "IsArray": true,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 146,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "IsAddMode",
+      "ProcedureType": "Function",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": "Boolean",
+      "Parameters": [
+        {
+          "Name": "args",
+          "DataType": "Variant",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 186,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "GetContextString",
+      "ProcedureType": "Function",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": "String",
+      "Parameters": [
+        {
+          "Name": "args",
+          "DataType": "Variant",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "key",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 194,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "GetContextLong",
+      "ProcedureType": "Function",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": "Long",
+      "Parameters": [
+        {
+          "Name": "args",
+          "DataType": "Variant",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "key",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 214,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "PopulateAddableListBoxFromAdo",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "lst",
+          "DataType": "Access.ListBox",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "sql",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "addLabel",
+          "DataType": "String",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 220,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "SanitizeForValueList",
+      "ProcedureType": "Function",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": "String",
+      "Parameters": [
+        {
+          "Name": "s",
+          "DataType": "String",
+          "PassingMechanism": "ByVal",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 295,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    }
+  ]
+}

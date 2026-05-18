@@ -1,0 +1,10 @@
+{
+  "Name": "qryApprovedPlansByClient",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT tblClientServiceNeeds.ClientID, tblClientServicePlan.FiscalYear, tblClientServicePlan.AnnualEstCost, tblClientServicePlan.ClientServicePlanID\r\nFROM tblClientServicePlan INNER JOIN tblClientServiceNeeds ON tblClientServicePlan.ClientServiceNeedID = tblClientServiceNeeds.ClientServiceNeedID\r\nWHERE tblClientServicePlan.Status = \u0027Approved\u0027;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

@@ -1,0 +1,893 @@
+{
+  "Type": "Form",
+  "Properties": {
+    "RecordSelectors": "NotDefault",
+    "AutoCenter": "NotDefault",
+    "NavigationButtons": "NotDefault",
+    "DividingLines": "NotDefault",
+    "AllowDesignChanges": "NotDefault",
+    "DefaultView": "0",
+    "ViewsAllowed": "1",
+    "TabularFamily": "0",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "10230",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "30",
+    "Right": "9165",
+    "Bottom": "10740",
+    "DatasheetGridlinesColor": "15263976",
+    "RecSrcDt": "0xa41636433288e640",
+    "GUID": "0x17d8eaf3a074ff409d6f58a9dba0fe11",
+    "NameMap": "0x0acc0e5500000000290b818178f9e643a8ad35839643a7be0000000020d67e8c ,\n0x4d89e6400000000000000000740062006c0043006c00690065006e0074005300 ,\n0x65007200760069006300650050006c0061006e000000000000001361b3528c40 ,\n0x584eaff83f4d9ff28dc607000000290b818178f9e643a8ad35839643a7be4300 ,\n0x6c00690065006e007400530065007200760069006300650050006c0061006e00 ,\n0x4900440000000000000081e2316fb5a3a94fa4f32423da9d711607000000290b ,\n0x818178f9e643a8ad35839643a7be43006c00690065006e007400530065007200 ,\n0x76006900630065004e0065006500640049004400000000000000164cbc26e290 ,\n0x84429fc571c69cc248e507000000290b818178f9e643a8ad35839643a7be4600 ,\n0x69007300630061006c0059006500610072000000000000009177faaa08fb9e44 ,\n0x9cc1ba717c109f2a07000000290b818178f9e643a8ad35839643a7be48006f00 ,\n0x7500720073005000650072005700650065006b00000000000000caf80307dae2 ,\n0x594fadb480532bd6930c07000000290b818178f9e643a8ad35839643a7be5700 ,\n0x650065006b006c00790043006f00730074000000000000000830e7d62ac5ee44 ,\n0xb21f85d941bb404b07000000290b818178f9e643a8ad35839643a7be41006e00 ,\n0x6e00750061006c0045007300740043006f0073007400000000000000f7d5ca76 ,\n0x8f4fd6448a4202f6efbc811907000000290b818178f9e643a8ad35839643a7be ,\n0x41007000700072006f00760061006c0044006100740065000000000000000016 ,\n0x9b7c01a7604991c603b8b43c4ae707000000290b818178f9e643a8ad35839643 ,\n0xa7be41007000700072006f0076006500640042007900000000000000d00d0fad ,\n0x522845459d225f6ac74ee71707000000290b818178f9e643a8ad35839643a7be ,\n0x4e006f0074006500730000000000000061fd09468fea844899fc0dcb92aefa2a ,\n0x07000000290b818178f9e643a8ad35839643a7be500072006f00760069006400 ,\n0x65007200530065007200760069006300650043006100740061006c006f006700 ,\n0x49004400000000000000b8410c33701a5c4ba4c6eb068ea2775907000000290b ,\n0x818178f9e643a8ad35839643a7be530074006100740075007300000000000000 ,\n0xd5320aa241388d43b146dab1ef55c7e200000000042b396a3488e64000000000 ,\n0x0000000074006c006b00700050006c0061006e00530074006100740075007300 ,\n0x65007300000000000000eadb805acdf5f14383a9033b87301e4607000000d532 ,\n0x0aa241388d43b146dab1ef55c7e25300740061007400750073004e0061006d00 ,\n0x6500000000000000000000000000000000000000000000000c00000005000000 ,\n0x0000000000000000000000000000",
+    "RecordSource": "tblClientServicePlan",
+    "Caption": "frmClientServicePlanDetail",
+    "BeforeUpdate": "[Event Procedure]",
+    "AfterUpdate": "[Event Procedure]",
+    "OnOpen": "[Event Procedure]",
+    "DatasheetFontName": "Aptos",
+    "PrtMip": "0x6801000068010000680100006801000000000000201c0000e010000001000000 ,\n0x010000006801000000000000a10700000100000001000000",
+    "PrtDevMode": "0x003f83f3fd7f00000000000000000000902f2ee129000000d01c2ee129000000 ,\n0x010403069c00f003532d800101000100ea0a6f08640001000101fcff02000100 ,\n0xb004030001004c6574746572007f0000000074301802000000000000f67f0000 ,\n0x7043861118020000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNames": "0x0800290048000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005753442d34353138316338662d323438612d343961312d61 ,\n0x3365302d63666435363464313538393600000000000000000000000000",
+    "OnLoad": "[Event Procedure]",
+    "OnError": "[Event Procedure]",
+    "AllowDatasheetView": "0",
+    "FilterOnLoad": "0",
+    "ShowPageMargins": "0",
+    "DisplayOnSharePointSite": "1",
+    "DatasheetAlternateBackColor": "15921906",
+    "DatasheetGridlinesColor12": "0",
+    "FitToScreen": "1",
+    "DatasheetBackThemeColorIndex": "1",
+    "BorderThemeColorIndex": "3",
+    "ThemeFontIndex": "1",
+    "ForeThemeColorIndex": "0",
+    "AlternateBackThemeColorIndex": "1",
+    "AlternateBackShade": "95.0",
+    "PrtDevModeW": "0x0000000000000000000000000000000060249211180200000000000000000000 ,\n0x502492111802000023000100000000005803a43c180200005100000029000000 ,\n0x01040306dc00f003532d800101000100ea0a6f08640001000101fcff02000100 ,\n0xb004030001004c00650074007400650072000000000000005001743018020000 ,\n0x8000000000000000800000000000000030299211180200002803743018020000 ,\n0x0300000000000000000000000000000000000000010000000000000001000000 ,\n0x0200000012010000ffffffff4749533400000000000000000000000044494e55 ,\n0x22007801d4031c00fef5d3800000000000000000000000000000000000000000 ,\n0x00000000000000000d0000000100000001000000000001000000000000000400 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000100000000000000000000000000000000000000 ,\n0x00000000000000000000000000000000000000000000000078010000534d544a ,\n0x00000000100068017b00380044004600350045004100310044002d0043003200 ,\n0x390032002d0034006200380031002d0041003200300039002d00350030003900 ,\n0x3400320036003100340043003900350035007d000000496e70757442696e0031 ,\n0x00524553444c4c00556e69726573444c4c00506167654f75747075745175616c ,\n0x697479004e6f726d616c004a6f62506167654f72646572005265766572736500 ,\n0x4465766963654c616e67756167650050434c6d5300436f6c6c617465004f4e00 ,\n0x446f63756d656e744e5570003100436f6c6f724d6f6465004f6666004475706c ,\n0x6578004e4f4e4500506170657253697a65004c4554544552004f7269656e7461 ,\n0x74696f6e00504f525452414954005265736f6c7574696f6e0036303078363030 ,\n0x004d656469615479706500302e313030342e3437373000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000000000001c0000005634444d0100000000000000 ,\n0x000000000000000000000000",
+    "PrtDevNamesW": "0x0400250044000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x00000000000000005700530044002d0034003500310038003100630038006600 ,\n0x2d0032003400380061002d0034003900610031002d0061003300650030002d00 ,\n0x6300660064003500360034006400310035003800390036000000000000000000 ,\n0x000000000000000000000000000000000000",
+    "NoSaveCTIWhenDisabled": "1"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {},
+      "Children": [
+        {
+          "Type": "Label",
+          "Properties": {
+            "BackStyle": "0",
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "BorderColor": "8355711",
+            "ForeColor": "6710886",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "0",
+            "BorderTint": "50.0",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "60.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "CommandButton",
+          "Properties": {
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "FontWeight": "400",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0",
+            "UseTheme": "1",
+            "Shape": "1",
+            "Gradient": "12",
+            "BackColor": "14790982",
+            "BackThemeColorIndex": "4",
+            "BackTint": "60.0",
+            "BorderLineStyle": "0",
+            "BorderColor": "14790982",
+            "BorderThemeColorIndex": "4",
+            "BorderTint": "60.0",
+            "ThemeFontIndex": "1",
+            "HoverColor": "15453059",
+            "HoverThemeColorIndex": "4",
+            "HoverTint": "40.0",
+            "PressedColor": "6440976",
+            "PressedThemeColorIndex": "4",
+            "PressedShade": "75.0",
+            "HoverForeColor": "4210752",
+            "HoverForeThemeColorIndex": "0",
+            "HoverForeTint": "75.0",
+            "PressedForeColor": "4210752",
+            "PressedForeThemeColorIndex": "0",
+            "PressedForeTint": "75.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "TextBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "FELineBreak": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "AsianLineBreak": "1",
+            "GridlineColor": "10921638",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ThemeFontIndex": "1",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "ComboBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "2102279",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "AllowValueListEdits": "1",
+            "InheritValueList": "1",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ForeThemeColorIndex": "2",
+            "ForeShade": "50.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormHeader",
+          "Properties": {
+            "Height": "780",
+            "BackColor": "15783096",
+            "Name": "FormHeader",
+            "GUID": "0x4943446fe95d7442a3e912e3e2c2afcb",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "2",
+            "BackTint": "20.0"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "60",
+                    "Top": "60",
+                    "Width": "5760",
+                    "Height": "598",
+                    "FontSize": "20",
+                    "Name": "lblEditClientServicePlan",
+                    "Caption": "Edit Client Service Plan",
+                    "GUID": "0xd6837b3e6de00d4db2987fda1ec2109e",
+                    "LayoutCachedLeft": "60",
+                    "LayoutCachedTop": "60",
+                    "LayoutCachedWidth": "5820",
+                    "LayoutCachedHeight": "658"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "Section",
+          "Properties": {
+            "Height": "5460",
+            "Name": "Detail",
+            "GUID": "0x39e973be6f10bc419e1fe57bbaac03df",
+            "AlternateBackColor": "15921906",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Visible": "NotDefault",
+                    "Locked": "NotDefault",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "360",
+                    "Width": "2190",
+                    "Height": "315",
+                    "ColumnWidth": "1440",
+                    "Name": "txtClientServicePlanID",
+                    "ControlSource": "ClientServicePlanID",
+                    "GUID": "0x755237accba1a742a88c3a12e7abfb45",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "360",
+                    "LayoutCachedWidth": "5100",
+                    "LayoutCachedHeight": "675"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "360",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblClientServicePlanID",
+                            "Caption": "Client Service Plan ID",
+                            "GUID": "0xeb56136b9c17944a811db98d70883455",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "360",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "690"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Visible": "NotDefault",
+                    "Locked": "NotDefault",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "7440",
+                    "Top": "420",
+                    "Width": "360",
+                    "Height": "330",
+                    "ColumnWidth": "1515",
+                    "TabIndex": "2",
+                    "Name": "txtClientServiceNeedID",
+                    "ControlSource": "ClientServiceNeedID",
+                    "GUID": "0x7cc0609ef8174142bc031e0d3f9565c9",
+                    "LayoutCachedLeft": "7440",
+                    "LayoutCachedTop": "420",
+                    "LayoutCachedWidth": "7800",
+                    "LayoutCachedHeight": "750"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Locked": "NotDefault",
+                    "TabStop": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "OverlapFlags": "85",
+                    "TextAlign": "3",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "1200",
+                    "Width": "2190",
+                    "Height": "330",
+                    "ColumnWidth": "1035",
+                    "TabIndex": "3",
+                    "Name": "txtFiscalYear",
+                    "ControlSource": "FiscalYear",
+                    "Format": "General Number",
+                    "GUID": "0x26494ce7ba41674fab8426eb72a30a6f",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "1200",
+                    "LayoutCachedWidth": "5100",
+                    "LayoutCachedHeight": "1530"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "1200",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblFiscalYear",
+                            "Caption": "Fiscal Year",
+                            "GUID": "0x98bae8e39c66e84587350209a15403d9",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "1200",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "1530"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "DecimalPlaces": "1",
+                    "OverlapFlags": "85",
+                    "TextAlign": "3",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "1620",
+                    "Width": "2190",
+                    "Height": "330",
+                    "ColumnWidth": "1740",
+                    "TabIndex": "4",
+                    "Name": "txtHoursPerWeek",
+                    "ControlSource": "HoursPerWeek",
+                    "Format": "Fixed",
+                    "GUID": "0xa7d8998ab839dc4797bce9eefd7c38ca",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "1620",
+                    "LayoutCachedWidth": "5100",
+                    "LayoutCachedHeight": "1950"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "1620",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblHoursPerWeek",
+                            "Caption": "Hours per Week",
+                            "GUID": "0xe96435d15e7f3846899c604cdc3e8e5c",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "1620",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "1950"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Locked": "NotDefault",
+                    "TabStop": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "OverlapFlags": "85",
+                    "TextAlign": "3",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "2040",
+                    "Width": "2190",
+                    "Height": "330",
+                    "ColumnWidth": "3000",
+                    "TabIndex": "5",
+                    "Name": "txtWeeklyCost",
+                    "ControlSource": "WeeklyCost",
+                    "Format": "$#,##0.00;($#,##0.00)",
+                    "GUID": "0xf19b19eb21d57b42822c97b8a8a9706a",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "2040",
+                    "LayoutCachedWidth": "5100",
+                    "LayoutCachedHeight": "2370",
+                    "CurrencySymbol": "$"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "2040",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblWeeklyCost",
+                            "Caption": "Weekly Cost",
+                            "GUID": "0x9a8088b9cced9b43b88a3affa005e8fa",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "2040",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "2370"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "Locked": "NotDefault",
+                    "TabStop": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "OverlapFlags": "85",
+                    "TextAlign": "3",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "2460",
+                    "Width": "2190",
+                    "Height": "330",
+                    "ColumnWidth": "3000",
+                    "TabIndex": "7",
+                    "Name": "txtAnnualEstCost",
+                    "ControlSource": "AnnualEstCost",
+                    "Format": "$#,##0.00;($#,##0.00)",
+                    "GUID": "0x2de5731a061fb047a897075d0bce7b18",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "2460",
+                    "LayoutCachedWidth": "5100",
+                    "LayoutCachedHeight": "2790",
+                    "CurrencySymbol": "$"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "2460",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblAnnualEstCost",
+                            "Caption": "Annual Est. Cost",
+                            "GUID": "0x4bb20973cb3a2f41afb76c0b42c349ae",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "2460",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "2790"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "2880",
+                    "Width": "2190",
+                    "Height": "330",
+                    "ColumnWidth": "1620",
+                    "TabIndex": "8",
+                    "Name": "txtApprovalDate",
+                    "ControlSource": "ApprovalDate",
+                    "Format": "Short Date",
+                    "GUID": "0x019d5d400e40034ebcd5af97f5e3340d",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "2880",
+                    "LayoutCachedWidth": "5100",
+                    "LayoutCachedHeight": "3210"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "2880",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblApprovalDate",
+                            "Caption": "Approval Date",
+                            "GUID": "0xe17210e002f84a44b75079d2aaa4afe3",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "2880",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "3210"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "3300",
+                    "Width": "3660",
+                    "Height": "330",
+                    "ColumnWidth": "3000",
+                    "TabIndex": "9",
+                    "Name": "txtApprovedBy",
+                    "ControlSource": "ApprovedBy",
+                    "GUID": "0x9aad7e14863a0642bfe5e01308061f15",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "3300",
+                    "LayoutCachedWidth": "6570",
+                    "LayoutCachedHeight": "3630"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "3300",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblApprovedBy",
+                            "Caption": "Approved By",
+                            "GUID": "0x8316abaf4f3dd843801664723c2e211e",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "3300",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "3630"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "EnterKeyBehavior": "NotDefault",
+                    "ScrollBars": "2",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "4140",
+                    "Width": "7260",
+                    "Height": "1140",
+                    "ColumnWidth": "3000",
+                    "TabIndex": "10",
+                    "Name": "txtNotes",
+                    "ControlSource": "Notes",
+                    "GUID": "0x7d3c05e4686a824eb6aab9c562b798cf",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "4140",
+                    "LayoutCachedWidth": "10170",
+                    "LayoutCachedHeight": "5280"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "4140",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblNotes",
+                            "Caption": "Notes",
+                            "GUID": "0xf50d6d8a168d5340afbba097ce683443",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "4140",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "4470"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "ComboBox",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "ColumnCount": "2",
+                    "ListWidth": "2880",
+                    "Left": "2910",
+                    "Top": "780",
+                    "Width": "3690",
+                    "Height": "315",
+                    "TabIndex": "1",
+                    "ForeColor": "4210752",
+                    "GUID": "0xe9ff23ae8fb4614fb616b3d4ec01eb8b",
+                    "Name": "cboProviderServiceCatalogID",
+                    "ControlSource": "ProviderServiceCatalogID",
+                    "RowSourceType": "Table/Query",
+                    "ColumnWidths": "0;2880",
+                    "AfterUpdate": "[Event Procedure]",
+                    "OnNotInList": "[Event Procedure]",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "780",
+                    "LayoutCachedWidth": "6600",
+                    "LayoutCachedHeight": "1095",
+                    "ForeThemeColorIndex": "0",
+                    "ForeTint": "75.0",
+                    "ForeShade": "100.0"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "780",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblProviderServiceCatalogID",
+                            "Caption": "Provider Service",
+                            "GUID": "0xae4f95d0692e8c41a18dc02986df68f5",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "780",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "1110"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "ComboBox",
+                  "Properties": {
+                    "Locked": "NotDefault",
+                    "TabStop": "NotDefault",
+                    "OldBorderStyle": "0",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "2910",
+                    "Top": "3720",
+                    "Width": "2190",
+                    "Height": "300",
+                    "TabIndex": "6",
+                    "ForeColor": "4210752",
+                    "ColumnInfo": "\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u002210\\\u0022;\\\u002240\\\u0022",
+                    "GUID": "0xbf7da134c666ad4b91af219944ca1095",
+                    "Name": "cboStatus",
+                    "ControlSource": "Status",
+                    "RowSourceType": "Table/Query",
+                    "RowSource": "SELECT tlkpPlanStatuses.StatusName FROM tlkpPlanStatuses; ",
+                    "LayoutCachedLeft": "2910",
+                    "LayoutCachedTop": "3720",
+                    "LayoutCachedWidth": "5100",
+                    "LayoutCachedHeight": "4020",
+                    "ForeThemeColorIndex": "0",
+                    "ForeTint": "75.0",
+                    "ForeShade": "100.0"
+                  },
+                  "Children": [
+                    {
+                      "Type": "Begin",
+                      "Properties": {},
+                      "Children": [
+                        {
+                          "Type": "Label",
+                          "Properties": {
+                            "OverlapFlags": "85",
+                            "Left": "360",
+                            "Top": "3720",
+                            "Width": "2460",
+                            "Height": "330",
+                            "Name": "lblStatus",
+                            "Caption": "Status",
+                            "GUID": "0xc241bbed79bbf24081ba8f58fcc34696",
+                            "LayoutCachedLeft": "360",
+                            "LayoutCachedTop": "3720",
+                            "LayoutCachedWidth": "2820",
+                            "LayoutCachedHeight": "4050"
+                          },
+                          "Children": [],
+                          "VbaCode": null
+                        }
+                      ],
+                      "VbaCode": null
+                    }
+                  ],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        },
+        {
+          "Type": "FormFooter",
+          "Properties": {
+            "Height": "960",
+            "Name": "FormFooter",
+            "GUID": "0x17fdff657622594caff20da5b8bcbe61",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "300",
+                    "Top": "240",
+                    "Width": "1620",
+                    "Height": "480",
+                    "Name": "btnSave",
+                    "Caption": "Save",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0xa4e8782cc0fa064f929fbff51db73aff",
+                    "LayoutCachedLeft": "300",
+                    "LayoutCachedTop": "240",
+                    "LayoutCachedWidth": "1920",
+                    "LayoutCachedHeight": "720",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "2280",
+                    "Top": "240",
+                    "Width": "1620",
+                    "Height": "480",
+                    "TabIndex": "1",
+                    "Name": "btnCancel",
+                    "Caption": "Cancel",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0xdb5a84b3531686448ddd379eb5be0a92",
+                    "LayoutCachedLeft": "2280",
+                    "LayoutCachedTop": "240",
+                    "LayoutCachedWidth": "3900",
+                    "LayoutCachedHeight": "720",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                },
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "4260",
+                    "Top": "240",
+                    "Width": "1620",
+                    "Height": "480",
+                    "TabIndex": "2",
+                    "Name": "btnDelete",
+                    "Caption": "Delete",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0x65723d5d856b60418fa0dc930a1c9cc2",
+                    "LayoutCachedLeft": "4260",
+                    "LayoutCachedTop": "240",
+                    "LayoutCachedWidth": "5880",
+                    "LayoutCachedHeight": "720",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null
+        }
+      ],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": "CodeBehindForm\r\nAttribute VB_GlobalNameSpace = False\r\nAttribute VB_Creatable = True\r\nAttribute VB_PredeclaredId = True\r\nAttribute VB_Exposed = False\r\nOption Compare Database\r\nOption Explicit\r\n\u0027 ============================================================================\r\n\u0027  frmClientServicePlanDetail\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027  Popup detail form for a single tblClientServicePlan row.\r\n\u0027  Opened acDialog from frmBudgetServicePlan.lstClientServicePlan.\r\n\u0027\r\n\u0027  RecordSource:  tblClientServicePlan\r\n\u0027  PopUp:         True\r\n\u0027  Modal:         True            (the caller also passes acDialog)\r\n\u0027  BorderStyle:   3  (Dialog)\r\n\u0027\r\n\u0027  Bound controls (suggested):\r\n\u0027     txtClientServiceNeedID      (hidden; FK; populated from OpenArgs in Add)\r\n\u0027     txtFiscalYear               (locked; populated from OpenArgs in Add)\r\n\u0027     cboProviderServiceCatalogID (combo ? providers offering this need\u0027s\r\n\u0027                                  service in this FY; row source is rebuilt\r\n\u0027                                  in Form_Load once the FK is known)\r\n\u0027     txtHoursPerWeek             (Decimal/Double, \u003E 0)\r\n\u0027     txtWeeklyCost               (LOCKED ? populated by data macro on save)\r\n\u0027     txtAnnualEstCost            (LOCKED ? populated by data macro on save)\r\n\u0027     txtApprovalDate             (Date; optional)\r\n\u0027     cboApprovedBy               (or txtApprovedBy; optional)\r\n\u0027     cboStatus                   (combo with: Pending, Approved, Cancelled)\r\n\u0027     txtNotes                    (memo)\r\n\u0027\r\n\u0027  Action buttons:\r\n\u0027     btnSave    ? validates \u002B commits \u002B closes\r\n\u0027     btnCancel  ? undoes \u002B closes (no save)\r\n\u0027     btnDelete  ? confirms \u002B deletes \u002B closes (disabled in Add mode)\r\n\u0027\r\n\u0027  Cost fields:\r\n\u0027     WeeklyCost and AnnualEstCost are written by a Before Change data macro\r\n\u0027     on tblClientServicePlan, derived from HoursPerWeek ? RatePerHour\r\n\u0027     (and ?52 for the annual). The bound controls on this form display\r\n\u0027     those values but are Locked = True so the user can\u0027t override them.\r\n\u0027     They will appear blank in Add mode until the record is saved, at\r\n\u0027     which point Access requeries and the macro-computed values appear.\r\n\u0027 ============================================================================\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    Dim args As Variant\r\n    args = Me.OpenArgs\r\n    If basListHelpers.IsAddMode(args) Then\r\n        Me.DataEntry = True\r\n    ElseIf IsNumeric(Nz(args, \u0022\u0022)) Then\r\n        Me.Filter = \u0022ClientServicePlanID=\u0022 \u0026 CLng(args)\r\n        Me.FilterOn = True\r\n    End If\r\nEnd Sub\r\nPrivate Sub Form_Load()\r\n    On Error GoTo LoadFailed\r\n    Dim needId As Long, fy As Long\r\n    If basListHelpers.IsAddMode(Me.OpenArgs) Then\r\n        needId = basListHelpers.GetContextLong(Me.OpenArgs, \u0022ClientServiceNeedID\u0022)\r\n        fy = basListHelpers.GetContextLong(Me.OpenArgs, \u0022FiscalYear\u0022)\r\n        If needId \u003E 0 Then Me!ClientServiceNeedID = needId\r\n        If fy \u003E 0 Then Me!FiscalYear = fy\r\n        If IsNull(Me!Status) Then Me!Status = \u0022Pending\u0022\r\n        Me.btnDelete.Enabled = False\r\n        Me.Caption = \u0022New Service Plan Entry\u0022\r\n    Else\r\n        needId = Nz(Me!ClientServiceNeedID, 0)\r\n        fy = Nz(Me!FiscalYear, 0)\r\n        Me.btnDelete.Enabled = True\r\n        Me.Caption = \u0022Edit Service Plan Entry\u0022\r\n    End If\r\n    BuildCatalogCombo needId, fy\r\n    Me.txtWeeklyCost.Locked = True\r\n    Me.txtAnnualEstCost.Locked = True\r\n    Me.txtFiscalYear.Locked = True\r\n    Exit Sub\r\nLoadFailed:\r\n    \u0027 Emit to Immediate Window so the failing line is visible.\r\n    \u0027 Resume Next keeps the form open instead of canceling the OpenForm.\r\n    Debug.Print \u0022[frmClientServicePlanDetail.Form_Load] Error \u0022 \u0026 _\r\n                Err.Number \u0026 \u0022 at line \u0022 \u0026 Erl \u0026 \u0022: \u0022 \u0026 Err.Description\r\n    Resume Next\r\nEnd Sub\r\nPrivate Sub BuildCatalogCombo(needId As Long, fy As Long)\r\n    If needId \u003C= 0 Or fy \u003C= 0 Then\r\n        Me.cboProviderServiceCatalogID.RowSource = \u0022\u0022\r\n        Exit Sub\r\n    End If\r\n    Dim sql As String\r\n    sql = _\r\n        \u0022SELECT psc.ProviderServiceCatalogID, \u0022 \u0026 _\r\n               \u0022p.ProviderName \u0026 \u0027 ? $\u0027 \u0026 Format(psc.RatePerHour,\u0027Fixed\u0027) \u0026 \u0027/hr\u0027 AS DisplayLabel \u0022 \u0026 _\r\n        \u0022FROM (tblProviderServiceCatalog AS psc \u0022 \u0026 _\r\n              \u0022INNER JOIN tblProviders AS p ON p.ProviderID = psc.ProviderID) \u0022 \u0026 _\r\n             \u0022INNER JOIN tblClientServiceNeeds AS csn \u0022 \u0026 _\r\n                \u0022ON  csn.ServiceID  = psc.ServiceID \u0022 \u0026 _\r\n                \u0022AND csn.FiscalYear = psc.FiscalYear \u0022 \u0026 _\r\n        \u0022WHERE csn.ClientServiceNeedID = \u0022 \u0026 needId \u0026 _\r\n          \u0022 AND psc.FiscalYear = \u0022 \u0026 fy \u0026 \u0022 \u0022 \u0026 _\r\n        \u0022ORDER BY p.ProviderName\u0022\r\n    Me.cboProviderServiceCatalogID.RowSourceType = \u0022Table/Query\u0022\r\n    Me.cboProviderServiceCatalogID.RowSource = sql\r\n    Me.cboProviderServiceCatalogID.Requery\r\nEnd Sub\r\nPrivate Sub Form_BeforeUpdate(Cancel As Integer)\r\n    If IsNull(Me!ProviderServiceCatalogID) Then\r\n        MsgBox \u0022Please select a provider/rate.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Me.cboProviderServiceCatalogID.SetFocus\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    If IsNull(Me!HoursPerWeek) Or Me!HoursPerWeek \u003C= 0 Then\r\n        MsgBox \u0022Hours per week must be greater than zero.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Me.txtHoursPerWeek.SetFocus\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    If Me!HoursPerWeek \u003E 168 Then\r\n        MsgBox \u0022Hours per week cannot exceed 168 (hours in a week).\u0022, _\r\n               vbExclamation, \u0022Validation\u0022\r\n        Me.txtHoursPerWeek.SetFocus\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    If Len(Nz(Me!Status, \u0022\u0022)) = 0 Then\r\n        \u0027 (cboStatus is Locked since Status is macro-derived; no SetFocus here.)\r\n        MsgBox \u0022Please choose a status.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    \u0027 Same need \u002B same provider/catalog row = duplicate plan entry.\r\n    Dim selfID As Long\r\n    selfID = Nz(Me!ClientServicePlanID, 0)\r\n    If DCount(\u0022*\u0022, \u0022tblClientServicePlan\u0022, _\r\n              \u0022ClientServiceNeedID=\u0022 \u0026 Me!ClientServiceNeedID \u0026 _\r\n              \u0022 AND ProviderServiceCatalogID=\u0022 \u0026 Me!ProviderServiceCatalogID \u0026 _\r\n              \u0022 AND ClientServicePlanID\u003C\u003E\u0022 \u0026 selfID) \u003E 0 Then\r\n        MsgBox \u0022A plan entry for this need and provider already exists.\u0022, _\r\n               vbExclamation, \u0022Duplicate\u0022\r\n        Cancel = True\r\n    End If\r\n    \u0027 Budget-exceeded enforcement lives in tblClientServicePlan.BeforeChange data macro.\r\n    \u0027 That macro RaiseError 1001 surfaces here as a data error caught by Form_Error.\r\nEnd Sub\r\nPrivate Sub Form_AfterUpdate()\r\n    \u0027 Tell the parent workspace that totals/list need to refresh. The\r\n    \u0027 parent\u0027s lstClientServicePlan_DblClick also calls PopulateClientServicePlan\r\n    \u0027 after we close, so this is belt-and-suspenders for the totals.\r\n    On Error Resume Next\r\n    Forms!frmBudgetServicePlan.NotifyPlanChanged\r\n    On Error GoTo 0\r\nEnd Sub\r\n\u0027 ============================================================================\r\n\u0027  Action buttons\r\n\u0027 ============================================================================\r\nPrivate Sub btnSave_Click()\r\n    On Error GoTo Failed\r\n    If Me.Dirty Then Me.Dirty = False    \u0027 fires Form_BeforeUpdate\r\n    DoCmd.Close acForm, Me.name\r\n    Exit Sub\r\nFailed:\r\n    \u0027 Validation canceled the save ? leave the dialog open.\r\nEnd Sub\r\nPrivate Sub btnCancel_Click()\r\n    On Error Resume Next\r\n    Me.Undo\r\n    DoCmd.Close acForm, Me.name, acSaveNo\r\nEnd Sub\r\nPrivate Sub btnDelete_Click()\r\n    If Me.NewRecord Then Exit Sub\r\n    If MsgBox(\u0022Delete this plan entry?\u0022, _\r\n              vbYesNo \u002B vbQuestion \u002B vbDefaultButton2, _\r\n              \u0022Confirm Delete\u0022) = vbNo Then Exit Sub\r\n    On Error GoTo Failed\r\n    RunCommand acCmdSelectRecord\r\n    RunCommand acCmdDeleteRecord\r\n    DoCmd.Close acForm, Me.name\r\n    On Error Resume Next\r\n    Forms!frmBudgetServicePlan.NotifyPlanChanged\r\n    Exit Sub\r\nFailed:\r\n    MsgBox \u0022Could not delete: \u0022 \u0026 Err.Description, vbCritical, \u0022Delete Failed\u0022\r\nEnd Sub\r\n\u0027 ============================================================================\r\n\u0027  Combo niceties\r\n\u0027 ============================================================================\r\nPrivate Sub cboProviderServiceCatalogID_AfterUpdate()\r\n    \u0027 If the user picked a catalog row, the data macro will recompute\r\n    \u0027 WeeklyCost and AnnualEstCost on save. We don\u0027t preview the values\r\n    \u0027 here ? the locked controls stay blank until the requery ? but if\r\n    \u0027 you want a live preview, this is where you\u0027d compute and display it\r\n    \u0027 (keeping the controls Locked so they\u0027re still macro-authoritative).\r\nEnd Sub\r\nPrivate Sub cboProviderServiceCatalogID_NotInList(NewData As String, Response As Integer)\r\n    Response = acDataErrContinue\r\n    MsgBox \u0022To add a provider or rate, use the Provider Detail form\u0027s catalog list.\u0022, _\r\n           vbInformation, \u0022Add Provider/Rate Elsewhere\u0022\r\nEnd Sub\r\nPrivate Sub Form_Error(DataErr As Integer, Response As Integer)\r\n    If DataErr = 1001 Then\r\n        MsgBox \u0022Cannot approve: this plan would exceed the client\u0027s annual budget.\u0022, _\r\n               vbExclamation, \u0022Budget Exceeded\u0022\r\n        Response = acDataErrContinue\r\n    End If\r\nEnd Sub\r\n"
+}

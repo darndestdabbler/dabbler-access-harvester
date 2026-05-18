@@ -1,0 +1,336 @@
+{
+  "Type": "Form",
+  "Properties": {
+    "RecordSelectors": "False",
+    "NavigationButtons": "False",
+    "DividingLines": "True",
+    "AllowDesignChanges": "False",
+    "DefaultView": "0",
+    "ScrollBars": "0",
+    "TabularFamily": "0",
+    "BorderStyle": "0",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "11520",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "43",
+    "Right": "9165",
+    "Bottom": "10740",
+    "DatasheetGridlinesColor": "15263976",
+    "RecSrcDt": "0x04acdff8ae83e640",
+    "OnDirty": "[Event Procedure]",
+    "GUID": "0x3ce256bf884a0843964c0b87c2b94784",
+    "NameMap": "0x0acc0e550000000000789dbdbfb1b14a8f0a1f377089d7da00000000d895336a ,\n0x3488e6400000000000000000740062006c00500072006f007600690064006500 ,\n0x72007300000000000000f16b229c0ce0044cacc1529ec115b3f6070000000078 ,\n0x9dbdbfb1b14a8f0a1f377089d7da500072006f00760069006400650072004900 ,\n0x4400000000000000679c19b998b15040b15ffd5aeb6531410700000000789dbd ,\n0xbfb1b14a8f0a1f377089d7da4900730041006300740069007600650000000000 ,\n0x0000868ee96342f56543b2004f0e97cb04740700000000789dbdbfb1b14a8f0a ,\n0x1f377089d7da500072006f00760069006400650072004e0061006d0065000000 ,\n0x00000000254c588ee0923146a0de608f763ef8470700000000789dbdbfb1b14a ,\n0x8f0a1f377089d7da43006f006e00740061006300740046006900720073007400 ,\n0x4e0061006d006500000000000000dd318d21dc417d46a38924fb7c255d710700 ,\n0x000000789dbdbfb1b14a8f0a1f377089d7da43006f006e007400610063007400 ,\n0x4c006100730074004e0061006d00650000000000000028542b8fd49f1d4189e4 ,\n0x3beb4f5d3ddc0700000000789dbdbfb1b14a8f0a1f377089d7da500068006f00 ,\n0x6e006500000000000000eec1c5b25ac6804c8a8e15cb7fd7ee9b070000000078 ,\n0x9dbdbfb1b14a8f0a1f377089d7da45006d00610069006c00000000000000dd46 ,\n0x902477b62e40abce16f8bbf75ac20700000000789dbdbfb1b14a8f0a1f377089 ,\n0xd7da4100640064007200650073007300310000000000000082c5a406063ac34c ,\n0x9aa5e79fe6c426740700000000789dbdbfb1b14a8f0a1f377089d7da41006400 ,\n0x640072006500730073003200000000000000225d29316e040f4bb59536067669 ,\n0x7c9f0700000000789dbdbfb1b14a8f0a1f377089d7da43006900740079000000 ,\n0x00000000f263424edfbf2d49a15e15d0c987602c0700000000789dbdbfb1b14a ,\n0x8f0a1f377089d7da5300740061007400650043006f0064006500000000000000 ,\n0xd85fcb75ee313a429220cafd7e41c05c0000000088a7301ce587e64000000000 ,\n0x0000000074006c006b007000530074006100740065007300000000000000901a ,\n0xa4c073c34b43bc5f185410a41de407000000d85fcb75ee313a429220cafd7e41 ,\n0xc05c5300740061007400650043006f006400650000000000000063b2b674b2e5 ,\n0x894a9abb60d729e2160e07000000d85fcb75ee313a429220cafd7e41c05c5300 ,\n0x74006100740065004e0061006d0065000000000000003d26bd7a48c0fd418a5c ,\n0x493c70371a000700000000789dbdbfb1b14a8f0a1f377089d7da5a0069007000 ,\n0x43006f006400650000000000000047a5e87591befa4288aacdaf20a63aff0700 ,\n0x000000789dbdbfb1b14a8f0a1f377089d7da4c006900630065006e0073006500 ,\n0x4e0075006d00620065007200000000000000a461a4e15f1ff84b89b92bab3a0f ,\n0xa1f80700000000789dbdbfb1b14a8f0a1f377089d7da4c006900630065006e00 ,\n0x73006500450078007000440061007400650000000000000056de534e62364747 ,\n0xa58c222c1fc364db00000000514b386a3488e640000000000000000074006c00 ,\n0x6b007000460069007300630061006c0059006500610072007300000000000000 ,\n0xf002456205a5234c8b66a5e074b4a96e0700000056de534e62364747a58c222c ,\n0x1fc364db460069007300630061006c00590065006100720000000000000028d8 ,\n0xc6d271934e45aa76ebe1349f36500700000056de534e62364747a58c222c1fc3 ,\n0x64db53007400610072007400440061007400650000000000000038ab1d2b8aa3 ,\n0x9c418a44de32ddd6ae280700000056de534e62364747a58c222c1fc364db4500 ,\n0x6e0064004400610074006500000000000000de49aadea588b34a9bcb52e542f5 ,\n0x8bd50700000056de534e62364747a58c222c1fc364db49007300430075007200 ,\n0x720065006e0074000000000000001610703fc460bb42b125ec152725d7570700 ,\n0x000000789dbdbfb1b14a8f0a1f377089d7da4e006f0074006500730000000000 ,\n0x0000000000000000000000000000000000000c00000005000000000000000000 ,\n0x0000000000000000",
+    "RecordSource": "tblProviders",
+    "Caption": "Provider Detail",
+    "OnCurrent": "[Event Procedure]",
+    "BeforeUpdate": "[Event Procedure]",
+    "OnOpen": "[Event Procedure]",
+    "DatasheetFontName": "Aptos",
+    "PrtMip": "0x6801000068010000680100006801000000000000201c0000e010000001000000 ,\n0x010000006801000000000000a10700000100000001000000",
+    "PrtDevMode": "0x000000000000000080122ee1290000000000000000000000d0132ee129000000 ,\n0x0104001e9c005411532d80010100010000000000640001000000fcff02000000 ,\n0xb004000000000000e657241ff67f000000001e0000000000f7701692fe7f0000 ,\n0x704c721118020000000000000000000000000000010000000000000001000000 ,\n0x0400000000000000000000000000000000000000000000000000000005000400 ,\n0x0300010001000500020001000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000800000003c0f000000005000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000010000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000004e00 ,\n0x6f006e0065000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000005000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000068d000004d0053004100430043004500530053002e004500 ,\n0x5800450000000000000000000000000000000000000000000000000000000000 ,\n0x000000000000000000000000640065006e006d00690000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000440045004e00490043004900000000000000 ,\n0x00000000000000000000000000000000",
+    "PrtDevNames": "0x0800230037000100000000000000000000000000000000000000000000000000 ,\n0x0000000000000000000000000000000000000000000000536f64615044464465 ,\n0x736b746f7031345f506f72743a00000000000000000000000000000000000000 ,\n0x000000000000000000000000000000000000000000000000000000000000",
+    "OnUndo": "[Event Procedure]",
+    "FilterOnLoad": "0",
+    "OnCloseEmMacro": "Version =196611\nColumnsShown =0\nBegin\nCondition =\u0022[CurrentProject].[AllForms]![frmProviderSearch].[IsLoaded]\u0022\nAction =\u0022Requery\u0022"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro Event=\\\u0022OnClose\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements\u003E\u003CConditionalBlock\u003E\u003CIf\u003E\u003CCondition\u003E[CurrentProject].[AllForms]![fr"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:mProviderSearch].[IsLoaded]\u003C/Condition\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022Requery\\\u0022/\u003E\u003C/Statements\u003E\u003C/If\u003E\u003C/ConditionalBlock\u003E\u003C/Statements\u003E\u003C/UserInterfaceMacro\u003E"
+      },
+      "Children": [],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": "CodeBehindForm\r\nAttribute VB_GlobalNameSpace = False\r\nAttribute VB_Creatable = True\r\nAttribute VB_PredeclaredId = True\r\nAttribute VB_Exposed = False\r\nOption Compare Database\r\nOption Explicit\r\nPrivate m_IsDirty As Boolean\r\n\u0027 ============================================================================\r\n\u0027  Replaces sfrmProviderServiceCatalog with lstProviderServiceCatalog.\r\n\u0027\r\n\u0027    lstProviderServiceCatalog\r\n\u0027      ColumnCount    = 4\r\n\u0027      ColumnWidths   = \u00220;3520;1320;1760\u0022   \u0027 first col (PK) hidden\r\n\u0027      ColumnHeads    = True\r\n\u0027      BoundColumn    = 1\r\n\u0027      RowSourceType  = \u0022Table/Query\u0022\r\n\u0027      Tied to: frmProviderServiceCatalogDetail\r\n\u0027 ============================================================================\r\nPrivate Sub PopulateProviderServiceCatalog()\r\n    If Me.NewRecord Or IsNull(Me.ProviderID) Then\r\n        Me.lstProviderServiceCatalog.RowSource = \u0022\u0022\r\n        Exit Sub\r\n    End If\r\n    Dim fy As Integer\r\n    fy = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())\r\n    Dim baseSql As String\r\n    baseSql = _\r\n        \u0022SELECT psc.ProviderServiceCatalogID AS ID, \u0022 \u0026 _\r\n               \u0022s.ServiceName AS [Service], \u0022 \u0026 _\r\n               \u0022psc.FiscalYear AS FY, \u0022 \u0026 _\r\n               \u0022Format(psc.RatePerHour,\u0027$#,##0.00\u0027) AS [Rate/Hr] \u0022 \u0026 _\r\n        \u0022FROM tblProviderServiceCatalog AS psc \u0022 \u0026 _\r\n             \u0022INNER JOIN tblServices AS s ON s.ServiceID = psc.ServiceID \u0022 \u0026 _\r\n        \u0022WHERE psc.ProviderID=\u0022 \u0026 Me.ProviderID \u0026 _\r\n          \u0022 AND psc.FiscalYear=\u0022 \u0026 fy\r\n    Me.lstProviderServiceCatalog.RowSource = basListHelpers.BuildAddableRowSource( _\r\n        dataSelect:=baseSql, _\r\n        addLabel:=\u0022(Add new catalog entry...)\u0022, _\r\n        dataColCount:=4, _\r\n        orderBy:=\u00222\u0022)           \u0027 by Service name\r\n    Me.lstProviderServiceCatalog.Requery\r\nEnd Sub\r\nPrivate Sub lstProviderServiceCatalog_DblClick(Cancel As Integer)\r\n    Dim ctx As String\r\n    ctx = basListHelpers.BuildContextArgs( _\r\n                \u0022ProviderID\u0022, Me.ProviderID, _\r\n                \u0022FiscalYear\u0022, Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear()))\r\n    basListHelpers.OpenDetailFromList Me.lstProviderServiceCatalog, _\r\n                                      \u0022frmProviderServiceCatalogDetail\u0022, _\r\n                                      ctx\r\nEnd Sub\r\n\u0027 ============================================================================\r\n\u0027  Existing form logic (preserved)\r\n\u0027 ============================================================================\r\nPrivate Sub cboFilterFiscalYear_AfterUpdate()\r\n    PopulateProviderServiceCatalog\r\n    UpdateCopyButtonState\r\nEnd Sub\r\nPrivate Sub Form_Open(Cancel As Integer)\r\n    If IsNull(Me.OpenArgs) Then Exit Sub\r\n    If UCase(Me.OpenArgs) = \u0022ADD\u0022 Then\r\n        Me.DataEntry = True\r\n    ElseIf IsNumeric(Me.OpenArgs) Then\r\n        Dim rs As DAO.Recordset\r\n        Set rs = Me.RecordsetClone\r\n        rs.FindFirst \u0022ProviderID=\u0022 \u0026 Me.OpenArgs\r\n        If Not rs.NoMatch Then\r\n            Me.Bookmark = rs.Bookmark\r\n        End If\r\n        Set rs = Nothing\r\n    End If\r\nEnd Sub\r\nPrivate Sub Form_Current()\r\n    Me.Caption = Nz(Me.txtProviderName, \u0022New Provider\u0022) \u0026 \u0022 - Provider Detail\u0022\r\n    \u0027 License expiration check\r\n    If Not IsNull(Me.txtLicenseExpDate) Then\r\n        If Me.txtLicenseExpDate \u003C Date Then\r\n            Me.lblLicenseWarning.Caption = \u0022LICENSE EXPIRED\u0022\r\n            Me.lblLicenseWarning.ForeColor = RGB(255, 0, 0)\r\n            Me.lblLicenseWarning.Visible = True\r\n        ElseIf Me.txtLicenseExpDate \u003C DateAdd(\u0022d\u0022, 90, Date) Then\r\n            Me.lblLicenseWarning.Caption = \u0022License expires soon\u0022\r\n            Me.lblLicenseWarning.ForeColor = RGB(255, 165, 0)\r\n            Me.lblLicenseWarning.Visible = True\r\n        Else\r\n            Me.lblLicenseWarning.Visible = False\r\n        End If\r\n    Else\r\n        Me.lblLicenseWarning.Visible = False\r\n    End If\r\n    m_IsDirty = False\r\n    \u0027 PK display: locked but visible (not grayed)\r\n    Me.txtProviderID.Locked = True\r\n    Me.txtProviderID.Enabled = True\r\n    Me.txtProviderID.BorderStyle = 0\r\n    Me.txtProviderID.TabStop = False\r\n    \u0027 Default the FY filter to whatever the combo\u0027s first item is.\r\n    On Error Resume Next\r\n    Me.cboFilterFiscalYear = Me.cboFilterFiscalYear.ItemData(1)\r\n    On Error GoTo 0\r\n    PopulateProviderServiceCatalog\r\n    UpdateCopyButtonState\r\n    On Error Resume Next\r\n    Me.btnSave.Enabled = False\r\n    On Error GoTo 0\r\nEnd Sub\r\nPrivate Sub Form_BeforeUpdate(Cancel As Integer)\r\n    If IsNull(Me.txtProviderName) Or Me.txtProviderName = \u0022\u0022 Then\r\n        MsgBox \u0022Provider Name is required.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Me.txtProviderName.SetFocus\r\n        Cancel = True\r\n    End If\r\nEnd Sub\r\nPrivate Sub Form_Dirty(Cancel As Integer)\r\n    m_IsDirty = True\r\n    On Error Resume Next\r\n    Me.btnSave.Enabled = True\r\n    On Error GoTo 0\r\nEnd Sub\r\nPrivate Sub Form_Undo(Cancel As Integer)\r\n    m_IsDirty = False\r\n    On Error Resume Next\r\n    Me.btnSave.Enabled = False\r\n    On Error GoTo 0\r\nEnd Sub\r\nPrivate Sub txtLicenseExpDate_AfterUpdate()\r\n    If Not IsNull(Me.txtLicenseExpDate) Then\r\n        If Me.txtLicenseExpDate \u003C Date Then\r\n            Me.lblLicenseWarning.Caption = \u0022LICENSE EXPIRED\u0022\r\n            Me.lblLicenseWarning.ForeColor = RGB(255, 0, 0)\r\n            Me.lblLicenseWarning.Visible = True\r\n        ElseIf Me.txtLicenseExpDate \u003C DateAdd(\u0022d\u0022, 90, Date) Then\r\n            Me.lblLicenseWarning.Caption = \u0022License expires soon\u0022\r\n            Me.lblLicenseWarning.ForeColor = RGB(255, 165, 0)\r\n            Me.lblLicenseWarning.Visible = True\r\n        Else\r\n            Me.lblLicenseWarning.Visible = False\r\n        End If\r\n    Else\r\n        Me.lblLicenseWarning.Visible = False\r\n    End If\r\nEnd Sub\r\nPrivate Sub txtProviderName_Exit(Cancel As Integer)\r\n    \u0027 Trim was moved to txtProviderName_BeforeUpdate to avoid the Form_Dirty-poisoning\r\n    \u0027 quirk caused by self-assignment inside _Exit. See lessons-learned.md.\r\n    \u0027 Safe to delete this Sub entirely once the form\u0027s OnExit binding is cleared\r\n    \u0027 in Design View.\r\nEnd Sub\r\nPrivate Sub txtProviderName_BeforeUpdate(Cancel As Integer)\r\n    \u0027 Use .Text (in-progress edit), not .Value (locked during BeforeUpdate).\r\n    Dim s As String\r\n    s = Trim(Nz(Me.txtProviderName.Text, \u0022\u0022))\r\n    If Len(s) \u003E 0 Then\r\n        If s \u003C\u003E Me.txtProviderName.Text Then\r\n            Me.txtProviderName.Text = s\r\n        End If\r\n        \u0027 Duplicate-name check (excluding this record)\r\n        If DCount(\u0022*\u0022, \u0022tblProviders\u0022, \u0022ProviderName=\u0027\u0022 \u0026 _\r\n                  Replace(s, \u0022\u0027\u0022, \u0022\u0027\u0027\u0022) \u0026 \u0022\u0027 AND ProviderID\u003C\u003E\u0022 \u0026 _\r\n                  Nz(Me.ProviderID, 0)) \u003E 0 Then\r\n            MsgBox \u0022A provider with this name already exists.\u0022, vbExclamation, \u0022Duplicate Name\u0022\r\n            Cancel = True\r\n        End If\r\n    End If\r\nEnd Sub\r\nPrivate Sub btnCopyCatalog_Click()\r\n    \u0027 Copies all service-catalog entries for this provider from the most\r\n    \u0027 recent populated prior FY into the FY currently selected in\r\n    \u0027 cboFilterFiscalYear. Replace-all semantics, single up-front prompt.\r\n    Dim targetFY As Long\r\n    targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())\r\n    Dim srcVar As Variant\r\n    srcVar = basDataOperations.MostRecentPopulatedFY( _\r\n                \u0022tblProviderServiceCatalog\u0022, _\r\n                \u0022ProviderID=\u0022 \u0026 Me.ProviderID, _\r\n                targetFY)\r\n    If IsNull(srcVar) Then\r\n        MsgBox \u0022No prior fiscal year has catalog entries to copy.\u0022, _\r\n               vbInformation, \u0022Nothing to Copy\u0022\r\n        Exit Sub\r\n    End If\r\n    Dim sourceFY As Integer\r\n    sourceFY = CInt(srcVar)\r\n    Dim srcCount As Long, tgtCount As Long\r\n    srcCount = DCount(\u0022*\u0022, \u0022tblProviderServiceCatalog\u0022, _\r\n                      \u0022ProviderID=\u0022 \u0026 Me.ProviderID \u0026 \u0022 AND FiscalYear=\u0022 \u0026 sourceFY)\r\n    tgtCount = DCount(\u0022*\u0022, \u0022tblProviderServiceCatalog\u0022, _\r\n                      \u0022ProviderID=\u0022 \u0026 Me.ProviderID \u0026 \u0022 AND FiscalYear=\u0022 \u0026 targetFY)\r\n    Dim msg As String\r\n    msg = \u0022Copy \u0022 \u0026 srcCount \u0026 \u0022 catalog entry(ies) from FY\u0022 \u0026 sourceFY \u0026 _\r\n          \u0022 into FY\u0022 \u0026 targetFY \u0026 \u0022?\u0022\r\n    If tgtCount \u003E 0 Then\r\n        msg = msg \u0026 vbCrLf \u0026 vbCrLf \u0026 _\r\n              \u0022FY\u0022 \u0026 targetFY \u0026 \u0022 currently has \u0022 \u0026 tgtCount \u0026 _\r\n              \u0022 catalog entry(ies) for this provider. They will be replaced.\u0022\r\n    End If\r\n    If MsgBox(msg, vbQuestion \u002B vbOKCancel \u002B vbDefaultButton1, _\r\n              \u0022Copy from FY\u0022 \u0026 sourceFY) \u003C\u003E vbOK Then\r\n        Exit Sub\r\n    End If\r\n    On Error GoTo Failed\r\n    Dim n As Long\r\n    n = basDataOperations.CopyProviderCatalog( _\r\n                Me.ProviderID, sourceFY, CInt(targetFY), overwrite:=True)\r\n    MsgBox n \u0026 \u0022 catalog entry(ies) copied from FY\u0022 \u0026 sourceFY \u0026 _\r\n           \u0022 to FY\u0022 \u0026 targetFY \u0026 \u0022.\u0022, vbInformation, \u0022Copy Complete\u0022\r\n    PopulateProviderServiceCatalog\r\n    UpdateCopyButtonState\r\n    Exit Sub\r\nFailed:\r\n    Select Case Err.Number\r\n        Case basDataOperations.ERR_CANCELED\r\n            \u0027 silent\r\n        Case basDataOperations.ERR_SAME_FY\r\n            MsgBox Err.Description, vbExclamation, \u0022Invalid Fiscal Years\u0022\r\n        Case Else\r\n            MsgBox \u0022Error copying catalog: \u0022 \u0026 Err.Description, vbCritical\r\n    End Select\r\nEnd Sub\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027  Refreshes btnCopyCatalog\u0027s label and visibility based on the currently\r\n\u0027  selected target FY and what prior-year data exists for this provider.\r\n\u0027 ----------------------------------------------------------------------------\r\nPrivate Sub UpdateCopyButtonState()\r\n    On Error Resume Next   \u0027 button may not exist yet during form load\r\n    If Me.NewRecord Or IsNull(Me.ProviderID) Then\r\n        Me.btnCopyCatalog.Visible = False\r\n        Exit Sub\r\n    End If\r\n    Dim targetFY As Long\r\n    targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())\r\n    Dim srcVar As Variant\r\n    srcVar = basDataOperations.MostRecentPopulatedFY( _\r\n                \u0022tblProviderServiceCatalog\u0022, _\r\n                \u0022ProviderID=\u0022 \u0026 Me.ProviderID, _\r\n                targetFY)\r\n    If IsNull(srcVar) Then\r\n        Me.btnCopyCatalog.Visible = False\r\n    Else\r\n        Me.btnCopyCatalog.Caption = \u0022Copy from FY\u0022 \u0026 CLng(srcVar)\r\n        Me.btnCopyCatalog.Visible = True\r\n    End If\r\nEnd Sub\r\nPrivate Sub btnClose_Click()\r\n    DoCmd.Close acForm, Me.name\r\nEnd Sub\r\n",
+  "GeometryIn": {
+    "W": 8
+  },
+  "NonDefaultProperties": [
+    "RecordSelectors",
+    "NavigationButtons",
+    "DividingLines",
+    "AllowDesignChanges"
+  ],
+  "Procedures": [
+    {
+      "Name": "PopulateProviderServiceCatalog",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 20,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "lstProviderServiceCatalog_DblClick",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 44,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "cboFilterFiscalYear_AfterUpdate",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 56,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "Form_Open",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 60,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "Form_Current",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 74,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "Form_BeforeUpdate",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 108,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "Form_Dirty",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 115,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "Form_Undo",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 121,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "txtLicenseExpDate_AfterUpdate",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 127,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "txtProviderName_Exit",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 144,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "txtProviderName_BeforeUpdate",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 150,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "btnCopyCatalog_Click",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 167,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "UpdateCopyButtonState",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 225,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "btnClose_Click",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 245,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    }
+  ],
+  "EventMacros": {
+    "OnClose": {
+      "Actions": [
+        {
+          "Action": "Requery",
+          "Arguments": {},
+          "Condition": "[CurrentProject].[AllForms]![frmProviderSearch].[IsLoaded]",
+          "ConditionBranch": "If",
+          "Comment": null,
+          "InferredFunctionality": null
+        }
+      ],
+      "InferredFunctionality": null
+    }
+  }
+}

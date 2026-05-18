@@ -1,0 +1,155 @@
+{
+  "Name": "tblProviderServiceCatalog",
+  "Type": "Table",
+  "Attributes": 0,
+  "DateCreated": "2026-03-28T11:13:39.01",
+  "LastUpdated": "2026-05-13T16:48:39.043",
+  "RecordCount": 53,
+  "SourceTableName": "",
+  "Connect": "",
+  "ValidationRule": "",
+  "ValidationText": "",
+  "Ddl": "CREATE TABLE [tblProviderServiceCatalog] (\r\n    [ProviderServiceCatalogID] COUNTER,\r\n    [ProviderID] LONG NOT NULL,\r\n    [ServiceID] LONG NOT NULL,\r\n    [FiscalYear] SHORT NOT NULL,\r\n    [RatePerHour] CURRENCY NOT NULL,\r\n    [Notes] LONGTEXT,\r\n    CONSTRAINT [PrimaryKey] PRIMARY KEY ([ProviderServiceCatalogID]),\r\n    CONSTRAINT [rel_Provider_Catalog] FOREIGN KEY ([ProviderID]) REFERENCES [tblProviders] ([ProviderID]) ON UPDATE CASCADE,\r\n    CONSTRAINT [rel_Service_ProviderCatalog] FOREIGN KEY ([ServiceID]) REFERENCES [tblServices] ([ServiceID]) ON UPDATE CASCADE\r\n);",
+  "Fields": [
+    {
+      "Name": "ProviderServiceCatalogID",
+      "TypeCode": 4,
+      "TypeName": "Long",
+      "Size": 4,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": null,
+      "Attributes": 17,
+      "OrdinalPosition": 0,
+      "ForeignName": null
+    },
+    {
+      "Name": "ProviderID",
+      "TypeCode": 4,
+      "TypeName": "Long",
+      "Size": 4,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 1,
+      "OrdinalPosition": 1,
+      "ForeignName": null
+    },
+    {
+      "Name": "ServiceID",
+      "TypeCode": 4,
+      "TypeName": "Long",
+      "Size": 4,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 1,
+      "OrdinalPosition": 2,
+      "ForeignName": null
+    },
+    {
+      "Name": "FiscalYear",
+      "TypeCode": 3,
+      "TypeName": "Integer",
+      "Size": 2,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": 109,
+      "Attributes": 1,
+      "OrdinalPosition": 3,
+      "ForeignName": null
+    },
+    {
+      "Name": "RatePerHour",
+      "TypeCode": 5,
+      "TypeName": "Currency",
+      "Size": 8,
+      "Required": true,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "\u003E0",
+      "ValidationText": "Rate must be greater than zero.",
+      "InputMask": null,
+      "Format": "$#,##0.00;($#,##0.00)",
+      "DisplayControl": null,
+      "Attributes": 1,
+      "OrdinalPosition": 6,
+      "ForeignName": null
+    },
+    {
+      "Name": "Notes",
+      "TypeCode": 12,
+      "TypeName": "Memo",
+      "Size": 0,
+      "Required": false,
+      "AllowZeroLength": false,
+      "DefaultValue": "",
+      "ValidationRule": "",
+      "ValidationText": "",
+      "InputMask": null,
+      "Format": null,
+      "DisplayControl": null,
+      "Attributes": 2,
+      "OrdinalPosition": 7,
+      "ForeignName": null
+    }
+  ],
+  "Indexes": [
+    {
+      "Name": "PrimaryKey",
+      "Primary": true,
+      "Unique": true,
+      "Required": true,
+      "Fields": [
+        {
+          "Name": "ProviderServiceCatalogID",
+          "Attributes": 0
+        }
+      ]
+    },
+    {
+      "Name": "rel_Provider_Catalog",
+      "Primary": false,
+      "Unique": false,
+      "Required": false,
+      "Fields": [
+        {
+          "Name": "ProviderID",
+          "Attributes": 0
+        }
+      ]
+    },
+    {
+      "Name": "rel_Service_ProviderCatalog",
+      "Primary": false,
+      "Unique": false,
+      "Required": false,
+      "Fields": [
+        {
+          "Name": "ServiceID",
+          "Attributes": 0
+        }
+      ]
+    }
+  ]
+}

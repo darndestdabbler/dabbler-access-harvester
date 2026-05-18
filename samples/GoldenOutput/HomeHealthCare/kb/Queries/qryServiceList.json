@@ -1,0 +1,10 @@
+{
+  "Name": "qryServiceList",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT tblServices.ServiceID, tblServices.ServiceCode, tblServices.ServiceName, tblServices.ServiceCategory, tblServices.IsActive\r\nFROM tblServices\r\nORDER BY tblServices.ServiceCategory, tblServices.ServiceName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

@@ -1,0 +1,10 @@
+{
+  "Name": "qryClientBudgetSummary",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, cb.FiscalYear, cb.AnnualBudget, Nz((SELECT SUM(csp2.AnnualEstCost) FROM tblClientServicePlan AS csp2 INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID WHERE csn2.ClientID = c.ClientID AND csp2.FiscalYear = cb.FiscalYear),0) AS TotalPlannedCost, [cb].[AnnualBudget]-Nz((SELECT SUM(csp3.AnnualEstCost) FROM tblClientServicePlan AS csp3 INNER JOIN tblClientServiceNeeds AS csn3 ON csp3.ClientServiceNeedID = csn3.ClientServiceNeedID WHERE csn3.ClientID = c.ClientID AND csp3.FiscalYear = cb.FiscalYear),0) AS RemainingBudget\r\nFROM tblClients AS c INNER JOIN tblClientBudgets AS cb ON c.ClientID = cb.ClientID;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

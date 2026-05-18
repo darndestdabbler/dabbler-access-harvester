@@ -1,0 +1,10 @@
+{
+  "Name": "qryClientNeedsNotMet",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceCode, s.ServiceName, csn.HoursPerWeek AS RequestedHours, csn.Priority, csn.FiscalYear\r\nFROM tblServices AS s INNER JOIN (tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csn.ClientServiceNeedID) Not In (SELECT ClientServiceNeedID FROM tblClientServicePlan\n    WHERE Status = \u0027Approved\u0027\n)))\r\nORDER BY c.LastName, c.FirstName, csn.Priority;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}

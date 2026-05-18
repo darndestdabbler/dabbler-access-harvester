@@ -1,0 +1,19 @@
+{
+  "Name": "rel_Service_ProviderCatalog",
+  "Type": "Relationship",
+  "ParentTable": "tblServices",
+  "ChildTable": "tblProviderServiceCatalog",
+  "Attributes": 256,
+  "AttributesDecoded": [
+    "UpdateCascade"
+  ],
+  "EnforceReferentialIntegrity": true,
+  "CascadeUpdate": true,
+  "CascadeDelete": false,
+  "Fields": [
+    {
+      "ParentField": "ServiceID",
+      "ChildField": "ServiceID"
+    }
+  ]
+}

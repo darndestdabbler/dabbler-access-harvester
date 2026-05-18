@@ -1,0 +1,307 @@
+{
+  "Type": "DocumentRoot",
+  "Properties": {
+    "Version": "196611",
+    "PublishOption": "1",
+    "ColumnsShown": "0"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "ValidateEmail",
+        "Condition": "IsNull([TempVars]![InputValue]) Or [TempVars]![InputValue]=\\\u0022\\\u0022",
+        "Action": "SetTempVar",
+        "Argument": [
+          "InputValid",
+          "True"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Condition": "...",
+        "Action": "StopMacro"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "SetLocalVar",
+        "Argument": [
+          "__*L0_",
+          "InStr([TempVars]![InputValue],\\\u0022@\\\u0022)=0 Or InStr([TempVars]![InputValue],\\\u0022.\\\u0022)=0"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "SetLocalVar",
+        "Argument": [
+          "__*L0C_",
+          "[LocalVars]![__*L0_]"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Condition": "[LocalVars]![__*L0C_]",
+        "Action": "SetTempVar",
+        "Argument": [
+          "InputValid",
+          "False"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Condition": "...",
+        "Action": "MsgBox",
+        "Argument": [
+          "Please enter a valid email address.",
+          "-1",
+          "3"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "SetLocalVar",
+        "Argument": [
+          "__*L0C_",
+          "(Not [LocalVars]![__*L0_])"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Condition": "[LocalVars]![__*L0C_]",
+        "Action": "SetTempVar",
+        "Argument": [
+          "InputValid",
+          "True"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "SetLocalVar",
+        "Argument": [
+          "__*L0C_",
+          "False"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "MacroName": "ValidatePhone",
+        "Condition": "IsNull([TempVars]![InputValue]) Or [TempVars]![InputValue]=\\\u0022\\\u0022",
+        "Action": "SetTempVar",
+        "Argument": [
+          "InputValid",
+          "True"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Condition": "...",
+        "Action": "StopMacro"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "SetLocalVar",
+        "Argument": [
+          "__*L0_",
+          "Len(Replace(Replace(Replace(Replace([TempVars]![InputValue],\\\u0022(\\\u0022,\\\u0022\\\u0022),\\\u0022)\\\u0022,\\\u0022"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "SetLocalVar",
+        "Argument": [
+          "__*L0C_",
+          "[LocalVars]![__*L0_]"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Condition": "[LocalVars]![__*L0C_]",
+        "Action": "SetTempVar",
+        "Argument": [
+          "InputValid",
+          "False"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Condition": "...",
+        "Action": "MsgBox",
+        "Argument": [
+          "Phone number must have at least 10 digits.",
+          "-1",
+          "3"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "SetLocalVar",
+        "Argument": [
+          "__*L0C_",
+          "(Not [LocalVars]![__*L0_])"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Condition": "[LocalVars]![__*L0C_]",
+        "Action": "SetTempVar",
+        "Argument": [
+          "InputValid",
+          "True"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Action": "SetLocalVar",
+        "Argument": [
+          "__*L0C_",
+          "False"
+        ]
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro MinimumClientDesignVersion=\\\u002214.0.0000.0000\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements/\u003E\u003CSub Name=\\\u0022ValidateEmail\\\u0022\u003E\u003CStatemen"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:ts\u003E\u003CConditionalBlock\u003E\u003CIf\u003E\u003CCondition\u003EIsNull([TempVars]![InputValue]) Or [TempVars]![InputValue]=\\\u0022\\\u0022\u003C/Condition\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022SetTempVar\\\u0022\u003E\u003CArgument Name=\\\u0022Name\\\u0022\u003EInputValid\u003C/Argument\u003E\u003CArgument Name=\\\u0022Expression\\\u0022\u003ETrue\u003C/Argument\u003E\u003C/Action\u003E\u003CActio"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:n Name=\\\u0022StopMacro\\\u0022/\u003E\u003C/Statements\u003E\u003C/If\u003E\u003C/ConditionalBlock\u003E\u003CConditionalBlock\u003E\u003CIf\u003E\u003CCondition\u003EInStr([TempVars]![InputValue],\\\u0022@\\\u0022)=0 Or InStr([TempVars]![InputValue],\\\u0022.\\\u0022)=0\u003C/Condition\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022SetTempVar\\\u0022\u003E\u003CArgument Name=\\\u0022Name\\\u0022\u003EInputValid"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003C/Argument\u003E\u003CArgument Name=\\\u0022Expression\\\u0022\u003EFalse\u003C/Argument\u003E\u003C/Action\u003E\u003CAction Name=\\\u0022MessageBox\\\u0022\u003E\u003CArgument Name=\\\u0022Message\\\u0022\u003EPlease enter a valid email address.\u003C/Argument\u003E\u003CArgument Name=\\\u0022Type\\\u0022\u003EWarning!\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/If\u003E\u003CElse\u003E\u003CStatements\u003E\u003C"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:Action Name=\\\u0022SetTempVar\\\u0022\u003E\u003CArgument Name=\\\u0022Name\\\u0022\u003EInputValid\u003C/Argument\u003E\u003CArgument Name=\\\u0022Expression\\\u0022\u003ETrue\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Else\u003E\u003C/ConditionalBlock\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003CSub Name=\\\u0022ValidatePhone\\\u0022\u003E\u003CStatements\u003E\u003CConditionalBlock\u003E\u003CIf\u003E\u003CCondition"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003EIsNull([TempVars]![InputValue]) Or [TempVars]![InputValue]=\\\u0022\\\u0022\u003C/Condition\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022SetTempVar\\\u0022\u003E\u003CArgument Name=\\\u0022Name\\\u0022\u003EInputValid\u003C/Argument\u003E\u003CArgument Name=\\\u0022Expression\\\u0022\u003ETrue\u003C/Argument\u003E\u003C/Action\u003E\u003CAction Name=\\\u0022StopMacro\\\u0022/\u003E\u003C/Statements\u003E\u003C/"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:If\u003E\u003C/ConditionalBlock\u003E\u003CConditionalBlock\u003E\u003CIf\u003E\u003CCondition\u003ELen(Replace(Replace(Replace(Replace([TempVars]![InputValue],\\\u0022(\\\u0022,\\\u0022\\\u0022),\\\u0022)\\\u0022,\\\u0022\\\u0022),\\\u0022-\\\u0022,\\\u0022\\\u0022),\\\u0022 \\\u0022,\\\u0022\\\u0022))\u0026lt;10\u003C/Condition\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022SetTempVar\\\u0022\u003E\u003CArgument Name=\\\u0022Name\\\u0022\u003EInputValid\u003C/Argument\u003E\u003CA"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:rgument Name=\\\u0022Expression\\\u0022\u003EFalse\u003C/Argument\u003E\u003C/Action\u003E\u003CAction Name=\\\u0022MessageBox\\\u0022\u003E\u003CArgument Name=\\\u0022Message\\\u0022\u003EPhone number must have at least 10 digits.\u003C/Argument\u003E\u003CArgument Name=\\\u0022Type\\\u0022\u003EWarning!\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/If\u003E\u003CElse\u003E\u003CStatements\u003E\u003CAction"
+      },
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL: Name=\\\u0022SetTempVar\\\u0022\u003E\u003CArgument Name=\\\u0022Name\\\u0022\u003EInputValid\u003C/Argument\u003E\u003CArgument Name=\\\u0022Expression\\\u0022\u003ETrue\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/Else\u003E\u003C/ConditionalBlock\u003E\u003C/Statements\u003E\u003C/Sub\u003E\u003C/UserInterfaceMacro\u003E"
+      },
+      "Children": [],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": null,
+  "Actions": [],
+  "InferredFunctionality": null
+}

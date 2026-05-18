@@ -1,0 +1,683 @@
+{
+  "Type": "Form",
+  "Properties": {
+    "DividingLines": "True",
+    "AllowDesignChanges": "False",
+    "ScrollBars": "0",
+    "TabularFamily": "0",
+    "BorderStyle": "0",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "8640",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "7",
+    "Right": "13245",
+    "Bottom": "11865",
+    "DatasheetGridlinesColor": "15263976",
+    "BeforeDelConfirm": "[Event Procedure]",
+    "RecSrcDt": "0xd1328cf8ae83e640",
+    "GUID": "0xc4bbf3769e86b8428ef3cfcce7c8febf",
+    "NameMap": "0x0acc0e550000000086518cf86bbb104580b920648887278f000000009699356a ,\n0x3488e6400000000000000000740062006c005300650072007600690063006500 ,\n0x52006100740065004c0069006d006900740073000000000000002a44ab8f28a6 ,\n0x5041b977b72dbbd58172000000004979366a3488e64000000000000000007400 ,\n0x62006c0053006500720076006900630065007300000000000000ff7b3d6da10b ,\n0xb74d82460f84acd2d8d9070000002a44ab8f28a65041b977b72dbbd581725300 ,\n0x6500720076006900630065004e0061006d006500000000000000a721cbe3d58b ,\n0x65409679afa1ecf194110700000086518cf86bbb104580b920648887278f5300 ,\n0x65007200760069006300650049004400000000000000504f7654e8209f459136 ,\n0xc9a1e9972879070000002a44ab8f28a65041b977b72dbbd58172530065007200 ,\n0x76006900630065004900440000000000000056de534e62364747a58c222c1fc3 ,\n0x64db00000000514b386a3488e640000000000000000074006c006b0070004600 ,\n0x69007300630061006c0059006500610072007300000000000000f002456205a5 ,\n0x234c8b66a5e074b4a96e0700000056de534e62364747a58c222c1fc364db4600 ,\n0x69007300630061006c0059006500610072000000000000007e7d7be22895c146 ,\n0x8d1875adb07a970e0700000086518cf86bbb104580b920648887278f46006900 ,\n0x7300630061006c0059006500610072000000000000008f3be66d23505b4a9b1e ,\n0xc9daf16146740700000086518cf86bbb104580b920648887278f4d0061007800 ,\n0x520061007400650050006500720048006f007500720000000000000000000000 ,\n0x0000000000000000000000000c00000005000000000000000000000000000000 ,\n0x0000",
+    "RecordSource": "SELECT tblServiceRateLimits.*, tblServices.ServiceName FROM tblServiceRateLimits INNER JOIN tblServices ON tblServiceRateLimits.ServiceID = tblServices.ServiceID; ",
+    "Caption": "Service Rate Limits",
+    "BeforeUpdate": "[Event Procedure]",
+    "DatasheetFontName": "Aptos",
+    "OnLoad": "[Event Procedure]",
+    "FilterOnLoad": "0",
+    "ShowPageMargins": "0",
+    "DisplayOnSharePointSite": "1",
+    "DatasheetAlternateBackColor": "15921906",
+    "DatasheetGridlinesColor12": "0",
+    "FitToScreen": "1",
+    "DatasheetBackThemeColorIndex": "1",
+    "BorderThemeColorIndex": "3",
+    "ThemeFontIndex": "1",
+    "ForeThemeColorIndex": "0",
+    "AlternateBackThemeColorIndex": "1",
+    "AlternateBackShade": "95.0",
+    "NoSaveCTIWhenDisabled": "1"
+  },
+  "Children": [
+    {
+      "Type": "Begin",
+      "Properties": {},
+      "Children": [
+        {
+          "Type": "Label",
+          "Properties": {
+            "BackStyle": "0",
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "BorderColor": "8355711",
+            "ForeColor": "6710886",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "0",
+            "BorderTint": "50.0",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "60.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null,
+          "TextCapacity": {
+            "unavailable": true,
+            "reason": "no geometry"
+          }
+        },
+        {
+          "Type": "CommandButton",
+          "Properties": {
+            "TextFontFamily": "0",
+            "FontSize": "11",
+            "FontWeight": "400",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0",
+            "UseTheme": "1",
+            "Shape": "1",
+            "Gradient": "12",
+            "BackColor": "14790982",
+            "BackThemeColorIndex": "4",
+            "BackTint": "60.0",
+            "BorderLineStyle": "0",
+            "BorderColor": "14790982",
+            "BorderThemeColorIndex": "4",
+            "BorderTint": "60.0",
+            "ThemeFontIndex": "1",
+            "HoverColor": "15453059",
+            "HoverThemeColorIndex": "4",
+            "HoverTint": "40.0",
+            "PressedColor": "6440976",
+            "PressedThemeColorIndex": "4",
+            "PressedShade": "75.0",
+            "HoverForeColor": "4210752",
+            "HoverForeThemeColorIndex": "0",
+            "HoverForeTint": "75.0",
+            "PressedForeColor": "4210752",
+            "PressedForeThemeColorIndex": "0",
+            "PressedForeTint": "75.0"
+          },
+          "Children": [],
+          "VbaCode": null
+        },
+        {
+          "Type": "TextBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "FELineBreak": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "4210752",
+            "FontName": "Aptos",
+            "AsianLineBreak": "1",
+            "GridlineColor": "10921638",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ThemeFontIndex": "1",
+            "ForeThemeColorIndex": "0",
+            "ForeTint": "75.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null,
+          "NonDefaultProperties": [
+            "AddColon",
+            "FELineBreak"
+          ],
+          "TextCapacity": {
+            "unavailable": true,
+            "reason": "no geometry"
+          }
+        },
+        {
+          "Type": "ComboBox",
+          "Properties": {
+            "AddColon": "NotDefault",
+            "TextFontFamily": "0",
+            "BorderLineStyle": "0",
+            "LabelX": "-1800",
+            "FontSize": "11",
+            "BorderColor": "10921638",
+            "ForeColor": "2102279",
+            "FontName": "Aptos",
+            "GridlineColor": "10921638",
+            "AllowValueListEdits": "1",
+            "InheritValueList": "1",
+            "ThemeFontIndex": "1",
+            "BackThemeColorIndex": "1",
+            "BorderThemeColorIndex": "1",
+            "BorderShade": "65.0",
+            "ForeThemeColorIndex": "2",
+            "ForeShade": "50.0",
+            "GridlineThemeColorIndex": "1",
+            "GridlineShade": "65.0"
+          },
+          "Children": [],
+          "VbaCode": null,
+          "NonDefaultProperties": [
+            "AddColon"
+          ],
+          "TextCapacity": {
+            "unavailable": true,
+            "reason": "no geometry"
+          }
+        },
+        {
+          "Type": "FormHeader",
+          "Properties": {
+            "Height": "1152",
+            "BackColor": "15783096",
+            "Name": "FormHeader",
+            "GUID": "0x4882b9059fd94440bb881b67e7ab222b",
+            "AutoHeight": "1",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "2",
+            "BackTint": "20.0"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "288",
+                    "Top": "72",
+                    "Width": "4320",
+                    "Height": "432",
+                    "FontSize": "14",
+                    "FontWeight": "700",
+                    "ForeColor": "0",
+                    "Name": "lblTitle",
+                    "Caption": "Service Rate Limits",
+                    "GUID": "0x2944f662d21e7a419e00d8179d3f6ba4",
+                    "LayoutCachedLeft": "288",
+                    "LayoutCachedTop": "72",
+                    "LayoutCachedWidth": "4608",
+                    "LayoutCachedHeight": "504",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.2,
+                    "Y": 0.05,
+                    "W": 3,
+                    "H": 0.3
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 30,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 14,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                },
+                {
+                  "Type": "Label",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "288",
+                    "Top": "576",
+                    "Width": "1440",
+                    "Height": "360",
+                    "FontSize": "8",
+                    "ForeColor": "0",
+                    "Name": "lblFiscalYear",
+                    "Caption": "Fiscal Year:",
+                    "GUID": "0xbe046f42cbf3254682dcf176a1659605",
+                    "LayoutCachedLeft": "288",
+                    "LayoutCachedTop": "576",
+                    "LayoutCachedWidth": "1728",
+                    "LayoutCachedHeight": "936",
+                    "ForeThemeColorIndex": "-1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.2,
+                    "Y": 0.4,
+                    "W": 1,
+                    "H": 0.25
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 17,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 8,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                },
+                {
+                  "Type": "ComboBox",
+                  "Properties": {
+                    "LimitToList": "True",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "1872",
+                    "Top": "576",
+                    "Height": "360",
+                    "ColumnInfo": "\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u00223\\\u0022;\\\u00222\\\u0022",
+                    "GUID": "0x96035e857b2c7f4bba5d22f083d105fa",
+                    "Name": "cboFilterFiscalYear",
+                    "RowSourceType": "Table/Query",
+                    "RowSource": "SELECT FiscalYear FROM tlkpFiscalYears ORDER BY FiscalYear DESC; ",
+                    "AfterUpdate": "[Event Procedure]",
+                    "LayoutCachedLeft": "1872",
+                    "LayoutCachedTop": "576",
+                    "LayoutCachedWidth": "3312",
+                    "LayoutCachedHeight": "936"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 1.3,
+                    "Y": 0.4,
+                    "H": 0.25
+                  },
+                  "NonDefaultProperties": [
+                    "LimitToList"
+                  ],
+                  "TextCapacity": {
+                    "unavailable": true,
+                    "reason": "no geometry"
+                  }
+                },
+                {
+                  "Type": "CommandButton",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "Left": "4031",
+                    "Top": "576",
+                    "Width": "2592",
+                    "TabIndex": "1",
+                    "Name": "btnCopyRateLimits",
+                    "Caption": "Copy Rate Limits...",
+                    "OnClick": "[Event Procedure]",
+                    "GUID": "0xea964b72faad24448ebac360a8510ef4",
+                    "LayoutCachedLeft": "4031",
+                    "LayoutCachedTop": "576",
+                    "LayoutCachedWidth": "6623",
+                    "LayoutCachedHeight": "936",
+                    "WebImagePaddingLeft": "2",
+                    "WebImagePaddingTop": "2",
+                    "WebImagePaddingRight": "1",
+                    "WebImagePaddingBottom": "1"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 2.799,
+                    "Y": 0.4,
+                    "W": 1.8
+                  }
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null,
+          "GeometryIn": {
+            "H": 0.8
+          }
+        },
+        {
+          "Type": "Section",
+          "Properties": {
+            "Height": "503",
+            "Name": "Detail",
+            "GUID": "0x1021cdad7b70884c8e8640d26e093886",
+            "AutoHeight": "1",
+            "AlternateBackColor": "15921906",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [
+            {
+              "Type": "Begin",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "ComboBox",
+                  "Properties": {
+                    "LimitToList": "True",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "ColumnCount": "2",
+                    "Left": "144",
+                    "Top": "72",
+                    "Width": "3600",
+                    "Height": "360",
+                    "ColumnInfo": "\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u0022\\\u0022;\\\u002210\\\u0022;\\\u0022200\\\u0022",
+                    "GUID": "0x7e01f7f72cb9ca4d9881ec1ad8df0341",
+                    "Name": "cboServiceID",
+                    "ControlSource": "ServiceID",
+                    "RowSourceType": "Table/Query",
+                    "RowSource": "SELECT ServiceID, ServiceName FROM tblServices ORDER BY ServiceName; ",
+                    "ColumnWidths": "0;3600",
+                    "BaseInfo": "\\\u0022SELECT ServiceID, ServiceName FROM tblServices ORDER BY ServiceName; \\\u0022;\\\u0022tblServices\\\u0022;\\\u0022\\\u0022;\\\u0022ServiceID\\\u0022;\\\u0022ServiceName\\\u0022;\\\u0022PrimaryKey\\\u0022",
+                    "LayoutCachedLeft": "144",
+                    "LayoutCachedTop": "72",
+                    "LayoutCachedWidth": "3744",
+                    "LayoutCachedHeight": "432"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 0.1,
+                    "Y": 0.05,
+                    "W": 2.5,
+                    "H": 0.25
+                  },
+                  "Label": {
+                    "source": "from-name",
+                    "text": "Cbo Service ID"
+                  },
+                  "NonDefaultProperties": [
+                    "LimitToList"
+                  ],
+                  "TextCapacity": {
+                    "charsPerLine": 32,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 11,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "3888",
+                    "Top": "72",
+                    "Width": "1152",
+                    "Height": "360",
+                    "TabIndex": "1",
+                    "Name": "txtFiscalYear",
+                    "ControlSource": "FiscalYear",
+                    "GUID": "0x58f8810a5418f941bded5a7ccc36904a",
+                    "LayoutCachedLeft": "3888",
+                    "LayoutCachedTop": "72",
+                    "LayoutCachedWidth": "5040",
+                    "LayoutCachedHeight": "432"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 2.7,
+                    "Y": 0.05,
+                    "W": 0.8,
+                    "H": 0.25
+                  },
+                  "Label": {
+                    "source": "from-name",
+                    "text": "Txt Fiscal Year"
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 9,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 11,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                },
+                {
+                  "Type": "TextBox",
+                  "Properties": {
+                    "DecimalPlaces": "2",
+                    "OverlapFlags": "85",
+                    "IMESentenceMode": "3",
+                    "Left": "5184",
+                    "Top": "72",
+                    "Width": "1728",
+                    "Height": "360",
+                    "TabIndex": "2",
+                    "Name": "txtMaxRatePerHour",
+                    "ControlSource": "MaxRatePerHour",
+                    "Format": "$#,##0.00",
+                    "BeforeUpdate": "[Event Procedure]",
+                    "GUID": "0x18f062d59a2ede4391c174fa2c8a87e7",
+                    "LayoutCachedLeft": "5184",
+                    "LayoutCachedTop": "72",
+                    "LayoutCachedWidth": "6912",
+                    "LayoutCachedHeight": "432"
+                  },
+                  "Children": [],
+                  "VbaCode": null,
+                  "GeometryIn": {
+                    "X": 3.6,
+                    "Y": 0.05,
+                    "W": 1.2,
+                    "H": 0.25
+                  },
+                  "Label": {
+                    "source": "from-name",
+                    "text": "Txt Max Rate Per Hour"
+                  },
+                  "TextCapacity": {
+                    "charsPerLine": 15,
+                    "visibleLines": 1,
+                    "font": {
+                      "name": "Aptos",
+                      "size": 11,
+                      "resolution": "inherited"
+                    },
+                    "metric": "avgWidth"
+                  }
+                }
+              ],
+              "VbaCode": null
+            }
+          ],
+          "VbaCode": null,
+          "GeometryIn": {
+            "H": 0.349
+          }
+        },
+        {
+          "Type": "FormFooter",
+          "Properties": {
+            "Height": "576",
+            "Name": "FormFooter",
+            "GUID": "0x6d16d7abbc098b4db430a05e90e38187",
+            "AutoHeight": "1",
+            "AlternateBackThemeColorIndex": "1",
+            "AlternateBackShade": "95.0",
+            "BackThemeColorIndex": "1"
+          },
+          "Children": [],
+          "VbaCode": null,
+          "GeometryIn": {
+            "H": 0.4
+          }
+        }
+      ],
+      "VbaCode": null
+    }
+  ],
+  "VbaCode": "CodeBehindForm\r\nAttribute VB_GlobalNameSpace = False\r\nAttribute VB_Creatable = True\r\nAttribute VB_PredeclaredId = True\r\nAttribute VB_Exposed = False\r\nOption Compare Database\r\nOption Explicit\r\n\u0027 ============================================================================\r\n\u0027  frmServiceRateLimits\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027  Continuous form bound to tblServiceRateLimits, filtered by fiscal year\r\n\u0027  via cboFilterFiscalYear. Direct-edit (not a listbox \u002B popup pattern).\r\n\u0027\r\n\u0027  btnCopyRateLimits copies all rate-limit entries from the most recent\r\n\u0027  populated prior FY into the FY currently selected in cboFilterFiscalYear.\r\n\u0027 ============================================================================\r\nPrivate Sub Form_Load()\r\n    Me.cboFilterFiscalYear = basUtilities.GetCurrentFiscalYear()\r\n    ApplyFiscalYearFilter\r\n    UpdateCopyButtonState\r\nEnd Sub\r\nPrivate Sub cboFilterFiscalYear_AfterUpdate()\r\n    ApplyFiscalYearFilter\r\n    UpdateCopyButtonState\r\nEnd Sub\r\nPrivate Sub ApplyFiscalYearFilter()\r\n    If Not IsNull(Me.cboFilterFiscalYear) Then\r\n        Me.Filter = \u0022FiscalYear=\u0022 \u0026 Me.cboFilterFiscalYear\r\n        Me.FilterOn = True\r\n    Else\r\n        Me.FilterOn = False\r\n    End If\r\nEnd Sub\r\n\u0027 ============================================================================\r\n\u0027  Validation\r\n\u0027 ============================================================================\r\nPrivate Sub txtMaxRatePerHour_BeforeUpdate(Cancel As Integer)\r\n    If Not IsNull(Me.txtMaxRatePerHour) Then\r\n        If Me.txtMaxRatePerHour \u003C= 0 Or Me.txtMaxRatePerHour \u003E 500 Then\r\n            MsgBox \u0022Rate must be between $0.01 and $500.00.\u0022, vbExclamation, \u0022Validation\u0022\r\n            Cancel = True\r\n        End If\r\n    End If\r\nEnd Sub\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027  Form_BeforeUpdate\r\n\u0027\r\n\u0027  Fires when ANY row on this continuous form is committed (tab away, save\r\n\u0027  button, navigate, etc.). Catches:\r\n\u0027    - missing ServiceID (relational FK constraint would catch it too,\r\n\u0027      but the message here is friendlier)\r\n\u0027    - missing or non-positive MaxRatePerHour\r\n\u0027    - missing FiscalYear (shouldn\u0027t happen ? the row inherits the filter ?\r\n\u0027      but defensive)\r\n\u0027    - duplicate (ServiceID, FiscalYear) for any other row in the table\r\n\u0027\r\n\u0027  Note: txtMaxRatePerHour_BeforeUpdate already validates the rate range\r\n\u0027  on field exit, so this BeforeUpdate is the second line of defense for\r\n\u0027  someone who pastes a value or commits without typing.\r\n\u0027 ----------------------------------------------------------------------------\r\nPrivate Sub Form_BeforeUpdate(Cancel As Integer)\r\n    If IsNull(Me!ServiceID) Then\r\n        MsgBox \u0022Please select a service.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    If IsNull(Me!FiscalYear) Then\r\n        Me!FiscalYear = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())\r\n    End If\r\n    If IsNull(Me!MaxRatePerHour) Or Me!MaxRatePerHour \u003C= 0 Then\r\n        MsgBox \u0022Please enter a positive maximum rate per hour.\u0022, _\r\n               vbExclamation, \u0022Validation\u0022\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    If Me!MaxRatePerHour \u003E 500 Then\r\n        MsgBox \u0022Rate exceeds the $500.00 ceiling.\u0022, vbExclamation, \u0022Validation\u0022\r\n        Cancel = True\r\n        Exit Sub\r\n    End If\r\n    \u0027 Duplicate check (same service, same FY, different row).\r\n    Dim selfID As Long\r\n    selfID = Nz(Me!ServiceRateLimitID, 0)\r\n    If DCount(\u0022*\u0022, \u0022tblServiceRateLimits\u0022, _\r\n              \u0022ServiceID=\u0022 \u0026 Me!ServiceID \u0026 _\r\n              \u0022 AND FiscalYear=\u0022 \u0026 Me!FiscalYear \u0026 _\r\n              \u0022 AND ServiceRateLimitID\u003C\u003E\u0022 \u0026 selfID) \u003E 0 Then\r\n        MsgBox \u0022A rate limit for this service in FY\u0022 \u0026 Me!FiscalYear \u0026 _\r\n               \u0022 already exists.\u0022, vbExclamation, \u0022Duplicate\u0022\r\n        Cancel = True\r\n    End If\r\nEnd Sub\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027  Form_BeforeDelConfirm\r\n\u0027\r\n\u0027  Fires after the user presses Delete on a row, before Access shows its\r\n\u0027  generic \u0022You are about to delete N record(s)...\u0022 prompt. Two responsibilities:\r\n\u0027    1. Block the delete if any tblProviderServiceCatalog row in the same FY\r\n\u0027       references this service (the rate limit governs those rows).\r\n\u0027    2. Suppress Access\u0027s stock prompt and show a more informative one.\r\n\u0027\r\n\u0027  The \u0022in-use\u0022 check intentionally scopes to the same FiscalYear: rate\r\n\u0027  limits for FY2024 don\u0027t constrain FY2025 catalog rows, so a FY2024\r\n\u0027  limit can be deleted even if FY2025 has matching catalog entries.\r\n\u0027 ----------------------------------------------------------------------------\r\nPrivate Sub Form_BeforeDelConfirm(Cancel As Integer, Response As Integer)\r\n    Dim inUse As Long\r\n    inUse = DCount(\u0022*\u0022, \u0022tblProviderServiceCatalog\u0022, _\r\n                   \u0022ServiceID=\u0022 \u0026 Me!ServiceID \u0026 _\r\n                   \u0022 AND FiscalYear=\u0022 \u0026 Me!FiscalYear)\r\n    If inUse \u003E 0 Then\r\n        MsgBox \u0022Cannot delete this rate limit.\u0022 \u0026 vbCrLf \u0026 vbCrLf \u0026 _\r\n               inUse \u0026 \u0022 provider catalog entry(ies) in FY\u0022 \u0026 Me!FiscalYear \u0026 _\r\n               \u0022 are governed by it. Remove or reassign those first.\u0022, _\r\n               vbExclamation, \u0022Rate Limit In Use\u0022\r\n        Cancel = True\r\n        Response = acDataErrContinue\r\n        Exit Sub\r\n    End If\r\n    \u0027 Replace Access\u0027s stock prompt with a clearer one.\r\n    If MsgBox(\u0022Delete the rate limit for service \u0022 \u0026 _\r\n              Nz(DLookup(\u0022ServiceName\u0022, \u0022tblServices\u0022, _\r\n                         \u0022ServiceID=\u0022 \u0026 Me!ServiceID), \u0022(unknown)\u0022) \u0026 _\r\n              \u0022 in FY\u0022 \u0026 Me!FiscalYear \u0026 \u0022?\u0022, _\r\n              vbYesNo \u002B vbQuestion \u002B vbDefaultButton2, _\r\n              \u0022Confirm Delete\u0022) = vbNo Then\r\n        Cancel = True\r\n    End If\r\n    Response = acDataErrContinue   \u0027 suppress Access\u0027s own prompt\r\nEnd Sub\r\n\u0027 ============================================================================\r\n\u0027  Copy from prior FY\r\n\u0027 ============================================================================\r\nPrivate Sub btnCopyRateLimits_Click()\r\n    Dim targetFY As Long\r\n    targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())\r\n    Dim srcVar As Variant\r\n    srcVar = basDataOperations.MostRecentPopulatedFY( _\r\n                \u0022tblServiceRateLimits\u0022, \u0022\u0022, targetFY)\r\n    If IsNull(srcVar) Then\r\n        MsgBox \u0022No prior fiscal year has service rate limits to copy.\u0022, _\r\n               vbInformation, \u0022Nothing to Copy\u0022\r\n        Exit Sub\r\n    End If\r\n    Dim sourceFY As Integer\r\n    sourceFY = CInt(srcVar)\r\n    Dim srcCount As Long, tgtCount As Long\r\n    srcCount = DCount(\u0022*\u0022, \u0022tblServiceRateLimits\u0022, \u0022FiscalYear=\u0022 \u0026 sourceFY)\r\n    tgtCount = DCount(\u0022*\u0022, \u0022tblServiceRateLimits\u0022, \u0022FiscalYear=\u0022 \u0026 targetFY)\r\n    Dim msg As String\r\n    msg = \u0022Copy \u0022 \u0026 srcCount \u0026 \u0022 rate limit entry(ies) from FY\u0022 \u0026 sourceFY \u0026 _\r\n          \u0022 into FY\u0022 \u0026 targetFY \u0026 \u0022?\u0022\r\n    If tgtCount \u003E 0 Then\r\n        msg = msg \u0026 vbCrLf \u0026 vbCrLf \u0026 _\r\n              \u0022FY\u0022 \u0026 targetFY \u0026 \u0022 currently has \u0022 \u0026 tgtCount \u0026 _\r\n              \u0022 rate limit entry(ies). They will be replaced.\u0022\r\n    End If\r\n    If MsgBox(msg, vbQuestion \u002B vbOKCancel \u002B vbDefaultButton1, _\r\n              \u0022Copy from FY\u0022 \u0026 sourceFY) \u003C\u003E vbOK Then\r\n        Exit Sub\r\n    End If\r\n    On Error GoTo Failed\r\n    Dim n As Long\r\n    n = basDataOperations.CopyServiceRateLimits( _\r\n                sourceFY, CInt(targetFY), overwrite:=True)\r\n    MsgBox n \u0026 \u0022 rate limit entry(ies) copied from FY\u0022 \u0026 sourceFY \u0026 _\r\n           \u0022 to FY\u0022 \u0026 targetFY \u0026 \u0022.\u0022, vbInformation, \u0022Copy Complete\u0022\r\n    Me.Requery\r\n    UpdateCopyButtonState\r\n    Exit Sub\r\nFailed:\r\n    Select Case Err.Number\r\n        Case basDataOperations.ERR_CANCELED\r\n            \u0027 silent\r\n        Case basDataOperations.ERR_SAME_FY\r\n            MsgBox Err.Description, vbExclamation, \u0022Invalid Fiscal Years\u0022\r\n        Case Else\r\n            MsgBox \u0022Error copying rate limits: \u0022 \u0026 Err.Description, vbCritical\r\n    End Select\r\nEnd Sub\r\n\u0027 ----------------------------------------------------------------------------\r\n\u0027  Refreshes btnCopyRateLimits\u0027s label and visibility based on the currently\r\n\u0027  selected target FY and what prior-year data exists.\r\n\u0027 ----------------------------------------------------------------------------\r\nPrivate Sub UpdateCopyButtonState()\r\n    On Error Resume Next   \u0027 button may not exist yet during form load\r\n    Dim targetFY As Long\r\n    targetFY = Nz(Me.cboFilterFiscalYear, basUtilities.GetCurrentFiscalYear())\r\n    Dim srcVar As Variant\r\n    srcVar = basDataOperations.MostRecentPopulatedFY( _\r\n                \u0022tblServiceRateLimits\u0022, \u0022\u0022, targetFY)\r\n    If IsNull(srcVar) Then\r\n        Me.btnCopyRateLimits.Visible = False\r\n    Else\r\n        Me.btnCopyRateLimits.Caption = \u0022Copy from FY\u0022 \u0026 CLng(srcVar)\r\n        Me.btnCopyRateLimits.Visible = True\r\n    End If\r\nEnd Sub\r\n",
+  "GeometryIn": {
+    "W": 6
+  },
+  "NonDefaultProperties": [
+    "DividingLines",
+    "AllowDesignChanges"
+  ],
+  "Procedures": [
+    {
+      "Name": "Form_Load",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 17,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "cboFilterFiscalYear_AfterUpdate",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 22,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "ApplyFiscalYearFilter",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 26,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "txtMaxRatePerHour_BeforeUpdate",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 37,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "Form_BeforeUpdate",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 61,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "Form_BeforeDelConfirm",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [
+        {
+          "Name": "Cancel",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        },
+        {
+          "Name": "Response",
+          "DataType": "Integer",
+          "PassingMechanism": "ByRef",
+          "IsOptional": false,
+          "IsParamArray": false,
+          "IsArray": false,
+          "DefaultValue": null
+        }
+      ],
+      "StartLine": 106,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "btnCopyRateLimits_Click",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 134,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "UpdateCopyButtonState",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 185,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    }
+  ]
+}

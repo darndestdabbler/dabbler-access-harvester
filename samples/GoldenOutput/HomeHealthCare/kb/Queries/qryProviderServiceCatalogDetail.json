@@ -1,0 +1,10 @@
+{
+  "Name": "qryProviderServiceCatalogDetail",
+  "Type": "Query",
+  "QueryTypeCode": 0,
+  "QueryTypeName": "Select",
+  "Sql": "SELECT p.ProviderID, p.ProviderName, s.ServiceCode, s.ServiceName, qryProviderServiceEffectiveFiscalYears.MinFiscalYear, qryProviderServiceEffectiveFiscalYears.MaxFiscalYear, psc.RatePerHour, psc.FiscalYear, (SELECT TOP 1 srl.MaxRatePerHour FROM tblServiceRateLimits AS srl WHERE srl.ServiceID = s.ServiceID AND srl.FiscalYear = psc.FiscalYear) AS MaxRatePerHour\r\nFROM (tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN tblProviderServiceCatalog AS psc ON p.ProviderID = psc.ProviderID) ON s.ServiceID = psc.ServiceID) INNER JOIN qryProviderServiceEffectiveFiscalYears ON (psc.ServiceID = qryProviderServiceEffectiveFiscalYears.ServiceID) AND (psc.ProviderID = qryProviderServiceEffectiveFiscalYears.ProviderID)\r\nORDER BY p.ProviderName, s.ServiceName;\r\n",
+  "Connect": "",
+  "ReturnsRecords": true,
+  "OdbcTimeout": 60
+}
