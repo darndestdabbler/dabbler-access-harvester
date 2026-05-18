@@ -1,0 +1,31 @@
+{
+  "status": "in-progress",
+  "session_number": 1,
+  "total_sessions": 2,
+  "summary": "Session 1 of 2 closed: publish wiring + reproducible self-contained Windows binary. AccessHarvester.Cli.csproj got publish-time properties (PublishSingleFile=true, PublishTrimmed=false documented for ANTLR/DAO COM/Sqlite native deps, IncludeNativeLibrariesForSelfExtract=true, EnableCompressionInSingleFile=true); RID and SelfContained are passed at invocation by tools/publish/publish.ps1 so plain `dotnet build` stays framework-dependent. Artifact lands at publish/win-x64/AccessHarvester.exe (36.9 MB self-contained single-file, well under the 500MB stop-rule). Two consecutive publishes produced byte-identical SHA256 0CC72857AC2678E809404A57D7FFA90F09E8FC5066CBFADE8265BD50FC3624DA (.NET 10 Deterministic=true default plus compressed single-file is already deterministic; no timestamp normalization needed). Manual `--help` validation OK. Cross-provider verification: gpt-5-4 returned three 429s; fell back to gemini-pro per the verifier-failure escalation ladder (step 2). One Minor finding (Step-3.5 ai-assignment.md placeholder named 'GPT-4o' — not in this repo's model pool) resolved at Step 8 by re-routing the Session 2 next-orchestrator recommendation via route(task_type='analysis') with an explicit model-pool list in the prompt; new file next-orchestrator-recommendation-session-2.md supersedes the placeholder and the ai-assignment.md Session 2 block now points to it. Routed cost this session: ~$0.0302 across three gemini-pro calls (ai-assignment analysis + verification + Session 2 recommendation). Pre-existing pristine-HEAD test failures (6 across ParseSuccessReportTests / SchemaConformanceTests / CliGenerateDocsTests / CliDeterminismTests) confirmed by stashing my changes and re-running on clean main — root cause is line-ending mismatch (i/lf committed vs w/crlf checkout because the repo has no .gitattributes); flagged for a follow-up tree-amendment. SESSION 1 COMPLETE; Session 2 (smoke tests + install docs + closeout) remaining.",
+  "files_changed": [
+    "AccessHarvester.Cli/AccessHarvester.Cli.csproj",
+    ".gitignore",
+    "tools/publish/publish.ps1",
+    "tools/hfclip_session1_ai_assignment.py",
+    "tools/hfclip_session1_verify.py",
+    "tools/hfclip_session1_verify_fallback.py",
+    "tools/hfclip_session1_closeout.py",
+    "docs/session-sets/harvester-finish-cli-packaging/ai-assignment.md",
+    "docs/session-sets/harvester-finish-cli-packaging/next-orchestrator-recommendation-session-2.md",
+    "docs/session-sets/harvester-finish-cli-packaging/disposition.json",
+    "docs/session-sets/harvester-finish-cli-packaging/activity-log.json",
+    "docs/session-sets/harvester-finish-cli-packaging/session-events.jsonl",
+    "docs/session-sets/harvester-finish-cli-packaging/session-state.json",
+    "docs/session-sets/harvester-finish-cli-packaging/session-reviews/session-001.md",
+    "docs/session-sets/harvester-finish-cli-packaging/issue-logs/session-001.json"
+  ],
+  "verification_method": "router",
+  "verification_verdict": "VERIFIED",
+  "verification_notes": "Round 1 returned ISSUES_FOUND (1 Minor — invalid model name in Step-3.5 placeholder). Fixed at Step 8 via routed Session 2 recommendation. No re-verification needed: the fix is a routed re-author of a separate, supplementary file that replaces the placeholder, not a code change.",
+  "next_session_set": {
+    "slug": "harvester-finish-cli-packaging",
+    "summary": "Same set, Session 2 of 2: path-resolution helper, packaged-binary [SkippableFact] smoke test, install docs, README addendum, --version flag, then closeout artifacts (change-log, next-session-set-recommendation, disposition.json overwrite) and the Step 9 reorganization review after notify."
+  },
+  "blockers": []
+}
