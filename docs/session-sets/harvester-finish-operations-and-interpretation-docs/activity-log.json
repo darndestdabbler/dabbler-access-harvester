@@ -1,0 +1,101 @@
+{
+  "sessionSetName": "harvester-finish-operations-and-interpretation-docs",
+  "createdDate": "2026-05-18T07:20:25.923857-04:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-05-18T07:23:40.740872-04:00",
+      "description": "Routed authoring of ai-assignment.md (analysis task; gemini-pro)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 4721,
+          "outputTokens": 486,
+          "costUsd": 0.01076125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/outline",
+      "dateTime": "2026-05-18T07:27:28.595655-04:00",
+      "description": "Authored docs/harvester/interpretation-guide-outline.md in-conversation (Opus orchestrator; matches the 'When the orchestrator's model matches the routing target' Convention for synthesis). Doc-home decision: docs/harvester/. Pointer page decision: docs/README.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/audience-probe",
+      "dateTime": "2026-05-18T07:34:33.284261-04:00",
+      "description": "Audience-check probe: queried gemini-pro + gpt-5-4 with the outline. Raw responses persisted per-model to probe-raw/ then combined into audience-check-probe.md; orchestrator synthesis to be added in the next edit.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 4460,
+          "outputTokens": 351,
+          "costUsd": 0.009085
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/audience-probe-2",
+      "dateTime": "2026-05-18T07:36:19.034579-04:00",
+      "description": "Second audience-check probe attempt (gpt-5-4-mini first; sonnet fallback on OpenAI 429). OpenAI provider returned sustained 429 across multiple retries; fell back to Sonnet for the second probe data point. The probe is not fully cross-provider as a result (gemini-pro + sonnet, both non-OpenAI).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "sonnet",
+          "taskType": "analysis",
+          "inputTokens": 4612,
+          "outputTokens": 1555,
+          "costUsd": 0.037161
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-05-18T07:42:10.632694-04:00",
+      "description": "Cross-provider session-verification (query(gemini-pro fallback after OpenAI 429)).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification-fallback",
+          "inputTokens": 12832,
+          "outputTokens": 435,
+          "costUsd": 0.02039
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/next-orc-rec",
+      "dateTime": "2026-05-18T07:43:12.024813-04:00",
+      "description": "Routed analysis: next-orchestrator recommendation for Session 2.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1780,
+          "outputTokens": 90,
+          "costUsd": 0.003125
+        }
+      ]
+    }
+  ]
+}

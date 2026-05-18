@@ -1,8 +1,10 @@
-# Operations and Interpretation Docs Spec — **STUB**
+# Operations and Interpretation Docs Spec
 
-> **Status:** STUB authored 2026-05-17 by `remaining-work-planner` Session 2.
-> Acceptance criteria are pinned; document organization, section
-> shape, and length are left for the set's own Session 1.
+> **Status:** Elaborated 2026-05-18 by Session 1 of this set.
+> Acceptance criteria (pinned by `remaining-work-planner` Session 2 on
+> 2026-05-17) remain unchanged. Document organization, section shape,
+> and length are now decided — see the outline at
+> [`docs/harvester/interpretation-guide-outline.md`](../../harvester/interpretation-guide-outline.md).
 >
 > **Purpose:** Author the downstream-AI-consumer-facing
 > interpretation guide: "given a harvester `ir/` JSON, here is what
@@ -120,18 +122,14 @@ downstream-AI-consumer-facing portion of that.
 
 ---
 
-## Doc-home decision (Session 1 picks)
+## Doc-home decision (resolved Session 1)
 
-Per gap-audit GAP #6's "Doc directory tidying" minor, Session 1
-decides whether the new docs land:
-
-- **Flat in `docs/`** (default if uncertain) — current convention.
-- **Under `docs/harvester/`** — separates "how to use the harvester"
-  from "how the harvester project is run."
-
-Either path is acceptable; the decision is Session 1's call after
-inspecting current `docs/` state. Document the rationale in the
-ai-assignment.md or the first session-review.
+**Resolved 2026-05-18:** new docs land under **`docs/harvester/`**.
+Rationale and the rejected-alternative analysis are in the outline's
+*Decisions of record* section
+([`docs/harvester/interpretation-guide-outline.md`](../../harvester/interpretation-guide-outline.md)).
+Pointer-page placement (also a Session 1 call per Session 3 Step 1):
+**`docs/README.md`** — consumer-discoverable from the repo root.
 
 ---
 
@@ -156,7 +154,7 @@ ai-assignment.md or the first session-review.
 6. End-of-session verification + commit + push + notify.
 
 **Creates:**
-- The outline document (at the chosen doc-home path).
+- [`docs/harvester/interpretation-guide-outline.md`](../../harvester/interpretation-guide-outline.md).
 - `docs/session-sets/harvester-finish-operations-and-interpretation-docs/ai-assignment.md`
 - `docs/session-sets/harvester-finish-operations-and-interpretation-docs/audience-check-probe.md`
 - `docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-reviews/session-001.md`
@@ -178,7 +176,8 @@ ai-assignment.md or the first session-review.
 5. End-of-session verification + commit + push + notify.
 
 **Creates:**
-- The interpretation-guide body sections.
+- [`docs/harvester/interpretation-guide.md`](../../harvester/interpretation-guide.md)
+  (sections 1–10 per the outline; target ~3,500–5,000 words).
 - `docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-reviews/session-002.md`
 
 ---
@@ -187,10 +186,11 @@ ai-assignment.md or the first session-review.
 
 **Steps:**
 
-1. Author the docs-index pointer page that lists every relevant
-   doc and what it contains. Lands at the doc-home path or at
-   `docs/README.md` (Session 1 decides; the latter is consumer-
-   discoverable from the repo root).
+1. Author the docs-index pointer page at
+   [`docs/README.md`](../../README.md) (location resolved by Session 1
+   — consumer-discoverable from the repo root). The page lists every
+   doc in `docs/` and its subdirectories with a one-line "what it is
+   and who reads it."
 2. Update the top-level `README.md` with a link to the new
    interpretation guide so a fresh consumer finds it.
 3. **Downstream-AI probe.** Hand the full guide to a fresh
@@ -204,7 +204,7 @@ ai-assignment.md or the first session-review.
 6. Step 9 reorganization review AFTER notify.
 
 **Creates:**
-- The pointer page.
+- [`docs/README.md`](../../README.md) — the docs-index pointer page.
 - `docs/session-sets/harvester-finish-operations-and-interpretation-docs/downstream-ai-probe.md`
 - `docs/session-sets/harvester-finish-operations-and-interpretation-docs/change-log.md`
 - `docs/session-sets/harvester-finish-operations-and-interpretation-docs/disposition.json`
@@ -241,9 +241,19 @@ exists.
 
 ---
 
-## Why this is a stub
+## Session 1 elaboration summary (2026-05-18)
 
-The stub fixes the contract: interpretation guide for a downstream
-AI consumer, audience-check + downstream-AI probes, pointer page,
-README link. Section shapes, doc-home placement, and length budget
-are Session 1's call.
+The previous *Why this is a stub* section is preserved here for
+historical context. Session 1 elaborated the stub by:
+
+- Resolving the doc-home decision: **`docs/harvester/`**.
+- Resolving the pointer-page location: **`docs/README.md`**.
+- Authoring [`docs/harvester/interpretation-guide-outline.md`](../../harvester/interpretation-guide-outline.md)
+  — the canonical section list, reading order, and length budget for
+  the Session 2 body.
+- Updating the per-session **Creates** lists above to reference the
+  resolved file paths.
+
+Acceptance criteria (interpretation guide for a downstream AI
+consumer, audience-check + downstream-AI probes, pointer page,
+README link) are unchanged from the stub contract.

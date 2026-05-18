@@ -1,0 +1,4 @@
+[probe attempt failed]
+Model: gpt-5-4-mini
+Error: RuntimeError: API call failed after 3 attempts: Client error '429 Too Many Requests' for url 'https://api.openai.com/v1/responses'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429

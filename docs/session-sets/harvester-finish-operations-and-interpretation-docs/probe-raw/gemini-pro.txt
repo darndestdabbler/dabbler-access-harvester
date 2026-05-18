@@ -1,0 +1,7 @@
+1.  `[must-have]` The outline does not specify the linkage mechanism for connecting records in the manifest's `FunctionClassifications` and `EventHandlerClassifications` arrays (§5.4) back to specific procedures in specific `ir/` files; I would get stuck trying to apply these critical classifications without knowing the join key.
+2.  `[must-have]` The outline states that query dependencies are in the manifest's `RowSourceSpecs` (§5.3), but does not describe the shape of a `RowSourceSpecs` entry; I would not know how to parse the list of referenced tables and queries without this structural information.
+3.  `[must-have]` The outline explains how to reassemble embedded macro XML from `_AXL:` comments (§5.1, §5.6), but does not specify how to interpret the reassembled XML itself; I would get stuck trying to understand the macro's actions without a primer on its structure or a pointer to a schema.
+4.  `[nice-to-have]` Section 7 correctly distinguishes omitted properties (use Access default) from `null` properties (explicitly no value), but does not state where to find the default values; I could infer a property is "not interesting" if omitted, but could not reconstruct its complete state with certainty.
+5.  `[nice-to-have]` The section on Relationships (§5.5) mentions join keys and cascade rules but not cardinality (one-to-one, one-to-many); I would have to infer cardinality from index properties instead of reading it directly from the relationship definition.
+
+COVERED_WITH_CAVEATS

@@ -1,0 +1,11 @@
+1. **Embedded-macro XML schema after reassembly (§5.1, §5.6)** `[must-have]` — The outline tells me to concatenate `_AXL:` `Comment` strings across `Begin` nodes but never describes the resulting XML schema; once I have the blob I'd have no basis for interpreting what the embedded macro actually does or how its action nodes map to Access macro actions.
+
+2. **`RowSourceSpecs` record shape (§5.3, §4)** `[must-have]` — §5.3 says dependency facts live in the manifest's `RowSourceSpecs` and promises a "cross-link explained here," but the outline never sketches the record shape (keys, typed fields, how a spec is matched back to a named query or form control); without this I cannot traverse form → query → table even though the outline implies that traversal is the core workflow.
+
+3. **`FunctionClassifications` and `EventHandlerClassifications` record shapes (§5.4)** `[must-have]` — The outline says these manifest arrays surface caller→callee edges and classify procedures as event handlers, helper subs, etc., but gives no sketch of the actual record shape; I would be able to find the arrays but not read the edges, leaving module call-graph reconstruction blocked.
+
+4. **`Diagnostics` field semantics (§4)** `[nice-to-have]` — It appears in the manifest envelope bullet list and the reading-order recap instructs me to "cross-reference findings against `Diagnostics`" for repo-wide synthesis, but no section describes what a Diagnostics entry contains or what action I should take on one; I'd skip it rather than risk misreading it.
+
+5. **`kb/` tier file structure for provenance checking (§3)** `[nice-to-have]` — §3 says to open `kb/` when an `ir/` field's provenance is in question, but never describes what `kb/` files look like or which fields to compare against their `ir/` counterparts; the fallback instruction is present but not actionable.
+
+**Overall verdict: COVERED_WITH_CAVEATS** — The outline covers the primary read path (manifest → ir/ → unresolved-items) adequately, but the three must-have gaps (embedded-macro XML schema, `RowSourceSpecs` shape, classification record shapes) would leave me unable to interpret significant structural content the guide itself directs me to read.
