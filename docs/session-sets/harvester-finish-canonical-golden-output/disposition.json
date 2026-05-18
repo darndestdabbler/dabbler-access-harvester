@@ -29,7 +29,10 @@
     "provider": "anthropic",
     "model": "claude-sonnet-4-6",
     "effort": "medium",
-    "reason": "Routed analysis (gemini-pro): Session 2's work is mechanical integration + schema-to-code correspondence, fitting the project-guidance convention for Sonnet; cross-provider verification stays on gpt-5-4."
+    "reason": {
+      "code": "switch-due-to-cost",
+      "specifics": "Routed analysis (gemini-pro): Session 2's work is mechanical integration (Pipeline.Run wiring) and schema-to-code correspondence (the schema-conformance test closing Gap A), fitting the project-guidance convention that pins mechanical tasks to Sonnet. Switching from Opus to Sonnet drops per-routed-call cost ~5x while keeping cross-provider verification on gpt-5-4 intact."
+    }
   },
   "blockers": []
 }
