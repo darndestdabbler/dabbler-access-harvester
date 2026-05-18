@@ -34,7 +34,8 @@
   - `[c]` Cancelled in-flight (set was started, then stopped; not a
     candidate to resume here)
 - **What to start next:** the first row under `## Phase 4 — Mechanical
-  Harvester Finish Line` that is not yet complete. F1 today.
+  Harvester Finish Line` that is not yet complete. F1.5
+  (`vba-attribute-header-strip`) today — F1 closed 2026-05-17.
 - **Session count ranges** are conservative; the per-stub specs are
   the authoritative budget when present.
 
@@ -50,30 +51,41 @@
 
 ## Phase 4 — Mechanical Harvester Finish Line
 
-These five sets close out [`strategy.md` Phase 4](../planning/strategy.md#phase-4--mechanical-harvester-finish-line).
-Total **5 session sets, 13 sessions**, routed-cost rollup
-**~$1.00–$3.20**. The recommended execution order tracks
+These six sets close out [`strategy.md` Phase 4](../planning/strategy.md#phase-4--mechanical-harvester-finish-line).
+Total **6 session sets, 14–15 sessions**, routed-cost rollup
+**~$1.10–$3.60**. The recommended execution order tracks
 [`remaining-work-tree.md`](remaining-work-planner/remaining-work-tree.md#recommended-execution-order)
 faithfully — the per-feature prereq table in that file is the
 authority on what can run in parallel.
 
+F1.5 was inserted on 2026-05-17 (post-F1-close) after F1's reports
+quantified the VBA `Attribute VB_*` header gap (HHC 91% / Northwind
+79% parseFailed driven entirely by code-behind headers the grammar
+does not recognise). The human picked **strip-at-loader rather than
+extend-the-grammar**, scoped as its own session set per the lean +
+"strategy-level changes are session-set work" Conventions; F2's
+prereq list expanded to include F1.5 because F1.5 regenerates the
+parse-success-report goldens F2 reconciles against.
+
 | Order | Status | Slug | Phase 4 criterion | Prereqs | Sessions |
 |---|---|---|---|---|---|
-| F1 | `[ ]` | [`harvester-finish-canonical-parse-success-report`](harvester-finish-canonical-parse-success-report/spec.md) | #1 Parser coverage finality | None new (uses existing parser + `UnresolvedItemAggregator`) | 2 |
-| F2 | `[ ]` | [`harvester-finish-canonical-golden-output`](harvester-finish-canonical-golden-output/spec.md) | #3 Sample-corpus validation **+ #5 Unresolved-record reporting (folded in)** | F1 (parse counts must agree with golden manifest counts) | 4 |
+| F1 | `[x]` | [`harvester-finish-canonical-parse-success-report`](harvester-finish-canonical-parse-success-report/change-log.md) | #1 Parser coverage finality | None new (uses existing parser + `UnresolvedItemAggregator`) | 2 |
+| F1.5 | `[ ]` | [`vba-attribute-header-strip`](vba-attribute-header-strip/spec.md) | #1 Parser coverage finality (tightens F1's signal — strips the canonical `Attribute VB_*` header before parsing, regenerates F1's goldens) | F1 (this set regenerates its goldens) | 1–2 |
+| F2 | `[ ]` | [`harvester-finish-canonical-golden-output`](harvester-finish-canonical-golden-output/spec.md) | #3 Sample-corpus validation **+ #5 Unresolved-record reporting (folded in)** | F1 + F1.5 (parse counts must agree with golden manifest counts, and post-strip counts are the gate-relevant ones) | 4 |
 | F3 | `[ ]` | [`harvester-finish-cli-e2e-test-audit`](harvester-finish-cli-e2e-test-audit/spec.md) | #4 CLI surface | F2 (determinism gate reuses F2's normalization layer) | 2 |
-| F4 | `[ ]` | [`harvester-finish-operations-and-interpretation-docs`](harvester-finish-operations-and-interpretation-docs/spec.md) | #6 Documentation (downstream-AI-consumer-facing portion) | F1, F2 (docs reference ground-truth output and per-reason narratives) | 3 |
+| F4 | `[ ]` | [`harvester-finish-operations-and-interpretation-docs`](harvester-finish-operations-and-interpretation-docs/spec.md) | #6 Documentation (downstream-AI-consumer-facing portion) | F1 + F1.5 + F2 (docs reference ground-truth output and per-reason narratives) | 3 |
 | F5 | `[ ]` | [`harvester-finish-cli-packaging`](harvester-finish-cli-packaging/spec.md) | #7 Packaging | F3 (CLI is feature-stable with black-box coverage before cutting a release) | 2 |
 
 **Parallel-eligibility (advisory, not a schedule):**
 
-- **F1 and F3's "black-box CLI tests" feature** can start in parallel
-  immediately after this ROADMAP commits — F1 has no new prereqs, and
-  F3's first feature has none either. F3's "determinism gate" feature
-  defers until F2 lands. Per
-  [`project-guidance.md` → Token-Window Budget Overrides](../planning/project-guidance.md)
+- **F1.5 and F3's "black-box CLI tests" feature** can start in parallel
+  immediately — F1.5 only needs F1 (closed), and F3's first feature has
+  no F-set prereq. F3's "determinism gate" feature defers until F2 lands.
+  Per [`project-guidance.md` → Token-Window Budget Overrides](../planning/project-guidance.md)
   and the per-set git-worktree convention, parallel runs go on
   `session-set/<slug>` branches.
+- **F2 strictly waits** on both F1 and F1.5 — F2 reconciles per-object
+  manifest counts against the post-strip parse-success-report goldens.
 - **F3 and F4 can run in parallel after F2 closes** — no mutual
   dependency; both consume F2.
 - **F5 strictly waits** on F3.
