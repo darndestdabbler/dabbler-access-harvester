@@ -1221,6 +1221,18 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ## Bare JSON Verdict From The Verifier (Block Present, Analysis Absent) — Reminder Prompts Fix It
 
+> **Promoted to `project-guidance.md` → Conventions → Workflow
+> Expectations** on 2026-05-18 (after `harvester-finish-cli-packaging`
+> Session 2's Step 9 reorganization review accepted the
+> proactive-application reading of the trigger: this set baked the
+> prose-before-JSON lead into Round 1 of the very first verification
+> prompt and got a substantive 7-point analysis with empty issues on
+> the first try — no Round 2 reminder needed). Retained here as the
+> action-detail reference; the rule itself is now a Convention. The
+> proactive-application reading mirrors the precedent set by the
+> "Write `disposition.json` Before The Final Session's Closeout
+> Commit" promotion (2026-05-15).
+
 - **Context:** End-of-session Step 6 cross-provider session-verification
   via `route(task_type="session-verification")` (or `query("gemini-pro",
   task_type="session-verification")` when falling back per the

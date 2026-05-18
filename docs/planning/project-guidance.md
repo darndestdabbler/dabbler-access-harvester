@@ -367,6 +367,33 @@ experiments only.
   recurrence). The action-detail reference is preserved in
   `lessons-learned.md` → "Require A Trailing JSON Block In
   Session-Verification Prompts To Prevent Terse Verdicts".
+- **Pair the JSON-block schema with an explicit prose-before-JSON
+  lead on closeout-grade session-verification prompts.** The trailing
+  JSON-block requirement forces verdict structure but does not by
+  itself force a substantive audit trail — verifiers (gemini-pro
+  empirically) can legally return only the JSON block with no
+  preceding analysis prose, leaving a structurally valid but
+  auditless verdict. On closeout-grade work (final session of a
+  set, work that closes a strategy-level criterion, high-stakes
+  refactor), open the verification prompt with a mandatory-phrased
+  prose-first instruction placed BEFORE the file listings, e.g.,
+  "Your response MUST begin with a detailed prose analysis for each
+  concern below BEFORE the JSON block. Do not skip the analysis.
+  Both the analysis and the JSON block are required." If Round 1
+  returns only the JSON block despite the JSON-block instruction
+  alone, retry once with the "show your reasoning before the JSON"
+  reminder. Confirmed in two contexts: `harvester-finish-cli-e2e-test-audit`
+  Session 2 (2026-05-18 — original failure; Round 1 returned a bare
+  verdict, Round 2 with the reminder produced a substantive 5-point
+  analysis) and `harvester-finish-cli-packaging` Session 2 (2026-05-18 —
+  proactive application; the lead was baked into the very first
+  prompt and Round 1 returned a substantive 7-point analysis with
+  empty issues on the first try, no Round 2 needed). The
+  proactive-application reading mirrors the precedent set by the
+  "Write `disposition.json` Before The Final Session's Closeout
+  Commit" promotion. The action-detail reference is preserved in
+  `lessons-learned.md` → "Bare JSON Verdict From The Verifier (Block
+  Present, Analysis Absent) — Reminder Prompts Fix It".
 - **Verifier-failure escalation ladder.** When the configured
   cross-provider `session-verification` model fails (timeout, transient
   HTTP error, garbled output), do not silently retry until budget
