@@ -1,36 +1,33 @@
 {
-  "status": "in-progress",
-  "session_number": 3,
+  "status": "complete",
+  "session_number": 4,
   "total_sessions": 4,
-  "summary": "Session 3 of 4 complete (golden corpus generation + normalization layer). Landed tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs with three entry points (NormalizeManifest, NormalizeUnresolvedItems, NormalizePerObjectIr) per Decision 4. Ran Pipeline.Default().Run(...) against both canonical fixtures (HomeHealthCare.accdb and NorthwindDevEdition.accdb). Drift survey across two consecutive runs confirmed Decision 4's narrow scope: only Database.ExportedAt actually drifts; HarvesterVersion + Database.FilePath added defensively (vary across commits/hosts); per-object IR is byte-stable across all 7 categories on both fixtures, so NormalizePerObjectIr stays a no-op. Built a one-shot tmp/build-golden-corpus/ tool (gitignored) that links the actual GoldenNormalizer.cs source and produces samples/GoldenOutput/<fixture>/{kb,ir,manifest.json,unresolved-items.json}. raw/ excluded per Decision 3. Confirmed idempotency: builder against second staging run produces byte-identical golden. Total corpus 17MB (HHC 175 files, NW 397 files) — within Decision 3's 15-20MB band, well under the 100MB stop-rule. Inspected output for surprises: no malformed IR, no missing fields; the empty manifest collections are intentional V1 per Session 2's spec (per-category threading is follow-on; rich data lives in ir/<Category>/). Cross-provider verification: R1 gpt-5-4 returned VERIFIED with 0 issues in a single round. All 1885 tests pass, 2 skipped (synthetic-DB fixtures absent). Routed cost ~$0.072. Session 4 (regression gate + closeout) remains.",
+  "summary": "Session set complete (4 of 4). Closes Phase 4 Criteria #3 (canonical golden output committed + CI-verified) and #5 (per-run UnresolvedItems report from production pipeline). Session 1 landed the DatabaseManifestAggregator + six record types + unit tests. Session 2 wired Pipeline.Run() to emit manifest.json and unresolved-items.json and added the schema-conformance gate (closes prior set's Gap A). Session 3 generated and committed samples/GoldenOutput/HomeHealthCare/ (175 files) and samples/GoldenOutput/NorthwindDevEdition/ (397 files) plus GoldenNormalizer.cs; drift survey confirmed only three envelope fields require normalization. Session 4 (this session) authored CanonicalGoldenRegressionTests.cs - two [SkippableFact] methods (one per fixture) that re-run Pipeline.Default().Run() into a temp staging dir, normalize the volatile artifacts, and diff every produced file against the committed golden corpus with a line-anchored failure message. Full test suite green: 1887 passed, 2 pre-existing skips, 0 failures. Verification: gemini-pro Round 1 VERIFIED with empty issues (fell back from gpt-5-4 after 429 rate limit per the verifier-failure escalation ladder).",
   "files_changed": [
-    "tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs",
-    "samples/GoldenOutput/HomeHealthCare/manifest.json",
-    "samples/GoldenOutput/HomeHealthCare/unresolved-items.json",
-    "samples/GoldenOutput/HomeHealthCare/kb/**",
-    "samples/GoldenOutput/HomeHealthCare/ir/**",
-    "samples/GoldenOutput/NorthwindDevEdition/manifest.json",
-    "samples/GoldenOutput/NorthwindDevEdition/unresolved-items.json",
-    "samples/GoldenOutput/NorthwindDevEdition/kb/**",
-    "samples/GoldenOutput/NorthwindDevEdition/ir/**",
-    "docs/session-sets/harvester-finish-canonical-golden-output/ai-assignment.md",
+    "tests/AccessHarvester.Integration/Pipeline/CanonicalGoldenRegressionTests.cs",
+    "docs/session-sets/harvester-finish-canonical-golden-output/change-log.md",
     "docs/session-sets/harvester-finish-canonical-golden-output/disposition.json",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-state.json",
+    "docs/session-sets/harvester-finish-canonical-golden-output/next-session-set-recommendation.md",
+    "docs/session-sets/harvester-finish-canonical-golden-output/ai-assignment.md",
     "docs/session-sets/harvester-finish-canonical-golden-output/activity-log.json",
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-state.json",
     "docs/session-sets/harvester-finish-canonical-golden-output/session-events.jsonl",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-003.md",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-003-verification-prompt.txt",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-003-next-session-recommendation.md"
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-004.md"
   ],
-  "next_session_set": null,
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_session_set": {
+    "slug": "harvester-finish-cli-e2e-test-audit",
+    "summary": "Phase 4 F3 per docs/planning/strategy.md. Routed analysis CONFIRMS the plan: audit black-box CLI coverage for every harvester subcommand, fill gaps, and add a determinism gate that re-runs the CLI and diffs output against the now-committed golden corpus. Parallel-eligible with F4 (harvester-finish-operations-and-interpretation-docs) per the Phase 4 advisory. See next-session-set-recommendation.md for orchestrator + parallelism guidance."
+  },
   "next_orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
     "model": "claude-sonnet-4-6",
     "effort": "high",
     "reason": {
-      "code": "switch-due-to-cost",
-      "specifics": "Routed analysis (gemini-pro): Session 4's primary task is authoring a well-defined integration test (CanonicalGoldenRegressionTests.cs), a less complex and more mechanical task than Session 3's exploratory corpus generation. Sonnet provides sufficient capability for this implementation-focused work at substantially lower cost than Opus. Cross-provider session-verification goes to gemini-pro per the rule-based pairing for Sonnet output."
+      "code": "continue-current-trajectory",
+      "specifics": "Routed analysis (gemini-pro) recommends Sonnet @ effort=high for F3 Session 1: mechanical test-authoring work (auditing existing CLI coverage, writing missing black-box tests, adding a determinism gate) matches the project-guidance Convention pinning mechanical-correspondence tasks to Sonnet. Cross-provider verification routes to gemini-pro for Sonnet output."
     }
   },
   "blockers": []

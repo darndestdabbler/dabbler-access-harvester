@@ -332,6 +332,75 @@
           "costUsd": 0.0021625
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/author-regression-test",
+      "dateTime": "2026-05-18T06:57:43.411121-04:00",
+      "description": "Authored CanonicalGoldenRegressionTests.cs: SkippableFact per fixture, normalizes manifest+unresolved-items, diffs kb/ verbatim + ir/ via NormalizePerObjectIr, file-set parity check, line-anchored diff message.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/build-and-test",
+      "dateTime": "2026-05-18T06:59:01.410460-04:00",
+      "description": "dotnet build (0 errors, 323 pre-existing CA1416 warnings) and dotnet test (1887 passed, 2 pre-existing skips, 0 failures) sequentially. CanonicalGoldenRegressionTests: both fixtures pass in ~10s; full Integration project: 18 passed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/verification-r1",
+      "dateTime": "2026-05-18T07:01:31.699815-04:00",
+      "description": "Cross-provider session-verification round 1. Default verifier gpt-5-4 returned 429 (rate limit); fell back to gemini-pro per the verifier-failure escalation ladder.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 4606,
+          "outputTokens": 24,
+          "costUsd": 0.005997499999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/next-set-recommendation-analysis",
+      "dateTime": "2026-05-18T07:03:32.655065-04:00",
+      "description": "Routed analysis to recommend the next session set (plan-driven; F3 expected per Phase 4 plan).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1032,
+          "outputTokens": 284,
+          "costUsd": 0.00413
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/change-log-generation",
+      "dateTime": "2026-05-18T07:04:21.459306-04:00",
+      "description": "Routed summarization (max_tier=1) to author change-log.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1710,
+          "outputTokens": 916,
+          "costUsd": 0.0008061
+        }
+      ]
     }
   ]
 }

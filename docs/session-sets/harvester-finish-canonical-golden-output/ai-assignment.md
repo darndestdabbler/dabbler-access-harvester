@@ -180,8 +180,50 @@ adjudication-prompt routing for any Round 2 stays the same.
 - **Estimate:** $0.75 - $2.00
 - **Rationale:** Medium-effort session with a premium orchestrator (`gpt-5-4`) chosen for its strength in both coding the regression gate and authoring high-quality narrative artifacts.
 
-### Actuals (filled after the session)
+### Actuals (filled after the session — 2026-05-18)
 
-- **Actual Cost:**
-- **Final Orchestrator:**
-- **Key Learnings:**
+- **Actual cost (routed): ~$0.0109**
+  - `session-verification` round 1 (gemini-pro): $0.0060 (fallback
+    from gpt-5-4 after 429 rate-limit retry exhaustion — VERIFIED
+    with 0 issues)
+  - `analysis` (gemini-pro, next-session-set recommendation): $0.0041
+  - `summarization` (gemini-flash, change-log.md): $0.0008
+- **Final orchestrator:** Claude Opus 4.7 (1M context) @ effort=high.
+  Deviation from this block's Session 3 recommendation (Sonnet @
+  effort=high): explicit human override at session start
+  ("Please run as Opus regardless of the recommendation"). Cost
+  stayed an order of magnitude under the $0.75–$2.00 estimate band
+  because Opus authored in-conversation (no routed orchestrator
+  call), and the routed steps were all task types that the router's
+  tier-picker naturally lands on cheap models (gemini-pro for
+  verification fallback + analysis, gemini-flash for summarization).
+- **Key learnings / deviations:**
+  - **Verifier-failure escalation ladder validated.** Default
+    cross-provider verifier `gpt-5-4` returned a 429 rate-limit
+    after the router's 3 internal retries. Per the lessons-learned
+    ladder, fell back to `gemini-pro` (the alternate
+    different-from-Claude verifier) via `query()` bypassing the
+    `task_type_override`. Single-round VERIFIED, no R2 needed.
+    Documented `verifier_fallback`-class fallback path (gpt-5-4
+    rate-limit → gemini-pro) is now repeated in two contexts:
+    `vba-statement-and-module-grammar` Session 1 (timeout) and
+    this session (rate limit). Same mitigation, different failure
+    mode — generalizes well.
+  - **Plan-driven next-set recommendation worked cleanly.** The
+    routed analysis read `docs/planning/strategy.md` Phase 4,
+    identified F3 (`harvester-finish-cli-e2e-test-audit`) as the
+    planned next set, and returned `CONFIRM` with no deviation.
+    The mechanism added in `docs/ai-led-session-workflow.md`
+    Step 8 (plan-driven repos must read the plan, confirm or
+    deviate) has now been exercised on this repo's actual
+    plan-driven trajectory.
+  - **Single-file regression test was correctly scoped.** The new
+    `CanonicalGoldenRegressionTests.cs` is 240 lines, runs in
+    ~10s for both fixtures, and reuses existing helpers
+    (`AccessAvailability`, `RepoPaths`, `GoldenNormalizer`). No
+    new test infrastructure was needed. Build clean (323 pre-
+    existing CA1416 warnings, 0 errors); full suite 1887 passed,
+    2 pre-existing skips.
+
+**This is the last session of the set; no next-session
+orchestrator recommendation needed.**
