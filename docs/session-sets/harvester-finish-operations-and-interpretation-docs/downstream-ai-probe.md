@@ -1,178 +1,168 @@
 # Downstream-AI Probe — Session 3
 
-> **Status:** Probe ran 2026-05-18. Verdict **INSUFFICIENT**. The cause
-> is a stale `examples/*.json` artefact, not a defect in the
-> interpretation guide; the spec's "Out-of-date examples" stop rule has
-> fired. Session 3 is STOPPED mid-session per the human's adjudication;
-> closeout is deferred until `examples/*.json` is regenerated against
-> the current canonical schema. The pointer page (`docs/README.md`),
-> the top-level README link, and this probe artefact are committed
-> as work-in-progress.
+> **Status:** Three probe rounds. Final verdict **SUFFICIENT WITH
+> ADDITIONS — 0 blocking gaps**. The spec's "material gap" closeout
+> gate is cleared. The three probe rounds chronicle a real failure
+> path: the v1 probe surfaced the spec's "Out-of-date examples" stop
+> rule (committed as WIP); the v2 probe (after regenerating
+> `examples/*.json` from the canonical golden corpus) returned 2
+> blocking + 3 nonblocking gaps; the v3 probe (after addressing the 2
+> blocking gaps in the guide) returned 0 blocking + 5 nonblocking
+> gaps. The 5 nonblocking gaps were then folded into the guide as
+> polish and the session proceeded to end-of-session verification.
 
-## Probe configuration
+## Probe configuration (consistent across rounds)
 
 - **Convention:** Session 3 spec → step 3 ("Hand the full guide to a
   fresh cross-provider model and ask: *Can you interpret this
   `northwind-output.json` based only on the guide?*").
 - **Orchestrator:** Claude Code (Claude Opus 4.7) @ effort=high.
-- **Cross-provider target (primary):** `gpt-5-4` (fresh provider —
-  Session 1 used `gemini-pro` and `sonnet`, Session 2 verification used
-  `gemini-pro`).
-- **Fallback:** `gemini-pro`, used after `gpt-5-4` returned sustained
-  HTTP 429s (third consecutive session in this set hitting that
-  condition; documented across Sessions 1 and 2's actuals).
-- **Routed via:** `query("gpt-5-4", task_type="analysis", ...)` →
-  fallback to `query("gemini-pro", task_type="analysis", ...)`.
-- **Cost:** `gemini-pro` $0.0430 (16,361 input tokens / 2,254 output).
-  The 429s on `gpt-5-4` were rejected before token spend.
-- **Prompt inputs:** the full
+- **Cross-provider target (primary):** `gpt-5-4` (fresh provider).
+  All three rounds returned sustained HTTP 429s, falling back to
+  `gemini-pro` per the verifier-failure escalation ladder. The 429
+  condition is durable across at least three days now.
+- **Fallback:** `gemini-pro` via `query("gemini-pro",
+  task_type="analysis", ...)`.
+- **Prompt inputs (v2 and v3):** the full
   [`docs/harvester/interpretation-guide.md`](../../harvester/interpretation-guide.md)
-  body plus
-  [`examples/northwind-output.json`](../../../examples/northwind-output.json)
-  verbatim.
-- **Raw response:** persisted to
-  [`probe-raw/downstream-ai-probe-gemini-pro.txt`](probe-raw/downstream-ai-probe-gemini-pro.txt)
-  before any display side effect, per the
-  *Persist Routed Output To Disk* Convention.
+  body plus the three example files
+  ([`examples/minimal-form.json`](../../../examples/minimal-form.json),
+  [`examples/complex-form.json`](../../../examples/complex-form.json),
+  [`examples/northwind-output.json`](../../../examples/northwind-output.json)).
+  The v1 probe sent only `examples/northwind-output.json` per the
+  literal reading of the spec; subsequent rounds expanded to all three
+  files since the guide's §9 names all three as the consumer-facing
+  gallery.
+- **Persisted:** raw responses go to disk *before* any display side
+  effect, per the *Persist Routed Output To Disk* Convention. The v2
+  pre-gap-fix response is preserved at
+  [`probe-raw/downstream-ai-probe-gemini-pro-v2-pre-gapfix.txt`](probe-raw/downstream-ai-probe-gemini-pro-v2-pre-gapfix.txt);
+  the v3 post-gap-fix response (the current verdict) is at
+  [`probe-raw/downstream-ai-probe-gemini-pro.txt`](probe-raw/downstream-ai-probe-gemini-pro.txt).
+  The v1 raw response was overwritten by v2 before this preservation
+  pattern was adopted; the v1 verdict and findings are reconstructable
+  from this document and from the WIP commit (see below).
 
-## Verdict
+## Round-by-round summary
 
-**INSUFFICIENT** — but with an important qualifier: the *content* of
-the guide is correct for the current canonical harvester output. The
-gap the probe surfaces is between the guide and the *legacy* example
-files at `examples/*.json`, not between the guide and the actual
-`samples/GoldenOutput/<fixture>/` corpus the guide was written against.
+### v1 — INSUFFICIENT (against stale `examples/*.json`)
 
-The probe model could not have known this — it has no way to
-cross-check the legacy examples against the golden corpus from the
-prompt alone. The verdict is a true positive for the question asked
-("can you interpret this JSON using only the guide?"); the underlying
-root cause is that the consumer was handed the wrong example file.
+- Sent the guide plus the legacy `examples/northwind-output.json`
+  (which predated `harvester-finish-canonical-golden-output` and used
+  a `{ Spec: { Sections, Controls, ... } }` shape).
+- Verdict: **INSUFFICIENT** with 2 blocking gaps (file-structure
+  mismatch, form-record shape mismatch) and 3 nonblocking gaps.
+- Root-cause investigation confirmed the canonical golden corpus at
+  `samples/GoldenOutput/HomeHealthCare/ir/Forms/*.ir.json` uses
+  exactly the `{ Type, Properties, Children, ... }` shape the guide
+  documents. The guide was correct; `examples/*.json` was stale.
+- Cost: ~$0.043 (`gemini-pro` after `gpt-5-4` 429).
+- Disposition: tripped the spec's "Out-of-date examples" stop rule.
+  Human adjudicated to honour the stop rule. Session 3 committed as
+  WIP (commit `8c85f07`); closeout deferred until `examples/*.json`
+  was regenerated.
 
-## Gaps reported by the probe
+### Regen between v1 and v2
 
-### Blocking (2)
+The user authorised regenerating the example files in this session
+rather than opening a tree-amendment session to
+`schema-finalization-and-docs`. This is a workflow deviation from the
+spec's stop-rule prescription ("Tree-amendment to
+`schema-finalization-and-docs`"); the trade is pragmatic — the
+session-set worktree already had the canonical golden corpus available
+and the regen was a four-command operation.
 
-1. **File-structure mismatch.** The guide describes a multi-file
-   output layout (`manifest.json` plus per-category `ir/` directories
-   plus `unresolved-items.json`). The example file is a single
-   consolidated JSON object with every category as a top-level array.
-   The guide does not mention this consolidated format.
-2. **Form/Report record shape mismatch.** The guide's §5.1 documents
-   the form record as `{ Type: "Form", Properties: {...}, Children:
-   [...], VbaCode, Procedures, ... }`. The example's forms are wrapped
-   in a `Spec` object with `DataSource`, `Sections` (string arrays of
-   control names), `Controls` (flat array referencing back to sections
-   by name), and a `ParserOutput: null` slot. The guide makes no
-   mention of `Spec`, `Sections`-as-string-arrays, or `ParserOutput`.
+The three `examples/*.json` files were replaced with verbatim copies
+from the canonical golden corpus:
 
-### Non-blocking (3)
+- `examples/minimal-form.json` ← `samples/GoldenOutput/HomeHealthCare/ir/Forms/frmReportParam_ClientFY.ir.json`
+  (116 lines — simplest form).
+- `examples/complex-form.json` ← `samples/GoldenOutput/HomeHealthCare/ir/Forms/frmServiceDetail.ir.json`
+  (1,045 lines — rich form with VBA, bindings, embedded macros).
+- `examples/northwind-output.json` ← `samples/GoldenOutput/NorthwindDevEdition/manifest.json`
+  (29 lines — the manifest envelope from a Northwind run; arrays are
+  empty per the golden corpus normalisation).
 
-3. **`NavigationGraph` top-level object.** The example's manifest has
-   a top-level `NavigationGraph` (`EntryPoints`, `Edges`,
-   `UnresolvedTargets`) that the guide's §4 envelope description
-   omits.
-4. **`UnresolvedItem` field set.** The example's `UnresolvedItems`
-   entries have a `ConstructDescription` field and lack the `Severity`
-   field the guide documents in §6.
-5. **`ParserOutput: null` on form records.** Each form in the example
-   carries this slot; the guide does not mention it.
+The interpretation guide's §9 (Examples gallery) was rewritten to
+describe each file accurately.
 
-## Root-cause investigation
+### v2 — SUFFICIENT WITH ADDITIONS (2 blocking, 3 nonblocking)
 
-I confirmed the canonical golden corpus shape directly:
+- Sent the guide plus all three regenerated example files.
+- Verdict: **SUFFICIENT WITH ADDITIONS** with 2 blocking gaps and 3
+  nonblocking gaps.
+- Blocking gaps:
+  1. `EventMacros` object — the enricher emits a structured
+     per-event `Actions` array on the form record that the guide
+     never mentioned; the guide pointed only at the legacy `_AXL:`
+     comment reassembly recipe.
+  2. `On<event>EmMacro` properties — Access also emits raw-text
+     macro dumps as sibling properties on the host's `Properties`
+     bag (e.g., `OnLoadEmMacro`); the guide's event-binding shape
+     list omitted this pattern.
+- Nonblocking gaps:
+  3. Hex-encoded binary properties (`NameMap`, `PrtDevMode`, etc.)
+     not contextualised.
+  4. `VbaCode` for form/report class modules begins with a
+     non-VBA `CodeBehindForm` header line not flagged in the guide.
+  5. Canonical filename `manifest.json` not explicitly named in
+     §2.
+- Cost: ~$0.067 (`gemini-pro` after `gpt-5-4` 429).
+- Disposition: addressed both blocking gaps in §5.1 and §5.6 of the
+  guide (added `EventMacros` object description, added the
+  `On<event>EmMacro` pattern to event-binding shape, added the
+  `CodeBehindForm` note to `VbaCode`, added the hex-blob note).
 
-```bash
-$ head samples/GoldenOutput/HomeHealthCare/ir/Forms/frmAbout.ir.json
-{
-  "Type": "Form",
-  "Properties": {
-    "PopUp": "True",
-    ...
-  },
-  ...
-}
-```
+### v3 — SUFFICIENT WITH ADDITIONS (0 blocking, 5 nonblocking)
 
-The canonical golden corpus emits exactly the
-`{ Type, Properties, Children, ... }` shape the guide describes. The
-`{ Spec: { Sections, Controls, ... } }` shape in
-`examples/northwind-output.json` is the legacy structure used by the
-pre-import `AccessExporterTemp1` codebase, before the
-`harvester-finish-canonical-golden-output` set normalized the output
-to the current per-fixture multi-file corpus shape.
+- Sent the guide plus all three example files (same as v2).
+- Verdict: **SUFFICIENT WITH ADDITIONS** with **0 blocking gaps** and
+  5 nonblocking gaps:
+  1. `TextCapacity` object on controls — not documented.
+  2. Hex-encoded property context still wants more specifics.
+  3. `EventMacros` omission semantics not explicit.
+  4. `Label.source` casing inconsistency (guide showed PascalCase
+     `Source`; JSON uses lowercase `source`).
+  5. Canonical filename `manifest.json` still wants an explicit
+     "always named X" sentence.
+- Cost: ~$0.065 (`gemini-pro` after `gpt-5-4` 429).
+- Disposition: spec gate cleared (0 blocking). Folded the 5
+  nonblocking polish fixes into the guide:
+  1. Added `TextCapacity` description to §5.1 (populated form
+     with `charsPerLine` / `visibleLines` / `font`, plus the
+     `unavailable: true` form).
+  2. Extended the hex-blob note in §5.1.
+  3. Added `EventMacros` omission semantics ("absence means no
+     embedded macros, not data not captured").
+  4. Fixed the `Label` casing in §7 (PascalCase → lowercase) plus
+     a one-paragraph framing about which provenance objects use
+     lowercase vs. which records use PascalCase.
+  5. Added explicit "filenames are stable" sentence to §2.
 
-In other words:
+## Final state
 
-- The interpretation guide's contract matches
-  `samples/GoldenOutput/<fixture>/`.
-- The three `examples/*.json` files
-  (`minimal-form.json`, `complex-form.json`,
-  `northwind-output.json`) are pre-canonical and follow a different
-  schema.
-- The guide's §9 ("Examples gallery") points at the legacy example
-  files — that is the breakage path the probe walked into.
+- **Verdict:** SUFFICIENT WITH ADDITIONS, 0 blocking gaps.
+- **Guide changes** since the WIP commit:
+  - §2: added stable-filename sentence.
+  - §5.1: added `TextCapacity`, `EventMacros` (with omission note),
+    `On<event>EmMacro`, `CodeBehindForm`, hex-blob bullets.
+  - §5.6: cross-references the three-form embedded-macro story in
+    §5.1.
+  - §7: fixed `Label.source` casing and added a framing paragraph
+    about provenance-object vs. record-shape casing conventions.
+  - §9: rewritten to describe the three regenerated example files.
+- **Examples regenerated:** the three `examples/*.json` files now
+  carry verbatim canonical-schema content (HHC for the two form
+  records, NW for the manifest envelope).
 
-## Disposition
+The session is unblocked. Proceeding to end-of-session cross-provider
+verification and closeout.
 
-The spec's stop-rule table contains this exact case:
+## Cost summary across the three rounds
 
-> | **Out-of-date examples** | `examples/*.json` no longer matches what
-> | the harvester produces after `harvester-finish-canonical-golden-output`
-> | lands | Stop. Tree-amendment to `schema-finalization-and-docs` to
-> | regenerate examples; resume docs after examples are current. |
-
-The human adjudicated to honour the stop rule: do not close out
-Session 3 until `examples/*.json` is regenerated against the current
-canonical schema. The three deliverables produced before the probe
-ran — the docs index at
-[`docs/README.md`](../../README.md), the link added to the top-level
-[`README.md`](../../../README.md), and this probe artefact plus its
-raw output — are committed as work-in-progress on the
-`session-set/harvester-finish-operations-and-interpretation-docs`
-branch. `session-state.json` remains at `status=in-progress`,
-`lifecycleState=work_in_progress`; `mark_session_complete()` is NOT
-called.
-
-## What the next orchestrator picks up
-
-When the resume window opens:
-
-1. **Prerequisite (handled before resuming):** a tree-amendment to
-   `schema-finalization-and-docs` regenerates the three
-   `examples/*.json` files from a real harvester run against the
-   current schema (`{ Type, Properties, Children, ... }` shape,
-   per-fixture multi-file corpus or a documented consolidated
-   "snapshot" format — the regeneration set decides which).
-2. **Resume Session 3:** re-run the downstream-AI probe against the
-   regenerated example, expect a SUFFICIENT or
-   SUFFICIENT-WITH-ADDITIONS verdict, then continue with end-of-session
-   verification and closeout (`disposition.json`,
-   `change-log.md`, `next-session-set-recommendation.md`, commit +
-   push + `mark_session_complete()` + notify + Step 9 reorganization
-   review).
-
-## Files committed in this partial Session 3
-
-- [`docs/README.md`](../../README.md) — new docs-index pointer page.
-- [`README.md`](../../../README.md) — top-level README updated with a
-  link to the interpretation guide and a pointer to `docs/README.md`.
-- [`downstream-ai-probe.md`](downstream-ai-probe.md) (this file).
-- [`probe-raw/downstream-ai-probe-gemini-pro.txt`](probe-raw/downstream-ai-probe-gemini-pro.txt)
-  — raw verifier output (never edited).
-- [`probe-raw/downstream-ai-probe-gemini-pro.meta.json`](probe-raw/downstream-ai-probe-gemini-pro.meta.json)
-  — token / cost metadata sidecar.
-- [`activity-log.json`](activity-log.json) — Session 3 entries logged
-  through the probe step.
-- [`session-state.json`](session-state.json) — Session 3 registered
-  as in-progress.
-
-## Why this is not a guide defect
-
-The guide accurately documents the current canonical harvester output.
-Adding sections for the legacy `examples/*.json` shape would create the
-exact failure mode the
-[`docs/planning/project-guidance.md`](../../planning/project-guidance.md)
-"Lean By Default" Principle warns against — documenting two schemas
-when the harvester only produces one. Regenerating the example files
-is the lower-cost, higher-truth fix.
+| Round | Verdict | Blocking | Nonblocking | Cost | Note |
+|---|---|---|---|---|---|
+| v1 | INSUFFICIENT | 2 | 3 | $0.043 | Triggered spec stop rule (WIP commit) |
+| v2 | SUFFICIENT WITH ADDITIONS | 2 | 3 | $0.067 | After examples regen |
+| v3 | SUFFICIENT WITH ADDITIONS | 0 | 5 | $0.065 | After blocking-gap fixes |
+| **Total** | | | | **~$0.175** | All `gemini-pro`; `gpt-5-4` 429d each time |

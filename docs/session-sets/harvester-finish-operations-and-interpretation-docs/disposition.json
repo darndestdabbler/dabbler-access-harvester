@@ -1,33 +1,45 @@
 {
-  "status": "completed",
-  "summary": "Session 1 of 3 produced the interpretation-guide outline at docs/harvester/interpretation-guide-outline.md, resolved the doc-home decision (docs/harvester/) and pointer-page decision (docs/README.md), authored ai-assignment.md via routed analysis, and ran the cross-provider audience-check probe. Both probes (gemini-pro plus sonnet fallback after sustained OpenAI 429) converged on the same three must-have gaps (RowSourceSpec record shape, classification record shapes, embedded-macro XML schema); all folded into the outline as per-section Session-2-must-include notes. Cross-provider session-verification escalated per the verifier-failure-ladder convention (rung 2: fell back from gpt-5-4 to gemini-pro after OpenAI 429); verdict VERIFIED with zero issues. Routed cost ~$0.0898.",
+  "status": "complete",
+  "summary": "harvester-finish-operations-and-interpretation-docs (3 sessions) closed Phase 4 Criterion #6: authored the downstream-AI-consumer-facing interpretation guide (docs/harvester/interpretation-guide.md, ~5,000 words across 10 sections), the docs-index pointer page (docs/README.md), added a link from the top-level README to both, and regenerated examples/*.json from the canonical golden corpus (verbatim copies of HomeHealthCare/ir/Forms/frmReportParam_ClientFY.ir.json, frmServiceDetail.ir.json, and NorthwindDevEdition/manifest.json) after Session 3's downstream-AI probe surfaced the spec's 'Out-of-date examples' stop rule. Session 3 ran three probe rounds (INSUFFICIENT against stale examples => SUFFICIENT WITH ADDITIONS / 2 blocking against regenerated examples => SUFFICIENT WITH ADDITIONS / 0 blocking after gap-fix); the guide gained five new bullets/paragraphs in section 5.1 (EventMacros, On<event>EmMacro, CodeBehindForm, hex-blob context, TextCapacity), a cross-reference update in section 5.6, a casing fix in section 7 (Label.source from PascalCase to lowercase), and a stable-filename sentence in section 2. Cross-provider verification VERIFIED with 0 issues (gemini-pro after gpt-5-4 429d, fourth consecutive session). Total set cost ~$0.332 (Session 1 ~$0.090, Session 2 ~$0.034, Session 3 ~$0.224). Workflow deviation: examples/*.json was regenerated in-session at human direction rather than via the spec-prescribed tree-amendment to schema-finalization-and-docs; the next-session-set recommendation calls for that amendment to formalise the provenance before Phase 4 closeout.",
   "files_changed": [
     "docs/harvester/interpretation-guide-outline.md",
+    "docs/harvester/interpretation-guide.md",
+    "docs/README.md",
+    "README.md",
+    "examples/minimal-form.json",
+    "examples/complex-form.json",
+    "examples/northwind-output.json",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/spec.md",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/ai-assignment.md",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/audience-check-probe.md",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/downstream-ai-probe.md",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/next-orchestrator-recommendation-session-2.md",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/next-orchestrator-recommendation-session-3.md",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/next-session-set-recommendation.md",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/change-log.md",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/disposition.json",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/activity-log.json",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-events.jsonl",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-state.json",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/gemini-pro.txt",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/gpt-5-4.txt",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/gpt-5-4-mini.txt",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/sonnet.txt",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/downstream-ai-probe-gemini-pro.txt",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/downstream-ai-probe-gemini-pro.meta.json",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/downstream-ai-probe-gemini-pro-v2-pre-gapfix.txt",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/downstream-ai-probe-gemini-pro-v2-pre-gapfix.meta.json",
     "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-reviews/session-001.md",
-    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/activity-log.json",
-    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-events.jsonl",
-    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-state.json",
-    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/disposition.json"
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-reviews/session-002.md",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-reviews/session-003.md",
+    "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-reviews/session-003.meta.json"
   ],
-  "verification_method": "api",
+  "verification_method": "router",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 2 is synthesis-heavy body authoring (~3,500-5,000 words across the 10 outline sections) per the project-guidance Convention pinning synthesis-document work above ~3K input tokens to in-conversation Opus orchestration. If OpenAI is still 429ing at Session 2 start, plan on gemini-pro for the cross-provider verification step from the outset rather than wasting a GPT-5.4 attempt."
-    }
+  "verification_verdict": "VERIFIED",
+  "next_session_set": {
+    "slug": "schema-finalization-and-docs-tree-amendment-001",
+    "summary": "Single-session tree-amendment under schema-finalization-and-docs to formally record the regeneration of examples/*.json that was performed in-session during this set (workflow deviation from the spec's 'Out-of-date examples' stop rule prescription). Closes a procedural-debt provenance gap before Phase 4 closeout. Alternative would be to start phase-4-closeout directly; the amendment is cheaper to do first and avoids rediscovering the same unrecorded change during a final audit. See next-session-set-recommendation.md for the full rationale and deferred-items list."
   },
   "blockers": []
 }

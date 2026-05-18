@@ -78,6 +78,9 @@ output directory:
   run produces a `manifest.json` (the inventory and the cross-cutting
   enrichment arrays — see §4) and an `unresolved-items.json` (the
   flat list of references the resolver could not fully bind — see §6).
+  Both filenames are stable: a consumer can rely on
+  `<output-dir>/manifest.json` and `<output-dir>/unresolved-items.json`
+  as the canonical entry points without scanning the directory.
 
 The **canonical golden corpus** at
 [`samples/GoldenOutput/<fixture>/`](../../samples/GoldenOutput/)
@@ -389,14 +392,23 @@ Children: [...], VbaCode: "...", ... }`. The interesting bits:
   example, a form's `Properties.Width` is the raw twip count, while
   `GeometryIn` (when present) holds the decoded `{ X, Y, W, H }` in
   inches. The convention scales to every Access dimension property.
+  Some properties carry hex-encoded binary blobs (`GUID`, `NameMap`,
+  `PrtDevMode`, `PrtDevNames`, `PrtMip`) — printer settings, internal
+  name maps, GUIDs, and similar Access-private formats. Unless the
+  consumer specifically needs these (e.g., a migration tool preserving
+  print-driver settings), they can be safely ignored.
 - **`Children`** is the form's section / control tree, recursive.
   Each child has the same `{ Type, Properties, Children, ... }`
   shape; section nodes (`Detail`, `FormHeader`, `FormFooter`) wrap
   controls; controls' `Children` are typically empty.
 - **`VbaCode`** is the form's class-module source as a string, with
-  Windows line endings (`\r\n`) preserved as Access stored them. A
-  consumer should prefer the structured `Procedures` list (below)
-  over re-parsing `VbaCode`.
+  Windows line endings (`\r\n`) preserved as Access stored them. For
+  form and report class modules, the string begins with a non-VBA
+  `CodeBehindForm` header line (added by Access's `SaveAsText`
+  export), followed by the standard `Attribute VB_*` headers, then
+  the actual code. A consumer feeding the body to a VBA parser should
+  strip the `CodeBehindForm` line first. A consumer should prefer the
+  structured `Procedures` list (below) over re-parsing `VbaCode`.
 - **`Procedures`** is the enricher-extracted procedure list: one
   entry per `Sub`, `Function`, or `Property *` declaration in
   `VbaCode`, each carrying `Name`, `ProcedureType`, `AccessModifier`,
@@ -416,19 +428,64 @@ Children: [...], VbaCode: "...", ... }`. The interesting bits:
   classification is in the manifest's
   `EventHandlerClassifications`. Other event property values:
   `=ExpressionFunction()` for an inline expression call, `"Macro
-  Name"` for a saved-macro reference, or `[Embedded Macro]` for an
-  embedded macro (see below).
+  Name"` for a saved-macro reference, `[Embedded Macro]` for an
+  embedded UI macro (see *Embedded-macro correlation* below), or
+  the raw macro text inline. **Inline-macro `On...EmMacro`
+  pattern.** Access also emits a sibling property whose name is
+  the event name suffixed `EmMacro` — `OnLoadEmMacro`,
+  `OnClickEmMacro`, etc. — whose value is the raw text dump of the
+  embedded macro the host control fires on that event. The text is
+  the same payload that appears `_AXL:`-encoded inside the
+  `Children` tree; the harvester surfaces it on the host's
+  `Properties` bag as a convenience. Consumers should prefer the
+  structured `EventMacros` object below over parsing the raw text.
+- **`EventMacros`** is the enricher's structured representation of
+  every embedded UI macro bound to one of the host's event slots.
+  The shape is `{ "<EventName>": { "Actions": [...],
+  "InferredFunctionality": ... }, ... }` — keyed by event name
+  (`OnLoad`, `OnClick`, `OnCurrent`, etc.). Each action entry
+  carries `Action` (the Access macro action name, e.g. `SetValue`,
+  `OpenForm`, `MessageBox`), `Arguments` (a name-keyed bag —
+  `Item`, `Expression`, `FormName`, etc.), and optional `Condition`
+  / `ConditionBranch` / `Comment` / `InferredFunctionality` slots.
+  This is the **consumer-friendly** form of an embedded macro;
+  prefer it over the lower-level `_AXL:` / `On...EmMacro` raw text.
+  The two raw forms remain in the output for debugging and
+  round-tripping. **Omission semantics:** `EventMacros` is omitted
+  from the record entirely when the host has no embedded UI macros;
+  absence means "no embedded macros," not "data not captured."
+- **`TextCapacity`** (per-control, enricher-added on text-bearing
+  controls) — the estimated display capacity for a text control,
+  computed from its geometry and font. Either populated as
+  `{ "charsPerLine": <int>, "visibleLines": <int>, "font": { "name":
+  "<font>", "size": <int>, "resolution": "inherited" | "fallback" } }`
+  (plus possibly a few extra metric fields) or, when the harvester
+  cannot compute it, the explicit absence form
+  `{ "unavailable": true, "reason": "<short reason>" }` — typical
+  reasons are `"no geometry"` (the control has no `Width`/`Height`
+  to measure against) or a missing font. A consumer doing layout
+  preservation or migration sizing reads the populated form; a
+  consumer just needing structure can ignore the field.
 
 **Embedded-macro correlation.** Embedded UI macros — the macros
 Access stores inside the form rather than as standalone objects —
-live inside the `Children` tree as `_AXL:` comment payloads. The
-extractor preserves them in place to keep the binding to the host
-control visible; reassembling the macro is the consumer's job.
+appear in three places in the `ir/` record. **Prefer the structured
+`EventMacros` object documented above for downstream consumption**;
+the raw forms are available for debugging and round-tripping:
 
-The reassembly recipe: walk the `Children` tree, collect every
-`Begin` node whose `Comment` string starts with `_AXL:`, and
-concatenate the comment payloads in source order. The result is a
-fragment of XML in the
+1. **`EventMacros`** (consumer-friendly, top-level) — the parsed,
+   per-event structured object documented in the bullet above.
+2. **`Properties.On<event>EmMacro`** (raw text, host-bag-attached) —
+   the verbatim text dump on the host's `Properties` bag.
+3. **`_AXL:` comments inside the `Children` tree** (raw XML
+   fragments) — the legacy in-tree form preserved for the
+   round-trip case described below.
+
+The `_AXL:` reassembly recipe (only needed when the consumer is
+specifically working with the in-tree XML form): walk the `Children`
+tree, collect every `Begin` node whose `Comment` string starts with
+`_AXL:`, and concatenate the comment payloads in source order. The
+result is a fragment of XML in the
 `http://schemas.microsoft.com/office/accessservices/2009/11/application`
 namespace. The shape is roughly:
 
@@ -593,14 +650,18 @@ tables) are emitted as separate macros under
 `ir/DataMacros/<tableName>.<event>.ir.json`.
 
 Embedded UI macros — the per-control event macros stored inside a
-form or report rather than as standalone objects — remain inside
-the host's `Children` tree as `_AXL:` comment payloads. See §5.1
-for the reassembly recipe and the
-`<UserInterfaceMacro>` XML shape sketch; the shape is identical for
-embedded macros regardless of whether the host is a form or a
-report. The harvester does **not** lift embedded macros into the
-standalone macros directory; preserving the binding to the host
-control is the higher-value property.
+form or report rather than as standalone objects — surface in three
+forms on the host record: the structured `EventMacros` object
+(preferred for consumers), the `Properties.On<event>EmMacro` raw
+text dump, and `_AXL:` comment payloads in the `Children` tree.
+See §5.1 for the full description of all three forms and the
+recommended consumption order, plus the `<UserInterfaceMacro>` XML
+shape sketch that applies if a consumer is working with the raw
+`_AXL:` form. The shape is identical for embedded macros regardless
+of whether the host is a form or a report. The harvester does
+**not** lift embedded macros into the standalone macros directory;
+preserving the binding to the host control is the higher-value
+property.
 
 ---
 
@@ -671,21 +732,29 @@ classes at the high level:
 Some fields look like `{ source: "...", ... }` rather than carrying a
 bare value. The shape signals that the harvester *looked* for the
 value and recorded what it found — including the case where it
-found nothing. For example:
+found nothing.
+
+**Field-name casing on these provenance objects is lower-case
+(`source`, `text`, `kind`) — *not* PascalCase.** The harvester's
+top-level record-shape fields use PascalCase (`Properties`,
+`Children`, `VbaCode`) but the small provenance wrappers documented
+in this section use lower-case keys verbatim. Consumers should
+match on the lower-case spelling.
 
 ```json
-"Label": { "Source": "Attached", "Text": "Customer Name" }
-"Label": { "Source": "Unresolved" }
-"Binding": { "Kind": "Unbound" }
+"Label": { "source": "attached", "text": "Customer Name" }
+"Label": { "source": "unresolved" }
+"Binding": { "kind": "Unbound" }
 ```
 
-A consumer reading `Label.Source` knows whether the label came from
-an attached `Label` control (`Attached`), from the control's caption
-(`Caption`), from the control's `Name` as a fallback (`NameFallback`),
-or whether the label could not be resolved at all (`Unresolved`).
-Bare missing keys are reserved for "this property is at its Access
-default"; an explicit `{ Source: "Unresolved" }` is "the harvester
-looked here and found nothing the consumer should trust."
+A consumer reading `Label.source` knows whether the label came from
+an attached `Label` control (`attached`), from the control's caption
+(`caption`), from the control's `Name` as a fallback
+(`nameFallback`), or whether the label could not be resolved at all
+(`unresolved`). Bare missing keys are reserved for "this property is
+at its Access default"; an explicit `{ source: "unresolved" }` is
+"the harvester looked here and found nothing the consumer should
+trust."
 
 ### Null versus omission
 
@@ -762,30 +831,60 @@ array are how the harvester says "this is for you to figure out."
 
 ## 9. Examples gallery
 
-Three small example outputs are committed under
+Three small example files are committed under
 [`examples/`](../../examples/) for consumers that want a complete
-JSON file to inspect without running the harvester:
+record to inspect without walking a full canonical corpus. Each is a
+verbatim copy of a record from the canonical golden corpus described
+in §2 — same schema, same conventions, same field names. The file
+naming follows the original three-example convention; the content
+shape is whatever the harvester actually writes today:
 
 - [`examples/minimal-form.json`](../../examples/minimal-form.json) —
-  the simplest possible Form + Table case. One form, one bound
-  control, no VBA. Use this to confirm the consumer's manifest /
-  ir-walk works end-to-end before pointing at a real fixture.
+  a single `ir/Forms/*.ir.json` record for a small parameter-prompt
+  form (`frmReportParam_ClientFY` from the HomeHealthCare canonical
+  corpus). Two combo controls and one button, no VBA procedures, no
+  subforms. Use this to confirm the consumer's per-form
+  `{ Type, Properties, Children, ... }` walk works end-to-end before
+  pointing at a richer record.
 - [`examples/complex-form.json`](../../examples/complex-form.json) —
-  a Form with subforms, validation rules, event bindings, and a
-  small module. Exhibits the cross-category linkage (form →
-  control → row-source → query → table) on a manageable scale.
+  a single `ir/Forms/*.ir.json` record for a richer detail form
+  (`frmServiceDetail` from the HomeHealthCare canonical corpus).
+  Demonstrates the `Properties` bag at scale, a deep `Children` tree
+  with multiple sections, a `VbaCode` body, and the per-form
+  `Procedures` and `NonDefaultProperties` enricher additions. Exhibits
+  the structural conventions §5.1 documents on a single self-contained
+  record.
 - [`examples/northwind-output.json`](../../examples/northwind-output.json) —
-  a Northwind-fixture run snapshot. Larger; useful for consumer
-  testing against realistic structural variety.
+  the `manifest.json` envelope from the NorthwindDevEdition canonical
+  corpus. Shows every top-level key §4 documents (envelope
+  identification, `Database`, `Summary`, the per-category stub arrays,
+  and the cross-cutting enrichment arrays) in the order the writer
+  emits them. The arrays are empty in this snapshot because the
+  committed Northwind golden corpus normalises per-record content out
+  of the manifest for diff-cleanliness — the per-record detail lives
+  in `samples/GoldenOutput/NorthwindDevEdition/ir/<Category>/` (see
+  below). The file is small by design; a consumer looking for a
+  populated envelope should read a populated `manifest.json` from a
+  live harvester run.
 
-For complete canonical corpora — the full multi-file output the
-harvester actually writes — see
-[`samples/GoldenOutput/HomeHealthCare/`](../../samples/GoldenOutput/HomeHealthCare/)
-(the primary fixture; unbound forms, ADODB, validation-only data
-macros, Hungarian naming) and
-[`samples/GoldenOutput/NorthwindDevEdition/`](../../samples/GoldenOutput/NorthwindDevEdition/)
-(secondary; bound split forms, subforms, audit data macros, AutoExec
-startup). The structural comparison at
+The example files are deliberately single-record (or single-envelope)
+slices. They are not a substitute for the full canonical corpus —
+they exist to let a consumer eyeball the per-record shape without
+opening a multi-file tree. For the complete multi-file output the
+harvester actually writes, including populated `ir/Forms/`,
+`ir/Queries/`, `ir/ModulesAndClasses/`, `ir/Tables/`,
+`ir/Relationships/`, `ir/Reports/`, `ir/Macros/`, `kb/`,
+`unresolved-items.json`, and the per-fixture `Defaults.json`, see
+the canonical corpora:
+
+- [`samples/GoldenOutput/HomeHealthCare/`](../../samples/GoldenOutput/HomeHealthCare/) —
+  primary fixture: unbound forms, ADODB, validation-only data macros,
+  Hungarian naming.
+- [`samples/GoldenOutput/NorthwindDevEdition/`](../../samples/GoldenOutput/NorthwindDevEdition/) —
+  secondary: bound split forms, subforms, audit data macros, AutoExec
+  startup.
+
+The structural comparison at
 [`docs/homehealthcare-northwind-comparison.md`](../homehealthcare-northwind-comparison.md)
 documents which fixture exhibits which characteristic.
 

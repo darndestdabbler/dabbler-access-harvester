@@ -1,0 +1,9 @@
+{
+  "model": "gemini-pro",
+  "chosen_label": "fallback-after-gpt-5-4-429:gemini-pro",
+  "task_type": "session-verification",
+  "input_tokens": 22433,
+  "output_tokens": 24,
+  "cost_usd": 0.028281250000000004,
+  "review_path": "docs/session-sets/harvester-finish-operations-and-interpretation-docs/session-reviews/session-003.md"
+}

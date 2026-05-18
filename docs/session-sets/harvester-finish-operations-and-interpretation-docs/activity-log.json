@@ -192,6 +192,84 @@
       "description": "Spec stop rule \"Out-of-date examples\" tripped by the probe finding. Human adjudicated: honour the stop rule, do not close out Session 3 until examples/*.json is regenerated against the current canonical schema via tree-amendment to schema-finalization-and-docs. downstream-ai-probe.md authored documenting the verdict, root cause, and resume conditions. Session-state.json remains at status=in-progress; mark_session_complete() NOT called; end-of-session verification NOT run; disposition.json / change-log.md / next-session-set-recommendation.md NOT produced.",
       "status": "blocked",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/examples-regen",
+      "dateTime": "2026-05-18T09:13:20.127148-04:00",
+      "description": "Per user direction, regenerated examples/*.json in-session rather than opening a tree-amendment to schema-finalization-and-docs (workflow deviation noted). Files replaced with verbatim copies from the canonical golden corpus: minimal-form.json <- HHC/ir/Forms/frmReportParam_ClientFY.ir.json (116 lines); complex-form.json <- HHC/ir/Forms/frmServiceDetail.ir.json (1045 lines); northwind-output.json <- NorthwindDevEdition/manifest.json (29-line envelope stub). Updated guide section 9 to describe the regenerated files accurately.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/probe-v2",
+      "dateTime": "2026-05-18T09:13:20.130113-04:00",
+      "description": "Re-ran downstream-AI probe (gemini-pro fallback after gpt-5-4 429) against the regenerated examples. Verdict SUFFICIENT WITH ADDITIONS with 2 blocking gaps (EventMacros object undocumented; On<event>EmMacro property pattern undocumented) and 3 nonblocking gaps. Raw response preserved at probe-raw/downstream-ai-probe-gemini-pro-v2-pre-gapfix.txt.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 33213,
+          "outputTokens": 2510,
+          "costUsd": 0.0666
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/blocking-gap-fix",
+      "dateTime": "2026-05-18T09:13:20.130113-04:00",
+      "description": "Addressed both v2 blocking gaps in the guide. Section 5.1: added EventMacros bullet (structured per-event Actions array), added On<event>EmMacro pattern to event-binding shape, added CodeBehindForm note to VbaCode bullet, added hex-blob note to Properties bullet. Section 5.6: cross-references the three-form embedded-macro story.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/probe-v3",
+      "dateTime": "2026-05-18T09:13:20.130113-04:00",
+      "description": "Re-ran downstream-AI probe after gap fixes (gemini-pro fallback after gpt-5-4 429). Verdict SUFFICIENT WITH ADDITIONS with 0 blocking gaps and 5 nonblocking gaps (TextCapacity, hex-blob context, EventMacros omission semantics, Label.source casing, canonical manifest.json filename). Spec gate cleared.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 33957,
+          "outputTokens": 2256,
+          "costUsd": 0.065
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/nonblocking-polish",
+      "dateTime": "2026-05-18T09:13:20.130113-04:00",
+      "description": "Folded the 5 v3 nonblocking gaps into the guide as polish. Section 2: added stable-filename sentence (manifest.json / unresolved-items.json). Section 5.1: added TextCapacity description (charsPerLine/visibleLines/font + unavailable form) and EventMacros omission semantics. Section 7: fixed Label.source casing from PascalCase to lowercase + added provenance-object vs. record-shape casing framing paragraph.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-3/verification",
+      "dateTime": "2026-05-18T09:17:21.491183-04:00",
+      "description": "End-of-session cross-provider verification. Routed via route(task_type=session-verification) -> gpt-5-4 returned sustained 429s (third+ consecutive session). Per verifier-failure escalation ladder, fell back to query(gemini-pro, task_type=session-verification). Verdict VERIFIED, 0 issues, terse-but-JSON-block-compliant response.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification-fallback",
+          "inputTokens": 22433,
+          "outputTokens": 24,
+          "costUsd": 0.0283
+        }
+      ]
     }
   ]
 }

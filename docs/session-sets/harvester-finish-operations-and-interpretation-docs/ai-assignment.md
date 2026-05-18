@@ -122,7 +122,7 @@ constraint flips compared with Sessions 1 and 2. The Session 3 spec
 also includes a downstream-AI probe that needs the same constraint
 honoured (don't ask Gemini to probe Gemini's output).
 
-### Actuals (Session 3 — PARTIAL; STOPPED at probe)
+### Actuals (Session 3 — COMPLETE)
 
 - **Orchestrator used:** Claude Code (Claude Opus 4.7) @ effort=high
   — deviation from the Gemini Pro recommendation. Human took over
@@ -131,39 +131,69 @@ honoured (don't ask Gemini to probe Gemini's output).
   `register_session_start` helper signature and a non-existent
   `gemini-3.1-pro` model). The user explicitly asked Claude to finish
   the set; Gemini's two scratch files were deleted (uncommitted).
-- **Total routed cost (this partial session):** ~$0.043
-  (downstream-AI probe via `gemini-pro` after `gpt-5-4` returned
-  sustained HTTP 429s — third consecutive session in this set hitting
-  that condition, exactly as Session 2's caveat warned).
+- **Session flow** — diverged from spec mid-way due to a stop-rule
+  trip, then resumed in the same session at user direction:
+  1. Authored `docs/README.md` (the docs-index pointer page).
+  2. Updated top-level `README.md` to point at the new guide and
+     index.
+  3. Ran downstream-AI probe v1 against `examples/northwind-output.json`.
+     Verdict INSUFFICIENT — root cause was stale `examples/*.json`
+     (legacy `{ Spec: { Sections, Controls, ... } }` shape), tripping
+     the spec's "Out-of-date examples" stop rule. Committed partial
+     state as WIP (commit `8c85f07`) per human direction.
+  4. **User authorised in-session regen** rather than opening a
+     tree-amendment session to `schema-finalization-and-docs`
+     (workflow deviation, disclosed in the probe write-up and in the
+     next-session-set recommendation).
+  5. Replaced `examples/*.json` with verbatim copies from the
+     canonical golden corpus (`samples/GoldenOutput/HomeHealthCare/ir/Forms/frmReportParam_ClientFY.ir.json`,
+     `frmServiceDetail.ir.json`, and
+     `samples/GoldenOutput/NorthwindDevEdition/manifest.json`).
+     Rewrote guide §9 to describe the regenerated files.
+  6. Re-ran downstream-AI probe v2. Verdict SUFFICIENT WITH ADDITIONS
+     with 2 blocking gaps (`EventMacros` object,
+     `On<event>EmMacro` property pattern) and 3 nonblocking gaps.
+  7. Addressed the 2 blocking gaps in §5.1 and §5.6 of the guide.
+  8. Re-ran probe v3. Verdict SUFFICIENT WITH ADDITIONS with 0
+     blocking gaps and 5 nonblocking gaps. **Spec gate cleared.**
+  9. Folded the 5 nonblocking gaps into the guide as polish
+     (TextCapacity, EventMacros omission semantics, Label casing,
+     stable filename note).
+  10. End-of-session cross-provider verification — gpt-5-4 429d
+      again, fell back to gemini-pro per the ladder. Verdict
+      **VERIFIED, 0 issues**.
+- **Total routed cost (full session):** ~$0.224
+  - v1 probe: $0.043
+  - v2 probe: $0.067
+  - v3 probe: $0.065
+  - Cross-provider verification: $0.028
+  - change-log (gemini-flash via summarization): $0.002
+  - next-session-set recommendation (gemini-pro analysis): $0.013
+  - next-orchestrator recommendation deferred (last session)
+  - **All non-orchestrator routed calls hit gemini-pro** after
+    gpt-5-4 returned sustained 429s — fourth consecutive session
+    confirming the durable OpenAI 429 condition.
 - **Deviations from recommendation:**
   - Orchestrator engine changed from Gemini CLI to Claude Code per
-    human direction.
-  - Cross-provider downstream-AI probe fell back from `gpt-5-4` to
-    `gemini-pro` after 429s. This is acceptable cross-provider
-    coverage for a Claude orchestrator (gemini-pro is a different
-    provider than Anthropic) but means the probe was not, strictly,
-    "fresh" relative to Sessions 1 and 2 (both used `gemini-pro` for
-    earlier routed work).
-  - **Session was STOPPED mid-way.** The probe surfaced a real
-    blocker: `examples/*.json` predates the canonical-golden-output
-    set and uses a legacy `{ Spec: { Sections, Controls, ... } }`
-    shape, while the canonical golden corpus uses the
-    `{ Type, Properties, Children, ... }` shape the guide
-    correctly documents. This is exactly the spec's "Out-of-date
-    examples" stop rule. Human adjudicated to honour the stop rule.
-    `mark_session_complete()` was NOT called;
-    `disposition.json` / `change-log.md` /
-    `next-session-set-recommendation.md` were NOT produced;
-    end-of-session verification was NOT run.
+    human direction (after Gemini Pro got confused).
+  - All cross-provider routed work fell back to gemini-pro (vs. the
+    configured gpt-5-4 target) due to durable 429s.
+  - **In-session examples regeneration** rather than tree-amendment
+    to `schema-finalization-and-docs` — explicitly authorised by
+    the human; documented in the probe write-up and in the
+    next-session-set recommendation (which names a tree-amendment
+    session to formalise the provenance).
 - **Notes for next-session calibration:**
-  - `gpt-5-4` 429s are durable across at least three sessions now.
-    Future sessions should plan on a non-OpenAI cross-provider verifier
-    from the outset.
-  - The next operational step is a tree-amendment to
-    `schema-finalization-and-docs` to regenerate `examples/*.json`
-    against the current canonical schema. Session 3 resumes from the
-    probe step (re-run the probe against the regenerated example,
-    then continue with the closeout artefacts) once that amendment
-    lands. The pointer page, top-level README link, and probe artefact
-    produced in this partial session are committed and do not need to
-    be re-done.
+  - The `gpt-5-4` 429 condition is now durable across four sessions.
+    Future sessions should plan on `gemini-pro` as the de-facto
+    cross-provider target for a Claude orchestrator and skip the
+    `gpt-5-4` attempt.
+  - The iterative-probe pattern (v1 → regen → v2 → blocking-fix
+    → v3 → polish → verification) cost ~$0.22 total. For a probe
+    that surfaces a real schema gap, this is good value — but the
+    cost would have been zero if `examples/*.json` had been
+    regenerated alongside the canonical-golden-output set. The
+    upstream lesson is a candidate for promotion: when a session
+    set produces a new schema or schema-touching corpus, regenerate
+    every committed example file in the same set, not as a
+    later-session amendment.

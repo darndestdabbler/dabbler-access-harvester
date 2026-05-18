@@ -1,0 +1,89 @@
+### 1. High-level interpretation
+
+*   **`examples/minimal-form.json`**: This is a per-record `ir/Forms/*.ir.json` file representing a simple Access form, identified in the guide as `frmReportParam_ClientFY`. The most important fields are `Type: "Form"`, `VbaCode` containing event handler logic, and the `EventMacros` object, which provides a structured representation of the form's `OnLoad` embedded macro.
+*   **`examples/complex-form.json`**: This is a per-record `ir/Forms/*.ir.json` file for a more complex data-bound Access form, `frmServiceDetail`. The most important fields are `Properties.RecordSource: "tblServices"` indicating it is bound to a table, a deep `Children` tree defining its UI controls, and the `Procedures` array listing its numerous VBA event handlers.
+*   **`examples/northwind-output.json`**: This is a `manifest.json` envelope for an entire Access database, `NorthwindDevEdition.accdb`. The most important fields are `SchemaType: "DatabaseManifest"` identifying the file type and the various top-level arrays (`Forms`, `Reports`, `RowSourceSpecs`, etc.), which are empty but serve as an inventory of database objects and cross-cutting metadata per the guide's §4 description.
+
+### 2. Per-record traversal
+
+For `examples/complex-form.json`:
+
+*   **(a) `RecordSource`**: The form is bound to the `tblServices` table.
+    *   **Path**: `$.Properties.RecordSource`
+*   **(b) Enricher-added fields**: Two examples are the list of extracted VBA procedures and the per-control geometry decoded into inches.
+    *   **Path 1**: `$.Procedures` (an array of procedure metadata objects)
+    *   **Path 2**: `$.Children[0].Children[5].Children[0].Children[0].GeometryIn` (an object containing dimensions like `X`, `Y`, `W`, `H`)
+*   **(c) VBA event-binding**: The form's `OnCurrent` event is bound to a VBA procedure.
+    *   **Path**: `$.Properties.OnCurrent` (value is `"[Event Procedure]"`)
+*   **(d) Control from `Children`**: A `TextBox` control named `txtServiceID` exists within the `Detail` section of the form.
+    *   **Path**: `$.Children[0].Children[6].Children[0].Children[0].Properties.Name`
+
+### 3. Gap detection
+
+**Blocking Gaps:**
+
+1.  **Field:** `EventMacros` object (in `minimal-form.json`).
+    *   **What the guide is missing:** The guide never mentions the `EventMacros` field. Instead, §5.1 and §5.6 explicitly instruct the consumer to find `_AXL:` comment payloads in the `Children` tree and reassemble them into XML. The `minimal-form.json` example contains a pre-parsed, structured `EventMacros` object, which is far superior but completely undocumented. This is a direct contradiction of the documented interpretation recipe.
+    *   **Impact:** Blocks correct interpretation. A consumer following the guide would write unnecessary and complex XML-parsing logic, ignoring the readily available structured data.
+    *   **Needed addition:** The guide must document the `EventMacros` object as the primary, structured source for embedded macro actions. It should state that the `_AXL:` comments are a lower-level representation and that consumers should prefer `EventMacros` when present.
+
+2.  **Field/Pattern:** `On...EmMacro` properties (e.g., `OnLoadEmMacro` in `minimal-form.json`).
+    *   **What the guide is missing:** §5.1 lists the possible values for event-binding properties (`[Event Procedure]`, `[Embedded Macro]`, etc.) but never mentions properties with an `EmMacro` suffix whose value is a string representation of the macro's actions. A consumer does not know what this property is for or its relationship to the `_AXL:` comments and the `EventMacros` object.
+    *   **Impact:** Blocks interpretation. The consumer cannot know the provenance or meaning of this property.
+    *   **Needed addition:** The guide's section on event binding (§5.1) should be updated to include the `On...EmMacro` pattern. It should explain that this property contains the raw text of an embedded macro and is the source from which the harvester produces the `_AXL:` comments and the structured `EventMacros` object.
+
+**Non-blocking Gaps (Ambiguities):**
+
+1.  **Field/Pattern:** Hex-encoded binary blobs in the `Properties` bag (e.g., `GUID`, `NameMap`, `PrtDevMode`).
+    *   **What the guide is missing:** The guide states that `Properties` is the "verbatim Access property-sheet bag" but provides no guidance on interpreting these large, opaque hex strings. A consumer does not know if these fields are safe to ignore or if they contain critical information.
+    *   **Impact:** Adds ambiguity. A consumer must guess whether to parse or discard these fields.
+    *   **Needed addition:** A short paragraph in §5.1 should state that certain properties are stored by Access as binary or hex-encoded data (e.g., GUIDs, printer settings, internal name maps) and that unless the consumer has a specific need to decode these proprietary formats, they can be safely ignored for most migration and analysis tasks.
+
+2.  **Field/Pattern:** The `VbaCode` string in form modules begins with `CodeBehindForm`.
+    *   **What the guide is missing:** §5.1 says `VbaCode` is the "class-module source as a string," but the examples show it prepended with a `CodeBehindForm` line before the standard `Attribute VB_*` headers. The guide does not clarify if this is part of the actual VBA source or a harvester-added marker.
+    *   **Impact:** Adds ambiguity. A consumer parsing the VBA might need to know whether to treat this line as a comment or strip it before processing.
+    *   **Needed addition:** A sentence in §5.1 should clarify the format of `VbaCode`, stating that for form/report class modules, the string may include a non-VBA header line like `CodeBehindForm` added by the `SaveAsText` process, which should be stripped before passing the code to a VBA parser.
+
+3.  **File Naming:** The canonical filename for the manifest.
+    *   **What the guide is missing:** The guide repeatedly refers to "the manifest" and tells the consumer to open `manifest.json` in §3, but it never explicitly states that `manifest.json` is the canonical, guaranteed filename for the database manifest envelope in the output directory's root.
+    *   **Impact:** Adds minor ambiguity. A human can infer the name, but a strictly-programmed AI might require an explicit statement of the entry-point filename.
+    *   **Needed addition:** §2 (What the harvester produces) should explicitly list `manifest.json` by name in its description of top-level envelope files.
+
+### 4. Overall verdict
+
+SUFFICIENT WITH ADDITIONS. The guide is well-structured and comprehensive on most topics, covering the overall file layout, reading order, and interpretation conventions like `null` vs. omission. However, the complete omission of the `EventMacros` object and the `On...EmMacro` properties—while providing an explicit but incorrect recipe for handling embedded macros—is a major gap that would lead a consumer to implement the wrong solution. The guide's core is solid, but it requires the specific additions listed above to align with the actual JSON output and prevent incorrect interpretation of a key Access feature.
+
+```json
+{
+  "verdict": "SUFFICIENT WITH ADDITIONS",
+  "blocking_gaps": [
+    {
+      "field_or_pattern": "EventMacros object",
+      "what_is_missing": "The guide does not mention the existence of the structured `EventMacros` object. It instead instructs the consumer to reassemble embedded macro XML from `_AXL:` comments, which contradicts the presence of this superior, pre-parsed structure in the JSON.",
+      "needed_addition": "The guide's sections on forms and macros (§5.1, §5.6) must be updated to document the `EventMacros` object. It should be presented as the primary, consumer-friendly representation of an embedded macro's actions, with the `_AXL:` comments described as a lower-level artefact that consumers can typically ignore in favor of the structured object."
+    },
+    {
+      "field_or_pattern": "On...EmMacro properties (e.g., OnLoadEmMacro)",
+      "what_is_missing": "The guide's list of event-binding property patterns in §5.1 is incomplete. It omits the `On...EmMacro` pattern, where the property value is a string representation of the macro. A consumer has no way to know what this property means or that it is the source for embedded macro information.",
+      "needed_addition": "The guide's event-binding description in §5.1 needs to be expanded to include the `On...EmMacro` pattern. The addition should explain that this property holds the raw text dump of an embedded macro and serves as the source from which the harvester generates both the `_AXL:` comments and the structured `EventMacros` object."
+    }
+  ],
+  "nonblocking_gaps": [
+    {
+      "field_or_pattern": "Hex-encoded blobs in Properties (e.g., NameMap, PrtDevMode)",
+      "what_is_missing": "The guide does not explain the nature of large, opaque hex-string properties, leaving the consumer to guess whether they are important or safe to ignore.",
+      "needed_addition": "A paragraph should be added to §5.1 explaining that some Access properties are stored in proprietary binary or hex-encoded formats (like printer settings or internal name maps) and can be safely ignored for most downstream tasks unless the consumer's goal is to decode these specific formats."
+    },
+    {
+      "field_or_pattern": "`VbaCode` starts with `CodeBehindForm`",
+      "what_is_missing": "The guide does not clarify whether the `CodeBehindForm` line at the start of a form's `VbaCode` is part of the source or a harvester/tooling artefact.",
+      "needed_addition": "A sentence should be added to §5.1 to clarify that `VbaCode` for form/report modules may contain non-VBA header lines from the export process, such as `CodeBehindForm`, which a consumer's VBA parser should be prepared to strip."
+    },
+    {
+      "field_or_pattern": "Canonical filename of the manifest",
+      "what_is_missing": "The guide refers to 'manifest.json' but never explicitly states this is the guaranteed, canonical filename for the top-level envelope.",
+      "needed_addition": "The output map in §2 should be updated to explicitly name the top-level files, stating that the manifest is always named `manifest.json` and the unresolved items list is always `unresolved-items.json`."
+    }
+  ]
+}
+```

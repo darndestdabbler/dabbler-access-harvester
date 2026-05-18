@@ -1,111 +1,117 @@
 {
-  "SchemaType": "DatabaseManifest",
-  "SchemaVersion": "1.0",
-  "HarvesterVersion": "1.0.0",
-  "Database": {
-    "Name": "Minimal.accdb",
-    "FilePath": "C:\\Samples\\Minimal.accdb",
-    "ExportedAt": "2026-04-28T00:00:00Z"
+  "Type": "Form",
+  "Properties": {
+    "RecordSelectors": "False",
+    "NavigationButtons": "False",
+    "DividingLines": "True",
+    "AllowDesignChanges": "False",
+    "DefaultView": "0",
+    "ScrollBars": "0",
+    "TabularFamily": "0",
+    "BorderStyle": "3",
+    "PictureAlignment": "2",
+    "DatasheetGridlinesBehavior": "3",
+    "GridX": "24",
+    "GridY": "24",
+    "Width": "5040",
+    "DatasheetFontHeight": "11",
+    "ItemSuffix": "7",
+    "Right": "9165",
+    "Bottom": "10740",
+    "DatasheetGridlinesColor": "15263976",
+    "RecSrcDt": "0x41f734f9ae83e640",
+    "GUID": "0x88ea855942b8234f8d3a14e03ede6432",
+    "NameMap": "0x0acc0e5500000000d2d19c9ca437d946b82bbdacc127c9dc00000000c6e421e3 ,\n0x8988e6400000000000000000740062006c0043006c00690065006e0074007300 ,\n0x000000000000dd9825f40d365a4fbea8e1ac99febf8807000000d2d19c9ca437 ,\n0xd946b82bbdacc127c9dc43006c00690065006e00740049004400000000000000 ,\n0xf14e17e0e4acce44879453701aa0962407000000d2d19c9ca437d946b82bbdac ,\n0xc127c9dc460069007200730074004e0061006d0065000000000000001bd69041 ,\n0xb004724fa46d6705cc29f8c407000000d2d19c9ca437d946b82bbdacc127c9dc ,\n0x4c006100730074004e0061006d00650000000000000056de534e62364747a58c ,\n0x222c1fc364db00000000514b386a3488e640000000000000000074006c006b00 ,\n0x7000460069007300630061006c0059006500610072007300000000000000f002 ,\n0x456205a5234c8b66a5e074b4a96e0700000056de534e62364747a58c222c1fc3 ,\n0x64db460069007300630061006c00590065006100720000000000000000000000 ,\n0x0000000000000000000000000c00000005000000000000000000000000000000 ,\n0x0000",
+    "Caption": "Select Client \u0026 Fiscal Year",
+    "DatasheetFontName": "Aptos",
+    "FilterOnLoad": "0",
+    "OnLoadEmMacro": "Version =196611\nColumnsShown =4\nBegin\nAction =\u0022SetValue\u0022\nArgument =\u0022[cboFiscalYear]\u0022\nArgument =\u0022GetCurrentFiscalYear()\u0022"
   },
-  "Summary": {
-    "FormCount": 1,
-    "ReportCount": 0,
-    "QueryCount": 0,
-    "ModuleCount": 0,
-    "TableCount": 1,
-    "UnresolvedItemCount": 0
-  },
-  "Forms": [
+  "Children": [
     {
-      "Spec": {
-        "SourceFormName": "frmCustomer",
-        "ModuleName": "Form_frmCustomer",
-        "SuggestedComponentName": "CustomerForm",
-        "DataSource": {
-          "Kind": "NamedReference",
-          "TargetName": "tblCustomer"
-        },
-        "DefaultView": "Single Form",
-        "Sections": [
-          {
-            "Name": "Detail",
-            "Kind": "Detail",
-            "ControlNames": ["txtName", "lblName"]
-          }
-        ],
-        "Controls": [
-          {
-            "Name": "txtName",
-            "SourceType": "TextBox",
-            "ComponentKind": "TextInput",
-            "SectionName": "Detail",
-            "Label": {
-              "Source": "Attached",
-              "Text": "Customer Name"
-            },
-            "Binding": {
-              "Kind": "TableField",
-              "ControlSource": "CustomerName"
-            }
-          },
-          {
-            "Name": "lblName",
-            "SourceType": "Label",
-            "ComponentKind": "Label",
-            "SectionName": "Detail",
-            "Binding": {
-              "Kind": "Unbound"
-            },
-            "RenderHints": {
-              "Caption": "Customer Name"
-            }
-          }
-        ],
-        "EventHandlers": [],
-        "ValidationRules": []
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:\u003C?xml version=\\\u00221.0\\\u0022 encoding=\\\u0022UTF-16\\\u0022 standalone=\\\u0022no\\\u0022?\u003E\\015\\012\u003CUserInterfaceMacro Event=\\\u0022OnLoad\\\u0022 xmlns=\\\u0022http://schemas.microsoft.com/office/accessservices/2009/11/application\\\u0022\u003E\u003CStatements\u003E\u003CAction Name=\\\u0022SetValue\\\u0022\u003E\u003CArgument Name=\\\u0022Item\\\u0022\u003E[cboFiscalYear]\u003C/Ar"
       },
-      "ParserOutput": null
+      "Children": [],
+      "VbaCode": null
+    },
+    {
+      "Type": "Begin",
+      "Properties": {
+        "Comment": "_AXL:gument\u003E\u003CArgument Name=\\\u0022Expression\\\u0022\u003EGetCurrentFiscalYear()\u003C/Argument\u003E\u003C/Action\u003E\u003C/Statements\u003E\u003C/UserInterfaceMacro\u003E"
+      },
+      "Children": [],
+      "VbaCode": null
     }
   ],
-  "Reports": [],
-  "Queries": [],
-  "Modules": [],
-  "Tables": [
+  "VbaCode": "CodeBehindForm\r\nAttribute VB_GlobalNameSpace = False\r\nAttribute VB_Creatable = True\r\nAttribute VB_PredeclaredId = True\r\nAttribute VB_Exposed = False\r\nOption Compare Database\r\nOption Explicit\r\nPrivate m_Cancelled As Boolean\r\nPublic Property Get cancelled() As Boolean\r\n    cancelled = m_Cancelled\r\nEnd Property\r\nPrivate Sub btnOK_Click()\r\n        If IsNull(Me.cboClient) Then\r\n        MsgBox \u0022Please select a client.\u0022, vbExclamation\r\n        Me.cboClient.SetFocus\r\n        Exit Sub\r\n    End If\r\n    If IsNull(Me.cboFiscalYear) Then\r\n        MsgBox \u0022Please select a fiscal year.\u0022, vbExclamation\r\n        Me.cboFiscalYear.SetFocus\r\n        Exit Sub\r\n    End If\r\n    Me.Visible = False\r\nEnd Sub\r\nPrivate Sub btnCancel_Click()\r\n    m_Cancelled = True\r\n    DoCmd.Close acForm, Me.name\r\nEnd Sub\r\n",
+  "GeometryIn": {
+    "W": 3.5
+  },
+  "NonDefaultProperties": [
+    "RecordSelectors",
+    "NavigationButtons",
+    "DividingLines",
+    "AllowDesignChanges"
+  ],
+  "Procedures": [
     {
-      "Name": "tblCustomer",
-      "Type": "TABLE",
-      "Fields": [
+      "Name": "cancelled",
+      "ProcedureType": "PropertyGet",
+      "AccessModifier": "Public",
+      "IsStatic": false,
+      "ReturnType": "Boolean",
+      "Parameters": [],
+      "StartLine": 9,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "btnOK_Click",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 12,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    },
+    {
+      "Name": "btnCancel_Click",
+      "ProcedureType": "Sub",
+      "AccessModifier": "Private",
+      "IsStatic": false,
+      "ReturnType": null,
+      "Parameters": [],
+      "StartLine": 25,
+      "Lib": null,
+      "Alias": null,
+      "InferredFunctionality": null,
+      "Notes": null
+    }
+  ],
+  "EventMacros": {
+    "OnLoad": {
+      "Actions": [
         {
-          "Name": "CustomerID",
-          "TypeCode": 4,
-          "TypeName": "Long",
-          "Required": true
-        },
-        {
-          "Name": "CustomerName",
-          "TypeCode": 10,
-          "TypeName": "Text",
-          "Size": 100,
-          "Required": false
+          "Action": "SetValue",
+          "Arguments": {
+            "Item": "[cboFiscalYear]",
+            "Expression": "GetCurrentFiscalYear()"
+          },
+          "Condition": null,
+          "ConditionBranch": null,
+          "Comment": null,
+          "InferredFunctionality": null
         }
       ],
-      "Indexes": [
-        {
-          "Name": "PrimaryKey",
-          "Primary": true,
-          "Unique": true,
-          "Foreign": false,
-          "Fields": ["CustomerID"]
-        }
-      ]
+      "InferredFunctionality": null
     }
-  ],
-  "Relationships": [],
-  "ValidationRules": [],
-  "RowSourceSpecs": [],
-  "FunctionClassifications": [],
-  "EventHandlerClassifications": [],
-  "NavigationGraph": null,
-  "UnresolvedItems": [],
-  "Diagnostics": []
+  }
 }

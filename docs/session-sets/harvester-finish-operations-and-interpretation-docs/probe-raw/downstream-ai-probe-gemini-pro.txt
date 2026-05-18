@@ -1,77 +1,81 @@
 ### 1. High-level interpretation
 
-The database is a sales and order management system for a business, likely a wholesaler, named "Northwind". It supports tracking customers, orders, employees, and sales performance by category.
+*   **`examples/minimal-form.json`**: This file is an `ir/Forms/*.ir.json` record representing a small Access form, confirmed by its `"Type": "Form"`, that has both VBA code in `VbaCode` and a structured representation of that code in the `Procedures` array, as well as an embedded macro described in `EventMacros`.
+*   **`examples/complex-form.json`**: This file is an `ir/Forms/*.ir.json` record for a larger Access form, confirmed by `"Type": "Form"`, which is bound to a data source as shown by `"RecordSource": "tblServices"`, has a deep UI hierarchy in its `Children` array, and has multiple VBA event handlers indicated by properties like `"OnDirty": "[Event Procedure]"`.
+*   **`examples/northwind-output.json`**: This file is a `manifest.json` envelope for a harvester run, confirmed by `"SchemaType": "DatabaseManifest"`, whose `Summary` shows zero objects and whose per-category arrays like `Forms` and `RowSourceSpecs` are empty, which the guide explains is an intentional normalization for the canonical corpus.
 
--   **Form:** `Customers` (`manifest.Forms[0]`). This form is used to view and edit customer information. I reached this conclusion by observing its `DataSource` is the `"Customers"` table and its `Controls` array lists text boxes for `CompanyName`, `ContactName`, and `ContactTitle`. It also includes a subform control named `fsubOrders`, indicating it displays orders related to the selected customer.
--   **Query:** `qryEmployeeList` (`manifest.Queries[0]`). This query provides a formatted list of employees. I determined this from its `ReturnShape`, which shows it returns an `EmployeeID` and a computed `FullName` field (`[LastName] & ', ' & [FirstName]`). The `OrderBy` clause on `LastName` confirms its purpose as a sorted list suitable for user interface elements.
--   **Module:** `modUtility` (`manifest.Modules[0]`). This is a standard module for utility functions. While the module's `Items` array is empty in the main body, the `UnresolvedItems` array (`manifest.UnresolvedItems[1]`) references a procedure named `CreateExcelExport` within `modUtility`, indicating its purpose is to house helper routines like data exports.
+### 2. Per-record traversal
 
-### 2. Reading-order verification
+Walking `examples/complex-form.json` against the guide's §5.1 conventions:
 
-Following the guide's §3 recipe:
-
-1.  **Open `manifest.json`:** The provided `northwind-output.json` file is the manifest.
-2.  **Pick a form:** I select the `Orders` form, identified by `manifest.Forms[1].Spec.SourceFormName`.
-3.  **Trace a row-source dependency:** Within the `Orders` form's `Controls` array, the combo box `cboEmployee` has a `Binding.RowSource` property with the value `"qryEmployeeList"`. To find the structured dependency record, I will consult the manifest's `RowSourceSpecs` array.
-4.  **Join to `RowSourceSpecs`:** The guide states the joining key is `(SourceFormName, ControlName)`.
-    -   From the form, `SourceFormName` is `"Orders"`.
-    -   From the control, `ControlName` is `"cboEmployee"`.
-5.  **Locate the entry:** I scan the `manifest.RowSourceSpecs` array for an entry matching these keys. The second entry (`manifest.RowSourceSpecs[1]`) matches:
-    ```json
-    {
-      "SourceFormName": "Orders",
-      "ControlName": "cboEmployee",
-      ...
-    }
-    ```
-6.  **Interpret the entry:** This entry's `Kind` is `"TableOrQueryNamed"` and its `TargetName` is `"qryEmployeeList"`. This successfully traces the dependency from the `cboEmployee` control on the `Orders` form to the saved query `qryEmployeeList`. The guide would then direct me to `ir/Queries/qryEmployeeList.ir.json`, which in this snapshot file corresponds to the `manifest.Queries[0]` object.
+*   **(a) `RecordSource`**: The form is bound to a table. The path is `$.Properties.RecordSource`, which has the value `"tblServices"`.
+*   **(b) Enricher-added fields**: The guide promises `GeometryIn`, `Procedures`, and `NonDefaultProperties`. The record contains all three:
+    *   `$.Procedures`: An array of 7 procedure objects extracted from the VBA code.
+    *   `$.NonDefaultProperties`: An array of 4 property names that differ from Access defaults.
+    *   `$.Children[0].Children[5].GeometryIn`: An object with `"H": 0.5`, representing the FormHeader's height in inches.
+*   **(c) VBA event-binding**: The guide documents the `"[Event Procedure]"` pattern. An example in the record is `$.Properties.OnCurrent` with the value `"[Event Procedure]"`.
+*   **(d) Control from `Children`**: The `Children` array contains the form's UI tree. An example control is a `TextBox` at path `$.Children[0].Children[6].Children[0].Children[2]`, whose name is `"txtServiceName"` (at `...Properties.Name`).
 
 ### 3. Gap detection
 
-| Gap Type | Field or Pattern | What the Guide Does Not Tell You | Blocks Interpretation? | Needed Addition |
-| :--- | :--- | :--- | :--- | :--- |
-| **Blocking** | Overall file structure (`manifest.json` vs. `ir/` dirs) | The guide's entire reading-order premise is based on a multi-file layout (`manifest.json` plus `ir/`, `kb/`, and `unresolved-items.json`). The example is a single, consolidated file. The guide does not explain this "snapshot" format or how to interpret it relative to the multi-file structure. | Yes | A paragraph explaining that a "snapshot" output consolidates all `ir/` content into the top-level arrays of the manifest for portability. It should state that `manifest.Forms[n]` in a snapshot is equivalent to the content of the corresponding `ir/Forms/<name>.ir.json` file. |
-| **Blocking** | Form/Report `ir/` structure (`Spec` object) | The guide's §5.1 describes a form's `ir/` record as having `Type`, `Properties`, and `Children` keys. The example file has a completely different structure, nesting the content under a `Spec` key with different fields like `DataSource`, `Sections`, and `Controls`. The guide does not mention the `Spec` object at all. | Yes | The guide's §5.1 and §5.2 must be rewritten or augmented to document the `Spec` object structure provided in the example, as it appears to be the primary representation. The relationship between the `Children` tree model and the `Spec` model must be clarified. |
-| **Non-blocking** | `NavigationGraph` top-level object | The manifest in the example contains a top-level `NavigationGraph` object. The guide's §4 (The DatabaseManifest envelope) does not list or describe this object. Its purpose and the meaning of its fields (`EntryPoints`, `Edges`, `UnresolvedTargets`) are unknown. | No | An entry in the manifest's top-level key list in §4 explaining the `NavigationGraph` object, its purpose of summarizing UI navigation flows, and a brief description of its sub-fields. |
-| **Non-blocking** | `UnresolvedItem` record shape | The guide's example `UnresolvedItem` in §6 contains `Severity`, `SurroundingText`, and `SuggestedNextSteps`. The records in the example JSON lack `Severity` and have a `ConstructDescription` field not mentioned in the guide. | No | The description of the `UnresolvedItem` record shape in §6 should be updated to match the example output, documenting the `ConstructDescription` field and clarifying that `Severity` may be optional. |
-| **Non-blocking** | `ParserOutput: null` field on Form objects | Each object in the `Forms` array contains a `ParserOutput: null` key-value pair. The guide never mentions this field. It is unclear what it is for or what a non-null value would contain. | No | A brief note in §5.1 mentioning the `ParserOutput` field, stating its purpose (e.g., for harvester-internal debugging) and confirming that it can typically be ignored by downstream consumers. |
+*   **Field:** `TextCapacity` object, present on many controls in `complex-form.json` (e.g., `...Children[0].Children[5].Children[0].Children[0].TextCapacity`).
+    *   **What is missing:** The guide does not mention the `TextCapacity` object, its purpose, its sub-fields (`charsPerLine`, `visibleLines`, `font`, `metric`), or the meaning of its `{ "unavailable": true, ... }` state.
+    *   **Impact:** Non-blocking, but adds ambiguity. A consumer performing UI analysis cannot use this potentially valuable enrichment without understanding its contract.
+    *   **Needed addition:** A paragraph in §5.1 should document `TextCapacity` as an enricher-added field that provides an estimated text capacity for a control based on its geometry and font. It should define the sub-fields and explain that the `unavailable` state occurs when geometry is missing, preventing the calculation.
+
+*   **Structural pattern:** The `Properties` bag contains many undocumented, hex-encoded fields beyond the examples given in §5.1 (e.g., `RecSrcDt`, `PrtMip`, `PrtDevModeW`, `PrtDevNamesW`).
+    *   **What is missing:** The guide states that such properties "can be safely ignored," but it provides no context for what they are or when a consumer might *not* want to ignore them (e.g., for a high-fidelity migration).
+    *   **Impact:** Non-blocking, but adds ambiguity. It forces a consumer to trust the "safe to ignore" advice without any means of verification.
+    *   **Needed addition:** A short paragraph in §5.1 should state that the property bag is a direct dump from Access and includes many internal-use fields related to printer settings, GUIDs, and cached metadata. It could clarify that unless the consumer's goal is to replicate Access-specific behaviors like printer driver settings, these fields have no bearing on application logic, structure, or behavior.
+
+*   **Field/Convention:** The casing of the `source` field in the `Label` object.
+    *   **What is missing:** The guide's example in §7 uses `"Label": { "Source": "Attached", ... }` (PascalCase), while the `complex-form.json` example shows `"Label": { "source": "attached", ... }` (camelCase). The guide does not specify a casing convention or acknowledge this discrepancy.
+    *   **Impact:** Non-blocking. A robust parser would likely use a case-insensitive comparison, but it is an inconsistency between the specification (guide) and the implementation (JSON output).
+    *   **Needed addition:** The example in §7 of the guide should be corrected to match the actual JSON output (`"source": "attached"`) to remove the ambiguity.
+
+*   **Structural pattern:** The omission of the `EventMacros` object.
+    *   **What is missing:** `minimal-form.json` has an `EventMacros` object, but `complex-form.json` does not. The guide explains what omission means for properties (`null` vs. omission in §7.1), but not for top-level enrichment objects. It's implied that `EventMacros` is omitted if there are no embedded macros, but this is not stated explicitly.
+    *   **Impact:** Non-blocking, but adds ambiguity. A consumer must infer the meaning of the object's absence.
+    *   **Needed addition:** A sentence in the description of `EventMacros` in §5.1 should explicitly state: "This object is omitted from the form record if the form contains no embedded UI macros."
+
+*   **Convention:** The canonical filename for the manifest.
+    *   **What is missing:** The guide refers to the manifest file as `manifest.json` throughout the text and provides an example named `northwind-output.json`. It never explicitly states that a harvester run *always* produces a file at the root named `manifest.json`.
+    *   **Impact:** Non-blocking. It is a very strong implication, but a consumer wanting a deterministic entry point would prefer an explicit statement.
+    *   **Needed addition:** A sentence in §2 ("What the harvester produces") should state: "Every run produces a `manifest.json` file in the root of the output directory."
 
 ### 4. Overall verdict
 
-My verdict is **INSUFFICIENT**.
-
-The guide fails as a standalone entry point because its structural descriptions of the most important objects—forms and reports—are fundamentally contradicted by the provided example output. A consumer following the guide's description of a form record (`{ Type, Properties, Children, ... }`) would be unable to parse the example's `{ Spec: { ... } }` structure. Furthermore, the guide's core premise of a multi-file directory walk is misaligned with the single-file snapshot format of the example, creating immediate confusion about where to find data. While the conceptual overview is useful, these blocking structural discrepancies make it impossible to write a reliable consumer using only the guide.
+**SUFFICIENT WITH ADDITIONS**. The guide is well-structured and provides the necessary concepts to interpret the core structure and relationships within the harvester output. A consumer can successfully follow the "reading order," join data across files using the specified keys, and understand the key conventions like `null` vs. omission. The identified gaps, particularly the undocumented `TextCapacity` object, are notable omissions but do not fundamentally block the interpretation of data flow, UI structure, or application logic. With the specific additions detailed above, the guide would be fully sufficient.
 
 ```json
 {
-  "verdict": "INSUFFICIENT",
-  "blocking_gaps": [
-    {
-      "field_or_pattern": "Overall file structure (manifest.json vs. ir/ dirs)",
-      "what_is_missing": "The guide exclusively describes a multi-file output structure, but the example is a single consolidated file. It does not explain what this 'snapshot' format is or how to read it.",
-      "needed_addition": "A paragraph explaining that a 'snapshot' output consolidates all ir/ content into the top-level arrays of the manifest for portability. It should state that `manifest.Forms[n]` in a snapshot is equivalent to the content of the corresponding `ir/Forms/<name>.ir.json` file."
-    },
-    {
-      "field_or_pattern": "Form/Report ir/ structure (the `Spec` object)",
-      "what_is_missing": "The guide describes form/report records with `Type`, `Properties`, and `Children` keys. The example file uses a completely different structure nested under a `Spec` key. The guide does not mention the `Spec` object or its schema.",
-      "needed_addition": "The guide's sections on Forms and Reports must be updated to document the `Spec` object structure as the primary representation, explaining its fields (`DataSource`, `Sections`, `Controls`, etc.) and how it relates to the conceptual control tree."
-    }
-  ],
+  "verdict": "SUFFICIENT WITH ADDITIONS",
+  "blocking_gaps": [],
   "nonblocking_gaps": [
     {
-      "field_or_pattern": "NavigationGraph top-level object",
-      "what_is_missing": "The example manifest contains a top-level `NavigationGraph` object that is not documented anywhere in the guide, specifically in the envelope description in §4.",
-      "needed_addition": "An entry in the manifest's top-level key list in §4 explaining the `NavigationGraph` object, its purpose of summarizing UI navigation flows, and a brief description of its sub-fields."
+      "field_or_pattern": "TextCapacity object on controls",
+      "what_is_missing": "The guide does not mention the existence, purpose, or schema of the `TextCapacity` object at all.",
+      "needed_addition": "A new paragraph in §5.1 is needed to document `TextCapacity` as an enricher-added field that estimates a control's display capacity. The paragraph should define its sub-fields (`charsPerLine`, `font`, `metric`, etc.) and explain the `unavailable` state."
     },
     {
-      "field_or_pattern": "UnresolvedItem record shape",
-      "what_is_missing": "The fields in the `UnresolvedItems` array in the example (e.g., `ConstructDescription`) do not perfectly match the fields described and shown in the guide's example in §6 (e.g., `Severity`).",
-      "needed_addition": "The description of the `UnresolvedItem` record shape in §6 should be updated to match the actual example output, documenting all possible fields and clarifying which are optional."
+      "field_or_pattern": "Undocumented properties in the `Properties` bag (e.g., `RecSrcDt`, `PrtMip`)",
+      "what_is_missing": "The guide gives a few examples of internal properties and advises ignoring them, but does not provide enough context for a consumer to confidently decide if a given property is ignorable for their use case.",
+      "needed_addition": "A paragraph in §5.1 should clarify that the property bag is a verbatim dump from Access and that any properties not explicitly documented in the guide are typically internal-use metadata (like printer settings or UI caches) that do not affect application logic or structure."
     },
     {
-      "field_or_pattern": "`ParserOutput: null` field on Form objects",
-      "what_is_missing": "The guide does not mention the `ParserOutput` field that appears on Form objects in the example output.",
-      "needed_addition": "A brief note in §5.1 mentioning the `ParserOutput` field, stating its purpose (e.g., for harvester-internal debugging) and confirming that it can typically be ignored by downstream consumers."
+      "field_or_pattern": "Omission of the `EventMacros` object",
+      "what_is_missing": "The guide does not explicitly state that the `EventMacros` object is omitted when a form has no embedded macros, forcing the consumer to infer this rule.",
+      "needed_addition": "A sentence should be added to the description of `EventMacros` in §5.1 stating that the object is only present if the host form or report contains at least one embedded UI macro."
+    },
+    {
+      "field_or_pattern": "Inconsistent casing for `Label.source`",
+      "what_is_missing": "The guide's example in §7 uses PascalCase (`Source`) while the JSON output uses camelCase (`source`), creating an inconsistency.",
+      "needed_addition": "The guide's example in §7 should be updated to use the correct casing (`source`) to match the JSON output."
+    },
+    {
+      "field_or_pattern": "Canonical filename of the manifest",
+      "what_is_missing": "The guide heavily implies the manifest is named `manifest.json` but never states this as a guaranteed convention for the output.",
+      "needed_addition": "A sentence in §2 should explicitly state that the manifest file is always named `manifest.json` and is located at the root of the output directory."
     }
   ]
 }

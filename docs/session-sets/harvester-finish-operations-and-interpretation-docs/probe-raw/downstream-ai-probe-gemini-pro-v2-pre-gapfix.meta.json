@@ -1,0 +1,9 @@
+{
+  "model": "gemini-pro",
+  "task_type": "analysis",
+  "input_tokens": 33213,
+  "output_tokens": 2510,
+  "cost_usd": 0.06661625,
+  "raw_path": "docs/session-sets/harvester-finish-operations-and-interpretation-docs/probe-raw/downstream-ai-probe-gemini-pro.txt",
+  "chosen_label": "fallback-after-gpt-5-4-failed:gemini-pro"
+}
