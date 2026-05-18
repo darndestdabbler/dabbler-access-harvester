@@ -1,0 +1,127 @@
+{
+  "sessionSetName": "harvester-finish-cli-e2e-test-audit",
+  "createdDate": "2026-05-18T07:26:26.427218-04:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-05-18T07:29:36.149494-04:00",
+      "description": "Routed analysis to produce ai-assignment.md per Step 3.5 schema.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3529,
+          "outputTokens": 809,
+          "costUsd": 0.01250125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/author-CliExtractTests",
+      "dateTime": "2026-05-18T07:32:38.715322-04:00",
+      "description": "Routed test-generation to author tests\\AccessHarvester.Integration\\Cli\\CliExtractTests.cs.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 10414,
+          "outputTokens": 813,
+          "costUsd": 0.0211475
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/author-CliTranslateTests",
+      "dateTime": "2026-05-18T07:33:32.994050-04:00",
+      "description": "Routed test-generation to author tests\\AccessHarvester.Integration\\Cli\\CliTranslateTests.cs.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 10462,
+          "outputTokens": 1101,
+          "costUsd": 0.024087499999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/author-CliRunTests",
+      "dateTime": "2026-05-18T07:35:10.140813-04:00",
+      "description": "Routed test-generation to author tests\\AccessHarvester.Integration\\Cli\\CliRunTests.cs.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 10381,
+          "outputTokens": 1122,
+          "costUsd": 0.02419625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/build",
+      "dateTime": "2026-05-18T07:37:37.610352-04:00",
+      "description": "dotnet build: 0 errors, 323 pre-existing CA1416 warnings unrelated to this session's new files.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/test",
+      "dateTime": "2026-05-18T07:37:37.610352-04:00",
+      "description": "dotnet test --no-build full suite. New CLI tests: 3 added, 3 passed (CliExtractTests, CliTranslateTests, CliRunTests). Integration assembly 20 passed / 1 skipped (Northwind gitignored). One pre-existing failure: AccessHarvester.Pipeline.Tests.ParseSuccessReport.ParseSuccessReportTests.HomeHealthCare_parse_success_report_matches_committed_golden \u2014 confirmed to fail on pristine main (origin/main before this session's changes were applied) with the same offset 1744 divergence. Out of scope for this session set per spec; disclosed in the Step 6 verification prompt.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/cross-provider-verification",
+      "dateTime": "2026-05-18T07:40:53.305152-04:00",
+      "description": "Step 6 routed session-verification, round 1.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 18513,
+          "outputTokens": 944,
+          "costUsd": 0.032581250000000006
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-05-18T07:42:13.625694-04:00",
+      "description": "Routed analysis to produce next-orchestrator recommendation for Session 2.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3358,
+          "outputTokens": 62,
+          "costUsd": 0.0048175
+        }
+      ]
+    }
+  ]
+}
