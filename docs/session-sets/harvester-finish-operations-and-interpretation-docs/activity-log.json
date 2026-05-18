@@ -96,6 +96,58 @@
           "costUsd": 0.003125
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/body",
+      "dateTime": "2026-05-18T07:56:02.043901-04:00",
+      "description": "Authored docs/harvester/interpretation-guide.md in-conversation (Opus orchestrator; synthesis-heavy per project-guidance Convention). Sections 1-10 per outline; ~4,711 words within the 3,500-5,000 budget. Includes the three must-have JSON snippets (RowSourceSpec, FunctionClassification, EventHandlerClassification) and the embedded-macro XML shape sketch, plus all four nice-to-haves (kb mirror note, Diagnostics shape, Defaults.json pointer, relationship cardinality).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-05-18T07:56:02.045908-04:00",
+      "description": "dotnet build / dotnet test \u2014 N/A per spec: docs-only session; no code touched.",
+      "status": "skipped",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-05-18T07:58:19.328795-04:00",
+      "description": "Cross-provider session-verification routed via route(task_type='session-verification'); verifier=gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 22197,
+          "outputTokens": 24,
+          "costUsd": 0.02798625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/next-orc-rec",
+      "dateTime": "2026-05-18T07:59:29.549300-04:00",
+      "description": "Routed analysis: next-orchestrator recommendation for Session 3 (model=gemini-pro).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3655,
+          "outputTokens": 117,
+          "costUsd": 0.00573875
+        }
+      ]
     }
   ]
 }
