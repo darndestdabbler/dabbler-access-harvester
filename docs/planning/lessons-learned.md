@@ -1219,6 +1219,50 @@ reference; if it proves out twice in *this* repo, propose promotion to
   workflow doc's Step 6 verification setup deserves a "pre-verify
   grep checklist" sub-bullet.
 
+## Bare JSON Verdict From The Verifier (Block Present, Analysis Absent) — Reminder Prompts Fix It
+
+- **Context:** End-of-session Step 6 cross-provider session-verification
+  via `route(task_type="session-verification")` (or `query("gemini-pro",
+  task_type="session-verification")` when falling back per the
+  Verifier-failure escalation ladder). First hit in Session 2 of
+  `harvester-finish-cli-e2e-test-audit` (2026-05-18).
+- **Failure or friction:** The existing "Require A Trailing JSON Block
+  In Session-Verification Prompts To Prevent Terse Verdicts" convention
+  covers the failure mode where the JSON block is *absent*. The new
+  variant: gemini-pro returned only the JSON block (`{"verdict":
+  "VERIFIED", "issues": []}`) with **no preceding analysis prose**. The
+  JSON block was structurally valid, so the convention's literal trigger
+  ("treat as malformed and retry once") did not fire — but the
+  verification was auditless. Session 1 of the same set, also a
+  gemini-pro fallback round, had produced a substantive 7-point
+  numbered analysis followed by the JSON block, so the bare-verdict
+  pattern is a per-call quality variance, not a systematic gemini-pro
+  output mode.
+- **Lesson:** The required-JSON-block prompt extension forces verdict
+  structure but does not by itself force analysis. When a substantive
+  audit trail matters (final session of a session set, work that
+  closes a strategy-level criterion, high-stakes refactor), the prompt
+  must also explicitly request the analysis section *before* the
+  verdict block. The default required-JSON-block hint phrases the JSON
+  block as the trailing output; the verifier is free to interpret that
+  as the *only* required output.
+- **Action for future sessions:** When calling `route()` or `query()`
+  with `task_type="session-verification"` on closeout-grade work, add a
+  second prompt block that explicitly requires:
+  1. A numbered analysis covering each verification question, AND
+  2. THEN the JSON verdict block in the required format.
+  Phrase the analysis requirement as mandatory (e.g., "Do not skip the
+  analysis. Both the analysis and the JSON block are required."). If
+  round 1 returns only the JSON block despite the required-JSON-block
+  hint, retry once with the "show your reasoning before the JSON"
+  reminder — Session 2 R2 took 1559→2851 output chars and produced
+  the substantive 5-point analysis. If a second session-set hits this
+  same bare-verdict variant, propose promoting this lesson to a
+  Convention in `project-guidance.md` and consider extending the
+  default verification prompt template in
+  `ai-router/prompt-templates/verification.md` to include the
+  analysis-required block by default.
+
 ## Diff-Gate Sentinel Tests: Extract The Failure-Message Builder Into A Helper Both The Gate And The Sentinel Consume
 
 - **Context:** Authoring a sentinel test for a diff-gate that fails
