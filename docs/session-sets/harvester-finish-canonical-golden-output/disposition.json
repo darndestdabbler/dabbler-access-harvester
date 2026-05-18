@@ -24,5 +24,11 @@
     "tests/AccessHarvester.Pipeline.Tests/Manifest/DatabaseManifestAggregatorTests.cs"
   ],
   "next_session_set": null,
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "model": "claude-sonnet-4-6",
+    "effort": "medium",
+    "rationale": "Routed analysis (gemini-pro): Session 2's work is mechanical integration + schema-to-code correspondence, fitting the project-guidance convention for Sonnet; cross-provider verification stays on gpt-5-4."
+  },
   "blockers": []
 }
