@@ -401,6 +401,24 @@
           "costUsd": 0.0008061
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/mark-complete-and-notify",
+      "dateTime": "2026-05-18T07:07:29.574905-04:00",
+      "description": "mark_session_complete(VERIFIED) + Pushover notification.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 7,
+      "stepKey": "session-4/step-9-reorganization-review",
+      "dateTime": "2026-05-18T07:09:22.475371-04:00",
+      "description": "Step 9 reorganization review (post-notify). Scanned project-guidance.md and lessons-learned.md; no promotions, demotions, or relocations qualified. Verifier-failure ladder text already covers HTTP 429 (transient HTTP error); diff-gate sentinel-helper lesson does not apply (no production gate + sentinel pair this session); Inventory Existing Assets lesson did not have its failure mode trigger this set. Outputting the canonical no-changes-recommended line.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
