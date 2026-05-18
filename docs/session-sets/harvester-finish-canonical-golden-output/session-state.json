@@ -1,12 +1,17 @@
 {
   "schemaVersion": 2,
   "sessionSetName": "harvester-finish-canonical-golden-output",
-  "currentSession": null,
-  "totalSessions": null,
-  "status": "not-started",
-  "lifecycleState": null,
-  "startedAt": null,
+  "currentSession": 1,
+  "totalSessions": 4,
+  "status": "in-progress",
+  "lifecycleState": "work_in_progress",
+  "startedAt": "2026-05-18T03:31:59.615258-04:00",
   "completedAt": null,
   "verificationVerdict": null,
-  "orchestrator": null
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "high"
+  }
 }
