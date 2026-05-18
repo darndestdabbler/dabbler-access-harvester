@@ -45,7 +45,14 @@ unavailable.
 
 ## CLI Usage
 
-The CLI exposes three subcommands:
+For downstream consumers who want to install the CLI without cloning
+the repo or running `dotnet build`, see
+[the install guide](docs/harvester/install.md) — the harvester also
+ships as a self-contained Windows binary (`AccessHarvester.exe`,
+~36 MB) produced by `tools/publish/publish.ps1`. Run
+`AccessHarvester --help` for the full usage text.
+
+The pipeline-driving subcommands:
 
 ### `extract` — produces the `raw/` tier
 

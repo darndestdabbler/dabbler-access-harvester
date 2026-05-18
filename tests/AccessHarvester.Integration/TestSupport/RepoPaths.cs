@@ -13,6 +13,23 @@ internal static class RepoPaths
     public static string SchemaFile()
         => Path.Combine(TestCases(), "harvester-schema.v1.0.json");
 
+    /// <summary>
+    /// Walks up from <see cref="AppContext.BaseDirectory"/> until it finds
+    /// a directory containing <paramref name="sentinel"/> (a file name or
+    /// relative path that uniquely identifies the target directory) and
+    /// returns that directory's absolute path. Useful for resolving the
+    /// repo root from a sentinel like <c>AccessHarvester.sln</c>.
+    /// </summary>
+    public static string LocateDirectoryContaining(string sentinel)
+    {
+        string match = Locate(sentinel);
+        string? parent = Path.GetDirectoryName(match);
+        if (string.IsNullOrEmpty(parent))
+            throw new DirectoryNotFoundException(
+                $"Sentinel '{sentinel}' resolved to '{match}' but has no parent directory.");
+        return parent;
+    }
+
     private static string Locate(string relative)
     {
         string dir = AppContext.BaseDirectory;

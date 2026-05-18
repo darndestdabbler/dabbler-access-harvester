@@ -98,6 +98,111 @@
           "costUsd": 0.00634625
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/ai-assignment-step3_5-noop",
+      "dateTime": "2026-05-18T10:22:04.152516-04:00",
+      "description": "Step 3.5 acknowledged: Session 1 actuals already recorded at Session 1 closeout; Session 2 next-orchestrator recommendation already routed at Session 1 Step 8 and lives at next-orchestrator-recommendation-session-2.md. Session 2 is last \u2014 no Session 3 recommendation to author.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/path-resolution-helper",
+      "dateTime": "2026-05-18T10:28:35.463389-04:00",
+      "description": "Authored tests/AccessHarvester.Integration/TestSupport/PublishedArtifact.cs. Resolves repo root via new RepoPaths.LocateDirectoryContaining(\"AccessHarvester.sln\") and probes publish/<rid>/AccessHarvester.exe. TryLocate returns null on absence so [SkippableFact] tests can skip cleanly.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/packaged-binary-smoke-tests",
+      "dateTime": "2026-05-18T10:28:35.464406-04:00",
+      "description": "Authored tests/AccessHarvester.Integration/Cli/PackagedBinarySmokeTests.cs \u2014 4 [SkippableFact] tests: no-args/usage, --help, parse against 01-simple-validation.bas, generate-docs against examples/northwind-output.json. Process invoked directly so the packaged exe is exercised (not the test-bin per-project copy). 90s timeout covers single-file cold-start native-lib extraction.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/install-docs",
+      "dateTime": "2026-05-18T10:28:35.464896-04:00",
+      "description": "Authored docs/harvester/install.md (install + invoke guide, versioning convention, verify-an-install smoke commands, constraints). Updated README.md CLI section with a link to the install doc and dropped the now-inaccurate 'three subcommands' lead. Synthesis prose authored in-conversation per the 'orchestrator's model matches routing target' Convention; Opus-as-orchestrator does not route synthesis to itself.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/version-flag",
+      "dateTime": "2026-05-18T10:28:35.465467-04:00",
+      "description": "Added --version / version flag to AccessHarvester.Cli.Program. Prints 'AccessHarvester <semver> (schema v1.0)'. Harvester semver pulled from AssemblyInformationalVersionAttribute on the Pipeline assembly with the '+commit-sha' SourceLink suffix stripped. Schema-version literal '1.0' pinned (must match DatabaseManifest.SchemaVersion). PrintUsage mentions --version. Bootstrap test theory covers both --version and 'version' forms.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-05-18T10:31:42.523053-04:00",
+      "description": "dotnet build PASSED (0 errors, 323 warnings \u2014 all pre-existing CA1416 warnings on Windows-only APIs in test files). dotnet test PASSED across 10 test assemblies: TranslationProbe(9), Characterization(131), Vba.Parser(69), Vba.Grammar(294), Sql.Grammar(85), Vba.Resolver(400), Pipeline(375), SymbolDb(70), AccessHarvester.Tests(436+2 skipped synthetic), Integration(31 \u2014 includes new VersionFlag bootstrap theory and 4 PackagedBinarySmokeTests). No failures. Re-published publish/win-x64/AccessHarvester.exe (36.9 MB) so smoke tests exercise the post-version-flag build; --version on the packaged binary prints 'AccessHarvester 1.0.0 (schema v1.0)' correctly.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-05-18T10:34:58.635388-04:00",
+      "description": "Cross-provider session-verification (Round 1, fallback per escalation ladder step 2): GPT-5.4 returned three 429s; queried gemini-pro directly. Prompt includes mandatory prose-before-JSON lead and the required-JSON-block schema per Conventions.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 15561,
+          "outputTokens": 1686,
+          "costUsd": 0.03631125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/change-log",
+      "dateTime": "2026-05-18T10:38:49.476440-04:00",
+      "description": "Routed change-log.md via route(task_type='summarization', max_tier=1) -> gemini-flash. Phase 4 closer end-of-set change log.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 6259,
+          "outputTokens": 1686,
+          "costUsd": 0.0019504499999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/next-session-set-recommendation",
+      "dateTime": "2026-05-18T10:39:07.874612-04:00",
+      "description": "Routed next-session-set-recommendation.md via route(task_type='analysis') -> gemini-pro. Plan-driven: confirms Phase 4 closes with this set, recommends maintenance posture; surfaces carry-overs for human decision.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3694,
+          "outputTokens": 549,
+          "costUsd": 0.0101075
+        }
+      ]
     }
   ]
 }

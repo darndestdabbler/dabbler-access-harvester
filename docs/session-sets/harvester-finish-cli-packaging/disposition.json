@@ -1,41 +1,48 @@
 {
-  "status": "in-progress",
-  "session_number": 1,
+  "status": "complete",
+  "session_number": 2,
   "total_sessions": 2,
-  "summary": "Session 1 of 2 closed: publish wiring + reproducible self-contained Windows binary. AccessHarvester.Cli.csproj got publish-time properties (PublishSingleFile=true, PublishTrimmed=false documented for ANTLR/DAO COM/Sqlite native deps, IncludeNativeLibrariesForSelfExtract=true, EnableCompressionInSingleFile=true); RID and SelfContained are passed at invocation by tools/publish/publish.ps1 so plain `dotnet build` stays framework-dependent. Artifact lands at publish/win-x64/AccessHarvester.exe (36.9 MB self-contained single-file, well under the 500MB stop-rule). Two consecutive publishes produced byte-identical SHA256 0CC72857AC2678E809404A57D7FFA90F09E8FC5066CBFADE8265BD50FC3624DA (.NET 10 Deterministic=true default plus compressed single-file is already deterministic; no timestamp normalization needed). Manual `--help` validation OK. Cross-provider verification: gpt-5-4 returned three 429s; fell back to gemini-pro per the verifier-failure escalation ladder (step 2). One Minor finding (Step-3.5 ai-assignment.md placeholder named 'GPT-4o' — not in this repo's model pool) resolved at Step 8 by re-routing the Session 2 next-orchestrator recommendation via route(task_type='analysis') with an explicit model-pool list in the prompt; new file next-orchestrator-recommendation-session-2.md supersedes the placeholder and the ai-assignment.md Session 2 block now points to it. Routed cost this session: ~$0.0302 across three gemini-pro calls (ai-assignment analysis + verification + Session 2 recommendation). Pre-existing pristine-HEAD test failures (6 across ParseSuccessReportTests / SchemaConformanceTests / CliGenerateDocsTests / CliDeterminismTests) confirmed by stashing my changes and re-running on clean main — root cause is line-ending mismatch (i/lf committed vs w/crlf checkout because the repo has no .gitattributes); flagged for a follow-up tree-amendment. SESSION 1 COMPLETE; Session 2 (smoke tests + install docs + closeout) remaining.",
+  "summary": "Phase 4 CLOSES with this session set. Session 2 of 2 shipped the packaged-binary smoke test surface and the install documentation, finishing Criterion #7 (Packaging). New: PublishedArtifact path-resolution helper, RepoPaths.LocateDirectoryContaining (additive), 4 [SkippableFact] PackagedBinarySmokeTests (bootstrap / --help / parse against 01-simple-validation.bas / generate-docs against examples/northwind-output.json) that invoke the packaged exe directly via Process.Start (not via CliInvoker's test-bin copy) and skip cleanly when publish/win-x64/AccessHarvester.exe is absent; --version / version flag on AccessHarvester.Cli that prints 'AccessHarvester <semver> (schema v1.0)' with the SourceLink commit-sha suffix stripped and the schema-version literal pinned to DatabaseManifest.SchemaVersion; bootstrap [Theory] coverage for both flag forms; docs/harvester/install.md (~150 lines covering distribution shape, where to get the artifact, install steps, invocation surface, exit codes, versioning convention, verify-an-install smoke recipe, constraints/stop-rule notes); README CLI section addendum linking to the install doc. Build/test green: 0 errors, 31 Integration tests pass (including 2 new --version theory rows and 4 new smoke tests). The packaged binary at publish/win-x64/AccessHarvester.exe was regenerated mid-session (36.9 MB) so the smoke tests exercised the post-version-flag build. Cross-provider session-verification: GPT-5.4 returned 429 three times (three-for-three across recent closeout-grade rounds — pattern surfaced as a carry-over for the next-session-set recommendation); fell back to gemini-pro via query() per the verifier-failure escalation ladder step 2. Round 1 VERIFIED with substantive 7-point prose analysis and empty issues array — the mandatory prose-before-JSON lead worked first try. Routed cost this session: ~$0.0484 across three gemini-pro/gemini-flash calls (verification fallback $0.0363, change-log on gemini-flash with max_tier=1 $0.0020, next-session-set recommendation $0.0101). Set-total routed cost: ~$0.078 — below the spec's $0.10-$0.40 band. PHASE 4 IS COMPLETE: Criterion #7 (this set) joins #1 (canonical parse-success report), #3+#5 (golden output + UnresolvedItems), #4 (CLI E2E tests), #6 (operations and interpretation docs), and #2 (schema finality, shipped pre-Phase-4). Per strategy.md and ROADMAP.md the harvester repo now moves to maintenance posture; the Access-to-Blazor application migration work moves to a future migration repo not yet created.",
   "files_changed": [
     "AccessHarvester.Cli/AccessHarvester.Cli.csproj",
+    "AccessHarvester.Cli/Program.cs",
     ".gitignore",
+    "README.md",
     "tools/publish/publish.ps1",
     "tools/hfclip_session1_ai_assignment.py",
+    "tools/hfclip_session1_closeout.py",
     "tools/hfclip_session1_verify.py",
     "tools/hfclip_session1_verify_fallback.py",
-    "tools/hfclip_session1_closeout.py",
+    "tools/hfclip_session2_register.py",
+    "tools/hfclip_session2_log_step3_5.py",
+    "tools/hfclip_session2_log_steps_4.py",
+    "tools/hfclip_session2_log_build_test.py",
+    "tools/hfclip_session2_verify.py",
+    "tools/hfclip_session2_verify_fallback.py",
+    "tools/hfclip_session2_closeout_route.py",
+    "tests/AccessHarvester.Integration/TestSupport/PublishedArtifact.cs",
+    "tests/AccessHarvester.Integration/TestSupport/RepoPaths.cs",
+    "tests/AccessHarvester.Integration/Cli/PackagedBinarySmokeTests.cs",
+    "tests/AccessHarvester.Integration/Cli/CliBootstrapTests.cs",
+    "docs/harvester/install.md",
     "docs/session-sets/harvester-finish-cli-packaging/ai-assignment.md",
     "docs/session-sets/harvester-finish-cli-packaging/next-orchestrator-recommendation-session-2.md",
     "docs/session-sets/harvester-finish-cli-packaging/disposition.json",
+    "docs/session-sets/harvester-finish-cli-packaging/change-log.md",
+    "docs/session-sets/harvester-finish-cli-packaging/next-session-set-recommendation.md",
     "docs/session-sets/harvester-finish-cli-packaging/activity-log.json",
     "docs/session-sets/harvester-finish-cli-packaging/session-events.jsonl",
     "docs/session-sets/harvester-finish-cli-packaging/session-state.json",
     "docs/session-sets/harvester-finish-cli-packaging/session-reviews/session-001.md",
+    "docs/session-sets/harvester-finish-cli-packaging/session-reviews/session-002.md",
     "docs/session-sets/harvester-finish-cli-packaging/issue-logs/session-001.json"
   ],
   "verification_method": "router",
   "verification_verdict": "VERIFIED",
-  "verification_notes": "Round 1 returned ISSUES_FOUND (1 Minor — invalid model name in Step-3.5 placeholder). Fixed at Step 8 via routed Session 2 recommendation. No re-verification needed: the fix is a routed re-author of a separate, supplementary file that replaces the placeholder, not a code change.",
+  "verification_notes": "Session 2 Round 1 VERIFIED with substantive 7-point analysis and empty issues. Verifier was gemini-pro (fallback from gpt-5-4 429 — third consecutive closeout-grade round to fall back this way; pattern surfaced for next-set review). No issues to resolve.",
   "next_session_set": {
-    "slug": "harvester-finish-cli-packaging",
-    "summary": "Same set, Session 2 of 2: path-resolution helper, packaged-binary [SkippableFact] smoke test, install docs, README addendum, --version flag, then closeout artifacts (change-log, next-session-set-recommendation, disposition.json overwrite) and the Step 9 reorganization review after notify."
-  },
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Per the Step 8 routed analysis in next-orchestrator-recommendation-session-2.md: mixes mechanical coding (path helper, smoke test, --version flag) with synthesis (install docs, change-log, closeout artifacts). Claude Opus 4.7 at effort=high covers both well — same orchestrator as Session 1. Cross-provider session-verification still routes to a non-Anthropic verifier (gemini-pro is the realistic choice given current GPT-5.4 429s)."
-    }
+    "slug": "(none — Phase 4 complete; harvester repo enters maintenance)",
+    "summary": "Per strategy.md and ROADMAP.md, the dabbler-access-harvester repo enters maintenance posture with this set's close. All seven Phase 4 criteria are green. The Access-to-Blazor application migration moves to a future migration repo not yet created. Three carry-overs surfaced in next-session-set-recommendation.md for human decision (whether to act): (1) the recurring GPT-5.4 verifier 429 pattern suggests swapping the configured session-verification target to gemini-pro for Claude orchestrators; (2) dotnet tool distribution channel remains deferred per Open Question 3; (3) code signing and a formal release channel remain deferred per the spec's out-of-scope list — both opt-in when a real downstream consumer surfaces."
   },
   "blockers": []
 }

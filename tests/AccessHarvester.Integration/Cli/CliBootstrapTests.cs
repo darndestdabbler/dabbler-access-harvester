@@ -29,6 +29,17 @@ public sealed class CliBootstrapTests
         Assert.Contains("Usage:", result.StdErr);
     }
 
+    [Theory]
+    [InlineData("--version")]
+    [InlineData("version")]
+    public void VersionFlag_PrintsVersionAndSchemaVersion_AndReturnsExitZero(string flag)
+    {
+        var result = CliInvoker.Run(flag);
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("AccessHarvester", result.StdOut);
+        Assert.Contains("schema v1.0", result.StdOut);
+    }
+
     [Fact]
     public void UnknownSubcommand_PrintsError_And_ReturnsExitOne()
     {

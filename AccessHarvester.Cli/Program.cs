@@ -1,8 +1,10 @@
+using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.Json;
 using AccessHarvester.Core;
 using AccessHarvester.Core.Abstractions;
 using AccessHarvester.Pipeline.DocGen;
+using AccessHarvester.Pipeline.Manifest;
 using AccessHarvester.Vba.Grammar.Generated;
 using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
@@ -50,6 +52,12 @@ public static class Program
             return args.Length == 0 ? 1 : 0;
         }
 
+        if (IsVersionFlag(args[0]))
+        {
+            PrintVersion();
+            return 0;
+        }
+
         // Bare-file mode: if the sole argument is not a known subcommand,
         // not a help flag, and not an option flag, treat it as an implicit
         // `parse <file>` call so the harness contract `<exe> <file>` works
@@ -59,6 +67,7 @@ public static class Program
         if (args.Length == 1
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
+            && !IsVersionFlag(args[0])
             && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs"))
         {
             return RunParse(args);
@@ -373,6 +382,7 @@ public static class Program
               AccessHarvester parse         <source-file>
               AccessHarvester parse         --in <source-file>
               AccessHarvester               <source-file>       (bare-file mode; equivalent to 'parse')
+              AccessHarvester --version                          (print version + schema-version, exit 0)
 
             `run` is extract + translate + enrich in one invocation.
             `generate-docs` reads a DatabaseManifest JSON and writes a markdown schema summary to
@@ -411,6 +421,34 @@ public static class Program
 
     private static bool IsHelpFlag(string arg)
         => arg is "-h" or "--help" or "/?" or "help";
+
+    private static bool IsVersionFlag(string arg)
+        => arg is "--version" or "version";
+
+    // Schema version the CLI's pipeline produces — must match the constant
+    // initialiser on DatabaseManifest.SchemaVersion (the value emitted into
+    // manifest.json's $.SchemaVersion). Surfacing it via --version lets a
+    // downstream consumer pin their integration to a specific schema shape
+    // without parsing a sample manifest first.
+    private const string SchemaVersionLiteral = "1.0";
+
+    private static void PrintVersion()
+    {
+        var harvesterAsm = typeof(DatabaseManifest).Assembly;
+        string harvesterVersion =
+            harvesterAsm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? harvesterAsm.GetName().Version?.ToString()
+            ?? "0.0.0";
+
+        // Strip the trailing "+<commit-sha>" SourceLink decoration the SDK
+        // appends to InformationalVersion when the build is in a git tree;
+        // the version string the consumer pins should be the semver, not
+        // the build provenance.
+        int plus = harvesterVersion.IndexOf('+');
+        if (plus >= 0) harvesterVersion = harvesterVersion[..plus];
+
+        Console.Out.WriteLine($"AccessHarvester {harvesterVersion} (schema v{SchemaVersionLiteral})");
+    }
 
     private static Dictionary<string, string> ParseOptions(string[] args)
     {
