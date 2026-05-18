@@ -1,0 +1,9 @@
+[
+  {
+    "severity": "Minor",
+    "location": "docs/session-sets/harvester-finish-cli-packaging/ai-assignment.md",
+    "summary": "Router's Step-3.5 Session 2 recommendation named 'GPT-4o' (not in this repo's model pool).",
+    "status": "fixed-at-step-8",
+    "fix": "Step 8 re-routed the Session 2 recommendation via route(task_type=analysis) with an explicit model-pool list in the prompt. New file next-orchestrator-recommendation-session-2.md replaces the placeholder; ai-assignment.md Session 2 block now points to it."
+  }
+]

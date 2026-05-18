@@ -1,0 +1,103 @@
+{
+  "sessionSetName": "harvester-finish-cli-packaging",
+  "createdDate": "2026-05-18T09:34:59.419934-04:00",
+  "totalSessions": 2,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/ai-assignment-routed",
+      "dateTime": "2026-05-18T09:37:13.656453-04:00",
+      "description": "Authored ai-assignment.md via route(task_type='analysis')",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2440,
+          "outputTokens": 1048,
+          "costUsd": 0.01353
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/csproj-publish-properties",
+      "dateTime": "2026-05-18T09:44:49.000530-04:00",
+      "description": "Added Publish* properties to AccessHarvester.Cli.csproj (PublishSingleFile=true, PublishTrimmed=false documented rationale, IncludeNativeLibrariesForSelfExtract=true, EnableCompressionInSingleFile=true). RID and SelfContained kept publish-time only via the script.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/publish-script",
+      "dateTime": "2026-05-18T09:44:49.000530-04:00",
+      "description": "Authored tools/publish/publish.ps1. dotnet publish --self-contained --runtime win-x64 to publish/win-x64/. Manual --help validation OK; binary 36.9 MB.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/reproducibility",
+      "dateTime": "2026-05-18T09:44:49.000530-04:00",
+      "description": "Two consecutive publishes produced byte-identical SHA256 0CC72857AC2678E809404A57D7FFA90F09E8FC5066CBFADE8265BD50FC3624DA. No timestamp normalization needed \u2014 .NET 10 Deterministic=true default plus compressed single-file already deterministic.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/gitignore-publish-output",
+      "dateTime": "2026-05-18T09:44:49.000530-04:00",
+      "description": "Added /publish/ to .gitignore so the self-contained binary is not committed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-05-18T09:44:49.003665-04:00",
+      "description": "dotnet build PASSED (0 errors, 323 pre-existing warnings). dotnet test: 2 pre-existing ParseSuccessReport failures + 4 pre-existing Integration failures (line-ending mismatch: committed LF, working-tree CRLF due to git autocrlf with no .gitattributes). Confirmed pre-existing by re-running on pristine HEAD with my changes stashed. Out of scope for this session \u2014 flagged for a follow-up tree-amendment.",
+      "status": "complete-with-preexisting-failures",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/cross-provider-verification",
+      "dateTime": "2026-05-18T09:46:56.108853-04:00",
+      "description": "Cross-provider verification via query(model='gemini-pro', task_type='session-verification') \u2014 fallback after GPT-5.4 returned 429 Too Many Requests three times (verifier-failure escalation ladder step 2).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 7028,
+          "outputTokens": 157,
+          "costUsd": 0.010355000000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-05-18T09:48:48.946532-04:00",
+      "description": "Routed analysis: next-orchestrator recommendation for Session 2 per Step 8 / Rule #17. Supersedes the Step-3.5 placeholder that named a non-existent model (verifier Round 1 Minor).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2797,
+          "outputTokens": 285,
+          "costUsd": 0.00634625
+        }
+      ]
+    }
+  ]
+}

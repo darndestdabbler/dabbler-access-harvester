@@ -9,6 +9,28 @@
     <AssemblyName>AccessHarvester</AssemblyName>
   </PropertyGroup>
 
+  <!--
+    Publish-time defaults for the self-contained Windows distribution.
+    Only Publish* properties live here so plain `dotnet build` (used by
+    every test project) stays framework-dependent and RID-neutral. The
+    publish script at tools/publish/publish.ps1 supplies
+    the self-contained and runtime flags at invocation time.
+
+    PublishTrimmed is false: ANTLR4 generated runtime + DAO COM interop
+    rely on reflection the IL trimmer cannot follow safely, and
+    Microsoft.Data.Sqlite carries native deps the extraction host must
+    see. EnableCompressionInSingleFile cuts the artifact to a more
+    reasonable size; IncludeNativeLibrariesForSelfExtract is required
+    so the SQLite native binaries are extracted alongside the managed
+    payload at first run.
+  -->
+  <PropertyGroup>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>false</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\AccessHarvester.Core\AccessHarvester.Core.csproj" />
     <ProjectReference Include="..\AccessHarvester.Pipeline\AccessHarvester.Pipeline.csproj" />

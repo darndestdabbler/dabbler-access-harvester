@@ -73,3 +73,8 @@ tools/_inventory_out/
 # Blazor pilot SQLite databases — runtime state, regenerated on startup
 output-tests/blazor-add-an-order/Data/*.db
 output-tests/blazor-add-an-order/Data/*.db-*
+
+# Self-contained CLI publish output — produced by tools/publish/publish.ps1
+# and consumed by the Session 2 packaged-binary smoke tests. The artifact
+# is reproducible from source, so it is never committed.
+/publish/
