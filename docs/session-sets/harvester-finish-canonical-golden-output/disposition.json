@@ -29,7 +29,7 @@
     "model": "claude-sonnet-4-6",
     "effort": "high",
     "reason": {
-      "code": "switch-for-cost",
+      "code": "switch-due-to-cost",
       "specifics": "Routed analysis (gemini-pro): Session 4's primary task is authoring a well-defined integration test (CanonicalGoldenRegressionTests.cs), a less complex and more mechanical task than Session 3's exploratory corpus generation. Sonnet provides sufficient capability for this implementation-focused work at substantially lower cost than Opus. Cross-provider session-verification goes to gemini-pro per the rule-based pairing for Sonnet output."
     }
   },
