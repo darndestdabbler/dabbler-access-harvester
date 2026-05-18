@@ -1,0 +1,29 @@
+{
+  "status": "in-progress",
+  "session_number": 1,
+  "total_sessions": 2,
+  "summary": "Session 1 of 2 complete. Added three SkippableFact-gated black-box CLI test classes (CliExtractTests, CliTranslateTests, CliRunTests) under tests/AccessHarvester.Integration/Cli/ that invoke AccessHarvester.exe out-of-process via the existing CliInvoker helper and assert on exit code + --json-status envelope shape + tier-directory shape for the extract, translate, and run subcommands respectively. CliTranslateTests uses an IClassFixture (ExtractFixture) to amortize one Access extraction across its tests, with skip gates pushed into the test method per xunit.skippablefact semantics. Full suite green on this Windows+Access host (Integration 20/20 + 1 skip for the gitignored Northwind fixture); one pre-existing failure in ParseSuccessReportTests.HomeHealthCare_parse_success_report was verified to exist on pristine origin/main and is out of scope here. Cross-provider verification VERIFIED via gemini-pro after gpt-5-4 hit a 429 (lessons-learned ladder step 2). Session 2 remains: determinism gate (run-twice-diff for parse / generate-docs / run reusing GoldenNormalizer) + PrintUsage() drift audit + closeout artifacts.",
+  "files_changed": [
+    "tests/AccessHarvester.Integration/Cli/CliExtractTests.cs",
+    "tests/AccessHarvester.Integration/Cli/CliTranslateTests.cs",
+    "tests/AccessHarvester.Integration/Cli/CliRunTests.cs",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/ai-assignment.md",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/activity-log.json",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/session-events.jsonl",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/session-reviews/session-001.md",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/session-state.json",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/disposition.json"
+  ],
+  "next_session_set": null,
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "effort": "low",
+    "reason": {
+      "code": "switch-due-to-cost",
+      "specifics": "Routed analysis (gemini-pro) recommends Sonnet @ effort=low for Session 2. The work is mechanical correspondence (run-twice-diff for parse / generate-docs / run reusing GoldenNormalizer, plus PrintUsage() vs. dispatcher drift audit) — exactly the pattern project-guidance.md pins to Sonnet rather than Opus. Switching from Opus@high to Sonnet@low drops per-routed-call cost materially while keeping cross-provider session-verification on gpt-5-4 (or the gemini-pro fallback) intact."
+    }
+  },
+  "blockers": []
+}
