@@ -401,6 +401,11 @@ public static class Program
             Exit codes for parse / bare-file:
               0  file parsed successfully
               1  file failed to parse (or file not found / usage error)
+
+            Exit codes for generate-docs:
+              0  schema summary written successfully
+              1  usage error
+              2  unexpected error
             """);
     }
 
