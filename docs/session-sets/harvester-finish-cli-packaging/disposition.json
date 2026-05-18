@@ -27,5 +27,12 @@
     "slug": "harvester-finish-cli-packaging",
     "summary": "Same set, Session 2 of 2: path-resolution helper, packaged-binary [SkippableFact] smoke test, install docs, README addendum, --version flag, then closeout artifacts (change-log, next-session-set-recommendation, disposition.json overwrite) and the Step 9 reorganization review after notify."
   },
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "high",
+    "rationale": "Per the Step 8 routed analysis in next-orchestrator-recommendation-session-2.md: mixes mechanical coding (path helper, smoke test, --version flag) with synthesis (install docs, change-log, closeout artifacts). Claude Opus 4.7 at effort=high covers both well. Cross-provider session-verification still routes to a non-Anthropic verifier (gemini-pro is the realistic choice given current GPT-5.4 429s)."
+  },
   "blockers": []
 }
