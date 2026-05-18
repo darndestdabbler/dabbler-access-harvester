@@ -1,28 +1,33 @@
 {
-  "status": "in-progress",
-  "session_number": 1,
+  "status": "complete",
+  "session_number": 2,
   "total_sessions": 2,
-  "summary": "Session 1 of 2 complete. Added three SkippableFact-gated black-box CLI test classes (CliExtractTests, CliTranslateTests, CliRunTests) under tests/AccessHarvester.Integration/Cli/ that invoke AccessHarvester.exe out-of-process via the existing CliInvoker helper and assert on exit code + --json-status envelope shape + tier-directory shape for the extract, translate, and run subcommands respectively. CliTranslateTests uses an IClassFixture (ExtractFixture) to amortize one Access extraction across its tests, with skip gates pushed into the test method per xunit.skippablefact semantics. Full suite green on this Windows+Access host (Integration 20/20 + 1 skip for the gitignored Northwind fixture); one pre-existing failure in ParseSuccessReportTests.HomeHealthCare_parse_success_report was verified to exist on pristine origin/main and is out of scope here. Cross-provider verification VERIFIED via gemini-pro after gpt-5-4 hit a 429 (lessons-learned ladder step 2). Session 2 remains: determinism gate (run-twice-diff for parse / generate-docs / run reusing GoldenNormalizer) + PrintUsage() drift audit + closeout artifacts.",
+  "summary": "Session set complete. Phase 4 Criterion #4 closed: every harvester CLI subcommand (extract, translate, run, parse, generate-docs) now has documented end-to-end test coverage with a determinism gate. Session 2 added CliDeterminismTests (run-twice-diff for parse + generate-docs; doc-comment delegates run to the stronger CanonicalGoldenRegressionTests which exercises Pipeline.Run() against the committed canonical golden corpus and also subsumes extract + translate) and CliUsageTextTests (4 tests covering subcommand list, exit-code legend per group, option list, and multi-arg UnknownCommand path). PrintUsage() drift was identified and patched: the exit-code legend previously omitted generate-docs (which has 0/1/2 semantic, no 3 for per-object failures); a new legend block was added and is asserted by CliUsageTextTests.PrintUsage_DocumentsExitCodesForEachSubcommandGroup. Integration test assembly: 26 passed / 1 skipped (Northwind gitignored). New tests this session: 6 added, 6 passed. Cross-provider session-verification: gpt-5-4 returned 429 again (two-for-two on this set), fell back to gemini-pro per lessons-learned ladder step 2; round 1 returned a bare verdict, round 2 with explicit analysis reminder produced a substantive 5-point analysis — VERIFIED, empty issues. The pre-existing ParseSuccessReportTests.HomeHealthCare_parse_success_report_matches_committed_golden failure (offset 1744) and 45 AccessHarvester.SymbolDb.Tests failures (requiring gitignored Northwind staging fixtures) were confirmed by Session 1 to exist on pristine origin/main and are out of scope here.",
   "files_changed": [
-    "tests/AccessHarvester.Integration/Cli/CliExtractTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliTranslateTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliRunTests.cs",
+    "AccessHarvester.Cli/Program.cs",
+    "tests/AccessHarvester.Integration/Cli/CliDeterminismTests.cs",
+    "tests/AccessHarvester.Integration/Cli/CliUsageTextTests.cs",
     "docs/session-sets/harvester-finish-cli-e2e-test-audit/ai-assignment.md",
     "docs/session-sets/harvester-finish-cli-e2e-test-audit/activity-log.json",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/change-log.md",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/disposition.json",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/next-session-set-recommendation.md",
     "docs/session-sets/harvester-finish-cli-e2e-test-audit/session-events.jsonl",
-    "docs/session-sets/harvester-finish-cli-e2e-test-audit/session-reviews/session-001.md",
-    "docs/session-sets/harvester-finish-cli-e2e-test-audit/session-state.json",
-    "docs/session-sets/harvester-finish-cli-e2e-test-audit/disposition.json"
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/session-reviews/session-002.md",
+    "docs/session-sets/harvester-finish-cli-e2e-test-audit/session-state.json"
   ],
-  "next_session_set": null,
+  "next_session_set": {
+    "slug": "harvester-finish-cli-packaging",
+    "summary": "F5 closes Phase 4 (Criterion #7). Routed analysis recommends F5 over F4 as the parallel-optimal next set: F4 (harvester-finish-operations-and-interpretation-docs) is already in flight in a sibling worktree, and F5 has no plan-level dependency on F4 — starting F5 in a new parallel worktree finishes Phase 4 faster than serializing on F4."
+  },
   "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "low",
+    "engine": "unknown",
+    "provider": "unknown",
+    "model": "unknown",
+    "effort": "unknown",
     "reason": {
-      "code": "switch-due-to-cost",
-      "specifics": "Routed analysis (gemini-pro) recommends Sonnet @ effort=low for Session 2. The work is mechanical correspondence (run-twice-diff for parse / generate-docs / run reusing GoldenNormalizer, plus PrintUsage() vs. dispatcher drift audit) — exactly the pattern project-guidance.md pins to Sonnet rather than Opus. Switching from Opus@high to Sonnet@low drops per-routed-call cost materially while keeping cross-provider session-verification on gpt-5-4 (or the gemini-pro fallback) intact."
+      "code": "deferred-to-f5-spec",
+      "specifics": "F5 (harvester-finish-cli-packaging) has its own ai-assignment.md author-step on its Session 1; the canonical recommendation is produced there via routed analysis, not pre-bound here."
     }
   },
   "blockers": []

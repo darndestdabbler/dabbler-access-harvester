@@ -122,6 +122,109 @@
           "costUsd": 0.0048175
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/route-test-generation",
+      "dateTime": "2026-05-18T07:55:37.684129-04:00",
+      "description": "Routed test-generation for CliDeterminismTests and CliUsageTextTests.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 1824,
+          "outputTokens": 1133,
+          "costUsd": 0.01361
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/write-test-classes",
+      "dateTime": "2026-05-18T07:57:37.339977-04:00",
+      "description": "Wrote CliDeterminismTests.cs and CliUsageTextTests.cs (routed draft with two corrections: dropped non-existent Assert.Contains 3-arg overload, fixed unknown-subcommand to multi-arg form since dispatcher bare-files single-arg unknowns to parse).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-05-18T07:59:53.844184-04:00",
+      "description": "dotnet build: 0 errors, 323 pre-existing CA1416 warnings. dotnet test: AccessHarvester.Integration 26 passed / 1 skipped (Northwind gitignored), AccessHarvester.Tests 434/0/4, AccessHarvester.Pipeline.Tests 373/1/1, AccessHarvester.Vba.Parser.Tests pass, AccessHarvester.Vba.Resolver.Tests 400/0/0. Pre-existing failures (confirmed on pristine origin/main per Session 1): ParseSuccessReportTests.HomeHealthCare_parse_success_report_matches_committed_golden (offset 1744 divergence) and AccessHarvester.SymbolDb.Tests (45 failures requiring gitignored Northwind staging fixtures at tmp/comprehension-ir/). Out of scope per spec. New CLI tests: 6 added, 6 passed (CliDeterminismTests x2, CliUsageTextTests x4).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/cross-provider-verification-fallback",
+      "dateTime": "2026-05-18T08:01:59.261459-04:00",
+      "description": "Step 6 verification fallback: gpt-5-4 returned 429 after 3 retries (same as Session 1). Per lessons-learned ladder step 2, switched to gemini-pro via query(). Different provider from orchestrator (Claude/Anthropic), so cross-provider property preserved.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 8587,
+          "outputTokens": 24,
+          "costUsd": 0.010973749999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/cross-provider-verification-r2",
+      "dateTime": "2026-05-18T08:03:34.757441-04:00",
+      "description": "Step 6 verification retry: R1 returned a bare JSON verdict (structurally valid but auditless). R2 prompts for explicit numbered analysis before the verdict per project-guidance Convention.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 8707,
+          "outputTokens": 687,
+          "costUsd": 0.01775375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/generate-change-log",
+      "dateTime": "2026-05-18T08:06:28.383486-04:00",
+      "description": "Routed summarization to author change-log.md (max_tier=1 per project-guidance).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 1388,
+          "outputTokens": 1065,
+          "costUsd": 0.0008471999999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/generate-next-set-recommendation",
+      "dateTime": "2026-05-18T08:06:42.623640-04:00",
+      "description": "Routed analysis to author next-session-set-recommendation.md per Step 8 plan-driven rules.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 790,
+          "outputTokens": 367,
+          "costUsd": 0.0046575
+        }
+      ]
     }
   ]
 }

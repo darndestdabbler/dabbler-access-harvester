@@ -67,8 +67,47 @@ low
 | 5 | Closeout: `disposition.json`, `change-log.md`, `next-session-set-recommendation.md`, commit/push. | route(task_type='summarization', target_model='gemini-1.5-pro-latest') |
 | 6 | Step 9 reorganization review. | in-conversation |
 
-### Actuals (filled after the session)
-- **Orchestrator used**:
-- **Total routed cost**:
-- **Deviations from recommendation**:
-- **Notes for next-session calibration**:
+### Session 2 actuals (filled at Step 8)
+
+- **Orchestrator used:** Claude Code Opus 4.7 @ effort=high
+  (deviation: spec recommended Sonnet @ medium; the human launched
+  this session on the existing Opus-orchestrator window without
+  the suggested provider switch).
+- **Total routed cost:** ~$0.043 across 3 routed calls
+  (test-generation $0.014 → both new test classes in one combined
+  call; session-verification round 1 $0.011 fallback-only;
+  session-verification round 2 $0.018 with explicit analysis
+  reminder).
+- **Routed model breakdown:** All Session 2 routed work landed on
+  `gemini-pro` (Google). The initial `session-verification` call to
+  the default verifier (`gpt-5-4`) returned HTTP 429 after the
+  router's three internal retries — same failure mode Session 1
+  hit. Per the `lessons-learned.md` Verifier-failure escalation
+  ladder, fell back to step 2 (`query("gemini-pro",
+  task_type="session-verification")`). Round 1 returned a
+  structurally valid but bare JSON verdict; round 2 with an explicit
+  analysis-required reminder returned a substantive 5-point analysis
+  + the JSON verdict (VERIFIED, empty issues).
+- **Deviations from recommendation:** Orchestrator stayed on Opus
+  rather than switching to Sonnet (window-management choice — Opus
+  was already loaded; the cost delta on a mechanical-correspondence
+  session is small). Session-verification fell back to gemini-pro
+  again — the `gpt-5-4` 429 has now hit both sessions of this set,
+  reinforcing the Session 1 calibration note. The router's `route(...)
+  task_type="session-verification")` call still attempts
+  `gpt-5-4` first by configuration; no per-set override.
+- **Notes for next-session calibration:** Two consecutive 429s on
+  `gpt-5-4` for `session-verification` is a calibration signal.
+  Options the next set could consider: (a) tweak
+  `router-config.yaml` to demote `gpt-5-4` to a lower priority for
+  session-verification; (b) treat `gemini-pro` as the de-facto
+  primary verifier for harvester sessions originating from a Claude
+  orchestrator; (c) add a short pre-emptive sleep before the
+  session-verification call. None of these is mandatory — the
+  fallback ladder is working as designed — but the cost of two
+  futile gpt-5-4 retries (3 internal retries each) is non-trivial
+  on token budgets.
+
+**Last session of the set — no next-session orchestrator recommendation needed.**
+Closeout artifacts (`change-log.md`, `disposition.json`, and
+`next-session-set-recommendation.md`) are authored at Step 8.
