@@ -1,0 +1,3 @@
+*   **Orchestrator**: Claude Opus 4.7 @ effort=high.
+*   **Rationale**: The critical "Inspect for surprises" step requires a high-capability model to avoid committing bugged output, justifying Opus over Sonnet despite the session's other mechanical steps.
+*   **Reason Code**: continue-current-trajectory: Human operator upgraded Session 2 to Opus, and Session 3's critical inspection step warrants continuing with this high-capability model.

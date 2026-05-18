@@ -67,11 +67,26 @@ correctly routed to gpt-5-4 to satisfy the cross-provider requirement."
 - **Estimate:** $0.25 - $0.75
 - **Rationale:** Medium-effort session focused on integration and testing. `sonnet` is highly cost-effective for these mechanical tasks.
 
-### Actuals (filled after the session)
+### Actuals (filled after the session — 2026-05-18)
 
-- **Actual Cost:**
-- **Final Orchestrator:**
-- **Key Learnings:**
+- **Actual cost (routed): ~$0.1337**
+  - `session-verification` round 1 (gpt-5-4): $0.1131
+  - `session-verification` round 2 tiebreaker (gemini-pro, opt-d second-opinion): $0.0183
+  - `analysis` (gemini-pro, next-session recommendation): $0.0023
+- **Final orchestrator:** Claude Opus 4.7 (1M context) @ effort=high (deviation from the Sonnet @ medium recommendation; this was a human orchestrator choice, not a routing miss).
+- **Key learnings / deviations:**
+  - **Verifier-context gap on R1.** `gpt-5-4` returned `ISSUES_FOUND` with a Minor finding flagging `session-002.md` as missing from the changeset. The file is the verifier's own output slot (created by `log.save_session_review` during the verification step), so it cannot appear in the "files changed" list of the prompt that triggers its own creation. The orchestrator presented the dismissal per the workflow's disagreement protocol; the human chose option (d) second-opinion. `gemini-pro` returned `VERIFIED` with empty issues, explicitly noting the R1 finding was a workflow context-gap. Adjudication recorded via `record_adjudication(cause="context-gap", resolution="second-opinion")`.
+  - **Future-session hint:** add an explicit disclosure to every session-verification prompt that `session-reviews/session-NNN.md` is the verifier's own output file slot, so the same context-gap does not repeat.
+  - **In-conversation execution for all build/test/test-author steps.** Per the "When the orchestrator's model matches the routing target..." Convention, Opus authored Steps 1-4 directly rather than routing to Sonnet. The deviation from the Sonnet recommendation was a human orchestrator choice; cost was still well under the estimated band because most of the spend is the cross-provider verification, not in-conversation work.
+
+**Next-session orchestrator recommendation (Session 3):**
+Opus 4.7 @ effort=high. Rationale (routed via `analysis` to `gemini-pro`):
+"The critical 'Inspect for surprises' step requires a high-capability model
+to avoid committing bugged output, justifying Opus over Sonnet despite the
+session's other mechanical steps." Reason code:
+`continue-current-trajectory` — Session 3's Stop Rule "Golden surfaces real
+defect" puts a premium on careful inspection of pipeline output before
+committing the canonical golden corpus.
 
 ---
 

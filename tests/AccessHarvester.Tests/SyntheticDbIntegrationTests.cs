@@ -2,6 +2,10 @@ using System.Runtime.Versioning;
 using System.Text.Json.Nodes;
 using AccessHarvester.Core;
 using Xunit;
+// Disambiguate the Pipeline class from the AccessHarvester.Pipeline
+// namespace now that Core transitively references the Pipeline assembly
+// (added in Session 2 of harvester-finish-canonical-golden-output).
+using CorePipeline = AccessHarvester.Core.Pipeline;
 
 namespace AccessHarvester.Tests;
 
@@ -29,7 +33,7 @@ public class SyntheticDbIntegrationTests
         var outRoot = Path.Combine(Path.GetTempPath(), $"ae-test-{Guid.NewGuid():N}");
         try
         {
-            var pipeline = Pipeline.Default().WithCategories(new[] { "Forms" });
+            var pipeline = CorePipeline.Default().WithCategories(new[] { "Forms" });
             var result = pipeline.Run(db, outRoot);
 
             Assert.All(result.Extract, c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));
@@ -132,7 +136,7 @@ public class SyntheticDbIntegrationTests
         {
             // Pull ModulesAndClasses too so the same run exercises the third
             // VbaSignatureEnricher target alongside the Forms code-behind path.
-            var pipeline = Pipeline.Default().WithCategories(new[] { "Forms", "ModulesAndClasses" });
+            var pipeline = CorePipeline.Default().WithCategories(new[] { "Forms", "ModulesAndClasses" });
             var result = pipeline.Run(db!, outRoot);
 
             Assert.All(result.Enrich, c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));
@@ -209,7 +213,7 @@ public class SyntheticDbIntegrationTests
         {
             // Forms come along so the embedded-macro side gets exercised in
             // the same end-to-end run.
-            var pipeline = Pipeline.Default().WithCategories(new[] { "Macros", "Forms" });
+            var pipeline = CorePipeline.Default().WithCategories(new[] { "Macros", "Forms" });
             var result = pipeline.Run(db!, outRoot);
 
             Assert.All(result.Enrich, c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));
@@ -355,7 +359,7 @@ public class SyntheticDbIntegrationTests
         var outRoot = Path.Combine(Path.GetTempPath(), $"ae-test-{Guid.NewGuid():N}");
         try
         {
-            var pipeline = Pipeline.Default().WithCategories(new[] { "Forms" });
+            var pipeline = CorePipeline.Default().WithCategories(new[] { "Forms" });
             var result = pipeline.Run(db, outRoot);
 
             Assert.All(result.Extract, c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));

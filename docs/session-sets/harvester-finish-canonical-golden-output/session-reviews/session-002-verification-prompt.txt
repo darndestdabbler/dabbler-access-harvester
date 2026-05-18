@@ -1,0 +1,968 @@
+You are reviewing Session 2 of the `harvester-finish-canonical-golden-output` session set in the Dabbler Access Harvester repo. Your response MUST begin with detailed prose analysis BEFORE the JSON block at the end.
+
+# What this session was supposed to do (from spec.md):
+
+### Session 2 of 4: Pipeline Wiring + UnresolvedItems Emission
+
+**Steps:**
+
+1. Wire `AccessHarvester.Core/Pipeline.Run()` to invoke
+   `DatabaseManifestAggregator.Build(...)` after the enrich phase
+   and write `manifest.json` and `unresolved-items.json` separately
+   at `<runRoot>/AccessMetaData/<dbName>/`. Two files (not
+   combined): the manifest carries the same `UnresolvedItems[]`
+   inline, but downstream tooling that just wants the manual-review
+   queue should not have to deserialise the whole manifest. The
+   shared array is built once and serialised twice.
+2. No new CLI flag is required for V1 — the manifest is always
+   emitted when `run` completes. If a `--manifest-only` mode
+   surfaces value during Session 2, defer to a follow-up set.
+3. Update `tests/AccessHarvester.Integration/Pipeline/EndToEndPipelineTests.cs`
+   so the "ran pipeline produced X" assertions cover the manifest +
+   UnresolvedItems files.
+4. Schema-validation test: produced manifest validates against
+   `harvester-schema.v1.0.json` via existing `SchemaValidator`
+   (closes the prior set's Gap A). Any in-memory-type-vs-schema
+   shape mismatch surfaces here — the fix is a tree amendment to
+   `schema-finalization-and-docs`, not a projection layer here.
+5. `dotnet build && dotnet test` sequentially.
+6. End-of-session verification + commit + push + notify.
+
+**Creates:**
+- `tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs`
+- `docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002.md`
+
+**Touches:**
+- `AccessHarvester.Core/Pipeline.cs` (wires the aggregator in
+  after `Enrich(...)`).
+- `tests/AccessHarvester.Integration/Pipeline/EndToEndPipelineTests.cs`
+  (adds manifest + unresolved-items.json assertions).
+- The Core project may need a `ProjectReference` to
+  `AccessHarvester.Pipeline` if it does not already have one
+  (Session 2 verifies and adds if missing).
+
+**Ends with:** the production pipeline writes
+`manifest.json` + `unresolved-items.json` on every run; schema
+validation gate green; Gap A closed.
+
+---
+
+# Appendix A — Aggregator API (Session 1 lock, not changed this session):
+
+## Appendix A — Aggregator API (Session 1 lock)
+
+`AccessHarvester.Pipeline.Manifest.DatabaseManifestAggregator` is
+a static class with one public entry point. Every input is
+optional (default `null`); the aggregator skips missing inputs
+and produces a minimal valid manifest from whatever is supplied.
+This matches the existing `UnresolvedItemAggregator.Build(...)`
+contract.
+
+```csharp
+public static DatabaseManifest Build(
+    DatabaseInfo database,
+    string harvesterVersion,
+    IEnumerable<FormExport>?               forms                       = null,
+    IEnumerable<FormExport>?               reports                     = null,
+    IEnumerable<QueryAbstraction>?         queries                     = null,
+    IEnumerable<ModuleExport>?             modules                     = null,
+    IEnumerable<TableMetadata>?            tables                      = null,
+    IEnumerable<RelationshipMetadata>?     relationships               = null,
+    IEnumerable<ValidationRule>?           validationRules             = null,
+    IEnumerable<RowSourceSpec>?            rowSourceSpecs              = null,
+    IEnumerable<FunctionClassification>?   functionClassifications     = null,
+    IEnumerable<EventHandlerClassification>? eventHandlerClassifications = null,
+    NavigationGraph?                       navigationGraph             = null,
+    IEnumerable<UnresolvedItem>?           unresolvedItems             = null,
+    IEnumerable<HarvesterDiagnostic>?      diagnostics                 = null);
+```
+
+Contract:
+
+- **Required inputs:** `database` and `harvesterVersion`. The
+  schema's `DatabaseManifest.required` is
+  `["SchemaType", "SchemaVersion", "HarvesterVersion", "Database"]`;
+  `SchemaType` and `SchemaVersion` are constants the aggregator
+  emits ("DatabaseManifest" and "1.0" respectively). The other
+  two come from the caller.
+- **All collection inputs:** treated as null-or-empty equivalent.
+  An empty collection produces an empty array in the manifest
+  (the schema permits zero-length arrays); a null collection
+  produces an empty array too — the manifest never has a
+  collection slot set to JSON `null`.
+- **Determinism:** the aggregator does **not** re-sort the inputs.
+  Callers pass already-deterministic ordering; the aggregator
+  preserves it verbatim. (`UnresolvedItemAggregator` does its own
+  multi-key sort because it merges from multiple sources;
+  `DatabaseManifestAggregator` merges nothing — each input is a
+  single source — so the responsibility is the caller's.)
+- **Summary:** `DatabaseSummary` is computed from the populated
+  collections — `FormCount = forms?.Count() ?? 0`, etc. — so the
+  manifest is internally consistent.
+- **No I/O:** the aggregator does not read or write files. Callers
+  serialize the returned `DatabaseManifest` themselves.
+
+## Why this was a stub
+
+The stub fixed the contract: manifest aggregator + production
+wiring + golden corpus + regression gate + UnresolvedItems
+emission. Session 1 (2026-05-18) elaborated the API shape,
+golden-subset decision, normalization layer design, and file
+paths — captured in *Design decisions (Session 1, 2026-05-18)*
+and *Appendix A* above. The remaining decisions are
+implementation work and surface in Sessions 2-4.
+
+# Files changed this session:
+
+## 1. AccessHarvester.Core/AccessHarvester.Core.csproj
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>AccessHarvester.Core</RootNamespace>
+    <AssemblyName>AccessHarvester.Core</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\property-defaults.json" />
+    <EmbeddedResource Include="Resources\font-metrics.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AccessHarvester.Pipeline\AccessHarvester.Pipeline.csproj" />
+  </ItemGroup>
+
+</Project>
+
+```
+
+The Core project gained a ProjectReference to AccessHarvester.Pipeline (which transitively pulls in Access, Vba.Parser, Vba.Resolver, Sql.Parser via Pipeline's own refs). No new package references.
+
+## 2. AccessHarvester.Core/Pipeline.cs (FULL file)
+
+```csharp
+using System.Globalization;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using AccessHarvester.Core.Abstractions;
+using AccessHarvester.Core.Com;
+using AccessHarvester.Core.Enrichment;
+using AccessHarvester.Core.Extraction;
+using AccessHarvester.Core.Translation;
+using AccessHarvester.Pipeline.Enrichment;
+using AccessHarvester.Pipeline.Manifest;
+
+namespace AccessHarvester.Core;
+
+/// <summary>
+/// Orchestrates the three-phase pipeline: extract Access objects to raw/ artifacts,
+/// translate those into kb/ JSON, then enrich into ir/ JSON (normalized geometry,
+/// etc.). Phases are independently callable.
+/// </summary>
+public sealed class Pipeline
+{
+    private readonly IReadOnlyList<IObjectExporter> _exporters;
+    private readonly IReadOnlyList<IObjectTranslator> _translators;
+    private readonly IReadOnlyList<IObjectEnricher> _enrichers;
+
+    public Pipeline(
+        IEnumerable<IObjectExporter> exporters,
+        IEnumerable<IObjectTranslator> translators,
+        IEnumerable<IObjectEnricher> enrichers)
+    {
+        _exporters = exporters.ToArray();
+        _translators = translators.ToArray();
+        _enrichers = enrichers.ToArray();
+    }
+
+    /// <summary>
+    /// Returns a new Pipeline with only the exporters/translators whose Category
+    /// appears in <paramref name="categories"/> (case-insensitive match).
+    /// </summary>
+    public Pipeline WithCategories(IEnumerable<string> categories)
+    {
+        var set = new HashSet<string>(categories, StringComparer.OrdinalIgnoreCase);
+        return new Pipeline(
+            _exporters.Where(e => set.Contains(e.Category)),
+            _translators.Where(t => set.Contains(t.Category)),
+            _enrichers.Where(e => set.Contains(e.Category)));
+    }
+
+    public IReadOnlyList<string> ExporterCategories
+        => _exporters.Select(e => e.Category).ToArray();
+
+    public IReadOnlyList<string> TranslatorCategories
+        => _translators.Select(t => t.Category).ToArray();
+
+    /// <summary>
+    /// Default pipeline covering all categories the harvester currently supports.
+    /// </summary>
+    public static Pipeline Default() => new(
+        exporters: new IObjectExporter[]
+        {
+            SaveAsTextExporter.Forms,
+            SaveAsTextExporter.Reports,
+            SaveAsTextExporter.Macros,
+            SaveAsTextExporter.Modules,
+            QueryExporter.Instance,
+            TableExporter.Instance,
+            RelationshipExporter.Instance,
+        },
+        translators: new IObjectTranslator[]
+        {
+            SaveAsTextTranslator.Forms,
+            SaveAsTextTranslator.Reports,
+            SaveAsTextTranslator.Macros,
+            SaveAsTextTranslator.Modules,
+            JsonPassthroughTranslator.Queries,
+            JsonPassthroughTranslator.Tables,
+            JsonPassthroughTranslator.Relationships,
+        },
+        enrichers: new IObjectEnricher[]
+        {
+            GeometryEnricher.Forms,
+            GeometryEnricher.Reports,
+            LabelResolver.Forms,
+            LabelResolver.Reports,
+            PropertyDecoder.Forms,
+            PropertyDecoder.Reports,
+            TextCapacityEnricher.Forms,
+            TextCapacityEnricher.Reports,
+            VbaSignatureEnricher.Forms,
+            VbaSignatureEnricher.Reports,
+            VbaSignatureEnricher.ModulesAndClasses,
+            MacroActionsEnricher.Macros,
+            MacroActionsEnricher.Forms,
+            MacroActionsEnricher.Reports,
+        });
+
+    public static string BaseDir(string outputRoot, string dbName)
+        => Path.Combine(outputRoot, "AccessMetaData", dbName);
+
+    public static string RawDir(string outputRoot, string dbName)
+        => Path.Combine(BaseDir(outputRoot, dbName), "raw");
+
+    public static string KbDir(string outputRoot, string dbName)
+        => Path.Combine(BaseDir(outputRoot, dbName), "kb");
+
+    public static string IrDir(string outputRoot, string dbName)
+        => Path.Combine(BaseDir(outputRoot, dbName), "ir");
+
+    public ExtractResult Extract(string databasePath, string outputRoot)
+    {
+        string dbName = Path.GetFileNameWithoutExtension(databasePath);
+        string baseDir = BaseDir(outputRoot, dbName);
+        string rawDir = RawDir(outputRoot, dbName);
+        Directory.CreateDirectory(rawDir);
+
+        var categories = new List<CategoryExportResult>();
+        using var session = new AccessComSession(databasePath);
+        foreach (var exporter in _exporters)
+        {
+            var categoryDir = Path.Combine(rawDir, exporter.Category);
+            var outcomes = exporter.Export(session, categoryDir);
+            categories.Add(new CategoryExportResult(exporter.Category, outcomes));
+        }
+
+        return new ExtractResult(baseDir, rawDir, categories);
+    }
+
+    public TranslateResult Translate(string rawDir, string kbDir)
+    {
+        Directory.CreateDirectory(kbDir);
+        var categories = new List<CategoryTranslateResult>();
+        foreach (var translator in _translators)
+        {
+            var rawCategoryDir = Path.Combine(rawDir, translator.Category);
+            var kbCategoryDir = Path.Combine(kbDir, translator.Category);
+            var outcomes = translator.Translate(rawCategoryDir, kbCategoryDir);
+            categories.Add(new CategoryTranslateResult(translator.Category, outcomes));
+        }
+        return new TranslateResult(rawDir, kbDir, categories);
+    }
+
+    public EnrichResult Enrich(string kbDir, string irDir)
+    {
+        Directory.CreateDirectory(irDir);
+        var categories = new List<CategoryEnrichResult>();
+
+        WriteDefaultsArtifact(irDir);
+
+        if (!Directory.Exists(kbDir))
+            return new EnrichResult(kbDir, irDir, categories);
+
+        foreach (var kbCategoryDir in Directory.GetDirectories(kbDir))
+        {
+            string categoryName = Path.GetFileName(kbCategoryDir);
+            string irCategoryDir = Path.Combine(irDir, categoryName);
+            Directory.CreateDirectory(irCategoryDir);
+
+            var categoryEnrichers = _enrichers
+                .Where(e => e.Category.Equals(categoryName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var outcomes = new List<EnrichOutcome>();
+            foreach (var file in Directory.GetFiles(kbCategoryDir, "*.json"))
+            {
+                string name = Path.GetFileNameWithoutExtension(file);
+                string targetFile = Path.Combine(irCategoryDir, name + ".ir.json");
+                try
+                {
+                    if (categoryEnrichers.Count == 0)
+                    {
+                        File.Copy(file, targetFile, overwrite: true);
+                    }
+                    else
+                    {
+                        // First enricher reads from kb/ and writes to ir/.
+                        // Subsequent enrichers read and rewrite the ir/ file in place,
+                        // each adding its own contribution. Enrichers run in the order
+                        // registered in the Pipeline's constructor.
+                        categoryEnrichers[0].EnrichFile(file, targetFile);
+                        for (int i = 1; i < categoryEnrichers.Count; i++)
+                            categoryEnrichers[i].EnrichFile(targetFile, targetFile);
+                    }
+                    outcomes.Add(new EnrichOutcome(name, true));
+                }
+                catch (Exception ex)
+                {
+                    outcomes.Add(new EnrichOutcome(name, false, ex.Message));
+                }
+            }
+            categories.Add(new CategoryEnrichResult(categoryName, outcomes));
+        }
+
+        return new EnrichResult(kbDir, irDir, categories);
+    }
+
+    private static void WriteDefaultsArtifact(string irDir)
+    {
+        var asm = typeof(Pipeline).Assembly;
+        const string resourceName = "AccessHarvester.Core.Resources.property-defaults.json";
+        using var stream = asm.GetManifestResourceStream(resourceName);
+        if (stream is null) return;
+        using var reader = new StreamReader(stream);
+        File.WriteAllText(Path.Combine(irDir, "Defaults.json"), reader.ReadToEnd());
+    }
+
+    public RunResult Run(string databasePath, string outputRoot)
+    {
+        var extract = Extract(databasePath, outputRoot);
+        string dbName = Path.GetFileNameWithoutExtension(databasePath);
+        string kbDir = KbDir(outputRoot, dbName);
+        var translate = Translate(extract.RawDir, kbDir);
+        string irDir = IrDir(outputRoot, dbName);
+        var enrich = Enrich(translate.KbDir, irDir);
+
+        EmitManifestArtifacts(extract.BaseDir, databasePath);
+
+        return new RunResult(
+            extract.BaseDir, extract.RawDir, translate.KbDir, enrich.IrDir,
+            extract.Categories, translate.Categories, enrich.Categories);
+    }
+
+    // V1 manifest emission: assemble a DatabaseManifest from whatever
+    // strongly-typed inputs Pipeline.Run() can supply today and write
+    // both manifest.json and unresolved-items.json to <baseDir>. The
+    // per-category collection inputs (Forms/Reports/Queries/Modules/
+    // Tables/Relationships/etc.) are owned by their respective builders
+    // (FormComponentSpecBuilder, QueryAbstractionBuilder, ...) and are
+    // not threaded through Pipeline.Run() yet — the aggregator's contract
+    // accepts a minimal set and emits a schema-valid envelope, so this
+    // wiring lands the emission seam. Collection population grows in
+    // follow-on sessions.
+    //
+    // The UnresolvedItems list is built once and serialised to both
+    // files: it lives inline inside manifest.json AND as a bare array in
+    // unresolved-items.json so downstream tooling that wants the
+    // manual-review queue does not have to deserialise the whole manifest
+    // (per the Session 2 spec).
+    private static void EmitManifestArtifacts(string baseDir, string databasePath)
+    {
+        var database = new DatabaseInfo
+        {
+            Name = Path.GetFileName(databasePath),
+            FilePath = Path.GetFullPath(databasePath),
+            ExportedAt = DateTimeOffset.UtcNow.ToString("o", CultureInfo.InvariantCulture),
+        };
+
+        IReadOnlyList<UnresolvedItem> unresolvedItems = Array.Empty<UnresolvedItem>();
+
+        var manifest = DatabaseManifestAggregator.Build(
+            database: database,
+            harvesterVersion: ResolveHarvesterVersion(),
+            unresolvedItems: unresolvedItems);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
+
+        File.WriteAllText(
+            Path.Combine(baseDir, "manifest.json"),
+            JsonSerializer.Serialize(manifest, options));
+        File.WriteAllText(
+            Path.Combine(baseDir, "unresolved-items.json"),
+            JsonSerializer.Serialize(unresolvedItems, options));
+    }
+
+    private static string ResolveHarvesterVersion()
+    {
+        var asm = typeof(Pipeline).Assembly;
+        var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        if (!string.IsNullOrEmpty(info?.InformationalVersion))
+            return info!.InformationalVersion;
+        return asm.GetName().Version?.ToString() ?? "0.0.0";
+    }
+}
+
+public sealed record CategoryExportResult(string Category, IReadOnlyList<ExportOutcome> Outcomes);
+public sealed record CategoryTranslateResult(string Category, IReadOnlyList<TranslateOutcome> Outcomes);
+public sealed record CategoryEnrichResult(string Category, IReadOnlyList<EnrichOutcome> Outcomes);
+
+public sealed record ExtractResult(string BaseDir, string RawDir, IReadOnlyList<CategoryExportResult> Categories);
+public sealed record TranslateResult(string RawDir, string KbDir, IReadOnlyList<CategoryTranslateResult> Categories);
+public sealed record EnrichResult(string KbDir, string IrDir, IReadOnlyList<CategoryEnrichResult> Categories);
+public sealed record RunResult(
+    string BaseDir,
+    string RawDir,
+    string KbDir,
+    string IrDir,
+    IReadOnlyList<CategoryExportResult> Extract,
+    IReadOnlyList<CategoryTranslateResult> Translate,
+    IReadOnlyList<CategoryEnrichResult> Enrich);
+
+```
+
+Notes on the new wiring:
+- Pipeline.Run() now calls EmitManifestArtifacts(extract.BaseDir, databasePath) after Enrich() and before returning RunResult.
+- EmitManifestArtifacts builds a DatabaseInfo (Name + absolute FilePath + ISO-8601 ExportedAt), constructs an empty UnresolvedItem array, calls DatabaseManifestAggregator.Build, serializes manifest to <baseDir>/manifest.json and the array to <baseDir>/unresolved-items.json with WriteIndented=true and DefaultIgnoreCondition=WhenWritingNull.
+- ResolveHarvesterVersion reads AssemblyInformationalVersionAttribute, falls back to AssemblyName.Version, falls back to "0.0.0".
+
+## 3. tests/AccessHarvester.Integration/Pipeline/EndToEndPipelineTests.cs (FULL file)
+
+```csharp
+using System;
+using System.IO;
+using System.Linq;
+using System.Runtime.Versioning;
+using System.Text.Json;
+using AccessHarvester.Core;
+using AccessHarvester.Integration.TestSupport;
+using Xunit;
+using CorePipeline = AccessHarvester.Core.Pipeline;
+
+namespace AccessHarvester.Integration.Pipeline;
+
+// Full Extract -> Translate -> Enrich pipeline against a committed
+// sample .accdb. SkippableFact-gated for hosts without Microsoft Access.
+//
+// This complements (does not duplicate) AccessHarvester.Tests'
+// SyntheticDbIntegrationTests:
+//   - SyntheticDbIntegrationTests asserts specific extractor behaviours
+//     (geometry-in-inches, signature start lines, etc.) against
+//     test-builder-built synthetic DBs.
+//   - This class asserts only the contract structure of the run output
+//     (each tier produced the expected directory shape, at least one IR
+//     file per requested category, and the Session-2 manifest +
+//     unresolved-items.json emission landed alongside the tier
+//     directories) so the integration project's gate is "the pipeline
+//     ran end-to-end and produced something downstream tooling can
+//     iterate".
+//
+// The schema-validation gate ("produced manifest validates against
+// harvester-schema.v1.0.json") lives in ManifestSchemaConformanceTests
+// — kept separate so a schema regression and a tier-shape regression
+// surface as distinct failures.
+[SupportedOSPlatform("windows")]
+public sealed class EndToEndPipelineTests
+{
+    [SkippableFact]
+    public void Pipeline_RunAgainstMiniComplex_EmitsRawKbIrTreesForFormsCategory()
+    {
+        AccessAvailability.SkipIfNoAccess();
+
+        string db = Path.Combine(RepoPaths.Samples(), "MiniComplex.accdb");
+        Skip.IfNot(File.Exists(db), $"Sample DB not present at {db}.");
+
+        string outRoot = Path.Combine(Path.GetTempPath(), $"ah-int-pipe-{Guid.NewGuid():N}");
+        try
+        {
+            var pipeline = CorePipeline.Default().WithCategories(new[] { "Forms" });
+            var result = pipeline.Run(db, outRoot);
+
+            // Pipeline did not surface per-object failures.
+            Assert.All(result.Extract,
+                c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));
+            Assert.All(result.Translate,
+                c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));
+            Assert.All(result.Enrich,
+                c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));
+
+            // Tier directories exist under the conventional layout.
+            Assert.True(Directory.Exists(result.RawDir), $"raw dir missing: {result.RawDir}");
+            Assert.True(Directory.Exists(result.KbDir),  $"kb dir missing: {result.KbDir}");
+            Assert.True(Directory.Exists(result.IrDir),  $"ir dir missing: {result.IrDir}");
+
+            // Forms tier emitted at least one ir file. The exact form list
+            // depends on MiniComplex.accdb's contents and is asserted only
+            // as "non-empty" — the regression-snapshot suite (Session 2)
+            // is where exact expected outputs get pinned.
+            //
+            // Both checks are mandatory, not conditional: if the pipeline
+            // regresses to the point of dropping the Forms category
+            // directory entirely, this test must fail rather than silently
+            // pass on a missing-directory branch.
+            string formsIrDir = Path.Combine(result.IrDir, "Forms");
+            Assert.True(
+                Directory.Exists(formsIrDir),
+                $"Expected ir/Forms directory at {formsIrDir}. " +
+                $"Pipeline reported no extract failures but the requested " +
+                $"category directory is absent — contract regression.");
+            var irFiles = Directory.GetFiles(formsIrDir, "*.ir.json", SearchOption.TopDirectoryOnly);
+            Assert.True(
+                irFiles.Any(),
+                $"Expected at least one Forms/*.ir.json under {formsIrDir}. " +
+                $"Pipeline reported no extract failures, so empty output indicates a contract change.");
+
+            // Session 2 emission gates: manifest.json and unresolved-items.json
+            // land alongside raw/, kb/, ir/ at <baseDir>. The contract is
+            // verified at the file-existence + minimal-shape level here; full
+            // schema validation lives in ManifestSchemaConformanceTests.
+            string manifestPath = Path.Combine(result.BaseDir, "manifest.json");
+            string unresolvedPath = Path.Combine(result.BaseDir, "unresolved-items.json");
+
+            Assert.True(File.Exists(manifestPath),
+                $"Expected manifest at {manifestPath}. Pipeline.Run() must emit the rolled-up " +
+                $"DatabaseManifest after Enrich() — contract regression.");
+            Assert.True(File.Exists(unresolvedPath),
+                $"Expected unresolved-items at {unresolvedPath}. Pipeline.Run() must emit the " +
+                $"sibling unresolved-items array (per GAP #5) — contract regression.");
+
+            using (var manifestDoc = JsonDocument.Parse(File.ReadAllText(manifestPath)))
+            {
+                var root = manifestDoc.RootElement;
+                Assert.Equal("DatabaseManifest", root.GetProperty("SchemaType").GetString());
+                Assert.Equal("1.0", root.GetProperty("SchemaVersion").GetString());
+                Assert.False(string.IsNullOrEmpty(root.GetProperty("HarvesterVersion").GetString()));
+                Assert.Equal(
+                    "MiniComplex.accdb",
+                    root.GetProperty("Database").GetProperty("Name").GetString());
+            }
+
+            using (var unresolvedDoc = JsonDocument.Parse(File.ReadAllText(unresolvedPath)))
+            {
+                // V1 wiring emits an empty array; downstream tooling reads
+                // this file as IReadOnlyList<UnresolvedItem>. Assert array
+                // shape regardless of cardinality so a future regression
+                // that flips the file to an object surfaces here.
+                Assert.Equal(JsonValueKind.Array, unresolvedDoc.RootElement.ValueKind);
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(outRoot))
+                Directory.Delete(outRoot, recursive: true);
+        }
+    }
+}
+
+```
+
+## 4. tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs (NEW)
+
+```csharp
+using System;
+using System.IO;
+using System.Runtime.Versioning;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using AccessHarvester.Core;
+using AccessHarvester.Integration.TestSupport;
+using AccessHarvester.Pipeline.Manifest;
+using AccessHarvester.Pipeline.Validation;
+using Xunit;
+using CorePipeline = AccessHarvester.Core.Pipeline;
+
+namespace AccessHarvester.Integration.Pipeline;
+
+// Manifest-side schema-conformance gate. Closes Gap A from the prior
+// integration-testing-and-acceptance set: until Session 2 wired
+// Pipeline.Run() to emit a rolled-up DatabaseManifest, there was no
+// document for SchemaValidator to consume against
+// harvester-schema.v1.0.json. This class validates both the
+// aggregator-produced shape (hermetic) and the production-pipeline-
+// produced manifest.json on disk (SkippableFact integration check).
+//
+// Distinct from SchemaConformanceTests in this same directory: that
+// class validates the committed example fixtures under examples/.
+// This one validates manifests the harvester itself produces.
+public sealed class ManifestSchemaConformanceTests
+{
+    [Fact]
+    public void AggregatorMinimalManifest_ValidatesAgainstSchema()
+    {
+        // Exercises the contract that the smallest valid input
+        // (Database + HarvesterVersion only) round-trips through
+        // serialization and passes SchemaValidator. If any field
+        // emitted by the envelope conflicts with the schema's
+        // required/property declarations, this gate catches it.
+        var database = new DatabaseInfo
+        {
+            Name = "Synthetic.accdb",
+            FilePath = @"C:\fixtures\Synthetic.accdb",
+            ExportedAt = "2026-05-18T12:00:00.0000000+00:00",
+        };
+
+        var manifest = DatabaseManifestAggregator.Build(
+            database: database,
+            harvesterVersion: "1.0.0-test");
+
+        string json = JsonSerializer.Serialize(manifest, ManifestSerializerOptions);
+
+        var result = ValidatorAgainstHarvesterSchema().Validate(json);
+
+        Assert.True(
+            result.IsValid,
+            "Aggregator-produced minimal manifest failed schema validation:\n  - " +
+            string.Join("\n  - ", result.Errors));
+    }
+
+    [SkippableFact]
+    [SupportedOSPlatform("windows")]
+    public void PipelineRunProducedManifest_ValidatesAgainstSchema()
+    {
+        AccessAvailability.SkipIfNoAccess();
+
+        string db = Path.Combine(RepoPaths.Samples(), "MiniComplex.accdb");
+        Skip.IfNot(File.Exists(db), $"Sample DB not present at {db}.");
+
+        string outRoot = Path.Combine(Path.GetTempPath(), $"ah-int-manifest-{Guid.NewGuid():N}");
+        try
+        {
+            var pipeline = CorePipeline.Default().WithCategories(new[] { "Forms" });
+            var runResult = pipeline.Run(db, outRoot);
+
+            string manifestPath = Path.Combine(runResult.BaseDir, "manifest.json");
+            Assert.True(File.Exists(manifestPath), $"Manifest not produced at {manifestPath}.");
+
+            string json = File.ReadAllText(manifestPath);
+            var result = ValidatorAgainstHarvesterSchema().Validate(json);
+
+            Assert.True(
+                result.IsValid,
+                $"Pipeline-produced manifest {manifestPath} failed schema validation:\n  - " +
+                string.Join("\n  - ", result.Errors));
+        }
+        finally
+        {
+            if (Directory.Exists(outRoot))
+                Directory.Delete(outRoot, recursive: true);
+        }
+    }
+
+    // Shared with Pipeline.Run() — keeping the options identical
+    // ensures the validator sees the same JSON the production path
+    // emits.
+    private static readonly JsonSerializerOptions ManifestSerializerOptions = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+    };
+
+    private static SchemaValidator ValidatorAgainstHarvesterSchema()
+        => new(RepoPaths.SchemaFile());
+}
+
+```
+
+# Mechanical disambiguation also landed this session
+
+Four files in `tests/AccessHarvester.Tests/` gained `using CorePipeline = AccessHarvester.Core.Pipeline;` (matching the existing pattern in AccessHarvester.Cli/Program.cs and the Integration project's EndToEndPipelineTests) and had their `Pipeline.Default()` call sites renamed to `CorePipeline.Default()`. The reason: now that Core transitively references the AccessHarvester.Pipeline assembly, the unqualified name `Pipeline` resolved to the namespace rather than the class — C# walks namespaces before using directives. The CorePipeline alias is the existing pattern; no semantic change. The four files: SyntheticDbIntegrationTests.cs, SyntheticMetadataExtractorIntegrationTests.cs, HomeHealthCareTableCoverageTests.cs, SyntheticFixtureSnapshotTests.cs.
+
+# Context for shape questions (Session-1-shipped, NOT changed this session)
+
+## AccessHarvester.Pipeline/Manifest/DatabaseManifestAggregator.cs (Session 1)
+
+```csharp
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using AccessHarvester.Access;
+using AccessHarvester.Pipeline.Enrichment;
+
+namespace AccessHarvester.Pipeline.Manifest;
+
+/// <summary>
+/// Assembles per-category in-memory inputs into a single
+/// <see cref="DatabaseManifest"/>. Mirrors the contract of
+/// <see cref="UnresolvedItemAggregator.Build"/>: every input is
+/// optional, missing inputs surface as empty arrays, and the
+/// aggregator does not perform I/O.
+/// </summary>
+/// <remarks>
+/// <para>
+/// The aggregator does <b>not</b> re-sort the supplied collections.
+/// Callers pass already-deterministic ordering; the aggregator
+/// preserves the caller's order verbatim. The contrast with
+/// <see cref="UnresolvedItemAggregator"/> is intentional — that
+/// aggregator merges from multiple sources and must impose order;
+/// this aggregator merges nothing — each per-category input has a
+/// single producer — so order ownership stays with the caller.
+/// </para>
+/// <para>
+/// The <see cref="DatabaseSummary"/> attached to the result is
+/// computed from the populated collections, so the manifest is
+/// internally consistent (i.e. <c>Forms.Count == Summary.FormCount</c>).
+/// </para>
+/// </remarks>
+public static class DatabaseManifestAggregator
+{
+    /// <summary>
+    /// Assemble a <see cref="DatabaseManifest"/> from the supplied
+    /// inputs. <paramref name="database"/> and
+    /// <paramref name="harvesterVersion"/> are required (matching
+    /// the schema's <c>DatabaseManifest.required</c> contract);
+    /// every other input is optional.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if <paramref name="database"/> is null or
+    /// <paramref name="harvesterVersion"/> is null/empty.
+    /// </exception>
+    public static DatabaseManifest Build(
+        DatabaseInfo database,
+        string harvesterVersion,
+        IEnumerable<FormExport>? forms = null,
+        IEnumerable<FormExport>? reports = null,
+        IEnumerable<QueryAbstraction>? queries = null,
+        IEnumerable<ModuleExport>? modules = null,
+        IEnumerable<TableMetadata>? tables = null,
+        IEnumerable<RelationshipMetadata>? relationships = null,
+        IEnumerable<ValidationRule>? validationRules = null,
+        IEnumerable<RowSourceSpec>? rowSourceSpecs = null,
+        IEnumerable<FunctionClassification>? functionClassifications = null,
+        IEnumerable<EventHandlerClassification>? eventHandlerClassifications = null,
+        NavigationGraph? navigationGraph = null,
+        IEnumerable<UnresolvedItem>? unresolvedItems = null,
+        IEnumerable<HarvesterDiagnostic>? diagnostics = null)
+    {
+        ArgumentNullException.ThrowIfNull(database);
+        if (string.IsNullOrEmpty(harvesterVersion))
+            throw new ArgumentException(
+                "HarvesterVersion is required by the schema.",
+                nameof(harvesterVersion));
+
+        var formsList                       = Materialize(forms);
+        var reportsList                     = Materialize(reports);
+        var queriesList                     = Materialize(queries);
+        var modulesList                     = Materialize(modules);
+        var tablesList                      = Materialize(tables);
+        var relationshipsList               = Materialize(relationships);
+        var validationRulesList             = Materialize(validationRules);
+        var rowSourceSpecsList              = Materialize(rowSourceSpecs);
+        var functionClassificationsList     = Materialize(functionClassifications);
+        var eventHandlerClassificationsList = Materialize(eventHandlerClassifications);
+        var unresolvedItemsList             = Materialize(unresolvedItems);
+        var diagnosticsList                 = Materialize(diagnostics);
+
+        var summary = new DatabaseSummary
+        {
+            FormCount            = formsList.Count,
+            ReportCount          = reportsList.Count,
+            QueryCount           = queriesList.Count,
+            ModuleCount          = modulesList.Count,
+            TableCount           = tablesList.Count,
+            UnresolvedItemCount  = unresolvedItemsList.Count,
+        };
+
+        return new DatabaseManifest
+        {
+            HarvesterVersion              = harvesterVersion,
+            Database                      = database,
+            Summary                       = summary,
+            Forms                         = formsList,
+            Reports                       = reportsList,
+            Queries                       = queriesList,
+            Modules                       = modulesList,
+            Tables                        = tablesList,
+            Relationships                 = relationshipsList,
+            ValidationRules               = validationRulesList,
+            RowSourceSpecs                = rowSourceSpecsList,
+            FunctionClassifications       = functionClassificationsList,
+            EventHandlerClassifications   = eventHandlerClassificationsList,
+            NavigationGraph               = navigationGraph,
+            UnresolvedItems               = unresolvedItemsList,
+            Diagnostics                   = diagnosticsList,
+        };
+    }
+
+    private static IReadOnlyList<T> Materialize<T>(IEnumerable<T>? source)
+        => source is null ? Array.Empty<T>() : source.ToArray();
+}
+
+```
+
+## AccessHarvester.Pipeline/Manifest/DatabaseManifest.cs (Session 1)
+
+```csharp
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using AccessHarvester.Access;
+using AccessHarvester.Pipeline.Enrichment;
+
+namespace AccessHarvester.Pipeline.Manifest;
+
+/// <summary>
+/// Root document for a full database export per the v1.0 schema's
+/// <c>DatabaseManifest</c> definition. Wraps all harvested metadata
+/// and enrichment output for one Access database.
+/// </summary>
+/// <remarks>
+/// <para>
+/// Build instances via
+/// <see cref="DatabaseManifestAggregator.Build"/> — the constructor
+/// surface is intentionally bare so callers cannot bypass the
+/// summary-count consistency the aggregator enforces.
+/// </para>
+/// <para>
+/// The per-category collections carry existing in-memory record
+/// types from <c>AccessHarvester.Access</c> /
+/// <c>AccessHarvester.Pipeline.Enrichment</c> rather than
+/// re-modelled wrappers. JSON property-name conformance against
+/// <c>harvester-schema.v1.0.json</c> is exercised by the
+/// schema-conformance test landing in Session 2 of the
+/// <c>harvester-finish-canonical-golden-output</c> set; any
+/// in-memory-type-vs-schema mismatch surfaces there.
+/// </para>
+/// </remarks>
+public sealed record DatabaseManifest
+{
+    /// <summary>
+    /// Constant discriminator the schema requires at
+    /// <c>$.SchemaType</c>. Always <c>"DatabaseManifest"</c>.
+    /// </summary>
+    [JsonPropertyOrder(-100)]
+    public string SchemaType { get; } = "DatabaseManifest";
+
+    /// <summary>
+    /// Constant schema version the schema requires at
+    /// <c>$.SchemaVersion</c>. Always <c>"1.0"</c> for documents
+    /// produced against <c>harvester-schema.v1.0.json</c>.
+    /// </summary>
+    [JsonPropertyOrder(-99)]
+    public string SchemaVersion { get; } = "1.0";
+
+    /// <summary>
+    /// Version of the harvester tool that produced this document.
+    /// Caller-supplied; the aggregator does not synthesise it.
+    /// </summary>
+    [JsonPropertyOrder(-98)]
+    public required string HarvesterVersion { get; init; }
+
+    [JsonPropertyOrder(-97)]
+    public required DatabaseInfo Database { get; init; }
+
+    public DatabaseSummary Summary { get; init; } = new();
+
+    public IReadOnlyList<FormExport> Forms { get; init; }
+        = System.Array.Empty<FormExport>();
+
+    public IReadOnlyList<FormExport> Reports { get; init; }
+        = System.Array.Empty<FormExport>();
+
+    public IReadOnlyList<QueryAbstraction> Queries { get; init; }
+        = System.Array.Empty<QueryAbstraction>();
+
+    public IReadOnlyList<ModuleExport> Modules { get; init; }
+        = System.Array.Empty<ModuleExport>();
+
+    public IReadOnlyList<TableMetadata> Tables { get; init; }
+        = System.Array.Empty<TableMetadata>();
+
+    public IReadOnlyList<RelationshipMetadata> Relationships { get; init; }
+        = System.Array.Empty<RelationshipMetadata>();
+
+    public IReadOnlyList<ValidationRule> ValidationRules { get; init; }
+        = System.Array.Empty<ValidationRule>();
+
+    public IReadOnlyList<RowSourceSpec> RowSourceSpecs { get; init; }
+        = System.Array.Empty<RowSourceSpec>();
+
+    public IReadOnlyList<FunctionClassification> FunctionClassifications { get; init; }
+        = System.Array.Empty<FunctionClassification>();
+
+    public IReadOnlyList<EventHandlerClassification> EventHandlerClassifications { get; init; }
+        = System.Array.Empty<EventHandlerClassification>();
+
+    public NavigationGraph? NavigationGraph { get; init; }
+
+    public IReadOnlyList<UnresolvedItem> UnresolvedItems { get; init; }
+        = System.Array.Empty<UnresolvedItem>();
+
+    public IReadOnlyList<HarvesterDiagnostic> Diagnostics { get; init; }
+        = System.Array.Empty<HarvesterDiagnostic>();
+}
+
+```
+
+# Out-of-scope / explicitly NOT in this session
+
+- **Collection-population wiring.** The aggregator's per-category inputs (Forms, Reports, Queries, Modules, Tables, Relationships, ValidationRules, RowSourceSpecs, FunctionClassifications, EventHandlerClassifications, NavigationGraph, UnresolvedItems) are owned by their respective builders (FormComponentSpecBuilder, QueryAbstractionBuilder, RowSourceSpecBuilder, NavigationGraphBuilder, EventHandlerClassifier, FunctionClassificationBuilder, ValidationRuleExtractor, ...) and those builders are NOT wired into Pipeline.Run() today. Session 2 lands the EMISSION SEAM (Pipeline.Run -> aggregator -> two JSON files); follow-on sessions wire each builder's in-memory output into the aggregator's inputs.
+- **Adding ManifestPath/UnresolvedItemsPath to RunResult.** Spec's "Touches" list does not mention RunResult changes. Tests derive paths via Path.Combine(result.BaseDir, "manifest.json"). Lean-by-default.
+- **Northwind regression test fixture.** Northwind .accdb is gitignored; the canonical regression test against both fixtures lands in Session 4.
+- **Golden output corpus.** Session 3 generates and commits the canonical golden under samples/GoldenOutput/.
+- **CLI flag for manifest-only mode.** Per the spec: "No new CLI flag is required for V1 — the manifest is always emitted when `run` completes."
+
+# Build + test results
+
+`dotnet build AccessHarvester.sln --nologo -v minimal`: 314 warnings (existing CA1416 noise unrelated to this session), 0 errors.
+
+`dotnet test AccessHarvester.sln --no-build --nologo`:
+- AccessHarvester.CharacterizationTests: 131 passed
+- AccessHarvester.TranslationProbe.Tests: 9 passed
+- AccessHarvester.Vba.Parser.Tests: 69 passed
+- AccessHarvester.Vba.Grammar.Tests: 294 passed
+- AccessHarvester.Sql.Grammar.Tests: 85 passed
+- AccessHarvester.Vba.Resolver.Tests: 400 passed
+- AccessHarvester.Integration: 16 passed (includes both new ManifestSchemaConformanceTests AND the manifest-aware EndToEndPipelineTests update; MS Access IS available on this host so SkippableFacts ran for real)
+- AccessHarvester.Pipeline.Tests: 375 passed (existing DatabaseManifestAggregatorTests from Session 1 still green)
+- AccessHarvester.SymbolDb.Tests: 70 passed
+- AccessHarvester.Tests: 436 passed, 2 skipped (synthetic-DB fixtures absent on this host)
+
+Total: 1885 passed, 2 skipped, 0 failed.
+
+# Review questions
+
+1. Does the wiring meet the Session 2 spec ("invoke aggregator after enrich phase; emit two separate files at <baseDir>/manifest.json and <baseDir>/unresolved-items.json; one shared in-memory array serialised twice")?
+2. Does ManifestSchemaConformanceTests close Gap A from the prior set (the schema-validation gate against harvester-schema.v1.0.json)?
+3. Is the V1-minimal collection-population strategy (Database + HarvesterVersion + empty everything else) sound for a "mechanical integration" session, or does it under-deliver the spec's intent?
+4. Is the CorePipeline alias disambiguation across the four AccessHarvester.Tests files mechanical and correct, or does it introduce any semantic risk?
+5. Is HarvesterVersion resolution (AssemblyInformationalVersionAttribute fallback) the right approach, or should it be a constant string?
+6. Any schema-vs-record-shape concerns (e.g., enum casing, property casing, JsonPropertyOrder use on DatabaseManifest)?
+7. Any concerns about determinism: with WriteIndented and ExportedAt-as-UtcNow, the manifest.json bytes vary across runs by definition. This is intentional — Session 3 lands GoldenNormalizer with NormalizeManifest replacing ExportedAt/FilePath/HarvesterVersion with stable placeholders before committing the golden corpus. Is this the right factoring?
+
+Be terse but specific. Anchor every issue to a file path + line range when possible.
+
+After your prose analysis, output a JSON block in this exact format:
+
+```json
+{
+  "verdict": "VERIFIED" | "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Critical" | "Major" | "Minor",
+      "location": "<file or test name>",
+      "summary": "<one-sentence description>",
+      "fix": "<recommended fix>"
+    }
+  ]
+}
+```
+
+If verdict is VERIFIED, `issues` must be an empty array `[]`. Do not omit this block.

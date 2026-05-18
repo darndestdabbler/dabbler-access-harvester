@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Text.Json;
 using AccessHarvester.Core;
 using AccessHarvester.Integration.TestSupport;
 using Xunit;
@@ -18,18 +19,17 @@ namespace AccessHarvester.Integration.Pipeline;
 //     (geometry-in-inches, signature start lines, etc.) against
 //     test-builder-built synthetic DBs.
 //   - This class asserts only the contract structure of the run output
-//     (that each tier produced the expected directory shape and at least
-//     one IR file per requested category) so the integration project's
-//     gate is "the pipeline ran end-to-end and produced something that
-//     downstream tooling can iterate", not "the extractor handled this
-//     specific edge case".
+//     (each tier produced the expected directory shape, at least one IR
+//     file per requested category, and the Session-2 manifest +
+//     unresolved-items.json emission landed alongside the tier
+//     directories) so the integration project's gate is "the pipeline
+//     ran end-to-end and produced something downstream tooling can
+//     iterate".
 //
-// The "ran-pipeline output validates against harvester-schema.v1.0.json"
-// gate is intentionally NOT here — see Gap A in
-// docs/session-sets/integration-testing-and-acceptance/coverage-audit.md.
-// The pipeline emits per-object IR files today, not a rolled-up
-// DatabaseManifest, so there is no document for SchemaValidator to
-// consume yet.
+// The schema-validation gate ("produced manifest validates against
+// harvester-schema.v1.0.json") lives in ManifestSchemaConformanceTests
+// — kept separate so a schema regression and a tier-shape regression
+// surface as distinct failures.
 [SupportedOSPlatform("windows")]
 public sealed class EndToEndPipelineTests
 {
@@ -80,6 +80,40 @@ public sealed class EndToEndPipelineTests
                 irFiles.Any(),
                 $"Expected at least one Forms/*.ir.json under {formsIrDir}. " +
                 $"Pipeline reported no extract failures, so empty output indicates a contract change.");
+
+            // Session 2 emission gates: manifest.json and unresolved-items.json
+            // land alongside raw/, kb/, ir/ at <baseDir>. The contract is
+            // verified at the file-existence + minimal-shape level here; full
+            // schema validation lives in ManifestSchemaConformanceTests.
+            string manifestPath = Path.Combine(result.BaseDir, "manifest.json");
+            string unresolvedPath = Path.Combine(result.BaseDir, "unresolved-items.json");
+
+            Assert.True(File.Exists(manifestPath),
+                $"Expected manifest at {manifestPath}. Pipeline.Run() must emit the rolled-up " +
+                $"DatabaseManifest after Enrich() — contract regression.");
+            Assert.True(File.Exists(unresolvedPath),
+                $"Expected unresolved-items at {unresolvedPath}. Pipeline.Run() must emit the " +
+                $"sibling unresolved-items array (per GAP #5) — contract regression.");
+
+            using (var manifestDoc = JsonDocument.Parse(File.ReadAllText(manifestPath)))
+            {
+                var root = manifestDoc.RootElement;
+                Assert.Equal("DatabaseManifest", root.GetProperty("SchemaType").GetString());
+                Assert.Equal("1.0", root.GetProperty("SchemaVersion").GetString());
+                Assert.False(string.IsNullOrEmpty(root.GetProperty("HarvesterVersion").GetString()));
+                Assert.Equal(
+                    "MiniComplex.accdb",
+                    root.GetProperty("Database").GetProperty("Name").GetString());
+            }
+
+            using (var unresolvedDoc = JsonDocument.Parse(File.ReadAllText(unresolvedPath)))
+            {
+                // V1 wiring emits an empty array; downstream tooling reads
+                // this file as IReadOnlyList<UnresolvedItem>. Assert array
+                // shape regardless of cardinality so a future regression
+                // that flips the file to an object surfaces here.
+                Assert.Equal(JsonValueKind.Array, unresolvedDoc.RootElement.ValueKind);
+            }
         }
         finally
         {

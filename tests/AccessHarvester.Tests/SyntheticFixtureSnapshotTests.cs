@@ -1,6 +1,10 @@
 using System.Text.Json.Nodes;
 using AccessHarvester.Core;
 using Xunit;
+// Disambiguate the Pipeline class from the AccessHarvester.Pipeline
+// namespace now that Core transitively references the Pipeline assembly
+// (added in Session 2 of harvester-finish-canonical-golden-output).
+using CorePipeline = AccessHarvester.Core.Pipeline;
 
 namespace AccessHarvester.Tests;
 
@@ -47,7 +51,7 @@ public class SyntheticFixtureSnapshotTests
         var expectedRoot = JsonNode.Parse(File.ReadAllText(expectedPath))!.AsObject();
         var expectedCategories = expectedRoot.Select(p => p.Key).ToArray();
 
-        var pipeline = Pipeline.Default().WithCategories(expectedCategories);
+        var pipeline = CorePipeline.Default().WithCategories(expectedCategories);
         var result = pipeline.Run(dbPath, outRoot);
 
         Assert.All(result.Extract, c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));

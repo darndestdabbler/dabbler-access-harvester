@@ -1,37 +1,37 @@
 {
   "status": "in-progress",
-  "session_number": 1,
+  "session_number": 2,
   "total_sessions": 4,
-  "summary": "Session 1 of 4 complete (manifest aggregator design + build). Elaborated stub spec with four locked decisions (aggregator API, manifest record types, golden subset, normalization layer) plus Appendix A signature lock. Landed six manifest envelope record types in AccessHarvester.Pipeline/Manifest/ and the static pure DatabaseManifestAggregator.Build(...) mirroring UnresolvedItemAggregator.Build(...). 14 unit tests pin the contract. Cross-provider verification VERIFIED on R5 after 5 rounds of spec-consistency convergence (no code changes after R2). Routed cost ~$0.63 (5 verifications + 2 analysis calls). Sessions 2-4 remain.",
+  "summary": "Session 2 of 4 complete (pipeline wiring + UnresolvedItems emission). Added Core -> Pipeline ProjectReference and wired Pipeline.Run() to invoke DatabaseManifestAggregator.Build after Enrich() and emit manifest.json + unresolved-items.json at <baseDir>. Shared in-memory UnresolvedItem array serialised twice. HarvesterVersion sourced from AssemblyInformationalVersionAttribute. New ManifestSchemaConformanceTests closes Gap A from integration-testing-and-acceptance (one hermetic [Fact] for minimal aggregator output, one [SkippableFact] for the production pipeline-produced manifest). EndToEndPipelineTests updated to assert manifest + unresolved-items files. Four AccessHarvester.Tests files gained the CorePipeline alias to disambiguate the Pipeline class from the Pipeline namespace. Cross-provider verification: R1 gpt-5-4 returned ISSUES_FOUND with one Minor finding (session-002.md missing from changeset) that the orchestrator judged a context-gap; human chose option (d) second-opinion; R2 gemini-pro tiebreaker returned VERIFIED, agreeing with the dismissal. All 1885 tests pass, 2 skipped (synthetic-DB fixtures absent). Routed cost ~$0.13. Sessions 3-4 remain.",
   "files_changed": [
+    "AccessHarvester.Core/AccessHarvester.Core.csproj",
+    "AccessHarvester.Core/Pipeline.cs",
+    "tests/AccessHarvester.Integration/Pipeline/EndToEndPipelineTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs",
+    "tests/AccessHarvester.Tests/SyntheticDbIntegrationTests.cs",
+    "tests/AccessHarvester.Tests/SyntheticMetadataExtractorIntegrationTests.cs",
+    "tests/AccessHarvester.Tests/HomeHealthCareTableCoverageTests.cs",
+    "tests/AccessHarvester.Tests/SyntheticFixtureSnapshotTests.cs",
     "docs/session-sets/harvester-finish-canonical-golden-output/spec.md",
     "docs/session-sets/harvester-finish-canonical-golden-output/ai-assignment.md",
+    "docs/session-sets/harvester-finish-canonical-golden-output/disposition.json",
     "docs/session-sets/harvester-finish-canonical-golden-output/session-state.json",
     "docs/session-sets/harvester-finish-canonical-golden-output/activity-log.json",
     "docs/session-sets/harvester-finish-canonical-golden-output/session-events.jsonl",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-001.md",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-001-r2.md",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-001-r3.md",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-001-r4.md",
-    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-001-r5.md",
-    "AccessHarvester.Pipeline/Manifest/DatabaseManifest.cs",
-    "AccessHarvester.Pipeline/Manifest/DatabaseInfo.cs",
-    "AccessHarvester.Pipeline/Manifest/DatabaseSummary.cs",
-    "AccessHarvester.Pipeline/Manifest/FormExport.cs",
-    "AccessHarvester.Pipeline/Manifest/ModuleExport.cs",
-    "AccessHarvester.Pipeline/Manifest/HarvesterDiagnostic.cs",
-    "AccessHarvester.Pipeline/Manifest/DatabaseManifestAggregator.cs",
-    "tests/AccessHarvester.Pipeline.Tests/Manifest/DatabaseManifestAggregatorTests.cs"
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002.md",
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002-r2-tiebreaker.md",
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002-verification-prompt.txt",
+    "docs/session-sets/harvester-finish-canonical-golden-output/session-reviews/session-002-next-session-recommendation.md"
   ],
   "next_session_set": null,
   "next_orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium",
+    "model": "claude-opus-4-7",
+    "effort": "high",
     "reason": {
-      "code": "switch-due-to-cost",
-      "specifics": "Routed analysis (gemini-pro): Session 2's work is mechanical integration (Pipeline.Run wiring) and schema-to-code correspondence (the schema-conformance test closing Gap A), fitting the project-guidance convention that pins mechanical tasks to Sonnet. Switching from Opus to Sonnet drops per-routed-call cost ~5x while keeping cross-provider verification on gpt-5-4 intact."
+      "code": "continue-current-trajectory",
+      "specifics": "Routed analysis (gemini-pro): Session 3 generates and commits the canonical golden corpus; the Stop Rule 'Golden surfaces real defect' requires careful inspection of produced output before commit. Continuing with Opus @ high keeps the inspection-and-judgement capacity high enough to catch malformed IR or unexpected schema drift before the golden is pinned, even though normalization-layer authoring itself is mechanical."
     }
   },
   "blockers": []

@@ -21,6 +21,9 @@ ai_router/router-metrics.jsonl
 # open, producing byte-level changes even on read-only access.
 samples/NorthwindDevEdition.accdb
 
+# Access lock files (created when Access opens a .accdb; never committed).
+*.laccdb
+
 # Northwind-derived YAML extracts — regenerated locally; not committed
 samples/DatabaseYaml/NorthwindDevEdition.accdb/
 samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml

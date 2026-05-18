@@ -13,4 +13,8 @@
     <EmbeddedResource Include="Resources\font-metrics.json" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\AccessHarvester.Pipeline\AccessHarvester.Pipeline.csproj" />
+  </ItemGroup>
+
 </Project>

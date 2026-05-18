@@ -1,8 +1,14 @@
+using System.Globalization;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AccessHarvester.Core.Abstractions;
 using AccessHarvester.Core.Com;
 using AccessHarvester.Core.Enrichment;
 using AccessHarvester.Core.Extraction;
 using AccessHarvester.Core.Translation;
+using AccessHarvester.Pipeline.Enrichment;
+using AccessHarvester.Pipeline.Manifest;
 
 namespace AccessHarvester.Core;
 
@@ -205,9 +211,67 @@ public sealed class Pipeline
         var translate = Translate(extract.RawDir, kbDir);
         string irDir = IrDir(outputRoot, dbName);
         var enrich = Enrich(translate.KbDir, irDir);
+
+        EmitManifestArtifacts(extract.BaseDir, databasePath);
+
         return new RunResult(
             extract.BaseDir, extract.RawDir, translate.KbDir, enrich.IrDir,
             extract.Categories, translate.Categories, enrich.Categories);
+    }
+
+    // V1 manifest emission: assemble a DatabaseManifest from whatever
+    // strongly-typed inputs Pipeline.Run() can supply today and write
+    // both manifest.json and unresolved-items.json to <baseDir>. The
+    // per-category collection inputs (Forms/Reports/Queries/Modules/
+    // Tables/Relationships/etc.) are owned by their respective builders
+    // (FormComponentSpecBuilder, QueryAbstractionBuilder, ...) and are
+    // not threaded through Pipeline.Run() yet — the aggregator's contract
+    // accepts a minimal set and emits a schema-valid envelope, so this
+    // wiring lands the emission seam. Collection population grows in
+    // follow-on sessions.
+    //
+    // The UnresolvedItems list is built once and serialised to both
+    // files: it lives inline inside manifest.json AND as a bare array in
+    // unresolved-items.json so downstream tooling that wants the
+    // manual-review queue does not have to deserialise the whole manifest
+    // (per the Session 2 spec).
+    private static void EmitManifestArtifacts(string baseDir, string databasePath)
+    {
+        var database = new DatabaseInfo
+        {
+            Name = Path.GetFileName(databasePath),
+            FilePath = Path.GetFullPath(databasePath),
+            ExportedAt = DateTimeOffset.UtcNow.ToString("o", CultureInfo.InvariantCulture),
+        };
+
+        IReadOnlyList<UnresolvedItem> unresolvedItems = Array.Empty<UnresolvedItem>();
+
+        var manifest = DatabaseManifestAggregator.Build(
+            database: database,
+            harvesterVersion: ResolveHarvesterVersion(),
+            unresolvedItems: unresolvedItems);
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
+
+        File.WriteAllText(
+            Path.Combine(baseDir, "manifest.json"),
+            JsonSerializer.Serialize(manifest, options));
+        File.WriteAllText(
+            Path.Combine(baseDir, "unresolved-items.json"),
+            JsonSerializer.Serialize(unresolvedItems, options));
+    }
+
+    private static string ResolveHarvesterVersion()
+    {
+        var asm = typeof(Pipeline).Assembly;
+        var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        if (!string.IsNullOrEmpty(info?.InformationalVersion))
+            return info!.InformationalVersion;
+        return asm.GetName().Version?.ToString() ?? "0.0.0";
     }
 }
 

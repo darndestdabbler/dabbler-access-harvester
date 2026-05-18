@@ -2,6 +2,10 @@ using System.Runtime.Versioning;
 using System.Text.Json.Nodes;
 using AccessHarvester.Core;
 using Xunit;
+// Disambiguate the Pipeline class from the AccessHarvester.Pipeline
+// namespace now that Core transitively references the Pipeline assembly
+// (added in Session 2 of harvester-finish-canonical-golden-output).
+using CorePipeline = AccessHarvester.Core.Pipeline;
 
 namespace AccessHarvester.Tests;
 
@@ -25,7 +29,7 @@ public class HomeHealthCareTableCoverageTests
         var outRoot = Path.Combine(Path.GetTempPath(), $"ae-test-{Guid.NewGuid():N}");
         try
         {
-            var pipeline = Pipeline.Default().WithCategories(new[] { "Tables", "Relationships" });
+            var pipeline = CorePipeline.Default().WithCategories(new[] { "Tables", "Relationships" });
             var result = pipeline.Run(db!, outRoot);
 
             Assert.All(result.Extract, c => Assert.All(c.Outcomes, o => Assert.True(o.Success, o.ErrorMessage)));

@@ -157,6 +157,93 @@
           "costUsd": 0.0014525
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/wire-pipeline-run",
+      "dateTime": "2026-05-18T04:55:39.617805-04:00",
+      "description": "Added AccessHarvester.Core -> AccessHarvester.Pipeline ProjectReference and wired Pipeline.Run() to emit manifest.json + unresolved-items.json via EmitManifestArtifacts after Enrich(). HarvesterVersion resolved from AssemblyInformationalVersionAttribute. UnresolvedItems list built once, serialised twice. Disambiguated four AccessHarvester.Tests files (SyntheticDbIntegrationTests, SyntheticMetadataExtractorIntegrationTests, HomeHealthCareTableCoverageTests, SyntheticFixtureSnapshotTests) with `using CorePipeline = AccessHarvester.Core.Pipeline;` to resolve the namespace-vs-class collision the new ProjectReference introduced.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/update-end-to-end-tests",
+      "dateTime": "2026-05-18T04:55:39.617805-04:00",
+      "description": "Updated tests/AccessHarvester.Integration/Pipeline/EndToEndPipelineTests.cs to assert manifest.json + unresolved-items.json land alongside raw/kb/ir at <baseDir>. Top-level shape verified: SchemaType=\"DatabaseManifest\", SchemaVersion=\"1.0\", HarvesterVersion non-empty, Database.Name matches input. unresolved-items.json asserted as a JSON array.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/schema-conformance-test",
+      "dateTime": "2026-05-18T04:55:39.617805-04:00",
+      "description": "Authored tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs closing Gap A from integration-testing-and-acceptance: hermetic [Fact] validates the aggregator-produced minimal manifest against harvester-schema.v1.0.json via SchemaValidator; [SkippableFact] drives Pipeline.Run() against MiniComplex.accdb and validates the produced manifest.json on disk.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-05-18T04:55:39.617805-04:00",
+      "description": "dotnet build && dotnet test sequentially. Build: 314 warnings (existing CA1416 noise), 0 errors. Test: 1885 passed, 2 skipped (synthetic-DB fixtures missing on this host). All Integration tests (16) ran, including new ManifestSchemaConformanceTests and updated EndToEndPipelineTests.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-05-18T04:59:23.745858-04:00",
+      "description": "Cross-provider session verification routed to gpt-5-4. Output persisted to session-002.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9178,
+          "outputTokens": 6010,
+          "costUsd": 0.113095
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/tiebreaker-verification",
+      "dateTime": "2026-05-18T05:01:51.676517-04:00",
+      "description": "Tiebreaker (third opinion) routed to gemini-pro after R1 ISSUES_FOUND from gpt-5-4 (one Minor finding judged a context gap by the orchestrator). Human selected option (d) second-opinion per the workflow disagreement protocol.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 10881,
+          "outputTokens": 473,
+          "costUsd": 0.01833125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/next-session-recommendation",
+      "dateTime": "2026-05-18T05:02:53.035215-04:00",
+      "description": "Next-session orchestrator recommendation routed to gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1041,
+          "outputTokens": 100,
+          "costUsd": 0.0023012500000000003
+        }
+      ]
     }
   ]
 }
