@@ -28,12 +28,16 @@ verification — there is no human-UAT layer.
 - `docs/planning/project-guidance.md` — durable principles + conventions
 - `docs/planning/lessons-learned.md` — repo-specific failure patterns
   and tactics learned from prior sessions
-- `docs/planning/session-set-authoring-guide.md` — how to author or update a
-  session-set spec (slug naming, sizing, Session Set Configuration block)
-- `docs/ai-led-session-workflow.md` — the authoritative session-set
-  workflow. Single source of truth for the step-by-step procedure, the
-  AI router usage, cross-provider verification, **the Step 7
-  verifier-disagreement resolution procedure (four human options,
+- [`session-set-authoring-guide.md`](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/planning/session-set-authoring-guide.md)
+  (canonical, lives in `dabbler-ai-orchestration`) — how to author or
+  update a session-set spec (slug naming, sizing, Session Set
+  Configuration block including `requiresUAT` / `requiresE2E` / `tier`
+  / `prerequisites`)
+- [`ai-led-session-workflow.md`](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/ai-led-session-workflow.md)
+  (canonical, lives in `dabbler-ai-orchestration`) — the authoritative
+  session-set workflow. Single source of truth for the step-by-step
+  procedure, the AI router usage, cross-provider verification, **the
+  Step 7 verifier-disagreement resolution procedure (four human options,
   disagreement logging)**, the Step 9 reorganization review (run after
   the Step 8 notify so the human is not blocking the completion
   signal), **the Delegation Discipline rules (when to route vs. handle

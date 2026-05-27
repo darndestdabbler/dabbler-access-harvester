@@ -28,12 +28,16 @@ verification — there is no human-UAT layer.
 - `docs/planning/project-guidance.md` — durable principles + conventions
 - `docs/planning/lessons-learned.md` — repo-specific failure patterns
   and tactics learned from prior sessions
-- `docs/planning/session-set-authoring-guide.md` — how to author or update a
-  session-set spec (slug naming, sizing, Session Set Configuration block)
-- `docs/ai-led-session-workflow.md` — the authoritative session-set
-  workflow. Single source of truth for the step-by-step procedure, the
-  AI router usage, cross-provider verification, **the Step 7
-  verifier-disagreement resolution procedure (four human options,
+- [`session-set-authoring-guide.md`](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/planning/session-set-authoring-guide.md)
+  (canonical, lives in `dabbler-ai-orchestration`) — how to author or
+  update a session-set spec (slug naming, sizing, Session Set
+  Configuration block including `requiresUAT` / `requiresE2E` / `tier`
+  / `prerequisites`)
+- [`ai-led-session-workflow.md`](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/ai-led-session-workflow.md)
+  (canonical, lives in `dabbler-ai-orchestration`) — the authoritative
+  session-set workflow. Single source of truth for the step-by-step
+  procedure, the AI router usage, cross-provider verification, **the
+  Step 7 verifier-disagreement resolution procedure (four human options,
   disagreement logging)**, the Step 9 reorganization review (run after
   the Step 8 notify so the human is not blocking the completion
   signal), **the Delegation Discipline rules (when to route vs. handle
@@ -113,6 +117,16 @@ right `task_type` and let the router handle the rest.
 See `docs/ai-led-session-workflow.md` → **Delegation Discipline** for
 the full criteria, the human-tunable thresholds (in
 `ai_router/router-config.yaml` under `delegation:`), and the rationale.
+
+### Decision-time consensus (pointer)
+
+When you hit an in-session design / architecture / process question
+that has more than one plausible answer, route it through cross-
+provider consensus *before* falling back to `AskUserQuestion`. The
+opt-in (`delegation.decision_consensus.enabled`), category gates,
+journal format, and the human-only vs consensus-eligible split are
+documented in `docs/ai-led-session-workflow.md` → **Decision-time
+consensus**.
 
 ## Building & Testing
 
