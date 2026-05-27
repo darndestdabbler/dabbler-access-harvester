@@ -1,16 +1,39 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "schema-finalization-and-docs",
-  "currentSession": 3,
-  "totalSessions": 3,
   "status": "complete",
-  "startedAt": "2026-04-28T06:49:39.786826-04:00",
-  "completedAt": "2026-04-28T06:56:44.710172-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Schema v0\u2192v1 Review Pass (Synthesis)",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Examples + Output Validation Pass",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Documentation Generation",
+      "status": "complete",
+      "startedAt": "2026-04-28T06:49:39.786826-04:00",
+      "completedAt": "2026-04-28T06:56:44.710172-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "medium"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

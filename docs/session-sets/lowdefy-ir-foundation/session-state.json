@@ -1,25 +1,30 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "lowdefy-ir-foundation",
-  "currentSession": 2,
-  "totalSessions": 2,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-17T07:11:35.923710Z",
-  "completedAt": "2026-05-17T20:30:00Z",
-  "session1VerificationVerdict": "VERIFIED",
-  "session1VerificationVerdictRound": 2,
-  "verificationVerdict": "VERIFIED",
-  "verificationVerdictRound": 2,
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "medium"
-  },
-  "completedSessions": [
-    1,
-    2
-  ],
-  "notes": "Two-session set on Lowdefy-as-IR foundation. Session 1: ModalDetailForm JSON Schema + hand-authored frmBudgetServicePlan IR sample, VERIFIED round 2 ($0.64 routed). Session 2: standalone .NET console-exe slice generator (tools/AccessHarvester.IrCodegen/) + generated Blazor pair compiled into the pilot csproj clean + generator-validation-notes.md + schema-refinements.md, VERIFIED round 2 ($0.76 routed). Set total: ~$1.40 routed. Round-1 verdicts both ISSUES_FOUND with findings applied / adjudicated before round 2; one Step 7 disagreement (Session 2 F1) resolved via context-gap reverify-reshaped after the orchestrator amended the spec to record the console-exe deliverable. Output artifacts: schema at AccessHarvester.Core/Ir/ModalDetailFormSchema.json, sample at AccessHarvester.Core/Ir/samples/, generator at tools/AccessHarvester.IrCodegen/, generated component at output-tests/blazor-add-an-order/Ui/Pages/Generated/, notes + refinements at docs/session-sets/lowdefy-ir-foundation/, full review trail at session-reviews/. Refinements log (SR-1..SR-P) seeds the next IR session (Report IR or MasterDetailListPage)."
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Schema + Hand-Authored Sample",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Generator + Validation",
+      "status": "complete",
+      "startedAt": "2026-05-17T07:11:35.923710Z",
+      "completedAt": "2026-05-17T20:30:00Z",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "medium"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

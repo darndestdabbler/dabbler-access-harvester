@@ -1,16 +1,48 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "enrichment-queries-and-forms",
-  "currentSession": 4,
-  "totalSessions": 4,
   "status": "complete",
-  "startedAt": "2026-04-27T19:40:00.236923-04:00",
-  "completedAt": "2026-04-27T19:50:35.652783-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "low"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Query Abstraction Structure (Synthesis)",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Form Component Spec Structure (Synthesis)",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "End-to-End Pipeline + Mechanical Tightening",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 4,
+      "title": "Verifier-Surfaced Cleanup",
+      "status": "complete",
+      "startedAt": "2026-04-27T19:40:00.236923-04:00",
+      "completedAt": "2026-04-27T19:50:35.652783-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "low"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

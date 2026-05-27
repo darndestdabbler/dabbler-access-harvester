@@ -1,16 +1,30 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "access-type-library-registry",
-  "currentSession": 2,
-  "totalSessions": 2,
   "status": "complete",
-  "startedAt": "2026-04-26T15:25:25.351129+00:00",
-  "completedAt": "2026-04-26T15:56:36.868300+00:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "unknown"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Registry Curation + Contract Design (Synthesis)",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Tightening + Cross-Provider Verification",
+      "status": "complete",
+      "startedAt": "2026-04-26T15:25:25.351129+00:00",
+      "completedAt": "2026-04-26T15:56:36.868300+00:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "unknown"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

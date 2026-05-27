@@ -1,16 +1,39 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "vba-symbol-db-path-b-probe",
-  "currentSession": 3,
-  "totalSessions": 3,
   "status": "complete",
-  "startedAt": "2026-04-29T18:16:55.584664-04:00",
-  "completedAt": "2026-04-29T18:29:22.945913-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Cross-Module Reference Writer Fix",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Translation Pass (one orchestrator authors)",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Peer Review + Decision Document (different orchestrator)",
+      "status": "complete",
+      "startedAt": "2026-04-29T18:16:55.584664-04:00",
+      "completedAt": "2026-04-29T18:29:22.945913-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

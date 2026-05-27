@@ -1,17 +1,21 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "access-object-extractor-spike",
-  "currentSession": 1,
-  "totalSessions": 1,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-14T05:11:00.864898-04:00",
-  "completedAt": "2026-05-14T05:27:01.597777-04:00",
-  "verificationVerdict": null,
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Gap Analysis + Strategy (Research)",
+      "status": "complete",
+      "startedAt": "2026-05-14T05:11:00.864898-04:00",
+      "completedAt": "2026-05-14T05:27:01.597777-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": null
+    }
+  ]
 }

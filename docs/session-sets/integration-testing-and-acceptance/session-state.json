@@ -1,17 +1,53 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "integration-testing-and-acceptance",
-  "currentSession": 3,
-  "totalSessions": 5,
   "status": "cancelled",
-  "preCancelStatus": "in-progress",
-  "startedAt": "2026-04-28T09:21:23.281045-04:00",
-  "completedAt": null,
-  "verificationVerdict": null,
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Session 1",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Layer C Scaffolding (Scenarios + Drafted Banks Deferred to Session 3)",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Scenarios Capture + Question Drafting + Curated Banks + First Green Baseline",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 4,
+      "title": "Acceptance Criteria Checkoff (Synthesis)",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 5,
+      "title": "Verifier-Surfaced Cleanup + Final v1 Change-Log",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    }
+  ],
+  "preCancelStatus": "in-progress"
 }

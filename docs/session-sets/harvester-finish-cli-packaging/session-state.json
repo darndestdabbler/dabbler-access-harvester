@@ -1,17 +1,30 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "harvester-finish-cli-packaging",
-  "currentSession": 2,
-  "totalSessions": 2,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-18T10:19:58.253475-04:00",
-  "completedAt": "2026-05-18T10:42:30.001428-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Publish Wiring + Reproducible Build",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Black-box Smoke Tests + Install Docs + Closeout",
+      "status": "complete",
+      "startedAt": "2026-05-18T10:19:58.253475-04:00",
+      "completedAt": "2026-05-18T10:42:30.001428-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

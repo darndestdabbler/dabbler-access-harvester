@@ -1,17 +1,39 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "structured-form-report-extractor",
-  "currentSession": 3,
-  "totalSessions": 3,
   "status": "complete",
-  "lifecycleState": "closeout_complete",
-  "startedAt": "2026-05-14T19:45:29.393420-04:00",
-  "completedAt": "2026-05-15T00:35:00.000000-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Audit the Current ir/ Output",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "FormMetadataExtractor + ReportMetadataExtractor",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Hermetic Tests + Typed-Schema Documentation",
+      "status": "complete",
+      "startedAt": "2026-05-14T19:45:29.393420-04:00",
+      "completedAt": "2026-05-15T00:35:00.000000-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

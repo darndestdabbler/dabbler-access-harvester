@@ -1,17 +1,30 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "table-extractor-coverage",
-  "currentSession": 2,
-  "totalSessions": 2,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-14T07:09:59.218519-04:00",
-  "completedAt": "2026-05-14T07:26:45.559274-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Core Additions (Table + Relationship)",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Tests, YAML Comparison, and Gap Close",
+      "status": "complete",
+      "startedAt": "2026-05-14T07:09:59.218519-04:00",
+      "completedAt": "2026-05-14T07:26:45.559274-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

@@ -1,16 +1,48 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "enrichment-events-and-validation",
-  "currentSession": 4,
-  "totalSessions": 4,
   "status": "complete",
-  "startedAt": "2026-04-28T02:19:55.548284-04:00",
-  "completedAt": "2026-04-28T02:31:49.220506-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Session 1",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Session 2",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Session 3",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 4,
+      "title": "Session 4",
+      "status": "complete",
+      "startedAt": "2026-04-28T02:19:55.548284-04:00",
+      "completedAt": "2026-04-28T02:31:49.220506-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "medium"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

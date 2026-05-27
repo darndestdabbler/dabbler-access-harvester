@@ -1,39 +1,39 @@
 {
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "sessionSetName": "harvester-finish-operations-and-interpretation-docs",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
       "title": "Outline + Audience-Check Probe",
-      "status": "complete"
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     },
     {
       "number": 2,
       "title": "Body Authoring",
-      "status": "complete"
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     },
     {
       "number": 3,
       "title": "Pointer Page + Closeout",
-      "status": "complete"
+      "status": "complete",
+      "startedAt": "2026-05-18T08:40:42.529351-04:00",
+      "completedAt": "2026-05-18T09:21:28.089613-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
     }
-  ],
-  "currentSession": null,
-  "totalSessions": 3,
-  "completedSessions": [
-    1,
-    2,
-    3
-  ],
-  "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-18T08:40:42.529351-04:00",
-  "completedAt": "2026-05-18T09:21:28.089613-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  ]
 }

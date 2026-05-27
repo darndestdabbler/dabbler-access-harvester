@@ -1,16 +1,75 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "vba-symbol-db",
-  "currentSession": 7,
-  "totalSessions": 7,
   "status": "complete",
-  "startedAt": "2026-04-29T14:06:33.258014-04:00",
-  "completedAt": "2026-04-29T14:48:42.827061-04:00",
-  "verificationVerdict": "SKIPPED_PER_HUMAN_DIRECTION",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Symbols Table + Dead-Code / Dead-Object / MD5 Detection + Measurement",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "References + Member Accesses + Caller-Kind Annotation",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Column Mappings (Form Controls + Event Bindings + Queries) + Macro Normalization",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 4,
+      "title": "AI Interpretation Pipeline (Leaves-First; Confidence-Thresholded)",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 5,
+      "title": "Block-Randomized Independent Cross-Provider Re-Interpretation",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 6,
+      "title": "Cross-Provider Consistency + Confidence Calibration",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 7,
+      "title": "Comprehension Probe + Migration-Readiness Review",
+      "status": "complete",
+      "startedAt": "2026-04-29T14:06:33.258014-04:00",
+      "completedAt": "2026-04-29T14:48:42.827061-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "SKIPPED_PER_HUMAN_DIRECTION"
+    }
+  ]
 }

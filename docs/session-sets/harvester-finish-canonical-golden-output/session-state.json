@@ -1,17 +1,48 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "harvester-finish-canonical-golden-output",
-  "currentSession": 4,
-  "totalSessions": 4,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-18T06:53:04.825255-04:00",
-  "completedAt": "2026-05-18T07:07:29.574905-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Manifest Aggregator Design + Build",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Pipeline Wiring + UnresolvedItems Emission",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Generate and Commit Golden Output",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 4,
+      "title": "Regression Gate + Closeout",
+      "status": "complete",
+      "startedAt": "2026-05-18T06:53:04.825255-04:00",
+      "completedAt": "2026-05-18T07:07:29.574905-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

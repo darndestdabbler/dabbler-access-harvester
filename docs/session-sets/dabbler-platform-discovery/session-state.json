@@ -1,17 +1,39 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "dabbler-platform-discovery",
-  "currentSession": 3,
-  "totalSessions": 3,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-17T12:48:18.513675-04:00",
-  "completedAt": "2026-05-17T13:02:48.294998-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Inventory + Schema",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Migration Map + PDF Boundary",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Smoke-Test + Buffer",
+      "status": "complete",
+      "startedAt": "2026-05-17T12:48:18.513675-04:00",
+      "completedAt": "2026-05-17T13:02:48.294998-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

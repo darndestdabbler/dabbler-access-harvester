@@ -1,17 +1,39 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "remaining-work-planner",
-  "currentSession": 3,
-  "totalSessions": 3,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-17T16:10:05.464741-04:00",
-  "completedAt": "2026-05-17T17:50:07.165740-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "medium"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Phase 4 Gap Audit",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Plan The Remaining Work",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Final Roadmap + Change Log",
+      "status": "complete",
+      "startedAt": "2026-05-17T16:10:05.464741-04:00",
+      "completedAt": "2026-05-17T17:50:07.165740-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "medium"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

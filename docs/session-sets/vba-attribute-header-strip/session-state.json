@@ -1,17 +1,21 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "vba-attribute-header-strip",
-  "currentSession": 1,
-  "totalSessions": 1,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-17T21:23:59.371669-04:00",
-  "completedAt": "2026-05-17T21:56:44.509935-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Session 1",
+      "status": "complete",
+      "startedAt": "2026-05-17T21:23:59.371669-04:00",
+      "completedAt": "2026-05-17T21:56:44.509935-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

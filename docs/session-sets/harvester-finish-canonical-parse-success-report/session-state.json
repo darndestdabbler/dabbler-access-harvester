@@ -1,17 +1,30 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "harvester-finish-canonical-parse-success-report",
-  "currentSession": 2,
-  "totalSessions": 2,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-17T19:01:29.564883-04:00",
-  "completedAt": "2026-05-17T19:26:36.272404-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Inventory + Report Shape + First-Pass Generation",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Per-Reason Narrative + Sentinel Test",
+      "status": "complete",
+      "startedAt": "2026-05-17T19:01:29.564883-04:00",
+      "completedAt": "2026-05-17T19:26:36.272404-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

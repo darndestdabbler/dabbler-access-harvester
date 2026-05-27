@@ -1,16 +1,39 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "access-resolver-symbol-table-integration",
-  "currentSession": 3,
-  "totalSessions": 3,
   "status": "complete",
-  "startedAt": "2026-04-27T13:35:26.368123-04:00",
-  "completedAt": "2026-04-27T13:39:50.892933-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Session 1",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Session 2",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Session 3",
+      "status": "complete",
+      "startedAt": "2026-04-27T13:35:26.368123-04:00",
+      "completedAt": "2026-04-27T13:39:50.892933-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

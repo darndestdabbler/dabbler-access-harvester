@@ -1,16 +1,48 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "vba-statement-and-module-grammar",
-  "currentSession": 4,
-  "totalSessions": 4,
   "status": "complete",
-  "startedAt": "2026-04-26T21:00:00+00:00",
-  "completedAt": "2026-04-26T22:30:00+00:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "unknown"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Statement Grammar",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Module Grammar",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Cross-Cut + Tightening",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 4,
+      "title": "Verifier-Surfaced Cleanup",
+      "status": "complete",
+      "startedAt": "2026-04-26T21:00:00+00:00",
+      "completedAt": "2026-04-26T22:30:00+00:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "unknown"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

@@ -1,18 +1,57 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 4,
   "sessionSetName": "enrichment-functions-navigation-review",
-  "currentSession": 5,
-  "totalSessions": 5,
   "status": "complete",
-  "lifecycleState": "closed",  "startedAt": "2026-04-28T02:51:23.446213-04:00",
-  "completedAt": "2026-04-28T03:12:55-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  },
-  "completedSessions": [1,2,3,4,5],
-  "notes": "Set complete after Session 4 of 4-5 (used the optional buffer notation; 4 sessions actual, 5 was the spec maximum). The state file was stale until the 2026-05-17 housekeeping pass: Session 4's closeout commit (c9feb04, 2026-04-28T03:12:55) shipped the change-log and the deliverables, but the state file was never flipped. Repaired 2026-05-17 with the actual Session-4 completion timestamp from git history. completedAt is the c9feb04 commit time."
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Session 1",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Session 2",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Session 3",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 4,
+      "title": "Session 4",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 5,
+      "title": "Session 5",
+      "status": "complete",
+      "startedAt": "2026-04-28T02:51:23.446213-04:00",
+      "completedAt": "2026-04-28T03:12:55-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

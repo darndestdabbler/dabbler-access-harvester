@@ -1,17 +1,39 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "form-report-code-and-grouping",
-  "currentSession": 3,
-  "totalSessions": 3,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-15T03:59:55.288357-04:00",
-  "completedAt": "2026-05-15T04:16:56.131344-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Fix GroupLevel Source + ModuleName Extraction",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Decoding Tables + Integration Test",
+      "status": "complete",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Schema Documentation Update + Close",
+      "status": "complete",
+      "startedAt": "2026-05-15T03:59:55.288357-04:00",
+      "completedAt": "2026-05-15T04:16:56.131344-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }
