@@ -552,6 +552,19 @@ experiments only.
   is preserved in `lessons-learned.md` → "Post-Fix Sweep All
   Narrative Artifacts When A Rule Or Contract Changes".
 
+- **When using `JsonSchema.Net` for schema validation, key the schema
+  cache by the schema's `$id` URI using `StringComparer.Ordinal` (not
+  `OrdinalIgnoreCase`).** URI path components are case-sensitive per
+  RFC 3986; `OrdinalIgnoreCase` can incorrectly alias distinct schemas
+  with `$id` values that differ only in case. Separately, cache the
+  schema text by file path (OrdinalIgnoreCase is correct for Windows
+  file paths) so that path-based and text-based loads of the same
+  schema share one `JsonSchema.Net` global-registry entry and do not
+  trigger the "Overwriting registered schemas is not permitted"
+  exception. Confirmed in `harvester-cli-validate-subcommand` Session 1
+  (2026-05-28): verifier flagged the OrdinalIgnoreCase `$id` cache key
+  as a correctness risk; the two-level cache redesign resolved it.
+
 ### Token-Window Budget Overrides
 
 The human has recurring token allotments across three orchestrator providers with
