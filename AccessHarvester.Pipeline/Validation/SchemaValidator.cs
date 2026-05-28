@@ -16,7 +16,12 @@ public sealed class SchemaValidator
     // JsonSchema.FromText registers the schema globally by its $id on first load.
     // Cache by absolute path to avoid duplicate-registration errors when multiple
     // instances are created with the same schema file.
-    private static readonly ConcurrentDictionary<string, JsonSchema> _cache = new(StringComparer.OrdinalIgnoreCase);
+    //
+    // Lazy<T> prevents the race in ConcurrentDictionary.GetOrAdd where the factory
+    // can be called multiple times concurrently: only the first Lazy<T> wins the
+    // slot, and its Value factory runs exactly once even under concurrent access.
+    private static readonly ConcurrentDictionary<string, Lazy<JsonSchema>> _cache =
+        new(StringComparer.OrdinalIgnoreCase);
 
     private readonly JsonSchema _schema;
 
@@ -24,11 +29,11 @@ public sealed class SchemaValidator
     {
         ArgumentException.ThrowIfNullOrEmpty(schemaJsonPath);
         string fullPath = Path.GetFullPath(schemaJsonPath);
-        _schema = _cache.GetOrAdd(fullPath, path =>
+        _schema = _cache.GetOrAdd(fullPath, path => new Lazy<JsonSchema>(() =>
         {
             var schemaText = File.ReadAllText(path, System.Text.Encoding.UTF8);
             return JsonSchema.FromText(schemaText);
-        });
+        })).Value;
     }
 
     /// <summary>

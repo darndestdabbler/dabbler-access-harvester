@@ -1,119 +1,213 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "kind": "procedure",
-    "location": {
-      "file": "13-preprocessor.bas",
-      "module": "Module1",
-      "startLine": 21,
-      "startColumn": 1,
-      "endLine": 34,
-      "endColumn": 8
-    },
-    "hostContext": {
-      "hostKind": "standard"
-    },
-    "originalSource": "Public Sub LogProcess(ByVal processName As String)\n    Dim startTime As Long\n    ' Note: GetTickCount is declared conditionally at the module level\n    startTime = GetTickCount()\n\n    ' Procedure-level conditional compilation\n    #If DEBUG_MODE = 1 Then\n        Debug.Print \"DEBUG: Starting process '\" & processName & \"' at \" & startTime\n    #Else\n        DoCmd.RunSQL \"INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('\" & processName & \"', \" & startTime & \")\"\n    #End If\n\n    Debug.Print \"Process logging complete.\"\nEnd Sub"
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "migrated-from-v0",
+  "Database": {
+    "Name": "13-preprocessor.expected",
+    "FilePath": "docs\\test-cases\\13-preprocessor.expected.json",
+    "ExportedAt": "2026-05-28T10:23:08.0000000+00:00"
   },
-  "items": [
+  "Modules": [
     {
-      "itemKind": "procedure",
-      "name": "LogProcess",
-      "procedureKind": "Sub",
-      "visibility": "Public",
-      "isStatic": false,
-      "signature": {
-        "parameters": [
-          {
-            "name": "processName",
-            "type": "String",
-            "byRef": false
-          }
-        ]
-      },
-      "classification": {
-        "purposeTags": ["sideEffect", "utility"],
-        "purity": "mixed",
-        "complexity": 4,
-        "linesOfCode": 8,
-        "translatability": "mechanical"
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "declaration",
-            "location": { "startLine": 22, "startColumn": 5, "endLine": 22, "endColumn": 24 },
-            "details": { "declarations": [{ "name": "startTime", "type": "Long" }] }
+      "ModuleName": "Module1",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Procedure",
+          "Location": {
+            "File": "13-preprocessor.bas",
+            "Module": "Module1",
+            "StartLine": 21,
+            "StartColumn": 1,
+            "EndLine": 34,
+            "EndColumn": 8
           },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 24, "startColumn": 5, "endLine": 24, "endColumn": 29 },
-            "summary": "Assigns result of GetTickCount() to startTime"
+          "HostContext": {
+            "HostKind": "Standard"
           },
+          "OriginalSource": "Public Sub LogProcess(ByVal processName As String)\n    Dim startTime As Long\n    ' Note: GetTickCount is declared conditionally at the module level\n    startTime = GetTickCount()\n\n    ' Procedure-level conditional compilation\n    #If DEBUG_MODE = 1 Then\n        Debug.Print \"DEBUG: Starting process '\" & processName & \"' at \" & startTime\n    #Else\n        DoCmd.RunSQL \"INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('\" & processName & \"', \" & startTime & \")\"\n    #End If\n\n    Debug.Print \"Process logging complete.\"\nEnd Sub"
+        },
+        "Items": [
           {
-            "kind": "preprocessorStatement",
-            "location": { "startLine": 27, "startColumn": 5, "endLine": 27, "endColumn": 28 },
-            "details": { "preprocessorKind": "If", "body": "DEBUG_MODE = 1 Then" }
-          },
-          {
-            "kind": "call",
-            "summary": "Prints a debug message with the process name and start time.",
-            "location": { "startLine": 28, "startColumn": 9, "endLine": 28, "endColumn": 86 }
-          },
-          {
-            "kind": "preprocessorStatement",
-            "location": { "startLine": 29, "startColumn": 5, "endLine": 29, "endColumn": 10 },
-            "details": { "preprocessorKind": "Else", "body": "" }
-          },
-          {
-            "kind": "call",
-            "summary": "Inserts a log entry into tbl_Log.",
-            "location": { "startLine": 30, "startColumn": 9, "endLine": 30, "endColumn": 110 }
-          },
-          {
-            "kind": "preprocessorStatement",
-            "location": { "startLine": 31, "startColumn": 5, "endLine": 31, "endColumn": 13 },
-            "details": { "preprocessorKind": "EndIf", "body": "" }
-          },
-          {
-            "kind": "call",
-            "summary": "Prints a completion message.",
-            "location": { "startLine": 33, "startColumn": 5, "endLine": 33, "endColumn": 40 }
-          }
-        ],
-        "references": [],
-        "calls": [
-          {
-            "calleeText": "GetTickCount",
-            "location": { "startLine": 24, "startColumn": 16, "endLine": 24, "endColumn": 28 },
-            "resolvedCallee": {
-              "originalText": "GetTickCount",
-              "location": { "startLine": 24, "startColumn": 16, "endLine": 24, "endColumn": 28 },
-              "resolutionStatus": "unresolved",
-              "referenceKind": "external",
-              "notes": "Declared conditionally at module level: GetTickCount (32-bit) or GetTickCount64 (VBA7). Cannot be resolved without evaluating preprocessor conditions.",
-              "confidence": 0.9
+            "ItemKind": "Procedure",
+            "Name": "LogProcess",
+            "ProcedureKind": "Sub",
+            "Visibility": "Public",
+            "IsStatic": false,
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "processName",
+                  "Type": "String",
+                  "ByRef": false
+                }
+              ]
+            },
+            "Classification": {
+              "PurposeTags": [
+                "SideEffect",
+                "Utility"
+              ],
+              "Purity": "Mixed",
+              "Complexity": 4,
+              "LinesOfCode": 8,
+              "Translatability": "Mechanical"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Declaration",
+                  "Location": {
+                    "StartLine": 22,
+                    "StartColumn": 5,
+                    "EndLine": 22,
+                    "EndColumn": 24
+                  },
+                  "Details": {
+                    "Declarations": [
+                      {
+                        "Name": "startTime",
+                        "Type": "Long"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 24,
+                    "StartColumn": 5,
+                    "EndLine": 24,
+                    "EndColumn": 29
+                  },
+                  "Summary": "Assigns result of GetTickCount() to startTime"
+                },
+                {
+                  "Kind": "PreprocessorStatement",
+                  "Location": {
+                    "StartLine": 27,
+                    "StartColumn": 5,
+                    "EndLine": 27,
+                    "EndColumn": 28
+                  },
+                  "Details": {
+                    "PreprocessorKind": "If",
+                    "Body": "DEBUG_MODE = 1 Then"
+                  }
+                },
+                {
+                  "Kind": "Call",
+                  "Summary": "Prints a debug message with the process name and start time.",
+                  "Location": {
+                    "StartLine": 28,
+                    "StartColumn": 9,
+                    "EndLine": 28,
+                    "EndColumn": 86
+                  }
+                },
+                {
+                  "Kind": "PreprocessorStatement",
+                  "Location": {
+                    "StartLine": 29,
+                    "StartColumn": 5,
+                    "EndLine": 29,
+                    "EndColumn": 10
+                  },
+                  "Details": {
+                    "PreprocessorKind": "Else",
+                    "Body": ""
+                  }
+                },
+                {
+                  "Kind": "Call",
+                  "Summary": "Inserts a log entry into tbl_Log.",
+                  "Location": {
+                    "StartLine": 30,
+                    "StartColumn": 9,
+                    "EndLine": 30,
+                    "EndColumn": 110
+                  }
+                },
+                {
+                  "Kind": "PreprocessorStatement",
+                  "Location": {
+                    "StartLine": 31,
+                    "StartColumn": 5,
+                    "EndLine": 31,
+                    "EndColumn": 13
+                  },
+                  "Details": {
+                    "PreprocessorKind": "EndIf",
+                    "Body": ""
+                  }
+                },
+                {
+                  "Kind": "Call",
+                  "Summary": "Prints a completion message.",
+                  "Location": {
+                    "StartLine": 33,
+                    "StartColumn": 5,
+                    "EndLine": 33,
+                    "EndColumn": 40
+                  }
+                }
+              ],
+              "References": [],
+              "Calls": [
+                {
+                  "CalleeText": "GetTickCount",
+                  "Location": {
+                    "StartLine": 24,
+                    "StartColumn": 16,
+                    "EndLine": 24,
+                    "EndColumn": 28
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "GetTickCount",
+                    "Location": {
+                      "StartLine": 24,
+                      "StartColumn": 16,
+                      "EndLine": 24,
+                      "EndColumn": 28
+                    },
+                    "ResolutionStatus": "Unresolved",
+                    "ReferenceKind": "External",
+                    "Notes": "Declared conditionally at module level: GetTickCount (32-bit) or GetTickCount64 (VBA7). Cannot be resolved without evaluating preprocessor conditions.",
+                    "Confidence": 0.9
+                  }
+                }
+              ],
+              "SqlStrings": [
+                {
+                  "OriginalText": "\"INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('\" & processName & \"', \" & startTime & \")\"",
+                  "Location": {
+                    "StartLine": 30,
+                    "StartColumn": 9,
+                    "EndLine": 30,
+                    "EndColumn": 110
+                  },
+                  "ConstructionMode": "Concatenated",
+                  "Notes": "Inside #Else branch of preprocessor guard; reachable only when DEBUG_MODE != 1"
+                }
+              ]
             }
           }
         ],
-        "sqlStrings": [
+        "UnresolvedItems": [],
+        "Diagnostics": [
           {
-            "originalText": "\"INSERT INTO tbl_Log (ProcessName, StartTime) VALUES ('\" & processName & \"', \" & startTime & \")\"",
-            "location": { "startLine": 30, "startColumn": 9, "endLine": 30, "endColumn": 110 },
-            "constructionMode": "concatenated",
-            "notes": "Inside #Else branch of preprocessor guard; reachable only when DEBUG_MODE != 1"
+            "Severity": "Info",
+            "Code": "HAR-PP-001",
+            "Message": "Module contains preprocessor directives (#If, #Const). Static analysis does not evaluate conditional compilation paths; all branches are represented in the AST as PreprocessorDirective / PreprocessorStatement nodes.",
+            "Location": {
+              "File": "13-preprocessor.bas",
+              "StartLine": 12,
+              "StartColumn": 1
+            }
           }
         ]
       }
-    }
-  ],
-  "unresolvedItems": [],
-  "diagnostics": [
-    {
-      "severity": "info",
-      "code": "HAR-PP-001",
-      "message": "Module contains preprocessor directives (#If, #Const). Static analysis does not evaluate conditional compilation paths; all branches are represented in the AST as PreprocessorDirective / PreprocessorStatement nodes.",
-      "location": { "file": "13-preprocessor.bas", "startLine": 12, "startColumn": 1 }
     }
   ]
 }

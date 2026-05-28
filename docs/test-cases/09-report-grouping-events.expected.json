@@ -1,448 +1,675 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "kind": "report",
-    "location": {
-      "file": "09-report-grouping-events.bas",
-      "module": "Report_rptCaseLoadByDistrict",
-      "startLine": 1,
-      "startColumn": 1,
-      "endLine": 90,
-      "endColumn": 8
-    },
-    "hostContext": {
-      "hostKind": "report",
-      "hostName": "rptCaseLoadByDistrict",
-      "controlsAvailable": [
-        { "name": "txtCaseworkerEmail", "controlType": "TextBox", "boundField": "Email" },
-        { "name": "lblEmailLabel", "controlType": "Label" },
-        { "name": "txtCaseValue", "controlType": "TextBox", "boundField": "CaseValue" },
-        { "name": "DaysOpen", "controlType": "TextBox", "controlSource": "=DateDiff('d',[OpenedDate],Date())" },
-        { "name": "txtCaseNumber", "controlType": "TextBox", "boundField": "CaseNumber" },
-        { "name": "txtGroupTotal", "controlType": "TextBox" },
-        { "name": "txtGroupCount", "controlType": "TextBox" },
-        { "name": "txtGroupAvg", "controlType": "TextBox" },
-        { "name": "txtGrandTotal", "controlType": "TextBox" }
-      ]
-    },
-    "originalSource": "(see source file)"
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "migrated-from-v0",
+  "Database": {
+    "Name": "09-report-grouping-events.expected",
+    "FilePath": "docs\\test-cases\\09-report-grouping-events.expected.json",
+    "ExportedAt": "2026-05-28T10:23:08.0000000+00:00"
   },
-  "items": [
+  "Modules": [
     {
-      "itemKind": "procedure",
-      "name": "Report_Open",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "Report",
-        "eventName": "Open",
-        "resolvedControl": {
-          "originalText": "Report",
-          "location": { "startLine": 19, "startColumn": 13, "endLine": 19, "endColumn": 19 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "report",
-          "resolvedTarget": {
-            "kind": "report",
-            "name": "rptCaseLoadByDistrict",
-            "fullyQualifiedName": "Reports!rptCaseLoadByDistrict",
-            "type": "Report_rptCaseLoadByDistrict"
+      "ModuleName": "Report_rptCaseLoadByDistrict",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Report",
+          "Location": {
+            "File": "09-report-grouping-events.bas",
+            "Module": "Report_rptCaseLoadByDistrict",
+            "StartLine": 1,
+            "StartColumn": 1,
+            "EndLine": 90,
+            "EndColumn": 8
           },
-          "confidence": 1.0
-        }
-      },
-      "signature": {
-        "parameters": [
-          { "name": "Cancel", "type": "Integer", "byRef": true }
+          "HostContext": {
+            "HostKind": "Report",
+            "HostName": "rptCaseLoadByDistrict",
+            "ControlsAvailable": [
+              {
+                "Name": "txtCaseworkerEmail",
+                "ControlType": "TextBox",
+                "BoundField": "Email"
+              },
+              {
+                "Name": "lblEmailLabel",
+                "ControlType": "Label"
+              },
+              {
+                "Name": "txtCaseValue",
+                "ControlType": "TextBox",
+                "BoundField": "CaseValue"
+              },
+              {
+                "Name": "DaysOpen",
+                "ControlType": "TextBox",
+                "ControlSource": "=DateDiff('d',[OpenedDate],Date())"
+              },
+              {
+                "Name": "txtCaseNumber",
+                "ControlType": "TextBox",
+                "BoundField": "CaseNumber"
+              },
+              {
+                "Name": "txtGroupTotal",
+                "ControlType": "TextBox"
+              },
+              {
+                "Name": "txtGroupCount",
+                "ControlType": "TextBox"
+              },
+              {
+                "Name": "txtGroupAvg",
+                "ControlType": "TextBox"
+              },
+              {
+                "Name": "txtGrandTotal",
+                "ControlType": "TextBox"
+              }
+            ]
+          },
+          "OriginalSource": "(see source file)"
+        },
+        "Items": [
+          {
+            "ItemKind": "Procedure",
+            "Name": "Report_Open",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "Report",
+              "EventName": "Open",
+              "ResolvedControl": {
+                "OriginalText": "Report",
+                "Location": {
+                  "StartLine": 19,
+                  "StartColumn": 13,
+                  "EndLine": 19,
+                  "EndColumn": 19
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "Report",
+                "ResolvedTarget": {
+                  "Kind": "Report",
+                  "Name": "rptCaseLoadByDistrict",
+                  "FullyQualifiedName": "Reports!rptCaseLoadByDistrict",
+                  "Type": "Report_rptCaseLoadByDistrict"
+                },
+                "Confidence": 1.0
+              }
+            },
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "Cancel",
+                  "Type": "Integer",
+                  "ByRef": true
+                }
+              ]
+            },
+            "Classification": {
+              "PurposeTags": [
+                "Validation",
+                "FormattingDisplay"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 3,
+              "LinesOfCode": 13,
+              "Translatability": "Structured"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 21,
+                    "StartColumn": 5,
+                    "EndLine": 25,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Cancel report if frmDistrictReport (parameter form) is not loaded",
+                  "Details": {
+                    "ValidationPattern": {
+                      "Type": "preconditionCheck",
+                      "Rule": "requireFormLoaded",
+                      "FormName": "frmDistrictReport",
+                      "MessageOnFailure": "Open frmDistrictReport first to set parameters."
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 28,
+                    "StartColumn": 5,
+                    "EndLine": 30,
+                    "EndColumn": 78
+                  },
+                  "Summary": "Set report caption from parameter form values"
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 32,
+                    "StartColumn": 5,
+                    "EndLine": 32,
+                    "EndColumn": 23
+                  },
+                  "Summary": "Initialize grand total accumulator"
+                }
+              ],
+              "References": [
+                {
+                  "OriginalText": "CurrentProject.AllForms(\"frmDistrictReport\").IsLoaded",
+                  "Location": {
+                    "StartLine": 21,
+                    "StartColumn": 12,
+                    "EndLine": 21,
+                    "EndColumn": 65
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "ObjectModel",
+                  "ResolvedTarget": {
+                    "Kind": "Property",
+                    "Name": "IsLoaded",
+                    "Container": "Access.AccessObject",
+                    "Type": "Boolean"
+                  },
+                  "Confidence": 1.0
+                },
+                {
+                  "OriginalText": "Forms!frmDistrictReport!cboDistrict.Column(1)",
+                  "Location": {
+                    "StartLine": 29,
+                    "StartColumn": 18,
+                    "EndLine": 29,
+                    "EndColumn": 63
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "ComboBoxColumn",
+                    "Name": "cboDistrict.Column(1)",
+                    "Container": "frmDistrictReport",
+                    "Type": "Variant"
+                  },
+                  "Confidence": 0.9,
+                  "Notes": "Cross-form reference; depends on frmDistrictReport being loaded (validated above)"
+                },
+                {
+                  "OriginalText": "Forms!frmDistrictReport!txtAsOfDate",
+                  "Location": {
+                    "StartLine": 30,
+                    "StartColumn": 25,
+                    "EndLine": 30,
+                    "EndColumn": 60
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "txtAsOfDate",
+                    "Container": "frmDistrictReport",
+                    "Type": "TextBox"
+                  },
+                  "Confidence": 0.9
+                },
+                {
+                  "OriginalText": "m_GrandTotal",
+                  "Location": {
+                    "StartLine": 32,
+                    "StartColumn": 5,
+                    "EndLine": 32,
+                    "EndColumn": 17
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Variable",
+                  "ResolvedTarget": {
+                    "Kind": "ModuleVariable",
+                    "Name": "m_GrandTotal",
+                    "Container": "Report_rptCaseLoadByDistrict",
+                    "Type": "Currency"
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Module-level state. In Blazor migration, this becomes component state on the report component or service-managed state for the report rendering pipeline."
+                }
+              ],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "GroupHeader0_Format",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "GroupHeader0",
+              "EventName": "Format",
+              "ResolvedControl": {
+                "OriginalText": "GroupHeader0",
+                "Location": {
+                  "StartLine": 35,
+                  "StartColumn": 13,
+                  "EndLine": 35,
+                  "EndColumn": 25
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "ObjectModel",
+                "ResolvedTarget": {
+                  "Kind": "Section",
+                  "Name": "GroupHeader0",
+                  "Container": "rptCaseLoadByDistrict",
+                  "Type": "Access.Section",
+                  "FullyQualifiedName": "Reports!rptCaseLoadByDistrict.Section(GroupHeader0)"
+                },
+                "Confidence": 1.0,
+                "Notes": "Report section, indexed by 0 = first group level. Format event fires when section is being laid out."
+              }
+            },
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "Cancel",
+                  "Type": "Integer",
+                  "ByRef": true
+                },
+                {
+                  "Name": "FormatCount",
+                  "Type": "Integer",
+                  "ByRef": true,
+                  "Notes": "Number of times this section has been formatted; > 1 indicates re-format"
+                }
+              ]
+            },
+            "Classification": {
+              "PurposeTags": [
+                "FormattingDisplay",
+                "Calculation"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 4,
+              "LinesOfCode": 14,
+              "Translatability": "Structured",
+              "Notes": "Reset-group-totals + conditional-visibility pattern. Migration target: Blazor section component with group state and conditional rendering."
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 38,
+                    "StartColumn": 5,
+                    "EndLine": 41,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Reset group running totals on first format pass (FormatCount = 1)",
+                  "Details": {
+                    "ReportPattern": {
+                      "Type": "groupReset",
+                      "GuardedBy": "FormatCount = 1",
+                      "Rationale": "Format may fire multiple times per section due to re-pagination; only first pass should reset"
+                    }
+                  }
+                },
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 44,
+                    "StartColumn": 5,
+                    "EndLine": 50,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Show/hide email label based on whether email field has a value"
+                }
+              ],
+              "References": [
+                {
+                  "OriginalText": "FormatCount",
+                  "Location": {
+                    "StartLine": 38,
+                    "StartColumn": 8,
+                    "EndLine": 38,
+                    "EndColumn": 19
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Parameter",
+                  "ResolvedTarget": {
+                    "Kind": "Parameter",
+                    "Name": "FormatCount",
+                    "Type": "Integer"
+                  },
+                  "Confidence": 1.0
+                },
+                {
+                  "OriginalText": "Me.txtCaseworkerEmail",
+                  "Location": {
+                    "StartLine": 44,
+                    "StartColumn": 16,
+                    "EndLine": 44,
+                    "EndColumn": 37
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "txtCaseworkerEmail",
+                    "Container": "rptCaseLoadByDistrict",
+                    "Type": "TextBox"
+                  },
+                  "Confidence": 1.0
+                },
+                {
+                  "OriginalText": "Me.lblEmailLabel.Visible",
+                  "Location": {
+                    "StartLine": 45,
+                    "StartColumn": 9,
+                    "EndLine": 45,
+                    "EndColumn": 33
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "lblEmailLabel",
+                    "Container": "rptCaseLoadByDistrict",
+                    "Type": "Label"
+                  },
+                  "Confidence": 1.0
+                }
+              ],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "Detail_Format",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "Detail",
+              "EventName": "Format",
+              "ResolvedControl": {
+                "OriginalText": "Detail",
+                "Location": {
+                  "StartLine": 53,
+                  "StartColumn": 13,
+                  "EndLine": 53,
+                  "EndColumn": 19
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "ObjectModel",
+                "ResolvedTarget": {
+                  "Kind": "Section",
+                  "Name": "Detail",
+                  "Container": "rptCaseLoadByDistrict",
+                  "Type": "Access.Section"
+                },
+                "Confidence": 1.0
+              }
+            },
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "Cancel",
+                  "Type": "Integer",
+                  "ByRef": true
+                },
+                {
+                  "Name": "FormatCount",
+                  "Type": "Integer",
+                  "ByRef": true
+                }
+              ]
+            },
+            "Classification": {
+              "PurposeTags": [
+                "FormattingDisplay",
+                "Calculation"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 4,
+              "LinesOfCode": 14,
+              "Translatability": "Structured"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 55,
+                    "StartColumn": 5,
+                    "EndLine": 58,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Accumulate running totals on first format pass",
+                  "Details": {
+                    "ReportPattern": {
+                      "Type": "runningTotal",
+                      "Accumulator": "m_GroupTotal",
+                      "Increment": "Nz(Me.txtCaseValue, 0)",
+                      "GuardedBy": "FormatCount = 1"
+                    }
+                  }
+                },
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 61,
+                    "StartColumn": 5,
+                    "EndLine": 67,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Color-code overdue cases red and bold",
+                  "Details": {
+                    "ReportPattern": {
+                      "Type": "conditionalFormatting",
+                      "Trigger": "Nz(Me.DaysOpen, 0) > 90",
+                      "AppliesTo": "Me.txtCaseNumber",
+                      "Properties": {
+                        "ForeColor": "RGB(192, 0, 0)",
+                        "FontBold": true
+                      },
+                      "ElseProperties": {
+                        "ForeColor": "RGB(0, 0, 0)",
+                        "FontBold": false
+                      }
+                    }
+                  }
+                }
+              ],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "GroupFooter0_Format",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "GroupFooter0",
+              "EventName": "Format",
+              "ResolvedControl": {
+                "OriginalText": "GroupFooter0",
+                "Location": {
+                  "StartLine": 70,
+                  "StartColumn": 13,
+                  "EndLine": 70,
+                  "EndColumn": 25
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "ObjectModel",
+                "ResolvedTarget": {
+                  "Kind": "Section",
+                  "Name": "GroupFooter0",
+                  "Container": "rptCaseLoadByDistrict"
+                },
+                "Confidence": 1.0
+              }
+            },
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "Cancel",
+                  "Type": "Integer",
+                  "ByRef": true
+                },
+                {
+                  "Name": "FormatCount",
+                  "Type": "Integer",
+                  "ByRef": true
+                }
+              ]
+            },
+            "Classification": {
+              "PurposeTags": [
+                "Calculation",
+                "FormattingDisplay"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 2,
+              "LinesOfCode": 9,
+              "Translatability": "Mechanical"
+            },
+            "Body": {
+              "Statements": [],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "Detail_Retreat",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "Detail",
+              "EventName": "Retreat",
+              "ResolvedControl": {
+                "OriginalText": "Detail",
+                "Location": {
+                  "StartLine": 86,
+                  "StartColumn": 13,
+                  "EndLine": 86,
+                  "EndColumn": 19
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "ObjectModel",
+                "ResolvedTarget": {
+                  "Kind": "Section",
+                  "Name": "Detail",
+                  "Container": "rptCaseLoadByDistrict"
+                },
+                "Confidence": 1.0
+              }
+            },
+            "Signature": {
+              "Parameters": []
+            },
+            "Classification": {
+              "PurposeTags": [
+                "Calculation"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 1,
+              "LinesOfCode": 4,
+              "Translatability": "ManualReview",
+              "Notes": "Retreat-event compensation pattern is unique to Access reports. Modern reporting frameworks render once and don't have this concept; running totals should be computed in the data source query rather than via Format/Retreat event pairs."
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 90,
+                    "StartColumn": 5,
+                    "EndLine": 90,
+                    "EndColumn": 50
+                  },
+                  "Summary": "Decrement m_GroupTotal to undo previous Format-event increment",
+                  "Details": {
+                    "ReportPattern": {
+                      "Type": "retreatCompensation",
+                      "Compensates": "Detail_Format",
+                      "Rationale": "Retreat fires when Access re-formats a section. Without this, Format's accumulator would double-count."
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 91,
+                    "StartColumn": 5,
+                    "EndLine": 91,
+                    "EndColumn": 30
+                  },
+                  "Summary": "Decrement m_GroupCount to undo previous Format-event increment"
+                }
+              ],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          }
+        ],
+        "UnresolvedItems": [],
+        "Diagnostics": [
+          {
+            "Severity": "Info",
+            "Code": "HARV-I090",
+            "Message": "Report uses Format/Retreat event pair for running totals via module-level state. Migration target: compute running totals in the data source SQL (window functions: SUM() OVER(PARTITION BY group)) rather than accumulating in event handlers. The Retreat compensation pattern disappears entirely in modern reporting.",
+            "Location": {
+              "StartLine": 53,
+              "StartColumn": 1,
+              "EndLine": 91,
+              "EndColumn": 8
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I091",
+            "Message": "Cross-form parameter dependency: report depends on frmDistrictReport being loaded for parameters. Modern equivalent: report component receives parameters explicitly via route or component parameters; parameter form is not 'open' in the Access sense.",
+            "Location": {
+              "StartLine": 21,
+              "StartColumn": 5,
+              "EndLine": 30,
+              "EndColumn": 78
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I092",
+            "Message": "Conditional formatting (red bold for overdue) implemented in Format event. Modern equivalent: conditional CSS class or inline style based on data, applied at render time without separate event logic.",
+            "Location": {
+              "StartLine": 61,
+              "StartColumn": 5,
+              "EndLine": 67,
+              "EndColumn": 11
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I093",
+            "Message": "Conditional visibility pattern (hide email label when blank). Modern equivalent: @if block in Razor or v-if in Vue, eliminating the explicit Visible toggle.",
+            "Location": {
+              "StartLine": 44,
+              "StartColumn": 5,
+              "EndLine": 50,
+              "EndColumn": 11
+            }
+          }
         ]
-      },
-      "classification": {
-        "purposeTags": ["validation", "formattingDisplay"],
-        "purity": "uiBound",
-        "complexity": 3,
-        "linesOfCode": 13,
-        "translatability": "structured"
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "if",
-            "location": { "startLine": 21, "startColumn": 5, "endLine": 25, "endColumn": 11 },
-            "summary": "Cancel report if frmDistrictReport (parameter form) is not loaded",
-            "details": {
-              "validationPattern": {
-                "type": "preconditionCheck",
-                "rule": "requireFormLoaded",
-                "formName": "frmDistrictReport",
-                "messageOnFailure": "Open frmDistrictReport first to set parameters."
-              }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 28, "startColumn": 5, "endLine": 30, "endColumn": 78 },
-            "summary": "Set report caption from parameter form values"
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 32, "startColumn": 5, "endLine": 32, "endColumn": 23 },
-            "summary": "Initialize grand total accumulator"
-          }
-        ],
-        "references": [
-          {
-            "originalText": "CurrentProject.AllForms(\"frmDistrictReport\").IsLoaded",
-            "location": { "startLine": 21, "startColumn": 12, "endLine": 21, "endColumn": 65 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "objectModel",
-            "resolvedTarget": {
-              "kind": "property",
-              "name": "IsLoaded",
-              "container": "Access.AccessObject",
-              "type": "Boolean"
-            },
-            "confidence": 1.0
-          },
-          {
-            "originalText": "Forms!frmDistrictReport!cboDistrict.Column(1)",
-            "location": { "startLine": 29, "startColumn": 18, "endLine": 29, "endColumn": 63 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "comboBoxColumn",
-              "name": "cboDistrict.Column(1)",
-              "container": "frmDistrictReport",
-              "type": "Variant"
-            },
-            "confidence": 0.9,
-            "notes": "Cross-form reference; depends on frmDistrictReport being loaded (validated above)"
-          },
-          {
-            "originalText": "Forms!frmDistrictReport!txtAsOfDate",
-            "location": { "startLine": 30, "startColumn": 25, "endLine": 30, "endColumn": 60 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "txtAsOfDate",
-              "container": "frmDistrictReport",
-              "type": "TextBox"
-            },
-            "confidence": 0.9
-          },
-          {
-            "originalText": "m_GrandTotal",
-            "location": { "startLine": 32, "startColumn": 5, "endLine": 32, "endColumn": 17 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "variable",
-            "resolvedTarget": {
-              "kind": "moduleVariable",
-              "name": "m_GrandTotal",
-              "container": "Report_rptCaseLoadByDistrict",
-              "type": "Currency"
-            },
-            "confidence": 1.0,
-            "notes": "Module-level state. In Blazor migration, this becomes component state on the report component or service-managed state for the report rendering pipeline."
-          }
-        ],
-        "calls": [],
-        "sqlStrings": []
       }
-    },
-    {
-      "itemKind": "procedure",
-      "name": "GroupHeader0_Format",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "GroupHeader0",
-        "eventName": "Format",
-        "resolvedControl": {
-          "originalText": "GroupHeader0",
-          "location": { "startLine": 35, "startColumn": 13, "endLine": 35, "endColumn": 25 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "objectModel",
-          "resolvedTarget": {
-            "kind": "section",
-            "name": "GroupHeader0",
-            "container": "rptCaseLoadByDistrict",
-            "type": "Access.Section",
-            "fullyQualifiedName": "Reports!rptCaseLoadByDistrict.Section(GroupHeader0)"
-          },
-          "confidence": 1.0,
-          "notes": "Report section, indexed by 0 = first group level. Format event fires when section is being laid out."
-        }
-      },
-      "signature": {
-        "parameters": [
-          { "name": "Cancel", "type": "Integer", "byRef": true },
-          { "name": "FormatCount", "type": "Integer", "byRef": true, "notes": "Number of times this section has been formatted; > 1 indicates re-format" }
-        ]
-      },
-      "classification": {
-        "purposeTags": ["formattingDisplay", "calculation"],
-        "purity": "uiBound",
-        "complexity": 4,
-        "linesOfCode": 14,
-        "translatability": "structured",
-        "notes": "Reset-group-totals + conditional-visibility pattern. Migration target: Blazor section component with group state and conditional rendering."
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "if",
-            "location": { "startLine": 38, "startColumn": 5, "endLine": 41, "endColumn": 11 },
-            "summary": "Reset group running totals on first format pass (FormatCount = 1)",
-            "details": {
-              "reportPattern": {
-                "type": "groupReset",
-                "guardedBy": "FormatCount = 1",
-                "rationale": "Format may fire multiple times per section due to re-pagination; only first pass should reset"
-              }
-            }
-          },
-          {
-            "kind": "if",
-            "location": { "startLine": 44, "startColumn": 5, "endLine": 50, "endColumn": 11 },
-            "summary": "Show/hide email label based on whether email field has a value"
-          }
-        ],
-        "references": [
-          {
-            "originalText": "FormatCount",
-            "location": { "startLine": 38, "startColumn": 8, "endLine": 38, "endColumn": 19 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "parameter",
-            "resolvedTarget": { "kind": "parameter", "name": "FormatCount", "type": "Integer" },
-            "confidence": 1.0
-          },
-          {
-            "originalText": "Me.txtCaseworkerEmail",
-            "location": { "startLine": 44, "startColumn": 16, "endLine": 44, "endColumn": 37 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "txtCaseworkerEmail",
-              "container": "rptCaseLoadByDistrict",
-              "type": "TextBox"
-            },
-            "confidence": 1.0
-          },
-          {
-            "originalText": "Me.lblEmailLabel.Visible",
-            "location": { "startLine": 45, "startColumn": 9, "endLine": 45, "endColumn": 33 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "lblEmailLabel",
-              "container": "rptCaseLoadByDistrict",
-              "type": "Label"
-            },
-            "confidence": 1.0
-          }
-        ],
-        "calls": [],
-        "sqlStrings": []
-      }
-    },
-    {
-      "itemKind": "procedure",
-      "name": "Detail_Format",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "Detail",
-        "eventName": "Format",
-        "resolvedControl": {
-          "originalText": "Detail",
-          "location": { "startLine": 53, "startColumn": 13, "endLine": 53, "endColumn": 19 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "objectModel",
-          "resolvedTarget": {
-            "kind": "section",
-            "name": "Detail",
-            "container": "rptCaseLoadByDistrict",
-            "type": "Access.Section"
-          },
-          "confidence": 1.0
-        }
-      },
-      "signature": {
-        "parameters": [
-          { "name": "Cancel", "type": "Integer", "byRef": true },
-          { "name": "FormatCount", "type": "Integer", "byRef": true }
-        ]
-      },
-      "classification": {
-        "purposeTags": ["formattingDisplay", "calculation"],
-        "purity": "uiBound",
-        "complexity": 4,
-        "linesOfCode": 14,
-        "translatability": "structured"
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "if",
-            "location": { "startLine": 55, "startColumn": 5, "endLine": 58, "endColumn": 11 },
-            "summary": "Accumulate running totals on first format pass",
-            "details": {
-              "reportPattern": {
-                "type": "runningTotal",
-                "accumulator": "m_GroupTotal",
-                "increment": "Nz(Me.txtCaseValue, 0)",
-                "guardedBy": "FormatCount = 1"
-              }
-            }
-          },
-          {
-            "kind": "if",
-            "location": { "startLine": 61, "startColumn": 5, "endLine": 67, "endColumn": 11 },
-            "summary": "Color-code overdue cases red and bold",
-            "details": {
-              "reportPattern": {
-                "type": "conditionalFormatting",
-                "trigger": "Nz(Me.DaysOpen, 0) > 90",
-                "appliesTo": "Me.txtCaseNumber",
-                "properties": { "ForeColor": "RGB(192, 0, 0)", "FontBold": true },
-                "elseProperties": { "ForeColor": "RGB(0, 0, 0)", "FontBold": false }
-              }
-            }
-          }
-        ],
-        "references": [],
-        "calls": [],
-        "sqlStrings": []
-      }
-    },
-    {
-      "itemKind": "procedure",
-      "name": "GroupFooter0_Format",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "GroupFooter0",
-        "eventName": "Format",
-        "resolvedControl": {
-          "originalText": "GroupFooter0",
-          "location": { "startLine": 70, "startColumn": 13, "endLine": 70, "endColumn": 25 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "objectModel",
-          "resolvedTarget": {
-            "kind": "section",
-            "name": "GroupFooter0",
-            "container": "rptCaseLoadByDistrict"
-          },
-          "confidence": 1.0
-        }
-      },
-      "signature": {
-        "parameters": [
-          { "name": "Cancel", "type": "Integer", "byRef": true },
-          { "name": "FormatCount", "type": "Integer", "byRef": true }
-        ]
-      },
-      "classification": {
-        "purposeTags": ["calculation", "formattingDisplay"],
-        "purity": "uiBound",
-        "complexity": 2,
-        "linesOfCode": 9,
-        "translatability": "mechanical"
-      },
-      "body": {
-        "statements": [],
-        "references": [],
-        "calls": [],
-        "sqlStrings": []
-      }
-    },
-    {
-      "itemKind": "procedure",
-      "name": "Detail_Retreat",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "Detail",
-        "eventName": "Retreat",
-        "resolvedControl": {
-          "originalText": "Detail",
-          "location": { "startLine": 86, "startColumn": 13, "endLine": 86, "endColumn": 19 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "objectModel",
-          "resolvedTarget": {
-            "kind": "section",
-            "name": "Detail",
-            "container": "rptCaseLoadByDistrict"
-          },
-          "confidence": 1.0
-        }
-      },
-      "signature": { "parameters": [] },
-      "classification": {
-        "purposeTags": ["calculation"],
-        "purity": "uiBound",
-        "complexity": 1,
-        "linesOfCode": 4,
-        "translatability": "manualReview",
-        "notes": "Retreat-event compensation pattern is unique to Access reports. Modern reporting frameworks render once and don't have this concept; running totals should be computed in the data source query rather than via Format/Retreat event pairs."
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "assignment",
-            "location": { "startLine": 90, "startColumn": 5, "endLine": 90, "endColumn": 50 },
-            "summary": "Decrement m_GroupTotal to undo previous Format-event increment",
-            "details": {
-              "reportPattern": {
-                "type": "retreatCompensation",
-                "compensates": "Detail_Format",
-                "rationale": "Retreat fires when Access re-formats a section. Without this, Format's accumulator would double-count."
-              }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 91, "startColumn": 5, "endLine": 91, "endColumn": 30 },
-            "summary": "Decrement m_GroupCount to undo previous Format-event increment"
-          }
-        ],
-        "references": [],
-        "calls": [],
-        "sqlStrings": []
-      }
-    }
-  ],
-  "unresolvedItems": [],
-  "diagnostics": [
-    {
-      "severity": "info",
-      "code": "HARV-I090",
-      "message": "Report uses Format/Retreat event pair for running totals via module-level state. Migration target: compute running totals in the data source SQL (window functions: SUM() OVER(PARTITION BY group)) rather than accumulating in event handlers. The Retreat compensation pattern disappears entirely in modern reporting.",
-      "location": { "startLine": 53, "startColumn": 1, "endLine": 91, "endColumn": 8 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I091",
-      "message": "Cross-form parameter dependency: report depends on frmDistrictReport being loaded for parameters. Modern equivalent: report component receives parameters explicitly via route or component parameters; parameter form is not 'open' in the Access sense.",
-      "location": { "startLine": 21, "startColumn": 5, "endLine": 30, "endColumn": 78 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I092",
-      "message": "Conditional formatting (red bold for overdue) implemented in Format event. Modern equivalent: conditional CSS class or inline style based on data, applied at render time without separate event logic.",
-      "location": { "startLine": 61, "startColumn": 5, "endLine": 67, "endColumn": 11 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I093",
-      "message": "Conditional visibility pattern (hide email label when blank). Modern equivalent: @if block in Razor or v-if in Vue, eliminating the explicit Visible toggle.",
-      "location": { "startLine": 44, "startColumn": 5, "endLine": 50, "endColumn": 11 }
     }
   ]
 }

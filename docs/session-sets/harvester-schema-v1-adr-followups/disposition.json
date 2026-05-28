@@ -1,0 +1,42 @@
+{
+  "status": "complete",
+  "summary": "Closed both v1-adr.md Known Issues: PredicateNode polymorphism fix via [JsonPolymorphic] attributes; v0->v1 fixture migration via tools/migrate_v0_to_v1.py. 12/13 fixtures pass v1.0 schema validation; conformance regression test added.",
+  "session_set": "harvester-schema-v1-adr-followups",
+  "session_number": 1,
+  "verification_verdict": "VERIFIED",
+  "verification_rounds": 3,
+  "verifier_model": "gpt-5-4",
+  "files_changed": [
+    "AccessHarvester.Pipeline/Enrichment/QueryAbstraction.cs",
+    "AccessHarvester.Pipeline/Validation/SchemaValidator.cs",
+    "tools/migrate_v0_to_v1.py",
+    "tests/AccessHarvester.Pipeline.Tests/PredicateNodeRoundTripTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/TestCaseFixtureConformanceTests.cs",
+    "docs/test-cases/01-simple-validation.expected.json",
+    "docs/test-cases/02-cascading-combo-subform.expected.json",
+    "docs/test-cases/03-with-block-shadowing.expected.json",
+    "docs/test-cases/04-saved-query-form-params.expected.json",
+    "docs/test-cases/05-dynamic-sql-construction.expected.json",
+    "docs/test-cases/06-calculated-expressions.expected.json",
+    "docs/test-cases/07-legacy-patterns.expected.json",
+    "docs/test-cases/08-unresolvable.expected.json",
+    "docs/test-cases/09-report-grouping-events.expected.json",
+    "docs/test-cases/10-class-with-events.expected.json",
+    "docs/test-cases/11-autoexec-startup-chain.expected.json",
+    "docs/test-cases/12-switchboard-navigation.expected.json",
+    "docs/test-cases/13-preprocessor.expected.json",
+    "docs/schema/v1-adr.md",
+    "docs/session-sets/harvester-schema-v1-adr-followups/session-reviews/session-001.md",
+    "docs/session-sets/harvester-schema-v1-adr-followups/session-reviews/session-001-r2.md",
+    "docs/session-sets/harvester-schema-v1-adr-followups/session-reviews/session-001-r3.md",
+    "docs/session-sets/harvester-schema-v1-adr-followups/change-log.md",
+    "docs/session-sets/harvester-schema-v1-adr-followups/next-session-set-recommendation.md",
+    "docs/session-sets/harvester-schema-v1-adr-followups/disposition.json"
+  ],
+  "next_session_set": {
+    "slug": "harvester-cli-validate-subcommand",
+    "summary": "Add AccessHarvester validate subcommand; soft-prerequisite (this set) is now complete."
+  },
+  "blockers": [],
+  "stop_rule_notes": "Fixture 12 (12-switchboard-navigation.expected.json) excluded from v1.0 conformance gate: Source field contains a VBA variable name ('g_CurrentUserID') where the v1.0 schema requires a ParserQueryParameter.Source enum value. Semantic incompatibility; fixture migrated in place but excluded from TestCaseFixtureConformanceTests via StopRuleExclusions."
+}

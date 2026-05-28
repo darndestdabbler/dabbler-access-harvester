@@ -1,435 +1,680 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "kind": "form",
-    "location": {
-      "file": "12-switchboard-navigation.bas",
-      "module": "Form_frmMainSwitchboard",
-      "startLine": 1,
-      "startColumn": 1,
-      "endLine": 110,
-      "endColumn": 1
-    },
-    "hostContext": {
-      "hostKind": "form",
-      "hostName": "frmMainSwitchboard",
-      "controlsAvailable": [
-        { "name": "lblHeader", "controlType": "Label" },
-        { "name": "btnNewCase", "controlType": "CommandButton" },
-        { "name": "btnSearchCases", "controlType": "CommandButton" },
-        { "name": "btnMyOpenCases", "controlType": "CommandButton" },
-        { "name": "btnReports", "controlType": "CommandButton" },
-        { "name": "btnQuickCaseload", "controlType": "CommandButton" },
-        { "name": "btnUserManagement", "controlType": "CommandButton" },
-        { "name": "btnAdminTools", "controlType": "CommandButton" },
-        { "name": "btnAuditLog", "controlType": "CommandButton" },
-        { "name": "btnRefresh", "controlType": "CommandButton" },
-        { "name": "btnExit", "controlType": "CommandButton" },
-        { "name": "btnHelp", "controlType": "CommandButton" }
-      ]
-    },
-    "originalSource": "(see source file)"
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "migrated-from-v0",
+  "Database": {
+    "Name": "12-switchboard-navigation.expected",
+    "FilePath": "docs\\test-cases\\12-switchboard-navigation.expected.json",
+    "ExportedAt": "2026-05-28T10:23:08.0000000+00:00"
   },
-  "items": [
+  "Modules": [
     {
-      "itemKind": "procedure",
-      "name": "Form_Load",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "Form",
-        "eventName": "Load",
-        "resolvedControl": {
-          "originalText": "Form",
-          "location": { "startLine": 19, "startColumn": 13, "endLine": 19, "endColumn": 17 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "form",
-          "resolvedTarget": {
-            "kind": "form",
-            "name": "frmMainSwitchboard"
+      "ModuleName": "Form_frmMainSwitchboard",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "12-switchboard-navigation.bas",
+            "Module": "Form_frmMainSwitchboard",
+            "StartLine": 1,
+            "StartColumn": 1,
+            "EndLine": 110,
+            "EndColumn": 1
           },
-          "confidence": 1.0
-        }
-      },
-      "signature": { "parameters": [] },
-      "classification": {
-        "purposeTags": ["formattingDisplay", "navigation"],
-        "purity": "uiBound",
-        "complexity": 4,
-        "linesOfCode": 11,
-        "translatability": "structured",
-        "notes": "Role-based UI customization. Migration target: conditional rendering with @if directives based on auth context."
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "assignment",
-            "location": { "startLine": 21, "startColumn": 5, "endLine": 21, "endColumn": 70 },
-            "summary": "Show btnAdminTools only for Administrator role",
-            "details": {
-              "uiPattern": {
-                "type": "roleBasedVisibility",
-                "control": "btnAdminTools",
-                "property": "Visible",
-                "predicate": "g_UserRole = 'Administrator'"
+          "HostContext": {
+            "HostKind": "Form",
+            "HostName": "frmMainSwitchboard",
+            "ControlsAvailable": [
+              {
+                "Name": "lblHeader",
+                "ControlType": "Label"
+              },
+              {
+                "Name": "btnNewCase",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnSearchCases",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnMyOpenCases",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnReports",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnQuickCaseload",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnUserManagement",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnAdminTools",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnAuditLog",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnRefresh",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnExit",
+                "ControlType": "CommandButton"
+              },
+              {
+                "Name": "btnHelp",
+                "ControlType": "CommandButton"
               }
-            }
+            ]
           },
+          "OriginalSource": "(see source file)"
+        },
+        "Items": [
           {
-            "kind": "assignment",
-            "location": { "startLine": 22, "startColumn": 5, "endLine": 22, "endColumn": 73 },
-            "summary": "Show btnUserManagement only for Administrator",
-            "details": {
-              "uiPattern": {
-                "type": "roleBasedVisibility",
-                "control": "btnUserManagement",
-                "predicate": "g_UserRole = 'Administrator'"
+            "ItemKind": "Procedure",
+            "Name": "Form_Load",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "Form",
+              "EventName": "Load",
+              "ResolvedControl": {
+                "OriginalText": "Form",
+                "Location": {
+                  "StartLine": 19,
+                  "StartColumn": 13,
+                  "EndLine": 19,
+                  "EndColumn": 17
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "Form",
+                "ResolvedTarget": {
+                  "Kind": "Form",
+                  "Name": "frmMainSwitchboard"
+                },
+                "Confidence": 1.0
               }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 23, "startColumn": 5, "endLine": 23, "endColumn": 60 },
-            "summary": "Hide btnReports for ReadOnly users",
-            "details": {
-              "uiPattern": {
-                "type": "roleBasedVisibility",
-                "control": "btnReports",
-                "predicate": "g_UserRole != 'ReadOnly'"
-              }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 24, "startColumn": 5, "endLine": 24, "endColumn": 90 },
-            "summary": "Enable btnNewCase only for Caseworker or Administrator",
-            "details": {
-              "uiPattern": {
-                "type": "roleBasedEnabled",
-                "control": "btnNewCase",
-                "predicate": "g_UserRole IN ('Caseworker', 'Administrator')"
-              }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 27, "startColumn": 5, "endLine": 29, "endColumn": 60 },
-            "summary": "Set lblHeader.Caption with welcome + fiscal year + date"
-          }
-        ],
-        "references": [
-          {
-            "originalText": "g_UserRole",
-            "location": { "startLine": 21, "startColumn": 38, "endLine": 21, "endColumn": 48 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "variable",
-            "resolvedTarget": {
-              "kind": "moduleVariable",
-              "name": "g_UserRole",
-              "container": "mdlStartup",
-              "type": "String"
             },
-            "confidence": 1.0,
-            "notes": "Cross-module reference to global state set by AutoExec/Initialize"
-          }
-        ],
-        "calls": [],
-        "sqlStrings": []
-      }
-    },
-    {
-      "itemKind": "procedure",
-      "name": "btnNewCase_Click",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "btnNewCase",
-        "eventName": "Click",
-        "resolvedControl": {
-          "originalText": "btnNewCase",
-          "location": { "startLine": 33, "startColumn": 13, "endLine": 33, "endColumn": 23 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "control",
-          "resolvedTarget": {
-            "kind": "control",
-            "name": "btnNewCase",
-            "container": "frmMainSwitchboard",
-            "type": "CommandButton"
+            "Signature": {
+              "Parameters": []
+            },
+            "Classification": {
+              "PurposeTags": [
+                "FormattingDisplay",
+                "Navigation"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 4,
+              "LinesOfCode": 11,
+              "Translatability": "Structured",
+              "Notes": "Role-based UI customization. Migration target: conditional rendering with @if directives based on auth context."
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 21,
+                    "StartColumn": 5,
+                    "EndLine": 21,
+                    "EndColumn": 70
+                  },
+                  "Summary": "Show btnAdminTools only for Administrator role",
+                  "Details": {
+                    "UiPattern": {
+                      "Type": "roleBasedVisibility",
+                      "Control": "btnAdminTools",
+                      "Property": "Visible",
+                      "Predicate": "g_UserRole = 'Administrator'"
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 22,
+                    "StartColumn": 5,
+                    "EndLine": 22,
+                    "EndColumn": 73
+                  },
+                  "Summary": "Show btnUserManagement only for Administrator",
+                  "Details": {
+                    "UiPattern": {
+                      "Type": "roleBasedVisibility",
+                      "Control": "btnUserManagement",
+                      "Predicate": "g_UserRole = 'Administrator'"
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 23,
+                    "StartColumn": 5,
+                    "EndLine": 23,
+                    "EndColumn": 60
+                  },
+                  "Summary": "Hide btnReports for ReadOnly users",
+                  "Details": {
+                    "UiPattern": {
+                      "Type": "roleBasedVisibility",
+                      "Control": "btnReports",
+                      "Predicate": "g_UserRole != 'ReadOnly'"
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 24,
+                    "StartColumn": 5,
+                    "EndLine": 24,
+                    "EndColumn": 90
+                  },
+                  "Summary": "Enable btnNewCase only for Caseworker or Administrator",
+                  "Details": {
+                    "UiPattern": {
+                      "Type": "roleBasedEnabled",
+                      "Control": "btnNewCase",
+                      "Predicate": "g_UserRole IN ('Caseworker', 'Administrator')"
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 27,
+                    "StartColumn": 5,
+                    "EndLine": 29,
+                    "EndColumn": 60
+                  },
+                  "Summary": "Set lblHeader.Caption with welcome + fiscal year + date"
+                }
+              ],
+              "References": [
+                {
+                  "OriginalText": "g_UserRole",
+                  "Location": {
+                    "StartLine": 21,
+                    "StartColumn": 38,
+                    "EndLine": 21,
+                    "EndColumn": 48
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Variable",
+                  "ResolvedTarget": {
+                    "Kind": "ModuleVariable",
+                    "Name": "g_UserRole",
+                    "Container": "mdlStartup",
+                    "Type": "String"
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Cross-module reference to global state set by AutoExec/Initialize"
+                }
+              ],
+              "Calls": [],
+              "SqlStrings": []
+            }
           },
-          "confidence": 1.0
-        }
-      },
-      "signature": { "parameters": [] },
-      "classification": {
-        "purposeTags": ["navigation"],
-        "purity": "uiBound",
-        "complexity": 1,
-        "linesOfCode": 3,
-        "translatability": "mechanical"
-      },
-      "body": {
-        "statements": [
           {
-            "kind": "call",
-            "location": { "startLine": 35, "startColumn": 5, "endLine": 36, "endColumn": 80 },
-            "summary": "Open frmCaseDetail in data-entry mode with OpenArgs string",
-            "details": {
-              "navigationAction": {
-                "type": "openForm",
-                "targetForm": "frmCaseDetail",
-                "dataMode": "acFormAdd",
-                "openArgs": "NewCase|<currentUserId>|<today as yyyy-mm-dd>",
-                "openArgsTemplate": "NewCase|{userId}|{date}",
-                "notes": "OpenArgs is a pipe-delimited string that frmCaseDetail's Form_Open handler will parse. Migration target: route parameters or component parameters with structured types."
+            "ItemKind": "Procedure",
+            "Name": "btnNewCase_Click",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "btnNewCase",
+              "EventName": "Click",
+              "ResolvedControl": {
+                "OriginalText": "btnNewCase",
+                "Location": {
+                  "StartLine": 33,
+                  "StartColumn": 13,
+                  "EndLine": 33,
+                  "EndColumn": 23
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "Control",
+                "ResolvedTarget": {
+                  "Kind": "Control",
+                  "Name": "btnNewCase",
+                  "Container": "frmMainSwitchboard",
+                  "Type": "CommandButton"
+                },
+                "Confidence": 1.0
               }
+            },
+            "Signature": {
+              "Parameters": []
+            },
+            "Classification": {
+              "PurposeTags": [
+                "Navigation"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 1,
+              "LinesOfCode": 3,
+              "Translatability": "Mechanical"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 35,
+                    "StartColumn": 5,
+                    "EndLine": 36,
+                    "EndColumn": 80
+                  },
+                  "Summary": "Open frmCaseDetail in data-entry mode with OpenArgs string",
+                  "Details": {
+                    "NavigationAction": {
+                      "Type": "openForm",
+                      "TargetForm": "frmCaseDetail",
+                      "DataMode": "acFormAdd",
+                      "OpenArgs": "NewCase|<currentUserId>|<today as yyyy-mm-dd>",
+                      "OpenArgsTemplate": "NewCase|{userId}|{date}",
+                      "Notes": "OpenArgs is a pipe-delimited string that frmCaseDetail's Form_Open handler will parse. Migration target: route parameters or component parameters with structured types."
+                    }
+                  }
+                }
+              ],
+              "References": [],
+              "Calls": [
+                {
+                  "CalleeText": "DoCmd.OpenForm",
+                  "Location": {
+                    "StartLine": 35,
+                    "StartColumn": 5,
+                    "EndLine": 35,
+                    "EndColumn": 19
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "DoCmd.OpenForm",
+                    "Location": {
+                      "StartLine": 35,
+                      "StartColumn": 5,
+                      "EndLine": 35,
+                      "EndColumn": 19
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "ObjectModel",
+                    "ResolvedTarget": {
+                      "Kind": "Method",
+                      "Name": "OpenForm",
+                      "Container": "Access.DoCmd"
+                    },
+                    "Confidence": 1.0
+                  }
+                }
+              ],
+              "SqlStrings": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "btnMyOpenCases_Click",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "btnMyOpenCases",
+              "EventName": "Click",
+              "ResolvedControl": {
+                "OriginalText": "btnMyOpenCases",
+                "Location": {
+                  "StartLine": 43,
+                  "StartColumn": 13
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "Control",
+                "ResolvedTarget": {
+                  "Kind": "Control",
+                  "Name": "btnMyOpenCases",
+                  "Container": "frmMainSwitchboard"
+                },
+                "Confidence": 1.0
+              }
+            },
+            "Signature": {
+              "Parameters": []
+            },
+            "Classification": {
+              "PurposeTags": [
+                "Navigation",
+                "FilterSearch"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 1,
+              "LinesOfCode": 4,
+              "Translatability": "Mechanical"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 45,
+                    "StartColumn": 5,
+                    "EndLine": 47,
+                    "EndColumn": 65
+                  },
+                  "Summary": "Open frmCaseList filtered to current caseworker, status open",
+                  "Details": {
+                    "NavigationAction": {
+                      "Type": "openFormWithFilter",
+                      "TargetForm": "frmCaseList",
+                      "FilterTemplate": "AssignedCaseworkerID = ? AND Status IN ('Open', 'Pending Review')",
+                      "FilterParameters": [
+                        {
+                          "Name": "p_userId",
+                          "Source": "g_CurrentUserID"
+                        }
+                      ],
+                      "Notes": "Common 'my open items' pattern. Migration target: route to /cases?caseworker={current}&status=open or equivalent filter parameters."
+                    }
+                  }
+                }
+              ],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": [
+                {
+                  "OriginalText": "\"AssignedCaseworkerID = \" & g_CurrentUserID & \" AND Status IN ('Open', 'Pending Review')\"",
+                  "Location": {
+                    "StartLine": 46,
+                    "StartColumn": 20,
+                    "EndLine": 47,
+                    "EndColumn": 65
+                  },
+                  "ConstructionMode": "Concatenated",
+                  "TemplateCandidates": [
+                    {
+                      "Template": "AssignedCaseworkerID = ? AND Status IN ('Open', 'Pending Review')",
+                      "ParameterBindings": [
+                        {
+                          "Name": "p_AssignedCaseworkerID",
+                          "Type": "Long",
+                          "Source": "VbaExpression"
+                        }
+                      ],
+                      "Confidence": 1.0,
+                      "Notes": "Filter clause, not full SQL. Applied as Form.Filter on the opened form."
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "btnQuickCaseload_Click",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "btnQuickCaseload",
+              "EventName": "Click",
+              "ResolvedControl": {
+                "OriginalText": "btnQuickCaseload",
+                "Location": {
+                  "StartLine": 56,
+                  "StartColumn": 13
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "Control",
+                "ResolvedTarget": {
+                  "Kind": "Control",
+                  "Name": "btnQuickCaseload",
+                  "Container": "frmMainSwitchboard"
+                },
+                "Confidence": 1.0
+              }
+            },
+            "Signature": {
+              "Parameters": []
+            },
+            "Classification": {
+              "PurposeTags": [
+                "Navigation",
+                "SideEffect"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 3,
+              "LinesOfCode": 8,
+              "Translatability": "Structured",
+              "Notes": "Multi-step navigation: open hidden parameter form, set its values, then open report. Migration target: pass parameters directly to report component without intermediate form."
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 60,
+                    "StartColumn": 5,
+                    "EndLine": 60,
+                    "EndColumn": 60
+                  },
+                  "Summary": "Open frmDistrictReport in hidden mode (parameter form for the report)",
+                  "Details": {
+                    "NavigationAction": {
+                      "Type": "openForm",
+                      "TargetForm": "frmDistrictReport",
+                      "WindowMode": "acHidden",
+                      "Notes": "Hidden form used as parameter container - pattern unique to Access. Migration target: pass parameters directly."
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 61,
+                    "StartColumn": 5,
+                    "EndLine": 62,
+                    "EndColumn": 70
+                  },
+                  "Summary": "Set cboDistrict on the now-loaded parameter form via DLookup of user's district"
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 63,
+                    "StartColumn": 5,
+                    "EndLine": 63,
+                    "EndColumn": 50
+                  },
+                  "Summary": "Set txtAsOfDate to today"
+                },
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 66,
+                    "StartColumn": 5,
+                    "EndLine": 66,
+                    "EndColumn": 70
+                  },
+                  "Summary": "Open the report in preview mode",
+                  "Details": {
+                    "NavigationAction": {
+                      "Type": "openReport",
+                      "TargetReport": "rptCaseLoadByDistrict",
+                      "ViewMode": "acViewPreview"
+                    }
+                  }
+                }
+              ],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "btnExit_Click",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "btnExit",
+              "EventName": "Click",
+              "ResolvedControl": {
+                "OriginalText": "btnExit",
+                "Location": {
+                  "StartLine": 89,
+                  "StartColumn": 13
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "Control",
+                "ResolvedTarget": {
+                  "Kind": "Control",
+                  "Name": "btnExit",
+                  "Container": "frmMainSwitchboard"
+                },
+                "Confidence": 1.0
+              }
+            },
+            "Signature": {
+              "Parameters": []
+            },
+            "Classification": {
+              "PurposeTags": [
+                "DataAccess",
+                "Navigation",
+                "SideEffect"
+              ],
+              "Purity": "Mixed",
+              "Complexity": 2,
+              "LinesOfCode": 8,
+              "Translatability": "Structured",
+              "Notes": "Session-end logging + Application.Quit. Migration target: log session end, then redirect to logout."
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 92,
+                    "StartColumn": 5
+                  },
+                  "Summary": "UPDATE tblSessionLog SET EndTime for this session"
+                },
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 99,
+                    "StartColumn": 5
+                  },
+                  "Summary": "DoCmd.Close acForm, Me.Name"
+                },
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 100,
+                    "StartColumn": 5
+                  },
+                  "Summary": "Application.Quit acQuitSaveNone"
+                }
+              ],
+              "References": [],
+              "Calls": [],
+              "SqlStrings": [
+                {
+                  "OriginalText": "\"UPDATE tblSessionLog SET EndTime = Now() WHERE UserID = \" & g_CurrentUserID & \" AND EndTime IS NULL\"",
+                  "Location": {
+                    "StartLine": 92,
+                    "StartColumn": 16,
+                    "EndLine": 94,
+                    "EndColumn": 35
+                  },
+                  "ConstructionMode": "Concatenated",
+                  "TemplateCandidates": [
+                    {
+                      "Template": "UPDATE tblSessionLog SET EndTime = Now() WHERE UserID = ? AND EndTime IS NULL",
+                      "ParameterBindings": [
+                        {
+                          "Name": "p_UserID",
+                          "Type": "Long",
+                          "Source": "VbaExpression"
+                        }
+                      ],
+                      "Confidence": 1.0
+                    }
+                  ]
+                }
+              ]
             }
           }
         ],
-        "references": [],
-        "calls": [
+        "UnresolvedItems": [],
+        "Diagnostics": [
           {
-            "calleeText": "DoCmd.OpenForm",
-            "location": { "startLine": 35, "startColumn": 5, "endLine": 35, "endColumn": 19 },
-            "resolvedCallee": {
-              "originalText": "DoCmd.OpenForm",
-              "location": { "startLine": 35, "startColumn": 5, "endLine": 35, "endColumn": 19 },
-              "resolutionStatus": "resolved",
-              "referenceKind": "objectModel",
-              "resolvedTarget": { "kind": "method", "name": "OpenForm", "container": "Access.DoCmd" },
-              "confidence": 1.0
+            "Severity": "Info",
+            "Code": "HARV-I120",
+            "Message": "Switchboard form pattern detected. 11 command buttons identified, 9 with click-handler navigation actions. Reconstructed navigation graph: frmMainSwitchboard -> {frmCaseDetail, frmCaseSearch, frmCaseList, frmReportMenu, frmDistrictReport, frmUserAdmin, frmAdminTools, frmAuditLogViewer, rptCaseLoadByDistrict}. Migration target: top-level navigation menu component with role-based visibility.",
+            "Location": {
+              "StartLine": 1,
+              "StartColumn": 1,
+              "EndLine": 110,
+              "EndColumn": 1
             }
-          }
-        ],
-        "sqlStrings": []
-      }
-    },
-    {
-      "itemKind": "procedure",
-      "name": "btnMyOpenCases_Click",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "btnMyOpenCases",
-        "eventName": "Click",
-        "resolvedControl": {
-          "originalText": "btnMyOpenCases",
-          "location": { "startLine": 43, "startColumn": 13 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "control",
-          "resolvedTarget": { "kind": "control", "name": "btnMyOpenCases", "container": "frmMainSwitchboard" },
-          "confidence": 1.0
-        }
-      },
-      "signature": { "parameters": [] },
-      "classification": {
-        "purposeTags": ["navigation", "filterSearch"],
-        "purity": "uiBound",
-        "complexity": 1,
-        "linesOfCode": 4,
-        "translatability": "mechanical"
-      },
-      "body": {
-        "statements": [
+          },
           {
-            "kind": "call",
-            "location": { "startLine": 45, "startColumn": 5, "endLine": 47, "endColumn": 65 },
-            "summary": "Open frmCaseList filtered to current caseworker, status open",
-            "details": {
-              "navigationAction": {
-                "type": "openFormWithFilter",
-                "targetForm": "frmCaseList",
-                "filterTemplate": "AssignedCaseworkerID = ? AND Status IN ('Open', 'Pending Review')",
-                "filterParameters": [
-                  { "name": "p_userId", "source": "g_CurrentUserID" }
-                ],
-                "notes": "Common 'my open items' pattern. Migration target: route to /cases?caseworker={current}&status=open or equivalent filter parameters."
-              }
+            "Severity": "Info",
+            "Code": "HARV-I121",
+            "Message": "Role-based visibility/enabled rules driven by g_UserRole. 4 controls have role-conditional visibility/enabled state. Migration target: AuthorizeView component or [Authorize(Roles=...)] policy with conditional rendering.",
+            "Location": {
+              "StartLine": 19,
+              "StartColumn": 1,
+              "EndLine": 30,
+              "EndColumn": 13
             }
-          }
-        ],
-        "references": [],
-        "calls": [],
-        "sqlStrings": [
+          },
           {
-            "originalText": "\"AssignedCaseworkerID = \" & g_CurrentUserID & \" AND Status IN ('Open', 'Pending Review')\"",
-            "location": { "startLine": 46, "startColumn": 20, "endLine": 47, "endColumn": 65 },
-            "constructionMode": "concatenated",
-            "templateCandidates": [
-              {
-                "template": "AssignedCaseworkerID = ? AND Status IN ('Open', 'Pending Review')",
-                "parameterBindings": [
-                  { "name": "p_AssignedCaseworkerID", "type": "Long", "source": "vbaExpression" }
-                ],
-                "confidence": 1.0,
-                "notes": "Filter clause, not full SQL. Applied as Form.Filter on the opened form."
-              }
-            ]
+            "Severity": "Info",
+            "Code": "HARV-I122",
+            "Message": "Hidden-form-as-parameter-container pattern in btnQuickCaseload_Click. The frmDistrictReport is opened hidden, populated via control assignments, then read by the report's Report_Open. Migration target: pass parameters directly to the report component.",
+            "Location": {
+              "StartLine": 56,
+              "StartColumn": 1,
+              "EndLine": 67,
+              "EndColumn": 13
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I123",
+            "Message": "OpenArgs pattern in btnNewCase_Click: pipe-delimited string 'NewCase|userId|date'. The receiving form's Form_Open handler will Split() this. Migration target: structured route parameters or typed component parameters - replace string-encoded arguments.",
+            "Location": {
+              "StartLine": 35,
+              "StartColumn": 5,
+              "EndLine": 36,
+              "EndColumn": 80
+            }
+          },
+          {
+            "Severity": "Warning",
+            "Code": "HARV-W120",
+            "Message": "btnHelp uses FollowHyperlink to open a PDF from CurrentProject.Path. Migration breaks this: there is no 'project path' in a web app. Help content needs to be hosted alongside the app or as a separate resource.",
+            "Location": {
+              "StartLine": 105,
+              "StartColumn": 5,
+              "EndLine": 109,
+              "EndColumn": 11
+            }
           }
         ]
       }
-    },
-    {
-      "itemKind": "procedure",
-      "name": "btnQuickCaseload_Click",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "btnQuickCaseload",
-        "eventName": "Click",
-        "resolvedControl": {
-          "originalText": "btnQuickCaseload",
-          "location": { "startLine": 56, "startColumn": 13 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "control",
-          "resolvedTarget": { "kind": "control", "name": "btnQuickCaseload", "container": "frmMainSwitchboard" },
-          "confidence": 1.0
-        }
-      },
-      "signature": { "parameters": [] },
-      "classification": {
-        "purposeTags": ["navigation", "sideEffect"],
-        "purity": "uiBound",
-        "complexity": 3,
-        "linesOfCode": 8,
-        "translatability": "structured",
-        "notes": "Multi-step navigation: open hidden parameter form, set its values, then open report. Migration target: pass parameters directly to report component without intermediate form."
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "call",
-            "location": { "startLine": 60, "startColumn": 5, "endLine": 60, "endColumn": 60 },
-            "summary": "Open frmDistrictReport in hidden mode (parameter form for the report)",
-            "details": {
-              "navigationAction": {
-                "type": "openForm",
-                "targetForm": "frmDistrictReport",
-                "windowMode": "acHidden",
-                "notes": "Hidden form used as parameter container - pattern unique to Access. Migration target: pass parameters directly."
-              }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 61, "startColumn": 5, "endLine": 62, "endColumn": 70 },
-            "summary": "Set cboDistrict on the now-loaded parameter form via DLookup of user's district"
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 63, "startColumn": 5, "endLine": 63, "endColumn": 50 },
-            "summary": "Set txtAsOfDate to today"
-          },
-          {
-            "kind": "call",
-            "location": { "startLine": 66, "startColumn": 5, "endLine": 66, "endColumn": 70 },
-            "summary": "Open the report in preview mode",
-            "details": {
-              "navigationAction": {
-                "type": "openReport",
-                "targetReport": "rptCaseLoadByDistrict",
-                "viewMode": "acViewPreview"
-              }
-            }
-          }
-        ],
-        "references": [],
-        "calls": [],
-        "sqlStrings": []
-      }
-    },
-    {
-      "itemKind": "procedure",
-      "name": "btnExit_Click",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "btnExit",
-        "eventName": "Click",
-        "resolvedControl": {
-          "originalText": "btnExit",
-          "location": { "startLine": 89, "startColumn": 13 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "control",
-          "resolvedTarget": { "kind": "control", "name": "btnExit", "container": "frmMainSwitchboard" },
-          "confidence": 1.0
-        }
-      },
-      "signature": { "parameters": [] },
-      "classification": {
-        "purposeTags": ["dataAccess", "navigation", "sideEffect"],
-        "purity": "mixed",
-        "complexity": 2,
-        "linesOfCode": 8,
-        "translatability": "structured",
-        "notes": "Session-end logging + Application.Quit. Migration target: log session end, then redirect to logout."
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "call",
-            "location": { "startLine": 92, "startColumn": 5 },
-            "summary": "UPDATE tblSessionLog SET EndTime for this session"
-          },
-          { "kind": "call", "location": { "startLine": 99, "startColumn": 5 }, "summary": "DoCmd.Close acForm, Me.Name" },
-          { "kind": "call", "location": { "startLine": 100, "startColumn": 5 }, "summary": "Application.Quit acQuitSaveNone" }
-        ],
-        "references": [],
-        "calls": [],
-        "sqlStrings": [
-          {
-            "originalText": "\"UPDATE tblSessionLog SET EndTime = Now() WHERE UserID = \" & g_CurrentUserID & \" AND EndTime IS NULL\"",
-            "location": { "startLine": 92, "startColumn": 16, "endLine": 94, "endColumn": 35 },
-            "constructionMode": "concatenated",
-            "templateCandidates": [
-              {
-                "template": "UPDATE tblSessionLog SET EndTime = Now() WHERE UserID = ? AND EndTime IS NULL",
-                "parameterBindings": [
-                  { "name": "p_UserID", "type": "Long", "source": "vbaExpression" }
-                ],
-                "confidence": 1.0
-              }
-            ]
-          }
-        ]
-      }
-    }
-  ],
-  "unresolvedItems": [],
-  "diagnostics": [
-    {
-      "severity": "info",
-      "code": "HARV-I120",
-      "message": "Switchboard form pattern detected. 11 command buttons identified, 9 with click-handler navigation actions. Reconstructed navigation graph: frmMainSwitchboard -> {frmCaseDetail, frmCaseSearch, frmCaseList, frmReportMenu, frmDistrictReport, frmUserAdmin, frmAdminTools, frmAuditLogViewer, rptCaseLoadByDistrict}. Migration target: top-level navigation menu component with role-based visibility.",
-      "location": { "startLine": 1, "startColumn": 1, "endLine": 110, "endColumn": 1 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I121",
-      "message": "Role-based visibility/enabled rules driven by g_UserRole. 4 controls have role-conditional visibility/enabled state. Migration target: AuthorizeView component or [Authorize(Roles=...)] policy with conditional rendering.",
-      "location": { "startLine": 19, "startColumn": 1, "endLine": 30, "endColumn": 13 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I122",
-      "message": "Hidden-form-as-parameter-container pattern in btnQuickCaseload_Click. The frmDistrictReport is opened hidden, populated via control assignments, then read by the report's Report_Open. Migration target: pass parameters directly to the report component.",
-      "location": { "startLine": 56, "startColumn": 1, "endLine": 67, "endColumn": 13 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I123",
-      "message": "OpenArgs pattern in btnNewCase_Click: pipe-delimited string 'NewCase|userId|date'. The receiving form's Form_Open handler will Split() this. Migration target: structured route parameters or typed component parameters - replace string-encoded arguments.",
-      "location": { "startLine": 35, "startColumn": 5, "endLine": 36, "endColumn": 80 }
-    },
-    {
-      "severity": "warning",
-      "code": "HARV-W120",
-      "message": "btnHelp uses FollowHyperlink to open a PDF from CurrentProject.Path. Migration breaks this: there is no 'project path' in a web app. Help content needs to be hosted alongside the app or as a separate resource.",
-      "location": { "startLine": 105, "startColumn": 5, "endLine": 109, "endColumn": 11 }
     }
   ]
 }

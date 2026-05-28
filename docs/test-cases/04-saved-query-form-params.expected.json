@@ -1,261 +1,411 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "kind": "query",
-    "location": {
-      "file": "04-saved-query-form-params.sql",
-      "startLine": 9,
-      "startColumn": 1,
-      "endLine": 36,
-      "endColumn": 18
-    },
-    "originalSource": "(see source file)"
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "migrated-from-v0",
+  "Database": {
+    "Name": "04-saved-query-form-params.expected",
+    "FilePath": "docs\\test-cases\\04-saved-query-form-params.expected.json",
+    "ExportedAt": "2026-05-28T10:23:08.0000000+00:00"
   },
-  "items": [
+  "Modules": [
     {
-      "itemKind": "query",
-      "name": "qryActiveCasesByDistrict",
-      "queryType": "Select",
-      "sql": {
-        "originalText": "PARAMETERS [Forms]![frmDistrictReport]![cboDistrict] Long, [Forms]![frmDistrictReport]![txtAsOfDate] DateTime; SELECT c.CaseID, c.CaseNumber, c.OpenedDate, Nz(cw.CaseworkerName, \"Unassigned\") AS Caseworker, cl.ClientLastName & \", \" & cl.ClientFirstName AS ClientName, DateDiff(\"d\", c.OpenedDate, [Forms]![frmDistrictReport]![txtAsOfDate]) AS DaysOpen, IIf(DateDiff(\"d\", c.OpenedDate, [Forms]![frmDistrictReport]![txtAsOfDate]) > 90, \"Overdue\", IIf(DateDiff(\"d\", c.OpenedDate, [Forms]![frmDistrictReport]![txtAsOfDate]) > 60, \"At Risk\", \"On Track\")) AS StatusFlag, c.Priority, c.LastActivityDate FROM ((tblCases AS c LEFT JOIN tblCaseworkers AS cw ON c.AssignedCaseworkerID = cw.CaseworkerID) INNER JOIN tblClients AS cl ON c.ClientID = cl.ClientID) WHERE c.DistrictID = [Forms]![frmDistrictReport]![cboDistrict] AND c.CaseStatus IN ('Open', 'Pending Review', 'Awaiting Documents') AND c.OpenedDate <= [Forms]![frmDistrictReport]![txtAsOfDate] AND (c.ClosedDate IS NULL OR c.ClosedDate > [Forms]![frmDistrictReport]![txtAsOfDate]) ORDER BY IIf(c.Priority = 'High', 1, IIf(c.Priority = 'Medium', 2, 3)), c.OpenedDate;",
-        "parsed": {
-          "queryType": "Select",
-          "select": [
-            { "expression": "c.CaseID", "alias": null },
-            { "expression": "c.CaseNumber", "alias": null },
-            { "expression": "c.OpenedDate", "alias": null },
-            {
-              "expression": {
-                "kind": "call",
-                "callee": "Nz",
-                "args": [
-                  { "kind": "memberAccess", "of": "cw", "member": "CaseworkerName" },
-                  { "kind": "literal", "literalKind": "string", "value": "Unassigned" }
-                ]
-              },
-              "alias": "Caseworker"
-            },
-            {
-              "expression": {
-                "kind": "binaryOp",
-                "op": "&",
-                "operands": ["cl.ClientLastName", "', '", "cl.ClientFirstName"]
-              },
-              "alias": "ClientName",
-              "notes": "String concatenation using & operator (JET dialect)"
-            },
-            {
-              "expression": {
-                "kind": "call",
-                "callee": "DateDiff",
-                "args": [
-                  { "kind": "literal", "literalKind": "string", "value": "d" },
-                  "c.OpenedDate",
-                  "[Forms]![frmDistrictReport]![txtAsOfDate]"
-                ]
-              },
-              "alias": "DaysOpen"
-            },
-            {
-              "expression": {
-                "kind": "call",
-                "callee": "IIf",
-                "args": [
+      "ModuleName": "04-saved-query-form-params.expected",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Query",
+          "Location": {
+            "File": "04-saved-query-form-params.sql",
+            "StartLine": 9,
+            "StartColumn": 1,
+            "EndLine": 36,
+            "EndColumn": 18
+          },
+          "OriginalSource": "(see source file)"
+        },
+        "Items": [
+          {
+            "ItemKind": "Query",
+            "Name": "qryActiveCasesByDistrict",
+            "QueryType": "Select",
+            "Sql": {
+              "OriginalText": "PARAMETERS [Forms]![frmDistrictReport]![cboDistrict] Long, [Forms]![frmDistrictReport]![txtAsOfDate] DateTime; SELECT c.CaseID, c.CaseNumber, c.OpenedDate, Nz(cw.CaseworkerName, \"Unassigned\") AS Caseworker, cl.ClientLastName & \", \" & cl.ClientFirstName AS ClientName, DateDiff(\"d\", c.OpenedDate, [Forms]![frmDistrictReport]![txtAsOfDate]) AS DaysOpen, IIf(DateDiff(\"d\", c.OpenedDate, [Forms]![frmDistrictReport]![txtAsOfDate]) > 90, \"Overdue\", IIf(DateDiff(\"d\", c.OpenedDate, [Forms]![frmDistrictReport]![txtAsOfDate]) > 60, \"At Risk\", \"On Track\")) AS StatusFlag, c.Priority, c.LastActivityDate FROM ((tblCases AS c LEFT JOIN tblCaseworkers AS cw ON c.AssignedCaseworkerID = cw.CaseworkerID) INNER JOIN tblClients AS cl ON c.ClientID = cl.ClientID) WHERE c.DistrictID = [Forms]![frmDistrictReport]![cboDistrict] AND c.CaseStatus IN ('Open', 'Pending Review', 'Awaiting Documents') AND c.OpenedDate <= [Forms]![frmDistrictReport]![txtAsOfDate] AND (c.ClosedDate IS NULL OR c.ClosedDate > [Forms]![frmDistrictReport]![txtAsOfDate]) ORDER BY IIf(c.Priority = 'High', 1, IIf(c.Priority = 'Medium', 2, 3)), c.OpenedDate;",
+              "Parsed": {
+                "QueryType": "Select",
+                "Select": [
                   {
-                    "kind": "binaryOp",
-                    "op": ">",
-                    "left": {
-                      "kind": "call",
-                      "callee": "DateDiff",
-                      "args": ["'d'", "c.OpenedDate", "[Forms]![frmDistrictReport]![txtAsOfDate]"]
-                    },
-                    "right": { "kind": "literal", "literalKind": "number", "value": 90 }
+                    "Expression": "c.CaseID",
+                    "Alias": null
                   },
-                  { "kind": "literal", "literalKind": "string", "value": "Overdue" },
                   {
-                    "kind": "call",
-                    "callee": "IIf",
-                    "args": [
-                      "DateDiff(...) > 60",
-                      "'At Risk'",
-                      "'On Track'"
-                    ],
-                    "notes": "Nested IIf forms a 3-way conditional"
+                    "Expression": "c.CaseNumber",
+                    "Alias": null
+                  },
+                  {
+                    "Expression": "c.OpenedDate",
+                    "Alias": null
+                  },
+                  {
+                    "Expression": {
+                      "Kind": "Call",
+                      "Callee": "Nz",
+                      "Args": [
+                        {
+                          "Kind": "MemberAccess",
+                          "Of": "cw",
+                          "Member": "CaseworkerName"
+                        },
+                        {
+                          "Kind": "Literal",
+                          "LiteralKind": "String",
+                          "Value": "Unassigned"
+                        }
+                      ]
+                    },
+                    "Alias": "Caseworker"
+                  },
+                  {
+                    "Expression": {
+                      "Kind": "BinaryOp",
+                      "Op": "&",
+                      "Operands": [
+                        "cl.ClientLastName",
+                        "', '",
+                        "cl.ClientFirstName"
+                      ]
+                    },
+                    "Alias": "ClientName",
+                    "Notes": "String concatenation using & operator (JET dialect)"
+                  },
+                  {
+                    "Expression": {
+                      "Kind": "Call",
+                      "Callee": "DateDiff",
+                      "Args": [
+                        {
+                          "Kind": "Literal",
+                          "LiteralKind": "String",
+                          "Value": "d"
+                        },
+                        "c.OpenedDate",
+                        "[Forms]![frmDistrictReport]![txtAsOfDate]"
+                      ]
+                    },
+                    "Alias": "DaysOpen"
+                  },
+                  {
+                    "Expression": {
+                      "Kind": "Call",
+                      "Callee": "IIf",
+                      "Args": [
+                        {
+                          "Kind": "BinaryOp",
+                          "Op": ">",
+                          "Left": {
+                            "Kind": "Call",
+                            "Callee": "DateDiff",
+                            "Args": [
+                              "'d'",
+                              "c.OpenedDate",
+                              "[Forms]![frmDistrictReport]![txtAsOfDate]"
+                            ]
+                          },
+                          "Right": {
+                            "Kind": "Literal",
+                            "LiteralKind": "Number",
+                            "Value": 90
+                          }
+                        },
+                        {
+                          "Kind": "Literal",
+                          "LiteralKind": "String",
+                          "Value": "Overdue"
+                        },
+                        {
+                          "Kind": "Call",
+                          "Callee": "IIf",
+                          "Args": [
+                            "DateDiff(...) > 60",
+                            "'At Risk'",
+                            "'On Track'"
+                          ],
+                          "Notes": "Nested IIf forms a 3-way conditional"
+                        }
+                      ]
+                    },
+                    "Alias": "StatusFlag",
+                    "MigrationHint": "CASE WHEN ... in target SQL, or ternary/switch in target code"
+                  },
+                  {
+                    "Expression": "c.Priority",
+                    "Alias": null
+                  },
+                  {
+                    "Expression": "c.LastActivityDate",
+                    "Alias": null
+                  }
+                ],
+                "From": [
+                  {
+                    "Table": "tblCases",
+                    "Alias": "c"
+                  }
+                ],
+                "Joins": [
+                  {
+                    "JoinType": "LEFT",
+                    "Table": "tblCaseworkers",
+                    "Alias": "cw",
+                    "OnCondition": {
+                      "Kind": "BinaryOp",
+                      "Op": "=",
+                      "Left": "c.AssignedCaseworkerID",
+                      "Right": "cw.CaseworkerID"
+                    }
+                  },
+                  {
+                    "JoinType": "INNER",
+                    "Table": "tblClients",
+                    "Alias": "cl",
+                    "OnCondition": {
+                      "Kind": "BinaryOp",
+                      "Op": "=",
+                      "Left": "c.ClientID",
+                      "Right": "cl.ClientID"
+                    }
+                  }
+                ],
+                "Where": {
+                  "Kind": "BinaryOp",
+                  "Op": "AND",
+                  "Predicates": [
+                    {
+                      "Kind": "BinaryOp",
+                      "Op": "=",
+                      "Left": "c.DistrictID",
+                      "Right": "[Forms]![frmDistrictReport]![cboDistrict]"
+                    },
+                    {
+                      "Kind": "In",
+                      "Expr": "c.CaseStatus",
+                      "Values": [
+                        "Open",
+                        "Pending Review",
+                        "Awaiting Documents"
+                      ]
+                    },
+                    {
+                      "Kind": "BinaryOp",
+                      "Op": "<=",
+                      "Left": "c.OpenedDate",
+                      "Right": "[Forms]![frmDistrictReport]![txtAsOfDate]"
+                    },
+                    {
+                      "Kind": "Or",
+                      "Left": {
+                        "Kind": "IsNull",
+                        "Expr": "c.ClosedDate"
+                      },
+                      "Right": {
+                        "Kind": "BinaryOp",
+                        "Op": ">",
+                        "Left": "c.ClosedDate",
+                        "Right": "[Forms]![frmDistrictReport]![txtAsOfDate]"
+                      }
+                    }
+                  ]
+                },
+                "OrderBy": [
+                  {
+                    "Expression": {
+                      "Kind": "Call",
+                      "Callee": "IIf",
+                      "Args": [
+                        "c.Priority = 'High'",
+                        1,
+                        "IIf(c.Priority = 'Medium', 2, 3)"
+                      ]
+                    },
+                    "Direction": "ASC",
+                    "Notes": "ORDER BY IIf is a Priority sort: High=1, Medium=2, else 3"
+                  },
+                  {
+                    "Expression": "c.OpenedDate",
+                    "Direction": "ASC"
                   }
                 ]
               },
-              "alias": "StatusFlag",
-              "migrationHint": "CASE WHEN ... in target SQL, or ternary/switch in target code"
+              "Parameters": [
+                {
+                  "Name": "cboDistrict",
+                  "Type": "Long",
+                  "Source": "FormControl",
+                  "ResolvedReference": {
+                    "OriginalText": "[Forms]![frmDistrictReport]![cboDistrict]",
+                    "Location": {
+                      "StartLine": 10,
+                      "StartColumn": 12,
+                      "EndLine": 10,
+                      "EndColumn": 53
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "Control",
+                    "ResolvedTarget": {
+                      "Kind": "Control",
+                      "Name": "cboDistrict",
+                      "Container": "frmDistrictReport",
+                      "FullyQualifiedName": "Forms!frmDistrictReport!cboDistrict",
+                      "Type": "ComboBox"
+                    },
+                    "Confidence": 1.0
+                  }
+                },
+                {
+                  "Name": "txtAsOfDate",
+                  "Type": "DateTime",
+                  "Source": "FormControl",
+                  "ResolvedReference": {
+                    "OriginalText": "[Forms]![frmDistrictReport]![txtAsOfDate]",
+                    "Location": {
+                      "StartLine": 11,
+                      "StartColumn": 12,
+                      "EndLine": 11,
+                      "EndColumn": 53
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "Control",
+                    "ResolvedTarget": {
+                      "Kind": "Control",
+                      "Name": "txtAsOfDate",
+                      "Container": "frmDistrictReport",
+                      "FullyQualifiedName": "Forms!frmDistrictReport!txtAsOfDate",
+                      "Type": "TextBox"
+                    },
+                    "Confidence": 1.0
+                  }
+                }
+              ]
             },
-            { "expression": "c.Priority", "alias": null },
-            { "expression": "c.LastActivityDate", "alias": null }
-          ],
-          "from": [
-            { "table": "tblCases", "alias": "c" }
-          ],
-          "joins": [
-            {
-              "joinType": "LEFT",
-              "table": "tblCaseworkers",
-              "alias": "cw",
-              "onCondition": {
-                "kind": "binaryOp",
-                "op": "=",
-                "left": "c.AssignedCaseworkerID",
-                "right": "cw.CaseworkerID"
-              }
-            },
-            {
-              "joinType": "INNER",
-              "table": "tblClients",
-              "alias": "cl",
-              "onCondition": {
-                "kind": "binaryOp",
-                "op": "=",
-                "left": "c.ClientID",
-                "right": "cl.ClientID"
-              }
+            "Abstraction": {
+              "SuggestedMethodName": "GetActiveCasesByDistrict",
+              "SuggestedParameters": [
+                {
+                  "Name": "districtId",
+                  "Type": "long",
+                  "ByRef": false,
+                  "Optional": false,
+                  "DerivedFrom": "Forms!frmDistrictReport!cboDistrict (declared parameter)"
+                },
+                {
+                  "Name": "asOfDate",
+                  "Type": "DateTime",
+                  "ByRef": false,
+                  "Optional": false,
+                  "DerivedFrom": "Forms!frmDistrictReport!txtAsOfDate (declared parameter, used in 4 expressions)"
+                }
+              ],
+              "ReturnShape": [
+                {
+                  "Name": "CaseID",
+                  "Type": "long",
+                  "Nullable": false
+                },
+                {
+                  "Name": "CaseNumber",
+                  "Type": "string",
+                  "Nullable": true
+                },
+                {
+                  "Name": "OpenedDate",
+                  "Type": "DateTime",
+                  "Nullable": false
+                },
+                {
+                  "Name": "Caseworker",
+                  "Type": "string",
+                  "Nullable": false,
+                  "Notes": "Nz wrapper makes effectively non-null"
+                },
+                {
+                  "Name": "ClientName",
+                  "Type": "string",
+                  "Nullable": false,
+                  "Notes": "Concatenation; null only if both name fields null"
+                },
+                {
+                  "Name": "DaysOpen",
+                  "Type": "long",
+                  "Nullable": true
+                },
+                {
+                  "Name": "StatusFlag",
+                  "Type": "string",
+                  "Nullable": false,
+                  "Notes": "Computed from nested IIf; values: Overdue, At Risk, On Track"
+                },
+                {
+                  "Name": "Priority",
+                  "Type": "string",
+                  "Nullable": true
+                },
+                {
+                  "Name": "LastActivityDate",
+                  "Type": "DateTime",
+                  "Nullable": true
+                }
+              ]
             }
-          ],
-          "where": {
-            "kind": "binaryOp",
-            "op": "AND",
-            "predicates": [
-              {
-                "kind": "binaryOp",
-                "op": "=",
-                "left": "c.DistrictID",
-                "right": "[Forms]![frmDistrictReport]![cboDistrict]"
-              },
-              {
-                "kind": "in",
-                "expr": "c.CaseStatus",
-                "values": ["Open", "Pending Review", "Awaiting Documents"]
-              },
-              {
-                "kind": "binaryOp",
-                "op": "<=",
-                "left": "c.OpenedDate",
-                "right": "[Forms]![frmDistrictReport]![txtAsOfDate]"
-              },
-              {
-                "kind": "or",
-                "left": { "kind": "isNull", "expr": "c.ClosedDate" },
-                "right": { "kind": "binaryOp", "op": ">", "left": "c.ClosedDate", "right": "[Forms]![frmDistrictReport]![txtAsOfDate]" }
-              }
-            ]
-          },
-          "orderBy": [
-            {
-              "expression": {
-                "kind": "call",
-                "callee": "IIf",
-                "args": ["c.Priority = 'High'", 1, "IIf(c.Priority = 'Medium', 2, 3)"]
-              },
-              "direction": "ASC",
-              "notes": "ORDER BY IIf is a Priority sort: High=1, Medium=2, else 3"
-            },
-            { "expression": "c.OpenedDate", "direction": "ASC" }
-          ]
-        },
-        "parameters": [
-          {
-            "name": "cboDistrict",
-            "type": "Long",
-            "source": "formControl",
-            "resolvedReference": {
-              "originalText": "[Forms]![frmDistrictReport]![cboDistrict]",
-              "location": { "startLine": 10, "startColumn": 12, "endLine": 10, "endColumn": 53 },
-              "resolutionStatus": "resolved",
-              "referenceKind": "control",
-              "resolvedTarget": {
-                "kind": "control",
-                "name": "cboDistrict",
-                "container": "frmDistrictReport",
-                "fullyQualifiedName": "Forms!frmDistrictReport!cboDistrict",
-                "type": "ComboBox"
-              },
-              "confidence": 1.0
-            }
-          },
-          {
-            "name": "txtAsOfDate",
-            "type": "DateTime",
-            "source": "formControl",
-            "resolvedReference": {
-              "originalText": "[Forms]![frmDistrictReport]![txtAsOfDate]",
-              "location": { "startLine": 11, "startColumn": 12, "endLine": 11, "endColumn": 53 },
-              "resolutionStatus": "resolved",
-              "referenceKind": "control",
-              "resolvedTarget": {
-                "kind": "control",
-                "name": "txtAsOfDate",
-                "container": "frmDistrictReport",
-                "fullyQualifiedName": "Forms!frmDistrictReport!txtAsOfDate",
-                "type": "TextBox"
-              },
-              "confidence": 1.0
-            }
-          }
-        ]
-      },
-      "abstraction": {
-        "suggestedMethodName": "GetActiveCasesByDistrict",
-        "suggestedParameters": [
-          {
-            "name": "districtId",
-            "type": "long",
-            "byRef": false,
-            "optional": false,
-            "derivedFrom": "Forms!frmDistrictReport!cboDistrict (declared parameter)"
-          },
-          {
-            "name": "asOfDate",
-            "type": "DateTime",
-            "byRef": false,
-            "optional": false,
-            "derivedFrom": "Forms!frmDistrictReport!txtAsOfDate (declared parameter, used in 4 expressions)"
           }
         ],
-        "returnShape": [
-          { "name": "CaseID", "type": "long", "nullable": false },
-          { "name": "CaseNumber", "type": "string", "nullable": true },
-          { "name": "OpenedDate", "type": "DateTime", "nullable": false },
-          { "name": "Caseworker", "type": "string", "nullable": false, "notes": "Nz wrapper makes effectively non-null" },
-          { "name": "ClientName", "type": "string", "nullable": false, "notes": "Concatenation; null only if both name fields null" },
-          { "name": "DaysOpen", "type": "long", "nullable": true },
-          { "name": "StatusFlag", "type": "string", "nullable": false, "notes": "Computed from nested IIf; values: Overdue, At Risk, On Track" },
-          { "name": "Priority", "type": "string", "nullable": true },
-          { "name": "LastActivityDate", "type": "DateTime", "nullable": true }
+        "UnresolvedItems": [],
+        "Diagnostics": [
+          {
+            "Severity": "Info",
+            "Code": "HARV-I030",
+            "Message": "Nested IIf for status classification: 3-way conditional based on DaysOpen thresholds (90, 60). Migration target: explicit if/else chain or computed property in domain model.",
+            "Location": {
+              "StartLine": 18,
+              "StartColumn": 5,
+              "EndLine": 22,
+              "EndColumn": 30
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I031",
+            "Message": "Priority sort via IIf: maps string priority to numeric sort key. Migration target: enum with explicit ordinal, or sort key column.",
+            "Location": {
+              "StartLine": 34,
+              "StartColumn": 5,
+              "EndLine": 34,
+              "EndColumn": 65
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I032",
+            "Message": "txtAsOfDate referenced 4 times in same query; consider single computed parameter binding rather than repeated expression evaluation in target SQL.",
+            "Location": {
+              "StartLine": 9,
+              "StartColumn": 1,
+              "EndLine": 36,
+              "EndColumn": 18
+            }
+          },
+          {
+            "Severity": "Warning",
+            "Code": "HARV-W030",
+            "Message": "Status calculation uses calendar-day DateDiff; migration must preserve same semantics (calendar days vs business days, time-of-day handling). Confirm intent with users.",
+            "Location": {
+              "StartLine": 18,
+              "StartColumn": 5,
+              "EndLine": 22,
+              "EndColumn": 30
+            }
+          }
         ]
       }
-    }
-  ],
-  "unresolvedItems": [],
-  "diagnostics": [
-    {
-      "severity": "info",
-      "code": "HARV-I030",
-      "message": "Nested IIf for status classification: 3-way conditional based on DaysOpen thresholds (90, 60). Migration target: explicit if/else chain or computed property in domain model.",
-      "location": { "startLine": 18, "startColumn": 5, "endLine": 22, "endColumn": 30 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I031",
-      "message": "Priority sort via IIf: maps string priority to numeric sort key. Migration target: enum with explicit ordinal, or sort key column.",
-      "location": { "startLine": 34, "startColumn": 5, "endLine": 34, "endColumn": 65 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I032",
-      "message": "txtAsOfDate referenced 4 times in same query; consider single computed parameter binding rather than repeated expression evaluation in target SQL.",
-      "location": { "startLine": 9, "startColumn": 1, "endLine": 36, "endColumn": 18 }
-    },
-    {
-      "severity": "warning",
-      "code": "HARV-W030",
-      "message": "Status calculation uses calendar-day DateDiff; migration must preserve same semantics (calendar days vs business days, time-of-day handling). Confirm intent with users.",
-      "location": { "startLine": 18, "startColumn": 5, "endLine": 22, "endColumn": 30 }
     }
   ]
 }

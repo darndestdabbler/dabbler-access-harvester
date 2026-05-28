@@ -1,0 +1,79 @@
+{
+  "sessionSetName": "harvester-schema-v1-adr-followups",
+  "createdDate": "2026-05-28T05:55:30.250872-04:00",
+  "totalSessions": 1,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 0,
+      "stepKey": "bootstrap",
+      "dateTime": "2026-05-28T05:56:27.952780-04:00",
+      "description": "API keys verified, session registered, prior-commit check passed (brand-new session set)",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "inspect-predicate-hierarchy",
+      "dateTime": "2026-05-28T06:27:12.955528-04:00",
+      "description": "Inspected PredicateNode hierarchy in QueryAbstraction.cs: 9 concrete sealed record types, all positional primary constructors",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "predicate-polymorphism-fix",
+      "dateTime": "2026-05-28T06:27:12.955528-04:00",
+      "description": "Applied [JsonPolymorphic] + [JsonDerivedType] attributes to PredicateNode base; added round-trip tests in PredicateNodeRoundTripTests.cs; fixed SchemaValidator Lazy<T> race condition",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "migration-script",
+      "dateTime": "2026-05-28T06:27:12.955528-04:00",
+      "description": "Authored tools/migrate_v0_to_v1.py with key-PascalCase, enum-value migration, DatabaseManifest wrapping, idempotency guard",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "run-migration",
+      "dateTime": "2026-05-28T06:27:12.955528-04:00",
+      "description": "Ran migration against all 13 docs/test-cases/*.expected.json fixtures; verified idempotency",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "conformance-test",
+      "dateTime": "2026-05-28T06:27:12.955528-04:00",
+      "description": "Added TestCaseFixtureConformanceTests.cs; 12/13 fixtures pass v1.0 validation; fixture 12 excluded per stop rule (Source: g_CurrentUserID)",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "build-test",
+      "dateTime": "2026-05-28T06:27:12.955528-04:00",
+      "description": "dotnet build: 0 errors. dotnet test: 391 Pipeline.Tests passed; 1919 total across all suites, 0 failures",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "update-adr",
+      "dateTime": "2026-05-28T06:27:12.955528-04:00",
+      "description": "Updated docs/schema/v1-adr.md: both Known Issues moved to Resolved with implementation details and stop-rule documentation",
+      "status": "completed",
+      "routedApiCalls": []
+    }
+  ]
+}

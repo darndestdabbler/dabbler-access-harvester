@@ -1,472 +1,488 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "kind": "procedure",
-    "location": {
-      "file": "05-dynamic-sql-construction.bas",
-      "module": "modReportRunner",
-      "startLine": 9,
-      "startColumn": 1,
-      "endLine": 88,
-      "endColumn": 13
-    },
-    "originalSource": "(see source file)"
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "migrated-from-v0",
+  "Database": {
+    "Name": "05-dynamic-sql-construction.expected",
+    "FilePath": "docs\\test-cases\\05-dynamic-sql-construction.expected.json",
+    "ExportedAt": "2026-05-28T10:23:08.0000000+00:00"
   },
-  "items": [
+  "Modules": [
     {
-      "itemKind": "procedure",
-      "name": "RunFilteredCaseReport",
-      "procedureKind": "Function",
-      "visibility": "Public",
-      "isStatic": false,
-      "signature": {
-        "parameters": [
-          {
-            "name": "sFilterArgs",
-            "type": "String",
-            "byRef": false,
-            "optional": true,
-            "defaultValue": "\"\"",
-            "derivedFrom": "Original parameter; carries filter directives like 'ACTIVE_ONLY|OVERDUE|BY_DATE'"
-          }
-        ],
-        "returnType": "Long"
-      },
-      "classification": {
-        "purposeTags": [
-          "dataAccess",
-          "filterSearch",
-          "calculation"
-        ],
-        "purity": "dataAccess",
-        "complexity": 12,
-        "linesOfCode": 75,
-        "translatability": "manualReview"
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "declaration",
-            "summary": "Local variables for SQL building, DAO objects, count",
-            "location": {
-              "startLine": 1,
-              "startColumn": 1
-            }
+      "ModuleName": "modReportRunner",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Procedure",
+          "Location": {
+            "File": "05-dynamic-sql-construction.bas",
+            "Module": "modReportRunner",
+            "StartLine": 9,
+            "StartColumn": 1,
+            "EndLine": 88,
+            "EndColumn": 13
           },
+          "OriginalSource": "(see source file)"
+        },
+        "Items": [
           {
-            "kind": "errorHandler",
-            "summary": "On Error GoTo ErrHandler",
-            "location": {
-              "startLine": 1,
-              "startColumn": 1
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": {
-              "startLine": 18,
-              "startColumn": 5,
-              "endLine": 19,
-              "endColumn": 39
+            "ItemKind": "Procedure",
+            "Name": "RunFilteredCaseReport",
+            "ProcedureKind": "Function",
+            "Visibility": "Public",
+            "IsStatic": false,
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "sFilterArgs",
+                  "Type": "String",
+                  "ByRef": false,
+                  "Optional": true,
+                  "DefaultValue": "\"\"",
+                  "DerivedFrom": "Original parameter; carries filter directives like 'ACTIVE_ONLY|OVERDUE|BY_DATE'"
+                }
+              ],
+              "ReturnType": "Long"
             },
-            "summary": "Initialize sSQL with base SELECT and FROM",
-            "details": {
-              "target": "sSQL",
-              "value": "literal string assembly: SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c"
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": {
-              "startLine": 22,
-              "startColumn": 5,
-              "endLine": 22,
-              "endColumn": 32
+            "Classification": {
+              "PurposeTags": [
+                "DataAccess",
+                "FilterSearch",
+                "Calculation"
+              ],
+              "Purity": "DataAccess",
+              "Complexity": 12,
+              "LinesOfCode": 75,
+              "Translatability": "ManualReview"
             },
-            "summary": "Initialize sWhere with always-true predicate (common pattern for conditional WHERE)",
-            "details": {
-              "target": "sWhere",
-              "value": " WHERE 1=1 "
-            }
-          },
-          {
-            "kind": "if",
-            "location": {
-              "startLine": 24,
-              "startColumn": 5,
-              "endLine": 26,
-              "endColumn": 11
-            },
-            "summary": "Conditionally append ACTIVE_ONLY filter based on InStr of filter args",
-            "details": {
-              "conditionalSqlAppend": {
-                "trigger": "InStr(sFilterArgs, 'ACTIVE_ONLY') > 0",
-                "appendsToWhere": " AND c.Status IN ('Open', 'Pending Review') "
-              }
-            }
-          },
-          {
-            "kind": "if",
-            "location": {
-              "startLine": 28,
-              "startColumn": 5,
-              "endLine": 30,
-              "endColumn": 11
-            },
-            "summary": "Conditionally append OVERDUE filter (DateDiff > 90 days)",
-            "details": {
-              "conditionalSqlAppend": {
-                "trigger": "InStr(sFilterArgs, 'OVERDUE') > 0",
-                "appendsToWhere": " AND DateDiff('d', c.OpenedDate, Date()) > 90 "
-              }
-            }
-          },
-          {
-            "kind": "if",
-            "location": {
-              "startLine": 33,
-              "startColumn": 5,
-              "endLine": 47,
-              "endColumn": 11
-            },
-            "summary": "If frmFilterPanel is loaded, append filters from its controls",
-            "details": {
-              "conditionalSqlAppend": {
-                "trigger": "CurrentProject.AllForms('frmFilterPanel').IsLoaded",
-                "innerConditionals": [
-                  {
-                    "trigger": "Not IsNull(Forms!frmFilterPanel!cboDistrict)",
-                    "appendsToWhere": " AND c.DistrictID = ?",
-                    "parameter": {
-                      "name": "p_DistrictID",
-                      "source": "formControl",
-                      "resolvedTarget": "Forms!frmFilterPanel!cboDistrict"
-                    }
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Declaration",
+                  "Summary": "Local variables for SQL building, DAO objects, count",
+                  "Location": {
+                    "StartLine": 1,
+                    "StartColumn": 1
+                  }
+                },
+                {
+                  "Kind": "ErrorHandler",
+                  "Summary": "On Error GoTo ErrHandler",
+                  "Location": {
+                    "StartLine": 1,
+                    "StartColumn": 1
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 18,
+                    "StartColumn": 5,
+                    "EndLine": 19,
+                    "EndColumn": 39
                   },
-                  {
-                    "trigger": "Not IsNull(Forms!frmFilterPanel!txtCaseworkerName) And not empty",
-                    "appendsToWhere": " AND c.AssignedCaseworkerID IN (SELECT CaseworkerID FROM tblCaseworkers WHERE CaseworkerName LIKE '*?*')",
-                    "parameter": {
-                      "name": "p_CaseworkerNamePattern",
-                      "source": "formControl",
-                      "resolvedTarget": "Forms!frmFilterPanel!txtCaseworkerName",
-                      "wrappedWith": "Replace(value, \"'\", \"''\")"
+                  "Summary": "Initialize sSQL with base SELECT and FROM",
+                  "Details": {
+                    "Target": "sSQL",
+                    "Value": "literal string assembly: SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c"
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 22,
+                    "StartColumn": 5,
+                    "EndLine": 22,
+                    "EndColumn": 32
+                  },
+                  "Summary": "Initialize sWhere with always-true predicate (common pattern for conditional WHERE)",
+                  "Details": {
+                    "Target": "sWhere",
+                    "Value": " WHERE 1=1 "
+                  }
+                },
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 24,
+                    "StartColumn": 5,
+                    "EndLine": 26,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Conditionally append ACTIVE_ONLY filter based on InStr of filter args",
+                  "Details": {
+                    "ConditionalSqlAppend": {
+                      "Trigger": "InStr(sFilterArgs, 'ACTIVE_ONLY') > 0",
+                      "AppendsToWhere": " AND c.Status IN ('Open', 'Pending Review') "
+                    }
+                  }
+                },
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 28,
+                    "StartColumn": 5,
+                    "EndLine": 30,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Conditionally append OVERDUE filter (DateDiff > 90 days)",
+                  "Details": {
+                    "ConditionalSqlAppend": {
+                      "Trigger": "InStr(sFilterArgs, 'OVERDUE') > 0",
+                      "AppendsToWhere": " AND DateDiff('d', c.OpenedDate, Date()) > 90 "
+                    }
+                  }
+                },
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 33,
+                    "StartColumn": 5,
+                    "EndLine": 47,
+                    "EndColumn": 11
+                  },
+                  "Summary": "If frmFilterPanel is loaded, append filters from its controls",
+                  "Details": {
+                    "ConditionalSqlAppend": {
+                      "Trigger": "CurrentProject.AllForms('frmFilterPanel').IsLoaded",
+                      "InnerConditionals": [
+                        {
+                          "Trigger": "Not IsNull(Forms!frmFilterPanel!cboDistrict)",
+                          "AppendsToWhere": " AND c.DistrictID = ?",
+                          "Parameter": {
+                            "Name": "p_DistrictID",
+                            "Source": "FormControl",
+                            "ResolvedTarget": "Forms!frmFilterPanel!cboDistrict"
+                          }
+                        },
+                        {
+                          "Trigger": "Not IsNull(Forms!frmFilterPanel!txtCaseworkerName) And not empty",
+                          "AppendsToWhere": " AND c.AssignedCaseworkerID IN (SELECT CaseworkerID FROM tblCaseworkers WHERE CaseworkerName LIKE '*?*')",
+                          "Parameter": {
+                            "Name": "p_CaseworkerNamePattern",
+                            "Source": "FormControl",
+                            "ResolvedTarget": "Forms!frmFilterPanel!txtCaseworkerName",
+                            "WrappedWith": "Replace(value, \"'\", \"''\")"
+                          },
+                          "Notes": "SQL-injection-aware quote escape via Replace; LIKE wildcards added literally. Migration target should use parameterized LIKE with proper wildcards (% in standard SQL, * in JET)."
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 51,
+                    "StartColumn": 5,
+                    "EndLine": 55,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Sort order: BY_DATE flag selects OpenedDate DESC, else CaseNumber ASC",
+                  "Details": {
+                    "ConditionalSqlAppend": {
+                      "Trigger": "InStr(sFilterArgs, 'BY_DATE') > 0",
+                      "ThenBranch": " ORDER BY c.OpenedDate DESC ",
+                      "ElseBranch": " ORDER BY c.CaseNumber "
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 58,
+                    "StartColumn": 5,
+                    "EndLine": 58,
+                    "EndColumn": 35
+                  },
+                  "Summary": "Final SQL assembly: sSQL = sSQL & sWhere & sOrder"
+                },
+                {
+                  "Kind": "Set",
+                  "Location": {
+                    "StartLine": 62,
+                    "StartColumn": 5,
+                    "EndLine": 62,
+                    "EndColumn": 50
+                  },
+                  "Summary": "Execute the dynamically-built SQL via OpenRecordset"
+                }
+              ],
+              "References": [
+                {
+                  "OriginalText": "Forms!frmFilterPanel!cboDistrict",
+                  "Location": {
+                    "StartLine": 35,
+                    "StartColumn": 13,
+                    "EndLine": 35,
+                    "EndColumn": 45
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "cboDistrict",
+                    "Container": "frmFilterPanel",
+                    "FullyQualifiedName": "Forms!frmFilterPanel!cboDistrict",
+                    "Type": "ComboBox"
+                  },
+                  "Confidence": 0.85,
+                  "Notes": "Cross-form reference: works only if frmFilterPanel is open. Code does check IsLoaded first."
+                },
+                {
+                  "OriginalText": "Forms!frmFilterPanel!txtCaseworkerName",
+                  "Location": {
+                    "StartLine": 41,
+                    "StartColumn": 17,
+                    "EndLine": 41,
+                    "EndColumn": 56
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "txtCaseworkerName",
+                    "Container": "frmFilterPanel",
+                    "Type": "TextBox"
+                  },
+                  "Confidence": 0.85
+                },
+                {
+                  "OriginalText": "CurrentProject",
+                  "Location": {
+                    "StartLine": 33,
+                    "StartColumn": 8,
+                    "EndLine": 33,
+                    "EndColumn": 22
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "ObjectModel",
+                  "ResolvedTarget": {
+                    "Kind": "Property",
+                    "Name": "CurrentProject",
+                    "Container": "Access.Application",
+                    "Type": "Access.CurrentProject"
+                  },
+                  "Confidence": 1.0
+                }
+              ],
+              "Calls": [
+                {
+                  "CalleeText": "InStr",
+                  "Location": {
+                    "StartLine": 24,
+                    "StartColumn": 8,
+                    "EndLine": 24,
+                    "EndColumn": 13
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "InStr",
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "BuiltIn",
+                    "ResolvedTarget": {
+                      "Kind": "BuiltInFunction",
+                      "Name": "InStr",
+                      "Type": "Long"
                     },
-                    "notes": "SQL-injection-aware quote escape via Replace; LIKE wildcards added literally. Migration target should use parameterized LIKE with proper wildcards (% in standard SQL, * in JET)."
-                  }
-                ]
-              }
-            }
-          },
-          {
-            "kind": "if",
-            "location": {
-              "startLine": 51,
-              "startColumn": 5,
-              "endLine": 55,
-              "endColumn": 11
-            },
-            "summary": "Sort order: BY_DATE flag selects OpenedDate DESC, else CaseNumber ASC",
-            "details": {
-              "conditionalSqlAppend": {
-                "trigger": "InStr(sFilterArgs, 'BY_DATE') > 0",
-                "thenBranch": " ORDER BY c.OpenedDate DESC ",
-                "elseBranch": " ORDER BY c.CaseNumber "
-              }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": {
-              "startLine": 58,
-              "startColumn": 5,
-              "endLine": 58,
-              "endColumn": 35
-            },
-            "summary": "Final SQL assembly: sSQL = sSQL & sWhere & sOrder"
-          },
-          {
-            "kind": "set",
-            "location": {
-              "startLine": 62,
-              "startColumn": 5,
-              "endLine": 62,
-              "endColumn": 50
-            },
-            "summary": "Execute the dynamically-built SQL via OpenRecordset"
-          }
-        ],
-        "references": [
-          {
-            "originalText": "Forms!frmFilterPanel!cboDistrict",
-            "location": {
-              "startLine": 35,
-              "startColumn": 13,
-              "endLine": 35,
-              "endColumn": 45
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "cboDistrict",
-              "container": "frmFilterPanel",
-              "fullyQualifiedName": "Forms!frmFilterPanel!cboDistrict",
-              "type": "ComboBox"
-            },
-            "confidence": 0.85,
-            "notes": "Cross-form reference: works only if frmFilterPanel is open. Code does check IsLoaded first."
-          },
-          {
-            "originalText": "Forms!frmFilterPanel!txtCaseworkerName",
-            "location": {
-              "startLine": 41,
-              "startColumn": 17,
-              "endLine": 41,
-              "endColumn": 56
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "txtCaseworkerName",
-              "container": "frmFilterPanel",
-              "type": "TextBox"
-            },
-            "confidence": 0.85
-          },
-          {
-            "originalText": "CurrentProject",
-            "location": {
-              "startLine": 33,
-              "startColumn": 8,
-              "endLine": 33,
-              "endColumn": 22
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "objectModel",
-            "resolvedTarget": {
-              "kind": "property",
-              "name": "CurrentProject",
-              "container": "Access.Application",
-              "type": "Access.CurrentProject"
-            },
-            "confidence": 1.0
-          }
-        ],
-        "calls": [
-          {
-            "calleeText": "InStr",
-            "location": {
-              "startLine": 24,
-              "startColumn": 8,
-              "endLine": 24,
-              "endColumn": 13
-            },
-            "resolvedCallee": {
-              "originalText": "InStr",
-              "resolutionStatus": "resolved",
-              "referenceKind": "builtIn",
-              "resolvedTarget": {
-                "kind": "builtInFunction",
-                "name": "InStr",
-                "type": "Long"
-              },
-              "confidence": 1.0,
-              "location": {
-                "startLine": 24,
-                "startColumn": 8,
-                "endLine": 24,
-                "endColumn": 13
-              }
-            },
-            "notes": "Used as a poor man's flag check on a delimited string parameter. Migration target should replace sFilterArgs with a typed flags enum or options object."
-          },
-          {
-            "calleeText": "Replace",
-            "location": {
-              "startLine": 45,
-              "startColumn": 30,
-              "endLine": 45,
-              "endColumn": 70
-            },
-            "resolvedCallee": {
-              "originalText": "Replace",
-              "resolutionStatus": "resolved",
-              "referenceKind": "builtIn",
-              "resolvedTarget": {
-                "kind": "builtInFunction",
-                "name": "Replace",
-                "type": "String"
-              },
-              "confidence": 1.0,
-              "notes": "Used to escape single quotes for SQL injection prevention. Migration target should use parameterized SQL instead.",
-              "location": {
-                "startLine": 45,
-                "startColumn": 30,
-                "endLine": 45,
-                "endColumn": 70
-              }
-            }
-          }
-        ],
-        "sqlStrings": [
-          {
-            "originalText": "Constructed across lines 18-58 via sSQL/sWhere/sOrder assembly",
-            "location": {
-              "startLine": 18,
-              "startColumn": 5,
-              "endLine": 58,
-              "endColumn": 35
-            },
-            "constructionMode": "dynamic",
-            "templateCandidates": [
-              {
-                "template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 ORDER BY c.CaseNumber",
-                "parameterBindings": [],
-                "confidence": 1.0,
-                "notes": "Minimum case: no filter args, frmFilterPanel not loaded, no BY_DATE flag"
-              },
-              {
-                "template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 AND c.Status IN ('Open', 'Pending Review') ORDER BY c.CaseNumber",
-                "parameterBindings": [],
-                "confidence": 0.95,
-                "notes": "ACTIVE_ONLY flag set; no other conditions"
-              },
-              {
-                "template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 AND c.Status IN ('Open', 'Pending Review') AND DateDiff('d', c.OpenedDate, Date()) > 90 ORDER BY c.OpenedDate DESC",
-                "parameterBindings": [],
-                "confidence": 0.9,
-                "notes": "ACTIVE_ONLY + OVERDUE + BY_DATE; no panel filters"
-              },
-              {
-                "template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 AND c.DistrictID = ? AND c.AssignedCaseworkerID IN (SELECT CaseworkerID FROM tblCaseworkers WHERE CaseworkerName LIKE '*?*') ORDER BY c.CaseNumber",
-                "parameterBindings": [
-                  {
-                    "name": "p_DistrictID",
-                    "type": "Long",
-                    "source": "formControl",
-                    "resolvedReference": {
-                      "originalText": "Forms!frmFilterPanel!cboDistrict",
-                      "resolutionStatus": "resolved",
-                      "location": {
-                        "startLine": 18,
-                        "startColumn": 5,
-                        "endLine": 58,
-                        "endColumn": 35
-                      }
+                    "Confidence": 1.0,
+                    "Location": {
+                      "StartLine": 24,
+                      "StartColumn": 8,
+                      "EndLine": 24,
+                      "EndColumn": 13
                     }
                   },
-                  {
-                    "name": "p_CaseworkerNamePattern",
-                    "type": "String",
-                    "source": "formControl",
-                    "resolvedReference": {
-                      "originalText": "Forms!frmFilterPanel!txtCaseworkerName",
-                      "resolutionStatus": "resolved",
-                      "location": {
-                        "startLine": 18,
-                        "startColumn": 5,
-                        "endLine": 58,
-                        "endColumn": 35
-                      }
+                  "Notes": "Used as a poor man's flag check on a delimited string parameter. Migration target should replace sFilterArgs with a typed flags enum or options object."
+                },
+                {
+                  "CalleeText": "Replace",
+                  "Location": {
+                    "StartLine": 45,
+                    "StartColumn": 30,
+                    "EndLine": 45,
+                    "EndColumn": 70
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "Replace",
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "BuiltIn",
+                    "ResolvedTarget": {
+                      "Kind": "BuiltInFunction",
+                      "Name": "Replace",
+                      "Type": "String"
+                    },
+                    "Confidence": 1.0,
+                    "Notes": "Used to escape single quotes for SQL injection prevention. Migration target should use parameterized SQL instead.",
+                    "Location": {
+                      "StartLine": 45,
+                      "StartColumn": 30,
+                      "EndLine": 45,
+                      "EndColumn": 70
                     }
                   }
-                ],
-                "confidence": 0.85,
-                "notes": "frmFilterPanel loaded with both fields populated; no other flags"
-              },
-              {
-                "template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 AND c.Status IN ('Open', 'Pending Review') AND DateDiff('d', c.OpenedDate, Date()) > 90 AND c.DistrictID = ? AND c.AssignedCaseworkerID IN (SELECT CaseworkerID FROM tblCaseworkers WHERE CaseworkerName LIKE '*?*') ORDER BY c.OpenedDate DESC",
-                "parameterBindings": [
-                  {
-                    "name": "p_DistrictID",
-                    "type": "Long",
-                    "source": "formControl"
+                }
+              ],
+              "SqlStrings": [
+                {
+                  "OriginalText": "Constructed across lines 18-58 via sSQL/sWhere/sOrder assembly",
+                  "Location": {
+                    "StartLine": 18,
+                    "StartColumn": 5,
+                    "EndLine": 58,
+                    "EndColumn": 35
                   },
-                  {
-                    "name": "p_CaseworkerNamePattern",
-                    "type": "String",
-                    "source": "formControl"
-                  }
-                ],
-                "confidence": 0.7,
-                "notes": "All flags + all panel filters; combinatorial maximum"
-              }
-            ]
+                  "ConstructionMode": "Dynamic",
+                  "TemplateCandidates": [
+                    {
+                      "Template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 ORDER BY c.CaseNumber",
+                      "ParameterBindings": [],
+                      "Confidence": 1.0,
+                      "Notes": "Minimum case: no filter args, frmFilterPanel not loaded, no BY_DATE flag"
+                    },
+                    {
+                      "Template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 AND c.Status IN ('Open', 'Pending Review') ORDER BY c.CaseNumber",
+                      "ParameterBindings": [],
+                      "Confidence": 0.95,
+                      "Notes": "ACTIVE_ONLY flag set; no other conditions"
+                    },
+                    {
+                      "Template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 AND c.Status IN ('Open', 'Pending Review') AND DateDiff('d', c.OpenedDate, Date()) > 90 ORDER BY c.OpenedDate DESC",
+                      "ParameterBindings": [],
+                      "Confidence": 0.9,
+                      "Notes": "ACTIVE_ONLY + OVERDUE + BY_DATE; no panel filters"
+                    },
+                    {
+                      "Template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 AND c.DistrictID = ? AND c.AssignedCaseworkerID IN (SELECT CaseworkerID FROM tblCaseworkers WHERE CaseworkerName LIKE '*?*') ORDER BY c.CaseNumber",
+                      "ParameterBindings": [
+                        {
+                          "Name": "p_DistrictID",
+                          "Type": "Long",
+                          "Source": "FormControl",
+                          "ResolvedReference": {
+                            "OriginalText": "Forms!frmFilterPanel!cboDistrict",
+                            "ResolutionStatus": "Resolved",
+                            "Location": {
+                              "StartLine": 18,
+                              "StartColumn": 5,
+                              "EndLine": 58,
+                              "EndColumn": 35
+                            }
+                          }
+                        },
+                        {
+                          "Name": "p_CaseworkerNamePattern",
+                          "Type": "String",
+                          "Source": "FormControl",
+                          "ResolvedReference": {
+                            "OriginalText": "Forms!frmFilterPanel!txtCaseworkerName",
+                            "ResolutionStatus": "Resolved",
+                            "Location": {
+                              "StartLine": 18,
+                              "StartColumn": 5,
+                              "EndLine": 58,
+                              "EndColumn": 35
+                            }
+                          }
+                        }
+                      ],
+                      "Confidence": 0.85,
+                      "Notes": "frmFilterPanel loaded with both fields populated; no other flags"
+                    },
+                    {
+                      "Template": "SELECT c.CaseID, c.CaseNumber, c.OpenedDate, c.Status FROM tblCases AS c WHERE 1=1 AND c.Status IN ('Open', 'Pending Review') AND DateDiff('d', c.OpenedDate, Date()) > 90 AND c.DistrictID = ? AND c.AssignedCaseworkerID IN (SELECT CaseworkerID FROM tblCaseworkers WHERE CaseworkerName LIKE '*?*') ORDER BY c.OpenedDate DESC",
+                      "ParameterBindings": [
+                        {
+                          "Name": "p_DistrictID",
+                          "Type": "Long",
+                          "Source": "FormControl"
+                        },
+                        {
+                          "Name": "p_CaseworkerNamePattern",
+                          "Type": "String",
+                          "Source": "FormControl"
+                        }
+                      ],
+                      "Confidence": 0.7,
+                      "Notes": "All flags + all panel filters; combinatorial maximum"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "UnresolvedItems": [
+          {
+            "Reason": "DynamicSqlTooComplex",
+            "Location": {
+              "StartLine": 18,
+              "StartColumn": 5,
+              "EndLine": 58,
+              "EndColumn": 35
+            },
+            "OriginalText": "Multi-branch SQL assembly across sSQL/sWhere/sOrder",
+            "Context": "The function builds SQL through 5 conditional branches (ACTIVE_ONLY, OVERDUE, panel-loaded, district, caseworker, BY_DATE) producing 2^5 = 32 possible final SQL forms. Static analysis identified 5 representative templates but cannot enumerate all combinations. Confidence varies by combination.",
+            "SuggestedNextStep": "Migration target should restructure as a query builder pattern (LINQ Where clauses, EF Core IQueryable composition) rather than string concatenation. Each conditional becomes a typed predicate. See diagnostic HARV-W040."
+          }
+        ],
+        "Diagnostics": [
+          {
+            "Severity": "Warning",
+            "Code": "HARV-W040",
+            "Message": "Dynamic SQL assembly across 5+ conditional branches. Combinatorial explosion of possible queries (~32 forms). Migration must restructure as query builder/IQueryable composition; cannot translate template-by-template.",
+            "Location": {
+              "StartLine": 18,
+              "StartColumn": 5,
+              "EndLine": 58,
+              "EndColumn": 35
+            }
+          },
+          {
+            "Severity": "Warning",
+            "Code": "HARV-W041",
+            "Message": "Cross-form dependency: function references Forms!frmFilterPanel controls but is callable from anywhere. IsLoaded check guards but coupling is implicit. Migration target should pass filter values as explicit parameters rather than reading global form state.",
+            "Location": {
+              "StartLine": 33,
+              "StartColumn": 5,
+              "EndLine": 47,
+              "EndColumn": 11
+            }
+          },
+          {
+            "Severity": "Warning",
+            "Code": "HARV-W042",
+            "Message": "String parameter sFilterArgs used as bag of flags via InStr substring matching. Brittle and case-sensitive. Migration target should replace with typed flags enum or strongly-typed options class.",
+            "Location": {
+              "StartLine": 9,
+              "StartColumn": 5,
+              "EndLine": 55,
+              "EndColumn": 11
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I040",
+            "Message": "Quote-escape via Replace(value, \"'\", \"''\") detected. Migration target should use parameterized queries; quote-escape becomes unnecessary.",
+            "Location": {
+              "StartLine": 45,
+              "StartColumn": 30,
+              "EndLine": 45,
+              "EndColumn": 70
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I041",
+            "Message": "RecordCount-after-MoveLast pattern detected for accurate count. Migration target should use SELECT COUNT(*) directly.",
+            "Location": {
+              "StartLine": 64,
+              "StartColumn": 5,
+              "EndLine": 70,
+              "EndColumn": 11
+            }
           }
         ]
-      }
-    }
-  ],
-  "unresolvedItems": [
-    {
-      "reason": "dynamicSqlTooComplex",
-      "location": {
-        "startLine": 18,
-        "startColumn": 5,
-        "endLine": 58,
-        "endColumn": 35
-      },
-      "originalText": "Multi-branch SQL assembly across sSQL/sWhere/sOrder",
-      "context": "The function builds SQL through 5 conditional branches (ACTIVE_ONLY, OVERDUE, panel-loaded, district, caseworker, BY_DATE) producing 2^5 = 32 possible final SQL forms. Static analysis identified 5 representative templates but cannot enumerate all combinations. Confidence varies by combination.",
-      "suggestedNextStep": "Migration target should restructure as a query builder pattern (LINQ Where clauses, EF Core IQueryable composition) rather than string concatenation. Each conditional becomes a typed predicate. See diagnostic HARV-W040."
-    }
-  ],
-  "diagnostics": [
-    {
-      "severity": "warning",
-      "code": "HARV-W040",
-      "message": "Dynamic SQL assembly across 5+ conditional branches. Combinatorial explosion of possible queries (~32 forms). Migration must restructure as query builder/IQueryable composition; cannot translate template-by-template.",
-      "location": {
-        "startLine": 18,
-        "startColumn": 5,
-        "endLine": 58,
-        "endColumn": 35
-      }
-    },
-    {
-      "severity": "warning",
-      "code": "HARV-W041",
-      "message": "Cross-form dependency: function references Forms!frmFilterPanel controls but is callable from anywhere. IsLoaded check guards but coupling is implicit. Migration target should pass filter values as explicit parameters rather than reading global form state.",
-      "location": {
-        "startLine": 33,
-        "startColumn": 5,
-        "endLine": 47,
-        "endColumn": 11
-      }
-    },
-    {
-      "severity": "warning",
-      "code": "HARV-W042",
-      "message": "String parameter sFilterArgs used as bag of flags via InStr substring matching. Brittle and case-sensitive. Migration target should replace with typed flags enum or strongly-typed options class.",
-      "location": {
-        "startLine": 9,
-        "startColumn": 5,
-        "endLine": 55,
-        "endColumn": 11
-      }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I040",
-      "message": "Quote-escape via Replace(value, \"'\", \"''\") detected. Migration target should use parameterized queries; quote-escape becomes unnecessary.",
-      "location": {
-        "startLine": 45,
-        "startColumn": 30,
-        "endLine": 45,
-        "endColumn": 70
-      }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I041",
-      "message": "RecordCount-after-MoveLast pattern detected for accurate count. Migration target should use SELECT COUNT(*) directly.",
-      "location": {
-        "startLine": 64,
-        "startColumn": 5,
-        "endLine": 70,
-        "endColumn": 11
       }
     }
   ]

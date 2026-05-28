@@ -458,6 +458,16 @@ public sealed record AggregationMarkers
 /// ON clauses. The hierarchy is closed (sealed records inheriting from a
 /// sealed-friendly abstract base) so consumers can switch exhaustively.
 /// </summary>
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "NodeKind")]
+[JsonDerivedType(typeof(AndPredicate), "And")]
+[JsonDerivedType(typeof(OrPredicate), "Or")]
+[JsonDerivedType(typeof(NotPredicate), "Not")]
+[JsonDerivedType(typeof(ComparisonPredicate), "Comparison")]
+[JsonDerivedType(typeof(InPredicate), "In")]
+[JsonDerivedType(typeof(IsNullPredicate), "IsNull")]
+[JsonDerivedType(typeof(BetweenPredicate), "Between")]
+[JsonDerivedType(typeof(LikePredicate), "Like")]
+[JsonDerivedType(typeof(OpaquePredicate), "Opaque")]
 public abstract record PredicateNode;
 
 /// <summary>Logical conjunction: <c>A AND B [AND ...]</c>.</summary>

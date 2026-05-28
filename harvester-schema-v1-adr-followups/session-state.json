@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "sessionSetName": "harvester-schema-v1-adr-followups",
+  "currentSession": 1,
+  "totalSessions": 1,
+  "status": "complete",
+  "lifecycleState": "closed",
+  "startedAt": "2026-05-28T05:55:58.115709-04:00",
+  "completedAt": "2026-05-28T06:39:46.401327-04:00",
+  "verificationVerdict": "VERIFIED",
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": null,
+    "model": "claude-sonnet-4-6",
+    "effort": "standard"
+  },
+  "forceClosed": true
+}

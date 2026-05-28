@@ -1,585 +1,601 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "kind": "procedure",
-    "location": {
-      "file": "03-with-block-shadowing.bas",
-      "module": "Form_frmPermitApplication",
-      "startLine": 10,
-      "startColumn": 1,
-      "endLine": 56,
-      "endColumn": 8
-    },
-    "hostContext": {
-      "hostKind": "form",
-      "hostName": "frmPermitApplication",
-      "controlsAvailable": [
-        {
-          "name": "txtPermitID",
-          "controlType": "TextBox",
-          "boundField": "PermitID"
-        },
-        {
-          "name": "sfrmInspections",
-          "controlType": "Subform",
-          "controlSource": "frmInspectionsEmbed"
-        },
-        {
-          "name": "lblStatus",
-          "controlType": "Label"
-        }
-      ]
-    },
-    "originalSource": "(see source file)"
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "migrated-from-v0",
+  "Database": {
+    "Name": "03-with-block-shadowing.expected",
+    "FilePath": "docs\\test-cases\\03-with-block-shadowing.expected.json",
+    "ExportedAt": "2026-05-28T10:23:08.0000000+00:00"
   },
-  "items": [
+  "Modules": [
     {
-      "itemKind": "procedure",
-      "name": "UpdatePermitStatus",
-      "procedureKind": "Sub",
-      "visibility": "Private",
-      "isStatic": false,
-      "signature": {
-        "parameters": []
-      },
-      "classification": {
-        "purposeTags": [
-          "sideEffect",
-          "cascadingUpdate",
-          "calculation"
-        ],
-        "purity": "mixed",
-        "complexity": 8,
-        "linesOfCode": 45,
-        "translatability": "structured"
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "declaration",
-            "location": {
-              "startLine": 11,
-              "startColumn": 5,
-              "endLine": 13,
-              "endColumn": 24
-            },
-            "summary": "Local variable declarations: db (DAO.Database), rs (DAO.Recordset), sStatus (String)"
+      "ModuleName": "Form_frmPermitApplication",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Procedure",
+          "Location": {
+            "File": "03-with-block-shadowing.bas",
+            "Module": "Form_frmPermitApplication",
+            "StartLine": 10,
+            "StartColumn": 1,
+            "EndLine": 56,
+            "EndColumn": 8
           },
-          {
-            "kind": "set",
-            "location": {
-              "startLine": 15,
-              "startColumn": 5,
-              "endLine": 15,
-              "endColumn": 22
-            },
-            "summary": "Get current Access database",
-            "details": {
-              "target": "db",
-              "value": "CurrentDb()"
-            }
-          },
-          {
-            "kind": "set",
-            "location": {
-              "startLine": 16,
-              "startColumn": 5,
-              "endLine": 17,
-              "endColumn": 60
-            },
-            "summary": "Open recordset of tblPermits filtered to current permit",
-            "details": {
-              "target": "rs",
-              "valueIsRecordsetOpen": true,
-              "constructedSql": true
-            }
-          },
-          {
-            "kind": "with",
-            "location": {
-              "startLine": 19,
-              "startColumn": 5,
-              "endLine": 49,
-              "endColumn": 13
-            },
-            "summary": "With rs - operates on the recordset throughout",
-            "details": {
-              "withTarget": "rs",
-              "withTargetType": "DAO.Recordset",
-              "scopeIntroduced": "withScope_rs",
-              "nestedReferences": "Bang and dot accesses inside this block resolve against rs by default; see notes for nested With"
-            }
-          },
-          {
-            "kind": "with",
-            "location": {
-              "startLine": 30,
-              "startColumn": 17,
-              "endLine": 43,
-              "endColumn": 25
-            },
-            "summary": "Nested With Me.sfrmInspections.Form - shadows the outer rs context for ! and . access",
-            "details": {
-              "withTarget": "Me.sfrmInspections.Form",
-              "withTargetType": "Form_frmInspectionsEmbed",
-              "scopeIntroduced": "withScope_inspectionsForm",
-              "shadowsOuter": true,
-              "shadowingNote": "Inside this With, !Status refers to a field on frmInspectionsEmbed's recordset, NOT to rs!Status from the outer With"
-            }
-          }
-        ],
-        "references": [
-          {
-            "originalText": "Me!txtPermitID",
-            "location": {
-              "startLine": 17,
-              "startColumn": 47,
-              "endLine": 17,
-              "endColumn": 61
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "txtPermitID",
-              "container": "frmPermitApplication",
-              "type": "TextBox"
-            },
-            "implicitContext": {
-              "implicitOf": "Me",
-              "viaWithBlock": false
-            },
-            "confidence": 1.0
-          },
-          {
-            "originalText": ".BOF",
-            "location": {
-              "startLine": 20,
-              "startColumn": 17,
-              "endLine": 20,
-              "endColumn": 21
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "objectModel",
-            "resolvedTarget": {
-              "kind": "property",
-              "name": "BOF",
-              "container": "DAO.Recordset",
-              "type": "Boolean"
-            },
-            "implicitContext": {
-              "implicitOf": "rs",
-              "viaWithBlock": true
-            },
-            "confidence": 1.0,
-            "notes": "Resolved via outer With block on rs"
-          },
-          {
-            "originalText": "!LastReviewedBy",
-            "location": {
-              "startLine": 22,
-              "startColumn": 13,
-              "endLine": 22,
-              "endColumn": 28
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "field",
-            "resolvedTarget": {
-              "kind": "recordsetField",
-              "name": "LastReviewedBy",
-              "container": "tblPermits",
-              "fullyQualifiedName": "rs!LastReviewedBy",
-              "type": "Variant"
-            },
-            "implicitContext": {
-              "implicitOf": "rs",
-              "viaWithBlock": true,
-              "viaDefaultMember": true
-            },
-            "confidence": 0.9,
-            "notes": "Bang access on rs resolves to Fields collection (default member). Field type inferred from tblPermits schema if available."
-          },
-          {
-            "originalText": "CurrentUser()",
-            "location": {
-              "startLine": 22,
-              "startColumn": 31,
-              "endLine": 22,
-              "endColumn": 44
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "objectModel",
-            "resolvedTarget": {
-              "kind": "function",
-              "name": "CurrentUser",
-              "container": "Access.Application",
-              "type": "String"
-            },
-            "confidence": 1.0,
-            "notes": "Returns Access workgroup user name; in modern Access, returns 'Admin' unless workgroup security configured. Migration target likely needs to substitute current authenticated user."
-          },
-          {
-            "originalText": "!ApplicantID",
-            "location": {
-              "startLine": 27,
-              "startColumn": 49,
-              "endLine": 27,
-              "endColumn": 61
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "field",
-            "resolvedTarget": {
-              "kind": "recordsetField",
-              "name": "ApplicantID",
-              "container": "tblPermits",
-              "fullyQualifiedName": "rs!ApplicantID",
-              "type": "Long"
-            },
-            "implicitContext": {
-              "implicitOf": "rs",
-              "viaWithBlock": true
-            },
-            "confidence": 0.95,
-            "notes": "Inside outer With on rs; nested With on Me.sfrmInspections.Form has not yet started at this line"
-          },
-          {
-            "originalText": "Me.sfrmInspections.Form",
-            "location": {
-              "startLine": 30,
-              "startColumn": 22,
-              "endLine": 30,
-              "endColumn": 45
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "form",
-            "resolvedTarget": {
-              "kind": "form",
-              "name": "frmInspectionsEmbed",
-              "fullyQualifiedName": "Forms!frmPermitApplication!sfrmInspections.Form",
-              "type": "Form_frmInspectionsEmbed"
-            },
-            "confidence": 1.0
-          },
-          {
-            "originalText": ".RecordsetClone",
-            "location": {
-              "startLine": 31,
-              "startColumn": 24,
-              "endLine": 31,
-              "endColumn": 39
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "objectModel",
-            "resolvedTarget": {
-              "kind": "property",
-              "name": "RecordsetClone",
-              "container": "Access.Form",
-              "type": "DAO.Recordset"
-            },
-            "implicitContext": {
-              "implicitOf": "Me.sfrmInspections.Form",
-              "viaWithBlock": true
-            },
-            "confidence": 1.0,
-            "notes": "Resolved via inner With block; NOT against outer rs"
-          },
-          {
-            "originalText": "!Status",
-            "location": {
-              "startLine": 32,
-              "startColumn": 25,
-              "endLine": 32,
-              "endColumn": 32
-            },
-            "resolutionStatus": "ambiguous",
-            "referenceKind": "field",
-            "resolvedTarget": {
-              "kind": "recordsetField",
-              "name": "Status",
-              "container": "frmInspectionsEmbed.recordSource",
-              "fullyQualifiedName": "Me.sfrmInspections.Form!Status",
-              "type": "Variant"
-            },
-            "implicitContext": {
-              "implicitOf": "Me.sfrmInspections.Form",
-              "viaWithBlock": true
-            },
-            "confidence": 0.7,
-            "notes": "AMBIGUITY: Inside the nested With on the inspections subform, !Status almost certainly refers to a control or field on that subform - NOT to the rs!Status of the outer With on tblPermits. However, the original code structure suggests the developer may have INTENDED this to be on the outer rs (because the surrounding logic is updating tblPermits). This pattern is a likely bug or an intentional but confusing shadow. Flag for human review."
-          },
-          {
-            "originalText": "Me!txtPermitID",
-            "location": {
-              "startLine": 35,
-              "startColumn": 41,
-              "endLine": 35,
-              "endColumn": 55
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "txtPermitID",
-              "container": "frmPermitApplication",
-              "type": "TextBox"
-            },
-            "confidence": 1.0,
-            "notes": "Inside nested With, but explicit Me reference resolves to outer form not the With target"
-          },
-          {
-            "originalText": "Me.lblStatus.Caption",
-            "location": {
-              "startLine": 55,
-              "startColumn": 5,
-              "endLine": 55,
-              "endColumn": 25
-            },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "lblStatus",
-              "container": "frmPermitApplication",
-              "type": "Label"
-            },
-            "confidence": 1.0
-          }
-        ],
-        "calls": [
-          {
-            "calleeText": "CurrentDb",
-            "location": {
-              "startLine": 15,
-              "startColumn": 14,
-              "endLine": 15,
-              "endColumn": 22
-            },
-            "resolvedCallee": {
-              "originalText": "CurrentDb",
-              "location": {
-                "startLine": 15,
-                "startColumn": 14,
-                "endLine": 15,
-                "endColumn": 22
-              },
-              "resolutionStatus": "resolved",
-              "referenceKind": "objectModel",
-              "resolvedTarget": {
-                "kind": "function",
-                "name": "CurrentDb",
-                "container": "Access.Application",
-                "type": "DAO.Database"
-              },
-              "confidence": 1.0
-            }
-          },
-          {
-            "calleeText": "DLookup",
-            "location": {
-              "startLine": 26,
-              "startColumn": 16,
-              "endLine": 27,
-              "endColumn": 62
-            },
-            "resolvedCallee": {
-              "originalText": "DLookup",
-              "location": {
-                "startLine": 26,
-                "startColumn": 16,
-                "endLine": 26,
-                "endColumn": 22
-              },
-              "resolutionStatus": "resolved",
-              "referenceKind": "domainFunction",
-              "resolvedTarget": {
-                "kind": "domainFunction",
-                "name": "DLookup",
-                "container": "Access.Application",
-                "type": "Variant"
-              },
-              "confidence": 1.0,
-              "notes": "Domain function: DLookup(expr, domain, criteria). Migration target should replace with single-row query against the resolved domain query/table."
-            },
-            "arguments": [
+          "HostContext": {
+            "HostKind": "Form",
+            "HostName": "frmPermitApplication",
+            "ControlsAvailable": [
               {
-                "originalText": "\"OutstandingBalance\"",
-                "parsed": {
-                  "kind": "literal",
-                  "literalKind": "string",
-                  "value": "OutstandingBalance"
-                }
+                "Name": "txtPermitID",
+                "ControlType": "TextBox",
+                "BoundField": "PermitID"
               },
               {
-                "originalText": "\"qryApplicantBalances\"",
-                "parsed": {
-                  "kind": "literal",
-                  "literalKind": "string",
-                  "value": "qryApplicantBalances"
-                }
+                "Name": "sfrmInspections",
+                "ControlType": "Subform",
+                "ControlSource": "frmInspectionsEmbed"
               },
               {
-                "originalText": "\"ApplicantID = \" & !ApplicantID",
-                "parsed": {
-                  "kind": "binaryOp",
-                  "op": "&",
-                  "isStringConcatenation": true,
-                  "constructedCriteria": true
-                }
+                "Name": "lblStatus",
+                "ControlType": "Label"
               }
             ]
           },
+          "OriginalSource": "(see source file)"
+        },
+        "Items": [
           {
-            "calleeText": "DCount",
-            "location": {
-              "startLine": 33,
-              "startColumn": 32,
-              "endLine": 35,
-              "endColumn": 60
+            "ItemKind": "Procedure",
+            "Name": "UpdatePermitStatus",
+            "ProcedureKind": "Sub",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "Signature": {
+              "Parameters": []
             },
-            "resolvedCallee": {
-              "originalText": "DCount",
-              "location": {
-                "startLine": 33,
-                "startColumn": 32,
-                "endLine": 33,
-                "endColumn": 37
-              },
-              "resolutionStatus": "resolved",
-              "referenceKind": "domainFunction",
-              "resolvedTarget": {
-                "kind": "domainFunction",
-                "name": "DCount",
-                "container": "Access.Application",
-                "type": "Variant"
-              },
-              "confidence": 1.0
-            }
-          }
-        ],
-        "sqlStrings": [
-          {
-            "originalText": "\"SELECT * FROM tblPermits WHERE PermitID = \" & Me!txtPermitID",
-            "location": {
-              "startLine": 16,
-              "startColumn": 32,
-              "endLine": 17,
-              "endColumn": 60
+            "Classification": {
+              "PurposeTags": [
+                "SideEffect",
+                "CascadingUpdate",
+                "Calculation"
+              ],
+              "Purity": "Mixed",
+              "Complexity": 8,
+              "LinesOfCode": 45,
+              "Translatability": "Structured"
             },
-            "constructionMode": "concatenated",
-            "templateCandidates": [
-              {
-                "template": "SELECT * FROM tblPermits WHERE PermitID = ?",
-                "parameterBindings": [
-                  {
-                    "name": "p_PermitID",
-                    "type": "Long",
-                    "source": "formControl",
-                    "resolvedReference": {
-                      "originalText": "Me!txtPermitID",
-                      "location": {
-                        "startLine": 17,
-                        "startColumn": 47,
-                        "endLine": 17,
-                        "endColumn": 61
-                      },
-                      "resolutionStatus": "resolved",
-                      "referenceKind": "control",
-                      "resolvedTarget": {
-                        "kind": "control",
-                        "name": "txtPermitID",
-                        "container": "frmPermitApplication",
-                        "type": "TextBox"
-                      },
-                      "confidence": 1.0
-                    }
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Declaration",
+                  "Location": {
+                    "StartLine": 11,
+                    "StartColumn": 5,
+                    "EndLine": 13,
+                    "EndColumn": 24
+                  },
+                  "Summary": "Local variable declarations: db (DAO.Database), rs (DAO.Recordset), sStatus (String)"
+                },
+                {
+                  "Kind": "Set",
+                  "Location": {
+                    "StartLine": 15,
+                    "StartColumn": 5,
+                    "EndLine": 15,
+                    "EndColumn": 22
+                  },
+                  "Summary": "Get current Access database",
+                  "Details": {
+                    "Target": "db",
+                    "Value": "CurrentDb()"
                   }
-                ],
-                "confidence": 0.95
-              }
-            ]
-          },
-          {
-            "originalText": "\"ApplicantID = \" & !ApplicantID",
-            "location": {
-              "startLine": 27,
-              "startColumn": 24,
-              "endLine": 27,
-              "endColumn": 62
-            },
-            "constructionMode": "concatenated",
-            "templateCandidates": [
-              {
-                "template": "ApplicantID = ?",
-                "parameterBindings": [
-                  {
-                    "name": "p_ApplicantID",
-                    "type": "Long",
-                    "source": "vbaExpression",
-                    "resolvedReference": {
-                      "originalText": "!ApplicantID",
-                      "resolutionStatus": "resolved",
-                      "referenceKind": "field",
-                      "resolvedTarget": {
-                        "kind": "recordsetField",
-                        "name": "ApplicantID",
-                        "container": "tblPermits"
-                      },
-                      "implicitContext": {
-                        "implicitOf": "rs",
-                        "viaWithBlock": true
-                      },
-                      "confidence": 0.95,
-                      "location": {
-                        "startLine": 27,
-                        "startColumn": 24,
-                        "endLine": 27,
-                        "endColumn": 62
+                },
+                {
+                  "Kind": "Set",
+                  "Location": {
+                    "StartLine": 16,
+                    "StartColumn": 5,
+                    "EndLine": 17,
+                    "EndColumn": 60
+                  },
+                  "Summary": "Open recordset of tblPermits filtered to current permit",
+                  "Details": {
+                    "Target": "rs",
+                    "ValueIsRecordsetOpen": true,
+                    "ConstructedSql": true
+                  }
+                },
+                {
+                  "Kind": "With",
+                  "Location": {
+                    "StartLine": 19,
+                    "StartColumn": 5,
+                    "EndLine": 49,
+                    "EndColumn": 13
+                  },
+                  "Summary": "With rs - operates on the recordset throughout",
+                  "Details": {
+                    "WithTarget": "rs",
+                    "WithTargetType": "DAO.Recordset",
+                    "ScopeIntroduced": "withScope_rs",
+                    "NestedReferences": "Bang and dot accesses inside this block resolve against rs by default; see notes for nested With"
+                  }
+                },
+                {
+                  "Kind": "With",
+                  "Location": {
+                    "StartLine": 30,
+                    "StartColumn": 17,
+                    "EndLine": 43,
+                    "EndColumn": 25
+                  },
+                  "Summary": "Nested With Me.sfrmInspections.Form - shadows the outer rs context for ! and . access",
+                  "Details": {
+                    "WithTarget": "Me.sfrmInspections.Form",
+                    "WithTargetType": "Form_frmInspectionsEmbed",
+                    "ScopeIntroduced": "withScope_inspectionsForm",
+                    "ShadowsOuter": true,
+                    "ShadowingNote": "Inside this With, !Status refers to a field on frmInspectionsEmbed's recordset, NOT to rs!Status from the outer With"
+                  }
+                }
+              ],
+              "References": [
+                {
+                  "OriginalText": "Me!txtPermitID",
+                  "Location": {
+                    "StartLine": 17,
+                    "StartColumn": 47,
+                    "EndLine": 17,
+                    "EndColumn": 61
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "txtPermitID",
+                    "Container": "frmPermitApplication",
+                    "Type": "TextBox"
+                  },
+                  "ImplicitContext": {
+                    "ImplicitOf": "Me",
+                    "ViaWithBlock": false
+                  },
+                  "Confidence": 1.0
+                },
+                {
+                  "OriginalText": ".BOF",
+                  "Location": {
+                    "StartLine": 20,
+                    "StartColumn": 17,
+                    "EndLine": 20,
+                    "EndColumn": 21
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "ObjectModel",
+                  "ResolvedTarget": {
+                    "Kind": "Property",
+                    "Name": "BOF",
+                    "Container": "DAO.Recordset",
+                    "Type": "Boolean"
+                  },
+                  "ImplicitContext": {
+                    "ImplicitOf": "rs",
+                    "ViaWithBlock": true
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Resolved via outer With block on rs"
+                },
+                {
+                  "OriginalText": "!LastReviewedBy",
+                  "Location": {
+                    "StartLine": 22,
+                    "StartColumn": 13,
+                    "EndLine": 22,
+                    "EndColumn": 28
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Field",
+                  "ResolvedTarget": {
+                    "Kind": "RecordsetField",
+                    "Name": "LastReviewedBy",
+                    "Container": "tblPermits",
+                    "FullyQualifiedName": "rs!LastReviewedBy",
+                    "Type": "Variant"
+                  },
+                  "ImplicitContext": {
+                    "ImplicitOf": "rs",
+                    "ViaWithBlock": true,
+                    "ViaDefaultMember": true
+                  },
+                  "Confidence": 0.9,
+                  "Notes": "Bang access on rs resolves to Fields collection (default member). Field type inferred from tblPermits schema if available."
+                },
+                {
+                  "OriginalText": "CurrentUser()",
+                  "Location": {
+                    "StartLine": 22,
+                    "StartColumn": 31,
+                    "EndLine": 22,
+                    "EndColumn": 44
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "ObjectModel",
+                  "ResolvedTarget": {
+                    "Kind": "Function",
+                    "Name": "CurrentUser",
+                    "Container": "Access.Application",
+                    "Type": "String"
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Returns Access workgroup user name; in modern Access, returns 'Admin' unless workgroup security configured. Migration target likely needs to substitute current authenticated user."
+                },
+                {
+                  "OriginalText": "!ApplicantID",
+                  "Location": {
+                    "StartLine": 27,
+                    "StartColumn": 49,
+                    "EndLine": 27,
+                    "EndColumn": 61
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Field",
+                  "ResolvedTarget": {
+                    "Kind": "RecordsetField",
+                    "Name": "ApplicantID",
+                    "Container": "tblPermits",
+                    "FullyQualifiedName": "rs!ApplicantID",
+                    "Type": "Long"
+                  },
+                  "ImplicitContext": {
+                    "ImplicitOf": "rs",
+                    "ViaWithBlock": true
+                  },
+                  "Confidence": 0.95,
+                  "Notes": "Inside outer With on rs; nested With on Me.sfrmInspections.Form has not yet started at this line"
+                },
+                {
+                  "OriginalText": "Me.sfrmInspections.Form",
+                  "Location": {
+                    "StartLine": 30,
+                    "StartColumn": 22,
+                    "EndLine": 30,
+                    "EndColumn": 45
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Form",
+                  "ResolvedTarget": {
+                    "Kind": "Form",
+                    "Name": "frmInspectionsEmbed",
+                    "FullyQualifiedName": "Forms!frmPermitApplication!sfrmInspections.Form",
+                    "Type": "Form_frmInspectionsEmbed"
+                  },
+                  "Confidence": 1.0
+                },
+                {
+                  "OriginalText": ".RecordsetClone",
+                  "Location": {
+                    "StartLine": 31,
+                    "StartColumn": 24,
+                    "EndLine": 31,
+                    "EndColumn": 39
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "ObjectModel",
+                  "ResolvedTarget": {
+                    "Kind": "Property",
+                    "Name": "RecordsetClone",
+                    "Container": "Access.Form",
+                    "Type": "DAO.Recordset"
+                  },
+                  "ImplicitContext": {
+                    "ImplicitOf": "Me.sfrmInspections.Form",
+                    "ViaWithBlock": true
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Resolved via inner With block; NOT against outer rs"
+                },
+                {
+                  "OriginalText": "!Status",
+                  "Location": {
+                    "StartLine": 32,
+                    "StartColumn": 25,
+                    "EndLine": 32,
+                    "EndColumn": 32
+                  },
+                  "ResolutionStatus": "Ambiguous",
+                  "ReferenceKind": "Field",
+                  "ResolvedTarget": {
+                    "Kind": "RecordsetField",
+                    "Name": "Status",
+                    "Container": "frmInspectionsEmbed.recordSource",
+                    "FullyQualifiedName": "Me.sfrmInspections.Form!Status",
+                    "Type": "Variant"
+                  },
+                  "ImplicitContext": {
+                    "ImplicitOf": "Me.sfrmInspections.Form",
+                    "ViaWithBlock": true
+                  },
+                  "Confidence": 0.7,
+                  "Notes": "AMBIGUITY: Inside the nested With on the inspections subform, !Status almost certainly refers to a control or field on that subform - NOT to the rs!Status of the outer With on tblPermits. However, the original code structure suggests the developer may have INTENDED this to be on the outer rs (because the surrounding logic is updating tblPermits). This pattern is a likely bug or an intentional but confusing shadow. Flag for human review."
+                },
+                {
+                  "OriginalText": "Me!txtPermitID",
+                  "Location": {
+                    "StartLine": 35,
+                    "StartColumn": 41,
+                    "EndLine": 35,
+                    "EndColumn": 55
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "txtPermitID",
+                    "Container": "frmPermitApplication",
+                    "Type": "TextBox"
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Inside nested With, but explicit Me reference resolves to outer form not the With target"
+                },
+                {
+                  "OriginalText": "Me.lblStatus.Caption",
+                  "Location": {
+                    "StartLine": 55,
+                    "StartColumn": 5,
+                    "EndLine": 55,
+                    "EndColumn": 25
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "lblStatus",
+                    "Container": "frmPermitApplication",
+                    "Type": "Label"
+                  },
+                  "Confidence": 1.0
+                }
+              ],
+              "Calls": [
+                {
+                  "CalleeText": "CurrentDb",
+                  "Location": {
+                    "StartLine": 15,
+                    "StartColumn": 14,
+                    "EndLine": 15,
+                    "EndColumn": 22
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "CurrentDb",
+                    "Location": {
+                      "StartLine": 15,
+                      "StartColumn": 14,
+                      "EndLine": 15,
+                      "EndColumn": 22
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "ObjectModel",
+                    "ResolvedTarget": {
+                      "Kind": "Function",
+                      "Name": "CurrentDb",
+                      "Container": "Access.Application",
+                      "Type": "DAO.Database"
+                    },
+                    "Confidence": 1.0
+                  }
+                },
+                {
+                  "CalleeText": "DLookup",
+                  "Location": {
+                    "StartLine": 26,
+                    "StartColumn": 16,
+                    "EndLine": 27,
+                    "EndColumn": 62
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "DLookup",
+                    "Location": {
+                      "StartLine": 26,
+                      "StartColumn": 16,
+                      "EndLine": 26,
+                      "EndColumn": 22
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "DomainFunction",
+                    "ResolvedTarget": {
+                      "Kind": "DomainFunction",
+                      "Name": "DLookup",
+                      "Container": "Access.Application",
+                      "Type": "Variant"
+                    },
+                    "Confidence": 1.0,
+                    "Notes": "Domain function: DLookup(expr, domain, criteria). Migration target should replace with single-row query against the resolved domain query/table."
+                  },
+                  "Arguments": [
+                    {
+                      "OriginalText": "\"OutstandingBalance\"",
+                      "Parsed": {
+                        "Kind": "Literal",
+                        "LiteralKind": "String",
+                        "Value": "OutstandingBalance"
+                      }
+                    },
+                    {
+                      "OriginalText": "\"qryApplicantBalances\"",
+                      "Parsed": {
+                        "Kind": "Literal",
+                        "LiteralKind": "String",
+                        "Value": "qryApplicantBalances"
+                      }
+                    },
+                    {
+                      "OriginalText": "\"ApplicantID = \" & !ApplicantID",
+                      "Parsed": {
+                        "Kind": "BinaryOp",
+                        "Op": "&",
+                        "IsStringConcatenation": true,
+                        "ConstructedCriteria": true
                       }
                     }
+                  ]
+                },
+                {
+                  "CalleeText": "DCount",
+                  "Location": {
+                    "StartLine": 33,
+                    "StartColumn": 32,
+                    "EndLine": 35,
+                    "EndColumn": 60
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "DCount",
+                    "Location": {
+                      "StartLine": 33,
+                      "StartColumn": 32,
+                      "EndLine": 33,
+                      "EndColumn": 37
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "DomainFunction",
+                    "ResolvedTarget": {
+                      "Kind": "DomainFunction",
+                      "Name": "DCount",
+                      "Container": "Access.Application",
+                      "Type": "Variant"
+                    },
+                    "Confidence": 1.0
                   }
-                ],
-                "confidence": 0.9,
-                "notes": "Criteria string for DLookup, not full SQL"
-              }
-            ]
+                }
+              ],
+              "SqlStrings": [
+                {
+                  "OriginalText": "\"SELECT * FROM tblPermits WHERE PermitID = \" & Me!txtPermitID",
+                  "Location": {
+                    "StartLine": 16,
+                    "StartColumn": 32,
+                    "EndLine": 17,
+                    "EndColumn": 60
+                  },
+                  "ConstructionMode": "Concatenated",
+                  "TemplateCandidates": [
+                    {
+                      "Template": "SELECT * FROM tblPermits WHERE PermitID = ?",
+                      "ParameterBindings": [
+                        {
+                          "Name": "p_PermitID",
+                          "Type": "Long",
+                          "Source": "FormControl",
+                          "ResolvedReference": {
+                            "OriginalText": "Me!txtPermitID",
+                            "Location": {
+                              "StartLine": 17,
+                              "StartColumn": 47,
+                              "EndLine": 17,
+                              "EndColumn": 61
+                            },
+                            "ResolutionStatus": "Resolved",
+                            "ReferenceKind": "Control",
+                            "ResolvedTarget": {
+                              "Kind": "Control",
+                              "Name": "txtPermitID",
+                              "Container": "frmPermitApplication",
+                              "Type": "TextBox"
+                            },
+                            "Confidence": 1.0
+                          }
+                        }
+                      ],
+                      "Confidence": 0.95
+                    }
+                  ]
+                },
+                {
+                  "OriginalText": "\"ApplicantID = \" & !ApplicantID",
+                  "Location": {
+                    "StartLine": 27,
+                    "StartColumn": 24,
+                    "EndLine": 27,
+                    "EndColumn": 62
+                  },
+                  "ConstructionMode": "Concatenated",
+                  "TemplateCandidates": [
+                    {
+                      "Template": "ApplicantID = ?",
+                      "ParameterBindings": [
+                        {
+                          "Name": "p_ApplicantID",
+                          "Type": "Long",
+                          "Source": "VbaExpression",
+                          "ResolvedReference": {
+                            "OriginalText": "!ApplicantID",
+                            "ResolutionStatus": "Resolved",
+                            "ReferenceKind": "Field",
+                            "ResolvedTarget": {
+                              "Kind": "RecordsetField",
+                              "Name": "ApplicantID",
+                              "Container": "tblPermits"
+                            },
+                            "ImplicitContext": {
+                              "ImplicitOf": "rs",
+                              "ViaWithBlock": true
+                            },
+                            "Confidence": 0.95,
+                            "Location": {
+                              "StartLine": 27,
+                              "StartColumn": 24,
+                              "EndLine": 27,
+                              "EndColumn": 62
+                            }
+                          }
+                        }
+                      ],
+                      "Confidence": 0.9,
+                      "Notes": "Criteria string for DLookup, not full SQL"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "UnresolvedItems": [],
+        "Diagnostics": [
+          {
+            "Severity": "Warning",
+            "Code": "HARV-W020",
+            "Message": "Likely shadow ambiguity at lines 32-41: bang-accesses inside nested With on Me.sfrmInspections.Form will resolve to the inspections subform's recordset, not the outer rs (tblPermits). If the developer intended these to update tblPermits, this is a latent bug. Recommend human review of original behavior before migrating.",
+            "Location": {
+              "StartLine": 30,
+              "StartColumn": 17,
+              "EndLine": 43,
+              "EndColumn": 25
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I020",
+            "Message": "Domain function DLookup against query 'qryApplicantBalances' with criteria string. Migration target: parameterized single-row query method.",
+            "Location": {
+              "StartLine": 26,
+              "StartColumn": 16,
+              "EndLine": 28,
+              "EndColumn": 36
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I021",
+            "Message": "CurrentUser() returns Access workgroup user. In migrated environment, substitute current authenticated user from auth context (e.g., HttpContext.User in ASP.NET).",
+            "Location": {
+              "StartLine": 22,
+              "StartColumn": 31,
+              "EndLine": 22,
+              "EndColumn": 44
+            }
           }
         ]
-      }
-    }
-  ],
-  "unresolvedItems": [],
-  "diagnostics": [
-    {
-      "severity": "warning",
-      "code": "HARV-W020",
-      "message": "Likely shadow ambiguity at lines 32-41: bang-accesses inside nested With on Me.sfrmInspections.Form will resolve to the inspections subform's recordset, not the outer rs (tblPermits). If the developer intended these to update tblPermits, this is a latent bug. Recommend human review of original behavior before migrating.",
-      "location": {
-        "startLine": 30,
-        "startColumn": 17,
-        "endLine": 43,
-        "endColumn": 25
-      }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I020",
-      "message": "Domain function DLookup against query 'qryApplicantBalances' with criteria string. Migration target: parameterized single-row query method.",
-      "location": {
-        "startLine": 26,
-        "startColumn": 16,
-        "endLine": 28,
-        "endColumn": 36
-      }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I021",
-      "message": "CurrentUser() returns Access workgroup user. In migrated environment, substitute current authenticated user from auth context (e.g., HttpContext.User in ASP.NET).",
-      "location": {
-        "startLine": 22,
-        "startColumn": 31,
-        "endLine": 22,
-        "endColumn": 44
       }
     }
   ]

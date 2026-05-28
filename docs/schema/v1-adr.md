@@ -16,7 +16,7 @@
 3. Adding the enrichment pipeline output types from Phase 6 child sets (forms, queries, event handlers, function classifications, navigation graph, validation rules, row-source specs, unresolved items).
 4. Introducing the `DatabaseManifest` root document (Phase 0.3/7.1 deliverable) that wraps the full pipeline output.
 
-The v0 schema remains valid for existing test fixtures and consumers until a migration script is shipped (see Back-Compatibility Plan below).
+The migration script (`tools/migrate_v0_to_v1.py`) was shipped with `harvester-schema-v1-adr-followups` Session 1 and applied to all 13 test fixtures. v1.0 is now the operative schema. Legacy consumers with their own v0 files should run the migration script (see Back-Compatibility Plan below).
 
 ---
 
@@ -28,7 +28,7 @@ The v0 schema remains valid for existing test fixtures and consumers until a mig
 
 **Rationale:** The downstream consumer is an AI agent, not a human; casing does not affect readability, only tooling consistency. A single casing convention across the full pipeline output (parser + tier + enrichment) simplifies AI prompts and any normalization shims consumers would otherwise need. The one-time cost of updating the 13 `.expected.json` test fixtures is bounded and mechanical.
 
-**Impact on test fixtures:** All 13 `docs/test-cases/*.expected.json` files use camelCase today. Session 2 of this set will update them as part of wiring the schema validator against real pipeline output.
+**Impact on test fixtures:** All 13 `docs/test-cases/*.expected.json` files used camelCase at the time of this decision. The migration was performed by `harvester-schema-v1-adr-followups` Session 1 (see Known Issues → Resolved below). 12 of 13 fixtures now conform to v1.0; fixture 12 was excluded by the stop rule for semantic incompatibility.
 
 ### D1/D2 — DatabaseManifest Envelope
 
@@ -94,17 +94,17 @@ These items from `v0-vs-tiers.md` §12 are intentionally left for a future schem
 
 ## Known Issues
 
-### PredicateNode polymorphism requires `[JsonPolymorphic]`
+> **All issues below are now Resolved.** See `docs/session-sets/harvester-schema-v1-adr-followups/change-log.md` for the implementation details.
 
-The C# `PredicateNode` hierarchy uses abstract + sealed records. Without `[JsonPolymorphic]` / `[JsonDerivedType]` attributes, `System.Text.Json` serializes each concrete type without a discriminator field, making `AndPredicate` and `OrPredicate` produce identical JSON shapes `{ "Operands": [...] }`.
+### ~~PredicateNode polymorphism requires `[JsonPolymorphic]`~~ — **Resolved**
 
-**v1.0 resolution:** The schema defines a `NodeKind` discriminator field on `PredicateNode`. The C# builders for `QueryAbstraction` must be updated to annotate `PredicateNode` with `[JsonPolymorphic(TypeDiscriminatorPropertyName = "NodeKind")]` and `[JsonDerivedType(typeof(AndPredicate), "And")]` etc., or implement a custom `JsonConverter<PredicateNode>`.
+**Resolution (harvester-schema-v1-adr-followups, Session 1):** `[JsonPolymorphic(TypeDiscriminatorPropertyName = "NodeKind")]` and nine `[JsonDerivedType]` attributes added to `PredicateNode` in `AccessHarvester.Pipeline/Enrichment/QueryAbstraction.cs`. Round-trip tests in `PredicateNodeRoundTripTests.cs` confirm the `NodeKind` discriminator is emitted and that serialize → deserialize → re-serialize is byte-identical. The schema-validation test `PredicateNodeInManifest_ValidatesAgainstV1Schema` confirms a DatabaseManifest containing a PredicateNode-valued Where clause passes v1.0 validation.
 
-**Action required:** Session 2 or a subsequent resolver session must add these attributes / converter before pipeline output can be validated against the v1.0 schema for `PredicateNode`-containing fields.
+### ~~Test fixture casing migration~~ — **Resolved (with one stop-rule exclusion)**
 
-### Test fixture casing migration
+**Resolution (harvester-schema-v1-adr-followups, Session 1):** `tools/migrate_v0_to_v1.py` ships a mechanical migration that (a) PascalCase-renames all JSON object keys, (b) migrates known enum values to PascalCase, and (c) wraps bare v0 `ParserOutput` documents in a `DatabaseManifest` envelope. The migration script was run against all 13 `docs/test-cases/*.expected.json` fixtures. 12 of 13 fixtures now validate against the v1.0 schema and are guarded by the `TestCaseFixtureConformanceTests` regression suite. Fixture 12 (`12-switchboard-navigation.expected.json`) was mechanically migrated but retains one semantic incompatibility (see stop-rule exclusion below) and remains outside the v1.0 conformance gate.
 
-All 13 `docs/test-cases/*.expected.json` files use camelCase field names (v0 convention). They will fail validation against v1.0 until migrated to PascalCase. Session 2 of this set performs the migration as part of wiring the output validator.
+**Stop-rule exclusion — `12-switchboard-navigation.expected.json`:** This fixture was mechanically migrated by the script (v1.0 DatabaseManifest envelope, PascalCase keys) but still fails v1.0 JSON Schema validation. The failure is `Source: "g_CurrentUserID"` on a `ParserQueryParameter` node — a VBA variable name used where the v1.0 schema requires a `ParserQueryParameter.Source` enum value (`FormControl | UserPrompt | NamedParameter | VbaExpression | ConcatenatedVariable`). Correcting this requires a semantic decision (the variable is used via SQL concatenation, suggesting `ConcatenatedVariable`), not a mechanical rename. The fixture is excluded from the v1.0 conformance gate via the `StopRuleExclusions` set in `TestCaseFixtureConformanceTests`.
 
 ---
 
@@ -112,10 +112,10 @@ All 13 `docs/test-cases/*.expected.json` files use camelCase field names (v0 con
 
 | Version | Behavior |
 |---|---|
-| v0 (current) | Continues to validate existing `*.expected.json` test fixtures. Remains the operative schema until Session 2 migrates those fixtures. |
-| v1.0 (this release) | New schema for all future pipeline output. Identified by `SchemaVersion: "1.0"` in the `DatabaseManifest.SchemaVersion` field. |
-| Migration path | Session 2 ships a migration script (`tools/migrate_v0_to_v1.py`) that renames camelCase keys to PascalCase and wraps bare parser-output files in a `DatabaseManifest` envelope. The script is applied to the 13 test fixtures. Consumers that maintain their own v0 files should run the same script. |
-| Version detection | Consumers inspect `document.SchemaVersion` (for `DatabaseManifest` documents) or `document.Source.SchemaVersion` (for embedded `ParserOutput` nodes). `1.0` prefix indicates v1; `0.*` indicates v0. |
+| v0 (archive) | No longer the operative schema. v0 is retired; all `.expected.json` fixtures have been migrated to DatabaseManifest v1.0 envelope format. |
+| v1.0 (operative) | The operative schema for all pipeline output. Identified by `SchemaVersion: "1.0"` in the `DatabaseManifest.SchemaVersion` field. All 13 `.expected.json` test fixtures are in v1.0 DatabaseManifest format; 12 of 13 pass v1.0 JSON Schema validation and are guarded by `TestCaseFixtureConformanceTests`. Fixture 12 is migrated but excluded from the conformance gate per the stop rule (see Known Issues above). |
+| Migration path | `tools/migrate_v0_to_v1.py` — ships with `harvester-schema-v1-adr-followups` Session 1 — renames camelCase keys to PascalCase, migrates known enum values, and wraps bare parser-output files in a `DatabaseManifest` envelope. Applied to all 13 test fixtures. Consumers that maintain their own v0 files should run the same script. |
+| Version detection | Consumers inspect `document.SchemaVersion` (for `DatabaseManifest` root documents) or the embedded `ParserOutput.SchemaVersion` field (accessed at paths like `Modules[n].ParserOutput.SchemaVersion` or `Forms[n].ParserOutput.SchemaVersion`). `1.0` prefix indicates v1; `0.*` indicates v0. |
 
 ---
 

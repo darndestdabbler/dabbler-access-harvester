@@ -1,432 +1,618 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "kind": "procedure",
-    "location": {
-      "file": "02-cascading-combo-subform.bas",
-      "module": "Form_frmCaseManagement",
-      "startLine": 10,
-      "startColumn": 1,
-      "endLine": 30,
-      "endColumn": 8
-    },
-    "hostContext": {
-      "hostKind": "form",
-      "hostName": "frmCaseManagement",
-      "controlsAvailable": [
-        {
-          "name": "cboCaseworker",
-          "controlType": "ComboBox",
-          "boundField": "CaseworkerID",
-          "rowSource": "SELECT CaseworkerID, CaseworkerName, Email, Phone FROM tblCaseworkers ORDER BY CaseworkerName",
-          "rowSourceType": "Table/Query",
-          "boundColumn": 1,
-          "columnCount": 4
-        },
-        {
-          "name": "cboClient",
-          "controlType": "ComboBox",
-          "boundField": "ClientID",
-          "rowSource": "",
-          "rowSourceType": "Table/Query",
-          "boundColumn": 1,
-          "columnCount": 2
-        },
-        {
-          "name": "txtCaseworkerEmail",
-          "controlType": "TextBox",
-          "boundField": "",
-          "controlSource": ""
-        },
-        {
-          "name": "txtCaseworkerPhone",
-          "controlType": "TextBox",
-          "boundField": "",
-          "controlSource": ""
-        },
-        {
-          "name": "sfrmOpenCases",
-          "controlType": "Subform",
-          "boundField": "",
-          "controlSource": "frmOpenCasesEmbed"
-        }
-      ]
-    },
-    "originalSource": "Private Sub cboCaseworker_AfterUpdate()\n    Me!cboClient.RowSource = \"SELECT ClientID, ClientName FROM tblClients \" & _\n                             \"WHERE AssignedCaseworkerID = \" & Me!cboCaseworker & _\n                             \" ORDER BY ClientName\"\n    Me!cboClient.Requery\n    Me!cboClient = Null\n    Me.txtCaseworkerEmail = Me!cboCaseworker.Column(2)\n    Me.txtCaseworkerPhone = Me!cboCaseworker.Column(3)\n    Me.sfrmOpenCases.Form.Filter = \"CaseworkerID = \" & Me!cboCaseworker & _\n                                   \" AND CaseStatus IN ('Open', 'Pending Review')\"\n    Me.sfrmOpenCases.Form.FilterOn = True\n    Call RecalculateCaseloadTotals(Me!cboCaseworker)\nEnd Sub"
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "migrated-from-v0",
+  "Database": {
+    "Name": "02-cascading-combo-subform.expected",
+    "FilePath": "docs\\test-cases\\02-cascading-combo-subform.expected.json",
+    "ExportedAt": "2026-05-28T10:23:08.0000000+00:00"
   },
-  "items": [
+  "Modules": [
     {
-      "itemKind": "procedure",
-      "name": "cboCaseworker_AfterUpdate",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "cboCaseworker",
-        "eventName": "AfterUpdate",
-        "resolvedControl": {
-          "originalText": "cboCaseworker",
-          "location": { "startLine": 10, "startColumn": 13, "endLine": 10, "endColumn": 26 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "control",
-          "resolvedTarget": {
-            "kind": "control",
-            "name": "cboCaseworker",
-            "container": "frmCaseManagement",
-            "fullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker",
-            "type": "ComboBox"
+      "ModuleName": "Form_frmCaseManagement",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Procedure",
+          "Location": {
+            "File": "02-cascading-combo-subform.bas",
+            "Module": "Form_frmCaseManagement",
+            "StartLine": 10,
+            "StartColumn": 1,
+            "EndLine": 30,
+            "EndColumn": 8
           },
-          "confidence": 1.0
-        }
-      },
-      "signature": { "parameters": [] },
-      "classification": {
-        "purposeTags": ["cascadingUpdate", "filterSearch", "calculation"],
-        "purity": "uiBound",
-        "complexity": 1,
-        "linesOfCode": 16,
-        "translatability": "structured"
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "assignment",
-            "location": { "startLine": 12, "startColumn": 5, "endLine": 14, "endColumn": 51 },
-            "summary": "Sets cboClient.RowSource to a dynamically-built SQL filtered by current caseworker",
-            "details": {
-              "target": {
-                "kind": "memberAccess",
-                "of": { "kind": "bangAccess", "of": "Me", "member": "cboClient" },
-                "member": "RowSource"
+          "HostContext": {
+            "HostKind": "Form",
+            "HostName": "frmCaseManagement",
+            "ControlsAvailable": [
+              {
+                "Name": "cboCaseworker",
+                "ControlType": "ComboBox",
+                "BoundField": "CaseworkerID",
+                "RowSource": "SELECT CaseworkerID, CaseworkerName, Email, Phone FROM tblCaseworkers ORDER BY CaseworkerName",
+                "RowSourceType": "Table/Query",
+                "BoundColumn": 1,
+                "ColumnCount": 4
               },
-              "value": {
-                "kind": "binaryOp",
-                "op": "&",
-                "isStringConcatenation": true,
-                "constructedSql": true
+              {
+                "Name": "cboClient",
+                "ControlType": "ComboBox",
+                "BoundField": "ClientID",
+                "RowSource": "",
+                "RowSourceType": "Table/Query",
+                "BoundColumn": 1,
+                "ColumnCount": 2
               },
-              "sqlConstruction": "concatenated"
-            }
-          },
-          {
-            "kind": "call",
-            "location": { "startLine": 15, "startColumn": 5, "endLine": 15, "endColumn": 28 },
-            "summary": "Requery cboClient to refresh its dropdown after RowSource change",
-            "details": {
-              "callee": "Me!cboClient.Requery",
-              "isMethodCall": true
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 16, "startColumn": 5, "endLine": 16, "endColumn": 25 },
-            "summary": "Clear cboClient selection",
-            "details": {
-              "target": "Me!cboClient",
-              "value": { "kind": "literal", "literalKind": "null" }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 19, "startColumn": 5, "endLine": 19, "endColumn": 60 },
-            "summary": "Set txtCaseworkerEmail from cboCaseworker.Column(2)",
-            "details": {
-              "target": "Me.txtCaseworkerEmail",
-              "value": "Me!cboCaseworker.Column(2)",
-              "displayPattern": {
-                "type": "comboColumnDisplay",
-                "sourceCombo": "cboCaseworker",
-                "columnIndex": 2,
-                "resolvedSourceField": "Email",
-                "notes": "Combo's RowSource SELECT list resolves column 2 to tblCaseworkers.Email"
+              {
+                "Name": "txtCaseworkerEmail",
+                "ControlType": "TextBox",
+                "BoundField": "",
+                "ControlSource": ""
+              },
+              {
+                "Name": "txtCaseworkerPhone",
+                "ControlType": "TextBox",
+                "BoundField": "",
+                "ControlSource": ""
+              },
+              {
+                "Name": "sfrmOpenCases",
+                "ControlType": "Subform",
+                "BoundField": "",
+                "ControlSource": "frmOpenCasesEmbed"
               }
-            }
+            ]
           },
+          "OriginalSource": "Private Sub cboCaseworker_AfterUpdate()\n    Me!cboClient.RowSource = \"SELECT ClientID, ClientName FROM tblClients \" & _\n                             \"WHERE AssignedCaseworkerID = \" & Me!cboCaseworker & _\n                             \" ORDER BY ClientName\"\n    Me!cboClient.Requery\n    Me!cboClient = Null\n    Me.txtCaseworkerEmail = Me!cboCaseworker.Column(2)\n    Me.txtCaseworkerPhone = Me!cboCaseworker.Column(3)\n    Me.sfrmOpenCases.Form.Filter = \"CaseworkerID = \" & Me!cboCaseworker & _\n                                   \" AND CaseStatus IN ('Open', 'Pending Review')\"\n    Me.sfrmOpenCases.Form.FilterOn = True\n    Call RecalculateCaseloadTotals(Me!cboCaseworker)\nEnd Sub"
+        },
+        "Items": [
           {
-            "kind": "assignment",
-            "location": { "startLine": 20, "startColumn": 5, "endLine": 20, "endColumn": 60 },
-            "summary": "Set txtCaseworkerPhone from cboCaseworker.Column(3)",
-            "details": {
-              "displayPattern": {
-                "type": "comboColumnDisplay",
-                "sourceCombo": "cboCaseworker",
-                "columnIndex": 3,
-                "resolvedSourceField": "Phone"
-              }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 23, "startColumn": 5, "endLine": 24, "endColumn": 64 },
-            "summary": "Set sfrmOpenCases subform filter to caseworker + status condition",
-            "details": {
-              "target": {
-                "kind": "memberAccess",
-                "of": {
-                  "kind": "memberAccess",
-                  "of": { "kind": "memberAccess", "of": "Me", "member": "sfrmOpenCases" },
-                  "member": "Form"
+            "ItemKind": "Procedure",
+            "Name": "cboCaseworker_AfterUpdate",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "cboCaseworker",
+              "EventName": "AfterUpdate",
+              "ResolvedControl": {
+                "OriginalText": "cboCaseworker",
+                "Location": {
+                  "StartLine": 10,
+                  "StartColumn": 13,
+                  "EndLine": 10,
+                  "EndColumn": 26
                 },
-                "member": "Filter"
-              },
-              "subformNavigation": {
-                "subformControl": "sfrmOpenCases",
-                "containedForm": "frmOpenCasesEmbed",
-                "viaFormProperty": true
-              },
-              "filterPattern": {
-                "type": "subformFilter",
-                "predicates": [
-                  { "field": "CaseworkerID", "op": "=", "valueSource": "Me!cboCaseworker" },
-                  { "field": "CaseStatus", "op": "IN", "valueSource": "literalList", "values": ["Open", "Pending Review"] }
-                ]
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "Control",
+                "ResolvedTarget": {
+                  "Kind": "Control",
+                  "Name": "cboCaseworker",
+                  "Container": "frmCaseManagement",
+                  "FullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker",
+                  "Type": "ComboBox"
+                },
+                "Confidence": 1.0
               }
-            }
-          },
-          {
-            "kind": "assignment",
-            "location": { "startLine": 25, "startColumn": 5, "endLine": 25, "endColumn": 38 },
-            "summary": "Activate the subform's filter",
-            "details": {
-              "target": "Me.sfrmOpenCases.Form.FilterOn",
-              "value": { "kind": "literal", "literalKind": "boolean", "value": true }
-            }
-          },
-          {
-            "kind": "call",
-            "location": { "startLine": 28, "startColumn": 5, "endLine": 28, "endColumn": 50 },
-            "summary": "Recalculate caseload totals for the selected caseworker",
-            "details": {
-              "callee": "RecalculateCaseloadTotals"
-            }
-          }
-        ],
-        "references": [
-          {
-            "originalText": "Me!cboClient",
-            "location": { "startLine": 12, "startColumn": 5, "endLine": 12, "endColumn": 17 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "cboClient",
-              "container": "frmCaseManagement",
-              "fullyQualifiedName": "Forms!frmCaseManagement!cboClient",
-              "type": "ComboBox"
             },
-            "implicitContext": { "implicitOf": "Me", "viaWithBlock": false },
-            "confidence": 1.0,
-            "notes": "Bang operator: Me!cboClient is shorthand for Me.Controls(\"cboClient\")"
-          },
-          {
-            "originalText": "Me!cboCaseworker",
-            "location": { "startLine": 13, "startColumn": 65, "endLine": 13, "endColumn": 81 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "cboCaseworker",
-              "container": "frmCaseManagement",
-              "fullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker",
-              "type": "ComboBox"
+            "Signature": {
+              "Parameters": []
             },
-            "confidence": 1.0,
-            "notes": "Used as scalar value via implicit default property (.Value), yields bound column"
-          },
-          {
-            "originalText": "Me!cboCaseworker.Column(2)",
-            "location": { "startLine": 19, "startColumn": 32, "endLine": 19, "endColumn": 58 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "comboBoxColumn",
-              "name": "cboCaseworker.Column(2)",
-              "container": "frmCaseManagement",
-              "fullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker.Column(2)",
-              "type": "Variant"
+            "Classification": {
+              "PurposeTags": [
+                "CascadingUpdate",
+                "FilterSearch",
+                "Calculation"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 1,
+              "LinesOfCode": 16,
+              "Translatability": "Structured"
             },
-            "confidence": 0.95,
-            "notes": "Column index 2 resolved against cboCaseworker.RowSource SELECT list -> Email"
-          },
-          {
-            "originalText": "Me!cboCaseworker.Column(3)",
-            "location": { "startLine": 20, "startColumn": 32, "endLine": 20, "endColumn": 58 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "comboBoxColumn",
-              "name": "cboCaseworker.Column(3)",
-              "container": "frmCaseManagement",
-              "fullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker.Column(3)",
-              "type": "Variant"
-            },
-            "confidence": 0.95,
-            "notes": "Column index 3 resolved against cboCaseworker.RowSource SELECT list -> Phone"
-          },
-          {
-            "originalText": "Me.sfrmOpenCases",
-            "location": { "startLine": 23, "startColumn": 5, "endLine": 23, "endColumn": 21 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "sfrmOpenCases",
-              "container": "frmCaseManagement",
-              "fullyQualifiedName": "Forms!frmCaseManagement!sfrmOpenCases",
-              "type": "SubForm"
-            },
-            "confidence": 1.0
-          },
-          {
-            "originalText": "Me.sfrmOpenCases.Form",
-            "location": { "startLine": 23, "startColumn": 5, "endLine": 23, "endColumn": 26 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "form",
-            "resolvedTarget": {
-              "kind": "form",
-              "name": "frmOpenCasesEmbed",
-              "fullyQualifiedName": "Forms!frmCaseManagement!sfrmOpenCases.Form",
-              "type": "Form_frmOpenCasesEmbed"
-            },
-            "confidence": 1.0,
-            "notes": "Subform navigation: .Form property accesses contained form object"
-          }
-        ],
-        "calls": [
-          {
-            "calleeText": "Me!cboClient.Requery",
-            "location": { "startLine": 15, "startColumn": 5, "endLine": 15, "endColumn": 25 },
-            "resolvedCallee": {
-              "originalText": "Requery",
-              "location": { "startLine": 15, "startColumn": 19, "endLine": 15, "endColumn": 25 },
-              "resolutionStatus": "resolved",
-              "referenceKind": "objectModel",
-              "resolvedTarget": {
-                "kind": "method",
-                "name": "Requery",
-                "container": "Access.ComboBox",
-                "fullyQualifiedName": "Access.ComboBox.Requery",
-                "type": "Void"
-              },
-              "confidence": 1.0
-            },
-            "arguments": []
-          },
-          {
-            "calleeText": "RecalculateCaseloadTotals",
-            "location": { "startLine": 28, "startColumn": 10, "endLine": 28, "endColumn": 35 },
-            "resolvedCallee": {
-              "originalText": "RecalculateCaseloadTotals",
-              "location": { "startLine": 28, "startColumn": 10, "endLine": 28, "endColumn": 35 },
-              "resolutionStatus": "partiallyResolved",
-              "referenceKind": "procedure",
-              "resolvedTarget": {
-                "kind": "procedure",
-                "name": "RecalculateCaseloadTotals",
-                "container": "modCaseload",
-                "fullyQualifiedName": "modCaseload.RecalculateCaseloadTotals",
-                "type": "Void"
-              },
-              "confidence": 0.85,
-              "notes": "Resolved by walking project scope; assumes single declaration. Verify no shadowing in form module."
-            },
-            "arguments": [
-              {
-                "originalText": "Me!cboCaseworker",
-                "parsed": { "kind": "bangAccess", "of": "Me", "member": "cboCaseworker" }
-              }
-            ]
-          }
-        ],
-        "sqlStrings": [
-          {
-            "originalText": "\"SELECT ClientID, ClientName FROM tblClients \" & \"WHERE AssignedCaseworkerID = \" & Me!cboCaseworker & \" ORDER BY ClientName\"",
-            "location": { "startLine": 12, "startColumn": 30, "endLine": 14, "endColumn": 51 },
-            "constructionMode": "concatenated",
-            "templateCandidates": [
-              {
-                "template": "SELECT ClientID, ClientName FROM tblClients WHERE AssignedCaseworkerID = ? ORDER BY ClientName",
-                "parameterBindings": [
-                  {
-                    "name": "p_AssignedCaseworkerID",
-                    "type": "Long",
-                    "source": "formControl",
-                    "resolvedReference": {
-                      "originalText": "Me!cboCaseworker",
-                      "location": { "startLine": 13, "startColumn": 65, "endLine": 13, "endColumn": 81 },
-                      "resolutionStatus": "resolved",
-                      "referenceKind": "control",
-                      "resolvedTarget": {
-                        "kind": "control",
-                        "name": "cboCaseworker",
-                        "container": "frmCaseManagement",
-                        "fullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker",
-                        "type": "ComboBox"
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 12,
+                    "StartColumn": 5,
+                    "EndLine": 14,
+                    "EndColumn": 51
+                  },
+                  "Summary": "Sets cboClient.RowSource to a dynamically-built SQL filtered by current caseworker",
+                  "Details": {
+                    "Target": {
+                      "Kind": "MemberAccess",
+                      "Of": {
+                        "Kind": "BangAccess",
+                        "Of": "Me",
+                        "Member": "cboClient"
                       },
-                      "confidence": 1.0
+                      "Member": "RowSource"
+                    },
+                    "Value": {
+                      "Kind": "BinaryOp",
+                      "Op": "&",
+                      "IsStringConcatenation": true,
+                      "ConstructedSql": true
+                    },
+                    "SqlConstruction": "concatenated"
+                  }
+                },
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 15,
+                    "StartColumn": 5,
+                    "EndLine": 15,
+                    "EndColumn": 28
+                  },
+                  "Summary": "Requery cboClient to refresh its dropdown after RowSource change",
+                  "Details": {
+                    "Callee": "Me!cboClient.Requery",
+                    "IsMethodCall": true
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 16,
+                    "StartColumn": 5,
+                    "EndLine": 16,
+                    "EndColumn": 25
+                  },
+                  "Summary": "Clear cboClient selection",
+                  "Details": {
+                    "Target": "Me!cboClient",
+                    "Value": {
+                      "Kind": "Literal",
+                      "LiteralKind": "Null"
                     }
                   }
-                ],
-                "confidence": 0.95
-              }
-            ]
-          },
-          {
-            "originalText": "\"CaseworkerID = \" & Me!cboCaseworker & \" AND CaseStatus IN ('Open', 'Pending Review')\"",
-            "location": { "startLine": 23, "startColumn": 38, "endLine": 24, "endColumn": 64 },
-            "constructionMode": "concatenated",
-            "templateCandidates": [
-              {
-                "template": "CaseworkerID = ? AND CaseStatus IN ('Open', 'Pending Review')",
-                "parameterBindings": [
-                  {
-                    "name": "p_CaseworkerID",
-                    "type": "Long",
-                    "source": "formControl",
-                    "resolvedReference": {
-                      "originalText": "Me!cboCaseworker",
-                      "location": { "startLine": 23, "startColumn": 57, "endLine": 23, "endColumn": 73 },
-                      "resolutionStatus": "resolved",
-                      "referenceKind": "control",
-                      "resolvedTarget": {
-                        "kind": "control",
-                        "name": "cboCaseworker",
-                        "container": "frmCaseManagement",
-                        "fullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker",
-                        "type": "ComboBox"
-                      },
-                      "confidence": 1.0
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 19,
+                    "StartColumn": 5,
+                    "EndLine": 19,
+                    "EndColumn": 60
+                  },
+                  "Summary": "Set txtCaseworkerEmail from cboCaseworker.Column(2)",
+                  "Details": {
+                    "Target": "Me.txtCaseworkerEmail",
+                    "Value": "Me!cboCaseworker.Column(2)",
+                    "DisplayPattern": {
+                      "Type": "comboColumnDisplay",
+                      "SourceCombo": "cboCaseworker",
+                      "ColumnIndex": 2,
+                      "ResolvedSourceField": "Email",
+                      "Notes": "Combo's RowSource SELECT list resolves column 2 to tblCaseworkers.Email"
                     }
                   }
-                ],
-                "confidence": 1.0,
-                "notes": "This is a Filter clause, not a full SQL statement. Migration should treat as predicate over subform's record source."
-              }
-            ]
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 20,
+                    "StartColumn": 5,
+                    "EndLine": 20,
+                    "EndColumn": 60
+                  },
+                  "Summary": "Set txtCaseworkerPhone from cboCaseworker.Column(3)",
+                  "Details": {
+                    "DisplayPattern": {
+                      "Type": "comboColumnDisplay",
+                      "SourceCombo": "cboCaseworker",
+                      "ColumnIndex": 3,
+                      "ResolvedSourceField": "Phone"
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 23,
+                    "StartColumn": 5,
+                    "EndLine": 24,
+                    "EndColumn": 64
+                  },
+                  "Summary": "Set sfrmOpenCases subform filter to caseworker + status condition",
+                  "Details": {
+                    "Target": {
+                      "Kind": "MemberAccess",
+                      "Of": {
+                        "Kind": "MemberAccess",
+                        "Of": {
+                          "Kind": "MemberAccess",
+                          "Of": "Me",
+                          "Member": "sfrmOpenCases"
+                        },
+                        "Member": "Form"
+                      },
+                      "Member": "Filter"
+                    },
+                    "SubformNavigation": {
+                      "SubformControl": "sfrmOpenCases",
+                      "ContainedForm": "frmOpenCasesEmbed",
+                      "ViaFormProperty": true
+                    },
+                    "FilterPattern": {
+                      "Type": "subformFilter",
+                      "Predicates": [
+                        {
+                          "Field": "CaseworkerID",
+                          "Op": "=",
+                          "ValueSource": "Me!cboCaseworker"
+                        },
+                        {
+                          "Field": "CaseStatus",
+                          "Op": "IN",
+                          "ValueSource": "literalList",
+                          "Values": [
+                            "Open",
+                            "Pending Review"
+                          ]
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 25,
+                    "StartColumn": 5,
+                    "EndLine": 25,
+                    "EndColumn": 38
+                  },
+                  "Summary": "Activate the subform's filter",
+                  "Details": {
+                    "Target": "Me.sfrmOpenCases.Form.FilterOn",
+                    "Value": {
+                      "Kind": "Literal",
+                      "LiteralKind": "Boolean",
+                      "Value": true
+                    }
+                  }
+                },
+                {
+                  "Kind": "Call",
+                  "Location": {
+                    "StartLine": 28,
+                    "StartColumn": 5,
+                    "EndLine": 28,
+                    "EndColumn": 50
+                  },
+                  "Summary": "Recalculate caseload totals for the selected caseworker",
+                  "Details": {
+                    "Callee": "RecalculateCaseloadTotals"
+                  }
+                }
+              ],
+              "References": [
+                {
+                  "OriginalText": "Me!cboClient",
+                  "Location": {
+                    "StartLine": 12,
+                    "StartColumn": 5,
+                    "EndLine": 12,
+                    "EndColumn": 17
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "cboClient",
+                    "Container": "frmCaseManagement",
+                    "FullyQualifiedName": "Forms!frmCaseManagement!cboClient",
+                    "Type": "ComboBox"
+                  },
+                  "ImplicitContext": {
+                    "ImplicitOf": "Me",
+                    "ViaWithBlock": false
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Bang operator: Me!cboClient is shorthand for Me.Controls(\"cboClient\")"
+                },
+                {
+                  "OriginalText": "Me!cboCaseworker",
+                  "Location": {
+                    "StartLine": 13,
+                    "StartColumn": 65,
+                    "EndLine": 13,
+                    "EndColumn": 81
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "cboCaseworker",
+                    "Container": "frmCaseManagement",
+                    "FullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker",
+                    "Type": "ComboBox"
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Used as scalar value via implicit default property (.Value), yields bound column"
+                },
+                {
+                  "OriginalText": "Me!cboCaseworker.Column(2)",
+                  "Location": {
+                    "StartLine": 19,
+                    "StartColumn": 32,
+                    "EndLine": 19,
+                    "EndColumn": 58
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "ComboBoxColumn",
+                    "Name": "cboCaseworker.Column(2)",
+                    "Container": "frmCaseManagement",
+                    "FullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker.Column(2)",
+                    "Type": "Variant"
+                  },
+                  "Confidence": 0.95,
+                  "Notes": "Column index 2 resolved against cboCaseworker.RowSource SELECT list -> Email"
+                },
+                {
+                  "OriginalText": "Me!cboCaseworker.Column(3)",
+                  "Location": {
+                    "StartLine": 20,
+                    "StartColumn": 32,
+                    "EndLine": 20,
+                    "EndColumn": 58
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "ComboBoxColumn",
+                    "Name": "cboCaseworker.Column(3)",
+                    "Container": "frmCaseManagement",
+                    "FullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker.Column(3)",
+                    "Type": "Variant"
+                  },
+                  "Confidence": 0.95,
+                  "Notes": "Column index 3 resolved against cboCaseworker.RowSource SELECT list -> Phone"
+                },
+                {
+                  "OriginalText": "Me.sfrmOpenCases",
+                  "Location": {
+                    "StartLine": 23,
+                    "StartColumn": 5,
+                    "EndLine": 23,
+                    "EndColumn": 21
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "sfrmOpenCases",
+                    "Container": "frmCaseManagement",
+                    "FullyQualifiedName": "Forms!frmCaseManagement!sfrmOpenCases",
+                    "Type": "SubForm"
+                  },
+                  "Confidence": 1.0
+                },
+                {
+                  "OriginalText": "Me.sfrmOpenCases.Form",
+                  "Location": {
+                    "StartLine": 23,
+                    "StartColumn": 5,
+                    "EndLine": 23,
+                    "EndColumn": 26
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Form",
+                  "ResolvedTarget": {
+                    "Kind": "Form",
+                    "Name": "frmOpenCasesEmbed",
+                    "FullyQualifiedName": "Forms!frmCaseManagement!sfrmOpenCases.Form",
+                    "Type": "Form_frmOpenCasesEmbed"
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Subform navigation: .Form property accesses contained form object"
+                }
+              ],
+              "Calls": [
+                {
+                  "CalleeText": "Me!cboClient.Requery",
+                  "Location": {
+                    "StartLine": 15,
+                    "StartColumn": 5,
+                    "EndLine": 15,
+                    "EndColumn": 25
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "Requery",
+                    "Location": {
+                      "StartLine": 15,
+                      "StartColumn": 19,
+                      "EndLine": 15,
+                      "EndColumn": 25
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "ObjectModel",
+                    "ResolvedTarget": {
+                      "Kind": "Method",
+                      "Name": "Requery",
+                      "Container": "Access.ComboBox",
+                      "FullyQualifiedName": "Access.ComboBox.Requery",
+                      "Type": "Void"
+                    },
+                    "Confidence": 1.0
+                  },
+                  "Arguments": []
+                },
+                {
+                  "CalleeText": "RecalculateCaseloadTotals",
+                  "Location": {
+                    "StartLine": 28,
+                    "StartColumn": 10,
+                    "EndLine": 28,
+                    "EndColumn": 35
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "RecalculateCaseloadTotals",
+                    "Location": {
+                      "StartLine": 28,
+                      "StartColumn": 10,
+                      "EndLine": 28,
+                      "EndColumn": 35
+                    },
+                    "ResolutionStatus": "PartiallyResolved",
+                    "ReferenceKind": "Procedure",
+                    "ResolvedTarget": {
+                      "Kind": "Procedure",
+                      "Name": "RecalculateCaseloadTotals",
+                      "Container": "modCaseload",
+                      "FullyQualifiedName": "modCaseload.RecalculateCaseloadTotals",
+                      "Type": "Void"
+                    },
+                    "Confidence": 0.85,
+                    "Notes": "Resolved by walking project scope; assumes single declaration. Verify no shadowing in form module."
+                  },
+                  "Arguments": [
+                    {
+                      "OriginalText": "Me!cboCaseworker",
+                      "Parsed": {
+                        "Kind": "BangAccess",
+                        "Of": "Me",
+                        "Member": "cboCaseworker"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "SqlStrings": [
+                {
+                  "OriginalText": "\"SELECT ClientID, ClientName FROM tblClients \" & \"WHERE AssignedCaseworkerID = \" & Me!cboCaseworker & \" ORDER BY ClientName\"",
+                  "Location": {
+                    "StartLine": 12,
+                    "StartColumn": 30,
+                    "EndLine": 14,
+                    "EndColumn": 51
+                  },
+                  "ConstructionMode": "Concatenated",
+                  "TemplateCandidates": [
+                    {
+                      "Template": "SELECT ClientID, ClientName FROM tblClients WHERE AssignedCaseworkerID = ? ORDER BY ClientName",
+                      "ParameterBindings": [
+                        {
+                          "Name": "p_AssignedCaseworkerID",
+                          "Type": "Long",
+                          "Source": "FormControl",
+                          "ResolvedReference": {
+                            "OriginalText": "Me!cboCaseworker",
+                            "Location": {
+                              "StartLine": 13,
+                              "StartColumn": 65,
+                              "EndLine": 13,
+                              "EndColumn": 81
+                            },
+                            "ResolutionStatus": "Resolved",
+                            "ReferenceKind": "Control",
+                            "ResolvedTarget": {
+                              "Kind": "Control",
+                              "Name": "cboCaseworker",
+                              "Container": "frmCaseManagement",
+                              "FullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker",
+                              "Type": "ComboBox"
+                            },
+                            "Confidence": 1.0
+                          }
+                        }
+                      ],
+                      "Confidence": 0.95
+                    }
+                  ]
+                },
+                {
+                  "OriginalText": "\"CaseworkerID = \" & Me!cboCaseworker & \" AND CaseStatus IN ('Open', 'Pending Review')\"",
+                  "Location": {
+                    "StartLine": 23,
+                    "StartColumn": 38,
+                    "EndLine": 24,
+                    "EndColumn": 64
+                  },
+                  "ConstructionMode": "Concatenated",
+                  "TemplateCandidates": [
+                    {
+                      "Template": "CaseworkerID = ? AND CaseStatus IN ('Open', 'Pending Review')",
+                      "ParameterBindings": [
+                        {
+                          "Name": "p_CaseworkerID",
+                          "Type": "Long",
+                          "Source": "FormControl",
+                          "ResolvedReference": {
+                            "OriginalText": "Me!cboCaseworker",
+                            "Location": {
+                              "StartLine": 23,
+                              "StartColumn": 57,
+                              "EndLine": 23,
+                              "EndColumn": 73
+                            },
+                            "ResolutionStatus": "Resolved",
+                            "ReferenceKind": "Control",
+                            "ResolvedTarget": {
+                              "Kind": "Control",
+                              "Name": "cboCaseworker",
+                              "Container": "frmCaseManagement",
+                              "FullyQualifiedName": "Forms!frmCaseManagement!cboCaseworker",
+                              "Type": "ComboBox"
+                            },
+                            "Confidence": 1.0
+                          }
+                        }
+                      ],
+                      "Confidence": 1.0,
+                      "Notes": "This is a Filter clause, not a full SQL statement. Migration should treat as predicate over subform's record source."
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "UnresolvedItems": [],
+        "Diagnostics": [
+          {
+            "Severity": "Info",
+            "Code": "HARV-I010",
+            "Message": "Cascading combo pattern detected: cboCaseworker drives cboClient.RowSource. Suggest two-level lookup component in migration.",
+            "Location": {
+              "StartLine": 12,
+              "StartColumn": 5,
+              "EndLine": 16,
+              "EndColumn": 25
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I011",
+            "Message": "Combo column display pattern detected: txtCaseworkerEmail and txtCaseworkerPhone derive from cboCaseworker.Column(N). Suggest computed/derived properties from caseworker entity in migration model rather than separate display textboxes.",
+            "Location": {
+              "StartLine": 19,
+              "StartColumn": 5,
+              "EndLine": 20,
+              "EndColumn": 60
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I012",
+            "Message": "Subform filter pattern detected. Migration target should pass filter parameters to child component.",
+            "Location": {
+              "StartLine": 23,
+              "StartColumn": 5,
+              "EndLine": 26,
+              "EndColumn": 38
+            }
           }
         ]
       }
-    }
-  ],
-  "unresolvedItems": [],
-  "diagnostics": [
-    {
-      "severity": "info",
-      "code": "HARV-I010",
-      "message": "Cascading combo pattern detected: cboCaseworker drives cboClient.RowSource. Suggest two-level lookup component in migration.",
-      "location": { "startLine": 12, "startColumn": 5, "endLine": 16, "endColumn": 25 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I011",
-      "message": "Combo column display pattern detected: txtCaseworkerEmail and txtCaseworkerPhone derive from cboCaseworker.Column(N). Suggest computed/derived properties from caseworker entity in migration model rather than separate display textboxes.",
-      "location": { "startLine": 19, "startColumn": 5, "endLine": 20, "endColumn": 60 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I012",
-      "message": "Subform filter pattern detected. Migration target should pass filter parameters to child component.",
-      "location": { "startLine": 23, "startColumn": 5, "endLine": 26, "endColumn": 38 }
     }
   ]
 }

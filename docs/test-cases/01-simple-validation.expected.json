@@ -1,226 +1,322 @@
 {
-  "schemaVersion": "0.1",
-  "source": {
-    "kind": "procedure",
-    "location": {
-      "file": "01-simple-validation.bas",
-      "module": "Form_frmCustomers",
-      "startLine": 9,
-      "startColumn": 1,
-      "endLine": 22,
-      "endColumn": 8
-    },
-    "hostContext": {
-      "hostKind": "form",
-      "hostName": "frmCustomers",
-      "controlsAvailable": [
-        {
-          "name": "txtCustomerName",
-          "controlType": "TextBox",
-          "boundField": "CustomerName",
-          "controlSource": "CustomerName"
-        },
-        {
-          "name": "txtPhone",
-          "controlType": "TextBox",
-          "boundField": "Phone",
-          "controlSource": "Phone"
-        }
-      ]
-    },
-    "originalSource": "Private Sub Form_BeforeUpdate(Cancel As Integer)\n    If IsNull(Me.txtCustomerName) Or Me.txtCustomerName = \"\" Then\n        MsgBox \"Customer Name is required.\", vbExclamation\n        Cancel = True\n        Me.txtCustomerName.SetFocus\n        Exit Sub\n    End If\n    \n    If IsNull(Me.txtPhone) Then\n        MsgBox \"Phone Number is required.\", vbExclamation\n        Cancel = True\n        Me.txtPhone.SetFocus\n    End If\nEnd Sub"
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "migrated-from-v0",
+  "Database": {
+    "Name": "01-simple-validation.expected",
+    "FilePath": "docs\\test-cases\\01-simple-validation.expected.json",
+    "ExportedAt": "2026-05-28T10:23:08.0000000+00:00"
   },
-  "items": [
+  "Modules": [
     {
-      "itemKind": "procedure",
-      "name": "Form_BeforeUpdate",
-      "procedureKind": "EventHandler",
-      "visibility": "Private",
-      "isStatic": false,
-      "eventBinding": {
-        "controlName": "Form",
-        "eventName": "BeforeUpdate",
-        "resolvedControl": {
-          "originalText": "Form",
-          "location": { "startLine": 9, "startColumn": 13, "endLine": 9, "endColumn": 17 },
-          "resolutionStatus": "resolved",
-          "referenceKind": "form",
-          "resolvedTarget": {
-            "kind": "form",
-            "name": "frmCustomers",
-            "fullyQualifiedName": "Forms!frmCustomers",
-            "type": "Form_frmCustomers"
+      "ModuleName": "Form_frmCustomers",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Procedure",
+          "Location": {
+            "File": "01-simple-validation.bas",
+            "Module": "Form_frmCustomers",
+            "StartLine": 9,
+            "StartColumn": 1,
+            "EndLine": 22,
+            "EndColumn": 8
           },
-          "confidence": 1.0
-        }
-      },
-      "signature": {
-        "parameters": [
-          {
-            "name": "Cancel",
-            "type": "Integer",
-            "byRef": true
-          }
-        ]
-      },
-      "classification": {
-        "purposeTags": ["validation"],
-        "purity": "uiBound",
-        "complexity": 5,
-        "linesOfCode": 12,
-        "translatability": "mechanical"
-      },
-      "body": {
-        "statements": [
-          {
-            "kind": "if",
-            "location": { "startLine": 10, "startColumn": 5, "endLine": 15, "endColumn": 11 },
-            "summary": "Validates txtCustomerName is not null/empty; cancels save if invalid",
-            "details": {
-              "condition": {
-                "kind": "binaryOp",
-                "op": "Or",
-                "left": {
-                  "kind": "call",
-                  "callee": "IsNull",
-                  "args": [{ "kind": "memberAccess", "of": "Me", "member": "txtCustomerName" }]
-                },
-                "right": {
-                  "kind": "binaryOp",
-                  "op": "=",
-                  "left": { "kind": "memberAccess", "of": "Me", "member": "txtCustomerName" },
-                  "right": { "kind": "literal", "literalKind": "string", "value": "" }
-                }
-              },
-              "validationPattern": {
-                "field": "txtCustomerName",
-                "rule": "required",
-                "messageOnFailure": "Customer Name is required."
-              }
-            }
-          },
-          {
-            "kind": "if",
-            "location": { "startLine": 17, "startColumn": 5, "endLine": 21, "endColumn": 11 },
-            "summary": "Validates txtPhone is not null; cancels save if invalid",
-            "details": {
-              "validationPattern": {
-                "field": "txtPhone",
-                "rule": "required",
-                "messageOnFailure": "Phone Number is required."
-              }
-            }
-          }
-        ],
-        "references": [
-          {
-            "originalText": "Me.txtCustomerName",
-            "location": { "startLine": 10, "startColumn": 15, "endLine": 10, "endColumn": 33 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "txtCustomerName",
-              "container": "frmCustomers",
-              "fullyQualifiedName": "Forms!frmCustomers!txtCustomerName",
-              "type": "TextBox"
-            },
-            "implicitContext": {
-              "implicitOf": "Me",
-              "viaWithBlock": false,
-              "viaDefaultMember": false
-            },
-            "confidence": 1.0
-          },
-          {
-            "originalText": "Me.txtCustomerName",
-            "location": { "startLine": 10, "startColumn": 38, "endLine": 10, "endColumn": 56 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "txtCustomerName",
-              "container": "frmCustomers",
-              "fullyQualifiedName": "Forms!frmCustomers!txtCustomerName",
-              "type": "TextBox"
-            },
-            "confidence": 1.0,
-            "notes": "Implicit default member access: Me.txtCustomerName = \"\" compares the .Value property"
-          },
-          {
-            "originalText": "Me.txtPhone",
-            "location": { "startLine": 17, "startColumn": 15, "endLine": 17, "endColumn": 26 },
-            "resolutionStatus": "resolved",
-            "referenceKind": "control",
-            "resolvedTarget": {
-              "kind": "control",
-              "name": "txtPhone",
-              "container": "frmCustomers",
-              "fullyQualifiedName": "Forms!frmCustomers!txtPhone",
-              "type": "TextBox"
-            },
-            "confidence": 1.0
-          }
-        ],
-        "calls": [
-          {
-            "calleeText": "IsNull",
-            "location": { "startLine": 10, "startColumn": 8, "endLine": 10, "endColumn": 14 },
-            "resolvedCallee": {
-              "originalText": "IsNull",
-              "location": { "startLine": 10, "startColumn": 8, "endLine": 10, "endColumn": 14 },
-              "resolutionStatus": "resolved",
-              "referenceKind": "builtIn",
-              "resolvedTarget": {
-                "kind": "builtInFunction",
-                "name": "IsNull",
-                "fullyQualifiedName": "VBA.Information.IsNull",
-                "type": "Boolean"
-              },
-              "confidence": 1.0
-            },
-            "arguments": [
+          "HostContext": {
+            "HostKind": "Form",
+            "HostName": "frmCustomers",
+            "ControlsAvailable": [
               {
-                "originalText": "Me.txtCustomerName",
-                "parsed": { "kind": "memberAccess", "of": "Me", "member": "txtCustomerName" }
+                "Name": "txtCustomerName",
+                "ControlType": "TextBox",
+                "BoundField": "CustomerName",
+                "ControlSource": "CustomerName"
+              },
+              {
+                "Name": "txtPhone",
+                "ControlType": "TextBox",
+                "BoundField": "Phone",
+                "ControlSource": "Phone"
               }
             ]
           },
+          "OriginalSource": "Private Sub Form_BeforeUpdate(Cancel As Integer)\n    If IsNull(Me.txtCustomerName) Or Me.txtCustomerName = \"\" Then\n        MsgBox \"Customer Name is required.\", vbExclamation\n        Cancel = True\n        Me.txtCustomerName.SetFocus\n        Exit Sub\n    End If\n    \n    If IsNull(Me.txtPhone) Then\n        MsgBox \"Phone Number is required.\", vbExclamation\n        Cancel = True\n        Me.txtPhone.SetFocus\n    End If\nEnd Sub"
+        },
+        "Items": [
           {
-            "calleeText": "MsgBox",
-            "location": { "startLine": 11, "startColumn": 9, "endLine": 11, "endColumn": 14 },
-            "resolvedCallee": {
-              "originalText": "MsgBox",
-              "location": { "startLine": 11, "startColumn": 9, "endLine": 11, "endColumn": 14 },
-              "resolutionStatus": "resolved",
-              "referenceKind": "builtIn",
-              "resolvedTarget": {
-                "kind": "builtInFunction",
-                "name": "MsgBox",
-                "fullyQualifiedName": "VBA.Interaction.MsgBox",
-                "type": "VbMsgBoxResult"
-              },
-              "confidence": 1.0
+            "ItemKind": "Procedure",
+            "Name": "Form_BeforeUpdate",
+            "ProcedureKind": "EventHandler",
+            "Visibility": "Private",
+            "IsStatic": false,
+            "EventBinding": {
+              "ControlName": "Form",
+              "EventName": "BeforeUpdate",
+              "ResolvedControl": {
+                "OriginalText": "Form",
+                "Location": {
+                  "StartLine": 9,
+                  "StartColumn": 13,
+                  "EndLine": 9,
+                  "EndColumn": 17
+                },
+                "ResolutionStatus": "Resolved",
+                "ReferenceKind": "Form",
+                "ResolvedTarget": {
+                  "Kind": "Form",
+                  "Name": "frmCustomers",
+                  "FullyQualifiedName": "Forms!frmCustomers",
+                  "Type": "Form_frmCustomers"
+                },
+                "Confidence": 1.0
+              }
+            },
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "Cancel",
+                  "Type": "Integer",
+                  "ByRef": true
+                }
+              ]
+            },
+            "Classification": {
+              "PurposeTags": [
+                "Validation"
+              ],
+              "Purity": "UIBound",
+              "Complexity": 5,
+              "LinesOfCode": 12,
+              "Translatability": "Mechanical"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 10,
+                    "StartColumn": 5,
+                    "EndLine": 15,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Validates txtCustomerName is not null/empty; cancels save if invalid",
+                  "Details": {
+                    "Condition": {
+                      "Kind": "BinaryOp",
+                      "Op": "Or",
+                      "Left": {
+                        "Kind": "Call",
+                        "Callee": "IsNull",
+                        "Args": [
+                          {
+                            "Kind": "MemberAccess",
+                            "Of": "Me",
+                            "Member": "txtCustomerName"
+                          }
+                        ]
+                      },
+                      "Right": {
+                        "Kind": "BinaryOp",
+                        "Op": "=",
+                        "Left": {
+                          "Kind": "MemberAccess",
+                          "Of": "Me",
+                          "Member": "txtCustomerName"
+                        },
+                        "Right": {
+                          "Kind": "Literal",
+                          "LiteralKind": "String",
+                          "Value": ""
+                        }
+                      }
+                    },
+                    "ValidationPattern": {
+                      "Field": "txtCustomerName",
+                      "Rule": "required",
+                      "MessageOnFailure": "Customer Name is required."
+                    }
+                  }
+                },
+                {
+                  "Kind": "If",
+                  "Location": {
+                    "StartLine": 17,
+                    "StartColumn": 5,
+                    "EndLine": 21,
+                    "EndColumn": 11
+                  },
+                  "Summary": "Validates txtPhone is not null; cancels save if invalid",
+                  "Details": {
+                    "ValidationPattern": {
+                      "Field": "txtPhone",
+                      "Rule": "required",
+                      "MessageOnFailure": "Phone Number is required."
+                    }
+                  }
+                }
+              ],
+              "References": [
+                {
+                  "OriginalText": "Me.txtCustomerName",
+                  "Location": {
+                    "StartLine": 10,
+                    "StartColumn": 15,
+                    "EndLine": 10,
+                    "EndColumn": 33
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "txtCustomerName",
+                    "Container": "frmCustomers",
+                    "FullyQualifiedName": "Forms!frmCustomers!txtCustomerName",
+                    "Type": "TextBox"
+                  },
+                  "ImplicitContext": {
+                    "ImplicitOf": "Me",
+                    "ViaWithBlock": false,
+                    "ViaDefaultMember": false
+                  },
+                  "Confidence": 1.0
+                },
+                {
+                  "OriginalText": "Me.txtCustomerName",
+                  "Location": {
+                    "StartLine": 10,
+                    "StartColumn": 38,
+                    "EndLine": 10,
+                    "EndColumn": 56
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "txtCustomerName",
+                    "Container": "frmCustomers",
+                    "FullyQualifiedName": "Forms!frmCustomers!txtCustomerName",
+                    "Type": "TextBox"
+                  },
+                  "Confidence": 1.0,
+                  "Notes": "Implicit default member access: Me.txtCustomerName = \"\" compares the .Value property"
+                },
+                {
+                  "OriginalText": "Me.txtPhone",
+                  "Location": {
+                    "StartLine": 17,
+                    "StartColumn": 15,
+                    "EndLine": 17,
+                    "EndColumn": 26
+                  },
+                  "ResolutionStatus": "Resolved",
+                  "ReferenceKind": "Control",
+                  "ResolvedTarget": {
+                    "Kind": "Control",
+                    "Name": "txtPhone",
+                    "Container": "frmCustomers",
+                    "FullyQualifiedName": "Forms!frmCustomers!txtPhone",
+                    "Type": "TextBox"
+                  },
+                  "Confidence": 1.0
+                }
+              ],
+              "Calls": [
+                {
+                  "CalleeText": "IsNull",
+                  "Location": {
+                    "StartLine": 10,
+                    "StartColumn": 8,
+                    "EndLine": 10,
+                    "EndColumn": 14
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "IsNull",
+                    "Location": {
+                      "StartLine": 10,
+                      "StartColumn": 8,
+                      "EndLine": 10,
+                      "EndColumn": 14
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "BuiltIn",
+                    "ResolvedTarget": {
+                      "Kind": "BuiltInFunction",
+                      "Name": "IsNull",
+                      "FullyQualifiedName": "VBA.Information.IsNull",
+                      "Type": "Boolean"
+                    },
+                    "Confidence": 1.0
+                  },
+                  "Arguments": [
+                    {
+                      "OriginalText": "Me.txtCustomerName",
+                      "Parsed": {
+                        "Kind": "MemberAccess",
+                        "Of": "Me",
+                        "Member": "txtCustomerName"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "CalleeText": "MsgBox",
+                  "Location": {
+                    "StartLine": 11,
+                    "StartColumn": 9,
+                    "EndLine": 11,
+                    "EndColumn": 14
+                  },
+                  "ResolvedCallee": {
+                    "OriginalText": "MsgBox",
+                    "Location": {
+                      "StartLine": 11,
+                      "StartColumn": 9,
+                      "EndLine": 11,
+                      "EndColumn": 14
+                    },
+                    "ResolutionStatus": "Resolved",
+                    "ReferenceKind": "BuiltIn",
+                    "ResolvedTarget": {
+                      "Kind": "BuiltInFunction",
+                      "Name": "MsgBox",
+                      "FullyQualifiedName": "VBA.Interaction.MsgBox",
+                      "Type": "VbMsgBoxResult"
+                    },
+                    "Confidence": 1.0
+                  }
+                }
+              ],
+              "SqlStrings": []
             }
           }
         ],
-        "sqlStrings": []
+        "UnresolvedItems": [],
+        "Diagnostics": [
+          {
+            "Severity": "Info",
+            "Code": "HARV-I001",
+            "Message": "Validation pattern detected: required-field check on txtCustomerName. Suggest [Required] attribute on bound model property in migration.",
+            "Location": {
+              "StartLine": 10,
+              "StartColumn": 5,
+              "EndLine": 15,
+              "EndColumn": 11
+            }
+          },
+          {
+            "Severity": "Info",
+            "Code": "HARV-I001",
+            "Message": "Validation pattern detected: required-field check on txtPhone. Suggest [Required] attribute on bound model property in migration.",
+            "Location": {
+              "StartLine": 17,
+              "StartColumn": 5,
+              "EndLine": 21,
+              "EndColumn": 11
+            }
+          }
+        ]
       }
-    }
-  ],
-  "unresolvedItems": [],
-  "diagnostics": [
-    {
-      "severity": "info",
-      "code": "HARV-I001",
-      "message": "Validation pattern detected: required-field check on txtCustomerName. Suggest [Required] attribute on bound model property in migration.",
-      "location": { "startLine": 10, "startColumn": 5, "endLine": 15, "endColumn": 11 }
-    },
-    {
-      "severity": "info",
-      "code": "HARV-I001",
-      "message": "Validation pattern detected: required-field check on txtPhone. Suggest [Required] attribute on bound model property in migration.",
-      "location": { "startLine": 17, "startColumn": 5, "endLine": 21, "endColumn": 11 }
     }
   ]
 }
