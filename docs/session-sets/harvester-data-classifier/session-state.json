@@ -1,7 +1,20 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-data-classifier",
+  "currentSession": 1,
+  "totalSessions": 4,
   "status": "in-progress",
+  "lifecycleState": "work_in_progress",
+  "startedAt": "2026-05-28T14:57:45.721333-04:00",
+  "completedAt": null,
+  "verificationVerdict": null,
+  "completedSessions": [],
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "medium"
+  },
   "sessions": [
     {
       "number": 1,
