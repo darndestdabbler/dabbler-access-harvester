@@ -1,0 +1,30 @@
+{
+  "status": "complete",
+  "summary": "Added the AccessHarvester validate subcommand (Session 1 of 1). The schema is embedded in the CLI binary; consumers run `AccessHarvester validate --in <output-root>` or `--manifest <path>` for a pass/fail verdict. Cross-provider verified (R2): VERIFIED.",
+  "files_changed": [
+    "AccessHarvester.Cli/AccessHarvester.Cli.csproj",
+    "AccessHarvester.Cli/Program.cs",
+    "AccessHarvester.Pipeline/Validation/SchemaValidator.cs",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "GEMINI.md",
+    "README.md",
+    "docs/harvester/install.md",
+    "examples/validate-invalid-manifest.json",
+    "tests/AccessHarvester.Integration/Cli/CliValidateTests.cs",
+    "tests/AccessHarvester.Integration/Cli/CliUsageTextTests.cs",
+    "tests/AccessHarvester.Integration/Cli/PackagedBinarySmokeTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Validation/SchemaValidatorTests.cs",
+    "docs/session-sets/harvester-cli-validate-subcommand/session-state.json",
+    "docs/session-sets/harvester-cli-validate-subcommand/session-reviews/session-001.md",
+    "docs/session-sets/harvester-cli-validate-subcommand/session-reviews/session-001-r2.md",
+    "docs/session-sets/harvester-cli-validate-subcommand/change-log.md",
+    "docs/session-sets/harvester-cli-validate-subcommand/disposition.json",
+    "docs/session-sets/harvester-cli-validate-subcommand/next-session-set-recommendation.md"
+  ],
+  "next_session_set": {
+    "slug": "harvester-cli-distribution",
+    "summary": "Establish a formal distribution channel for the CLI artifact. The harvester now ships everything a downstream consumer needs; the next step is making the artifact reliably findable and versioned for consumer pipelines."
+  },
+  "blockers": []
+}
