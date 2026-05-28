@@ -25,8 +25,8 @@
     "model": "claude-opus-4-7",
     "effort": "high",
     "reason": {
-      "code": "switch-due-to-task-complexity",
-      "specifics": "Session 4 is the final session of the set. It ships the AccessHarvester sanitize subcommand with a FK graph builder + lockstep PK/FK remap + per-category masking handlers + the output-format decision (.accdb vs CSV), plus final-session closeout artifacts (change-log.md, next-session-set-recommendation.md, Step 9 reorganization review). The FK consistency invariant carries real correctness risk if remap ordering is wrong. Per gemini-pro analysis 2026-05-28: 'The task requires synthesizing a correctness-critical algorithm for the FK graph builder and lockstep remapping... This choice aligns with the synthesis-document-Opus-orchestrator-when-large convention.' Estimated routed cost moderate ($3.50-$6.00)."
+      "code": "other",
+      "specifics": "Correctness-critical synthesis. Session 4 is the final session of the set. It ships the AccessHarvester sanitize subcommand with a FK graph builder + lockstep PK/FK remap + per-category masking handlers + the output-format decision (.accdb vs CSV), plus final-session closeout artifacts (change-log.md, next-session-set-recommendation.md, Step 9 reorganization review). The FK consistency invariant carries real correctness risk if remap ordering is wrong. Per gemini-pro analysis 2026-05-28: 'The task requires synthesizing a correctness-critical algorithm for the FK graph builder and lockstep remapping... This choice aligns with the synthesis-document-Opus-orchestrator-when-large convention.' Estimated routed cost moderate ($3.50-$6.00). (Reason code 'other' used because the disposition schema lacks a 'switch-due-to-task-complexity' option; this is not a cost-driven or blocker-driven switch.)"
     }
   },
   "blockers": []
