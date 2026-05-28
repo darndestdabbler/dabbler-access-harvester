@@ -1,0 +1,430 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dabbler.dev/harvester/schemas/classification.json",
+  "title": "Access Database Data Classification",
+  "description": "Per-table/per-column data-sensitivity classification produced by AccessHarvester classify. Read by the HTML classification editor (humans confirm/override AI guesses) and the AccessHarvester sanitize command (drives masking per category). See docs/planning/data-classification-plan.md. Privacy invariant (scope: scanner-emitted fields, plan § 4): scanner-emitted fields never carry raw sampled values; only derived signals (counts, booleans, format patterns). Format patterns are structurally constrained (see Column.valueFormatPattern) so raw-digit sequences and arbitrary literals cannot validate. Reviewer-authored `notes` fields are free-form by design (a contract rule cannot prevent a determined reviewer from pasting a real value, and over-restricting notes would be hostile to their purpose); the scanner never writes notes, and reviewer-facing documentation must instruct reviewers to keep notes generic. v1.0 supports single-column foreign keys only; composite foreign keys are a planned v1.1 extension. Structural FK metadata (isForeignKey, fkTarget) is authoritative: humanOverride values for FK columns are structurally constrained so that no override can independently fake a foreign-key value (plan § 5).",
+  "type": "object",
+  "required": [
+    "version",
+    "database",
+    "scannedUtc",
+    "config",
+    "tables"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Must be '1.0'."
+    },
+    "database": {
+      "type": "string",
+      "description": "Name of the classified Access database (file name, with or without extension)."
+    },
+    "scannedUtc": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 date-time (with UTC offset, typically 'Z') when the classify run produced this file."
+    },
+    "config": {
+      "$ref": "#/definitions/ScanConfig"
+    },
+    "tables": {
+      "type": "array",
+      "description": "One entry per non-system table classified. System tables (MSys*) are excluded from this file entirely. Sorted by table name (case-insensitive).",
+      "items": {
+        "$ref": "#/definitions/Table"
+      }
+    }
+  },
+  "definitions": {
+    "ScanConfig": {
+      "type": "object",
+      "description": "The effective configuration used for this scan. Persisted so the editor and sanitizer can see exactly which vocabularies fired which heuristics, and so a reviewer can reproduce the scan.",
+      "required": [
+        "systemColumnPatterns",
+        "piiNamePatterns",
+        "piiValuePatterns",
+        "valueSampleSize"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "systemColumnPatterns": {
+          "type": "array",
+          "description": "Glob-style patterns identifying audit/system columns by name (e.g., 'LastModified*', 'CreatedBy', 'UserId', 'Timestamp', 'RowVersion'). A column is treated as system/audit only when its name matches one of these AND the same column name recurs across multiple tables (plan § 3.2).",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "piiNamePatterns": {
+          "type": "array",
+          "description": "Glob-style patterns identifying PII column names (e.g., 'SSN*', 'Soc*', 'DOB', 'Email*', 'Phone*', 'Addr*', 'Last*', 'First*'). Seeded from Microsoft Presidio's recognizer context-word lists (plan § 3.4). Presidio itself is NOT a runtime dependency.",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "piiValuePatterns": {
+          "type": "array",
+          "description": "Named regex patterns applied during value sampling (e.g., SSN '###-##-####', US phone, email, US ZIP). Each entry stores the pattern's identifier; the regex itself is fixed in the scanner. Raw sampled values are NEVER stored in this file (plan § 4).",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "valueSampleSize": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum number of rows sampled per column when applying piiValuePatterns. Recorded so a reviewer can interpret piiValueMatch booleans (a 'no match' on a tiny sample is weaker evidence than a 'no match' on a large one)."
+        }
+      }
+    },
+    "Table": {
+      "type": "object",
+      "required": [
+        "name",
+        "isLinkedTable",
+        "rowCount",
+        "lookupGuess",
+        "nonKeyNonSystemColumnCount",
+        "referencedByFkCount",
+        "tableHint",
+        "confidence",
+        "firedHeuristics",
+        "humanOverride",
+        "columns"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Access table name exactly as it appears in the database."
+        },
+        "isLinkedTable": {
+          "type": "boolean",
+          "description": "True when this is a linked table (Access ODBC-/file-link). Linked tables are typically flagged for human attention before sanitization since their backing store is not the .accdb being sanitized (plan § 8)."
+        },
+        "rowCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total row count at scan time. Informational; the sanitizer does not depend on it."
+        },
+        "lookupGuess": {
+          "type": "boolean",
+          "description": "AI guess: is this a lookup/reference table? Driven by the non-key/non-system column count heuristic (plan § 3.1) and the PII veto rule (plan § 3.3). The PII veto means a thin table is still NOT a lookup if any column matches PII name or value patterns."
+        },
+        "nonKeyNonSystemColumnCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of this table's columns minus foreign-key columns minus system/audit columns. The primary input to lookupGuess (plan § 3.1: 1 remaining = very likely lookup; 2-3 = possibly lookup; more = probably not)."
+        },
+        "referencedByFkCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Informational only. The number of foreign keys across the database that target this table's primary key. NOT weighted in lookupGuess because it fails in both directions (plan § 3.1): legitimate lookups often have one parent (false negative); high-fan-in entity tables like Person are PII-dense not reference data (false positive). The editor shows this number so the human reviewer has context."
+        },
+        "tableHint": {
+          "type": "string",
+          "enum": [
+            "lookup-reference",
+            "entity-pii-bearing",
+            "entity-non-pii",
+            "transaction",
+            "audit-log",
+            "junction",
+            "linked",
+            "unclassified"
+          ],
+          "description": "Coarse table-shape hint paired with lookupGuess. Informational; the editor shows it next to lookupGuess to help the reviewer judge. The sanitizer does not switch on this field; per-column category is authoritative."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "AI confidence in lookupGuess and tableHint, [0..1]. The editor displays this next to the guess."
+        },
+        "firedHeuristics": {
+          "type": "array",
+          "description": "Identifiers of heuristics that contributed to this table's classification (e.g., 'lookup-thin-table', 'pii-veto', 'audit-log-name-match'). Free-form strings; the scanner emits whichever names it uses. Order is heuristic-application order.",
+          "items": { "type": "string" }
+        },
+        "humanOverride": {
+          "$ref": "#/definitions/TableHumanOverride"
+        },
+        "columns": {
+          "type": "array",
+          "description": "One entry per column. Sorted by ordinal position as Access reports it. System columns (matching ScanConfig.systemColumnPatterns AND recurring across tables) are INCLUDED here with guessedCategory='system-audit' so the editor can present them to the reviewer.",
+          "items": { "$ref": "#/definitions/Column" }
+        }
+      }
+    },
+    "TableHumanOverride": {
+      "type": "object",
+      "description": "Reviewer's override of table-level AI guesses. Null entries mean 'no override; use the AI guess.' The editor sets these; the scanner emits the null/false defaults.",
+      "required": ["isLookup", "reviewedBy", "notes"],
+      "additionalProperties": false,
+      "properties": {
+        "isLookup": {
+          "type": ["boolean", "null"],
+          "description": "When non-null, overrides lookupGuess. Null means 'use lookupGuess as-is'."
+        },
+        "reviewedBy": {
+          "type": ["string", "null"],
+          "description": "Identifier of the human reviewer (free-form, typically initials or username). Null until the table has been reviewed."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form reviewer notes about this table. Empty string when not yet annotated. Reviewer-facing documentation MUST instruct reviewers to keep notes generic and to never paste raw sampled values, names, identifiers, or other live PII into this field. The privacy invariant cannot be structurally enforced on free-form human input; reviewer discipline is the only defense and the scanner never writes here."
+        }
+      }
+    },
+    "Column": {
+      "type": "object",
+      "required": [
+        "name",
+        "ordinalPosition",
+        "dataType",
+        "isAutoNumber",
+        "isPrimaryKey",
+        "isForeignKey",
+        "fkTarget",
+        "isMemo",
+        "isOleObject",
+        "isMultiValue",
+        "isRequired",
+        "rowCount",
+        "nullCount",
+        "cardinality",
+        "uniquenessRatio",
+        "relativeCardinality",
+        "piiNameMatch",
+        "piiValueMatch",
+        "valueFormatPattern",
+        "guessedCategory",
+        "confidence",
+        "firedHeuristics",
+        "humanOverride"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "description": "FK authority: when isForeignKey is true, humanOverride may not change the column's category away from 'foreign-key' nor pick a masking strategy that fakes the value independently (plan § 5). Allowed overrides are 'preserve' (FK target also preserved) or 'remap-id' (FK target remapped in lockstep).",
+          "if": {
+            "properties": { "isForeignKey": { "const": true } },
+            "required": ["isForeignKey"]
+          },
+          "then": {
+            "properties": {
+              "humanOverride": {
+                "properties": {
+                  "category": {
+                    "oneOf": [
+                      { "type": "null" },
+                      { "const": "foreign-key" }
+                    ]
+                  },
+                  "maskingStrategy": {
+                    "oneOf": [
+                      { "type": "null" },
+                      { "enum": ["preserve", "remap-id"] }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Access column name exactly as it appears in the table."
+        },
+        "ordinalPosition": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Zero-based position from the OLE DB COLUMNS schema rowset."
+        },
+        "dataType": {
+          "type": "string",
+          "description": "Access/DAO data-type name (e.g., 'Long', 'Text', 'Memo', 'Date/Time', 'Currency', 'Yes/No', 'OLE Object', 'Hyperlink', 'Attachment'). Free-form string because the DAO name surface is large; the sanitizer's per-category handlers do not switch on this string directly — see the boolean flags below for the cases that matter."
+        },
+        "isAutoNumber": {
+          "type": "boolean",
+          "description": "True when the column is an AutoNumber (DAO dbAutoIncrField attribute). Read via DAO interop; OLE DB does not expose this reliably (plan § 8)."
+        },
+        "isPrimaryKey": {
+          "type": "boolean",
+          "description": "True when this column is part of the table's primary key."
+        },
+        "isForeignKey": {
+          "type": "boolean",
+          "description": "True when this column is the source side of a foreign-key relationship (declared, or recovered from a combo-box RowSource implicit FK — plan § 8)."
+        },
+        "fkTarget": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/FkTarget" }
+          ],
+          "description": "When isForeignKey is true, the referenced table+column. Null when the column is not a foreign key. The sanitizer uses this to lockstep-remap surrogate PKs (plan § 5)."
+        },
+        "isMemo": {
+          "type": "boolean",
+          "description": "True when the column is a Memo / Long Text field. Memo columns carry the highest free-text PII risk (plan § 8) and default to the scrub-free-text masking strategy."
+        },
+        "isOleObject": {
+          "type": "boolean",
+          "description": "True when the column is an OLE Object. Flagged for human attention; does not migrate cleanly to SQL Server (plan § 8)."
+        },
+        "isMultiValue": {
+          "type": "boolean",
+          "description": "True when the column is an Access multi-value field. Flagged for human attention; does not migrate cleanly to SQL Server (plan § 8)."
+        },
+        "isRequired": {
+          "type": "boolean",
+          "description": "True when the column is NOT NULL (DAO Required attribute). Informational; the sanitizer must keep NOT NULL columns populated."
+        },
+        "rowCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total row count of the parent table (duplicated here so a column entry is self-contained for per-column metrics)."
+        },
+        "nullCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of NULL values in this column at scan time."
+        },
+        "cardinality": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Distinct non-NULL value count. Computed via the Jet/ACE-compatible subquery 'SELECT COUNT(*) FROM (SELECT DISTINCT col FROM tbl)' (plan § 8) since COUNT(DISTINCT) is unavailable in Jet SQL."
+        },
+        "uniquenessRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "cardinality / rowCount, within this column's own table. Low ratio leans categorical/code (lookup/low-risk); near 1.0 leans identifier-like (PII or natural key). Per plan § 3.1, this is a better per-table discriminator than relativeCardinality."
+        },
+        "relativeCardinality": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "cardinality / max-cardinality-across-all-columns-in-this-database. Supporting signal only (plan § 3.1)."
+        },
+        "piiNameMatch": {
+          "type": "boolean",
+          "description": "True when the column name matches at least one piiNamePatterns entry (plan § 3.3 primary preliminary signal)."
+        },
+        "piiValueMatch": {
+          "type": "boolean",
+          "description": "True when at least one sampled value matched at least one piiValuePatterns regex (plan § 3.3 secondary signal). Boolean only — raw matches are NOT stored. Strength of evidence depends on ScanConfig.valueSampleSize."
+        },
+        "valueFormatPattern": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "string",
+              "allOf": [
+                { "pattern": "^[A-Z#? .,()+:/-]*$" },
+                { "pattern": "[#?]" }
+              ]
+            }
+          ],
+          "description": "When sampled values share a consistent format (e.g., '###-##-####' for SSN, 'MRN-#######' for an MRN), the canonical format pattern. NEVER a raw value (plan § 4). Null when no consistent pattern emerged or no sampling was performed. Structurally constrained by two regex rules: (1) only the placeholder tokens `#` (digit) and `?` (any single character), uppercase ASCII letters (for literal labels like 'MRN' or 'ZIP'), and separators (space, comma, period, parens, plus, colon, slash, hyphen) may appear; (2) at least one non-alphabetic placeholder token (`#` or `?`) MUST be present, so an all-uppercase literal like 'JOHNSMITH' or 'JANE DOE' is rejected as a non-pattern (rule 2). Real digits and lowercase letters are rejected by rule (1), so a raw value like '123-45-6789' or 'John Smith' cannot validate. Letter-class placeholders (`X`, `A`) are deliberately NOT allowed because they collide with real uppercase letters used in literal labels; downstream consumers MUST encode any letter-class meaning via the `?` any-character placeholder. The editor MUST NOT render this field as a sample value."
+        },
+        "guessedCategory": {
+          "$ref": "#/definitions/ColumnCategory"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "AI confidence in guessedCategory, [0..1]."
+        },
+        "firedHeuristics": {
+          "type": "array",
+          "description": "Identifiers of heuristics that contributed to this column's classification (e.g., 'autonumber-pk', 'fk-declared', 'pii-name-match', 'pii-value-match', 'pii-veto', 'memo-free-text', 'system-audit-name-and-recurrence', 'uniqueness-high'). Order is heuristic-application order.",
+          "items": { "type": "string" }
+        },
+        "humanOverride": {
+          "$ref": "#/definitions/ColumnHumanOverride"
+        }
+      }
+    },
+    "ColumnHumanOverride": {
+      "type": "object",
+      "description": "Reviewer's override of column-level AI guesses. The sanitizer reads effective values as (humanOverride.X ?? AI X) for category and masking strategy. preserveAutonumber is purely a human flag with no AI counterpart; the scanner emits false and the editor sets true when a surrogate PK is filing-significant (plan § 5.2).",
+      "required": ["category", "maskingStrategy", "preserveAutonumber", "reviewedBy", "notes"],
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/ColumnCategory" }
+          ],
+          "description": "When non-null, overrides guessedCategory. Null means 'use guessedCategory as-is'."
+        },
+        "maskingStrategy": {
+          "oneOf": [
+            { "type": "null" },
+            { "$ref": "#/definitions/MaskingStrategy" }
+          ],
+          "description": "When non-null, overrides the category-default masking strategy. Null means 'use the default strategy for the effective category' (see MaskingStrategy.description)."
+        },
+        "preserveAutonumber": {
+          "type": "boolean",
+          "description": "Human flag: this surrogate autonumber is filing-significant (used to communicate about a case, printed on documents, etc.) and must be preserved during sanitization and migration. The scanner always emits false; the editor sets true. Independent of foreign-key referential preservation, which is mandatory whenever a PK is referenced regardless of this flag (plan § 5.2). On SQL Server migration, true implies SET IDENTITY_INSERT ON for this column."
+        },
+        "reviewedBy": {
+          "type": ["string", "null"],
+          "description": "Identifier of the human reviewer. Null until the column has been reviewed."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form reviewer notes about this column. Empty string when not yet annotated. Reviewer-facing documentation MUST instruct reviewers to keep notes generic and to never paste raw sampled values, names, identifiers, or other live PII into this field. The privacy invariant cannot be structurally enforced on free-form human input; reviewer discipline is the only defense and the scanner never writes here."
+        }
+      }
+    },
+    "FkTarget": {
+      "type": "object",
+      "description": "Single-column foreign-key target. v1.0 supports single-column foreign keys only — there is one Column entry per source column, each carrying its own FkTarget. Composite foreign keys are not representable in v1.0; the Session 2 scanner SHOULD report a degradation note when a composite FK is encountered, and the schema will grow a composite-relationship shape in v1.1.",
+      "required": ["table", "column"],
+      "additionalProperties": false,
+      "properties": {
+        "table": {
+          "type": "string",
+          "description": "Referenced table name."
+        },
+        "column": {
+          "type": "string",
+          "description": "Referenced column name (typically the target table's primary key)."
+        }
+      }
+    },
+    "ColumnCategory": {
+      "type": "string",
+      "enum": [
+        "direct-identifier-pii",
+        "quasi-identifier",
+        "sensitive-non-pii",
+        "free-text-memo",
+        "lookup-reference",
+        "system-audit",
+        "foreign-key",
+        "surrogate-autonumber-pk",
+        "business-natural-key",
+        "generic-non-sensitive"
+      ],
+      "description": "The 10-category column taxonomy from data-classification-plan § 3.5. Codes are stable; display labels are the editor's concern. Default masking strategy per category: direct-identifier-pii -> mock-replace; quasi-identifier -> generalize; sensitive-non-pii -> redact; free-text-memo -> scrub-free-text; lookup-reference -> preserve; system-audit -> regenerate; foreign-key -> preserve (with lockstep remap when the referenced PK is remapped); surrogate-autonumber-pk -> remap-id (or preserve when humanOverride.preserveAutonumber is true); business-natural-key -> preserve; generic-non-sensitive -> preserve."
+    },
+    "MaskingStrategy": {
+      "type": "string",
+      "enum": [
+        "mock-replace",
+        "generalize",
+        "redact",
+        "scrub-free-text",
+        "preserve",
+        "remap-id",
+        "regenerate"
+      ],
+      "description": "The masking-strategy taxonomy applied by AccessHarvester sanitize. mock-replace = replace with realistic mock data per detected PII pattern. generalize = reduce specificity (e.g., DOB -> birth year, exact ZIP -> ZIP3). redact = replace with a constant or null. scrub-free-text = replace with deterministic Lorem-style placeholder. preserve = keep as-is. remap-id = generate a new surrogate value and propagate to all referencing FK columns in lockstep (plan § 5). regenerate = produce a deterministic value (e.g., set audit timestamps to a fixed scan epoch)."
+    }
+  }
+}

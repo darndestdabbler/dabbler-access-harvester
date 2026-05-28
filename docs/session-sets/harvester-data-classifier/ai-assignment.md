@@ -20,22 +20,53 @@ cost multiple sessions to repair. Opus at `effort=high` is appropriate.
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- **Orchestrator used:** `claude-opus-4-7` at effort=medium (matched the
+  recommendation).
+- **Total routed cost:** ≈$0.69 — R1 verification $0.22 (GPT-5.4), R2 $0.20,
+  R3 $0.13, R4 $0.14, Session-2-recommendation analysis (Gemini Pro) $0.002,
+  R4 tiebreaker (Gemini Pro) $0.003. No Step-2 architecture route call;
+  per the project-guidance convention "When the orchestrator's model
+  matches the routing target for a given task type, handle the task
+  in-conversation rather than calling `route()`," the schema was authored
+  in-conversation because the `architecture` task type routes to Opus, and
+  the orchestrator was already Opus.
+- **Deviations from recommendation:** None on orchestrator choice. The
+  routed cost ran higher than the original $0.05–$0.15 estimate because
+  verification went four rounds (R1→R2→R3 closed substantive findings on
+  the privacy regex and FK authority; R4 surfaced a contrived edge case
+  that was adjudicated as accept-dismissal after a Gemini Pro tiebreaker
+  and human confirmation per the Step 7 disagreement procedure).
+- **Notes for next-session calibration:** The keystone-schema arc
+  reinforced two existing conventions: (1) Opus is the right orchestrator
+  for synthesis-document work on long-lived contracts even when each
+  individual decision is small — the breadth of cross-cutting concerns
+  (10-category coverage, privacy invariant, FK authority, editor-on-paper,
+  sanitizer-on-paper, Access gotchas) is what justifies the cost; (2) the
+  prose-before-JSON verification lead worked well for closeout-grade
+  review — every round returned substantive analysis, not bare verdicts.
+  A new lesson candidate emerged on multi-round convergent verification:
+  when each round closes real issues but surfaces a smaller residual, the
+  workflow's max-2-retries rule should be paired with a clear escalation
+  path (orchestrator + tiebreaker + human option set), which this session
+  exercised. Worth logging as a lessons-learned candidate at Step 9.
 
 ---
 
-**Next-session orchestrator recommendation (Session 2):** (To be filled after Session 1 completes.)
+**Next-session orchestrator recommendation (Session 2):** `claude-sonnet-4-6` at effort=high (gemini-pro analysis 2026-05-28: "The key architectural decisions are already documented in the plan, making this session a task of implementation rather than design. Sonnet is better suited and more cost-effective for this type of mechanical correspondence, translating a detailed specification into C# code.")
 
 ## Session 2 of 4: Scanner CLI
 
-**Recommended orchestrator:** `claude-opus-4-7`
-**Rationale:** The scanner involves non-trivial `architecture` decisions:
-OLE DB vs. DAO routing, PII veto rule interaction, cardinality subquery
-workaround, and Access-specific COM gotchas. The heuristics engine has
-enough complexity that Opus at `effort=medium` is warranted. A Sonnet
-orchestrator could route the architecture sub-tasks, but Opus in-
-conversation is cleaner given the interconnected decision surface.
-**Estimated routed cost:** Moderate ($0.08–$0.20)
+**Recommended orchestrator:** `claude-sonnet-4-6` at effort=high
+**Rationale:** Recommendation updated post-Session 1 via
+`route(task_type="analysis")` to Gemini Pro: the plan section 3 + section 8
+have already captured the architecture decisions, so Session 2 is mostly
+mechanical correspondence (OLE DB schema rowset reads, DAO interop for
+AutoNumber and RowSource, regex application for PII detection, subquery
+cardinality). Per project-guidance "Pin mechanical-correspondence task
+types to Sonnet rather than Opus", Sonnet at high effort is the right
+cost band; cross-provider verification stays on to mitigate the
+cheaper-model false-VERIFIED risk.
+**Estimated routed cost:** Low-Moderate ($0.05–$0.15)
 
 | Step | Action | Routing Decision |
 |---|---|---|

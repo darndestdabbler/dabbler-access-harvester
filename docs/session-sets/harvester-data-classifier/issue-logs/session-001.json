@@ -1,0 +1,11 @@
+[
+  {
+    "severity": "Critical",
+    "location": "AccessHarvester.Pipeline/Classification/classification-schema.json",
+    "summary": "valueFormatPattern accepts contrived uppercase+placeholder literals like APT #B",
+    "fix": "Structured token array would be airtight but is over-engineered beyond plan section 4 (single-string format-pattern).",
+    "status": "deferred",
+    "resolution": "Dismissed after adjudication. Two-engine consensus (Claude orchestrator + Gemini Pro tiebreaker) reached the same conclusion that defense-in-depth via regex is adequate alongside scanner code review; human confirmed option (b) accept-dismissal in Step 7 disagreement procedure. Logged via record_adjudication (cause=genuine-split, resolution=accept-dismissal).",
+    "round": 4
+  }
+]

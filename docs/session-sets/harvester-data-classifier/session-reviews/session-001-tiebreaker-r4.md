@@ -1,0 +1,3 @@
+The correct question is whether the schema, as a secondary control, must be theoretically perfect at a high cost, or practically effective at zero cost. The schema serves as a defense-in-depth measure; the scanner is the primary control responsible for emitting patterns, not values. The current regex effectively blocks the most probable raw PII leaks by rejecting digits and lowercase letters, making the verifier's counter-examples highly contrived and unrealistic edge cases. The significant, certain engineering cost of re-architecting the contract and all three pipeline components for Option A is not justified by the minimal, theoretical risk reduction it provides. The existing solution is a pragmatic and sufficient safeguard.
+
+RECOMMENDATION: B

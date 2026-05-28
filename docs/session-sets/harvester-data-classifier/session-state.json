@@ -1,12 +1,19 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-data-classifier",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
       "title": "JSON Contract",
-      "status": "not-started"
+      "status": "in-progress",
+      "startedAt": "2026-05-28T14:57:45.721333-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "medium"
+      }
     },
     {
       "number": 2,
