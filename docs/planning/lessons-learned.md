@@ -1403,3 +1403,41 @@ reference; if it proves out twice in *this* repo, propose promotion to
 - **Failure or friction:** `Directory.GetFiles()` returns files in NTFS creation order, which varies across different pipeline runs on the same machine and across fresh temp directories. The golden regression test compared manifests produced at different times and hit ordering drift in Forms/Reports arrays when different Access COM extraction runs created ir-files in different NTFS order.
 - **Lesson:** Any collection emitted to a determinism-sensitive JSON output (manifest, golden corpus, schema validation fixture) must be explicitly sorted before emission. Relying on "the upstream should be deterministic" is insufficient — upstream ordering may be guaranteed within a single process run but differ across processes, hosts, or fresh extractions.
 - **Action for future sessions:** When building a list from `Directory.GetFiles()`, `module.References`, or any ordered-but-not-guaranteed-stable upstream source that feeds a manifest or test fixture, add `.OrderBy(f => f, StringComparer.Ordinal)` (for paths) or the appropriate stable sort key (for AST/resolver results, use location: Line → Column → EndLine → EndColumn → text). For `Body.References`, the total sort key is `(StartLine, StartColumn, EndLine, EndColumn, ExpressionText)` — this is now the established pattern in `ParserOutputProjector.BuildBody()`.
+
+### Sweep Spurious `.accdb` Binary Diffs After `dotnet test` Before Staging The Closeout Commit
+
+- **Context:** `harvester-object-cleanup-identifier` Session 3 (2026-05-28),
+  preparing the Session 3 closeout commit after the full sequential
+  `dotnet test` run.
+- **Failure or friction:** `git status --short` showed two unexpected
+  binary modifications — `samples/HomeHealthCare.accdb` and
+  `samples/MiniComplex.accdb`. Neither file was touched by any source
+  edit in the session, and the explicit `identify-cleanup` pilot was
+  run with `--no-com`. The diffs were caused by `dotnet test`:
+  Access integration tests that open an `.accdb` via COM cause
+  Access to mutate internal timestamps and persistence-state fields
+  on close, even when the test is read-only at the SQL/DAO level.
+  This is the same Access-COM-mutates-on-open root cause that
+  "Run Parallel Session Sets In Per-Set Git Worktrees" documents
+  for `samples/NorthwindDevEdition.accdb` in the worktree-merge
+  context. But the failure mode is wider: any session that runs
+  the test suite before its closeout commit can hit it on any
+  `.accdb` under `samples/`.
+- **Lesson:** Spurious `.accdb` diffs after `dotnet test` carry no
+  semantic content — only Access-managed timestamp metadata — and
+  must not be committed. If they sneak into the closeout commit
+  they pollute git history with noise that future workers diff
+  against, and they conflict-and-rebase miserably across parallel
+  worktrees. The session's actual deliverables already live in
+  source files (`.cs`, `.md`, `.json`) and emitted golden outputs
+  under `samples/GoldenOutput/<db>/`; the `.accdb` binaries
+  themselves are inputs, not outputs.
+- **Action for future sessions:** As part of the Step 8 closeout
+  pre-commit pass, run `git status --short -- samples/*.accdb` and
+  `git checkout -- samples/*.accdb` for any `.accdb` shown as
+  modified. Do this BEFORE `git add` so the spurious touches are
+  never staged. If a second context in this repo confirms the
+  pattern as session-set-spanning rather than session-spanning,
+  propose promoting it to a Convention in `project-guidance.md` →
+  Conventions → Workflow Expectations alongside the existing
+  "session-state.json is the single source of truth" entry.
