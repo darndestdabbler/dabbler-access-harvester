@@ -71,7 +71,7 @@ public static class Program
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
             && !IsVersionFlag(args[0])
-            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage"))
+            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage" or "identify-cleanup"))
         {
             return RunParse(args);
         }
@@ -86,6 +86,7 @@ public static class Program
             "generate-docs"   => RunGenerateDocs(rest),
             "validate"        => RunValidate(rest),
             "identify-usage"  => IdentifyUsageCommand.Run(rest),
+            "identify-cleanup" => IdentifyCleanupCommand.Run(rest),
             _                 => UnknownCommand(args[0]),
         };
     }
@@ -548,6 +549,8 @@ public static class Program
               AccessHarvester validate        --manifest <manifest.json> [--json-status]
               AccessHarvester identify-usage  --in <harvested-output-root> [--exclude-cleanup <path>] [--json-status]
               AccessHarvester identify-usage  --manifest <manifest.json>   [--exclude-cleanup <path>] [--json-status]
+              AccessHarvester identify-cleanup --in <harvested-output-root> [--harvest-date <YYYY-MM-DD>] [--threshold-days <N>] [--no-com] [--json-status]
+              AccessHarvester identify-cleanup --manifest <manifest.json>   [--harvest-date <YYYY-MM-DD>] [--threshold-days <N>] [--no-com] [--json-status]
               AccessHarvester parse           <source-file>
               AccessHarvester parse           --in <source-file>
               AccessHarvester                 <source-file>       (bare-file mode; equivalent to 'parse')

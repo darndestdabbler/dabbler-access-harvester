@@ -84,6 +84,7 @@ public static class IrLoader
         bool hasBeforeUpdate = false, hasAfterUpdate = false, hasOnDelete = false;
         var controls = new List<IrControl>();
         var macroActions = new List<IrMacroAction>();
+        var properties = new Dictionary<string, string>(StringComparer.Ordinal);
 
         if (root.TryGetProperty("Properties", out var props))
         {
@@ -91,6 +92,7 @@ public static class IrLoader
             hasBeforeUpdate = HasEventProcedure(props, "BeforeUpdate");
             hasAfterUpdate  = HasEventProcedure(props, "AfterUpdate");
             hasOnDelete     = HasEventProcedure(props, "OnDelete");
+            CopyStringProperties(props, properties);
         }
 
         if (root.TryGetProperty("VbaCode", out var vba) && vba.ValueKind == JsonValueKind.String)
@@ -123,7 +125,22 @@ public static class IrLoader
             HasAfterUpdate  = hasAfterUpdate,
             HasOnDelete     = hasOnDelete,
             MacroActions    = macroActions,
+            Properties      = properties,
         };
+    }
+
+    private static void CopyStringProperties(JsonElement props, Dictionary<string, string> sink)
+    {
+        if (props.ValueKind != JsonValueKind.Object) return;
+        foreach (var p in props.EnumerateObject())
+        {
+            if (p.Value.ValueKind == JsonValueKind.String)
+            {
+                string? val = p.Value.GetString();
+                if (val != null)
+                    sink[p.Name] = val;
+            }
+        }
     }
 
     private static void WalkChildren(JsonElement children, List<IrControl> controls,
@@ -138,11 +155,13 @@ public static class IrLoader
             {
                 string? childName = null;
                 string? rowSource = null, rowSourceType = null;
+                var childProps = new Dictionary<string, string>(StringComparer.Ordinal);
                 if (child.TryGetProperty("Properties", out var p))
                 {
                     childName = GetString(p, "Name");
                     rowSource = GetString(p, "RowSource");
                     rowSourceType = GetString(p, "RowSourceType");
+                    CopyStringProperties(p, childProps);
                 }
                 controls.Add(new IrControl
                 {
@@ -150,10 +169,15 @@ public static class IrLoader
                     Name = childName,
                     RowSource = NullIfEmpty(rowSource),
                     RowSourceType = NullIfEmpty(rowSourceType),
+                    Properties = childProps,
                 });
             }
             else if (type == "Begin" && child.TryGetProperty("Properties", out var bProps))
             {
+                // Embedded macro-action node on a form/report. Must be checked
+                // BEFORE the generic-properties branch below, otherwise Begin
+                // nodes get consumed as generic controls and never reach
+                // MacroActions (regression fixed per R2 Issue 2).
                 string? action = GetString(bProps, "Action");
                 if (action != null)
                 {
@@ -163,6 +187,22 @@ public static class IrLoader
                         MacroName = GetString(bProps, "MacroName"),
                         Action = action,
                         Arguments = args,
+                    });
+                }
+            }
+            else if (child.TryGetProperty("Properties", out var anyProps))
+            {
+                var childProps = new Dictionary<string, string>(StringComparer.Ordinal);
+                CopyStringProperties(anyProps, childProps);
+                if (childProps.Count > 0)
+                {
+                    controls.Add(new IrControl
+                    {
+                        Type = type,
+                        Name = GetString(anyProps, "Name"),
+                        RowSource = null,
+                        RowSourceType = null,
+                        Properties = childProps,
                     });
                 }
             }
@@ -228,13 +268,48 @@ public static class IrLoader
                 string name = GetString(root, "Name")
                     ?? Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file));
                 int colCount = 0;
+                var dateTimeColumns = new List<string>();
                 if (root.TryGetProperty("Fields", out var fields) && fields.ValueKind == JsonValueKind.Array)
+                {
                     colCount = fields.GetArrayLength();
-                results.Add(new IrTable { Name = name, ColumnCount = colCount });
+                    foreach (var field in fields.EnumerateArray())
+                    {
+                        string? typeName = GetString(field, "TypeName");
+                        string? fieldName = GetString(field, "Name");
+                        if (fieldName != null && typeName != null
+                            && (typeName.Contains("Date", StringComparison.OrdinalIgnoreCase)
+                                || typeName.Contains("Time", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            dateTimeColumns.Add(fieldName);
+                        }
+                    }
+                }
+                System.DateTimeOffset? lastUpdated = ParseNaiveUtc(GetString(root, "LastUpdated"));
+                string? connect = GetString(root, "Connect");
+                results.Add(new IrTable
+                {
+                    Name = name,
+                    ColumnCount = colCount,
+                    LastUpdated = lastUpdated,
+                    Connect = connect,
+                    DateTimeColumnNames = dateTimeColumns,
+                });
             }
             catch { }
         }
         return results;
+    }
+
+    private static System.DateTimeOffset? ParseNaiveUtc(string? raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return null;
+        if (System.DateTime.TryParse(raw, System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.AssumeUniversal | System.Globalization.DateTimeStyles.AdjustToUniversal,
+            out var dt))
+        {
+            return new System.DateTimeOffset(System.DateTime.SpecifyKind(dt, System.DateTimeKind.Utc), System.TimeSpan.Zero);
+        }
+        return null;
     }
 
     // ── Relationships ─────────────────────────────────────────────────────────────

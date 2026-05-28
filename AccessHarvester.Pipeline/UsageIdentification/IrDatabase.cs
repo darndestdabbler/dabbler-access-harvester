@@ -33,6 +33,7 @@ public sealed record IrFormOrReport
     public bool HasAfterUpdate { get; init; }
     public bool HasOnDelete { get; init; }
     public required IReadOnlyList<IrMacroAction> MacroActions { get; init; }
+    public IReadOnlyDictionary<string, string> Properties { get; init; } = new Dictionary<string, string>();
 }
 
 /// <summary>One control node found in a form or report's design tree.</summary>
@@ -42,6 +43,7 @@ public sealed record IrControl
     public string? Name { get; init; }
     public string? RowSource { get; init; }
     public string? RowSourceType { get; init; }
+    public IReadOnlyDictionary<string, string> Properties { get; init; } = new Dictionary<string, string>();
 }
 
 /// <summary>Minimal parsed representation of a query IR file.</summary>
@@ -57,6 +59,9 @@ public sealed record IrTable
 {
     public required string Name { get; init; }
     public required int ColumnCount { get; init; }
+    public System.DateTimeOffset? LastUpdated { get; init; }
+    public string? Connect { get; init; }
+    public IReadOnlyList<string> DateTimeColumnNames { get; init; } = [];
 }
 
 /// <summary>Parsed FK relationship from a relationship IR file.</summary>

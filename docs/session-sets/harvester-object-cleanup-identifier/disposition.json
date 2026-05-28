@@ -1,21 +1,36 @@
 {
   "status": "completed",
-  "summary": "Session 1 of 3 delivered: (1) docs/planning/object-cleanup-strategy.md — design spec for AccessHarvester identify-cleanup with three signal families (NamePattern with five implementation-safe regex sub-patterns, DateMaximaSampler with COM primary / DAO LastUpdated fallback, CrossReferenceAbsenceDetector with inline-SQL parsing and event-property binding paths), confidence-tier algorithm, output format mapping, CLI surface, and degradation-observability via top-level degradationNotes array; (2) AccessHarvester.Pipeline/Cleanup/object-cleanup-schema.json — JSON Schema (draft-07) for object-cleanup.json with tagged-union Signal oneOf discrimination. Verification: gpt-5-4 four rounds. R1 ISSUES_FOUND 4 Major + 2 Minor (regex contract, cross-reference matrix, Subarea polarity, harvestDate type, CLI mutex, degradationNotes); all fixed. R2 ISSUES_FOUND 2 Major + 1 Minor (year-month numeric month-first, event-property predicate, §10 prereq scope); all fixed. R3 ISSUES_FOUND 1 Major + 2 Minor (global code-behind exclusion, bidirectional SQL impact, maxValue timezone); all fixed. R4 ISSUES_FOUND 1 Minor (example day-count arithmetic 1080→1535); fixed post-R4. R5 not run; the byte-trivial arithmetic correction is post-verification per user closeout authorization. No code changes — strategy + schema only. dotnet build clean; 3 pre-existing CLI integration tests against HomeHealthCare time out under test-harness parallelism (direct CLI invocation succeeds in <30s) — disclosed as out-of-scope in every verification round.",
+  "summary": "Session 2 of 3 delivered: `AccessHarvester identify-cleanup` subcommand implementing the Session 1 strategy. New files: Pipeline/Cleanup/{CleanupFinding,NamePatternDetector,CrossReferenceDetector,DateMaximaSampler,CleanupChecklistWriter,CleanupAnalyser,ComDateMaximaProbe}.cs; Cli/Commands/IdentifyCleanupCommand.cs; Core/Com/AccessDateMaximaSampler.cs; 5 new test files (NamePatternDetectorTests, CrossReferenceDetectorTests, DateMaximaSamplerTests, ComDateMaximaProbeTests, IrLoaderTests). Additive extensions to IrFormOrReport/IrControl/IrTable (Properties dict on form/report/control; LastUpdated/Connect/DateTimeColumnNames on table) and IrLoader population. Dispatcher entry + usage block added to Program.cs. Verification: gpt-5-4 four rounds. R1 ISSUES_FOUND 2 Major + 3 Minor (per-table date fallback, VBA DoCmd parsing, event-property scope, matchedSubstring boundary, test coverage); all fixed. R2 ISSUES_FOUND 2 Major + 2 Minor including a regression in IrLoader (R1 generic-properties branch swallowed Begin macro-action nodes — caught by R2 verifier; reordered + 2 regression tests added) and incomplete COM-failure degradation (extracted ComDateMaximaProbe helper + 5 tests); also narrowed bare-token module/class scan to Call/Set/qualifier contexts and added RowSource tests. All R2 issues fixed. R3 ISSUES_FOUND 2 Minor (missing usage message on dual-flag, contradictory degradation notes); both fixed. R4 (human-authorized override of 2-retry cap, matching Session 1 precedent) VERIFIED. Total verification cost ~$0.82. dotnet build clean; 582/582 tests pass in Pipeline.Tests (+13 new). Smoke test against samples/GoldenOutput/HomeHealthCare validates cleanly against the JSON schema. Pre-existing 3 HomeHealthCare CLI integration test timeouts persist (42/45, unchanged from Session 1 baseline). Architectural deviation documented: DateMaximaSampler.cs is split between Pipeline/Cleanup (interface + DAO fallback per spec) and Core/Com (COM impl) because Core→Pipeline is the existing project-reference direction; Pipeline cannot reference Core.",
   "verification_method": "api",
   "files_changed": [
-    "docs/planning/object-cleanup-strategy.md",
-    "AccessHarvester.Pipeline/Cleanup/object-cleanup-schema.json",
+    "AccessHarvester.Cli/Program.cs",
+    "AccessHarvester.Cli/Commands/IdentifyCleanupCommand.cs",
+    "AccessHarvester.Core/Com/AccessDateMaximaSampler.cs",
+    "AccessHarvester.Pipeline/Cleanup/CleanupFinding.cs",
+    "AccessHarvester.Pipeline/Cleanup/NamePatternDetector.cs",
+    "AccessHarvester.Pipeline/Cleanup/CrossReferenceDetector.cs",
+    "AccessHarvester.Pipeline/Cleanup/DateMaximaSampler.cs",
+    "AccessHarvester.Pipeline/Cleanup/CleanupChecklistWriter.cs",
+    "AccessHarvester.Pipeline/Cleanup/CleanupAnalyser.cs",
+    "AccessHarvester.Pipeline/Cleanup/ComDateMaximaProbe.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/IrDatabase.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/IrLoader.cs",
+    "tests/AccessHarvester.Pipeline.Tests/AccessHarvester.Pipeline.Tests.csproj",
+    "tests/AccessHarvester.Pipeline.Tests/Cleanup/NamePatternDetectorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Cleanup/CrossReferenceDetectorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Cleanup/DateMaximaSamplerTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Cleanup/ComDateMaximaProbeTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/IrLoaderTests.cs",
     "docs/session-sets/harvester-object-cleanup-identifier/session-state.json",
     "docs/session-sets/harvester-object-cleanup-identifier/ai-assignment.md",
-    "docs/session-sets/harvester-object-cleanup-identifier/activity-log.json",
     "docs/session-sets/harvester-object-cleanup-identifier/session-events.jsonl",
-    "docs/session-sets/harvester-object-cleanup-identifier/session-reviews/session-001.md",
-    "docs/session-sets/harvester-object-cleanup-identifier/issue-logs/session-001.json",
+    "docs/session-sets/harvester-object-cleanup-identifier/session-reviews/session-002.md",
+    "docs/session-sets/harvester-object-cleanup-identifier/issue-logs/session-002.json",
     "docs/session-sets/harvester-object-cleanup-identifier/disposition.json",
-    "tools/session-scripts/verify-cleanup-session1.py",
-    "tools/session-scripts/verify-cleanup-session1-r2.py",
-    "tools/session-scripts/verify-cleanup-session1-r3.py",
-    "tools/session-scripts/verify-cleanup-session1-r4.py"
+    "tools/run_session2_verification.py",
+    "tools/run_session2_verification_r2.py",
+    "tools/run_session2_verification_r3.py",
+    "tools/run_session2_verification_r4.py"
   ],
   "verification_message_ids": [],
   "next_orchestrator": {
@@ -25,7 +40,7 @@
     "effort": "medium",
     "reason": {
       "code": "continue-current-trajectory",
-      "specifics": "Session 2 implements the Session 1 strategy verbatim in C# under AccessHarvester.Pipeline/Cleanup/ — mechanical correspondence work (regex constants, IR file readers, output writers, unit tests). Per ai-assignment.md and the repo's mechanical-vs-synthesis routing convention, Sonnet at medium effort is the right cost band; no architecture decisions remain."
+      "specifics": "Session 3 scope is pilot + calibration — running identify-cleanup against HomeHealthCare and NorthwindDevEdition golden outputs, tuning vocabulary/thresholds/templates, and committing calibrated golden fixtures. This is analysis + light tuning work, matching the repo convention of Sonnet at medium effort for analysis tasks. Recommendation routed via gemini-pro analysis task ($0.0024) confirmed Sonnet as the appropriate cost band; iterative refinement is inherent to this project (4 rounds in both Sessions 1 and 2), not a model-capability issue."
     }
   },
   "blockers": []

@@ -1,0 +1,101 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "category": "Correctness",
+    "location": "IdentifyCleanupCommand.cs; CleanupAnalyser.cs; DateMaximaSampler.cs",
+    "summary": "Date-signal path was whole-run either/or instead of per-table mixed-source. Strategy §3.2/§5 require per-table fallback to DAO LastUpdated when COM is unavailable OR when a table has no DateTime columns.",
+    "fix": "CleanupAnalyser.Run now takes an optional primaryDateSampler (COM) plus the required fallback (IR LastUpdated). Per-table selection: COM if table has DateTime columns AND COM produced a sample; otherwise DAO LastUpdated. CLI wires both.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Major",
+    "category": "Correctness",
+    "location": "CrossReferenceDetector.cs",
+    "summary": "VBA DoCmd.OpenForm/OpenReport/OpenQuery/OpenMacro/RunMacro parsing missing. Form/report names appearing as bare tokens in other modules' VBA also not counted as VbaReference. Both produce false-positive Low-confidence findings.",
+    "fix": "Added regex parsing for DoCmd.Open*/RunMacro in all VBA blobs (modules + form/report code-behind). Added bare-token presence scanning for form/report/module names across modules with self-reference owner-name exclusion. Filtered DCount/OpenRecordset targets to known object names.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "category": "False Positive",
+    "location": "CrossReferenceDetector.cs CollectEventPropertyBindings",
+    "summary": "Event-property binding (On*/Before*/After*) treated bare identifiers matching forms/reports/queries as NavigationEdge. Strategy §3.3.2 restricts this to macro identifiers only.",
+    "fix": "Narrowed CollectEventPropertyBindings to macro names only.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "category": "Correctness",
+    "location": "NamePatternDetector.cs; CleanupAnalyser.cs BuildExplanation",
+    "summary": "matchedSubstring stored only the token (`OLD`) instead of the boundary-bearing substring (`_OLD`) per strategy §3.1.6/§5 schema example. Medium-tier explanation used the Category name instead of the matched substring.",
+    "fix": "Replaced Groups[1].Value with TrimTrailingBoundary(match.Value) for all four regex-based categories so the leading boundary char is preserved. BuildExplanation now uses MatchedSubstring.",
+    "status": "fixed"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "category": "Completeness",
+    "location": "CrossReferenceDetectorTests.cs; DateMaximaSamplerTests.cs",
+    "summary": "Missing tests for the §3.2 mixed-source path, VBA DoCmd.Open*/RunMacro/DCount, and bare-token form references.",
+    "fix": "Added 9 hermetic tests covering all the above paths + negative tests for the narrowed event-property scope.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "category": "Correctness",
+    "location": "IdentifyCleanupCommand.cs; AccessDateMaximaSampler.cs",
+    "summary": "CLI did not gracefully degrade on COM activation/open failure. Strategy §3.2 requires automatic fallback to DAO LastUpdated when COM throws.",
+    "fix": "Extracted ComDateMaximaProbe helper that runs sampler-factory + Sample() in try/catch and returns either primary sampler or a degradation note. CLI consumes the result, prints a stderr warning, and prepends note to findings.DegradationNotes. 5 new hermetic tests in ComDateMaximaProbeTests cover all branches.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Major",
+    "category": "Correctness",
+    "location": "AccessHarvester.Pipeline/UsageIdentification/IrLoader.cs WalkChildren",
+    "summary": "REGRESSION introduced by R1 fix: new generic-properties branch placed before the type==Begin branch, consuming Begin macro-action nodes as generic controls and silently breaking IrFormOrReport.MacroActions population for form/report embedded macro actions.",
+    "fix": "Reordered WalkChildren so type==Begin is checked BEFORE the generic catch-all. Added 2 hermetic regression tests in tests/AccessHarvester.Pipeline.Tests/UsageIdentification/IrLoaderTests.cs covering embedded Begin-action capture + generic-control walk.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Minor",
+    "category": "False Positive",
+    "location": "CrossReferenceDetector.cs ScanBareTokenPresence",
+    "summary": "Module/class bare-token VBA scan was over-broad. Strategy §3.3 restricts module/class evidence to Call / Set ... New / qualifying namespace contexts.",
+    "fix": "New ScanModuleContextPresence uses three context-specific regexes per module name (Call, Set...New, qualifier dot-access). Form/report bare-token scan kept per §3.3.3 matrix. 4 hermetic tests cover all three contexts + a comment/string-literal negative.",
+    "status": "fixed"
+  },
+  {
+    "round": 2,
+    "severity": "Minor",
+    "category": "Completeness",
+    "location": "CrossReferenceDetectorTests.cs",
+    "summary": "No hermetic test for RowSource-based references (§3.3.1 inline-SQL parsing on controls).",
+    "fix": "Added 2 hermetic tests for RowSource: literal table name + inline SELECT FROM tblTarget.",
+    "status": "fixed"
+  },
+  {
+    "round": 3,
+    "severity": "Minor",
+    "category": "Completeness",
+    "location": "IdentifyCleanupCommand.cs",
+    "summary": "CLI did not print usage message when both --in and --manifest were supplied (only printed an error). Strategy §8 requires usage text on both supplied AND neither supplied.",
+    "fix": "Added PrintUsage() call before return 2 in the dual-flag branch.",
+    "status": "fixed"
+  },
+  {
+    "round": 3,
+    "severity": "Minor",
+    "category": "Correctness",
+    "location": "IdentifyCleanupCommand.cs; ComDateMaximaProbe.cs",
+    "summary": "COM-failure degradation note (Per-table date signals fell back to DAO LastUpdated.) could contradict the analyser's Date sampling unavailable note when no IR LastUpdated values exist.",
+    "fix": "Made the probe-note prepend conditional on findings.DateSignalSource != 'unavailable'. When DAO fallback also produced no findings, the analyser's own note stands alone and the probe message is suppressed.",
+    "status": "fixed"
+  }
+]

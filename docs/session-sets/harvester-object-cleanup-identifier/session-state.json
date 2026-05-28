@@ -20,7 +20,16 @@
     {
       "number": 2,
       "title": "CLI Detection Code",
-      "status": "not-started"
+      "status": "complete",
+      "startedAt": "2026-05-28T13:17:30-04:00",
+      "completedAt": "2026-05-28T15:50:00-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "medium"
+      },
+      "verificationVerdict": "VERIFIED"
     },
     {
       "number": 3,
