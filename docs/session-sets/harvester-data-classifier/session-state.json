@@ -6,38 +6,22 @@
     {
       "number": 1,
       "title": "JSON Contract",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
+      "status": "not-started"
     },
     {
       "number": 2,
       "title": "Scanner CLI",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
+      "status": "not-started"
     },
     {
       "number": 3,
       "title": "HTML Classification Editor",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
+      "status": "not-started"
     },
     {
       "number": 4,
       "title": "Test-Data Generator CLI",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
+      "status": "not-started"
     }
   ]
 }

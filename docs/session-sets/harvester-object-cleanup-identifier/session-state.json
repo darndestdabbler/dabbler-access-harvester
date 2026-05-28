@@ -6,29 +6,17 @@
     {
       "number": 1,
       "title": "Schema + Detection Strategy",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
+      "status": "not-started"
     },
     {
       "number": 2,
       "title": "CLI Detection Code",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
+      "status": "not-started"
     },
     {
       "number": 3,
       "title": "Pilot + Calibration",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
+      "status": "not-started"
     }
   ]
 }

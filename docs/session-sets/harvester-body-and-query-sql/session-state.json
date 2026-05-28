@@ -1,17 +1,26 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "harvester-body-and-query-sql",
-  "currentSession": 2,
-  "totalSessions": 2,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-28T08:44:20.960169-04:00",
-  "completedAt": "2026-05-28T09:16:32.894807-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "standard"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "ParserOutputProjector + Module Wiring (D5 + D6)",
+      "status": "complete",
+      "startedAt": "2026-05-28T08:44:20.960169-04:00"
+    },
+    {
+      "number": 2,
+      "title": "QuerySqlProjector + Query Wiring (D14)",
+      "status": "complete",
+      "completedAt": "2026-05-28T09:16:32.894807-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "standard"
+      },
+      "verificationVerdict": "VERIFIED"
+    }
+  ]
 }

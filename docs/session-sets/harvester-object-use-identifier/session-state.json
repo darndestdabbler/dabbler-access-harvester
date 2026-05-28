@@ -1,17 +1,31 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "harvester-object-use-identifier",
-  "currentSession": 2,
-  "totalSessions": 3,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-28T09:35:39.882469-04:00",
-  "completedAt": "2026-05-28T09:48:56.642703-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium"
-  }
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Schema + Analysis Strategy",
+      "status": "complete",
+      "startedAt": "2026-05-28T09:35:39.882469-04:00"
+    },
+    {
+      "number": 2,
+      "title": "CLI Analysis Code",
+      "status": "complete",
+      "completedAt": "2026-05-28T09:48:56.642703-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "medium"
+      },
+      "verificationVerdict": "VERIFIED"
+    },
+    {
+      "number": 3,
+      "title": "Pilot + Calibration",
+      "status": "not-started"
+    }
+  ]
 }
