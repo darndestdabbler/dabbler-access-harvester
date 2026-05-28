@@ -8,15 +8,6892 @@
     "ExportedAt": "\u003CNORMALIZED:Database.ExportedAt\u003E"
   },
   "Summary": {
-    "FormCount": 0,
-    "ReportCount": 0,
+    "FormCount": 19,
+    "ReportCount": 12,
     "QueryCount": 0,
     "ModuleCount": 0,
     "TableCount": 0,
     "UnresolvedItemCount": 0
   },
-  "Forms": [],
-  "Reports": [],
+  "Forms": [
+    {
+      "Spec": {
+        "SourceFormName": "frmAbout",
+        "SuggestedComponentName": "AboutComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "X": -20.178,
+          "Y": 2.802,
+          "W": 6.5
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 1.083
+            },
+            "ControlNames": [
+              "lblAppTitle",
+              "lblVersion"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 3.167
+            },
+            "ControlNames": [
+              "lblAboutBody",
+              "lnSeparator1",
+              "lnSeparator2"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.375
+            }
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblAppTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "Y": 0.25,
+              "W": 6.5,
+              "H": 0.354
+            },
+            "RenderHints": {
+              "Caption": "Home Health Care \\012Services Tracking"
+            }
+          },
+          {
+            "Name": "lblVersion",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "Y": 0.667,
+              "W": 6.5,
+              "H": 0.354
+            },
+            "RenderHints": {
+              "Caption": "Version 1.0"
+            }
+          },
+          {
+            "Name": "lblAboutBody",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.458,
+              "Y": 0.833,
+              "W": 5.583,
+              "H": 1.458
+            },
+            "RenderHints": {
+              "Caption": "Home Health Care Services Tracking was designed as a sample database for testing tools and techniques for migrating Microsoft Access databases to other platforms (e.g., .NET).  The database contains some purposely overengineered code.  It is not intended for use in production."
+            },
+            "NonDefaultProperties": [
+              "FontItalic"
+            ]
+          },
+          {
+            "Name": "lnSeparator1",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 1.167,
+              "Y": 0.292,
+              "W": 4
+            }
+          },
+          {
+            "Name": "lnSeparator2",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 1.167,
+              "Y": 2.75,
+              "W": 4
+            }
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmAbout",
+            "Module": "frmAbout",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmBudgetServicePlan",
+        "SuggestedComponentName": "BudgetServicePlanComponent",
+        "DataSource": {
+          "Kind": "InlineSql",
+          "InlineSql": "SELECT cb.*, Trim(Nz([c.FirstName],\\\u0022\\\u0022) \u0026 \u0027 \u0027 \u0026 Nz([c.LastName],\\\u0022\\\u0022)) AS ClientName FROM tblClientBudgets AS cb INNER JOIN tblClients AS c ON cb.ClientID = c.ClientID; "
+        },
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 9
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.865
+            },
+            "ControlNames": [
+              "lblAppTitle",
+              "lblClient",
+              "lblFY",
+              "lblBudgeted",
+              "lblRemaining",
+              "lblPlanned",
+              "lnSeparator1"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 6.792
+            },
+            "ControlNames": [
+              "txtClientBudgetID",
+              "txtFiscalYear",
+              "txtAnnualBudget",
+              "txtRemaining",
+              "txtTotalPlanned",
+              "lnSeparator2",
+              "txtClientName",
+              "txtClientID",
+              "lstClientServiceNeeds",
+              "lstClientServicePlan"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.542
+            },
+            "ControlNames": [
+              "btnSave",
+              "btnClose",
+              "btnDelete"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblAppTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 1,
+              "Y": 0.083,
+              "W": 7,
+              "H": 0.344
+            },
+            "RenderHints": {
+              "Caption": "FY-Budgeted Service Plan"
+            }
+          },
+          {
+            "Name": "lblClient",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 1,
+              "Y": 0.583,
+              "W": 2.167,
+              "H": 0.208
+            },
+            "RenderHints": {
+              "Caption": "Client"
+            }
+          },
+          {
+            "Name": "lblFY",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 3.333,
+              "Y": 0.583,
+              "W": 0.708,
+              "H": 0.208
+            },
+            "RenderHints": {
+              "Caption": "FY"
+            }
+          },
+          {
+            "Name": "lblBudgeted",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 4.25,
+              "Y": 0.583,
+              "W": 1.125,
+              "H": 0.208
+            },
+            "RenderHints": {
+              "Caption": "Budgeted"
+            }
+          },
+          {
+            "Name": "lblRemaining",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 6.917,
+              "Y": 0.583,
+              "W": 1.083,
+              "H": 0.208
+            },
+            "RenderHints": {
+              "Caption": "Remaining"
+            }
+          },
+          {
+            "Name": "lblPlanned",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 5.583,
+              "Y": 0.583,
+              "W": 1.125,
+              "H": 0.208
+            },
+            "RenderHints": {
+              "Caption": "Planned"
+            }
+          },
+          {
+            "Name": "lnSeparator1",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.167,
+              "Y": 0.5,
+              "W": 8.667
+            }
+          },
+          {
+            "Name": "txtClientBudgetID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Client Budget ID"
+            },
+            "GeometryIn": {
+              "X": 8.833,
+              "Y": 0.042,
+              "W": 0.083,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ClientBudgetID"
+            },
+            "RenderHints": {
+              "IsVisible": false,
+              "IsLocked": true
+            },
+            "NonDefaultProperties": [
+              "Visible",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "txtFiscalYear",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Fiscal Year"
+            },
+            "GeometryIn": {
+              "X": 3.333,
+              "Y": 0.083,
+              "W": 0.708,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "FiscalYear"
+            },
+            "RenderHints": {
+              "IsLocked": true,
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtAnnualBudget",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Annual Budget"
+            },
+            "GeometryIn": {
+              "X": 4.25,
+              "Y": 0.083,
+              "W": 1.125,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "AnnualBudget"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00;($#,##0.00)",
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "txtRemaining",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Remaining"
+            },
+            "GeometryIn": {
+              "X": 6.917,
+              "Y": 0.083,
+              "W": 1.083,
+              "H": 0.219
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00;($#,##0.00)",
+              "IsLocked": true,
+              "TabIndex": 3
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtTotalPlanned",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Total Planned"
+            },
+            "GeometryIn": {
+              "X": 5.583,
+              "Y": 0.083,
+              "W": 1.125,
+              "H": 0.219
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00;($#,##0.00)",
+              "IsLocked": true,
+              "TabIndex": 4
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "lnSeparator2",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.167,
+              "Y": 0.375,
+              "W": 8.625
+            }
+          },
+          {
+            "Name": "txtClientName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Client Name"
+            },
+            "GeometryIn": {
+              "X": 1,
+              "Y": 0.083,
+              "W": 2.167,
+              "H": 0.219
+            },
+            "RenderHints": {
+              "IsLocked": true,
+              "TabIndex": 5
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtClientID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Client ID"
+            },
+            "GeometryIn": {
+              "X": 8.75,
+              "Y": 0.083,
+              "W": 0.083,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ClientID"
+            },
+            "RenderHints": {
+              "IsVisible": false,
+              "IsLocked": true,
+              "TabIndex": 6
+            },
+            "NonDefaultProperties": [
+              "Visible",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "lstClientServiceNeeds",
+            "SourceType": "ListBox",
+            "ComponentKind": "ListBox",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Client Needs"
+            },
+            "GeometryIn": {
+              "X": 0.167,
+              "Y": 1.042,
+              "W": 8.667,
+              "H": 2.417
+            },
+            "Binding": {
+              "Kind": "Unbound",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 5,
+              "ColumnWidths": "0;4320;1080;1080;4320"
+            },
+            "RenderHints": {
+              "TabIndex": 7
+            },
+            "NonDefaultProperties": [
+              "ColumnHeads"
+            ]
+          },
+          {
+            "Name": "lstClientServicePlan",
+            "SourceType": "ListBox",
+            "ComponentKind": "ListBox",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Service Plan"
+            },
+            "GeometryIn": {
+              "X": 0.167,
+              "Y": 4.208,
+              "W": 8.667,
+              "H": 2.417
+            },
+            "Binding": {
+              "Kind": "Unbound",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 6,
+              "ColumnWidths": "0;4320;1440;1440;1440;1440"
+            },
+            "RenderHints": {
+              "TabIndex": 8
+            },
+            "NonDefaultProperties": [
+              "ColumnHeads"
+            ]
+          },
+          {
+            "Name": "btnSave",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.167,
+              "Y": 0.133,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Save",
+              "IsEnabled": false
+            },
+            "NonDefaultProperties": [
+              "Enabled"
+            ]
+          },
+          {
+            "Name": "btnClose",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 7.833,
+              "Y": 0.125,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Close",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "btnDelete",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.333,
+              "Y": 0.125,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Delete",
+              "TabIndex": 2
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "txtFiscalYear",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "txtFiscalYear_AfterUpdate"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "lstClientServiceNeeds",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "lstClientServiceNeeds_AfterUpdate"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "lstClientServiceNeeds",
+            "PropertyName": "OnDblClick",
+            "EventName": "DblClick",
+            "VbaProcedureName": "lstClientServiceNeeds_DblClick"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "lstClientServicePlan",
+            "PropertyName": "OnDblClick",
+            "EventName": "DblClick",
+            "VbaProcedureName": "lstClientServicePlan_DblClick"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnSave",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnSave_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnClose",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnClose_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnDelete",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnDelete_Click"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnDirty",
+            "EventName": "Dirty",
+            "VbaProcedureName": "Form_Dirty"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnCurrent",
+            "EventName": "Current",
+            "VbaProcedureName": "Form_Current"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "Form_AfterUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnLoad",
+            "EventName": "Load",
+            "VbaProcedureName": "Form_Load"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnUndo",
+            "EventName": "Undo",
+            "VbaProcedureName": "Form_Undo"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmBudgetServicePlan",
+            "Module": "frmBudgetServicePlan",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmClientDetail",
+        "SuggestedComponentName": "ClientDetailComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblClients"
+        },
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 8.5
+        },
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnDirty",
+            "EventName": "Dirty",
+            "VbaProcedureName": "Form_Dirty"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnCurrent",
+            "EventName": "Current",
+            "VbaProcedureName": "Form_Current"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnDelete",
+            "EventName": "Delete",
+            "VbaProcedureName": "Form_Delete"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnLoad",
+            "EventName": "Load",
+            "VbaProcedureName": "Form_Load"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnUndo",
+            "EventName": "Undo",
+            "VbaProcedureName": "Form_Undo"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmClientDetail",
+            "Module": "frmClientDetail",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmClientSearch",
+        "SuggestedComponentName": "ClientSearchComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 8
+        },
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnActivate",
+            "EventName": "Activate",
+            "VbaProcedureName": "Form_Activate"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmClientSearch",
+            "Module": "frmClientSearch",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmClientServiceNeedDetail",
+        "SuggestedComponentName": "ClientServiceNeedDetailComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblClientServiceNeeds"
+        },
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "X": -20.178,
+          "Y": 2.802,
+          "W": 7.208
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.542
+            },
+            "ControlNames": [
+              "lblEditClientServiceNeed"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 3.75
+            },
+            "ControlNames": [
+              "txtClientServiceNeedID",
+              "txtClientID",
+              "txtFiscalYear",
+              "txtPriority",
+              "txtDaysOfWeek",
+              "txtPreferredTimeStart",
+              "txtPreferredTimeEnd",
+              "txtHoursPerWeek",
+              "txtNotes",
+              "cboServiceID"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.583
+            },
+            "ControlNames": [
+              "btnSave",
+              "btnCancel",
+              "btnDelete"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblEditClientServiceNeed",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.042,
+              "Y": 0.042,
+              "W": 4.125,
+              "H": 0.417
+            },
+            "RenderHints": {
+              "Caption": "Edit Client Service Need"
+            }
+          },
+          {
+            "Name": "txtClientServiceNeedID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "ClientServiceNeedID"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.25,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ClientServiceNeedID"
+            },
+            "RenderHints": {
+              "IsLocked": true
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtClientID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "ClientID"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.542,
+              "W": 1.052,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ClientID"
+            },
+            "RenderHints": {
+              "IsLocked": true,
+              "TabIndex": 2
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtFiscalYear",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "FiscalYear"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.125,
+              "W": 0.719,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "FiscalYear"
+            },
+            "RenderHints": {
+              "IsLocked": true,
+              "TabIndex": 3
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtPriority",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Priority"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.417,
+              "W": 0.719,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Priority"
+            },
+            "RenderHints": {
+              "TabIndex": 4
+            }
+          },
+          {
+            "Name": "txtDaysOfWeek",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "DaysOfWeek"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.708,
+              "W": 1.708,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "DaysOfWeek"
+            },
+            "RenderHints": {
+              "TabIndex": 5
+            }
+          },
+          {
+            "Name": "txtPreferredTimeStart",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "PreferredTimeStart"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 2,
+              "W": 1.396,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "PreferredTimeStart"
+            },
+            "RenderHints": {
+              "Format": "Short Time",
+              "TabIndex": 7
+            }
+          },
+          {
+            "Name": "txtPreferredTimeEnd",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "PreferredTimeEnd"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 2.292,
+              "W": 1.396,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "PreferredTimeEnd"
+            },
+            "RenderHints": {
+              "Format": "Short Time",
+              "TabIndex": 6
+            }
+          },
+          {
+            "Name": "txtHoursPerWeek",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "HoursPerWeek"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 2.583,
+              "W": 1.208,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "HoursPerWeek"
+            },
+            "RenderHints": {
+              "Format": "Fixed",
+              "TabIndex": 8
+            }
+          },
+          {
+            "Name": "txtNotes",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Notes"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 2.875,
+              "W": 5.042,
+              "H": 0.792
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Notes"
+            },
+            "RenderHints": {
+              "TabIndex": 9
+            },
+            "NonDefaultProperties": [
+              "EnterKeyBehavior"
+            ]
+          },
+          {
+            "Name": "cboServiceID",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "ServiceID"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.833,
+              "W": 1.896,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceID",
+              "RowSource": "qryServiceList",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;2880"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "btnSave",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.292,
+              "Y": 0.125,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Save"
+            }
+          },
+          {
+            "Name": "btnCancel",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.667,
+              "Y": 0.125,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Cancel",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "btnDelete",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 3.042,
+              "Y": 0.125,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Delete",
+              "TabIndex": 2
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboServiceID",
+            "PropertyName": "OnNotInList",
+            "EventName": "NotInList",
+            "VbaProcedureName": "cboServiceID_NotInList"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnSave",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnSave_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnCancel",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnCancel_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnDelete",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnDelete_Click"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnLoad",
+            "EventName": "Load",
+            "VbaProcedureName": "Form_Load"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmClientServiceNeedDetail",
+            "Module": "frmClientServiceNeedDetail",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmClientServicePlanDetail",
+        "SuggestedComponentName": "ClientServicePlanDetailComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblClientServicePlan"
+        },
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 7.104
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.542
+            },
+            "ControlNames": [
+              "lblEditClientServicePlan"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 3.792
+            },
+            "ControlNames": [
+              "txtClientServicePlanID",
+              "txtClientServiceNeedID",
+              "txtFiscalYear",
+              "txtHoursPerWeek",
+              "txtWeeklyCost",
+              "txtAnnualEstCost",
+              "txtApprovalDate",
+              "txtApprovedBy",
+              "txtNotes",
+              "cboProviderServiceCatalogID",
+              "cboStatus"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.667
+            },
+            "ControlNames": [
+              "btnSave",
+              "btnCancel",
+              "btnDelete"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblEditClientServicePlan",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.042,
+              "Y": 0.042,
+              "W": 4,
+              "H": 0.415
+            },
+            "RenderHints": {
+              "Caption": "Edit Client Service Plan"
+            }
+          },
+          {
+            "Name": "txtClientServicePlanID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Client Service Plan ID"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.25,
+              "W": 1.521,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ClientServicePlanID"
+            },
+            "RenderHints": {
+              "IsVisible": false,
+              "IsLocked": true
+            },
+            "NonDefaultProperties": [
+              "Visible",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "txtClientServiceNeedID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Client Service Need ID"
+            },
+            "GeometryIn": {
+              "X": 5.167,
+              "Y": 0.292,
+              "W": 0.25,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ClientServiceNeedID"
+            },
+            "RenderHints": {
+              "IsVisible": false,
+              "IsLocked": true,
+              "TabIndex": 2
+            },
+            "NonDefaultProperties": [
+              "Visible",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "txtFiscalYear",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Fiscal Year"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.833,
+              "W": 1.521,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "FiscalYear"
+            },
+            "RenderHints": {
+              "Format": "General Number",
+              "IsLocked": true,
+              "TabIndex": 3
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtHoursPerWeek",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Hours per Week"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.125,
+              "W": 1.521,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "HoursPerWeek"
+            },
+            "RenderHints": {
+              "Format": "Fixed",
+              "TabIndex": 4
+            }
+          },
+          {
+            "Name": "txtWeeklyCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Weekly Cost"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.417,
+              "W": 1.521,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "WeeklyCost"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00;($#,##0.00)",
+              "IsLocked": true,
+              "TabIndex": 5
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtAnnualEstCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Annual Est. Cost"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.708,
+              "W": 1.521,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "AnnualEstCost"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00;($#,##0.00)",
+              "IsLocked": true,
+              "TabIndex": 7
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtApprovalDate",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Approval Date"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 2,
+              "W": 1.521,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ApprovalDate"
+            },
+            "RenderHints": {
+              "Format": "Short Date",
+              "TabIndex": 8
+            }
+          },
+          {
+            "Name": "txtApprovedBy",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Approved By"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 2.292,
+              "W": 2.542,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ApprovedBy"
+            },
+            "RenderHints": {
+              "TabIndex": 9
+            }
+          },
+          {
+            "Name": "txtNotes",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Notes"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 2.875,
+              "W": 5.042,
+              "H": 0.792
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Notes"
+            },
+            "RenderHints": {
+              "TabIndex": 10
+            },
+            "NonDefaultProperties": [
+              "EnterKeyBehavior"
+            ]
+          },
+          {
+            "Name": "cboProviderServiceCatalogID",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Provider Service"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.542,
+              "W": 2.562,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ProviderServiceCatalogID",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;2880"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "cboStatus",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Status"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 2.583,
+              "W": 1.521,
+              "H": 0.208
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Status",
+              "RowSource": "SELECT tlkpPlanStatuses.StatusName FROM tlkpPlanStatuses; ",
+              "RowSourceType": "Table/Query"
+            },
+            "RenderHints": {
+              "IsLocked": true,
+              "TabIndex": 6
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "btnSave",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.208,
+              "Y": 0.167,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Save"
+            }
+          },
+          {
+            "Name": "btnCancel",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.583,
+              "Y": 0.167,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Cancel",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "btnDelete",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 2.958,
+              "Y": 0.167,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Delete",
+              "TabIndex": 2
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboProviderServiceCatalogID",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "cboProviderServiceCatalogID_AfterUpdate"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cboProviderServiceCatalogID",
+            "PropertyName": "OnNotInList",
+            "EventName": "NotInList",
+            "VbaProcedureName": "cboProviderServiceCatalogID_NotInList"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnSave",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnSave_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnCancel",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnCancel_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnDelete",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnDelete_Click"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "Form_AfterUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnLoad",
+            "EventName": "Load",
+            "VbaProcedureName": "Form_Load"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnError",
+            "EventName": "Error",
+            "VbaProcedureName": "Form_Error"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmClientServicePlanDetail",
+            "Module": "frmClientServicePlanDetail",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmProviderDetail",
+        "SuggestedComponentName": "ProviderDetailComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblProviders"
+        },
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 8
+        },
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnDirty",
+            "EventName": "Dirty",
+            "VbaProcedureName": "Form_Dirty"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnCurrent",
+            "EventName": "Current",
+            "VbaProcedureName": "Form_Current"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnUndo",
+            "EventName": "Undo",
+            "VbaProcedureName": "Form_Undo"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmProviderDetail",
+            "Module": "frmProviderDetail",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmProviderSearch",
+        "SuggestedComponentName": "ProviderSearchComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 7.708
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 1.6
+            },
+            "ControlNames": [
+              "lblTitle",
+              "lblState",
+              "cboFilterState",
+              "lblCity",
+              "cboFilterCity",
+              "lblStatus",
+              "cboFilterStatus",
+              "lblName",
+              "txtFilterName",
+              "btnSearch",
+              "btnClear",
+              "btnAddNew"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 5
+            },
+            "ControlNames": [
+              "lstProviderList"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0
+            }
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.05,
+              "W": 3,
+              "H": 0.349
+            },
+            "RenderHints": {
+              "Caption": "Provider Search"
+            }
+          },
+          {
+            "Name": "lblState",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.5,
+              "W": 0.8,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "State:"
+            }
+          },
+          {
+            "Name": "cboFilterState",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 1,
+              "Y": 0.5,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "StateCode;StateName;(All);(All);CT;Connecticut;MA;Massachusetts;RI;Rhode Island",
+              "RowSourceType": "Value List",
+              "ColumnCount": 2,
+              "ColumnWidths": "1440;2160"
+            },
+            "RenderHints": {
+              "DefaultValue": "\\\u0022(All)\\\u0022"
+            },
+            "NonDefaultProperties": [
+              "ColumnHeads",
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "lblCity",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 2.799,
+              "Y": 0.5,
+              "W": 0.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "City:"
+            }
+          },
+          {
+            "Name": "cboFilterCity",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 3.3,
+              "Y": 0.5,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "City;(All);Brockton;Fall River;Hartford;New Bedford;Plymouth;Providence;Taunton;Warwick",
+              "RowSourceType": "Value List",
+              "ColumnWidths": "2160"
+            },
+            "RenderHints": {
+              "DefaultValue": "\\\u0022(All)\\\u0022",
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "ColumnHeads",
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "lblStatus",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 5.2,
+              "Y": 0.5,
+              "W": 0.6,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Status:"
+            }
+          },
+          {
+            "Name": "cboFilterStatus",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 5.8,
+              "Y": 0.5,
+              "W": 1.2,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "-1;(All);1;Active;2;Inactive",
+              "RowSourceType": "Value List",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;1440"
+            },
+            "RenderHints": {
+              "DefaultValue": "-1",
+              "TabIndex": 2
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "lblName",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.9,
+              "W": 0.8,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Name:"
+            }
+          },
+          {
+            "Name": "txtFilterName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 1,
+              "Y": 0.9,
+              "W": 2.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "TabIndex": 3
+            }
+          },
+          {
+            "Name": "btnSearch",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 1.2,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Search",
+              "TabIndex": 4
+            }
+          },
+          {
+            "Name": "btnClear",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 1.6,
+              "Y": 1.2,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Clear",
+              "TabIndex": 5
+            }
+          },
+          {
+            "Name": "btnAddNew",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 5.8,
+              "Y": 1.2,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Add New",
+              "TabIndex": 6
+            }
+          },
+          {
+            "Name": "lstProviderList",
+            "SourceType": "ListBox",
+            "ComponentKind": "ListBox",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Lst Provider List"
+            },
+            "GeometryIn": {
+              "X": 0.083,
+              "Y": 0.083,
+              "W": 7.542,
+              "H": 4.875
+            },
+            "Binding": {
+              "Kind": "Unbound",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 6,
+              "ColumnWidths": "0;2999;2399;1440;1440;1080"
+            },
+            "NonDefaultProperties": [
+              "ColumnHeads"
+            ]
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboFilterState",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "cboFilterState_AfterUpdate"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnSearch",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnSearch_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnClear",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnClear_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnAddNew",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnAddNew_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "lstProviderList",
+            "PropertyName": "OnDblClick",
+            "EventName": "DblClick",
+            "VbaProcedureName": "lstProviderList_DblClick"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnActivate",
+            "EventName": "Activate",
+            "VbaProcedureName": "Form_Activate"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboFilterState",
+            "Source": "LimitToList"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cboFilterCity",
+            "Source": "LimitToList"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cboFilterStatus",
+            "Source": "LimitToList"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmProviderSearch",
+            "Module": "frmProviderSearch",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmProviderServiceCatalogDetail",
+        "SuggestedComponentName": "ProviderServiceCatalogDetailComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblProviderServiceCatalog"
+        },
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 7.104
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.542
+            },
+            "ControlNames": [
+              "lblEditProviderServiceCatalog"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 2.583
+            },
+            "ControlNames": [
+              "txtProviderServiceCatalogID",
+              "txtFiscalYear",
+              "txtRatePerHour",
+              "txtNotes",
+              "cboProviderID",
+              "cboServiceID"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.583
+            },
+            "ControlNames": [
+              "btnSave",
+              "btnCancel",
+              "btnDelete"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblEditProviderServiceCatalog",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.042,
+              "Y": 0.042,
+              "W": 4.812,
+              "H": 0.416
+            },
+            "RenderHints": {
+              "Caption": "Edit Provider Service Catalog"
+            }
+          },
+          {
+            "Name": "txtProviderServiceCatalogID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "ProviderServiceCatalogID"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.25,
+              "W": 1.854,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ProviderServiceCatalogID"
+            },
+            "RenderHints": {
+              "IsLocked": true,
+              "TabIndex": 2
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtFiscalYear",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "FiscalYear"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.125,
+              "W": 0.719,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "FiscalYear"
+            },
+            "RenderHints": {
+              "IsLocked": true,
+              "TabIndex": 3
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtRatePerHour",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "RatePerHour"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.417,
+              "W": 1.708,
+              "H": 0.229
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "RatePerHour"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00;($#,##0.00)",
+              "TabIndex": 4
+            }
+          },
+          {
+            "Name": "txtNotes",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Notes"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 1.708,
+              "W": 5.042,
+              "H": 0.792
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Notes"
+            },
+            "RenderHints": {
+              "TabIndex": 5
+            },
+            "NonDefaultProperties": [
+              "EnterKeyBehavior"
+            ]
+          },
+          {
+            "Name": "cboProviderID",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Provider"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.542,
+              "W": 1.938,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ProviderID",
+              "RowSource": "tblProviders",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;1440"
+            },
+            "RenderHints": {
+              "IsLocked": true
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "cboServiceID",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Service"
+            },
+            "GeometryIn": {
+              "X": 2.021,
+              "Y": 0.833,
+              "W": 1.938,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceID",
+              "RowSource": "tblServices",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;2880"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "btnSave",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.125,
+              "Y": 0.125,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Save"
+            }
+          },
+          {
+            "Name": "btnCancel",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.5,
+              "Y": 0.125,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Cancel",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "btnDelete",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 2.875,
+              "Y": 0.125,
+              "W": 1.125,
+              "H": 0.333
+            },
+            "RenderHints": {
+              "Caption": "Delete",
+              "TabIndex": 2
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "txtRatePerHour",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "txtRatePerHour_AfterUpdate"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cboServiceID",
+            "PropertyName": "OnNotInList",
+            "EventName": "NotInList",
+            "VbaProcedureName": "cboServiceID_NotInList"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnSave",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnSave_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnCancel",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnCancel_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnDelete",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnDelete_Click"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnLoad",
+            "EventName": "Load",
+            "VbaProcedureName": "Form_Load"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmProviderServiceCatalogDetail",
+            "Module": "frmProviderServiceCatalogDetail",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmReportMenu",
+        "SuggestedComponentName": "ReportMenuComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 4
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.5
+            },
+            "ControlNames": [
+              "lblTitle"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 4.7
+            },
+            "ControlNames": [
+              "lblClientReports",
+              "btnClientProfile",
+              "btnServicePlanShortfall"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.1,
+              "W": 3,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Reports Menu"
+            }
+          },
+          {
+            "Name": "lblClientReports",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.2,
+              "W": 2,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Client Reports"
+            }
+          },
+          {
+            "Name": "btnClientProfile",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.5,
+              "Y": 0.5,
+              "W": 3,
+              "H": 0.349
+            },
+            "RenderHints": {
+              "Caption": "Client Profile"
+            }
+          },
+          {
+            "Name": "btnServicePlanShortfall",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.5,
+              "Y": 0.95,
+              "W": 3,
+              "H": 0.349
+            },
+            "RenderHints": {
+              "Caption": "Service Plan \u0026 Shortfall",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "lblProviderReports",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 1.4,
+              "W": 2,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Provider Reports"
+            }
+          },
+          {
+            "Name": "btnProviderCatalog",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "GeometryIn": {
+              "X": 0.5,
+              "Y": 1.7,
+              "W": 3,
+              "H": 0.349
+            },
+            "RenderHints": {
+              "Caption": "Provider Service Catalog",
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "btnPlansByClient",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "GeometryIn": {
+              "X": 0.5,
+              "Y": 2.15,
+              "W": 3,
+              "H": 0.349
+            },
+            "RenderHints": {
+              "Caption": "Plans by Client",
+              "TabIndex": 3
+            }
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmReportMenu",
+            "Module": "frmReportMenu",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmReportParam_Client",
+        "SuggestedComponentName": "ReportParamClientComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 3.5
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.4
+            },
+            "ControlNames": [
+              "lblTitle"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.6
+            },
+            "ControlNames": [
+              "lblClient",
+              "cboClient"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.5
+            },
+            "ControlNames": [
+              "btnOK",
+              "btnCancel"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.05,
+              "W": 3,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Select Client"
+            }
+          },
+          {
+            "Name": "lblClient",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.1,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Client:"
+            }
+          },
+          {
+            "Name": "cboClient",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Proximity",
+              "Text": "Client:"
+            },
+            "GeometryIn": {
+              "X": 1.3,
+              "Y": 0.1,
+              "W": 1.8,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "SELECT ClientID, FirstName \u0026 \u0027 \u0027 \u0026 LastName AS ClientName FROM tblClients ORDER BY LastName, FirstName; ",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;2880"
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "btnOK",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.3,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "OK"
+            }
+          },
+          {
+            "Name": "btnCancel",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.8,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Cancel",
+              "TabIndex": 1
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "btnOK",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnOK_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnCancel",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnCancel_Click"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboClient",
+            "Source": "LimitToList"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmReportParam_Client",
+            "Module": "frmReportParam_Client",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmReportParam_ClientFY",
+        "SuggestedComponentName": "ReportParamClientFYComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 3.5
+        }
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmReportParam_ClientFY",
+            "Module": "frmReportParam_ClientFY",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmReportParam_FY",
+        "SuggestedComponentName": "ReportParamFYComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 3.5
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.4
+            },
+            "ControlNames": [
+              "lblTitle"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.6
+            },
+            "ControlNames": [
+              "lblFiscalYear",
+              "cboFiscalYear"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.5
+            },
+            "ControlNames": [
+              "btnOK",
+              "btnCancel"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.05,
+              "W": 3,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Select Fiscal Year"
+            }
+          },
+          {
+            "Name": "lblFiscalYear",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.1,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Fiscal Year:"
+            }
+          },
+          {
+            "Name": "cboFiscalYear",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Proximity",
+              "Text": "Fiscal Year:"
+            },
+            "GeometryIn": {
+              "X": 1.3,
+              "Y": 0.1,
+              "W": 1.8,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "SELECT FiscalYear FROM tlkpFiscalYears ORDER BY FiscalYear DESC; ",
+              "RowSourceType": "Table/Query"
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "btnOK",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.3,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "OK"
+            }
+          },
+          {
+            "Name": "btnCancel",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.8,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Cancel",
+              "TabIndex": 1
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "btnOK",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnOK_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnCancel",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnCancel_Click"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboFiscalYear",
+            "Source": "LimitToList"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmReportParam_FY",
+            "Module": "frmReportParam_FY",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmReportParam_Provider",
+        "SuggestedComponentName": "ReportParamProviderComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 3.5
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.4
+            },
+            "ControlNames": [
+              "lblTitle"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.542
+            },
+            "ControlNames": [
+              "lblProvider",
+              "cboProvider"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.5
+            },
+            "ControlNames": [
+              "btnOK",
+              "btnCancel"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.05,
+              "W": 3,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Select Provider"
+            }
+          },
+          {
+            "Name": "lblProvider",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.1,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Provider:"
+            }
+          },
+          {
+            "Name": "cboProvider",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Proximity",
+              "Text": "Provider:"
+            },
+            "GeometryIn": {
+              "X": 1.3,
+              "Y": 0.1,
+              "W": 1.8,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "SELECT ProviderID, ProviderName FROM tblProviders ORDER BY ProviderName; ",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;2880"
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "btnOK",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.3,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "OK"
+            }
+          },
+          {
+            "Name": "btnCancel",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.8,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Cancel",
+              "TabIndex": 1
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "btnOK",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnOK_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnCancel",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnCancel_Click"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboProvider",
+            "Source": "LimitToList"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmReportParam_Provider",
+            "Module": "frmReportParam_Provider",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmReportParam_ProviderFY",
+        "SuggestedComponentName": "ReportParamProviderFYComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 3.5
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.4
+            },
+            "ControlNames": [
+              "lblTitle"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "ControlNames": [
+              "lblProvider",
+              "cboProvider",
+              "lblFiscalYear",
+              "cboFiscalYear"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.5
+            },
+            "ControlNames": [
+              "btnOK",
+              "btnCancel"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.05,
+              "W": 3,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Select Provider \u0026 Fiscal Year"
+            }
+          },
+          {
+            "Name": "lblProvider",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.1,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Provider:"
+            }
+          },
+          {
+            "Name": "cboProvider",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Cbo Provider"
+            },
+            "GeometryIn": {
+              "X": 1.3,
+              "Y": 0.1,
+              "W": 1.8,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "SELECT ProviderID, ProviderName FROM tblProviders ORDER BY ProviderName; ",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;2880"
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "lblFiscalYear",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "Detail",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.5,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Fiscal Year:"
+            }
+          },
+          {
+            "Name": "cboFiscalYear",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Cbo Fiscal Year"
+            },
+            "GeometryIn": {
+              "X": 1.3,
+              "Y": 0.5,
+              "W": 1.8,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "SELECT FiscalYear FROM tlkpFiscalYears ORDER BY FiscalYear DESC; ",
+              "RowSourceType": "Table/Query"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "btnOK",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.3,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "OK"
+            }
+          },
+          {
+            "Name": "btnCancel",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.8,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Cancel",
+              "TabIndex": 1
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "btnOK",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnOK_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnCancel",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnCancel_Click"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboProvider",
+            "Source": "LimitToList"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cboFiscalYear",
+            "Source": "LimitToList"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmReportParam_ProviderFY",
+            "Module": "frmReportParam_ProviderFY",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmServiceDetail",
+        "SuggestedComponentName": "ServiceDetailComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblServices"
+        },
+        "DefaultView": "Single Form",
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.5
+            },
+            "ControlNames": [
+              "lblTitle"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 3
+            },
+            "ControlNames": [
+              "txtServiceID",
+              "txtServiceCode",
+              "txtServiceName",
+              "cboServiceCategory",
+              "txtDescription",
+              "chkIsActive"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.567
+            },
+            "ControlNames": [
+              "btnClose",
+              "btnSave",
+              "btnDelete"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.1,
+              "W": 3,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Service Detail"
+            }
+          },
+          {
+            "Name": "txtServiceID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Service ID:"
+            },
+            "GeometryIn": {
+              "X": 1.875,
+              "Y": 0.208,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceID"
+            },
+            "RenderHints": {
+              "IsLocked": true
+            },
+            "NonDefaultProperties": [
+              "Locked",
+              "TabStop"
+            ]
+          },
+          {
+            "Name": "txtServiceCode",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Service Code:"
+            },
+            "GeometryIn": {
+              "X": 1.875,
+              "Y": 0.558,
+              "W": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceCode"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtServiceName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Service Name:"
+            },
+            "GeometryIn": {
+              "X": 1.875,
+              "Y": 0.907,
+              "W": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceName"
+            },
+            "RenderHints": {
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "cboServiceCategory",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Service Category:"
+            },
+            "GeometryIn": {
+              "X": 1.875,
+              "Y": 1.256,
+              "W": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceCategory",
+              "RowSource": "SELECT CategoryName FROM tlkpServiceCategories ORDER BY CategoryName; ",
+              "RowSourceType": "Table/Query"
+            },
+            "RenderHints": {
+              "TabIndex": 3
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "txtDescription",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Description:"
+            },
+            "GeometryIn": {
+              "X": 1.875,
+              "Y": 1.606,
+              "W": 2.5,
+              "H": 0.75
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Description"
+            },
+            "RenderHints": {
+              "TabIndex": 4
+            }
+          },
+          {
+            "Name": "chkIsActive",
+            "SourceType": "CheckBox",
+            "ComponentKind": "Toggle",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "Attached",
+              "Text": "Active"
+            },
+            "GeometryIn": {
+              "X": 1.75,
+              "Y": 2.479,
+              "W": 0.3,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "IsActive"
+            },
+            "RenderHints": {
+              "TabIndex": 5
+            }
+          },
+          {
+            "Name": "btnClose",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 1.6,
+              "Y": 0.083,
+              "W": 1.2,
+              "H": 0.331
+            },
+            "RenderHints": {
+              "Caption": "Close"
+            }
+          },
+          {
+            "Name": "btnSave",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 0.25,
+              "Y": 0.085,
+              "W": 1.254,
+              "H": 0.338
+            },
+            "RenderHints": {
+              "Caption": "Save",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "btnDelete",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormFooter",
+            "GeometryIn": {
+              "X": 2.917,
+              "Y": 0.085,
+              "W": 1.2,
+              "H": 0.331
+            },
+            "RenderHints": {
+              "Caption": "Delete",
+              "TabIndex": 2
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "btnClose",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnClose_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnSave",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnSave_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnDelete",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnDelete_Click"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnDirty",
+            "EventName": "Dirty",
+            "VbaProcedureName": "Form_Dirty"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnCurrent",
+            "EventName": "Current",
+            "VbaProcedureName": "Form_Current"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnUndo",
+            "EventName": "Undo",
+            "VbaProcedureName": "Form_Undo"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboServiceCategory",
+            "Source": "LimitToList"
+          },
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmServiceDetail",
+            "Module": "frmServiceDetail",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmServiceList",
+        "SuggestedComponentName": "ServiceListComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblServices"
+        },
+        "GeometryIn": {
+          "W": 7.167
+        },
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnDblClick",
+            "EventName": "DblClick",
+            "VbaProcedureName": "Form_DblClick"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmServiceList",
+            "Module": "frmServiceList",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmServiceRateLimits",
+        "SuggestedComponentName": "ServiceRateLimitsComponent",
+        "DataSource": {
+          "Kind": "InlineSql",
+          "InlineSql": "SELECT tblServiceRateLimits.*, tblServices.ServiceName FROM tblServiceRateLimits INNER JOIN tblServices ON tblServiceRateLimits.ServiceID = tblServices.ServiceID; "
+        },
+        "GeometryIn": {
+          "W": 6
+        },
+        "Sections": [
+          {
+            "Name": "FormHeader",
+            "Kind": "FormHeader",
+            "GeometryIn": {
+              "H": 0.8
+            },
+            "ControlNames": [
+              "lblTitle",
+              "lblFiscalYear",
+              "cboFilterFiscalYear",
+              "btnCopyRateLimits"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.349
+            },
+            "ControlNames": [
+              "cboServiceID",
+              "txtFiscalYear",
+              "txtMaxRatePerHour"
+            ]
+          },
+          {
+            "Name": "FormFooter",
+            "Kind": "FormFooter",
+            "GeometryIn": {
+              "H": 0.4
+            }
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblTitle",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.05,
+              "W": 3,
+              "H": 0.3
+            },
+            "RenderHints": {
+              "Caption": "Service Rate Limits"
+            }
+          },
+          {
+            "Name": "lblFiscalYear",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 0.2,
+              "Y": 0.4,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Fiscal Year:"
+            }
+          },
+          {
+            "Name": "cboFilterFiscalYear",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 1.3,
+              "Y": 0.4,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "RowSourceList",
+              "RowSource": "SELECT FiscalYear FROM tlkpFiscalYears ORDER BY FiscalYear DESC; ",
+              "RowSourceType": "Table/Query"
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "btnCopyRateLimits",
+            "SourceType": "CommandButton",
+            "ComponentKind": "Button",
+            "SectionName": "FormHeader",
+            "GeometryIn": {
+              "X": 2.799,
+              "Y": 0.4,
+              "W": 1.8
+            },
+            "RenderHints": {
+              "Caption": "Copy Rate Limits...",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "cboServiceID",
+            "SourceType": "ComboBox",
+            "ComponentKind": "Dropdown",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Cbo Service ID"
+            },
+            "GeometryIn": {
+              "X": 0.1,
+              "Y": 0.05,
+              "W": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceID",
+              "RowSource": "SELECT ServiceID, ServiceName FROM tblServices ORDER BY ServiceName; ",
+              "RowSourceType": "Table/Query",
+              "ColumnCount": 2,
+              "ColumnWidths": "0;3600"
+            },
+            "NonDefaultProperties": [
+              "LimitToList"
+            ]
+          },
+          {
+            "Name": "txtFiscalYear",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Fiscal Year"
+            },
+            "GeometryIn": {
+              "X": 2.7,
+              "Y": 0.05,
+              "W": 0.8,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "FiscalYear"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtMaxRatePerHour",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Max Rate Per Hour"
+            },
+            "GeometryIn": {
+              "X": 3.6,
+              "Y": 0.05,
+              "W": 1.2,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "MaxRatePerHour"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 2
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboFilterFiscalYear",
+            "PropertyName": "AfterUpdate",
+            "EventName": "AfterUpdate",
+            "VbaProcedureName": "cboFilterFiscalYear_AfterUpdate"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "btnCopyRateLimits",
+            "PropertyName": "OnClick",
+            "EventName": "Click",
+            "VbaProcedureName": "btnCopyRateLimits_Click"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "txtMaxRatePerHour",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "txtMaxRatePerHour_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeDelConfirm",
+            "EventName": "BeforeDelConfirm",
+            "VbaProcedureName": "Form_BeforeDelConfirm"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "BeforeUpdate",
+            "EventName": "BeforeUpdate",
+            "VbaProcedureName": "Form_BeforeUpdate"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnLoad",
+            "EventName": "Load",
+            "VbaProcedureName": "Form_Load"
+          }
+        ],
+        "ValidationRules": [
+          {
+            "HostKind": "Control",
+            "ControlName": "cboFilterFiscalYear",
+            "Source": "LimitToList"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "cboServiceID",
+            "Source": "LimitToList"
+          },
+          {
+            "HostKind": "Control",
+            "ControlName": "txtMaxRatePerHour",
+            "Source": "BeforeUpdateHandler"
+          },
+          {
+            "HostKind": "Form",
+            "Source": "BeforeUpdateHandler"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmServiceRateLimits",
+            "Module": "frmServiceRateLimits",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "frmSwitchboard",
+        "SuggestedComponentName": "SwitchboardComponent",
+        "DefaultView": "Single Form",
+        "GeometryIn": {
+          "W": 5.75
+        },
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnTimer",
+            "EventName": "Timer",
+            "VbaProcedureName": "Form_Timer"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "frmSwitchboard",
+            "Module": "frmSwitchboard",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    }
+  ],
+  "Reports": [
+    {
+      "Spec": {
+        "SourceFormName": "rptClientProfile",
+        "SuggestedComponentName": "RptClientProfileComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblClients"
+        },
+        "GeometryIn": {
+          "W": 8
+        },
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnNoData",
+            "EventName": "NoData",
+            "VbaProcedureName": "Form_NoData"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnPage",
+            "EventName": "Page",
+            "VbaProcedureName": "Form_Page"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "rptClientProfile",
+            "Module": "rptClientProfile",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "rptProviderCosts",
+        "SuggestedComponentName": "RptProviderCostsComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "qryProviderServiceCosts_ByFiscalYear"
+        },
+        "GeometryIn": {
+          "W": 8
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "lblProviderCostAnalysis"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "lblProvider",
+              "lblTotalCost",
+              "lblPctOfTotal"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.26
+            },
+            "ControlNames": [
+              "txtProviderName",
+              "txtTotalCost",
+              "txtPctOfTotal"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.417
+            },
+            "ControlNames": [
+              "txtPageNumber",
+              "txtDateTime",
+              "lnFooter"
+            ]
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "lblGrandTotal",
+              "txtGrandTotal"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblProviderCostAnalysis",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 4,
+              "H": 0.287
+            },
+            "RenderHints": {
+              "Caption": "Provider Cost Analysis"
+            }
+          },
+          {
+            "Name": "lblProvider",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "W": 2.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Provider"
+            }
+          },
+          {
+            "Name": "lblTotalCost",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 2.917,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Total Cost"
+            }
+          },
+          {
+            "Name": "lblPctOfTotal",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 4.792,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Pct of Total"
+            }
+          },
+          {
+            "Name": "txtProviderName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Provider Name"
+            },
+            "GeometryIn": {
+              "W": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ProviderName"
+            }
+          },
+          {
+            "Name": "txtTotalCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Total Cost"
+            },
+            "GeometryIn": {
+              "X": 2.917,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "TotalCost"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtPctOfTotal",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Pct Of Total"
+            },
+            "GeometryIn": {
+              "X": 4.792,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "PctCost"
+            },
+            "RenderHints": {
+              "Format": "Percent",
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "txtPageNumber",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "X": 5.417,
+              "Y": 0.042,
+              "W": 2.5,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=\\\u0022Page \\\u0022 \u0026 [Page]"
+            }
+          },
+          {
+            "Name": "txtDateTime",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 3,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=Date() \u0026 \\\u0022 \\\u0022 \u0026 Time()"
+            },
+            "RenderHints": {
+              "Format": "Short Date",
+              "IsEnabled": false,
+              "IsLocked": true,
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "Enabled",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "lnFooter",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "W": 8
+            }
+          },
+          {
+            "Name": "lblGrandTotal",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "W": 2.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Grand Total:"
+            }
+          },
+          {
+            "Name": "txtGrandTotal",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 2.917,
+              "W": 1.5,
+              "H": 0.25
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnNoData",
+            "EventName": "NoData",
+            "VbaProcedureName": "Form_NoData"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "rptProviderCosts",
+            "Module": "rptProviderCosts",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "rptProviderServiceCatalog",
+        "SuggestedComponentName": "RptProviderServiceCatalogComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "qryProviderServiceCatalogDetail"
+        },
+        "GeometryIn": {
+          "W": 9
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "lblProviderServiceCatalog",
+              "txtProviderName"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "lblService",
+              "lblRateHr",
+              "lblServiceStarted",
+              "lblServiceEnded",
+              "lblFY"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "txtServiceName",
+              "txtRatePerHour",
+              "txtServiceStarted",
+              "txtServiceEnded",
+              "txtFiscalYear"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "txtPageNumber",
+              "txtDateTime",
+              "lnFooter"
+            ]
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblProviderServiceCatalog",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 4,
+              "H": 0.287
+            },
+            "RenderHints": {
+              "Caption": "Provider Service Catalog"
+            }
+          },
+          {
+            "Name": "txtProviderName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 4.167,
+              "Y": 0.042,
+              "W": 3.458,
+              "H": 0.292
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ProviderName"
+            }
+          },
+          {
+            "Name": "lblService",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "W": 3,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Service"
+            }
+          },
+          {
+            "Name": "lblRateHr",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 5.125,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Rate/Hr"
+            }
+          },
+          {
+            "Name": "lblServiceStarted",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 6.292,
+              "W": 1.208,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Service Started"
+            }
+          },
+          {
+            "Name": "lblServiceEnded",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 7.667,
+              "W": 1.208,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Service Ended"
+            }
+          },
+          {
+            "Name": "lblFY",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 3.917,
+              "W": 1,
+              "H": 0.229
+            },
+            "RenderHints": {
+              "Caption": "FY"
+            }
+          },
+          {
+            "Name": "txtServiceName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Service Name"
+            },
+            "GeometryIn": {
+              "W": 3,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceName"
+            }
+          },
+          {
+            "Name": "txtRatePerHour",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Rate Per Hour"
+            },
+            "GeometryIn": {
+              "X": 5.125,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "RatePerHour"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtServiceStarted",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Service Started"
+            },
+            "GeometryIn": {
+              "X": 6.292,
+              "W": 1.208,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "MinFiscalYear"
+            },
+            "RenderHints": {
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "txtServiceEnded",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Service Ended"
+            },
+            "GeometryIn": {
+              "X": 7.667,
+              "W": 1.208,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=IIf([MaxFiscalYear]\u003CGetCurrentFiscalYear(),[MaxFiscalYear],\\\u0022\\\u0022)"
+            },
+            "RenderHints": {
+              "TabIndex": 3
+            }
+          },
+          {
+            "Name": "txtFiscalYear",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Fiscal Year"
+            },
+            "GeometryIn": {
+              "X": 3.917,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "FiscalYear"
+            },
+            "RenderHints": {
+              "TabIndex": 4
+            }
+          },
+          {
+            "Name": "txtPageNumber",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "X": 5.417,
+              "Y": 0.083,
+              "W": 2.5,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=\\\u0022Page \\\u0022 \u0026 [Page]"
+            }
+          },
+          {
+            "Name": "txtDateTime",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "Y": 0.083,
+              "W": 3,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=Date() \u0026 \\\u0022 \\\u0022 \u0026 Time()"
+            },
+            "RenderHints": {
+              "Format": "Short Date",
+              "IsEnabled": false,
+              "IsLocked": true,
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "Enabled",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "lnFooter",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 8
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnNoData",
+            "EventName": "NoData",
+            "VbaProcedureName": "Form_NoData"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "rptProviderServiceCatalog",
+            "Module": "rptProviderServiceCatalog",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "rptProviderServiceStatistics",
+        "SuggestedComponentName": "RptProviderServiceStatisticsComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "qryProviderServiceStatistics"
+        },
+        "GeometryIn": {
+          "W": 8
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "lblProviderServiceStatistics",
+              "txtFYHeader"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.292
+            },
+            "ControlNames": [
+              "lblProvider",
+              "lblClients",
+              "lblHours",
+              "lblTotalCost",
+              "lblAvgClient"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "txtProviderName",
+              "txtTotalClients",
+              "txtTotalHours",
+              "txtTotalCost",
+              "txtAvgCostPerClient"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.333
+            },
+            "ControlNames": [
+              "txtPageNumber",
+              "txtDateTime",
+              "lnFooter"
+            ]
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.333
+            },
+            "ControlNames": [
+              "lblGrandTotals",
+              "txtGrandTotalClients",
+              "txtGrandTotalCost",
+              "txtGrandTotalHours"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblProviderServiceStatistics",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 2.792,
+              "H": 0.328
+            },
+            "RenderHints": {
+              "Caption": "Provider Service Statistics"
+            }
+          },
+          {
+            "Name": "txtFYHeader",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 3.208,
+              "Y": 0.042,
+              "W": 4.667,
+              "H": 0.292
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=\\\u0022FY\\\u0022 \u0026 Right([FiscalYear],2)"
+            }
+          },
+          {
+            "Name": "lblProvider",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "W": 2.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Provider"
+            }
+          },
+          {
+            "Name": "lblClients",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 2.7,
+              "W": 0.8,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Clients"
+            }
+          },
+          {
+            "Name": "lblHours",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 3.7,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Hours"
+            }
+          },
+          {
+            "Name": "lblTotalCost",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 4.9,
+              "W": 1.3,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Total Cost"
+            }
+          },
+          {
+            "Name": "lblAvgClient",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 6.4,
+              "W": 1.1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Avg/Client"
+            }
+          },
+          {
+            "Name": "txtProviderName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Provider Name"
+            },
+            "GeometryIn": {
+              "W": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ProviderName"
+            }
+          },
+          {
+            "Name": "txtTotalClients",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Total Clients"
+            },
+            "GeometryIn": {
+              "X": 2.7,
+              "W": 0.8,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Clients"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtTotalHours",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Total Hours"
+            },
+            "GeometryIn": {
+              "X": 3.7,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Hours"
+            },
+            "RenderHints": {
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "txtTotalCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Total Cost"
+            },
+            "GeometryIn": {
+              "X": 4.9,
+              "W": 1.3,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "TotalCost"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 3
+            }
+          },
+          {
+            "Name": "txtAvgCostPerClient",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Avg Cost Per Client"
+            },
+            "GeometryIn": {
+              "X": 6.4,
+              "W": 1.1,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "AvgPerClient"
+            },
+            "RenderHints": {
+              "TabIndex": 4
+            }
+          },
+          {
+            "Name": "txtPageNumber",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "X": 5.417,
+              "Y": 0.042,
+              "W": 2.5,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=\\\u0022Page \\\u0022 \u0026 [Page]"
+            }
+          },
+          {
+            "Name": "txtDateTime",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 3,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=Date() \u0026 \\\u0022 \\\u0022 \u0026 Time()"
+            },
+            "RenderHints": {
+              "Format": "Short Date",
+              "IsEnabled": false,
+              "IsLocked": true,
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "Enabled",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "lnFooter",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "W": 8
+            }
+          },
+          {
+            "Name": "lblGrandTotals",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 2,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Grand Totals:"
+            }
+          },
+          {
+            "Name": "txtGrandTotalClients",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 2.7,
+              "Y": 0.042,
+              "W": 0.8,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=GetCountOfClientsByFiscalYear([FiscalYear])"
+            }
+          },
+          {
+            "Name": "txtGrandTotalCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 4.9,
+              "Y": 0.042,
+              "W": 1.3,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=FormatCurrency(Sum([TotalCost]))"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtGrandTotalHours",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 3.667,
+              "Y": 0.042,
+              "W": 1.04,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=Sum([Hours])"
+            },
+            "RenderHints": {
+              "TabIndex": 2
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnNoData",
+            "EventName": "NoData",
+            "VbaProcedureName": "Form_NoData"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "rptProviderServiceStatistics",
+            "Module": "rptProviderServiceStatistics",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "rptServiceCosts",
+        "SuggestedComponentName": "RptServiceCostsComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "qryServiceCosts_ByFiscalYear"
+        },
+        "GeometryIn": {
+          "W": 8
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "lblServiceCostAnalysis"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.4
+            },
+            "ControlNames": [
+              "lblService",
+              "lblTotalCost",
+              "lblPctOfTotal"
+            ]
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.3
+            },
+            "ControlNames": [
+              "txtServiceName",
+              "txtTotalCost",
+              "txtPctOfTotal"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.292
+            },
+            "ControlNames": [
+              "txtPageNumber",
+              "txtDateTime",
+              "lnFooter"
+            ]
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.4
+            },
+            "ControlNames": [
+              "lblGrandTotal",
+              "txtGrandTotal"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblServiceCostAnalysis",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 4,
+              "H": 0.287
+            },
+            "RenderHints": {
+              "Caption": "Service Cost Analysis"
+            }
+          },
+          {
+            "Name": "lblService",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "W": 2.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Service"
+            }
+          },
+          {
+            "Name": "lblTotalCost",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 2.7,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Total Cost"
+            }
+          },
+          {
+            "Name": "lblPctOfTotal",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "PageHeaderSection",
+            "GeometryIn": {
+              "X": 4.4,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "% of Total"
+            }
+          },
+          {
+            "Name": "txtServiceName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Service Name"
+            },
+            "GeometryIn": {
+              "W": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceName"
+            }
+          },
+          {
+            "Name": "txtTotalCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Total Cost"
+            },
+            "GeometryIn": {
+              "X": 2.7,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "TotalCost"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtPctOfTotal",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Pct Of Total"
+            },
+            "GeometryIn": {
+              "X": 4.4,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "PctCost"
+            },
+            "RenderHints": {
+              "Format": "Percent",
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "txtPageNumber",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "X": 5.417,
+              "Y": 0.042,
+              "W": 2.5,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=\\\u0022Page \\\u0022 \u0026 [Page]"
+            }
+          },
+          {
+            "Name": "txtDateTime",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 3,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=Date() \u0026 \\\u0022 \\\u0022 \u0026 Time()"
+            },
+            "RenderHints": {
+              "Format": "Short Date",
+              "IsEnabled": false,
+              "IsLocked": true,
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "Enabled",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "lnFooter",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "W": 8
+            }
+          },
+          {
+            "Name": "lblGrandTotal",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "Y": 0.083,
+              "W": 2,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Grand Total:"
+            }
+          },
+          {
+            "Name": "txtGrandTotal",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 2.7,
+              "Y": 0.083,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=FormatCurrency(Sum([TotalCost]))"
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnNoData",
+            "EventName": "NoData",
+            "VbaProcedureName": "Form_NoData"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "rptServiceCosts",
+            "Module": "rptServiceCosts",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "rptServicePlanAndShortfall",
+        "SuggestedComponentName": "RptServicePlanAndShortfallComponent",
+        "DataSource": {
+          "Kind": "InlineSql",
+          "InlineSql": "SELECT * FROM tblClients WHERE ClientID = 1; "
+        },
+        "GeometryIn": {
+          "W": 9
+        },
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnNoData",
+            "EventName": "NoData",
+            "VbaProcedureName": "Form_NoData"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "rptServicePlanAndShortfall",
+            "Module": "rptServicePlanAndShortfall",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "rptServicePlansByClient",
+        "SuggestedComponentName": "RptServicePlansByClientComponent",
+        "DataSource": {
+          "Kind": "InlineSql",
+          "InlineSql": "SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblServices.ServiceID, tblServices.ServiceName, tblClientServicePlan.FiscalYear, tblProviderServiceCatalog.RatePerHour, tblClientServicePlan.HoursPerWeek AS WeeklyHours, tblClientServicePlan.WeeklyCost, tblClientServicePlan.AnnualEstCost, tblClients.ClientID, Trim(Nz ([LastName], \\\u0022\\\u0022) \u0026 \\\u0022, \\\u0022 \u0026 Nz ([FirstName], \\\u0022\\\u0022)) AS ClientName FROM tblServices INNER JOIN (tblProviders INNER JOIN ((tblClients INNER JOIN tblClientServiceNeeds ON tblClients.ClientID = tblClientServiceNeeds.ClientID) INNER JOIN (tblProviderServiceCatalog INNER JOIN tblClientServicePlan ON tblProviderServiceCatalog.ProviderServiceCatalogID = tblClientServicePlan.ProviderServiceCatalogID) ON tblClientServiceNeeds.ClientServiceNeedID = tblClientServicePlan.ClientServiceNeedID) ON tblProviders.ProviderID = tblProviderServiceCatalog.ProviderID) ON (         tblServices.ServiceID = tblProviderServiceCatalog.ServiceID     ) AND (         tblServices.ServiceID = tblClientServiceNeeds.ServiceID     ); "
+        },
+        "GeometryIn": {
+          "W": 7.5
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "lblServicePlansByClient",
+              "txtProviderFYHeader"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.125
+            }
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "txtServiceName",
+              "txtWeeklyHours",
+              "txtAnnualEstCost"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.333
+            },
+            "ControlNames": [
+              "txtPageNumber",
+              "txtDateTime",
+              "lnFooter"
+            ]
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.333
+            },
+            "ControlNames": [
+              "lblGrandTotal",
+              "txtGrandTotal"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblServicePlansByClient",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 2.292,
+              "H": 0.287
+            },
+            "RenderHints": {
+              "Caption": "Service Plans by Client"
+            }
+          },
+          {
+            "Name": "txtProviderFYHeader",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 2.708,
+              "Y": 0.042,
+              "W": 4.708,
+              "H": 0.292
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=[ProviderName] \u0026 \\\u0022, FY\\\u0022 \u0026 Right([FiscalYear],2)"
+            }
+          },
+          {
+            "Name": "GroupHeader0",
+            "SourceType": "BreakHeader",
+            "ComponentKind": "Other",
+            "GeometryIn": {
+              "H": 0.4
+            },
+            "NonDefaultProperties": [
+              "KeepTogether"
+            ]
+          },
+          {
+            "Name": "txtServiceName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Service Name"
+            },
+            "GeometryIn": {
+              "X": 0.2,
+              "W": 2,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceName"
+            }
+          },
+          {
+            "Name": "txtWeeklyHours",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Weekly Hours"
+            },
+            "GeometryIn": {
+              "X": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "WeeklyHours"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtAnnualEstCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Annual Est Cost"
+            },
+            "GeometryIn": {
+              "X": 3.8,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "AnnualEstCost"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "GroupFooter1",
+            "SourceType": "BreakFooter",
+            "ComponentKind": "Other",
+            "GeometryIn": {
+              "H": 0.5
+            },
+            "NonDefaultProperties": [
+              "KeepTogether"
+            ]
+          },
+          {
+            "Name": "txtPageNumber",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "X": 5,
+              "Y": 0.042,
+              "W": 2.5,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=\\\u0022Page \\\u0022 \u0026 [Page]"
+            }
+          },
+          {
+            "Name": "txtDateTime",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 3,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=Date() \u0026 \\\u0022 \\\u0022 \u0026 Time()"
+            },
+            "RenderHints": {
+              "Format": "Short Date",
+              "IsEnabled": false,
+              "IsLocked": true,
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "Enabled",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "lnFooter",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "W": 7.5
+            }
+          },
+          {
+            "Name": "lblGrandTotal",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 2,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Grand Total:"
+            }
+          },
+          {
+            "Name": "txtGrandTotal",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 3.8,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=FormatCurrency(Sum([AnnualEstCost]))"
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Control",
+            "ControlName": "GroupFooter1",
+            "PropertyName": "OnFormat",
+            "EventName": "Format",
+            "VbaProcedureName": "GroupFooter1_Format"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnNoData",
+            "EventName": "NoData",
+            "VbaProcedureName": "Form_NoData"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "rptServicePlansByClient",
+            "Module": "rptServicePlansByClient",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "rptServicePlansByService",
+        "SuggestedComponentName": "RptServicePlansByServiceComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "qryServicePlansByService"
+        },
+        "GeometryIn": {
+          "W": 7
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "lblServicePlansByService",
+              "txtProviderFYHeader"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.125
+            }
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "txtClientID",
+              "txtWeeklyHours",
+              "txtAnnualEstCost"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "txtPageNumber",
+              "txtDateTime",
+              "lnFooter"
+            ]
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.375
+            },
+            "ControlNames": [
+              "txtGrandTotal",
+              "lblGrandTotal"
+            ]
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblServicePlansByService",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 2.5,
+              "H": 0.287
+            },
+            "RenderHints": {
+              "Caption": "Service Plans by Service"
+            }
+          },
+          {
+            "Name": "txtProviderFYHeader",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 2.625,
+              "Y": 0.042,
+              "W": 4.292,
+              "H": 0.292
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=[ProviderName] \u0026 \\\u0022, FY\\\u0022 \u0026 Right([FiscalYear],2)"
+            }
+          },
+          {
+            "Name": "GroupHeader0",
+            "SourceType": "BreakHeader",
+            "ComponentKind": "Other",
+            "GeometryIn": {
+              "H": 0.719
+            },
+            "NonDefaultProperties": [
+              "KeepTogether"
+            ]
+          },
+          {
+            "Name": "txtClientID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Client ID"
+            },
+            "GeometryIn": {
+              "X": 0.2,
+              "W": 2,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ClientName"
+            }
+          },
+          {
+            "Name": "txtWeeklyHours",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Weekly Hours"
+            },
+            "GeometryIn": {
+              "X": 2.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "WeeklyHours"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          },
+          {
+            "Name": "txtAnnualEstCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Annual Est Cost"
+            },
+            "GeometryIn": {
+              "X": 3.8,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "AnnualEstCost"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 2
+            }
+          },
+          {
+            "Name": "GroupFooter1",
+            "SourceType": "BreakFooter",
+            "ComponentKind": "Other",
+            "GeometryIn": {
+              "H": 0.625
+            },
+            "NonDefaultProperties": [
+              "KeepTogether"
+            ]
+          },
+          {
+            "Name": "txtPageNumber",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "X": 4.5,
+              "Y": 0.042,
+              "W": 2.5,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=\\\u0022Page \\\u0022 \u0026 [Page]"
+            }
+          },
+          {
+            "Name": "txtDateTime",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "Y": 0.042,
+              "W": 3,
+              "H": 0.219
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=Date() \u0026 \\\u0022 \\\u0022 \u0026 Time()"
+            },
+            "RenderHints": {
+              "Format": "Short Date",
+              "IsEnabled": false,
+              "IsLocked": true,
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "Enabled",
+              "Locked"
+            ]
+          },
+          {
+            "Name": "lnFooter",
+            "SourceType": "Line",
+            "ComponentKind": "Decoration",
+            "SectionName": "PageFooterSection",
+            "GeometryIn": {
+              "W": 7
+            }
+          },
+          {
+            "Name": "txtGrandTotal",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 3.833,
+              "Y": 0.042,
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "ComputedExpression",
+              "ControlSource": "=FormatCurrency(Sum([AnnualEstCost]))"
+            }
+          },
+          {
+            "Name": "lblGrandTotal",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportFooter",
+            "GeometryIn": {
+              "X": 1.5,
+              "Y": 0.042,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Grand Total:"
+            }
+          }
+        ],
+        "EventHandlers": [
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnNoData",
+            "EventName": "NoData",
+            "VbaProcedureName": "Form_NoData"
+          },
+          {
+            "HostKind": "Form",
+            "PropertyName": "OnOpen",
+            "EventName": "Open",
+            "VbaProcedureName": "Form_Open"
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "rptServicePlansByService",
+            "Module": "rptServicePlansByService",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "srptClientBudgets",
+        "SuggestedComponentName": "SrptClientBudgetsComponent",
+        "DataSource": {
+          "Kind": "NamedReference",
+          "TargetName": "tblClientBudgets"
+        },
+        "GeometryIn": {
+          "W": 6
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "lblFiscalYear",
+              "lblAnnualBudget"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "txtFiscalYear",
+              "txtAnnualBudget"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblFiscalYear",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "W": 1.5,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Fiscal Year"
+            }
+          },
+          {
+            "Name": "lblAnnualBudget",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 2,
+              "W": 2,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Annual Budget"
+            }
+          },
+          {
+            "Name": "txtFiscalYear",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Fiscal Year"
+            },
+            "GeometryIn": {
+              "W": 1.5,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "FiscalYear"
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          },
+          {
+            "Name": "txtAnnualBudget",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Annual Budget"
+            },
+            "GeometryIn": {
+              "X": 2,
+              "W": 2,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "AnnualBudget"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "srptClientBudgets",
+            "Module": "srptClientBudgets",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "srptClientCurrentNeeds",
+        "SuggestedComponentName": "SrptClientCurrentNeedsComponent",
+        "DataSource": {
+          "Kind": "InlineSql",
+          "InlineSql": "SELECT n.*, s.ServiceName FROM tblClientServiceNeeds AS n LEFT JOIN tblServices AS s ON n.ServiceID = s.ServiceID; "
+        },
+        "GeometryIn": {
+          "W": 6
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "lblService",
+              "lblPriority"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "txtServiceID",
+              "txtPriority"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblService",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "W": 3.583,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Service"
+            }
+          },
+          {
+            "Name": "lblPriority",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 3.708,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Priority"
+            }
+          },
+          {
+            "Name": "txtServiceID",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Service ID"
+            },
+            "GeometryIn": {
+              "W": 3.583,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceName"
+            }
+          },
+          {
+            "Name": "txtPriority",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Priority"
+            },
+            "GeometryIn": {
+              "X": 3.708,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Priority"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            }
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "srptClientCurrentNeeds",
+            "Module": "srptClientCurrentNeeds",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "srptServicePlanEntries",
+        "SuggestedComponentName": "SrptServicePlanEntriesComponent",
+        "DataSource": {
+          "Kind": "InlineSql",
+          "InlineSql": "SELECT * FROM qryClientServicePlanDetail WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; "
+        },
+        "GeometryIn": {
+          "W": 9
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "lblService",
+              "lblProvider",
+              "lblHrsWk",
+              "lblStatus",
+              "lblEstCost"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "txtServiceName",
+              "txtProviderName",
+              "txtWeeklyHours",
+              "txtStatus",
+              "txtAnnualEstCost"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblService",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "W": 3.583,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Service"
+            }
+          },
+          {
+            "Name": "lblProvider",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 3.708,
+              "W": 2.167,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Provider"
+            }
+          },
+          {
+            "Name": "lblHrsWk",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 6.002,
+              "W": 0.625,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Hrs/Wk"
+            }
+          },
+          {
+            "Name": "lblStatus",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 6.752,
+              "W": 0.917,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Status"
+            }
+          },
+          {
+            "Name": "lblEstCost",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 7.796,
+              "W": 1.065,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Est. Cost"
+            }
+          },
+          {
+            "Name": "txtServiceName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Service Name"
+            },
+            "GeometryIn": {
+              "W": 3.583,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceName"
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          },
+          {
+            "Name": "txtProviderName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Provider Name"
+            },
+            "GeometryIn": {
+              "X": 3.708,
+              "W": 2.167,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ProviderName"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          },
+          {
+            "Name": "txtWeeklyHours",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Weekly Hours"
+            },
+            "GeometryIn": {
+              "X": 6.002,
+              "W": 0.623,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "HoursPerWeek"
+            },
+            "RenderHints": {
+              "TabIndex": 2
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          },
+          {
+            "Name": "txtStatus",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Status"
+            },
+            "GeometryIn": {
+              "X": 6.752,
+              "W": 0.917,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Status"
+            },
+            "RenderHints": {
+              "TabIndex": 3
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          },
+          {
+            "Name": "txtAnnualEstCost",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Annual Est Cost"
+            },
+            "GeometryIn": {
+              "X": 7.796,
+              "W": 1.065,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "AnnualEstCost"
+            },
+            "RenderHints": {
+              "Format": "$#,##0.00",
+              "TabIndex": 4
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "srptServicePlanEntries",
+            "Module": "srptServicePlanEntries",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    },
+    {
+      "Spec": {
+        "SourceFormName": "srptServiceShortfall",
+        "SuggestedComponentName": "SrptServiceShortfallComponent",
+        "DataSource": {
+          "Kind": "InlineSql",
+          "InlineSql": "SELECT * FROM qryClientNeedsNotMet WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; "
+        },
+        "GeometryIn": {
+          "W": 9
+        },
+        "Sections": [
+          {
+            "Name": "ReportHeader",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "lblUnmetServiceNeed",
+              "lblPriority"
+            ]
+          },
+          {
+            "Name": "PageHeaderSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          },
+          {
+            "Name": "Detail",
+            "Kind": "Detail",
+            "GeometryIn": {
+              "H": 0.25
+            },
+            "ControlNames": [
+              "txtServiceName",
+              "txtPriority"
+            ]
+          },
+          {
+            "Name": "PageFooterSection",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          },
+          {
+            "Name": "ReportFooter",
+            "Kind": "Other",
+            "GeometryIn": {
+              "H": 0
+            }
+          }
+        ],
+        "Controls": [
+          {
+            "Name": "lblUnmetServiceNeed",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "W": 5.25,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Unmet Service Need"
+            }
+          },
+          {
+            "Name": "lblPriority",
+            "SourceType": "Label",
+            "ComponentKind": "Label",
+            "SectionName": "ReportHeader",
+            "GeometryIn": {
+              "X": 5.542,
+              "W": 1,
+              "H": 0.25
+            },
+            "RenderHints": {
+              "Caption": "Priority"
+            }
+          },
+          {
+            "Name": "txtServiceName",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Service Name"
+            },
+            "GeometryIn": {
+              "W": 5.25,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "ServiceName"
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          },
+          {
+            "Name": "txtPriority",
+            "SourceType": "TextBox",
+            "ComponentKind": "TextInput",
+            "SectionName": "Detail",
+            "Label": {
+              "Source": "FromName",
+              "Text": "Txt Priority"
+            },
+            "GeometryIn": {
+              "X": 5.792,
+              "W": 0.458,
+              "H": 0.25
+            },
+            "Binding": {
+              "Kind": "TableField",
+              "ControlSource": "Priority"
+            },
+            "RenderHints": {
+              "TabIndex": 1
+            },
+            "NonDefaultProperties": [
+              "CanGrow",
+              "CanShrink"
+            ]
+          }
+        ]
+      },
+      "ParserOutput": {
+        "SchemaVersion": "1.0",
+        "Source": {
+          "Kind": "Form",
+          "Location": {
+            "File": "srptServiceShortfall",
+            "Module": "srptServiceShortfall",
+            "StartLine": 1,
+            "StartColumn": 1
+          }
+        },
+        "Items": []
+      }
+    }
+  ],
   "Queries": [],
   "Modules": [],
   "Tables": [],

@@ -354,7 +354,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Service ID:"
                   },
                   "NonDefaultProperties": [
@@ -436,7 +436,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Service Code:"
                   },
                   "TextCapacity": {
@@ -520,7 +520,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Service Name:"
                   },
                   "TextCapacity": {
@@ -608,7 +608,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Service Category:"
                   },
                   "NonDefaultProperties": [
@@ -695,7 +695,7 @@
                     "H": 0.75
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Description:"
                   },
                   "TextCapacity": {
@@ -778,7 +778,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Active"
                   }
                 }

@@ -265,7 +265,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Service Name"
                   },
                   "NonDefaultProperties": [
@@ -311,7 +311,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Priority"
                   },
                   "NonDefaultProperties": [

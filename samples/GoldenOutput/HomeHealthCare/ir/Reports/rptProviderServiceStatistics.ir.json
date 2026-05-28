@@ -478,7 +478,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Provider Name"
                   },
                   "TextCapacity": {
@@ -518,7 +518,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Total Clients"
                   },
                   "TextCapacity": {
@@ -556,7 +556,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Total Hours"
                   },
                   "TextCapacity": {
@@ -592,7 +592,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Total Cost"
                   },
                   "TextCapacity": {
@@ -632,7 +632,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Avg Cost Per Client"
                   },
                   "TextCapacity": {

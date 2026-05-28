@@ -264,7 +264,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Service ID"
                   },
                   "TextCapacity": {
@@ -301,7 +301,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Priority"
                   },
                   "TextCapacity": {

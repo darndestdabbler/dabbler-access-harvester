@@ -341,7 +341,7 @@
                     "H": 0.219
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "ClientServiceNeedID"
                   },
                   "NonDefaultProperties": [
@@ -427,7 +427,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "ClientID"
                   },
                   "NonDefaultProperties": [
@@ -519,7 +519,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "FiscalYear"
                   },
                   "NonDefaultProperties": [
@@ -608,7 +608,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Priority"
                   },
                   "TextCapacity": {
@@ -693,7 +693,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "DaysOfWeek"
                   },
                   "TextCapacity": {
@@ -778,7 +778,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "PreferredTimeStart"
                   },
                   "TextCapacity": {
@@ -864,7 +864,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "PreferredTimeEnd"
                   },
                   "TextCapacity": {
@@ -951,7 +951,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "HoursPerWeek"
                   },
                   "TextCapacity": {
@@ -1038,7 +1038,7 @@
                     "H": 0.792
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Notes"
                   },
                   "NonDefaultProperties": [
@@ -1137,7 +1137,7 @@
                     "H": 0.219
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "ServiceID"
                   },
                   "TextCapacity": {

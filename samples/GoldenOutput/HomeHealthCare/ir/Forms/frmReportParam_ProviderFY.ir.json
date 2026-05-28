@@ -295,7 +295,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Cbo Provider"
                   },
                   "NonDefaultProperties": [
@@ -380,7 +380,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Cbo Fiscal Year"
                   },
                   "NonDefaultProperties": [

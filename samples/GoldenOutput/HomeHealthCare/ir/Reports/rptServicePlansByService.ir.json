@@ -489,7 +489,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Client ID"
                   },
                   "TextCapacity": {
@@ -528,7 +528,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Weekly Hours"
                   },
                   "TextCapacity": {
@@ -565,7 +565,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Annual Est Cost"
                   },
                   "TextCapacity": {

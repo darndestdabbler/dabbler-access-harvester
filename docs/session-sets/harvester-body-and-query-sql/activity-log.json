@@ -1,0 +1,79 @@
+{
+  "sessionSetName": "harvester-body-and-query-sql",
+  "createdDate": "2026-05-28T07:20:20.644440-04:00",
+  "totalSessions": 2,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "bootstrap",
+      "dateTime": "2026-05-28T07:20:47.895048-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, spec.md; API keys OK; session start registered",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "read-seam",
+      "dateTime": "2026-05-28T07:32:10.208462-04:00",
+      "description": "Read Pipeline.cs EmitManifestArtifacts, ModuleExport, FormExport, DatabaseManifestAggregator, ResolvedModule, CrossReferenceIndex, FunctionClassification, ResolutionOutcome, ProcedureScope",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "architecture",
+      "dateTime": "2026-05-28T07:32:10.209025-04:00",
+      "description": "Routed architecture task (Opus). ParserOutputProjector: static class in Pipeline.Manifest, scope-chain filtering, ResolutionOutcome\u2192schema mapping, EventHandler by name pattern, module discovery from raw/ tier",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "implement",
+      "dateTime": "2026-05-28T08:29:43.674851-04:00",
+      "description": "Implemented ParserOutputProjector.cs in Pipeline.Manifest/. Also fixed: CodePage 1252 registration, ParserSource schema shape (Kind+Location not ModuleName/ModuleKind), LabelInfo.Source PascalCase enum (attached\u2192Attached etc.), ConformanceTest fixture (MiniComplex\u2192HomeHealthCare)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "wire",
+      "dateTime": "2026-05-28T08:29:43.675886-04:00",
+      "description": "Updated Pipeline.EmitManifestArtifacts() to parse VBA from raw/ tier, run resolve+classify chain, project ParserOutput for modules and forms/reports, update golden corpus",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "tests",
+      "dateTime": "2026-05-28T08:29:43.675886-04:00",
+      "description": "Added 14 ParserOutputProjectorTests (event binding, references, calls, SqlStrings, schema envelope, TryExtractEventBinding). All 14 pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "build-test",
+      "dateTime": "2026-05-28T08:29:43.676397-04:00",
+      "description": "dotnet build && dotnet test: all tests pass (407 Pipeline, 70 SymbolDb, 436+2skip Tests, 44 Integration)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "verify",
+      "dateTime": "2026-05-28T08:40:08.634371-04:00",
+      "description": "Cross-provider verification (gpt-5-4) Round 1: ISSUES_FOUND (Major: ResolvedToMe Kind inconsistency, Minor: incomplete sort key). Round 2: fixed both. Round 3: VERIFIED",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}

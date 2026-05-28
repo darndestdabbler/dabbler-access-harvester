@@ -395,7 +395,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Cbo Service ID"
                   },
                   "NonDefaultProperties": [
@@ -439,7 +439,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Fiscal Year"
                   },
                   "TextCapacity": {
@@ -483,7 +483,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Max Rate Per Hour"
                   },
                   "TextCapacity": {

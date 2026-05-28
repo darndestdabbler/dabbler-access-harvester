@@ -153,14 +153,14 @@ public sealed record GeometryInches
 public sealed record LabelInfo
 {
     /// <summary>
-    /// One of <c>attached</c>, <c>proximity</c>, <c>from-name</c>,
-    /// <c>from-binding</c>, <c>unresolved</c>.
+    /// One of <c>Attached</c>, <c>Proximity</c>, <c>FromName</c>,
+    /// <c>FromBinding</c>, <c>Unresolved</c> (matching the v1.0 schema enum).
     /// </summary>
     public required string Source { get; init; }
 
     /// <summary>
     /// The resolved label text. Null when <see cref="Source"/> is
-    /// <c>unresolved</c>; non-null otherwise.
+    /// <c>Unresolved</c>; non-null otherwise.
     /// </summary>
     public string? Text { get; init; }
 }

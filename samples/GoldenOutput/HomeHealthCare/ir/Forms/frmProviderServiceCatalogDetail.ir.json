@@ -338,7 +338,7 @@
                     "H": 0.219
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "ProviderServiceCatalogID"
                   },
                   "NonDefaultProperties": [
@@ -430,7 +430,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "FiscalYear"
                   },
                   "NonDefaultProperties": [
@@ -522,7 +522,7 @@
                     "H": 0.229
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "RatePerHour"
                   },
                   "TextCapacity": {
@@ -609,7 +609,7 @@
                     "H": 0.792
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Notes"
                   },
                   "NonDefaultProperties": [
@@ -709,7 +709,7 @@
                     "H": 0.219
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Provider"
                   },
                   "NonDefaultProperties": [
@@ -808,7 +808,7 @@
                     "H": 0.219
                   },
                   "Label": {
-                    "source": "attached",
+                    "source": "Attached",
                     "text": "Service"
                   },
                   "TextCapacity": {

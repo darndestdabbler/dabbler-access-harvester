@@ -362,7 +362,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Service Name"
                   },
                   "TextCapacity": {
@@ -403,7 +403,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Total Cost"
                   },
                   "TextCapacity": {
@@ -441,7 +441,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Pct Of Total"
                   },
                   "TextCapacity": {

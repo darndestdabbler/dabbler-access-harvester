@@ -207,7 +207,7 @@ public class PropertyDecoderTests
             // Control-level: Geometry + Label + decoded property
             var txt = result["Children"]!.AsArray()[0]!["Children"]!.AsArray()[0]!.AsObject();
             Assert.Equal(0.25, txt["GeometryIn"]!["X"]!.GetValue<double>());
-            Assert.Equal("from-name", txt["Label"]!["source"]!.GetValue<string>());
+            Assert.Equal("FromName", txt["Label"]!["source"]!.GetValue<string>());
             Assert.Equal("Customer First Name", txt["Label"]!["text"]!.GetValue<string>());
             Assert.Equal("True", txt["Properties"]!["Locked"]!.GetValue<string>());
         }

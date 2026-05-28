@@ -391,7 +391,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Service Name"
                   },
                   "NonDefaultProperties": [
@@ -436,7 +436,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Provider Name"
                   },
                   "NonDefaultProperties": [
@@ -481,7 +481,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Weekly Hours"
                   },
                   "NonDefaultProperties": [
@@ -526,7 +526,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Status"
                   },
                   "NonDefaultProperties": [
@@ -573,7 +573,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Annual Est Cost"
                   },
                   "NonDefaultProperties": [

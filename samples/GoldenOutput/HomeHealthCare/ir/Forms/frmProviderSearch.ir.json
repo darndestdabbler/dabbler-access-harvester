@@ -767,7 +767,7 @@
                     "H": 4.875
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Lst Provider List"
                   },
                   "NonDefaultProperties": [

@@ -23,7 +23,7 @@ public class LabelResolverTests
         var result = ReadForm(outFile);
 
         var ctrl = FindControl(result, "txtA");
-        AssertLabel(ctrl, source: "attached", text: "First Name");
+        AssertLabel(ctrl, source: "Attached", text: "First Name");
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public class LabelResolverTests
         var result = ReadForm(EnrichAndWrite(form));
 
         AssertLabel(FindControl(result, "customerFirstName"),
-            source: "attached", text: "Given Name");
+            source: "Attached", text: "Given Name");
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class LabelResolverTests
 
         var result = ReadForm(EnrichAndWrite(form));
         AssertLabel(FindControl(result, "EmployeeName"),
-            source: "from-name", text: "Employee Name");
+            source: "FromName", text: "Employee Name");
     }
 
     // ----- Round 2: proximity -----
@@ -71,7 +71,7 @@ public class LabelResolverTests
 
         var result = ReadForm(EnrichAndWrite(form));
         AssertLabel(FindControl(result, "Text1"),
-            source: "proximity", text: "Amount");
+            source: "Proximity", text: "Amount");
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class LabelResolverTests
         });
 
         var result = ReadForm(EnrichAndWrite(form));
-        AssertLabel(FindControl(result, "Text1"), source: "unresolved", text: null);
+        AssertLabel(FindControl(result, "Text1"), source: "Unresolved", text: null);
     }
 
     [Fact]
@@ -103,8 +103,8 @@ public class LabelResolverTests
         });
 
         var result = ReadForm(EnrichAndWrite(form));
-        AssertLabel(FindControl(result, "Text1"), source: "unresolved", text: null);
-        AssertLabel(FindControl(result, "Text2"), source: "unresolved", text: null);
+        AssertLabel(FindControl(result, "Text1"), source: "Unresolved", text: null);
+        AssertLabel(FindControl(result, "Text2"), source: "Unresolved", text: null);
     }
 
     [Fact]
@@ -122,8 +122,8 @@ public class LabelResolverTests
         });
 
         var result = ReadForm(EnrichAndWrite(form));
-        AssertLabel(FindControl(result, "Text1"), source: "proximity", text: "First Name");
-        AssertLabel(FindControl(result, "Text2"), source: "unresolved", text: null);
+        AssertLabel(FindControl(result, "Text1"), source: "Proximity", text: "First Name");
+        AssertLabel(FindControl(result, "Text2"), source: "Unresolved", text: null);
     }
 
     [Fact]
@@ -136,7 +136,7 @@ public class LabelResolverTests
             detail => detail.AddControl("TextBox", "Text1", 0, 0, 1440, 360));
 
         var result = ReadForm(EnrichAndWrite(form));
-        AssertLabel(FindControl(result, "Text1"), source: "unresolved", text: null);
+        AssertLabel(FindControl(result, "Text1"), source: "Unresolved", text: null);
     }
 
     // ----- Round 3: non-generic Name -----
@@ -151,7 +151,7 @@ public class LabelResolverTests
 
         var result = ReadForm(EnrichAndWrite(form));
         AssertLabel(FindControl(result, "CustomerFirstName"),
-            source: "from-name", text: "Customer First Name");
+            source: "FromName", text: "Customer First Name");
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class LabelResolverTests
 
         var result = ReadForm(EnrichAndWrite(form));
         AssertLabel(FindControl(result, "Text1"),
-            source: "from-binding", text: "Order Total");
+            source: "FromBinding", text: "Order Total");
     }
 
     // ----- Round 4: ControlSource -----
@@ -179,7 +179,7 @@ public class LabelResolverTests
 
         var result = ReadForm(EnrichAndWrite(form));
         AssertLabel(FindControl(result, "Text1"),
-            source: "from-binding", text: "First Name");
+            source: "FromBinding", text: "First Name");
     }
 
     [Fact]
@@ -191,7 +191,7 @@ public class LabelResolverTests
                 controlSource: "=Sum([Amount])"));
 
         var result = ReadForm(EnrichAndWrite(form));
-        AssertLabel(FindControl(result, "Text1"), source: "unresolved", text: null);
+        AssertLabel(FindControl(result, "Text1"), source: "Unresolved", text: null);
     }
 
     // ----- Unresolved -----
@@ -205,7 +205,7 @@ public class LabelResolverTests
 
         var result = ReadForm(EnrichAndWrite(form));
         var ctrl = FindControl(result, "Text1");
-        AssertLabel(ctrl, source: "unresolved", text: null);
+        AssertLabel(ctrl, source: "Unresolved", text: null);
     }
 
     // ----- Begin-wrapper transparency -----
@@ -244,7 +244,7 @@ public class LabelResolverTests
 
         var result = ReadForm(EnrichAndWrite(form));
         AssertLabel(FindControl(result, "Text1"),
-            source: "proximity", text: "Amount");
+            source: "Proximity", text: "Amount");
     }
 
     // ----- Ineligible types don't get a Label key -----
@@ -291,7 +291,7 @@ public class LabelResolverTests
             Assert.Equal(0.5, geom["Y"]!.GetValue<double>());
 
             // Label was added.
-            AssertLabel(ctrl, source: "from-name", text: "Customer First Name");
+            AssertLabel(ctrl, source: "FromName", text: "Customer First Name");
         }
         finally
         {

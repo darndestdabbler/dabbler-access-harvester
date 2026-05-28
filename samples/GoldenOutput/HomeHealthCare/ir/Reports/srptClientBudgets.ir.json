@@ -277,7 +277,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Fiscal Year"
                   },
                   "NonDefaultProperties": [
@@ -324,7 +324,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Annual Budget"
                   },
                   "NonDefaultProperties": [

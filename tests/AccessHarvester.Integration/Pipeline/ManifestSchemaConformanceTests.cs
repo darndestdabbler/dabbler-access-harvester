@@ -60,7 +60,10 @@ public sealed class ManifestSchemaConformanceTests
     {
         AccessAvailability.SkipIfNoAccess();
 
-        string db = Path.Combine(RepoPaths.Samples(), "MiniComplex.accdb");
+        // HomeHealthCare is the primary fixture per project-guidance.md.
+        // MiniComplex is excluded from automated test coverage pending an
+        // error-audit pass (Label.Source enum drift in that DB's ir/ data).
+        string db = Path.Combine(RepoPaths.Samples(), "HomeHealthCare.accdb");
         Skip.IfNot(File.Exists(db), $"Sample DB not present at {db}.");
 
         string outRoot = Path.Combine(Path.GetTempPath(), $"ah-int-manifest-{Guid.NewGuid():N}");

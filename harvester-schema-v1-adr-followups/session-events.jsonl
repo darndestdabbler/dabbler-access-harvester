@@ -1,3 +1,4 @@
 {"timestamp": "2026-05-28T09:55:58.115709Z", "session_number": 1, "event_type": "work_started"}
 {"timestamp": "2026-05-28T10:39:46.400329Z", "session_number": 1, "event_type": "closeout_succeeded", "forced": true, "method": "snapshot_flip", "failed_checks": ["disposition_present"], "verdict": "VERIFIED"}
 {"timestamp": "2026-05-28T10:39:46.400329Z", "session_number": 1, "event_type": "closeout_force_used", "method": "snapshot_flip", "failed_checks": ["disposition_present"]}
+{"timestamp": "2026-05-28T10:40:49.967752Z", "session_number": 1, "event_type": "closeout_succeeded", "forced": false, "method": "snapshot_flip", "verdict": "VERIFIED"}

@@ -129,7 +129,7 @@ public sealed class LabelResolver : IObjectEnricher
             if (c.Resolved) continue;
             var attached = FindAttachedLabelCaption(c.Node);
             if (attached is not null)
-                c.Assign("attached", attached);
+                c.Assign("Attached", attached);
         }
 
         // Round 2 — proximity (uses only controls still unlabeled and peer labels).
@@ -140,7 +140,7 @@ public sealed class LabelResolver : IObjectEnricher
         {
             if (c.Resolved) continue;
             if (c.Name is not null && !GenericNameRegex.IsMatch(c.Name))
-                c.Assign("from-name", SplitCamelCase(c.Name));
+                c.Assign("FromName", SplitCamelCase(c.Name));
         }
 
         // Round 4 — ControlSource.
@@ -148,13 +148,13 @@ public sealed class LabelResolver : IObjectEnricher
         {
             if (c.Resolved) continue;
             if (c.ControlSource is not null && SimpleIdentifierRegex.IsMatch(c.ControlSource))
-                c.Assign("from-binding", SplitCamelCase(c.ControlSource));
+                c.Assign("FromBinding", SplitCamelCase(c.ControlSource));
         }
 
         // Fallback — unresolved.
         foreach (var c in controls)
         {
-            if (!c.Resolved) c.Assign("unresolved", null);
+            if (!c.Resolved) c.Assign("Unresolved", null);
         }
 
         foreach (var c in controls) c.WriteBack();
@@ -257,7 +257,7 @@ public sealed class LabelResolver : IObjectEnricher
             }
             if (!controlUnique) continue;
 
-            c.Assign("proximity", best.Caption);
+            c.Assign("Proximity", best.Caption);
             consumedLabels.Add(best);
         }
     }

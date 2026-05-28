@@ -1,7 +1,9 @@
 using System.Globalization;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using AccessHarvester.Access;
 using AccessHarvester.Core.Abstractions;
 using AccessHarvester.Core.Com;
 using AccessHarvester.Core.Enrichment;
@@ -9,6 +11,13 @@ using AccessHarvester.Core.Extraction;
 using AccessHarvester.Core.Translation;
 using AccessHarvester.Pipeline.Enrichment;
 using AccessHarvester.Pipeline.Manifest;
+using AccessHarvester.Vba.Parser;
+using AccessHarvester.Vba.Resolver.CrossReference;
+using AccessHarvester.Vba.Resolver.References;
+using VbaReferenceResolver = AccessHarvester.Vba.Resolver.References.ReferenceResolver;
+using AccessHarvester.Vba.Resolver.Scopes;
+using ManifestModuleKind = AccessHarvester.Pipeline.Manifest.ModuleKind;
+using ResolverModuleKind = AccessHarvester.Vba.Resolver.Scopes.ModuleKind;
 
 namespace AccessHarvester.Core;
 
@@ -212,30 +221,28 @@ public sealed class Pipeline
         string irDir = IrDir(outputRoot, dbName);
         var enrich = Enrich(translate.KbDir, irDir);
 
-        EmitManifestArtifacts(extract.BaseDir, databasePath);
+        EmitManifestArtifacts(extract.BaseDir, databasePath, extract.RawDir, enrich.IrDir);
 
         return new RunResult(
             extract.BaseDir, extract.RawDir, translate.KbDir, enrich.IrDir,
             extract.Categories, translate.Categories, enrich.Categories);
     }
 
-    // V1 manifest emission: assemble a DatabaseManifest from whatever
-    // strongly-typed inputs Pipeline.Run() can supply today and write
-    // both manifest.json and unresolved-items.json to <baseDir>. The
-    // per-category collection inputs (Forms/Reports/Queries/Modules/
-    // Tables/Relationships/etc.) are owned by their respective builders
-    // (FormComponentSpecBuilder, QueryAbstractionBuilder, ...) and are
-    // not threaded through Pipeline.Run() yet — the aggregator's contract
-    // accepts a minimal set and emits a schema-valid envelope, so this
-    // wiring lands the emission seam. Collection population grows in
-    // follow-on sessions.
+    // V1 manifest emission: parse VBA module text from the raw/ tier,
+    // run the resolve + classify chain, project to JSON, and assemble
+    // into a DatabaseManifest alongside any form/report specs already
+    // built by the ir/ enrichment pass.
     //
-    // The UnresolvedItems list is built once and serialised to both
-    // files: it lives inline inside manifest.json AND as a bare array in
-    // unresolved-items.json so downstream tooling that wants the
-    // manual-review queue does not have to deserialise the whole manifest
-    // (per the Session 2 spec).
-    private static void EmitManifestArtifacts(string baseDir, string databasePath)
+    // Module discovery reads *.txt files from raw/Modules/, raw/Forms/,
+    // and raw/Reports/ (SaveAsText output). Form/report specs are loaded
+    // from ir/Forms/*.ir.json and ir/Reports/*.ir.json via
+    // FormMetadataExtractor + FormComponentSpecBuilder.
+    //
+    // Files that fail to parse are logged as HarvesterDiagnostics and
+    // skipped rather than aborting the emission — one broken module
+    // should not prevent the rest of the manifest from being written.
+    private static void EmitManifestArtifacts(
+        string baseDir, string databasePath, string rawDir, string irDir)
     {
         var database = new DatabaseInfo
         {
@@ -244,12 +251,100 @@ public sealed class Pipeline
             ExportedAt = DateTimeOffset.UtcNow.ToString("o", CultureInfo.InvariantCulture),
         };
 
+        var diagnostics = new List<HarvesterDiagnostic>();
+
+        // Ensure Windows codepage 1252 (used by Access SaveAsText output) is
+        // available. In .NET Core, GetEncoding(1252) requires this registration;
+        // it is a no-op if the provider is already registered.
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+        // ── 1. Parse VBA text from all three raw categories ──────────
+        var parsed = new List<ParsedModuleEntry>();
+        foreach (var category in new[] { "Modules", "Forms", "Reports" })
+        {
+            var categoryDir = Path.Combine(rawDir, category);
+            if (!Directory.Exists(categoryDir)) continue;
+
+            foreach (var file in Directory.GetFiles(categoryDir, "*.txt").OrderBy(f => f, StringComparer.Ordinal))
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                try
+                {
+                    var text = File.ReadAllText(file, Encoding.GetEncoding(1252));
+                    var (ast, _) = VbaModuleBodyLoader.LoadAndParse(text);
+
+                    // Class modules have "VERSION 1.0 CLASS" in the SaveAsText header.
+                    bool isClassModule = category != "Modules"
+                        || text.Contains("VERSION 1.0 CLASS\r\n", StringComparison.Ordinal)
+                        || text.Contains("VERSION 1.0 CLASS\n", StringComparison.Ordinal);
+
+                    var manifestKind = isClassModule
+                        ? ManifestModuleKind.ClassModule
+                        : ManifestModuleKind.Standard;
+                    var resolverKind = category switch
+                    {
+                        "Forms" => ResolverModuleKind.Form,
+                        "Reports" => ResolverModuleKind.Report,
+                        _ when isClassModule => ResolverModuleKind.Class,
+                        _ => ResolverModuleKind.Standard,
+                    };
+
+                    var project = new ProjectScope();
+                    var visitor = new ScopeBuildingVisitor();
+                    var scope = visitor.BuildModuleScope(project, ast, name, resolverKind);
+                    var resolved = new VbaReferenceResolver().Resolve(scope, ast);
+                    parsed.Add(new ParsedModuleEntry(name, manifestKind, category, resolved));
+                }
+                catch (Exception ex)
+                {
+                    diagnostics.Add(new HarvesterDiagnostic
+                    {
+                        Severity = HarvesterDiagnosticSeverity.Warning,
+                        Message = $"VBA parse failed for '{name}': {ex.Message}",
+                        Code = "VBA_PARSE_FAILURE",
+                    });
+                }
+            }
+        }
+
+        // ── 2. Cross-reference index and classification ────────────────
+        var resolvedModules = parsed.Select(p => p.Resolved).ToList();
+        var crossRefs = new CrossReferenceIndex(resolvedModules);
+        var classifications = FunctionClassificationBuilder.BuildAll(resolvedModules, crossRefs);
+
+        // ── 3. Standalone module exports ───────────────────────────────
+        var moduleExports = parsed
+            .Where(p => p.Category == "Modules")
+            .Select(p =>
+            {
+                var parserOutput = ParserOutputProjector.Project(
+                    p.Resolved, classifications, p.Name, p.Kind);
+                return new ModuleExport
+                {
+                    ModuleName = p.Name,
+                    ModuleKind = p.Kind,
+                    ParserOutput = parserOutput,
+                };
+            })
+            .ToList();
+
+        // ── 4. Form and report exports (merge spec + parser output) ────
+        var formExports = BuildFormOrReportExports(
+            parsed, classifications, irDir, "Forms", diagnostics);
+        var reportExports = BuildFormOrReportExports(
+            parsed, classifications, irDir, "Reports", diagnostics);
+
+        // ── 5. Assemble and write ──────────────────────────────────────
         IReadOnlyList<UnresolvedItem> unresolvedItems = Array.Empty<UnresolvedItem>();
 
         var manifest = DatabaseManifestAggregator.Build(
             database: database,
             harvesterVersion: ResolveHarvesterVersion(),
-            unresolvedItems: unresolvedItems);
+            forms: formExports,
+            reports: reportExports,
+            modules: moduleExports,
+            unresolvedItems: unresolvedItems,
+            diagnostics: diagnostics);
 
         var options = new JsonSerializerOptions
         {
@@ -264,6 +359,65 @@ public sealed class Pipeline
             Path.Combine(baseDir, "unresolved-items.json"),
             JsonSerializer.Serialize(unresolvedItems, options));
     }
+
+    // Loads form/report specs from ir/ and merges with parser outputs
+    // from the raw/ category. Returns one FormExport per form/report that
+    // has both a spec (from ir/) and parser output (from raw/).
+    // Forms with no spec are omitted; the parser output is not lost — the
+    // HarvesterDiagnostic records the skip so the human can investigate.
+    private static List<FormExport> BuildFormOrReportExports(
+        List<ParsedModuleEntry> parsed,
+        IReadOnlyList<FunctionClassification> classifications,
+        string irDir,
+        string category,
+        List<HarvesterDiagnostic> diagnostics)
+    {
+        // Build parser-output map: form name → JsonNode
+        var parserOutputs = new Dictionary<string, System.Text.Json.Nodes.JsonNode>(
+            StringComparer.OrdinalIgnoreCase);
+        foreach (var p in parsed.Where(e => e.Category == category))
+        {
+            var output = ParserOutputProjector.Project(
+                p.Resolved, classifications, p.Name, p.Kind);
+            parserOutputs[p.Name] = output;
+        }
+
+        // Load form specs from ir/<category>/*.ir.json
+        var irCategoryDir = Path.Combine(irDir, category);
+        if (!Directory.Exists(irCategoryDir))
+            return new List<FormExport>();
+
+        var exports = new List<FormExport>();
+        foreach (var irFile in Directory.GetFiles(irCategoryDir, "*.ir.json").OrderBy(f => f, StringComparer.Ordinal))
+        {
+            // ir/Forms/frmSomething.ir.json → name = "frmSomething"
+            var irName = Path.GetFileNameWithoutExtension(
+                Path.GetFileNameWithoutExtension(irFile));
+            try
+            {
+                var irJson = File.ReadAllText(irFile, Encoding.UTF8);
+                var metadata = FormMetadataExtractor.Extract(irName, irJson);
+                var spec = FormComponentSpecBuilder.Build(metadata);
+
+                parserOutputs.TryGetValue(irName, out var parserOutput);
+                exports.Add(new FormExport { Spec = spec, ParserOutput = parserOutput });
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add(new HarvesterDiagnostic
+                {
+                    Severity = HarvesterDiagnosticSeverity.Warning,
+                    Message = $"Form spec load failed for '{irName}': {ex.Message}",
+                    Code = "FORM_SPEC_LOAD_FAILURE",
+                });
+            }
+        }
+
+        return exports;
+    }
+
+    private sealed record ParsedModuleEntry(
+        string Name, ManifestModuleKind Kind, string Category, ResolvedModule Resolved);
 
     private static string ResolveHarvesterVersion()
     {

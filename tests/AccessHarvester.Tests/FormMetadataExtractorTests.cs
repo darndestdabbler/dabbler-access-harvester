@@ -327,7 +327,7 @@ public class FormMetadataExtractorTests
             {
               "Type": "TextBox",
               "Properties": { "Name": "txtFirst" },
-              "Label": { "source": "attached", "text": "First Name" }
+              "Label": { "source": "Attached", "text": "First Name" }
             }
           ]
         }
@@ -337,7 +337,7 @@ public class FormMetadataExtractorTests
 
         var ctrl = meta.Children![0];
         Assert.NotNull(ctrl.Label);
-        Assert.Equal("attached", ctrl.Label!.Source);
+        Assert.Equal("Attached", ctrl.Label!.Source);
         Assert.Equal("First Name", ctrl.Label.Text);
     }
 

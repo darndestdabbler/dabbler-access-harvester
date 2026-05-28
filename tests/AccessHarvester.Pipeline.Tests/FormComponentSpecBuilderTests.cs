@@ -706,7 +706,7 @@ public class FormComponentSpecBuilderTests
     [Fact]
     public void Build_PassesThroughLabelInfoAndNonDefaultProperties()
     {
-        var label = new LabelInfo { Source = "attached", Text = "Customer Name" };
+        var label = new LabelInfo { Source = "Attached", Text = "Customer Name" };
         var form = new FormMetadata
         {
             Name = "frmDemo",

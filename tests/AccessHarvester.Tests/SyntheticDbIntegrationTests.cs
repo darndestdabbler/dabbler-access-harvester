@@ -302,12 +302,12 @@ public class SyntheticDbIntegrationTests
     {
         var form = RunPipelineAndOpenForm("labels_attached", "frmLabelsAttached");
 
-        AssertLabel(form, "txtFirstName", source: "attached", text: "First Name");
-        AssertLabel(form, "cmbCountry", source: "attached", text: "Country");
-        AssertLabel(form, "chkActive", source: "attached", text: "Active?");
+        AssertLabel(form, "txtFirstName", source: "Attached", text: "First Name");
+        AssertLabel(form, "cmbCountry", source: "Attached", text: "Country");
+        AssertLabel(form, "chkActive", source: "Attached", text: "Active?");
         // Attached caption beats Round 4 binding: ControlSource=ShouldBeIgnored is
         // present but its synthesis ("Should Be Ignored") must NOT win.
-        AssertLabel(form, "txtAttachedBeatsBinding", source: "attached", text: "Custom Label");
+        AssertLabel(form, "txtAttachedBeatsBinding", source: "Attached", text: "Custom Label");
     }
 
     [SkippableFact]
@@ -315,10 +315,10 @@ public class SyntheticDbIntegrationTests
     {
         var form = RunPipelineAndOpenForm("labels_from_name", "frmLabelsFromName");
 
-        AssertLabel(form, "CustomerFirstName", source: "from-name", text: "Customer First Name");
-        AssertLabel(form, "XMLPayload", source: "from-name", text: "XML Payload");
-        AssertLabel(form, "OrderTotal", source: "from-name", text: "Order Total");
-        AssertLabel(form, "Text99", source: "unresolved", text: null);
+        AssertLabel(form, "CustomerFirstName", source: "FromName", text: "Customer First Name");
+        AssertLabel(form, "XMLPayload", source: "FromName", text: "XML Payload");
+        AssertLabel(form, "OrderTotal", source: "FromName", text: "Order Total");
+        AssertLabel(form, "Text99", source: "Unresolved", text: null);
     }
 
     [SkippableFact]
@@ -326,10 +326,10 @@ public class SyntheticDbIntegrationTests
     {
         var form = RunPipelineAndOpenForm("labels_binding", "frmLabelsBinding");
 
-        AssertLabel(form, "Text1", source: "from-binding", text: "First Name");
-        AssertLabel(form, "Text2", source: "from-binding", text: "Order ID");
-        AssertLabel(form, "Text3", source: "unresolved", text: null);   // expression rejected
-        AssertLabel(form, "Text4", source: "unresolved", text: null);   // no ControlSource
+        AssertLabel(form, "Text1", source: "FromBinding", text: "First Name");
+        AssertLabel(form, "Text2", source: "FromBinding", text: "Order ID");
+        AssertLabel(form, "Text3", source: "Unresolved", text: null);   // expression rejected
+        AssertLabel(form, "Text4", source: "Unresolved", text: null);   // no ControlSource
     }
 
     [SkippableFact]
@@ -339,13 +339,13 @@ public class SyntheticDbIntegrationTests
 
         // Source assertions (text values for proximity matches are deferred to
         // a future label-quality session set — UAT machinery is out of scope here).
-        AssertLabelSource(form, "Text1", "proximity");
-        AssertLabelSource(form, "Text2", "proximity");
-        AssertLabelSource(form, "Text3", "unresolved");
-        AssertLabelSource(form, "Text4", "unresolved");
-        AssertLabelSource(form, "Text5", "unresolved");
-        AssertLabelSource(form, "Text6", "unresolved");
-        AssertLabelSource(form, "Text7", "proximity");
+        AssertLabelSource(form, "Text1", "Proximity");
+        AssertLabelSource(form, "Text2", "Proximity");
+        AssertLabelSource(form, "Text3", "Unresolved");
+        AssertLabelSource(form, "Text4", "Unresolved");
+        AssertLabelSource(form, "Text5", "Unresolved");
+        AssertLabelSource(form, "Text6", "Unresolved");
+        AssertLabelSource(form, "Text7", "Proximity");
     }
 
     // ----- helpers shared by the four label-resolution tests -----

@@ -296,7 +296,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "proximity",
+                    "source": "Proximity",
                     "text": "Client:"
                   },
                   "NonDefaultProperties": [

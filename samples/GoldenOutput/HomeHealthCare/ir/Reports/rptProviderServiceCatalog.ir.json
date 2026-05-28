@@ -481,7 +481,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Service Name"
                   },
                   "TextCapacity": {
@@ -520,7 +520,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Rate Per Hour"
                   },
                   "TextCapacity": {
@@ -553,7 +553,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Service Started"
                   },
                   "TextCapacity": {
@@ -592,7 +592,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Service Ended"
                   },
                   "TextCapacity": {
@@ -630,7 +630,7 @@
                     "H": 0.25
                   },
                   "Label": {
-                    "source": "from-name",
+                    "source": "FromName",
                     "text": "Txt Fiscal Year"
                   },
                   "TextCapacity": {
