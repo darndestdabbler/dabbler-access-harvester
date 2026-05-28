@@ -1,19 +1,28 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-object-use-identifier",
-  "status": "complete",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
       "title": "Schema + Analysis Strategy",
       "status": "complete",
-      "startedAt": "2026-05-28T09:35:39.882469-04:00"
+      "startedAt": "2026-05-28T09:35:39.882469-04:00",
+      "completedAt": "2026-05-28T09:49:37.000000-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-sonnet-4-6",
+        "effort": "medium"
+      },
+      "verificationVerdict": "VERIFIED"
     },
     {
       "number": 2,
       "title": "CLI Analysis Code",
       "status": "complete",
-      "completedAt": "2026-05-28T09:48:56.642703-04:00",
+      "startedAt": "2026-05-28T10:00:00.000000-04:00",
+      "completedAt": "2026-05-28T10:36:20.000000-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
