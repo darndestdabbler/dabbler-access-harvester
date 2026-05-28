@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 using AccessHarvester.Access;
 using AccessHarvester.Pipeline.Enrichment;
 
@@ -47,7 +48,7 @@ public static class DatabaseManifestAggregator
         string harvesterVersion,
         IEnumerable<FormExport>? forms = null,
         IEnumerable<FormExport>? reports = null,
-        IEnumerable<QueryAbstraction>? queries = null,
+        IEnumerable<JsonNode>? queries = null,
         IEnumerable<ModuleExport>? modules = null,
         IEnumerable<TableMetadata>? tables = null,
         IEnumerable<RelationshipMetadata>? relationships = null,

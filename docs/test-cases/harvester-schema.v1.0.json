@@ -18,7 +18,7 @@
         "Summary": { "$ref": "#/$defs/DatabaseSummary" },
         "Forms": { "type": "array", "items": { "$ref": "#/$defs/FormExport" }, "description": "Form-level enrichment output. One entry per harvested form." },
         "Reports": { "type": "array", "items": { "$ref": "#/$defs/FormExport" }, "description": "Report-level enrichment output. Same shape as forms." },
-        "Queries": { "type": "array", "items": { "$ref": "#/$defs/QueryAbstraction" }, "description": "Query-level enrichment output. One entry per saved query." },
+        "Queries": { "type": "array", "items": { "$ref": "#/$defs/QueryItem" }, "description": "Query-level enrichment output (D14). One entry per saved query; each includes Sql.Parsed and Sql.Parameters from the Jet SQL parser." },
         "Modules": { "type": "array", "items": { "$ref": "#/$defs/ModuleExport" }, "description": "VBA module-level output. One entry per standard or class module." },
         "Tables": { "type": "array", "items": { "$ref": "#/$defs/TableSchema" }, "description": "Table schema metadata. One entry per table." },
         "Relationships": { "type": "array", "items": { "$ref": "#/$defs/RelationshipDefinition" }, "description": "Table-level relationships from Access's DAO Relation objects." },

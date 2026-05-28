@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Nodes;
 using AccessHarvester.Access;
 using AccessHarvester.Pipeline.Enrichment;
 using AccessHarvester.Pipeline.Manifest;
@@ -111,7 +112,7 @@ public sealed class DatabaseManifestAggregatorTests
             "1.0.0",
             forms: new[] { MinimalFormExport("frm1"), MinimalFormExport("frm2") },
             reports: new[] { MinimalFormExport("rpt1") },
-            queries: System.Array.Empty<QueryAbstraction>(),
+            queries: System.Array.Empty<JsonNode>(),
             modules: new[] { MinimalModule("mod1"), MinimalModule("Cls1", ModuleKind.ClassModule), MinimalModule("mod2") },
             tables: new[] { MinimalTable("t1"), MinimalTable("t2"), MinimalTable("t3"), MinimalTable("t4") });
 
@@ -248,10 +249,12 @@ public sealed class DatabaseManifestAggregatorTests
         // exact slot rather than on count alone.
         var form        = MinimalFormExport("F1-passthrough");
         var report      = MinimalFormExport("R1-passthrough");
-        var query       = new QueryAbstraction
+        var query       = (JsonNode)new JsonObject
         {
-            SourceQueryName = "Q1-passthrough",
-            Shape = QueryShape.Select,
+            ["ItemKind"]   = "Query",
+            ["Name"]       = "Q1-passthrough",
+            ["QueryType"]  = "Select",
+            ["Sql"]        = new JsonObject { ["OriginalText"] = "SELECT 1" },
         };
         var module      = MinimalModule("M1-passthrough", ModuleKind.ClassModule);
         var table       = MinimalTable("T1-passthrough");
@@ -314,7 +317,7 @@ public sealed class DatabaseManifestAggregatorTests
             "1.0.0",
             forms:                       new[] { form },
             reports:                     new[] { report },
-            queries:                     new[] { query },
+            queries:                     new JsonNode[] { query },
             modules:                     new[] { module },
             tables:                      new[] { table },
             relationships:               new[] { relationship },
@@ -329,7 +332,7 @@ public sealed class DatabaseManifestAggregatorTests
         // verified by the unique sentinel value on each item.
         Assert.Equal("F1-passthrough",          Assert.Single(manifest.Forms).Spec.SourceFormName);
         Assert.Equal("R1-passthrough",          Assert.Single(manifest.Reports).Spec.SourceFormName);
-        Assert.Equal("Q1-passthrough",          Assert.Single(manifest.Queries).SourceQueryName);
+        Assert.Equal("Q1-passthrough",          Assert.Single(manifest.Queries)["Name"]!.GetValue<string>());
         Assert.Equal("M1-passthrough",          Assert.Single(manifest.Modules).ModuleName);
         Assert.Equal(ModuleKind.ClassModule,    manifest.Modules[0].ModuleKind);
         Assert.Equal("T1-passthrough",          Assert.Single(manifest.Tables).Name);

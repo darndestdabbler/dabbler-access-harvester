@@ -10,7 +10,7 @@
   "Summary": {
     "FormCount": 19,
     "ReportCount": 12,
-    "QueryCount": 0,
+    "QueryCount": 22,
     "ModuleCount": 0,
     "TableCount": 0,
     "UnresolvedItemCount": 0
@@ -6894,7 +6894,1952 @@
       }
     }
   ],
-  "Queries": [],
+  "Queries": [
+    {
+      "ItemKind": "Query",
+      "Name": "qryApprovedPlansByClient",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT tblClientServiceNeeds.ClientID, tblClientServicePlan.FiscalYear, tblClientServicePlan.AnnualEstCost, tblClientServicePlan.ClientServicePlanID\r\nFROM tblClientServicePlan INNER JOIN tblClientServiceNeeds ON tblClientServicePlan.ClientServiceNeedID = tblClientServiceNeeds.ClientServiceNeedID\r\nWHERE tblClientServicePlan.Status = \u0027Approved\u0027;\r\n",
+        "Parsed": {
+          "Raw": "SELECT tblClientServiceNeeds.ClientID, tblClientServicePlan.FiscalYear, tblClientServicePlan.AnnualEstCost, tblClientServicePlan.ClientServicePlanID\r\nFROM tblClientServicePlan INNER JOIN tblClientServiceNeeds ON tblClientServicePlan.ClientServiceNeedID = tblClientServiceNeeds.ClientServiceNeedID\r\nWHERE tblClientServicePlan.Status = \u0027Approved\u0027;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ClientID",
+              "Expression": "tblClientServiceNeeds.ClientID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "FiscalYear",
+              "Expression": "tblClientServicePlan.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "AnnualEstCost",
+              "Expression": "tblClientServicePlan.AnnualEstCost",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientServicePlanID",
+              "Expression": "tblClientServicePlan.ClientServicePlanID",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblClientServicePlan"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblClientServiceNeeds",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "tblClientServicePlan.ClientServiceNeedID",
+                  "Kind": "Column",
+                  "ColumnName": "ClientServiceNeedID",
+                  "TableQualifier": "tblClientServicePlan"
+                },
+                "Right": {
+                  "Display": "tblClientServiceNeeds.ClientServiceNeedID",
+                  "Kind": "Column",
+                  "ColumnName": "ClientServiceNeedID",
+                  "TableQualifier": "tblClientServiceNeeds"
+                }
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "Comparison",
+            "Operator": "=",
+            "Left": {
+              "Display": "tblClientServicePlan.Status",
+              "Kind": "Column",
+              "ColumnName": "Status",
+              "TableQualifier": "tblClientServicePlan"
+            },
+            "Right": {
+              "Display": "\u0027Approved\u0027",
+              "Kind": "Literal",
+              "LiteralKind": "String"
+            }
+          }
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetApprovedPlansByClient"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryBudgetUtilization",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, cb.FiscalYear, cb.AnnualBudget, GetBudgetUtilizationPct([c].[ClientID],[cb].[FiscalYear]) AS UtilizationPct\r\nFROM tblClients AS c INNER JOIN tblClientBudgets AS cb ON c.ClientID = cb.ClientID\r\nORDER BY cb.FiscalYear DESC , c.LastName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, cb.FiscalYear, cb.AnnualBudget, GetBudgetUtilizationPct([c].[ClientID],[cb].[FiscalYear]) AS UtilizationPct\r\nFROM tblClients AS c INNER JOIN tblClientBudgets AS cb ON c.ClientID = cb.ClientID\r\nORDER BY cb.FiscalYear DESC , c.LastName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ClientID",
+              "Expression": "c.ClientID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientName",
+              "Expression": "c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "FiscalYear",
+              "Expression": "cb.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "AnnualBudget",
+              "Expression": "cb.AnnualBudget",
+              "IsAggregate": false
+            },
+            {
+              "Name": "UtilizationPct",
+              "Expression": "GetBudgetUtilizationPct(c.[ClientID], cb.[FiscalYear])",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblClients",
+              "Alias": "c"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblClientBudgets",
+              "RightTableAlias": "cb",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "c.ClientID",
+                  "Kind": "Column",
+                  "ColumnName": "ClientID",
+                  "TableQualifier": "c"
+                },
+                "Right": {
+                  "Display": "cb.ClientID",
+                  "Kind": "Column",
+                  "ColumnName": "ClientID",
+                  "TableQualifier": "cb"
+                }
+              }
+            }
+          ],
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "cb.FiscalYear",
+                "Kind": "Column",
+                "ColumnName": "FiscalYear",
+                "TableQualifier": "cb"
+              },
+              "Direction": "Descending"
+            },
+            {
+              "Expression": {
+                "Display": "c.LastName",
+                "Kind": "Column",
+                "ColumnName": "LastName",
+                "TableQualifier": "c"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetBudgetUtilization"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryClientAge",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT tblClients.ClientID, LastName \u0026 \u0022, \u0022 \u0026 FirstName AS ClientName, tblClients.DateOfBirth, CalcAge([DateOfBirth]) AS Age\r\nFROM tblClients\r\nORDER BY tblClients.LastName, tblClients.FirstName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT tblClients.ClientID, LastName \u0026 \u0022, \u0022 \u0026 FirstName AS ClientName, tblClients.DateOfBirth, CalcAge([DateOfBirth]) AS Age\r\nFROM tblClients\r\nORDER BY tblClients.LastName, tblClients.FirstName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ClientID",
+              "Expression": "tblClients.ClientID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientName",
+              "Expression": "LastName \u0026 \u0022, \u0022 \u0026 FirstName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "DateOfBirth",
+              "Expression": "tblClients.DateOfBirth",
+              "IsAggregate": false
+            },
+            {
+              "Name": "Age",
+              "Expression": "CalcAge([DateOfBirth])",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblClients"
+            }
+          ],
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "tblClients.LastName",
+                "Kind": "Column",
+                "ColumnName": "LastName",
+                "TableQualifier": "tblClients"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "tblClients.FirstName",
+                "Kind": "Column",
+                "ColumnName": "FirstName",
+                "TableQualifier": "tblClients"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetClientAge"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryClientBudgetSummary",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, cb.FiscalYear, cb.AnnualBudget, Nz((SELECT SUM(csp2.AnnualEstCost) FROM tblClientServicePlan AS csp2 INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID WHERE csn2.ClientID = c.ClientID AND csp2.FiscalYear = cb.FiscalYear),0) AS TotalPlannedCost, [cb].[AnnualBudget]-Nz((SELECT SUM(csp3.AnnualEstCost) FROM tblClientServicePlan AS csp3 INNER JOIN tblClientServiceNeeds AS csn3 ON csp3.ClientServiceNeedID = csn3.ClientServiceNeedID WHERE csn3.ClientID = c.ClientID AND csp3.FiscalYear = cb.FiscalYear),0) AS RemainingBudget\r\nFROM tblClients AS c INNER JOIN tblClientBudgets AS cb ON c.ClientID = cb.ClientID;\r\n",
+        "Parsed": {
+          "Raw": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, cb.FiscalYear, cb.AnnualBudget, Nz((SELECT SUM(csp2.AnnualEstCost) FROM tblClientServicePlan AS csp2 INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID WHERE csn2.ClientID = c.ClientID AND csp2.FiscalYear = cb.FiscalYear),0) AS TotalPlannedCost, [cb].[AnnualBudget]-Nz((SELECT SUM(csp3.AnnualEstCost) FROM tblClientServicePlan AS csp3 INNER JOIN tblClientServiceNeeds AS csn3 ON csp3.ClientServiceNeedID = csn3.ClientServiceNeedID WHERE csn3.ClientID = c.ClientID AND csp3.FiscalYear = cb.FiscalYear),0) AS RemainingBudget\r\nFROM tblClients AS c INNER JOIN tblClientBudgets AS cb ON c.ClientID = cb.ClientID;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ClientID",
+              "Expression": "c.ClientID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientName",
+              "Expression": "c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "FiscalYear",
+              "Expression": "cb.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "AnnualBudget",
+              "Expression": "cb.AnnualBudget",
+              "IsAggregate": false
+            },
+            {
+              "Name": "TotalPlannedCost",
+              "Expression": "Nz((...), 0)",
+              "IsAggregate": false
+            },
+            {
+              "Name": "RemainingBudget",
+              "Expression": "cb.[AnnualBudget] - Nz((...), 0)",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblClients",
+              "Alias": "c"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblClientBudgets",
+              "RightTableAlias": "cb",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "c.ClientID",
+                  "Kind": "Column",
+                  "ColumnName": "ClientID",
+                  "TableQualifier": "c"
+                },
+                "Right": {
+                  "Display": "cb.ClientID",
+                  "Kind": "Column",
+                  "ColumnName": "ClientID",
+                  "TableQualifier": "cb"
+                }
+              }
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetClientBudgetSummary"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryClientList",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT tblClients.ClientID, LastName \u0026 \u0022, \u0022 \u0026 FirstName AS ClientName, tblClients.Phone, tblClients.City, tblClients.StateCode, tblClients.IsActive\r\nFROM tblClients\r\nORDER BY tblClients.LastName, tblClients.FirstName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT tblClients.ClientID, LastName \u0026 \u0022, \u0022 \u0026 FirstName AS ClientName, tblClients.Phone, tblClients.City, tblClients.StateCode, tblClients.IsActive\r\nFROM tblClients\r\nORDER BY tblClients.LastName, tblClients.FirstName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ClientID",
+              "Expression": "tblClients.ClientID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientName",
+              "Expression": "LastName \u0026 \u0022, \u0022 \u0026 FirstName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "Phone",
+              "Expression": "tblClients.Phone",
+              "IsAggregate": false
+            },
+            {
+              "Name": "City",
+              "Expression": "tblClients.City",
+              "IsAggregate": false
+            },
+            {
+              "Name": "StateCode",
+              "Expression": "tblClients.StateCode",
+              "IsAggregate": false
+            },
+            {
+              "Name": "IsActive",
+              "Expression": "tblClients.IsActive",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblClients"
+            }
+          ],
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "tblClients.LastName",
+                "Kind": "Column",
+                "ColumnName": "LastName",
+                "TableQualifier": "tblClients"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "tblClients.FirstName",
+                "Kind": "Column",
+                "ColumnName": "FirstName",
+                "TableQualifier": "tblClients"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetClientList"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryClientNeedsNotMet",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceCode, s.ServiceName, csn.HoursPerWeek AS RequestedHours, csn.Priority, csn.FiscalYear\r\nFROM tblServices AS s INNER JOIN (tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csn.ClientServiceNeedID) Not In (SELECT ClientServiceNeedID FROM tblClientServicePlan\n    WHERE Status = \u0027Approved\u0027\n)))\r\nORDER BY c.LastName, c.FirstName, csn.Priority;\r\n",
+        "Parsed": {
+          "Raw": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceCode, s.ServiceName, csn.HoursPerWeek AS RequestedHours, csn.Priority, csn.FiscalYear\r\nFROM tblServices AS s INNER JOIN (tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csn.ClientServiceNeedID) Not In (SELECT ClientServiceNeedID FROM tblClientServicePlan\n    WHERE Status = \u0027Approved\u0027\n)))\r\nORDER BY c.LastName, c.FirstName, csn.Priority;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ClientID",
+              "Expression": "c.ClientID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientName",
+              "Expression": "c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceCode",
+              "Expression": "s.ServiceCode",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceName",
+              "Expression": "s.ServiceName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "RequestedHours",
+              "Expression": "csn.HoursPerWeek",
+              "IsAggregate": false
+            },
+            {
+              "Name": "Priority",
+              "Expression": "csn.Priority",
+              "IsAggregate": false
+            },
+            {
+              "Name": "FiscalYear",
+              "Expression": "csn.FiscalYear",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblServices",
+              "Alias": "s"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblClients",
+              "RightTableAlias": "c",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "s.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "s"
+                },
+                "Right": {
+                  "Display": "csn.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "csn"
+                }
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "Opaque",
+            "Expression": {
+              "Display": "(csn.ClientServiceNeedID) NOT IN (...)",
+              "Kind": "Subquery"
+            }
+          },
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "c.LastName",
+                "Kind": "Column",
+                "ColumnName": "LastName",
+                "TableQualifier": "c"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "c.FirstName",
+                "Kind": "Column",
+                "ColumnName": "FirstName",
+                "TableQualifier": "c"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "csn.Priority",
+                "Kind": "Column",
+                "ColumnName": "Priority",
+                "TableQualifier": "csn"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetClientNeedsNotMet"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryClientServicePlanDetail",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceCode, s.ServiceName, p.ProviderName, csp.HoursPerWeek, csp.WeeklyCost, csp.AnnualEstCost, csp.Status, csp.FiscalYear\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nORDER BY c.LastName, c.FirstName, s.ServiceName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT c.ClientID, c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceCode, s.ServiceName, p.ProviderName, csp.HoursPerWeek, csp.WeeklyCost, csp.AnnualEstCost, csp.Status, csp.FiscalYear\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nORDER BY c.LastName, c.FirstName, s.ServiceName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ClientID",
+              "Expression": "c.ClientID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientName",
+              "Expression": "c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceCode",
+              "Expression": "s.ServiceCode",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceName",
+              "Expression": "s.ServiceName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ProviderName",
+              "Expression": "p.ProviderName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "HoursPerWeek",
+              "Expression": "csp.HoursPerWeek",
+              "IsAggregate": false
+            },
+            {
+              "Name": "WeeklyCost",
+              "Expression": "csp.WeeklyCost",
+              "IsAggregate": false
+            },
+            {
+              "Name": "AnnualEstCost",
+              "Expression": "csp.AnnualEstCost",
+              "IsAggregate": false
+            },
+            {
+              "Name": "Status",
+              "Expression": "csp.Status",
+              "IsAggregate": false
+            },
+            {
+              "Name": "FiscalYear",
+              "Expression": "csp.FiscalYear",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblServices",
+              "Alias": "s"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblProviders",
+              "RightTableAlias": "p",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "s.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "s"
+                },
+                "Right": {
+                  "Display": "csn.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "csn"
+                }
+              }
+            }
+          ],
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "c.LastName",
+                "Kind": "Column",
+                "ColumnName": "LastName",
+                "TableQualifier": "c"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "c.FirstName",
+                "Kind": "Column",
+                "ColumnName": "FirstName",
+                "TableQualifier": "c"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "s.ServiceName",
+                "Kind": "Column",
+                "ColumnName": "ServiceName",
+                "TableQualifier": "s"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetClientServicePlanDetail"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryClientServicePlan_ByClient",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "PARAMETERS [Enter Client ID:] Long;\r\nSELECT csp.*, csn.ServiceID, s.ServiceName, p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csn.ClientID)=[Enter Client ID:]))\r\nORDER BY s.ServiceName, csp.FiscalYear;\r\n",
+        "Parameters": [
+          {
+            "Name": "enterClientID:",
+            "Source": "NamedParameter",
+            "Type": "long"
+          }
+        ],
+        "Parsed": {
+          "Raw": "PARAMETERS [Enter Client ID:] Long;\r\nSELECT csp.*, csn.ServiceID, s.ServiceName, p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csn.ClientID)=[Enter Client ID:]))\r\nORDER BY s.ServiceName, csp.FiscalYear;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "csp.*",
+              "Expression": "csp.*",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceID",
+              "Expression": "csn.ServiceID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceName",
+              "Expression": "s.ServiceName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ProviderName",
+              "Expression": "p.ProviderName",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblServices",
+              "Alias": "s"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblProviders",
+              "RightTableAlias": "p",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "s.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "s"
+                },
+                "Right": {
+                  "Display": "csn.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "csn"
+                }
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "Comparison",
+            "Operator": "=",
+            "Left": {
+              "Display": "(csn.ClientID)",
+              "Kind": "Compound"
+            },
+            "Right": {
+              "Display": "[Enter Client ID:]",
+              "Kind": "Column",
+              "ColumnName": "Enter Client ID:"
+            }
+          },
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "s.ServiceName",
+                "Kind": "Column",
+                "ColumnName": "ServiceName",
+                "TableQualifier": "s"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "csp.FiscalYear",
+                "Kind": "Column",
+                "ColumnName": "FiscalYear",
+                "TableQualifier": "csp"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetClientServicePlanByClient",
+        "SuggestedParameters": [
+          {
+            "Name": "enterClientID:",
+            "Type": "long"
+          }
+        ]
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryCosts_ByFiscalYear",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT psc.FiscalYear, Sum(csp.AnnualEstCost) AS TotalCost\r\nFROM tblProviders AS p INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID\r\nWHERE (((csp.Status)\u003C\u003E\u0022Cancelled\u0022))\r\nGROUP BY psc.FiscalYear;\r\n",
+        "Parsed": {
+          "Raw": "SELECT psc.FiscalYear, Sum(csp.AnnualEstCost) AS TotalCost\r\nFROM tblProviders AS p INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID\r\nWHERE (((csp.Status)\u003C\u003E\u0022Cancelled\u0022))\r\nGROUP BY psc.FiscalYear;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "FiscalYear",
+              "Expression": "psc.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "TotalCost",
+              "Expression": "Sum(csp.AnnualEstCost)",
+              "IsAggregate": true
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblProviders",
+              "Alias": "p"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblProviderServiceCatalog",
+              "RightTableAlias": "psc",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "p.ProviderID",
+                  "Kind": "Column",
+                  "ColumnName": "ProviderID",
+                  "TableQualifier": "p"
+                },
+                "Right": {
+                  "Display": "psc.ProviderID",
+                  "Kind": "Column",
+                  "ColumnName": "ProviderID",
+                  "TableQualifier": "psc"
+                }
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "Comparison",
+            "Operator": "\u003C\u003E",
+            "Left": {
+              "Display": "(csp.Status)",
+              "Kind": "Compound"
+            },
+            "Right": {
+              "Display": "\u0022Cancelled\u0022",
+              "Kind": "Literal",
+              "LiteralKind": "String"
+            }
+          },
+          "GroupBy": [
+            {
+              "Display": "psc.FiscalYear",
+              "Kind": "Column",
+              "ColumnName": "FiscalYear",
+              "TableQualifier": "psc"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetCostsByFiscalYear"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryProviderList",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblProviders.Phone, tblProviders.City, tblProviders.StateCode, tblProviders.IsActive\r\nFROM tblProviders\r\nORDER BY tblProviders.ProviderName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblProviders.Phone, tblProviders.City, tblProviders.StateCode, tblProviders.IsActive\r\nFROM tblProviders\r\nORDER BY tblProviders.ProviderName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ProviderID",
+              "Expression": "tblProviders.ProviderID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ProviderName",
+              "Expression": "tblProviders.ProviderName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "Phone",
+              "Expression": "tblProviders.Phone",
+              "IsAggregate": false
+            },
+            {
+              "Name": "City",
+              "Expression": "tblProviders.City",
+              "IsAggregate": false
+            },
+            {
+              "Name": "StateCode",
+              "Expression": "tblProviders.StateCode",
+              "IsAggregate": false
+            },
+            {
+              "Name": "IsActive",
+              "Expression": "tblProviders.IsActive",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblProviders"
+            }
+          ],
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "tblProviders.ProviderName",
+                "Kind": "Column",
+                "ColumnName": "ProviderName",
+                "TableQualifier": "tblProviders"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetProviderList"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryProviderPlansByClient_Param",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "PARAMETERS [Enter Provider ID:] Long, [Enter Fiscal Year:] Long;\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceName, csp.HoursPerWeek, csp.WeeklyCost\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((psc.ProviderID)=[Enter Provider ID:]) AND ((csp.FiscalYear)=[Enter Fiscal Year:]))\r\nORDER BY c.LastName, c.FirstName, s.ServiceName;\r\n",
+        "Parameters": [
+          {
+            "Name": "enterProviderID:",
+            "Source": "NamedParameter",
+            "Type": "long"
+          },
+          {
+            "Name": "enterFiscalYear:",
+            "Source": "NamedParameter",
+            "Type": "long"
+          }
+        ],
+        "Parsed": {
+          "Raw": "PARAMETERS [Enter Provider ID:] Long, [Enter Fiscal Year:] Long;\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName, s.ServiceName, csp.HoursPerWeek, csp.WeeklyCost\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((psc.ProviderID)=[Enter Provider ID:]) AND ((csp.FiscalYear)=[Enter Fiscal Year:]))\r\nORDER BY c.LastName, c.FirstName, s.ServiceName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ClientName",
+              "Expression": "c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceName",
+              "Expression": "s.ServiceName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "HoursPerWeek",
+              "Expression": "csp.HoursPerWeek",
+              "IsAggregate": false
+            },
+            {
+              "Name": "WeeklyCost",
+              "Expression": "csp.WeeklyCost",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblServices",
+              "Alias": "s"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblClients",
+              "RightTableAlias": "c",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "s.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "s"
+                },
+                "Right": {
+                  "Display": "csn.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "csn"
+                }
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "And",
+            "Operands": [
+              {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "(psc.ProviderID)",
+                  "Kind": "Compound"
+                },
+                "Right": {
+                  "Display": "[Enter Provider ID:]",
+                  "Kind": "Column",
+                  "ColumnName": "Enter Provider ID:"
+                }
+              },
+              {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "(csp.FiscalYear)",
+                  "Kind": "Compound"
+                },
+                "Right": {
+                  "Display": "[Enter Fiscal Year:]",
+                  "Kind": "Column",
+                  "ColumnName": "Enter Fiscal Year:"
+                }
+              }
+            ]
+          },
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "c.LastName",
+                "Kind": "Column",
+                "ColumnName": "LastName",
+                "TableQualifier": "c"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "c.FirstName",
+                "Kind": "Column",
+                "ColumnName": "FirstName",
+                "TableQualifier": "c"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "s.ServiceName",
+                "Kind": "Column",
+                "ColumnName": "ServiceName",
+                "TableQualifier": "s"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetProviderPlansByClientParam",
+        "SuggestedParameters": [
+          {
+            "Name": "enterProviderID:",
+            "Type": "long"
+          },
+          {
+            "Name": "enterFiscalYear:",
+            "Type": "long"
+          }
+        ]
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryProviderServiceCatalogDetail",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT p.ProviderID, p.ProviderName, s.ServiceCode, s.ServiceName, qryProviderServiceEffectiveFiscalYears.MinFiscalYear, qryProviderServiceEffectiveFiscalYears.MaxFiscalYear, psc.RatePerHour, psc.FiscalYear, (SELECT TOP 1 srl.MaxRatePerHour FROM tblServiceRateLimits AS srl WHERE srl.ServiceID = s.ServiceID AND srl.FiscalYear = psc.FiscalYear) AS MaxRatePerHour\r\nFROM (tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN tblProviderServiceCatalog AS psc ON p.ProviderID = psc.ProviderID) ON s.ServiceID = psc.ServiceID) INNER JOIN qryProviderServiceEffectiveFiscalYears ON (psc.ServiceID = qryProviderServiceEffectiveFiscalYears.ServiceID) AND (psc.ProviderID = qryProviderServiceEffectiveFiscalYears.ProviderID)\r\nORDER BY p.ProviderName, s.ServiceName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT p.ProviderID, p.ProviderName, s.ServiceCode, s.ServiceName, qryProviderServiceEffectiveFiscalYears.MinFiscalYear, qryProviderServiceEffectiveFiscalYears.MaxFiscalYear, psc.RatePerHour, psc.FiscalYear, (SELECT TOP 1 srl.MaxRatePerHour FROM tblServiceRateLimits AS srl WHERE srl.ServiceID = s.ServiceID AND srl.FiscalYear = psc.FiscalYear) AS MaxRatePerHour\r\nFROM (tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN tblProviderServiceCatalog AS psc ON p.ProviderID = psc.ProviderID) ON s.ServiceID = psc.ServiceID) INNER JOIN qryProviderServiceEffectiveFiscalYears ON (psc.ServiceID = qryProviderServiceEffectiveFiscalYears.ServiceID) AND (psc.ProviderID = qryProviderServiceEffectiveFiscalYears.ProviderID)\r\nORDER BY p.ProviderName, s.ServiceName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ProviderID",
+              "Expression": "p.ProviderID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ProviderName",
+              "Expression": "p.ProviderName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceCode",
+              "Expression": "s.ServiceCode",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceName",
+              "Expression": "s.ServiceName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "MinFiscalYear",
+              "Expression": "qryProviderServiceEffectiveFiscalYears.MinFiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "MaxFiscalYear",
+              "Expression": "qryProviderServiceEffectiveFiscalYears.MaxFiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "RatePerHour",
+              "Expression": "psc.RatePerHour",
+              "IsAggregate": false
+            },
+            {
+              "Name": "FiscalYear",
+              "Expression": "psc.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "MaxRatePerHour",
+              "Expression": "(...)",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblServices",
+              "Alias": "s"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblProviders",
+              "RightTableAlias": "p",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "s.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "s"
+                },
+                "Right": {
+                  "Display": "psc.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "psc"
+                }
+              }
+            },
+            {
+              "Kind": "Inner",
+              "RightTable": "qryProviderServiceEffectiveFiscalYears",
+              "OnExpression": {
+                "NodeKind": "And",
+                "Operands": [
+                  {
+                    "NodeKind": "Comparison",
+                    "Operator": "=",
+                    "Left": {
+                      "Display": "psc.ServiceID",
+                      "Kind": "Column",
+                      "ColumnName": "ServiceID",
+                      "TableQualifier": "psc"
+                    },
+                    "Right": {
+                      "Display": "qryProviderServiceEffectiveFiscalYears.ServiceID",
+                      "Kind": "Column",
+                      "ColumnName": "ServiceID",
+                      "TableQualifier": "qryProviderServiceEffectiveFiscalYears"
+                    }
+                  },
+                  {
+                    "NodeKind": "Comparison",
+                    "Operator": "=",
+                    "Left": {
+                      "Display": "psc.ProviderID",
+                      "Kind": "Column",
+                      "ColumnName": "ProviderID",
+                      "TableQualifier": "psc"
+                    },
+                    "Right": {
+                      "Display": "qryProviderServiceEffectiveFiscalYears.ProviderID",
+                      "Kind": "Column",
+                      "ColumnName": "ProviderID",
+                      "TableQualifier": "qryProviderServiceEffectiveFiscalYears"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "p.ProviderName",
+                "Kind": "Column",
+                "ColumnName": "ProviderName",
+                "TableQualifier": "p"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "s.ServiceName",
+                "Kind": "Column",
+                "ColumnName": "ServiceName",
+                "TableQualifier": "s"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetProviderServiceCatalogDetail"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryProviderServiceCosts_ByFiscalYear",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT psc.FiscalYear, p.ProviderID, p.ProviderName, Sum(csp.AnnualEstCost) AS TotalCost, Sum([csp.AnnualEstCost]/[qryCosts_ByFiscalYear].[TotalCost]) AS PctCost\r\nFROM tblProviders AS p INNER JOIN ((tblProviderServiceCatalog AS psc INNER JOIN qryCosts_ByFiscalYear ON psc.FiscalYear = qryCosts_ByFiscalYear.FiscalYear) INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID\r\nWHERE (((csp.Status)\u003C\u003E\u0022Cancelled\u0022))\r\nGROUP BY psc.FiscalYear, p.ProviderID, p.ProviderName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT psc.FiscalYear, p.ProviderID, p.ProviderName, Sum(csp.AnnualEstCost) AS TotalCost, Sum([csp.AnnualEstCost]/[qryCosts_ByFiscalYear].[TotalCost]) AS PctCost\r\nFROM tblProviders AS p INNER JOIN ((tblProviderServiceCatalog AS psc INNER JOIN qryCosts_ByFiscalYear ON psc.FiscalYear = qryCosts_ByFiscalYear.FiscalYear) INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID\r\nWHERE (((csp.Status)\u003C\u003E\u0022Cancelled\u0022))\r\nGROUP BY psc.FiscalYear, p.ProviderID, p.ProviderName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "FiscalYear",
+              "Expression": "psc.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ProviderID",
+              "Expression": "p.ProviderID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ProviderName",
+              "Expression": "p.ProviderName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "TotalCost",
+              "Expression": "Sum(csp.AnnualEstCost)",
+              "IsAggregate": true
+            },
+            {
+              "Name": "PctCost",
+              "Expression": "Sum([csp.AnnualEstCost] / qryCosts_ByFiscalYear.[TotalCost])",
+              "IsAggregate": true
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblProviders",
+              "Alias": "p"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblProviderServiceCatalog",
+              "RightTableAlias": "psc",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "p.ProviderID",
+                  "Kind": "Column",
+                  "ColumnName": "ProviderID",
+                  "TableQualifier": "p"
+                },
+                "Right": {
+                  "Display": "psc.ProviderID",
+                  "Kind": "Column",
+                  "ColumnName": "ProviderID",
+                  "TableQualifier": "psc"
+                }
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "Comparison",
+            "Operator": "\u003C\u003E",
+            "Left": {
+              "Display": "(csp.Status)",
+              "Kind": "Compound"
+            },
+            "Right": {
+              "Display": "\u0022Cancelled\u0022",
+              "Kind": "Literal",
+              "LiteralKind": "String"
+            }
+          },
+          "GroupBy": [
+            {
+              "Display": "psc.FiscalYear",
+              "Kind": "Column",
+              "ColumnName": "FiscalYear",
+              "TableQualifier": "psc"
+            },
+            {
+              "Display": "p.ProviderID",
+              "Kind": "Column",
+              "ColumnName": "ProviderID",
+              "TableQualifier": "p"
+            },
+            {
+              "Display": "p.ProviderName",
+              "Kind": "Column",
+              "ColumnName": "ProviderName",
+              "TableQualifier": "p"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetProviderServiceCostsByFiscalYear"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryProviderServiceEffectiveFiscalYears",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT tblProviderServiceCatalog.ProviderID, tblProviderServiceCatalog.ServiceID, Min(tblProviderServiceCatalog.[FiscalYear]) AS MinFiscalYear, Max(tblProviderServiceCatalog.[FiscalYear]) AS MaxFiscalYear\r\nFROM tblProviderServiceCatalog\r\nGROUP BY tblProviderServiceCatalog.ProviderID, tblProviderServiceCatalog.ServiceID;\r\n",
+        "Parsed": {
+          "Raw": "SELECT tblProviderServiceCatalog.ProviderID, tblProviderServiceCatalog.ServiceID, Min(tblProviderServiceCatalog.[FiscalYear]) AS MinFiscalYear, Max(tblProviderServiceCatalog.[FiscalYear]) AS MaxFiscalYear\r\nFROM tblProviderServiceCatalog\r\nGROUP BY tblProviderServiceCatalog.ProviderID, tblProviderServiceCatalog.ServiceID;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ProviderID",
+              "Expression": "tblProviderServiceCatalog.ProviderID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceID",
+              "Expression": "tblProviderServiceCatalog.ServiceID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "MinFiscalYear",
+              "Expression": "Min(tblProviderServiceCatalog.[FiscalYear])",
+              "IsAggregate": true
+            },
+            {
+              "Name": "MaxFiscalYear",
+              "Expression": "Max(tblProviderServiceCatalog.[FiscalYear])",
+              "IsAggregate": true
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblProviderServiceCatalog"
+            }
+          ],
+          "GroupBy": [
+            {
+              "Display": "tblProviderServiceCatalog.ProviderID",
+              "Kind": "Column",
+              "ColumnName": "ProviderID",
+              "TableQualifier": "tblProviderServiceCatalog"
+            },
+            {
+              "Display": "tblProviderServiceCatalog.ServiceID",
+              "Kind": "Column",
+              "ColumnName": "ServiceID",
+              "TableQualifier": "tblProviderServiceCatalog"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetProviderServiceEffectiveFiscalYears"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryProviderServiceStatistics",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 0,
+      "Sql": {
+        "OriginalText": "SELECT p.ProviderID, p.ProviderName, csp.FiscalYear, sub.UniqueClientCount AS Clients, Sum(csp.HoursPerWeek * 52) AS Hours, Sum(csp.AnnualEstCost) AS TotalCost, FormatCurrency (Sum(csp.AnnualEstCost) / sub.UniqueClientCount) AS AvgPerClient\r\nFROM (tblProviders AS p INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID) INNER JOIN (SELECT Dist.ProviderID, Count(Dist.ClientID) AS UniqueClientCount FROM (SELECT DISTINCT psc2.ProviderID, csn2.ClientID FROM tblProviderServiceCatalog AS psc2 INNER JOIN (tblClientServicePlan AS csp2 INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID) ON psc2.ProviderServiceCatalogID = csp2.ProviderServiceCatalogID WHERE csp2.Status \u003C\u003E \u0027Cancelled\u0027)  AS Dist GROUP BY Dist.ProviderID)  AS sub ON p.ProviderID = sub.ProviderID\r\nWHERE csp.Status \u003C\u003E \u0027Cancelled\u0027\r\nGROUP BY p.ProviderID, p.ProviderName, csp.FiscalYear, sub.UniqueClientCount;\r\n",
+        "Parsed": {
+          "Raw": "SELECT p.ProviderID, p.ProviderName, csp.FiscalYear, sub.UniqueClientCount AS Clients, Sum(csp.HoursPerWeek * 52) AS Hours, Sum(csp.AnnualEstCost) AS TotalCost, FormatCurrency (Sum(csp.AnnualEstCost) / sub.UniqueClientCount) AS AvgPerClient\r\nFROM (tblProviders AS p INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON p.ProviderID = psc.ProviderID) INNER JOIN (SELECT Dist.ProviderID, Count(Dist.ClientID) AS UniqueClientCount FROM (SELECT DISTINCT psc2.ProviderID, csn2.ClientID FROM tblProviderServiceCatalog AS psc2 INNER JOIN (tblClientServicePlan AS csp2 INNER JOIN tblClientServiceNeeds AS csn2 ON csp2.ClientServiceNeedID = csn2.ClientServiceNeedID) ON psc2.ProviderServiceCatalogID = csp2.ProviderServiceCatalogID WHERE csp2.Status \u003C\u003E \u0027Cancelled\u0027)  AS Dist GROUP BY Dist.ProviderID)  AS sub ON p.ProviderID = sub.ProviderID\r\nWHERE csp.Status \u003C\u003E \u0027Cancelled\u0027\r\nGROUP BY p.ProviderID, p.ProviderName, csp.FiscalYear, sub.UniqueClientCount;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ProviderID",
+              "Expression": "p.ProviderID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ProviderName",
+              "Expression": "p.ProviderName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "FiscalYear",
+              "Expression": "csp.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "Clients",
+              "Expression": "sub.UniqueClientCount",
+              "IsAggregate": false
+            },
+            {
+              "Name": "Hours",
+              "Expression": "Sum(csp.HoursPerWeek * 52)",
+              "IsAggregate": true
+            },
+            {
+              "Name": "TotalCost",
+              "Expression": "Sum(csp.AnnualEstCost)",
+              "IsAggregate": true
+            },
+            {
+              "Name": "AvgPerClient",
+              "Expression": "FormatCurrency(Sum(csp.AnnualEstCost) / sub.UniqueClientCount)",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblProviders",
+              "Alias": "p"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblProviderServiceCatalog",
+              "RightTableAlias": "psc",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "p.ProviderID",
+                  "Kind": "Column",
+                  "ColumnName": "ProviderID",
+                  "TableQualifier": "p"
+                },
+                "Right": {
+                  "Display": "psc.ProviderID",
+                  "Kind": "Column",
+                  "ColumnName": "ProviderID",
+                  "TableQualifier": "psc"
+                }
+              }
+            },
+            {
+              "Kind": "Inner",
+              "RightTableAlias": "sub",
+              "IsSubquery": true,
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "p.ProviderID",
+                  "Kind": "Column",
+                  "ColumnName": "ProviderID",
+                  "TableQualifier": "p"
+                },
+                "Right": {
+                  "Display": "sub.ProviderID",
+                  "Kind": "Column",
+                  "ColumnName": "ProviderID",
+                  "TableQualifier": "sub"
+                }
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "Comparison",
+            "Operator": "\u003C\u003E",
+            "Left": {
+              "Display": "csp.Status",
+              "Kind": "Column",
+              "ColumnName": "Status",
+              "TableQualifier": "csp"
+            },
+            "Right": {
+              "Display": "\u0027Cancelled\u0027",
+              "Kind": "Literal",
+              "LiteralKind": "String"
+            }
+          },
+          "GroupBy": [
+            {
+              "Display": "p.ProviderID",
+              "Kind": "Column",
+              "ColumnName": "ProviderID",
+              "TableQualifier": "p"
+            },
+            {
+              "Display": "p.ProviderName",
+              "Kind": "Column",
+              "ColumnName": "ProviderName",
+              "TableQualifier": "p"
+            },
+            {
+              "Display": "csp.FiscalYear",
+              "Kind": "Column",
+              "ColumnName": "FiscalYear",
+              "TableQualifier": "csp"
+            },
+            {
+              "Display": "sub.UniqueClientCount",
+              "Kind": "Column",
+              "ColumnName": "UniqueClientCount",
+              "TableQualifier": "sub"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetProviderServiceStatistics"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryServiceCosts_ByFiscalYear",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT csp.FiscalYear, s.ServiceCode, s.ServiceName, Count(csp.ClientServicePlanID) AS PlanCount, Sum(52*csp.HoursPerWeek) AS TotalHours, Sum(csp.AnnualEstCost) AS TotalCost, Avg(csp.WeeklyCost) AS AvgWeeklyCost, Sum(csp.AnnualEstCost/cfy.TotalCost) AS PctCost\r\nFROM tblServices AS s INNER JOIN ((tblClientServiceNeeds AS csn INNER JOIN qryCosts_ByFiscalYear AS cfy ON csn.FiscalYear = cfy.FiscalYear) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.Status)\u003C\u003E\u0022Cancelled\u0022))\r\nGROUP BY csp.FiscalYear, s.ServiceCode, s.ServiceName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT csp.FiscalYear, s.ServiceCode, s.ServiceName, Count(csp.ClientServicePlanID) AS PlanCount, Sum(52*csp.HoursPerWeek) AS TotalHours, Sum(csp.AnnualEstCost) AS TotalCost, Avg(csp.WeeklyCost) AS AvgWeeklyCost, Sum(csp.AnnualEstCost/cfy.TotalCost) AS PctCost\r\nFROM tblServices AS s INNER JOIN ((tblClientServiceNeeds AS csn INNER JOIN qryCosts_ByFiscalYear AS cfy ON csn.FiscalYear = cfy.FiscalYear) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.Status)\u003C\u003E\u0022Cancelled\u0022))\r\nGROUP BY csp.FiscalYear, s.ServiceCode, s.ServiceName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "FiscalYear",
+              "Expression": "csp.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceCode",
+              "Expression": "s.ServiceCode",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceName",
+              "Expression": "s.ServiceName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "PlanCount",
+              "Expression": "Count(csp.ClientServicePlanID)",
+              "IsAggregate": true
+            },
+            {
+              "Name": "TotalHours",
+              "Expression": "Sum(52 * csp.HoursPerWeek)",
+              "IsAggregate": true
+            },
+            {
+              "Name": "TotalCost",
+              "Expression": "Sum(csp.AnnualEstCost)",
+              "IsAggregate": true
+            },
+            {
+              "Name": "AvgWeeklyCost",
+              "Expression": "Avg(csp.WeeklyCost)",
+              "IsAggregate": true
+            },
+            {
+              "Name": "PctCost",
+              "Expression": "Sum(csp.AnnualEstCost / cfy.TotalCost)",
+              "IsAggregate": true
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblServices",
+              "Alias": "s"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblClientServiceNeeds",
+              "RightTableAlias": "csn",
+              "OnExpression": {
+                "NodeKind": "Comparison",
+                "Operator": "=",
+                "Left": {
+                  "Display": "s.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "s"
+                },
+                "Right": {
+                  "Display": "csn.ServiceID",
+                  "Kind": "Column",
+                  "ColumnName": "ServiceID",
+                  "TableQualifier": "csn"
+                }
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "Comparison",
+            "Operator": "\u003C\u003E",
+            "Left": {
+              "Display": "(csp.Status)",
+              "Kind": "Compound"
+            },
+            "Right": {
+              "Display": "\u0022Cancelled\u0022",
+              "Kind": "Literal",
+              "LiteralKind": "String"
+            }
+          },
+          "GroupBy": [
+            {
+              "Display": "csp.FiscalYear",
+              "Kind": "Column",
+              "ColumnName": "FiscalYear",
+              "TableQualifier": "csp"
+            },
+            {
+              "Display": "s.ServiceCode",
+              "Kind": "Column",
+              "ColumnName": "ServiceCode",
+              "TableQualifier": "s"
+            },
+            {
+              "Display": "s.ServiceName",
+              "Kind": "Column",
+              "ColumnName": "ServiceName",
+              "TableQualifier": "s"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetServiceCostsByFiscalYear"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryServiceList",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "SELECT tblServices.ServiceID, tblServices.ServiceCode, tblServices.ServiceName, tblServices.ServiceCategory, tblServices.IsActive\r\nFROM tblServices\r\nORDER BY tblServices.ServiceCategory, tblServices.ServiceName;\r\n",
+        "Parsed": {
+          "Raw": "SELECT tblServices.ServiceID, tblServices.ServiceCode, tblServices.ServiceName, tblServices.ServiceCategory, tblServices.IsActive\r\nFROM tblServices\r\nORDER BY tblServices.ServiceCategory, tblServices.ServiceName;\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ServiceID",
+              "Expression": "tblServices.ServiceID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceCode",
+              "Expression": "tblServices.ServiceCode",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceName",
+              "Expression": "tblServices.ServiceName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceCategory",
+              "Expression": "tblServices.ServiceCategory",
+              "IsAggregate": false
+            },
+            {
+              "Name": "IsActive",
+              "Expression": "tblServices.IsActive",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblServices"
+            }
+          ],
+          "OrderBy": [
+            {
+              "Expression": {
+                "Display": "tblServices.ServiceCategory",
+                "Kind": "Column",
+                "ColumnName": "ServiceCategory",
+                "TableQualifier": "tblServices"
+              },
+              "Direction": "Ascending"
+            },
+            {
+              "Expression": {
+                "Display": "tblServices.ServiceName",
+                "Kind": "Column",
+                "ColumnName": "ServiceName",
+                "TableQualifier": "tblServices"
+              },
+              "Direction": "Ascending"
+            }
+          ]
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetServiceList"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qryServicePlansByService",
+      "QueryType": "Select",
+      "QueryTypeCode": 0,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 0,
+      "Sql": {
+        "OriginalText": "SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblClientServicePlan.FiscalYear, tblClientServicePlan.HoursPerWeek AS WeeklyHours, tblClientServicePlan.WeeklyCost, tblClientServicePlan.AnnualEstCost, tblProviderServiceCatalog.RatePerHour, tblServices.ServiceID, tblServices.ServiceName, tblClients.ClientID, Trim(Nz([LastName],\u0022\u0022) \u0026 \u0022, \u0022 \u0026 Nz([FirstName],\u0022\u0022)) AS ClientName\r\nFROM tblServices INNER JOIN (tblProviders INNER JOIN ((tblClients INNER JOIN tblClientServiceNeeds ON tblClients.ClientID = tblClientServiceNeeds.ClientID) INNER JOIN (tblProviderServiceCatalog INNER JOIN tblClientServicePlan ON tblProviderServiceCatalog.ProviderServiceCatalogID = tblClientServicePlan.ProviderServiceCatalogID) ON tblClientServiceNeeds.ClientServiceNeedID = tblClientServicePlan.ClientServiceNeedID) ON tblProviders.ProviderID = tblProviderServiceCatalog.ProviderID) ON (tblServices.ServiceID = tblClientServiceNeeds.ServiceID) AND (tblServices.ServiceID = tblProviderServiceCatalog.ServiceID)\r\nWHERE (((tblClientServicePlan.Status)\u003C\u003E\u0022Cancelled\u0022));\r\n",
+        "Parsed": {
+          "Raw": "SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblClientServicePlan.FiscalYear, tblClientServicePlan.HoursPerWeek AS WeeklyHours, tblClientServicePlan.WeeklyCost, tblClientServicePlan.AnnualEstCost, tblProviderServiceCatalog.RatePerHour, tblServices.ServiceID, tblServices.ServiceName, tblClients.ClientID, Trim(Nz([LastName],\u0022\u0022) \u0026 \u0022, \u0022 \u0026 Nz([FirstName],\u0022\u0022)) AS ClientName\r\nFROM tblServices INNER JOIN (tblProviders INNER JOIN ((tblClients INNER JOIN tblClientServiceNeeds ON tblClients.ClientID = tblClientServiceNeeds.ClientID) INNER JOIN (tblProviderServiceCatalog INNER JOIN tblClientServicePlan ON tblProviderServiceCatalog.ProviderServiceCatalogID = tblClientServicePlan.ProviderServiceCatalogID) ON tblClientServiceNeeds.ClientServiceNeedID = tblClientServicePlan.ClientServiceNeedID) ON tblProviders.ProviderID = tblProviderServiceCatalog.ProviderID) ON (tblServices.ServiceID = tblClientServiceNeeds.ServiceID) AND (tblServices.ServiceID = tblProviderServiceCatalog.ServiceID)\r\nWHERE (((tblClientServicePlan.Status)\u003C\u003E\u0022Cancelled\u0022));\r\n",
+          "QueryType": "Select",
+          "Select": [
+            {
+              "Name": "ProviderID",
+              "Expression": "tblProviders.ProviderID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ProviderName",
+              "Expression": "tblProviders.ProviderName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "FiscalYear",
+              "Expression": "tblClientServicePlan.FiscalYear",
+              "IsAggregate": false
+            },
+            {
+              "Name": "WeeklyHours",
+              "Expression": "tblClientServicePlan.HoursPerWeek",
+              "IsAggregate": false
+            },
+            {
+              "Name": "WeeklyCost",
+              "Expression": "tblClientServicePlan.WeeklyCost",
+              "IsAggregate": false
+            },
+            {
+              "Name": "AnnualEstCost",
+              "Expression": "tblClientServicePlan.AnnualEstCost",
+              "IsAggregate": false
+            },
+            {
+              "Name": "RatePerHour",
+              "Expression": "tblProviderServiceCatalog.RatePerHour",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceID",
+              "Expression": "tblServices.ServiceID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ServiceName",
+              "Expression": "tblServices.ServiceName",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientID",
+              "Expression": "tblClients.ClientID",
+              "IsAggregate": false
+            },
+            {
+              "Name": "ClientName",
+              "Expression": "Trim(Nz([LastName], \u0022\u0022) \u0026 \u0022, \u0022 \u0026 Nz([FirstName], \u0022\u0022))",
+              "IsAggregate": false
+            }
+          ],
+          "From": [
+            {
+              "TableName": "tblServices"
+            }
+          ],
+          "Joins": [
+            {
+              "Kind": "Inner",
+              "RightTable": "tblProviders",
+              "OnExpression": {
+                "NodeKind": "And",
+                "Operands": [
+                  {
+                    "NodeKind": "Comparison",
+                    "Operator": "=",
+                    "Left": {
+                      "Display": "tblServices.ServiceID",
+                      "Kind": "Column",
+                      "ColumnName": "ServiceID",
+                      "TableQualifier": "tblServices"
+                    },
+                    "Right": {
+                      "Display": "tblClientServiceNeeds.ServiceID",
+                      "Kind": "Column",
+                      "ColumnName": "ServiceID",
+                      "TableQualifier": "tblClientServiceNeeds"
+                    }
+                  },
+                  {
+                    "NodeKind": "Comparison",
+                    "Operator": "=",
+                    "Left": {
+                      "Display": "tblServices.ServiceID",
+                      "Kind": "Column",
+                      "ColumnName": "ServiceID",
+                      "TableQualifier": "tblServices"
+                    },
+                    "Right": {
+                      "Display": "tblProviderServiceCatalog.ServiceID",
+                      "Kind": "Column",
+                      "ColumnName": "ServiceID",
+                      "TableQualifier": "tblProviderServiceCatalog"
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "Where": {
+            "NodeKind": "Comparison",
+            "Operator": "\u003C\u003E",
+            "Left": {
+              "Display": "(tblClientServicePlan.Status)",
+              "Kind": "Compound"
+            },
+            "Right": {
+              "Display": "\u0022Cancelled\u0022",
+              "Kind": "Literal",
+              "LiteralKind": "String"
+            }
+          }
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetServicePlansByService"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qxtClientServiceCosts",
+      "QueryType": "MakeTable",
+      "QueryTypeCode": 16,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
+        "Parsed": {
+          "Raw": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
+          "QueryType": "MakeTable"
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetQxtClientServiceCosts"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qxtClientServiceHours",
+      "QueryType": "MakeTable",
+      "QueryTypeCode": 16,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "TRANSFORM Sum(csp.HoursPerWeek) AS TotalHours\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
+        "Parsed": {
+          "Raw": "TRANSFORM Sum(csp.HoursPerWeek) AS TotalHours\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
+          "QueryType": "MakeTable"
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetQxtClientServiceHours"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qxtProviderServiceCosts",
+      "QueryType": "MakeTable",
+      "QueryTypeCode": 16,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
+        "Parsed": {
+          "Raw": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
+          "QueryType": "MakeTable"
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetQxtProviderServiceCosts"
+      }
+    },
+    {
+      "ItemKind": "Query",
+      "Name": "qxtProviderServiceHours",
+      "QueryType": "MakeTable",
+      "QueryTypeCode": 16,
+      "Connect": "",
+      "ReturnsRecords": true,
+      "OdbcTimeout": 60,
+      "Sql": {
+        "OriginalText": "TRANSFORM Sum(csp.HoursPerWeek) AS TotalHours\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
+        "Parsed": {
+          "Raw": "TRANSFORM Sum(csp.HoursPerWeek) AS TotalHours\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
+          "QueryType": "MakeTable"
+        }
+      },
+      "Abstraction": {
+        "SuggestedMethodName": "GetQxtProviderServiceHours"
+      }
+    }
+  ],
   "Modules": [],
   "Tables": [],
   "Relationships": [],

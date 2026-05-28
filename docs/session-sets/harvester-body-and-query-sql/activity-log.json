@@ -74,6 +74,87 @@
       "description": "Cross-provider verification (gpt-5-4) Round 1: ISSUES_FOUND (Major: ResolvedToMe Kind inconsistency, Minor: incomplete sort key). Round 2: fixed both. Round 3: VERIFIED",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "bootstrap",
+      "dateTime": "2026-05-28T08:44:27.647450-04:00",
+      "description": "Read spec and prior session review. Session 1 complete (VERIFIED). API keys OK. Session 2 start registered.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "bootstrap",
+      "dateTime": "2026-05-28T09:05:37.917614-04:00",
+      "description": "Prior session VERIFIED committed pushed. API keys OK. Session 2 start registered.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "read-prior-review",
+      "dateTime": "2026-05-28T09:05:37.918622-04:00",
+      "description": "Read Session 1 review and v1-adr D14 description. QueryAbstraction builder already produces structured SQL data.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "read-seam",
+      "dateTime": "2026-05-28T09:05:37.918622-04:00",
+      "description": "Read QueryExporter (raw/Queries/*.json format), SqlParserPipeline, QueryAbstractionBuilder, DatabaseManifest.Queries (was QueryAbstraction[], changed to JsonNode[]).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "architecture",
+      "dateTime": "2026-05-28T09:05:37.918622-04:00",
+      "description": "Routed architecture task (Opus). Design: QuerySqlProjector.Project(name, typeName, sql, abstraction) -> JsonNode. RawQueryRecord for deserialization. QueryType map, parameter source map, PredicateNode via JsonSerializer.SerializeToNode.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "implement",
+      "dateTime": "2026-05-28T09:05:37.919638-04:00",
+      "description": "Created QuerySqlProjector.cs in Pipeline.Manifest/. Updated DatabaseManifest.Queries from QueryAbstraction[] to JsonNode[]. Updated aggregator. Updated schema: Queries.items from QueryAbstraction to QueryItem. Wired BuildQueryExports in EmitManifestArtifacts.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "unit-tests",
+      "dateTime": "2026-05-28T09:05:37.919638-04:00",
+      "description": "20 QuerySqlProjectorTests: basic shape, QueryType mapping (9 theory), SELECT projection, aggregate detection, FROM projection, PARAMETERS mapping, failed-parse fallback, abstraction section, optional DAO fields. All pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "schema-conformance",
+      "dateTime": "2026-05-28T09:05:37.920627-04:00",
+      "description": "Added HomeHealthCare_FullRun_ManifestValidatesAgainstSchema integration test. All 45 integration tests pass. 427 Pipeline tests pass.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "build-test",
+      "dateTime": "2026-05-28T09:05:37.920627-04:00",
+      "description": "dotnet build && dotnet test: 427 Pipeline, 436+2skip Tests, 70 SymbolDb, 45 Integration. All pass.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }

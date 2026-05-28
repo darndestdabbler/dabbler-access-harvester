@@ -44,9 +44,11 @@ public sealed class PredicateNodeRoundTripTests
 
     private static string WrapInManifest(PredicateNode where)
     {
-        // Minimal DatabaseManifest with one QueryAbstraction that holds
-        // the PredicateNode as its Where clause. Used to validate the
+        // Minimal DatabaseManifest with one QueryItem (D14 format) that holds
+        // the PredicateNode as Sql.Parsed.Where. Used to validate the
         // full document (including the PredicateNode) against v1.0.
+        var whereNode = JsonSerializer.SerializeToDocument(
+            where, typeof(PredicateNode), SerializerOptions).RootElement;
         var manifest = new
         {
             SchemaType = "DatabaseManifest",
@@ -57,10 +59,19 @@ public sealed class PredicateNodeRoundTripTests
             {
                 new
                 {
-                    SourceQueryName = "qryTest",
-                    Shape = "Select",
-                    Where = JsonSerializer.SerializeToDocument(
-                        where, typeof(PredicateNode), SerializerOptions).RootElement,
+                    ItemKind = "Query",
+                    Name = "qryTest",
+                    QueryType = "Select",
+                    Sql = new
+                    {
+                        OriginalText = "SELECT * FROM tblTest WHERE StatusID = 1",
+                        Parsed = new
+                        {
+                            Raw = "SELECT * FROM tblTest WHERE StatusID = 1",
+                            QueryType = "Select",
+                            Where = whereNode,
+                        }
+                    }
                 }
             },
         };

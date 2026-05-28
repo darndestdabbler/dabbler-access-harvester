@@ -1,0 +1,2 @@
+Next, focus on `D15: ExpressionItem` population. This involves parsing and populating expression trees for form control sources, validation rules, default values, and calculated expressions. This work is critical for defining form behavior and can proceed before the more complex `Body.Statements` or `QueryItem.Abstraction.ReturnShape` which require a resolved symbol table.
+Suggested slug: `harvester-expressions-and-statements`

@@ -90,6 +90,44 @@ public sealed class ManifestSchemaConformanceTests
         }
     }
 
+    /// <summary>
+    /// Full pipeline run against HomeHealthCare validates the complete manifest
+    /// (Modules + Forms + Reports + Queries) against the v1.0 schema.
+    /// Closes D14: the Queries array now holds QueryItem objects with
+    /// Sql.Parsed populated by the Jet SQL parser.
+    /// </summary>
+    [SkippableFact]
+    [SupportedOSPlatform("windows")]
+    public void HomeHealthCare_FullRun_ManifestValidatesAgainstSchema()
+    {
+        AccessAvailability.SkipIfNoAccess();
+
+        string db = Path.Combine(RepoPaths.Samples(), "HomeHealthCare.accdb");
+        Skip.IfNot(File.Exists(db), $"Canonical fixture not present at {db}.");
+
+        string outRoot = Path.Combine(Path.GetTempPath(), $"ah-int-hhc-fullrun-{Guid.NewGuid():N}");
+        try
+        {
+            var runResult = CorePipeline.Default().Run(db, outRoot);
+
+            string manifestPath = Path.Combine(runResult.BaseDir, "manifest.json");
+            Assert.True(File.Exists(manifestPath), $"Manifest not produced at {manifestPath}.");
+
+            string json = File.ReadAllText(manifestPath);
+            var result = ValidatorAgainstHarvesterSchema().Validate(json);
+
+            Assert.True(
+                result.IsValid,
+                $"HomeHealthCare full-run manifest {manifestPath} failed schema validation:\n  - " +
+                string.Join("\n  - ", result.Errors));
+        }
+        finally
+        {
+            if (Directory.Exists(outRoot))
+                Directory.Delete(outRoot, recursive: true);
+        }
+    }
+
     // Shared with Pipeline.Run() — keeping the options identical
     // ensures the validator sees the same JSON the production path
     // emits.

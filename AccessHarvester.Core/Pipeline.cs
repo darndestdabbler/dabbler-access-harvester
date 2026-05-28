@@ -11,6 +11,7 @@ using AccessHarvester.Core.Extraction;
 using AccessHarvester.Core.Translation;
 using AccessHarvester.Pipeline.Enrichment;
 using AccessHarvester.Pipeline.Manifest;
+using AccessHarvester.Sql.Parser;
 using AccessHarvester.Vba.Parser;
 using AccessHarvester.Vba.Resolver.CrossReference;
 using AccessHarvester.Vba.Resolver.References;
@@ -334,6 +335,9 @@ public sealed class Pipeline
         var reportExports = BuildFormOrReportExports(
             parsed, classifications, irDir, "Reports", diagnostics);
 
+        // ── 4b. Query exports (D14: Sql.Parsed + Sql.Parameters) ──────
+        var queryExports = BuildQueryExports(rawDir, diagnostics);
+
         // ── 5. Assemble and write ──────────────────────────────────────
         IReadOnlyList<UnresolvedItem> unresolvedItems = Array.Empty<UnresolvedItem>();
 
@@ -342,6 +346,7 @@ public sealed class Pipeline
             harvesterVersion: ResolveHarvesterVersion(),
             forms: formExports,
             reports: reportExports,
+            queries: queryExports,
             modules: moduleExports,
             unresolvedItems: unresolvedItems,
             diagnostics: diagnostics);
@@ -415,6 +420,78 @@ public sealed class Pipeline
 
         return exports;
     }
+
+    // Reads saved-query JSON files from raw/Queries/, parses each query's SQL
+    // with SqlParserPipeline, builds a QueryAbstraction, and projects a QueryItem
+    // JsonNode per the D14 spec.
+    private static List<System.Text.Json.Nodes.JsonNode> BuildQueryExports(
+        string rawDir,
+        List<HarvesterDiagnostic> diagnostics)
+    {
+        var queryDir = Path.Combine(rawDir, "Queries");
+        var exports = new List<System.Text.Json.Nodes.JsonNode>();
+        if (!Directory.Exists(queryDir)) return exports;
+
+        var readOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+        foreach (var file in Directory.GetFiles(queryDir, "*.json")
+                                      .OrderBy(f => f, StringComparer.Ordinal))
+        {
+            string name = Path.GetFileNameWithoutExtension(file);
+            try
+            {
+                var raw = JsonSerializer.Deserialize<RawQueryRecord>(
+                    File.ReadAllText(file, Encoding.UTF8), readOptions)
+                    ?? throw new InvalidDataException("Null JSON root.");
+
+                // Parse the SQL; graceful fallback when parse fails.
+                QueryAbstraction? abstraction = null;
+                try
+                {
+                    var sqlText = raw.Sql ?? string.Empty;
+                    var parseResult = SqlParserPipeline.Parse(sqlText);
+                    var sqlAst = parseResult.BuildAst(raw.Name ?? name);
+                    abstraction = QueryAbstractionBuilder.Build(raw.Name ?? name, sqlAst);
+                }
+                catch
+                {
+                    // Parse failure → abstraction stays null → Raw-only Parsed
+                }
+
+                var queryNode = QuerySqlProjector.Project(
+                    name: raw.Name ?? name,
+                    queryTypeName: raw.QueryTypeName ?? "Select",
+                    sqlText: raw.Sql ?? string.Empty,
+                    abstraction: abstraction,
+                    connect: raw.Connect,
+                    returnsRecords: raw.ReturnsRecords,
+                    odbcTimeout: raw.OdbcTimeout,
+                    queryTypeCode: raw.QueryTypeCode);
+
+                exports.Add(queryNode);
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add(new HarvesterDiagnostic
+                {
+                    Severity = HarvesterDiagnosticSeverity.Warning,
+                    Message = $"Query export failed for '{name}': {ex.Message}",
+                    Code = "QUERY_EXPORT_FAILURE",
+                });
+            }
+        }
+
+        return exports;
+    }
+
+    private sealed record RawQueryRecord(
+        string? Name,
+        int? QueryTypeCode,
+        string? QueryTypeName,
+        string? Sql,
+        string? Connect,
+        bool? ReturnsRecords,
+        int? OdbcTimeout);
 
     private sealed record ParsedModuleEntry(
         string Name, ManifestModuleKind Kind, string Category, ResolvedModule Resolved);

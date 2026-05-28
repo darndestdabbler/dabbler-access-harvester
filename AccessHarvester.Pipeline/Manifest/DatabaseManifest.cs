@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using AccessHarvester.Access;
 using AccessHarvester.Pipeline.Enrichment;
@@ -63,8 +64,8 @@ public sealed record DatabaseManifest
     public IReadOnlyList<FormExport> Reports { get; init; }
         = System.Array.Empty<FormExport>();
 
-    public IReadOnlyList<QueryAbstraction> Queries { get; init; }
-        = System.Array.Empty<QueryAbstraction>();
+    public IReadOnlyList<JsonNode> Queries { get; init; }
+        = System.Array.Empty<JsonNode>();
 
     public IReadOnlyList<ModuleExport> Modules { get; init; }
         = System.Array.Empty<ModuleExport>();

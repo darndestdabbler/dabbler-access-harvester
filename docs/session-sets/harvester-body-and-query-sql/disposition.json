@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "summary": "Session 2 (final): D14 closed. QuerySqlProjector projects Jet SQL parser output (QueryAbstraction) into manifest QueryItem JSON. DatabaseManifest.Queries now holds QueryItem objects with Sql.Parsed, Sql.Parameters, and Abstraction populated. 20 new unit tests. Schema updated. Golden corpus rebuilt. Full-run schema conformance test added. VERIFIED (gpt-5-4, 2 rounds).",
+  "verification_method": "cross-provider",
+  "files_changed": [
+    "AccessHarvester.Pipeline/Manifest/QuerySqlProjector.cs",
+    "AccessHarvester.Pipeline/Manifest/DatabaseManifest.cs",
+    "AccessHarvester.Pipeline/Manifest/DatabaseManifestAggregator.cs",
+    "AccessHarvester.Core/Pipeline.cs",
+    "docs/test-cases/harvester-schema.v1.0.json",
+    "tests/AccessHarvester.Pipeline.Tests/Manifest/QuerySqlProjectorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Manifest/DatabaseManifestAggregatorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/PredicateNodeRoundTripTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs",
+    "samples/GoldenOutput/HomeHealthCare/",
+    "samples/GoldenOutput/NorthwindDevEdition/"
+  ],
+  "next_session_set": {
+    "slug": "expression-item-population",
+    "summary": "Populate ExpressionItem in the manifest for form control sources, validation rules, default values, and calculated expressions (D15). Requires reading ir-tier form data and projecting expressions."
+  },
+  "blockers": []
+}
