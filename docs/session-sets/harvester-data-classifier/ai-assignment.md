@@ -80,11 +80,48 @@ cheaper-model false-VERIFIED risk.
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- **Orchestrator used:** `claude-opus-4-7` at effort=medium (operator override of
+  the routed Sonnet-at-high recommendation; the human triggered the session
+  with the default trigger phrase, which retained the Anthropic Max window's
+  Opus orchestrator).
+- **Total routed cost:** ≈$1.01 — R1 session-verification (gpt-5-4) $0.384,
+  R2 (gpt-5-4) $0.387, R3 (gpt-5-4) $0.233, Session-3 recommendation
+  (gemini-pro) $0.009.
+- **Deviations from recommendation:** Orchestrator. The routed analysis
+  picked Sonnet-at-high; the operator used Opus-at-medium. In practice this
+  was net-positive because the scanner pipeline turned out to need three
+  rounds of cross-provider verification to settle (R1 surfaced five issues,
+  R2 surfaced four more, R3 VERIFIED) and each fix touched multiple files
+  with interleaved correctness, security, and resource-hygiene concerns —
+  exactly the kind of cross-cutting synthesis Opus handles well. Routed cost
+  came in within an order of magnitude of the Sonnet estimate ($0.05–$0.15)
+  because verification ran three times.
+- **Notes for next-session calibration:** Two existing lessons were
+  re-confirmed here:
+  (1) the **prose-before-JSON closeout-grade verification lead** kept every
+  verifier round substantive — R1 returned a 7-paragraph audit, R2 a
+  7-paragraph audit with new findings, R3 a 6-paragraph audit with a
+  VERIFIED verdict, and not one round needed a re-prompt for the JSON block;
+  and (2) the **"Send related files to the cross-provider verifier"**
+  convention paid off — including the prior round's review file in R2 and
+  R3 let the verifier explicitly check whether the prior findings were
+  resolved rather than re-flagging from scratch. A new
+  lesson-candidate worth logging at Step 9: when a session ships substantial
+  COM-using code, the round-1 verification will almost always flag RCW
+  hygiene + SQL identifier escaping; pre-empting both in the first cut
+  would save a round.
 
 ---
 
-**Next-session orchestrator recommendation (Session 3):** (To be filled after Session 2 completes.)
+**Next-session orchestrator recommendation (Session 3):**
+`claude-sonnet-4-6` at effort=normal (gemini-pro analysis 2026-05-28: "The
+task is to implement a single-file HTML/JS editor from a detailed
+specification and a pre-existing JSON schema, which is a clear example of
+mechanical correspondence. Per project guidance, this work is pinned to the
+more cost-effective Sonnet model, as the architectural synthesis was
+completed in Session 1. The only open decision (repo location) is
+operator-driven, not a task for the AI."). Estimated routed cost: Low
+($0.03–$0.10).
 
 ## Session 3 of 4: HTML Classification Editor
 

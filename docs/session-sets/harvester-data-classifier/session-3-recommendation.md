@@ -1,0 +1,3 @@
+**Recommended orchestrator:** `claude-sonnet-4-6` at `effort=normal`
+**Rationale:** The task is to implement a single-file HTML/JS editor from a detailed specification and a pre-existing JSON schema, which is a clear example of mechanical correspondence. Per project guidance, this work is pinned to the more cost-effective Sonnet model, as the architectural synthesis was completed in Session 1. The only open decision (repo location) is operator-driven, not a task for the AI.
+**Estimated routed cost:** Low ($0.03-$0.10)

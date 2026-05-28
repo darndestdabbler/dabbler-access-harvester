@@ -1,14 +1,36 @@
 {
   "status": "completed",
-  "summary": "Session 1 of 4 finalised the classification.json keystone JSON contract (Draft-07 schema + realistic sample fixture). Cross-provider verification ran four rounds: R1 produced 1 Critical + 2 Major findings (privacy invariant, single-column FK scope, FK-authority ambiguity); R2 and R3 applied surgical fixes (placeholder-regex hardening, explicit single-column-FK scope statement, if/then constraint on humanOverride for FK columns); R4 surfaced a contrived all-uppercase-with-placeholder residual that was adjudicated as accept-dismissal after a Gemini Pro tiebreaker (cause=genuine-split, resolution=accept-dismissal recorded via record_adjudication) and human confirmation per the Step 7 disagreement procedure.",
+  "summary": "Session 2 of 4 implemented the AccessHarvester classify subcommand: a pure-logic Pipeline layer (RawSchema/ScanConfig/PiiDictionary/ValueFormatDetector/HeuristicsEngine/ClassificationWriter/ClassificationRunner + ISchemaReader/IValueSampler interfaces and a ClassificationDegradation channel), a Core/Com COM-using OleDbDaoSchemaReader (OLE DB TABLES/COLUMNS/PK/FK + DAO AutoNumber + DAO RowSource implicit-FK + linked-table flagging) and OleDbValueSampler (Jet-subquery cardinality, value sampling that never leaks raw values, defensive identifier escaper), and a CLI ClassifyCommand wired into Program.cs with --in / --out / --exclude-cleanup / --json-status. Three rounds of cross-provider verification by gpt-5-4: R1 surfaced 5 issues (lookup-reference category never emitted; incomplete DAO RCW release; identifier escaping + over-broad sampler catches; TryRead*Property too broad; fkTarget.column='*' placeholder + Degradations channel unused) — all 5 fixed. R2 surfaced 4 issues against the R1 fixes (lookup-promotion missed format-pattern columns; rejected identifier aborted scan instead of degrading; TryRead*Property still caught all COMException; composite-FK fallback false-positive) — all 4 fixed. R3 verdict VERIFIED with no further findings. Tests: full suite green (~1900 passing, 2 pre-existing skipped, 1 SkippableFact skipped on Windows-without-COM); 13 new hermetic Pipeline.Tests + 4 new Tests.Classification identifier-escaper tests + 3 new Integration ClassifyCommand tests.",
   "files_changed": [
-    "AccessHarvester.Pipeline/Classification/classification-schema.json",
-    "samples/classification-fixture.json",
+    "AccessHarvester.Cli/Commands/ClassifyCommand.cs",
+    "AccessHarvester.Cli/Program.cs",
+    "AccessHarvester.Core/AccessHarvester.Core.csproj",
+    "AccessHarvester.Core/Com/OleDbDaoSchemaReader.cs",
+    "AccessHarvester.Core/Com/OleDbValueSampler.cs",
+    "AccessHarvester.Pipeline/Classification/ClassificationDegradation.cs",
+    "AccessHarvester.Pipeline/Classification/ClassificationFinding.cs",
+    "AccessHarvester.Pipeline/Classification/ClassificationRunner.cs",
+    "AccessHarvester.Pipeline/Classification/ClassificationWriter.cs",
+    "AccessHarvester.Pipeline/Classification/HeuristicsEngine.cs",
+    "AccessHarvester.Pipeline/Classification/ISchemaReader.cs",
+    "AccessHarvester.Pipeline/Classification/PiiDictionary.cs",
+    "AccessHarvester.Pipeline/Classification/RawSchema.cs",
+    "AccessHarvester.Pipeline/Classification/ScanConfig.cs",
+    "AccessHarvester.Pipeline/Classification/ValueFormatDetector.cs",
+    "tests/AccessHarvester.Integration/Cli/ClassifyCommandTests.cs",
+    "tests/AccessHarvester.Integration/TestSupport/CliInvoker.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Classification/ClassificationWriterTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Classification/HeuristicsEngineTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Classification/PiiDictionaryTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Classification/ValueFormatDetectorTests.cs",
+    "tests/AccessHarvester.Tests/Classification/OleDbValueSamplerIdentifierEscapingTests.cs",
     "docs/session-sets/harvester-data-classifier/ai-assignment.md",
     "docs/session-sets/harvester-data-classifier/session-state.json",
-    "docs/session-sets/harvester-data-classifier/session-reviews/session-001.md",
-    "docs/session-sets/harvester-data-classifier/session-reviews/session-001-tiebreaker-r4.md",
-    "docs/session-sets/harvester-data-classifier/issue-logs/session-001.json"
+    "docs/session-sets/harvester-data-classifier/session-3-recommendation.md",
+    "docs/session-sets/harvester-data-classifier/session-reviews/session-002-r1.md",
+    "docs/session-sets/harvester-data-classifier/session-reviews/session-002-r2.md",
+    "docs/session-sets/harvester-data-classifier/session-reviews/session-002-r3.md",
+    "docs/session-sets/harvester-data-classifier/issue-logs/session-002.json"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
@@ -16,10 +38,10 @@
     "engine": "claude-code",
     "provider": "anthropic",
     "model": "claude-sonnet-4-6",
-    "effort": "high",
+    "effort": "normal",
     "reason": {
       "code": "switch-due-to-cost",
-      "specifics": "Session 2 is mechanical correspondence (OLE DB schema reader, DAO interop, regex application, subquery cardinality) per plan section 3 and section 8 — the architecture is already documented; Sonnet at effort=high fits the pin-mechanical-correspondence-to-Sonnet convention. Routed analysis (Gemini Pro 2026-05-28) recommended the downgrade from Opus to Sonnet."
+      "specifics": "Session 3 is a single-file zero-install HTML editor (JS + DOM) driven by a finalised JSON schema. The 'open decision' (new repo vs. tools/classification-editor.html) is the only architectural call and is operator-driven. Per project-guidance 'Pin mechanical-correspondence task types to Sonnet rather than Opus', Sonnet at effort=normal fits the cost band; gemini-pro analysis on 2026-05-28 confirmed."
     }
   },
   "blockers": []

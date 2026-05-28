@@ -1,7 +1,7 @@
 {
   "sessionSetName": "harvester-data-classifier",
   "createdDate": "2026-05-28T15:03:42.322129-04:00",
-  "totalSessions": 0,
+  "totalSessions": 4,
   "entries": [
     {
       "sessionNumber": 1,
@@ -153,6 +153,140 @@
       "stepKey": "session-1/disposition",
       "dateTime": "2026-05-28T15:29:15.767654-04:00",
       "description": "Authored docs/session-sets/harvester-data-classifier/disposition.json with status=completed, next_orchestrator block (claude-sonnet-4-6 high, reason=switch-due-to-cost), and the full files_changed list per the lessons-learned 'write disposition before closeout commit' convention.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/read-guidance-and-register-start",
+      "dateTime": "2026-05-28T15:56:11.754470-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, data-classification-plan.md § 3 + § 8, the Session 1 schema and fixture, and the Session 2 block of ai-assignment.md. Registered session start via ai_router.register_session_start (which wrote v2 shape on disk); restored the hybrid v4+v2 session-state.json shape per the user's installed-router-vs-canonical-router workaround (feedback_session_state_hybrid_shape memory).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/implement-pipeline-classification",
+      "dateTime": "2026-05-28T16:00:00-04:00",
+      "description": "Implemented AccessHarvester.Pipeline/Classification/: ScanConfig, PiiDictionary (Presidio-seeded patterns + glob compiler), RawSchema (DTO), ClassificationFinding (10-category taxonomy + table-hint enum + kebab-case wire mapping), ValueFormatDetector (canonical format pattern with schema-conformant rules), HeuristicsEngine (pure-logic classification with lookup detection, PII veto, system-audit detection, lookup-payload promotion), ClassificationWriter (JSON serializer with editor-default humanOverride blocks), ClassificationRunner (interface-driven pipeline + degradation channel), ISchemaReader/IValueSampler interfaces, ClassificationDegradation/IDegradationReporter for the partial-failure channel.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/implement-com-readers",
+      "dateTime": "2026-05-28T16:05:00-04:00",
+      "description": "Implemented AccessHarvester.Core/Com/OleDbDaoSchemaReader (OLE DB GetOleDbSchemaTable for TABLES/COLUMNS/PRIMARY_KEYS/FOREIGN_KEYS with ACE 16.0->12.0 provider fallback + DAO via AccessComSession for AutoNumber attribute, combo-box RowSource implicit FK, linked-table flagging, multi-value field detection) and OleDbValueSampler (Jet/ACE subquery cardinality, value sampling that never leaks raw values, defensive bracketed-identifier escaper rejecting ]/NUL/CR/LF). Added System.Data.OleDb 9.0.0 PackageReference to AccessHarvester.Core.csproj.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/wire-cli",
+      "dateTime": "2026-05-28T16:10:00-04:00",
+      "description": "Authored AccessHarvester.Cli/Commands/ClassifyCommand.cs (--in/--out/--exclude-cleanup/--json-status; --exclude-cleanup honours the same uat-checklist-editor Review[Passes=true] format as identify-usage/identify-cleanup). Wired classify subcommand into Program.cs dispatch table, bare-file exclusion set, and usage text.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/unit-tests",
+      "dateTime": "2026-05-28T16:15:00-04:00",
+      "description": "Wrote hermetic unit tests under tests/AccessHarvester.Pipeline.Tests/Classification/: PiiDictionaryTests (glob anchoring + value-regex coverage), ValueFormatDetectorTests (consistent shape, literal+digit, null on disagreement, schema-conformant output), HeuristicsEngineTests (autonumber PK, FK, PII name+value, quasi-id DOB, memo, thin lookup, PII veto, system-audit recurrence requirement, linked tables, referenced-by informational only, deterministic table order), ClassificationWriterTests (writer output schema-validates, scanner-default humanOverride emitted, ISO 8601 UTC scannedUtc, kebab-case wire forms). Wrote OleDbValueSamplerIdentifierEscapingTests for the defensive escaper.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/integration-test",
+      "dateTime": "2026-05-28T16:18:00-04:00",
+      "description": "Wrote tests/AccessHarvester.Integration/Cli/ClassifyCommandTests.cs: [SkippableFact] end-to-end test that runs the published CLI against samples/HomeHealthCare.accdb and asserts schema-conformant output + privacy invariant (empty notes) + --json-status envelope; two negative-case tests for missing --in and nonexistent database. Added RunWithTimeout overload to CliInvoker so COM-heavy invocations have a 240s budget.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-05-28T16:22:00-04:00",
+      "description": "dotnet build -c Debug then dotnet test (sequential per project-guidance). Initial build needed System.Collections.Generic/System/Linq using directives in every new Pipeline file (Pipeline does not enable ImplicitUsings). Full test run green: 131 + 9 + 85 + 294 + 400 + 637 + 70 + 447 (2 skipped, 1 SkippableFact skipped on no-Access host) + 48 = ~1900 passed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verification-r1",
+      "dateTime": "2026-05-28T16:30:00-04:00",
+      "description": "Round 1 cross-provider session-verification via route(task_type='session-verification') -> gpt-5-4 (cost $0.384). Verdict ISSUES_FOUND: 4 Major + 1 Minor — lookup-reference category never emitted; DAO RCW cleanup incomplete; SQL identifier escaping + over-broad sampler catches; TryRead*Property too broad; fkTarget.column='*' placeholder + Degradations channel unused.",
+      "status": "complete",
+      "routedApiCalls": [
+        { "model": "gpt-5-4", "taskType": "session-verification", "costUsd": 0.3838 }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/fix-r1-and-verify-r2",
+      "dateTime": "2026-05-28T16:55:00-04:00",
+      "description": "Applied all 5 R1 fixes: post-pass lookup-reference promotion in HeuristicsEngine; paired finally RCW releases in OleDbDaoSchemaReader.ReadDaoAugmentations (currentDb, tableDefs, fields, td, fd, propsObj, propObj); EscapeIdentifier helper + narrowed per-query catches that surface DegradationKind.SamplingError; TryRead*Property narrowed to catch(COMException); new ClassificationDegradation + IDegradationReporter contract + ResolveImplicitFk that refuses to fabricate column names + DetectCompositeFks for composite-FK degradations + ClassifyCommand exit 3 with full --json-status surface. Added unit tests for the lookup-payload promotion + the identifier escaper. R2 gpt-5-4 verdict ISSUES_FOUND (cost $0.387): 2 Major + 2 Minor — lookup promotion missed sensitive-non-pii-from-format-pattern; rejected identifier aborted scan; TryRead*Property still caught all COMException; composite-FK fallback false-positive.",
+      "status": "complete",
+      "routedApiCalls": [
+        { "model": "gpt-5-4", "taskType": "session-verification", "costUsd": 0.3869 }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/fix-r2-and-verify-r3",
+      "dateTime": "2026-05-28T17:10:00-04:00",
+      "description": "Applied all 4 R2 fixes: lookup-promotion guard switched from positive allowlist to negative exclusion list; EscapeIdentifier calls moved inside per-table/per-column try/catch that converts ArgumentException to SamplingError degradation; TryRead*Property gained a when(DaoPropertyAbsentHResults.Contains(ex.HResult)) filter restricted to DAO HRESULTs 0x800A0CC1 and 0x800A0CB3; DetectCompositeFks fallback removed — composite degradation only emitted when FK_NAME is populated. Added Lookup_payload_promotion_includes_format_pattern_sensitive_columns test. R3 gpt-5-4 verdict VERIFIED (cost $0.233): all four R2 fixes confirmed; no new findings; no regressions; privacy invariant intact.",
+      "status": "complete",
+      "routedApiCalls": [
+        { "model": "gpt-5-4", "taskType": "session-verification", "costUsd": 0.2326 }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 11,
+      "stepKey": "session-2/issue-log",
+      "dateTime": "2026-05-28T17:12:00-04:00",
+      "description": "Wrote issue-logs/session-002.json covering all three rounds (R1 5 issues all fixed, R2 4 issues all fixed, R3 VERIFIED) with status=fixed and per-issue fixSummary.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 12,
+      "stepKey": "session-2/session-3-recommendation",
+      "dateTime": "2026-05-28T17:14:00-04:00",
+      "description": "Routed Session 3 orchestrator recommendation via route(task_type='analysis') -> gemini-pro (cost $0.009). Recommendation: claude-sonnet-4-6 at effort=normal (mechanical correspondence: single-file HTML/JS editor from finalised JSON schema; per project-guidance Pin-mechanical-correspondence-to-Sonnet convention).",
+      "status": "complete",
+      "routedApiCalls": [
+        { "model": "gemini-pro", "taskType": "analysis", "costUsd": 0.0091 }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 13,
+      "stepKey": "session-2/ai-assignment-actuals",
+      "dateTime": "2026-05-28T17:15:00-04:00",
+      "description": "Appended Session 2 actuals to ai-assignment.md (orchestrator used = claude-opus-4-7 medium with operator override of the routed Sonnet-high recommendation, total routed cost ~$1.01, deviations note, calibration notes including the new lesson-candidate about RCW + SQL escaping being routine R1 findings on COM-heavy code). Updated Session 3 block with the routed Sonnet-normal recommendation.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 14,
+      "stepKey": "session-2/disposition",
+      "dateTime": "2026-05-28T17:16:00-04:00",
+      "description": "Authored docs/session-sets/harvester-data-classifier/disposition.json with status=completed, full files_changed list (15 new + 7 modified), next_orchestrator block (claude-sonnet-4-6 normal, reason=switch-due-to-cost), blockers=[].",
       "status": "complete",
       "routedApiCalls": []
     }

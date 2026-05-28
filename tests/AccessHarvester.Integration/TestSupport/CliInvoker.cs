@@ -19,7 +19,16 @@ internal static class CliInvoker
 {
     private static readonly string ExePath = LocateExe();
 
-    public static CliResult Run(params string[] args)
+    public static CliResult Run(params string[] args) => RunWithTimeout(60_000, args);
+
+    /// <summary>
+    /// Variant that lets a caller override the default 60-second per-process
+    /// timeout. COM-driven subcommands against larger sample databases
+    /// (e.g. <c>classify</c> against HomeHealthCare.accdb, which value-samples
+    /// every non-key column across hundreds of tables) can legitimately need
+    /// more wall-clock than the default.
+    /// </summary>
+    public static CliResult RunWithTimeout(int timeoutMs, params string[] args)
     {
         var psi = new ProcessStartInfo
         {
@@ -38,10 +47,10 @@ internal static class CliInvoker
         // Drain both streams concurrently to avoid deadlock if either fills.
         var stdoutTask = proc.StandardOutput.ReadToEndAsync();
         var stderrTask = proc.StandardError.ReadToEndAsync();
-        if (!proc.WaitForExit(60_000))
+        if (!proc.WaitForExit(timeoutMs))
         {
             try { proc.Kill(entireProcessTree: true); } catch { /* best-effort */ }
-            throw new TimeoutException($"CLI process did not exit within 60s. args=[{string.Join(' ', args)}]");
+            throw new TimeoutException($"CLI process did not exit within {timeoutMs}ms. args=[{string.Join(' ', args)}]");
         }
         return new CliResult(proc.ExitCode, stdoutTask.Result, stderrTask.Result);
     }

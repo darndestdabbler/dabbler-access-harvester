@@ -1,14 +1,14 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-data-classifier",
-  "currentSession": 1,
+  "currentSession": 2,
   "totalSessions": 4,
   "status": "in-progress",
-  "lifecycleState": "work_in_progress",
+  "lifecycleState": "work_verified",
   "startedAt": "2026-05-28T14:57:45.721333-04:00",
   "completedAt": null,
   "verificationVerdict": "VERIFIED",
-  "completedSessions": [1],
+  "completedSessions": [1, 2],
   "orchestrator": {
     "engine": "claude-code",
     "provider": "anthropic",
@@ -33,7 +33,16 @@
     {
       "number": 2,
       "title": "Scanner CLI",
-      "status": "not-started"
+      "status": "complete",
+      "startedAt": "2026-05-28T15:56:11.754470-04:00",
+      "completedAt": "2026-05-28T17:16:00-04:00",
+      "verificationVerdict": "VERIFIED",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "medium"
+      }
     },
     {
       "number": 3,

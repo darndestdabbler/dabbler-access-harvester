@@ -1,0 +1,108 @@
+{
+  "sessionNumber": 2,
+  "roundsCompleted": 3,
+  "finalVerdict": "VERIFIED",
+  "rounds": [
+    {
+      "round": 1,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Major",
+          "id": "R1-1",
+          "location": "AccessHarvester.Pipeline/Classification/HeuristicsEngine.cs",
+          "summary": "Engine never assigned lookup-reference column category, so payload columns of identified lookup tables landed as generic-non-sensitive.",
+          "status": "fixed",
+          "fixedIn": "round 1",
+          "fixSummary": "Added post-pass in HeuristicsEngine.Run that promotes non-key, non-system, non-PII, non-memo payload columns of lookup tables to ColumnCategory.LookupReference. R2 refined the guard from a positive allowlist to a negative exclusion list so format-pattern-recognised payload columns also promote."
+        },
+        {
+          "severity": "Major",
+          "id": "R1-2",
+          "location": "AccessHarvester.Core/Com/OleDbDaoSchemaReader.cs",
+          "summary": "DAO COM cleanup was incomplete — currentDb, tableDefs, fields collections, and Properties RCWs were not released in finally blocks.",
+          "status": "fixed",
+          "fixedIn": "round 1",
+          "fixSummary": "Every acquired DAO RCW (currentDbObj, tableDefsObj, td, fieldsObj, fd, propsObj, propObj) is now released in a paired finally so exceptions cannot leave live RCWs behind."
+        },
+        {
+          "severity": "Major",
+          "id": "R1-3",
+          "location": "AccessHarvester.Core/Com/OleDbValueSampler.cs",
+          "summary": "Sampler built SQL from unescaped schema names and then swallowed execution failures as zero counts, silently corrupting classification results.",
+          "status": "fixed",
+          "fixedIn": "round 1",
+          "fixSummary": "Introduced EscapeIdentifier helper that rejects ], NUL, CR, LF; narrowed per-query catches to surface ClassificationDegradation entries. R2 moved EscapeIdentifier inside the per-table/per-column try blocks so a rejected identifier becomes a degradation instead of aborting the scan."
+        },
+        {
+          "severity": "Minor",
+          "id": "R1-4",
+          "location": "AccessHarvester.Core/Com/OleDbDaoSchemaReader.cs",
+          "summary": "TryRead*Property caught all exceptions, masking real DAO/COM property-read failures.",
+          "status": "fixed",
+          "fixedIn": "round 1",
+          "fixSummary": "Narrowed to catch (COMException). R2 further restricted with a when-clause that only treats DAO HRESULTs 0x800A0CC1 (item not in collection) and 0x800A0CB3 (operation not supported for this type) as 'property absent'; other COM failures bubble out as SchemaReadError degradations."
+        },
+        {
+          "severity": "Major",
+          "id": "R1-5",
+          "location": "AccessHarvester.Core/Com/OleDbDaoSchemaReader.cs + ClassificationRunner + ClassifyCommand",
+          "summary": "Implicit FKs exposing only a table name emitted fkTarget.column = '*' placeholder; the Degradations channel was unused despite the contract.",
+          "status": "fixed",
+          "fixedIn": "round 1",
+          "fixSummary": "Added ClassificationDegradation + IDegradationReporter; ResolveImplicitFk now refuses to fabricate a column name and emits UnresolvedImplicitFk for unresolvable RowSources; ClassifyCommand exits 3 and surfaces every degradation through --json-status. R2 tightened the composite-FK detector to only fire when FK_NAME is present, removing a false-positive fallback that conflated two parallel single-column FKs to the same target table."
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Major",
+          "id": "R2-1",
+          "location": "AccessHarvester.Pipeline/Classification/HeuristicsEngine.cs",
+          "summary": "Lookup post-pass only promoted columns already classified as generic, so format-pattern-recognised non-PII payload columns in lookup tables stayed sensitive-non-pii.",
+          "status": "fixed",
+          "fixedIn": "round 2",
+          "fixSummary": "Refactored the promotion guard from a positive allowlist (GenericNonSensitive | BusinessNaturalKey) to a negative exclusion list (PK / FK / memo / system-audit / both PII flavours / already-LookupReference). Pinned with Lookup_payload_promotion_includes_format_pattern_sensitive_columns test."
+        },
+        {
+          "severity": "Major",
+          "id": "R2-2",
+          "location": "AccessHarvester.Core/Com/OleDbValueSampler.cs",
+          "summary": "Rejected identifiers from EscapeIdentifier threw before the per-query degradation catches, aborting the classify run.",
+          "status": "fixed",
+          "fixedIn": "round 2",
+          "fixSummary": "Wrapped both EscapeIdentifier(table.Name) and EscapeIdentifier(col.Name) calls in their own try/catch blocks that convert ArgumentException into DegradationKind.SamplingError and continue."
+        },
+        {
+          "severity": "Minor",
+          "id": "R2-3",
+          "location": "AccessHarvester.Core/Com/OleDbDaoSchemaReader.cs",
+          "summary": "TryRead*Property treated every COMException as 'property absent', potentially masking real DAO/COM property-read failures.",
+          "status": "fixed",
+          "fixedIn": "round 2",
+          "fixSummary": "Added DaoPropertyAbsentHResults set (0x800A0CC1 and 0x800A0CB3) and a when-clause filter so only those two HRESULTs are treated as 'property absent'; everything else bubbles out for the per-field SchemaReadError catch."
+        },
+        {
+          "severity": "Minor",
+          "id": "R2-4",
+          "location": "AccessHarvester.Core/Com/OleDbDaoSchemaReader.cs",
+          "summary": "Composite-FK detection's fallback grouped by source-table → target-table pair when FK_NAME was missing, falsely conflating two parallel single-column FKs to the same target table.",
+          "status": "fixed",
+          "fixedIn": "round 2",
+          "fixSummary": "Removed the source→target fallback. Per-column FK targets are still always recorded; composite detection only fires when FK_NAME is populated and multiple rows share the same name."
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "verifier": "gpt-5-4",
+      "verdict": "VERIFIED",
+      "issues": []
+    }
+  ]
+}

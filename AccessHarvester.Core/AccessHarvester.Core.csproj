@@ -17,4 +17,12 @@
     <ProjectReference Include="..\AccessHarvester.Pipeline\AccessHarvester.Pipeline.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- System.Data.OleDb is shipped as a separate NuGet package on .NET 8+;
+         required by the classification pipeline (OleDbDaoSchemaReader,
+         OleDbValueSampler). Windows-only at runtime, gated by
+         [SupportedOSPlatform("windows")] on the calling types. -->
+    <PackageReference Include="System.Data.OleDb" Version="9.0.0" />
+  </ItemGroup>
+
 </Project>
