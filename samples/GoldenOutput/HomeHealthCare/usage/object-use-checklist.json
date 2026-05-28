@@ -1,0 +1,867 @@
+﻿{
+  "projectName": "HomeHealthCare \u2014 Object Use Checklist",
+  "review": [
+    {
+      "functionalArea": "Form",
+      "subarea": "frmAbout",
+      "itemLabel": "Form \u0027frmAbout\u0027 \u2014 insufficient signals to determine usage",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Form \u0027frmAbout\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmBudgetServicePlan",
+      "itemLabel": "Main data entry form backed by SELECT cb.*, Trim(Nz([c.FirstName],\\\u0022\\\u0022) \u0026 \u0027 \u0027 \u0026 Nz([c.LastName],\\\u0022\\\u0022)) AS ClientName FROM tblClientBudgets AS cb INNER JOIN tblClients AS c ON cb.ClientID = c.ClientID; ",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "No navigation entry found for Form \u0027frmBudgetServicePlan\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmClientDetail",
+      "itemLabel": "Main data entry form backed by tblClients",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmClientSearch",
+      "itemLabel": "Navigation/shell form \u0027frmClientSearch\u0027 that opens other forms or reports",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmClientServiceNeedDetail",
+      "itemLabel": "Main data entry form backed by tblClientServiceNeeds",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "No navigation entry found for Form \u0027frmClientServiceNeedDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmClientServicePlanDetail",
+      "itemLabel": "Main data entry form backed by tblClientServicePlan",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "No navigation entry found for Form \u0027frmClientServicePlanDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmProviderDetail",
+      "itemLabel": "Main data entry form backed by tblProviders",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmProviderSearch",
+      "itemLabel": "Navigation/shell form \u0027frmProviderSearch\u0027 that opens other forms or reports",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmProviderServiceCatalogDetail",
+      "itemLabel": "Main data entry form backed by tblProviderServiceCatalog",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "No navigation entry found for Form \u0027frmProviderServiceCatalogDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmReportMenu",
+      "itemLabel": "Form \u0027frmReportMenu\u0027 \u2014 insufficient signals to determine usage",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Form \u0027frmReportMenu\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "verifications": []
+        },
+        {
+          "stepNumber": 2,
+          "action": "Form \u0027frmReportMenu\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmReportParam_Client",
+      "itemLabel": "Form \u0027frmReportParam_Client\u0027 \u2014 insufficient signals to determine usage",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Form \u0027frmReportParam_Client\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "verifications": []
+        },
+        {
+          "stepNumber": 2,
+          "action": "Form \u0027frmReportParam_Client\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmReportParam_ClientFY",
+      "itemLabel": "Form \u0027frmReportParam_ClientFY\u0027 \u2014 insufficient signals to determine usage",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Form \u0027frmReportParam_ClientFY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "verifications": []
+        },
+        {
+          "stepNumber": 2,
+          "action": "Form \u0027frmReportParam_ClientFY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmReportParam_FY",
+      "itemLabel": "Form \u0027frmReportParam_FY\u0027 \u2014 insufficient signals to determine usage",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Form \u0027frmReportParam_FY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "verifications": []
+        },
+        {
+          "stepNumber": 2,
+          "action": "Form \u0027frmReportParam_FY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmReportParam_Provider",
+      "itemLabel": "Form \u0027frmReportParam_Provider\u0027 \u2014 insufficient signals to determine usage",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Form \u0027frmReportParam_Provider\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "verifications": []
+        },
+        {
+          "stepNumber": 2,
+          "action": "Form \u0027frmReportParam_Provider\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmReportParam_ProviderFY",
+      "itemLabel": "Form \u0027frmReportParam_ProviderFY\u0027 \u2014 insufficient signals to determine usage",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Form \u0027frmReportParam_ProviderFY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "verifications": []
+        },
+        {
+          "stepNumber": 2,
+          "action": "Form \u0027frmReportParam_ProviderFY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmServiceDetail",
+      "itemLabel": "Main data entry form backed by tblServices",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmServiceList",
+      "itemLabel": "Main data entry form backed by tblServices",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmServiceRateLimits",
+      "itemLabel": "Main data entry form backed by SELECT tblServiceRateLimits.*, tblServices.ServiceName FROM tblServiceRateLimits INNER JOIN tblServices ON tblServiceRateLimits.ServiceID = tblServices.ServiceID; ",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Form",
+      "subarea": "frmSwitchboard",
+      "itemLabel": "Form \u0027frmSwitchboard\u0027 \u2014 insufficient signals to determine usage",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "No navigation entry found for Form \u0027frmSwitchboard\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "verifications": []
+        },
+        {
+          "stepNumber": 2,
+          "action": "Form \u0027frmSwitchboard\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "verifications": []
+        },
+        {
+          "stepNumber": 3,
+          "action": "Form \u0027frmSwitchboard\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "rptClientProfile",
+      "itemLabel": "Report backed by tblClients",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "rptProviderCosts",
+      "itemLabel": "Report backed by qryProviderServiceCosts_ByFiscalYear",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "rptProviderServiceCatalog",
+      "itemLabel": "Report backed by qryProviderServiceCatalogDetail",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "rptProviderServiceStatistics",
+      "itemLabel": "Report backed by qryProviderServiceStatistics",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "rptServiceCosts",
+      "itemLabel": "Report backed by qryServiceCosts_ByFiscalYear",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "rptServicePlanAndShortfall",
+      "itemLabel": "Report backed by SELECT * FROM tblClients WHERE ClientID = 1; ",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "rptServicePlansByClient",
+      "itemLabel": "Report backed by SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblServices.ServiceID, tblServices.ServiceName, tblClientServicePlan.FiscalYear, tblProviderServiceCatalog.RatePerHour, tblClientServicePlan.HoursPerWeek AS WeeklyHours, tblClientServicePlan.WeeklyCost, tblClientServicePlan.AnnualEstCost, tblClients.ClientID, Trim(Nz ([LastName], \\\u0022\\\u0022) \u0026 \\\u0022, \\\u0022 \u0026 Nz ([FirstName], \\\u0022\\\u0022)) AS ClientName FROM tblServices INNER JOIN (tblProviders INNER JOIN ((tblClients INNER JOIN tblClientServiceNeeds ON tblClients.ClientID = tblClientServiceNeeds.ClientID) INNER JOIN (tblProviderServiceCatalog INNER JOIN tblClientServicePlan ON tblProviderServiceCatalog.ProviderServiceCatalogID = tblClientServicePlan.ProviderServiceCatalogID) ON tblClientServiceNeeds.ClientServiceNeedID = tblClientServicePlan.ClientServiceNeedID) ON tblProviders.ProviderID = tblProviderServiceCatalog.ProviderID) ON (         tblServices.ServiceID = tblProviderServiceCatalog.ServiceID     ) AND (         tblServices.ServiceID = tblClientServiceNeeds.ServiceID     ); ",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "rptServicePlansByService",
+      "itemLabel": "Report backed by qryServicePlansByService",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "srptClientBudgets",
+      "itemLabel": "Report backed by tblClientBudgets",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "srptClientCurrentNeeds",
+      "itemLabel": "Report backed by SELECT n.*, s.ServiceName FROM tblClientServiceNeeds AS n LEFT JOIN tblServices AS s ON n.ServiceID = s.ServiceID; ",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "srptServicePlanEntries",
+      "itemLabel": "Report backed by SELECT * FROM qryClientServicePlanDetail WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; ",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Report",
+      "subarea": "srptServiceShortfall",
+      "itemLabel": "Report backed by SELECT * FROM qryClientNeedsNotMet WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; ",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryApprovedPlansByClient",
+      "itemLabel": "Query \u0027qryApprovedPlansByClient\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qryApprovedPlansByClient\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryBudgetUtilization",
+      "itemLabel": "Query \u0027qryBudgetUtilization\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qryBudgetUtilization\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryClientAge",
+      "itemLabel": "Query \u0027qryClientAge\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qryClientAge\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryClientBudgetSummary",
+      "itemLabel": "Query \u0027qryClientBudgetSummary\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qryClientBudgetSummary\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryClientList",
+      "itemLabel": "Query \u0027qryClientList\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qryClientList\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryClientNeedsNotMet",
+      "itemLabel": "Reporting query \u0027qryClientNeedsNotMet\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryClientServicePlanDetail",
+      "itemLabel": "Reporting query \u0027qryClientServicePlanDetail\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryClientServicePlan_ByClient",
+      "itemLabel": "Reporting query \u0027qryClientServicePlan_ByClient\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryCosts_ByFiscalYear",
+      "itemLabel": "Reporting query \u0027qryCosts_ByFiscalYear\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryProviderList",
+      "itemLabel": "Query \u0027qryProviderList\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qryProviderList\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryProviderPlansByClient_Param",
+      "itemLabel": "Reporting query \u0027qryProviderPlansByClient_Param\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryProviderServiceCatalogDetail",
+      "itemLabel": "Reporting query \u0027qryProviderServiceCatalogDetail\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryProviderServiceCosts_ByFiscalYear",
+      "itemLabel": "Reporting query \u0027qryProviderServiceCosts_ByFiscalYear\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryProviderServiceEffectiveFiscalYears",
+      "itemLabel": "Reporting query \u0027qryProviderServiceEffectiveFiscalYears\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryProviderServiceStatistics",
+      "itemLabel": "Reporting query \u0027qryProviderServiceStatistics\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryServiceCosts_ByFiscalYear",
+      "itemLabel": "Reporting query \u0027qryServiceCosts_ByFiscalYear\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryServiceList",
+      "itemLabel": "Reporting query \u0027qryServiceList\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qryServicePlansByService",
+      "itemLabel": "Reporting query \u0027qryServicePlansByService\u0027",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qxtClientServiceCosts",
+      "itemLabel": "Query \u0027qxtClientServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qxtClientServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qxtClientServiceHours",
+      "itemLabel": "Query \u0027qxtClientServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qxtClientServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qxtProviderServiceCosts",
+      "itemLabel": "Query \u0027qxtProviderServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qxtProviderServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Query",
+      "subarea": "qxtProviderServiceHours",
+      "itemLabel": "Query \u0027qxtProviderServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Query \u0027qxtProviderServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblClientBudgets",
+      "itemLabel": "Main data entry table",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblClientServiceNeeds",
+      "itemLabel": "Main data entry table",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblClientServicePlan",
+      "itemLabel": "Main data entry table",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblClients",
+      "itemLabel": "Main data entry table",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblProviderServiceCatalog",
+      "itemLabel": "Main data entry table",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblProviders",
+      "itemLabel": "Main data entry table",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblServiceRateLimits",
+      "itemLabel": "Standalone utility table \u0027tblServiceRateLimits\u0027 not referenced by any form or report",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblServices",
+      "itemLabel": "Main data entry table",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tblSwitchboardItems",
+      "itemLabel": "Table \u0027tblSwitchboardItems\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Table \u0027tblSwitchboardItems\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tlkpFiscalYears",
+      "itemLabel": "Lookup/reference table \u0027tlkpFiscalYears\u0027",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Table \u0027tlkpFiscalYears\u0027 appears to hold reference/lookup values \u2014 should it migrate as static reference data, or be replaced with application constants?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tlkpPlanStatuses",
+      "itemLabel": "Lookup/reference table \u0027tlkpPlanStatuses\u0027",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Table \u0027tlkpPlanStatuses\u0027 appears to hold reference/lookup values \u2014 should it migrate as static reference data, or be replaced with application constants?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tlkpServiceCategories",
+      "itemLabel": "Lookup/reference table \u0027tlkpServiceCategories\u0027",
+      "steps": [
+        {
+          "stepNumber": 1,
+          "action": "Table \u0027tlkpServiceCategories\u0027 appears to hold reference/lookup values \u2014 should it migrate as static reference data, or be replaced with application constants?",
+          "verifications": []
+        }
+      ],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Table",
+      "subarea": "tlkpStates",
+      "itemLabel": "Main data entry table",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Module",
+      "subarea": "basDataOperations",
+      "itemLabel": "VBA module \u0027basDataOperations\u0027 providing shared code for the application",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Module",
+      "subarea": "basListHelpers",
+      "itemLabel": "VBA module \u0027basListHelpers\u0027 providing shared code for the application",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Module",
+      "subarea": "basResetFixture",
+      "itemLabel": "VBA module \u0027basResetFixture\u0027 providing shared code for the application",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Module",
+      "subarea": "basUtilities",
+      "itemLabel": "VBA module \u0027basUtilities\u0027 providing shared code for the application",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Macro",
+      "subarea": "AutoKeys",
+      "itemLabel": "Macro \u0027AutoKeys\u0027 containing navigation actions that open forms or reports",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Macro",
+      "subarea": "mcrErrorHandler",
+      "itemLabel": "Macro \u0027mcrErrorHandler\u0027 providing automated actions",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Macro",
+      "subarea": "mcrSwitchboardActions",
+      "itemLabel": "Macro \u0027mcrSwitchboardActions\u0027 containing navigation actions that open forms or reports",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    },
+    {
+      "functionalArea": "Macro",
+      "subarea": "mcrValidation",
+      "itemLabel": "Macro \u0027mcrValidation\u0027 providing automated actions",
+      "steps": [],
+      "isJudgmentItem": true,
+      "passes": false,
+      "feedback": ""
+    }
+  ]
+}

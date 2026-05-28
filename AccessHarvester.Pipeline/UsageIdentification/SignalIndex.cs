@@ -87,7 +87,12 @@ public sealed class SignalIndex
     /// <summary>Builds a <see cref="SignalIndex"/> from an <see cref="IrDatabase"/>.</summary>
     public static SignalIndex Build(IrDatabase db)
     {
-        // RecordSources — split into form-level and report-level for Q2/Q3 classification
+        // Build known query name set first — needed for inline-SQL scanning below.
+        var knownQueryNamesEarly = new HashSet<string>(
+            db.Queries.Select(q => q.Name), StringComparer.OrdinalIgnoreCase);
+
+        // RecordSources — split into form-level and report-level for Q2/Q3 classification.
+        // Phase 1: direct named references (RecordSource is a bare table/query name, not SQL).
         var recordSourceByObject = RecordSourceCollector.Collect(db);
         var usedAsFormRecordSource = new HashSet<string>(
             db.Forms
@@ -99,8 +104,21 @@ public sealed class SignalIndex
               .Where(r => r.RecordSource != null && !SqlDetection.IsInlineSql(r.RecordSource))
               .Select(r => r.RecordSource!.Trim()),
             StringComparer.OrdinalIgnoreCase);
+
+        // Phase 2: scan inline-SQL RecordSource strings for named query references.
+        // A report RecordSource like "SELECT * FROM qryFoo WHERE …" counts as using qryFoo.
+        foreach (var form in db.Forms.Where(f => f.RecordSource != null && SqlDetection.IsInlineSql(f.RecordSource)))
+            foreach (var name in ExtractQueryNamesFromSql(form.RecordSource!, knownQueryNamesEarly))
+                usedAsFormRecordSource.Add(name);
+        foreach (var report in db.Reports.Where(r => r.RecordSource != null && SqlDetection.IsInlineSql(r.RecordSource)))
+            foreach (var name in ExtractQueryNamesFromSql(report.RecordSource!, knownQueryNamesEarly))
+                usedAsReportRecordSource.Add(name);
+
         var usedAsRecordSource = new HashSet<string>(
             recordSourceByObject.Values, StringComparer.OrdinalIgnoreCase);
+        // Include inline-SQL-sourced query names in the broad used-as-RS set.
+        foreach (var name in usedAsFormRecordSource.Concat(usedAsReportRecordSource))
+            usedAsRecordSource.Add(name);
 
         // RowSources
         var rowSourceTriples = RowSourceCollector.Collect(db);
@@ -155,11 +173,6 @@ public sealed class SignalIndex
               .Select(t => t.Name),
             StringComparer.OrdinalIgnoreCase);
 
-        // All query names (for classifier to distinguish query RecordSource from table RS)
-        var knownQueryNames = new HashSet<string>(
-            db.Queries.Select(q => q.Name),
-            StringComparer.OrdinalIgnoreCase);
-
         return new SignalIndex(
             recordSourceByObject,
             usedAsRecordSource,
@@ -174,7 +187,33 @@ public sealed class SignalIndex
             fkChildrenByTable,
             fkParentsByTable,
             lookupNamedTables,
-            knownQueryNames);
+            knownQueryNamesEarly);
+    }
+
+    // Extracts query names referenced via FROM or JOIN in an inline SQL string.
+    // Only returns names that are in the knownQueryNames set (avoids false positives on table names).
+    private static IEnumerable<string> ExtractQueryNamesFromSql(string sql, IReadOnlySet<string> knownQueryNames)
+    {
+        var tokens = sql.Split(new char[] { ' ', '\t', '\n', '\r', ',', '(', ')' },
+                               StringSplitOptions.RemoveEmptyEntries);
+        bool nextIsName = false;
+        foreach (var token in tokens)
+        {
+            if (nextIsName)
+            {
+                string candidate = token.Trim('[', ']');
+                int asIdx = candidate.IndexOf(' ');
+                if (asIdx > 0) candidate = candidate[..asIdx];
+                if (knownQueryNames.Contains(candidate))
+                    yield return candidate;
+                nextIsName = false;
+            }
+            if (token.Equals("FROM", StringComparison.OrdinalIgnoreCase) ||
+                token.Equals("JOIN", StringComparison.OrdinalIgnoreCase))
+            {
+                nextIsName = true;
+            }
+        }
     }
 
     // True when a table name matches the conventional lookup/reference naming prefixes.

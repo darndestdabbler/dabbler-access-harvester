@@ -90,4 +90,9 @@ are expected. The verification step guards output quality.
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- Orchestrator: `claude-sonnet-4-6` (ai-assignment recommended Sonnet; applied)
+- Pilot: HomeHealthCare 74 objects, NorthwindDevEdition 167 objects; 6% Unknown on Northwind (clear of 60% stop rule)
+- Calibration: 4 fixes — query type constants (0-6 → DAO values), inline SQL RecordSource scanning, form F7b nav-target rule, table T4b FK-child+RS rule; 3 new tests added
+- Verification: R1 via gemini-pro: VERIFIED ($0.00 — cost n/a from router)
+- Deliverables: golden fixtures in samples/GoldenOutput/{HomeHealthCare,NorthwindDevEdition}/usage/, change-log.md, disposition.json, next-session-set-recommendation.md
+- Notable: inline SQL scanning closed a signal gap where queries referenced via SELECT * FROM <name> WHERE... in report RecordSources were falsely classified PossiblyUnused

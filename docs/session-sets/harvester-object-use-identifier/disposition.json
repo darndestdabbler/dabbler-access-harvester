@@ -1,22 +1,32 @@
 {
-  "status": "completed",
-  "summary": "Session 1 complete: strategy doc and JSON schema for identify-usage designed and cross-provider verified (3 rounds). Sessions 2-3 pending.",
+  "status": "complete",
+  "summary": "Added AccessHarvester identify-usage subcommand across 3 sessions. Session 1 designed the taxonomy and JSON schema. Session 2 implemented six signal collectors, classifier, question generator, and 84 unit tests. Session 3 ran pilot calibration, fixed four correctness issues (query type constants, inline SQL RecordSource scanning, form nav-target rule, table FK-child rule), committed golden fixtures for HomeHealthCare (74 objects) and NorthwindDevEdition (167 objects), and cross-provider verified VERIFIED in R1.",
   "files_changed": [
-    "docs/planning/object-use-identification-strategy.md",
+    "AccessHarvester.Cli/Commands/IdentifyUsageCommand.cs",
+    "AccessHarvester.Cli/Program.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/UsageClassifier.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/SignalIndex.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/QuestionGenerator.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/UsageFinding.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/UsageChecklistWriter.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/IrLoader.cs",
     "AccessHarvester.Pipeline/UsageIdentification/object-use-schema.json",
-    "docs/session-sets/harvester-object-use-identifier/ai-assignment.md"
+    "docs/planning/object-use-identification-strategy.md",
+    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/UsageClassifierTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/QuestionGeneratorTests.cs",
+    "samples/GoldenOutput/HomeHealthCare/usage/object-use.json",
+    "samples/GoldenOutput/HomeHealthCare/usage/object-use-checklist.json",
+    "samples/GoldenOutput/NorthwindDevEdition/usage/object-use.json",
+    "samples/GoldenOutput/NorthwindDevEdition/usage/object-use-checklist.json",
+    "docs/session-sets/harvester-object-use-identifier/session-state.json",
+    "docs/session-sets/harvester-object-use-identifier/ai-assignment.md",
+    "docs/session-sets/harvester-object-use-identifier/change-log.md",
+    "docs/session-sets/harvester-object-use-identifier/disposition.json",
+    "docs/session-sets/harvester-object-use-identifier/next-session-set-recommendation.md"
   ],
-  "verification_method": "api",
-  "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 2 is mechanical implementation. Sonnet at effort=medium per ai-assignment."
-    }
+  "next_session_set": {
+    "slug": "harvester-object-cleanup-identifier",
+    "summary": "Run the cleanup identifier (soft prereq for this set) against HomeHealthCare and NorthwindDevEdition, then re-run identify-usage with --exclude-cleanup to produce a usage checklist that excludes confirmed-stale objects. This completes the two-pass object-analysis arc."
   },
   "blockers": []
 }

@@ -145,6 +145,22 @@ public class UsageClassifierTests
         Assert.Equal(UsageCategory.PossiblyUnused, f.Classification);
     }
 
+    [Fact]
+    public void Form_F7b_NavigationTarget_NoOtherSignals_Is_Unknown()
+    {
+        // A form that is a navigation target but has no record source, no nav edges out,
+        // and no VBA should be Unknown (not PossiblyUnused) — it's reachable but unclassifiable.
+        var db = EmptyDb() with
+        {
+            Forms = [
+                Form("frmAbout"),
+                Form("frmMain", macroActions: [new IrMacroAction { Action = "OpenForm", Arguments = ["frmAbout"] }]),
+            ],
+        };
+        var f = Classify(db, "frmAbout");
+        Assert.Equal(UsageCategory.Unknown, f.Classification);
+    }
+
     // ── Report rules ───────────────────────────────────────────────────────────
 
     [Fact]
@@ -177,7 +193,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qxtBySvc", typeCode: 1)],
+            Queries = [Query("qxtBySvc", typeCode: 112)],
         };
         var f = Classify(db, "qxtBySvc");
         Assert.Equal(UsageCategory.Reporting, f.Classification);
@@ -214,7 +230,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qryDeleteOld", typeCode: 2)],
+            Queries = [Query("qryDeleteOld", typeCode: 64)],  // TypeDelete = 64
             Macros = [new IrMacro
             {
                 Name = "mcrMaintenance",
@@ -230,7 +246,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qryDeleteStale", typeCode: 2)],
+            Queries = [Query("qryDeleteStale", typeCode: 64)],  // TypeDelete = 64
         };
         var f = Classify(db, "qryDeleteStale");
         Assert.Equal(UsageCategory.PossiblyUnused, f.Classification);
@@ -241,7 +257,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qryPassThrough", typeCode: 128)],
+            Queries = [Query("qryPassThrough", typeCode: 144)],  // TypePassThrough = 144
         };
         var f = Classify(db, "qryPassThrough");
         Assert.Equal(UsageCategory.StandaloneUtility, f.Classification);
@@ -298,6 +314,21 @@ public class UsageClassifierTests
         };
         var f = Classify(db, "tlkpPlanStatuses");
         Assert.Equal(UsageCategory.LookupReference, f.Classification);
+    }
+
+    [Fact]
+    public void Table_T4b_FkParent_UsedAsRecordSource_Is_MainDataEntry()
+    {
+        // A table that is a FK child (has FK parents) and is used as a form RecordSource
+        // should be MainDataEntry — it's a transactional data-entry table on the child side.
+        var db = EmptyDb() with
+        {
+            Forms = [Form("frmBudgets", "tblClientBudgets")],
+            Tables = [Table("tblClients", 10), Table("tblClientBudgets", 8)],
+            Relationships = [Rel("rel_Client_Budgets", "tblClients", "tblClientBudgets")],
+        };
+        var f = Classify(db, "tblClientBudgets");
+        Assert.Equal(UsageCategory.MainDataEntry, f.Classification);
     }
 
     [Fact]
@@ -386,6 +417,22 @@ public class UsageClassifierTests
         Assert.Equal(UsageCategory.Reporting, f.Classification);
     }
 
+    [Fact]
+    public void Query_Q3_UsedInReportInlineSql_Is_Reporting()
+    {
+        // A query referenced inside an inline-SQL RecordSource of a report
+        // (e.g., "SELECT * FROM qryClientList WHERE ClientID=1")
+        // should be classified as Reporting, not PossiblyUnused.
+        var db = EmptyDb() with
+        {
+            Reports = [Report("srptDetail", "SELECT * FROM qryClientList WHERE ClientID=1")],
+            Queries = [Query("qryClientList", typeCode: 0, sql: "SELECT * FROM tblClients")],
+            Tables = [Table("tblClients", 10)],
+        };
+        var f = Classify(db, "qryClientList");
+        Assert.Equal(UsageCategory.Reporting, f.Classification);
+    }
+
     // ── Q10 Union handling ─────────────────────────────────────────────────────
 
     [Fact]
@@ -394,7 +441,7 @@ public class UsageClassifierTests
         var db = EmptyDb() with
         {
             Forms = [Form("frmUnion", "qryUnionAll")],
-            Queries = [Query("qryUnionAll", typeCode: 64, sql: "SELECT * FROM tblA UNION ALL SELECT * FROM tblB")],
+            Queries = [Query("qryUnionAll", typeCode: 80, sql: "SELECT * FROM tblA UNION ALL SELECT * FROM tblB")],  // TypeUnion = 80
         };
         var f = Classify(db, "qryUnionAll");
         // Union queries follow Q2 path when used as form RecordSource
@@ -406,7 +453,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qryUnionOrphan", typeCode: 64, sql: "SELECT * FROM tblA UNION ALL SELECT * FROM tblB")],
+            Queries = [Query("qryUnionOrphan", typeCode: 80, sql: "SELECT * FROM tblA UNION ALL SELECT * FROM tblB")],  // TypeUnion = 80
         };
         var f = Classify(db, "qryUnionOrphan");
         // Q7 applies to unreferenced Select/Union queries

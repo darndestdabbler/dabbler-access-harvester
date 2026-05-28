@@ -64,7 +64,7 @@ public static class QuestionGenerator
         }
 
         // CrosstabQuery — query is crosstab type
-        if (objectType == "Query" && queryTypeCode == 1)
+        if (objectType == "Query" && queryTypeCode == 112)
         {
             questions.Add(new ClarifyingQuestion
             {

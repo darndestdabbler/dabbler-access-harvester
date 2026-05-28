@@ -11,16 +11,16 @@ namespace AccessHarvester.Pipeline.UsageIdentification;
 /// </summary>
 public static class UsageClassifier
 {
-    // QueryTypeCode constants per Access DAO
-    private const int TypeSelect     = 0;
-    private const int TypeCrosstab   = 1;
-    private const int TypeDelete     = 2;
-    private const int TypeUpdate     = 3;
-    private const int TypeAppend     = 4;
-    private const int TypeMakeTable  = 5;
-    private const int TypeDataDef    = 6;
-    private const int TypeUnion      = 64;
-    private const int TypePassThrough = 128;
+    // QueryTypeCode constants — values from QueryExporter.QueryTypeName() / DAO dbQueryType enum.
+    private const int TypeSelect      = 0;
+    private const int TypeMakeTable   = 16;
+    private const int TypeAppend      = 32;
+    private const int TypeUpdate      = 48;
+    private const int TypeDelete      = 64;
+    private const int TypeUnion       = 80;
+    private const int TypeCrosstab    = 112;
+    private const int TypeDataDef     = 128;
+    private const int TypePassThrough = 144;
 
     /// <summary>
     /// Produces one <see cref="UsageFinding"/> per object in the database.
@@ -146,9 +146,16 @@ public static class UsageClassifier
             confidence = 0.30;
             evidence.Add("has-VBA-no-record-source");
         }
+        else if (index.NavigationTargets.Contains(form.Name))
+        {
+            // F7b: form is opened by navigation but has no other classifying signals
+            category   = UsageCategory.Unknown;
+            confidence = 0.40;
+            evidence.Add("is-navigation-target-no-other-signals");
+        }
         else
         {
-            // F7
+            // F7: no signals at all
             category   = UsageCategory.PossiblyUnused;
             confidence = 0.70;
         }
@@ -359,6 +366,14 @@ public static class UsageClassifier
             category   = UsageCategory.LookupReference;
             confidence = 0.75;
             evidence.Add("lookup-name-pattern");
+        }
+        else if (usedAsRS && hasFkParents)
+        {
+            // T4b — FK-child table used as a RecordSource; treat as a transactional data-entry table
+            category   = UsageCategory.MainDataEntry;
+            confidence = 0.60;
+            evidence.Add("used-as-RecordSource");
+            evidence.Add("FK-child");
         }
         else if (vbaReferenced)
         {

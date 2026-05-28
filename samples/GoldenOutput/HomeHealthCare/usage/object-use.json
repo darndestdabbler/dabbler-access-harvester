@@ -1,0 +1,4084 @@
+﻿{
+  "version": "1.0",
+  "database": "HomeHealthCare",
+  "generatedAt": "2026-05-28T14:54:27.1563102Z",
+  "excludedObjects": [],
+  "objects": [
+    {
+      "objectType": "Form",
+      "objectName": "frmAbout",
+      "classification": "Unknown",
+      "confidence": 0.4,
+      "usageSummary": "Form \u0027frmAbout\u0027 \u2014 insufficient signals to determine usage",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Form \u0027frmAbout\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "uncertaintySignal": "NoRecordSource"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmBudgetServicePlan",
+      "classification": "MainDataEntry",
+      "confidence": 0.7,
+      "usageSummary": "Main data entry form backed by SELECT cb.*, Trim(Nz([c.FirstName],\\\u0022\\\u0022) \u0026 \u0027 \u0027 \u0026 Nz([c.LastName],\\\u0022\\\u0022)) AS ClientName FROM tblClientBudgets AS cb INNER JOIN tblClients AS c ON cb.ClientID = c.ClientID; ",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "SELECT cb.*, Trim(Nz([c.FirstName],\\\u0022\\\u0022) \u0026 \u0027 \u0027 \u0026 Nz([c.LastName],\\\u0022\\\u0022)) AS ClientName FROM tblClientBudgets AS cb INNER JOIN tblClients AS c ON cb.ClientID = c.ClientID; "
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "No navigation entry found for Form \u0027frmBudgetServicePlan\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "uncertaintySignal": "NoNavigationEntry"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmClientDetail",
+      "classification": "MainDataEntry",
+      "confidence": 1,
+      "usageSummary": "Main data entry form backed by tblClients",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblClients"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges",
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmClientSearch",
+      "classification": "NavigationShell",
+      "confidence": 0.9,
+      "usageSummary": "Navigation/shell form \u0027frmClientSearch\u0027 that opens other forms or reports",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges",
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmClientServiceNeedDetail",
+      "classification": "MainDataEntry",
+      "confidence": 1,
+      "usageSummary": "Main data entry form backed by tblClientServiceNeeds",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblClientServiceNeeds"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "No navigation entry found for Form \u0027frmClientServiceNeedDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "uncertaintySignal": "NoNavigationEntry"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmClientServicePlanDetail",
+      "classification": "MainDataEntry",
+      "confidence": 0.6,
+      "usageSummary": "Main data entry form backed by tblClientServicePlan",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblClientServicePlan"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "No navigation entry found for Form \u0027frmClientServicePlanDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "uncertaintySignal": "NoNavigationEntry"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmProviderDetail",
+      "classification": "MainDataEntry",
+      "confidence": 0.95,
+      "usageSummary": "Main data entry form backed by tblProviders",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblProviders"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmProviderSearch",
+      "classification": "NavigationShell",
+      "confidence": 0.9,
+      "usageSummary": "Navigation/shell form \u0027frmProviderSearch\u0027 that opens other forms or reports",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges",
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmProviderServiceCatalogDetail",
+      "classification": "MainDataEntry",
+      "confidence": 0.95,
+      "usageSummary": "Main data entry form backed by tblProviderServiceCatalog",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblProviderServiceCatalog"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "No navigation entry found for Form \u0027frmProviderServiceCatalogDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "uncertaintySignal": "NoNavigationEntry"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmReportMenu",
+      "classification": "Unknown",
+      "confidence": 0.35,
+      "usageSummary": "Form \u0027frmReportMenu\u0027 \u2014 insufficient signals to determine usage",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Form \u0027frmReportMenu\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "uncertaintySignal": "NoRecordSource"
+        },
+        {
+          "questionText": "Form \u0027frmReportMenu\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "uncertaintySignal": "UnrecognizedVbaPattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmReportParam_Client",
+      "classification": "Unknown",
+      "confidence": 0.35,
+      "usageSummary": "Form \u0027frmReportParam_Client\u0027 \u2014 insufficient signals to determine usage",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Form \u0027frmReportParam_Client\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "uncertaintySignal": "NoRecordSource"
+        },
+        {
+          "questionText": "Form \u0027frmReportParam_Client\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "uncertaintySignal": "UnrecognizedVbaPattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmReportParam_ClientFY",
+      "classification": "Unknown",
+      "confidence": 0.35,
+      "usageSummary": "Form \u0027frmReportParam_ClientFY\u0027 \u2014 insufficient signals to determine usage",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Form \u0027frmReportParam_ClientFY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "uncertaintySignal": "NoRecordSource"
+        },
+        {
+          "questionText": "Form \u0027frmReportParam_ClientFY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "uncertaintySignal": "UnrecognizedVbaPattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmReportParam_FY",
+      "classification": "Unknown",
+      "confidence": 0.35,
+      "usageSummary": "Form \u0027frmReportParam_FY\u0027 \u2014 insufficient signals to determine usage",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Form \u0027frmReportParam_FY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "uncertaintySignal": "NoRecordSource"
+        },
+        {
+          "questionText": "Form \u0027frmReportParam_FY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "uncertaintySignal": "UnrecognizedVbaPattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmReportParam_Provider",
+      "classification": "Unknown",
+      "confidence": 0.35,
+      "usageSummary": "Form \u0027frmReportParam_Provider\u0027 \u2014 insufficient signals to determine usage",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Form \u0027frmReportParam_Provider\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "uncertaintySignal": "NoRecordSource"
+        },
+        {
+          "questionText": "Form \u0027frmReportParam_Provider\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "uncertaintySignal": "UnrecognizedVbaPattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmReportParam_ProviderFY",
+      "classification": "Unknown",
+      "confidence": 0.35,
+      "usageSummary": "Form \u0027frmReportParam_ProviderFY\u0027 \u2014 insufficient signals to determine usage",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Form \u0027frmReportParam_ProviderFY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "uncertaintySignal": "NoRecordSource"
+        },
+        {
+          "questionText": "Form \u0027frmReportParam_ProviderFY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "uncertaintySignal": "UnrecognizedVbaPattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmServiceDetail",
+      "classification": "MainDataEntry",
+      "confidence": 0.95,
+      "usageSummary": "Main data entry form backed by tblServices",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblServices"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmServiceList",
+      "classification": "MainDataEntry",
+      "confidence": 0.8,
+      "usageSummary": "Main data entry form backed by tblServices",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblServices"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges",
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmServiceRateLimits",
+      "classification": "MainDataEntry",
+      "confidence": 0.7,
+      "usageSummary": "Main data entry form backed by SELECT tblServiceRateLimits.*, tblServices.ServiceName FROM tblServiceRateLimits INNER JOIN tblServices ON tblServiceRateLimits.ServiceID = tblServices.ServiceID; ",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "SELECT tblServiceRateLimits.*, tblServices.ServiceName FROM tblServiceRateLimits INNER JOIN tblServices ON tblServiceRateLimits.ServiceID = tblServices.ServiceID; "
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Form",
+      "objectName": "frmSwitchboard",
+      "classification": "Unknown",
+      "confidence": 0.35,
+      "usageSummary": "Form \u0027frmSwitchboard\u0027 \u2014 insufficient signals to determine usage",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "No navigation entry found for Form \u0027frmSwitchboard\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "uncertaintySignal": "NoNavigationEntry"
+        },
+        {
+          "questionText": "Form \u0027frmSwitchboard\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
+          "uncertaintySignal": "NoRecordSource"
+        },
+        {
+          "questionText": "Form \u0027frmSwitchboard\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "uncertaintySignal": "UnrecognizedVbaPattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Report",
+      "objectName": "rptClientProfile",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by tblClients",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblClients"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "is-navigation-target"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "rptProviderCosts",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by qryProviderServiceCosts_ByFiscalYear",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "qryProviderServiceCosts_ByFiscalYear"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "rptProviderServiceCatalog",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by qryProviderServiceCatalogDetail",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "qryProviderServiceCatalogDetail"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "rptProviderServiceStatistics",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by qryProviderServiceStatistics",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "qryProviderServiceStatistics"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "rptServiceCosts",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by qryServiceCosts_ByFiscalYear",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "qryServiceCosts_ByFiscalYear"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "rptServicePlanAndShortfall",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by SELECT * FROM tblClients WHERE ClientID = 1; ",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "SELECT * FROM tblClients WHERE ClientID = 1; "
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "rptServicePlansByClient",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblServices.ServiceID, tblServices.ServiceName, tblClientServicePlan.FiscalYear, tblProviderServiceCatalog.RatePerHour, tblClientServicePlan.HoursPerWeek AS WeeklyHours, tblClientServicePlan.WeeklyCost, tblClientServicePlan.AnnualEstCost, tblClients.ClientID, Trim(Nz ([LastName], \\\u0022\\\u0022) \u0026 \\\u0022, \\\u0022 \u0026 Nz ([FirstName], \\\u0022\\\u0022)) AS ClientName FROM tblServices INNER JOIN (tblProviders INNER JOIN ((tblClients INNER JOIN tblClientServiceNeeds ON tblClients.ClientID = tblClientServiceNeeds.ClientID) INNER JOIN (tblProviderServiceCatalog INNER JOIN tblClientServicePlan ON tblProviderServiceCatalog.ProviderServiceCatalogID = tblClientServicePlan.ProviderServiceCatalogID) ON tblClientServiceNeeds.ClientServiceNeedID = tblClientServicePlan.ClientServiceNeedID) ON tblProviders.ProviderID = tblProviderServiceCatalog.ProviderID) ON (         tblServices.ServiceID = tblProviderServiceCatalog.ServiceID     ) AND (         tblServices.ServiceID = tblClientServiceNeeds.ServiceID     ); ",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "SELECT tblProviders.ProviderID, tblProviders.ProviderName, tblServices.ServiceID, tblServices.ServiceName, tblClientServicePlan.FiscalYear, tblProviderServiceCatalog.RatePerHour, tblClientServicePlan.HoursPerWeek AS WeeklyHours, tblClientServicePlan.WeeklyCost, tblClientServicePlan.AnnualEstCost, tblClients.ClientID, Trim(Nz ([LastName], \\\u0022\\\u0022) \u0026 \\\u0022, \\\u0022 \u0026 Nz ([FirstName], \\\u0022\\\u0022)) AS ClientName FROM tblServices INNER JOIN (tblProviders INNER JOIN ((tblClients INNER JOIN tblClientServiceNeeds ON tblClients.ClientID = tblClientServiceNeeds.ClientID) INNER JOIN (tblProviderServiceCatalog INNER JOIN tblClientServicePlan ON tblProviderServiceCatalog.ProviderServiceCatalogID = tblClientServicePlan.ProviderServiceCatalogID) ON tblClientServiceNeeds.ClientServiceNeedID = tblClientServicePlan.ClientServiceNeedID) ON tblProviders.ProviderID = tblProviderServiceCatalog.ProviderID) ON (         tblServices.ServiceID = tblProviderServiceCatalog.ServiceID     ) AND (         tblServices.ServiceID = tblClientServiceNeeds.ServiceID     ); "
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "rptServicePlansByService",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by qryServicePlansByService",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "qryServicePlansByService"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "srptClientBudgets",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by tblClientBudgets",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "tblClientBudgets"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "srptClientCurrentNeeds",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by SELECT n.*, s.ServiceName FROM tblClientServiceNeeds AS n LEFT JOIN tblServices AS s ON n.ServiceID = s.ServiceID; ",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "SELECT n.*, s.ServiceName FROM tblClientServiceNeeds AS n LEFT JOIN tblServices AS s ON n.ServiceID = s.ServiceID; "
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "srptServicePlanEntries",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by SELECT * FROM qryClientServicePlanDetail WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; ",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "SELECT * FROM qryClientServicePlanDetail WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; "
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Report",
+      "objectName": "srptServiceShortfall",
+      "classification": "Reporting",
+      "confidence": 0.95,
+      "usageSummary": "Report backed by SELECT * FROM qryClientNeedsNotMet WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; ",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "SELECT * FROM qryClientNeedsNotMet WHERE ClientID=TempVars!repCID And FiscalYear=TempVars!repFY; "
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryApprovedPlansByClient",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qryApprovedPlansByClient\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qryApprovedPlansByClient\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryBudgetUtilization",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qryBudgetUtilization\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qryBudgetUtilization\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryClientAge",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qryClientAge\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qryClientAge\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryClientBudgetSummary",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qryClientBudgetSummary\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qryClientBudgetSummary\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryClientList",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qryClientList\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qryClientList\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryClientNeedsNotMet",
+      "classification": "Reporting",
+      "confidence": 0.8,
+      "usageSummary": "Reporting query \u0027qryClientNeedsNotMet\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryClientServicePlanDetail",
+      "classification": "Reporting",
+      "confidence": 0.8,
+      "usageSummary": "Reporting query \u0027qryClientServicePlanDetail\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryClientServicePlan_ByClient",
+      "classification": "Reporting",
+      "confidence": 0.65,
+      "usageSummary": "Reporting query \u0027qryClientServicePlan_ByClient\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryCosts_ByFiscalYear",
+      "classification": "Reporting",
+      "confidence": 0.6,
+      "usageSummary": "Reporting query \u0027qryCosts_ByFiscalYear\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryProviderList",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qryProviderList\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qryProviderList\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryProviderPlansByClient_Param",
+      "classification": "Reporting",
+      "confidence": 0.65,
+      "usageSummary": "Reporting query \u0027qryProviderPlansByClient_Param\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryProviderServiceCatalogDetail",
+      "classification": "Reporting",
+      "confidence": 0.8,
+      "usageSummary": "Reporting query \u0027qryProviderServiceCatalogDetail\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryProviderServiceCosts_ByFiscalYear",
+      "classification": "Reporting",
+      "confidence": 0.8,
+      "usageSummary": "Reporting query \u0027qryProviderServiceCosts_ByFiscalYear\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryProviderServiceEffectiveFiscalYears",
+      "classification": "Reporting",
+      "confidence": 0.6,
+      "usageSummary": "Reporting query \u0027qryProviderServiceEffectiveFiscalYears\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryProviderServiceStatistics",
+      "classification": "Reporting",
+      "confidence": 0.8,
+      "usageSummary": "Reporting query \u0027qryProviderServiceStatistics\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryServiceCosts_ByFiscalYear",
+      "classification": "Reporting",
+      "confidence": 0.8,
+      "usageSummary": "Reporting query \u0027qryServiceCosts_ByFiscalYear\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryServiceList",
+      "classification": "Reporting",
+      "confidence": 0.6,
+      "usageSummary": "Reporting query \u0027qryServiceList\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RowSource"
+          ]
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qryServicePlansByService",
+      "classification": "Reporting",
+      "confidence": 0.8,
+      "usageSummary": "Reporting query \u0027qryServicePlansByService\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=0"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qxtClientServiceCosts",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qxtClientServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=16"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qxtClientServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qxtClientServiceHours",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qxtClientServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=16"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qxtClientServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qxtProviderServiceCosts",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qxtProviderServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=16"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qxtProviderServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Query",
+      "objectName": "qxtProviderServiceHours",
+      "classification": "PossiblyUnused",
+      "confidence": 0.65,
+      "usageSummary": "Query \u0027qxtProviderServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": true,
+          "evidence": [
+            "QueryTypeCode=16"
+          ]
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Query \u0027qxtProviderServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblClientBudgets",
+      "classification": "MainDataEntry",
+      "confidence": 0.7,
+      "usageSummary": "Main data entry table",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RecordSource"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-parents"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblClientServiceNeeds",
+      "classification": "MainDataEntry",
+      "confidence": 0.95,
+      "usageSummary": "Main data entry table",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RecordSource"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-children",
+            "has-FK-parents"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblClientServicePlan",
+      "classification": "MainDataEntry",
+      "confidence": 0.7,
+      "usageSummary": "Main data entry table",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RecordSource"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-parents"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblClients",
+      "classification": "MainDataEntry",
+      "confidence": 0.95,
+      "usageSummary": "Main data entry table",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RecordSource"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-children",
+            "has-FK-parents"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblProviderServiceCatalog",
+      "classification": "MainDataEntry",
+      "confidence": 0.95,
+      "usageSummary": "Main data entry table",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RecordSource"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-children",
+            "has-FK-parents"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblProviders",
+      "classification": "MainDataEntry",
+      "confidence": 0.95,
+      "usageSummary": "Main data entry table",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RecordSource"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RowSource"
+          ]
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-children",
+            "has-FK-parents"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblServiceRateLimits",
+      "classification": "StandaloneUtility",
+      "confidence": 0.7,
+      "usageSummary": "Standalone utility table \u0027tblServiceRateLimits\u0027 not referenced by any form or report",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-parents"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblServices",
+      "classification": "MainDataEntry",
+      "confidence": 0.95,
+      "usageSummary": "Main data entry table",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RecordSource"
+          ]
+        },
+        {
+          "signalType": "RowSource",
+          "fired": true,
+          "evidence": [
+            "used-as-RowSource"
+          ]
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": true,
+          "evidence": [
+            "appears-in-query-FROM-or-JOIN"
+          ]
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-children"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tblSwitchboardItems",
+      "classification": "PossiblyUnused",
+      "confidence": 0.7,
+      "usageSummary": "Table \u0027tblSwitchboardItems\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Table \u0027tblSwitchboardItems\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "uncertaintySignal": "UnreferencedObject"
+        }
+      ]
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tlkpFiscalYears",
+      "classification": "LookupReference",
+      "confidence": 0.8,
+      "usageSummary": "Lookup/reference table \u0027tlkpFiscalYears\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": true,
+          "evidence": [
+            "domain-function-or-recordset-reference"
+          ]
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": true,
+          "evidence": [
+            "lookup-name-pattern"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Table \u0027tlkpFiscalYears\u0027 appears to hold reference/lookup values \u2014 should it migrate as static reference data, or be replaced with application constants?",
+          "uncertaintySignal": "LookupTablePattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tlkpPlanStatuses",
+      "classification": "LookupReference",
+      "confidence": 0.75,
+      "usageSummary": "Lookup/reference table \u0027tlkpPlanStatuses\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": true,
+          "evidence": [
+            "lookup-name-pattern"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Table \u0027tlkpPlanStatuses\u0027 appears to hold reference/lookup values \u2014 should it migrate as static reference data, or be replaced with application constants?",
+          "uncertaintySignal": "LookupTablePattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tlkpServiceCategories",
+      "classification": "LookupReference",
+      "confidence": 0.75,
+      "usageSummary": "Lookup/reference table \u0027tlkpServiceCategories\u0027",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": true,
+          "evidence": [
+            "lookup-name-pattern"
+          ]
+        }
+      ],
+      "questions": [
+        {
+          "questionText": "Table \u0027tlkpServiceCategories\u0027 appears to hold reference/lookup values \u2014 should it migrate as static reference data, or be replaced with application constants?",
+          "uncertaintySignal": "LookupTablePattern"
+        }
+      ]
+    },
+    {
+      "objectType": "Table",
+      "objectName": "tlkpStates",
+      "classification": "MainDataEntry",
+      "confidence": 0.65,
+      "usageSummary": "Main data entry table",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": true,
+          "evidence": [
+            "has-FK-children"
+          ]
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": true,
+          "evidence": [
+            "lookup-name-pattern"
+          ]
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Module",
+      "objectName": "basDataOperations",
+      "classification": "StandaloneUtility",
+      "confidence": 0.7,
+      "usageSummary": "VBA module \u0027basDataOperations\u0027 providing shared code for the application",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Module",
+      "objectName": "basListHelpers",
+      "classification": "StandaloneUtility",
+      "confidence": 0.7,
+      "usageSummary": "VBA module \u0027basListHelpers\u0027 providing shared code for the application",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Module",
+      "objectName": "basResetFixture",
+      "classification": "StandaloneUtility",
+      "confidence": 0.7,
+      "usageSummary": "VBA module \u0027basResetFixture\u0027 providing shared code for the application",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Module",
+      "objectName": "basUtilities",
+      "classification": "StandaloneUtility",
+      "confidence": 0.7,
+      "usageSummary": "VBA module \u0027basUtilities\u0027 providing shared code for the application",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Macro",
+      "objectName": "AutoKeys",
+      "classification": "NavigationShell",
+      "confidence": 0.75,
+      "usageSummary": "Macro \u0027AutoKeys\u0027 containing navigation actions that open forms or reports",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Macro",
+      "objectName": "mcrErrorHandler",
+      "classification": "StandaloneUtility",
+      "confidence": 0.6,
+      "usageSummary": "Macro \u0027mcrErrorHandler\u0027 providing automated actions",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Macro",
+      "objectName": "mcrSwitchboardActions",
+      "classification": "NavigationShell",
+      "confidence": 0.75,
+      "usageSummary": "Macro \u0027mcrSwitchboardActions\u0027 containing navigation actions that open forms or reports",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges"
+          ]
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    },
+    {
+      "objectType": "Macro",
+      "objectName": "mcrValidation",
+      "classification": "StandaloneUtility",
+      "confidence": 0.6,
+      "usageSummary": "Macro \u0027mcrValidation\u0027 providing automated actions",
+      "signals": [
+        {
+          "signalType": "RecordSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "RowSource",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "NavigationEdge",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "VbaReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryTableReference",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "FkRelationship",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "QueryType",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        }
+      ],
+      "questions": []
+    }
+  ]
+}
