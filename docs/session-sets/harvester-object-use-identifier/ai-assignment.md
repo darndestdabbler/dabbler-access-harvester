@@ -22,11 +22,17 @@ orchestrator allows the core synthesis to be handled in-conversation.
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- Orchestrator: `claude-sonnet-4-6` (ai-assignment recommended Opus; Sonnet used because session was started by Sonnet orchestrator; architecture authored in-conversation)
+- Architecture: In-conversation on Sonnet; taxonomy, signal collectors, classification rules, and question templates designed from HomeHealthCare golden output inspection
+- Verification: 3 rounds via gemini-pro ($0.0542 total)
+  - R1: REJECTED — Action Queries (TypeCode 2-5) not covered; soft-prereq degradation imprecise
+  - R2: ISSUES_FOUND — Union queries (TypeCode 64) misclassified as StandaloneUtility
+  - R3: VERIFIED
+- Deliverables: `docs/planning/object-use-identification-strategy.md` (taxonomy, 6 signal collectors, 11 query rules, confidence scoring, question templates, output mappings), `AccessHarvester.Pipeline/UsageIdentification/object-use-schema.json` (JSON Schema Draft-07)
 
 ---
 
-**Next-session orchestrator recommendation (Session 2):** (To be filled after Session 1 completes.)
+**Next-session orchestrator recommendation (Session 2):** `claude-sonnet-4-6` — Session 2 is mechanical implementation of the strategy. All interfaces are defined; Sonnet at effort=medium is appropriate per the original ai-assignment.
 
 ## Session 2 of 3: CLI Analysis Code
 

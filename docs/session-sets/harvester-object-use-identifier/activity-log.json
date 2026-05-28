@@ -1,0 +1,160 @@
+{
+  "sessionSetName": "harvester-object-use-identifier",
+  "createdDate": "2026-05-28T09:34:19.358255-04:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "read-guidance",
+      "dateTime": "2026-05-28T09:41:11.406142-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, cleanup identifier spec, and HomeHealthCare golden output signal structure",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "architecture-taxonomy",
+      "dateTime": "2026-05-28T09:41:11.409687-04:00",
+      "description": "Designed usage classification taxonomy: 7 categories (MainDataEntry/LookupReference/Reporting/NavigationShell/StandaloneUtility/PossiblyUnused/Unknown) with confidence 0.0-1.0; in-conversation on Sonnet",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "signal-collectors",
+      "dateTime": "2026-05-28T09:41:11.409687-04:00",
+      "description": "Defined 6 signal collectors (RecordSource, RowSource, NavigationGraph, VbaReference, QueryTableReference, RelationshipGraph) \u2014 all from ir/ files, no COM",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "classification-rules",
+      "dateTime": "2026-05-28T09:41:11.409687-04:00",
+      "description": "Authored per-type classification rule tables (Forms: 8 rules, Reports: 3, Queries: 7, Tables: 7) and confidence adjustment formula",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "question-templates",
+      "dateTime": "2026-05-28T09:41:11.409687-04:00",
+      "description": "Defined 8 uncertainty signals and matching clarifying question templates (NoNavigationEntry, NoRecordSource, QueryReferencesNoTables, UnreferencedObject, LookupTablePattern, CrosstabQuery, UnrecognizedVbaPattern, CrypticObjectName)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "write-strategy-doc",
+      "dateTime": "2026-05-28T09:41:11.409687-04:00",
+      "description": "Wrote docs/planning/object-use-identification-strategy.md",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "write-schema",
+      "dateTime": "2026-05-28T09:41:11.409687-04:00",
+      "description": "Wrote AccessHarvester.Pipeline/UsageIdentification/object-use-schema.json (JSON Schema Draft-07)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "verify-r1",
+      "dateTime": "2026-05-28T09:46:04.140483-04:00",
+      "description": "Cross-provider verification R1 (gemini-pro): REJECTED \u2014 Action Queries not classified (Major), soft-prereq description imprecise (Low)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "fix-r1",
+      "dateTime": "2026-05-28T09:46:04.140483-04:00",
+      "description": "Fixed: added Q8/Q9 (Delete/Update/Append/MakeTable), Q10 (Union), Q11 (DDL/Pass-through); corrected Section 11 soft-prereq degradation text",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "verify-r2",
+      "dateTime": "2026-05-28T09:46:04.140483-04:00",
+      "description": "Cross-provider verification R2 (gemini-pro): ISSUES_FOUND \u2014 Union queries (Q10) misclassified as StandaloneUtility instead of Reporting (Major)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "fix-r2",
+      "dateTime": "2026-05-28T09:46:04.150739-04:00",
+      "description": "Fixed: split Q10 into Union (follows Q2-Q7 logic, TypeCode {0,64}) and Q11 (DDL/Pass-through -> StandaloneUtility)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 12,
+      "stepKey": "verify-r3",
+      "dateTime": "2026-05-28T09:46:04.150739-04:00",
+      "description": "Cross-provider verification R3 (gemini-pro): VERIFIED \u2014 all concerns resolved",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "verify-r1",
+      "dateTime": "2026-05-28T09:46:17.533870-04:00",
+      "description": "Cross-provider verification R1 (gemini-pro): REJECTED - Action Queries not classified (Major), soft-prereq description imprecise (Low)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "fix-r1",
+      "dateTime": "2026-05-28T09:46:17.534394-04:00",
+      "description": "Fixed: added Q8/Q9 (Delete/Update/Append/MakeTable), Q10 (Union), Q11 (DDL/Pass-through); corrected Section 11 soft-prereq degradation text",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "verify-r2",
+      "dateTime": "2026-05-28T09:46:17.534917-04:00",
+      "description": "Cross-provider verification R2 (gemini-pro): ISSUES_FOUND - Union queries (Q10) misclassified as StandaloneUtility (Major)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "fix-r2",
+      "dateTime": "2026-05-28T09:46:17.535463-04:00",
+      "description": "Fixed: Union queries (TypeCode 64) now follow Q2-Q7 logic same as Select; Q11 handles DDL/Pass-through",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 12,
+      "stepKey": "verify-r3",
+      "dateTime": "2026-05-28T09:46:17.535463-04:00",
+      "description": "Cross-provider verification R3 (gemini-pro): VERIFIED - all concerns resolved",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}

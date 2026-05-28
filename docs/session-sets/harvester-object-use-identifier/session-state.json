@@ -1,34 +1,17 @@
 {
-  "schemaVersion": 4,
+  "schemaVersion": 2,
   "sessionSetName": "harvester-object-use-identifier",
-  "status": "not-started",
-  "sessions": [
-    {
-      "number": 1,
-      "title": "Schema + Analysis Strategy",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
-    },
-    {
-      "number": 2,
-      "title": "CLI Analysis Code",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
-    },
-    {
-      "number": 3,
-      "title": "Pilot + Calibration",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
-    }
-  ]
+  "currentSession": 1,
+  "totalSessions": 3,
+  "status": "in-progress",
+  "lifecycleState": "work_in_progress",
+  "startedAt": "2026-05-28T09:35:39.882469-04:00",
+  "completedAt": null,
+  "verificationVerdict": null,
+  "orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "effort": "medium"
+  }
 }

@@ -1,0 +1,66 @@
+This response provides a detailed analysis of each verification concern followed by a concluding JSON block.
+
+### 1. Taxonomy completeness
+
+The seven-category taxonomy (`MainDataEntry`, `LookupReference`, `Reporting`, `NavigationShell`, `StandaloneUtility`, `PossiblyUnused`, `Unknown`) is robust and covers the most common usage patterns for Access objects in business applications. The categories are well-defined, mutually exclusive, and address the primary roles of forms, reports, tables, and queries. The inclusion of `PossiblyUnused` and `Unknown` provides necessary fallbacks for unreferenced objects and ambiguous cases.
+
+However, a notable gap exists: the taxonomy and classification rules do not explicitly account for **Action Queries** (e.g., `UPDATE`, `INSERT INTO`, `DELETE`, `MAKE TABLE`). These are a fundamental component of many Access applications, used for batch data processing, and represent a distinct usage pattern from `SELECT` queries (data retrieval/reporting) or `Crosstab` queries. In the current design, an Action Query would likely be classified as `StandaloneUtility` or `PossiblyUnused` if not called directly from a UI object, failing to capture its data-modifying intent.
+
+### 2. Signal collector feasibility
+
+The six described signal collectors are feasible and correctly designed to operate on the specified KB/IR file structure without requiring Access COM automation. The extraction logic for each is sound:
+- **RecordSource/RowSource:** Reading `Properties.RecordSource` and `Properties.RowSource` from form/report IR JSON is a direct and reliable method.
+- **NavigationGraph/VbaReference:** Using regex to parse VBA code for `DoCmd.Open*`, domain functions (`DLookup`, etc.), and `OpenRecordset` calls is a standard static analysis technique. While it cannot capture dynamically constructed object names, it is sufficient for a baseline implementation. Similarly, parsing macro IR for `Open*` actions is straightforward.
+- **QueryTableReference:** Parsing the `Sql` field from query IR files using regex for `FROM` and `JOIN` clauses is a practical, though imperfect, approach to discovering table dependencies.
+- **RelationshipGraph:** Reading pre-processed relationship files is the most reliable way to determine foreign key structures.
+
+All specified sources and extraction methods align with the expected output of the harvester, making the signal collection strategy viable.
+
+### 3. Classification rule correctness
+
+The classification rules are logical and correctly handle canonical cases. The "first matching rule wins" approach provides a deterministic classification process. For example:
+- A form with a `RecordSource` pointing to a transactional table and containing CRUD event handlers will correctly match rule F1 and be classified as `MainDataEntry`.
+- A form lacking a `RecordSource` but containing navigation commands (`DoCmd.OpenForm`) will correctly match rule F5 and be classified as `NavigationShell`.
+- A table named `tlkpStates` or having few columns and no foreign key children will correctly match rules T3/T4 and be classified as `LookupReference`.
+- A report with any `RecordSource` will correctly match rule R1 and be classified as `Reporting`.
+
+The rules demonstrate a clear hierarchy from high-confidence, specific patterns to more general ones, which is a sound design.
+
+### 4. uat-checklist-editor mapping
+
+The mapping of `object-use.json` findings to the `uat-checklist-editor` format, as described in Section 8, is correct and complete. The strategy correctly assigns `ProjectName` at the top level and populates the required fields for each `Review` item (`FunctionalArea`, `Subarea`, `ItemLabel`) from the object's type, name, and usage summary. The generation of `Steps` from the clarifying questions is also correctly structured. The plan to include objects even if they have no questions ensures a comprehensive review checklist, which is a good practice. The output specified will be valid for the target tool.
+
+### 5. Schema correctness
+
+The `object-use-schema.json` is internally consistent and accurately reflects the structures detailed in the strategy document.
+- **Structure:** All required top-level and nested properties (`version`, `objects`, `classification`, `confidence`, etc.) are present and correctly typed. The use of `additionalProperties: false` enforces a strict structure.
+- **Enums:** The `enum` values for `classification`, `signalType`, and `uncertaintySignal` precisely match the categories and signals defined in the strategy document, ensuring data integrity.
+- **Cross-references:** The schema correctly references its own definitions (e.g., `ObjectUseFinding`, `Signal`) and aligns with the descriptions provided in sections 2, 3, 5, and 7 of the strategy.
+
+The schema is well-formed and fit for its purpose.
+
+### 6. Soft-prereq degradation
+
+The plan for graceful degradation is mostly sound, but contains one imprecise description.
+- **Missing Cleanup Checklist:** The behavior is correctly defined. If the `--exclude-cleanup` file is absent, all objects are processed, and the `excludedObjects` array in the output is empty. This is a complete and correct degradation path.
+- **Missing Query KB Files:** The description of this degradation path is imprecise. The strategy states that queries will "default to `Unknown` with the `QueryReferencesNoTables` question." However, based on the specified rules, a query without its SQL file could still be classified by other rules (e.g., Q2/Q3 if it's a `RecordSource`, or Q7 if it's unreferenced elsewhere), resulting in a `MainDataEntry` or `PossiblyUnused` classification. The outcome is not a guaranteed default to `Unknown`. The system would function, but its behavior is not as simple as described.
+
+```json
+{
+  "verdict": "REJECTED",
+  "issues": [
+    {
+      "concern": "Taxonomy completeness",
+      "severity": "High",
+      "summary": "The taxonomy and classification rules do not explicitly handle Action Queries (UPDATE, INSERT, DELETE, MAKE TABLE).",
+      "description": "The current taxonomy focuses on objects for data entry, reporting, and navigation. Action Queries, which perform batch data manipulation, are a common and distinct usage pattern in Access. They are not covered by the Query classification rules (Q1-Q7), which only address Select and Crosstab queries. This gap will lead to the misclassification of a key object type."
+    },
+    {
+      "concern": "Soft-prereq degradation",
+      "severity": "Low",
+      "summary": "The documentation's description of behavior when query KB files are missing is imprecise.",
+      "description": "Section 11 states that if query KB files are absent, queries will 'default to Unknown'. This is not guaranteed by the rule set in Section 4, as other rules based on RecordSource usage or lack of references (e.g., Q2, Q3, Q7) could still fire and assign a different classification. The documentation should be updated to reflect the actual behavior of the rule engine under this condition."
+    }
+  ]
+}
+```

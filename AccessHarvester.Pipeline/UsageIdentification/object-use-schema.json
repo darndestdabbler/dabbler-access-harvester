@@ -1,0 +1,141 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dabbler.dev/harvester/schemas/object-use.json",
+  "title": "Object Use Findings",
+  "description": "Per-object usage classification findings produced by AccessHarvester identify-usage.",
+  "type": "object",
+  "required": ["version", "database", "generatedAt", "excludedObjects", "objects"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Must be '1.0'."
+    },
+    "database": {
+      "type": "string",
+      "description": "Name of the harvested Access database (without path or extension)."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when the file was generated."
+    },
+    "excludedObjects": {
+      "type": "array",
+      "description": "Object names excluded via --exclude-cleanup (Passes: true in the cleanup checklist). These objects are not present in the objects array.",
+      "items": { "type": "string" }
+    },
+    "objects": {
+      "type": "array",
+      "description": "One finding per non-excluded, non-system object in the harvested database.",
+      "items": { "$ref": "#/definitions/ObjectUseFinding" }
+    }
+  },
+  "definitions": {
+    "ObjectUseFinding": {
+      "type": "object",
+      "required": ["objectType", "objectName", "classification", "confidence", "usageSummary", "signals", "questions"],
+      "additionalProperties": false,
+      "properties": {
+        "objectType": {
+          "type": "string",
+          "enum": ["Form", "Report", "Query", "Table", "Module", "Macro"],
+          "description": "The Access object type."
+        },
+        "objectName": {
+          "type": "string",
+          "description": "The Access object name exactly as it appears in the database."
+        },
+        "classification": {
+          "type": "string",
+          "enum": [
+            "MainDataEntry",
+            "LookupReference",
+            "Reporting",
+            "NavigationShell",
+            "StandaloneUtility",
+            "PossiblyUnused",
+            "Unknown"
+          ],
+          "description": "Usage category. See object-use-identification-strategy.md §2."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Classification confidence: >=0.8 High, 0.5-0.8 Medium, 0.2-0.5 Low, <0.2 Unknown."
+        },
+        "usageSummary": {
+          "type": "string",
+          "description": "One-sentence description of how the object is used, suitable for display as ItemLabel in the uat-checklist-editor checklist."
+        },
+        "signals": {
+          "type": "array",
+          "description": "One entry per signal type evaluated. Includes both fired and not-fired signals so readers can see what was checked.",
+          "items": { "$ref": "#/definitions/Signal" }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Clarifying questions generated for this object, one per fired uncertainty signal.",
+          "items": { "$ref": "#/definitions/ClarifyingQuestion" }
+        }
+      }
+    },
+    "Signal": {
+      "type": "object",
+      "required": ["signalType", "fired", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "signalType": {
+          "type": "string",
+          "enum": [
+            "RecordSource",
+            "RowSource",
+            "NavigationEdge",
+            "VbaReference",
+            "QueryTableReference",
+            "FkRelationship",
+            "QueryType",
+            "ObjectNameConvention"
+          ],
+          "description": "Which signal family produced this entry. See strategy doc §3."
+        },
+        "fired": {
+          "type": "boolean",
+          "description": "True if this signal type produced any evidence for this object."
+        },
+        "evidence": {
+          "type": "array",
+          "description": "Specific evidence values: table names, object names, SQL fragments, or relationship identifiers. Empty when fired=false.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "ClarifyingQuestion": {
+      "type": "object",
+      "required": ["questionText", "uncertaintySignal"],
+      "additionalProperties": false,
+      "properties": {
+        "questionText": {
+          "type": "string",
+          "description": "The clarifying question to display in the checklist step."
+        },
+        "uncertaintySignal": {
+          "type": "string",
+          "enum": [
+            "NoNavigationEntry",
+            "NoRecordSource",
+            "QueryReferencesNoTables",
+            "UnreferencedObject",
+            "LookupTablePattern",
+            "CrosstabQuery",
+            "UnrecognizedVbaPattern",
+            "CrypticObjectName"
+          ],
+          "description": "Which uncertainty signal triggered this question. See strategy doc §5-6."
+        }
+      }
+    }
+  }
+}
