@@ -1,12 +1,21 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-object-cleanup-identifier",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
       "title": "Schema + Detection Strategy",
-      "status": "not-started"
+      "status": "complete",
+      "startedAt": "2026-05-28T11:15:34-04:00",
+      "completedAt": "2026-05-28T13:00:00-04:00",
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "medium"
+      },
+      "verificationVerdict": "VERIFIED"
     },
     {
       "number": 2,

@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dabbler.dev/harvester/schemas/object-cleanup.json",
+  "title": "Object Cleanup Findings",
+  "description": "Per-object cleanup-candidate findings produced by AccessHarvester identify-cleanup. See docs/planning/object-cleanup-strategy.md for the design specification.",
+  "type": "object",
+  "required": ["version", "database", "generatedAt", "harvestDate", "dateSignalSource", "thresholdDays", "degradationNotes", "findings"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Must be '1.0'."
+    },
+    "database": {
+      "type": "string",
+      "description": "Name of the harvested Access database (without path or extension)."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 date-time when the file was generated."
+    },
+    "harvestDate": {
+      "type": "string",
+      "format": "date",
+      "description": "ISO 8601 calendar date (YYYY-MM-DD) anchoring the date-signal threshold. Date-only because the threshold is day-based. Defaults to the process's local date when --harvest-date is omitted."
+    },
+    "dateSignalSource": {
+      "type": "string",
+      "enum": ["com", "dao-metadata", "unavailable"],
+      "description": "Path used overall for §3.2 date sampling. 'com' = primary COM-based DateMaximaSampler succeeded for at least one table; 'dao-metadata' = COM was skipped/unavailable and IR LastUpdated was used; 'unavailable' = neither path produced data."
+    },
+    "thresholdDays": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Date-signal threshold in days. A table's max DateTime value more than this many days before harvestDate fires the DateSignal. Default 90; --threshold-days overrides."
+    },
+    "degradationNotes": {
+      "type": "array",
+      "description": "Zero-or-more human-readable strings, one per signal path that ran in a degraded mode (e.g., query SQL absent so QueryTableReference detection coverage was reduced; COM declined and no LastUpdated values present so DateSignal path produced no findings). Empty array when all signal paths ran at full fidelity. See strategy doc §5 for example messages.",
+      "items": { "type": "string" }
+    },
+    "findings": {
+      "type": "array",
+      "description": "One entry per object with at least one fired signal. Sorted by (confidenceTier desc, objectType asc, objectName asc). Objects with zero fired signals are not present.",
+      "items": { "$ref": "#/definitions/CleanupFinding" }
+    }
+  },
+  "definitions": {
+    "CleanupFinding": {
+      "type": "object",
+      "required": ["objectType", "objectName", "confidenceTier", "explanation", "firedSignals"],
+      "additionalProperties": false,
+      "properties": {
+        "objectType": {
+          "type": "string",
+          "enum": ["Form", "Report", "Query", "Table", "Module", "Macro"],
+          "description": "The Access object type."
+        },
+        "objectName": {
+          "type": "string",
+          "description": "The Access object name exactly as it appears in the database."
+        },
+        "confidenceTier": {
+          "type": "string",
+          "enum": ["High", "Medium", "Low"],
+          "description": "Categorical confidence. High = NamePattern AND DateSignal both fired. Medium = exactly one of NamePattern or DateSignal fired. Low = only CrossReferenceAbsence fired."
+        },
+        "explanation": {
+          "type": "string",
+          "description": "One-sentence human-readable why-flagged summary, suitable for display as ItemLabel in the uat-checklist-editor checklist. See strategy doc §5 for templates."
+        },
+        "firedSignals": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Every signal that fired for this object. At least one entry; non-fired signals are not recorded.",
+          "items": { "$ref": "#/definitions/Signal" }
+        }
+      }
+    },
+    "Signal": {
+      "oneOf": [
+        { "$ref": "#/definitions/NamePatternSignal" },
+        { "$ref": "#/definitions/DateSignal" },
+        { "$ref": "#/definitions/CrossReferenceAbsenceSignal" }
+      ]
+    },
+    "NamePatternSignal": {
+      "type": "object",
+      "required": ["signalType", "summary", "matchedSubstring", "category"],
+      "additionalProperties": false,
+      "properties": {
+        "signalType": {
+          "const": "NamePattern",
+          "description": "Discriminator for tagged-union Signal."
+        },
+        "summary": {
+          "type": "string",
+          "description": "Human-readable description of which pattern matched."
+        },
+        "matchedSubstring": {
+          "type": "string",
+          "description": "The exact substring of the object name that triggered the match (e.g., '_OLD', '2023', 'Jan2024')."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["vocabulary", "year", "year-month", "quarter", "numeric-duplicate"],
+          "description": "Which name-pattern category fired. See strategy doc §3.1."
+        }
+      }
+    },
+    "DateSignal": {
+      "type": "object",
+      "required": ["signalType", "summary", "source", "maxValue", "daysSinceMax", "thresholdDays"],
+      "additionalProperties": false,
+      "properties": {
+        "signalType": {
+          "const": "DateSignal",
+          "description": "Discriminator for tagged-union Signal."
+        },
+        "summary": {
+          "type": "string",
+          "description": "Human-readable description of the date observation."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["com", "dao-metadata"],
+          "description": "Source of the maxValue for this specific signal. 'com' = sampled via DateMaximaSampler; 'dao-metadata' = read from IR LastUpdated. The top-level dateSignalSource summarises the overall run."
+        },
+        "maxValue": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 / ISO 8601 date-time of the latest data observed for the table. Must include a UTC offset (`Z` or `+/-HH:MM`); naive timestamps without timezone are not valid. When the source is DAO `LastUpdated` (no timezone info), emit `Z` to assert UTC."
+        },
+        "daysSinceMax": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Whole days between maxValue and harvestDate."
+        },
+        "thresholdDays": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "The effective threshold used for this finding. The DateSignal fires only when daysSinceMax > thresholdDays."
+        }
+      }
+    },
+    "CrossReferenceAbsenceSignal": {
+      "type": "object",
+      "required": ["signalType", "summary", "checkedReferenceTypes"],
+      "additionalProperties": false,
+      "properties": {
+        "signalType": {
+          "const": "CrossReferenceAbsence",
+          "description": "Discriminator for tagged-union Signal."
+        },
+        "summary": {
+          "type": "string",
+          "description": "Human-readable summary listing the reference types that were checked and came up empty."
+        },
+        "checkedReferenceTypes": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Reference types the detector applied for this object type, all of which produced no evidence. See strategy doc §3.3 for the per-object-type matrix.",
+          "items": {
+            "type": "string",
+            "enum": [
+              "RecordSource",
+              "RowSource",
+              "NavigationEdge",
+              "VbaReference",
+              "QueryTableReference",
+              "FkRelationship"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

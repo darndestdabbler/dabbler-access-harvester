@@ -1,0 +1,10 @@
+[
+  {
+    "round": 4,
+    "severity": "Minor",
+    "location": "docs/planning/object-cleanup-strategy.md sec5 DateSignal example",
+    "summary": "Example daysSinceMax 1080 was arithmetically wrong for the stated dates (2022-03-15 to 2026-05-28 = 1535 days).",
+    "fix": "Changed daysSinceMax and the summary string from 1080 to 1535. No schema or strategy structural change. R5 not run per user closeout budget; the byte-trivial arithmetic fix is post-verification.",
+    "status": "fixed-post-r4"
+  }
+]

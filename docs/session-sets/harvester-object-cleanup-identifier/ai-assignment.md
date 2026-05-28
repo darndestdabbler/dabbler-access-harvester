@@ -21,11 +21,55 @@ to be handled in-conversation.
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- **Orchestrator used:** claude-code / claude-opus-4-7 @ effort=medium
+- **Total routed cost:** ~$0.94 USD across four verification rounds
+  (R1 $0.215, R2 $0.219, R3 $0.261, R4 $0.243 — all gpt-5-4
+  session-verification rounds).
+- **Deviations from recommendation:**
+  - Architecture synthesis handled in-conversation (Opus orchestrator
+    matches the architecture-task routing target — per
+    project-guidance.md "When the orchestrator's model matches the
+    routing target, handle in-conversation").
+  - Four cross-provider verification rounds instead of the workflow's
+    Step 7 "max 2 retries" cap. Human authorized R4 explicitly to
+    close out with a clean VERIFIED rather than defer the R3 doc-
+    consistency findings. R4 itself returned 1 trivial Minor
+    (example arithmetic error 1080→1535 days); fixed post-R4
+    without R5 per closeout budget.
+  - Three pre-existing HomeHealthCare CLI integration tests time out
+    at 60s under the dotnet test harness (direct CLI invocation
+    succeeds in <30s; orphan MSACCESS process cleanup did not
+    resolve). Documented as out-of-scope in every verification
+    prompt — Session 1's deliverables are docs/schema-only and
+    cannot have caused this. 42/45 integration tests pass.
+- **Notes for next-session calibration:**
+  - The strategy doc compresses several cross-section invariants
+    (Subarea no-transformation rule, code-behind global exclusion,
+    bidirectional SQL impact). Session 2's implementation should
+    treat each invariant as a test target — at minimum: a unit
+    test asserting Subarea equals objectName byte-for-byte, a unit
+    test asserting Form_*/Report_* never appear in findings, and
+    a unit test exercising the inline-SQL parse in
+    RecordSource/RowSource against a fixture.
+  - The four verification rounds surfaced that closeout-grade
+    strategy docs benefit from re-reading the OUTPUT examples
+    (especially DateSignal) for arithmetic and timezone
+    consistency before sending to verification — the R4 finding
+    was caught only because the verifier did the date math.
+    Pre-verification orchestrator self-check on numeric examples
+    would have saved one round.
 
 ---
 
-**Next-session orchestrator recommendation (Session 2):** (To be filled after Session 1 completes.)
+**Next-session orchestrator recommendation (Session 2):** claude-code
+/ claude-sonnet-4-6 @ effort=medium. Rationale: Session 2 is
+mechanical correspondence work — translate the Session 1 strategy
+verbatim into C# detectors, output writers, and unit tests under
+`AccessHarvester.Pipeline/Cleanup/`. No architecture decisions
+remain; the regexes, signal-combinator rules, and JSON output
+shapes are fully specified. Sonnet at medium is the right cost
+band per the repo's mechanical-vs-synthesis routing convention
+(`project-guidance.md` → Conventions → Workflow Expectations).
 
 ## Session 2 of 3: CLI Detection Code
 
