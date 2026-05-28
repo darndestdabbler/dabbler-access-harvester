@@ -9,3 +9,4 @@
 {"timestamp": "2026-05-28T20:55:47.537962Z", "session_number": 2, "event_type": "closeout_requested", "force": false, "manual_verify": false}
 {"timestamp": "2026-05-28T20:55:47.719171Z", "session_number": 2, "event_type": "closeout_succeeded", "method": "api"}
 {"timestamp": "2026-05-28T22:58:43.076757Z", "session_number": 3, "event_type": "work_started"}
+{"timestamp": "2026-05-28T23:21:20.174474Z", "session_number": 3, "event_type": "closeout_succeeded", "forced": false, "method": "snapshot_flip", "verdict": "VERIFIED"}
