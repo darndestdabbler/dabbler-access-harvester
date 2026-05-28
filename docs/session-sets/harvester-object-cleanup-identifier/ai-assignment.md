@@ -176,4 +176,54 @@ production.
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- **Orchestrator used:** claude-code / claude-opus-4-7 @ effort=medium
+  (DEVIATION from recommendation: user invoked Opus rather than Sonnet
+  for Session 3; orchestrator proceeded per user direction. Same pattern
+  as Session 2's deviation.)
+- **Total routed cost:** ~$0.157 USD for a single verification round
+  (R1 gpt-5-4 session-verification, $0.157, 127s elapsed, 15.8k input
+  tokens, 7.8k output tokens). No analysis-task routes used —
+  in-conversation handling per the "Opus orchestrator matches the
+  analysis target" Convention in project-guidance.md.
+- **Deviations from recommendation:**
+  - Opus orchestrator instead of Sonnet (user-invoked).
+  - Pilot used `--no-com` on both DBs rather than COM-backed date
+    sampling. Reason: HHC `.accdb` is committed but the calibration
+    goal (name-pattern + cross-reference FPs) does not require the
+    date dimension; Northwind `.accdb` is gitignored. The date-signal
+    path was verified in Session 2's `[SkippableFact]` tests.
+  - VERIFIED in 1 round (R1) instead of the 4-round pattern from
+    Sessions 1 and 2. The verifier returned a substantive 7-point
+    prose analysis with empty issues array. No retries.
+- **Calibration outcomes:**
+  - **Vocabulary regex `(?i)` scoping** — fixed a real false-positive
+    bug. Global `(?i)` was case-folding the `[a-z]` / `[A-Z]`
+    boundary character classes, collapsing the lower→upper CamelCase
+    boundary check into a generic letter→letter check. That allowed
+    `tEmp` (inside `Employee`) to falsely match the `Temp`
+    vocabulary token. Scoped `(?i)` to the vocabulary alternation
+    only with `(?i:...)`; added 6 regression test rows; updated
+    strategy doc §3.1.1.
+  - **Northwind** dropped 41 → 37 findings (4 FPs removed).
+    HomeHealthCare unchanged at 30 findings.
+  - **Threshold tuning** — none required. The 90-day date threshold
+    did not fire on either pilot DB (fresh DAO `LastUpdated` on
+    both).
+  - **Description templates** — reviewed; tier-prefixed, object-
+    name-quoted, clear. No change made.
+  - **Subarea = objectName** invariant verified byte-for-byte.
+- **Test suite delta:** NamePatternDetectorTests 28 → 34 (+6
+  InlineData rows). Full suite: 2127 passing across 10 assemblies,
+  2 skipped synthetic-fixture cases (unchanged from baseline), 0
+  failed. The 3 HomeHealthCare CLI integration test timeouts noted
+  in Session 2 actuals did not recur in this run (45/45 integration).
+- **Notes for next session set (`harvester-data-classifier`):**
+  - The committed cleanup checklists at
+    `samples/GoldenOutput/<db>/cleanup/object-cleanup-checklist.json`
+    satisfy the data-classifier's soft prereq for stale-table
+    exclusion.
+  - Optional follow-up: the R1 verifier suggested adding `Save`/
+    `Saved` hardening tests to NamePatternDetector. Deferred per
+    "lean by default" — the existing regression coverage is
+    adequate. If a future session touches `NamePatternDetector` for
+    other reasons, those tests are a natural pair-up.

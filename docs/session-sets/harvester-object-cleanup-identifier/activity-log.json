@@ -2,5 +2,23 @@
   "sessionSetName": "harvester-object-cleanup-identifier",
   "createdDate": "2026-05-28T11:35:30.240875-04:00",
   "totalSessions": 3,
-  "entries": []
+  "entries": [
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/verify-r1",
+      "dateTime": "2026-05-28T14:47:10.305981-04:00",
+      "description": "Cross-provider session-verification round 1",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 15815,
+          "outputTokens": 7833,
+          "costUsd": 0.1570325
+        }
+      ]
+    }
+  ]
 }

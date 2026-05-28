@@ -29,6 +29,13 @@ public class NamePatternDetectorTests
     [Theory]
     [InlineData("frmclients")]      // no vocabulary token at all
     [InlineData("tblOrders")]
+    // Calibration cases — Session 3 NorthwindDevEdition pilot:
+    [InlineData("qryrptEmployeeEmailList")]   // contains "tEmp" inside "Employee"; no CamelCase boundary
+    [InlineData("qryrptEmployeePhoneList")]
+    [InlineData("rptEmployeeEmailList")]
+    [InlineData("rptEmployeePhoneList")]
+    [InlineData("Hollander")]                  // contains "Hold" but trailing "er" has no boundary
+    [InlineData("Tempest")]                    // contains "Temp" but trailing "est" has no boundary
     public void Vocabulary_Does_Not_Match(string name)
     {
         var sigs = Run(name, "Form");

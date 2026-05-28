@@ -9,8 +9,13 @@ namespace AccessHarvester.Pipeline.Cleanup;
 /// <summary>Name-pattern signal detector — see strategy doc §3.1.</summary>
 public static class NamePatternDetector
 {
+    // (?i) is scoped to the vocabulary alternation only. A global (?i) would also
+    // case-fold the [a-z] / [A-Z] character classes in the boundary lookarounds, which
+    // collapses the CamelCase transition check into a generic letter-letter check and
+    // produces false positives like "tEmp" matching inside "Employee". Calibrated in
+    // Session 3 against NorthwindDevEdition; see object-cleanup-strategy.md §3.1.1.
     private static readonly Regex VocabularyPattern =
-        new(@"(?i)(?:^|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))(Old|Copy|Bak|Archive|Tmp|Temp|Hold|Save|Backup|Snapshot)(?:$|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))",
+        new(@"(?:^|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))(?i:Old|Copy|Bak|Archive|Tmp|Temp|Hold|Save|Backup|Snapshot)(?:$|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))",
             RegexOptions.Compiled);
 
     private static readonly Regex YearPattern =

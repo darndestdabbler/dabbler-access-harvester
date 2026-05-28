@@ -83,16 +83,27 @@ correctly.
 #### 3.1.1 `vocabulary` pattern
 
 Matches a staleness token bounded by word break, underscore/other
-non-letter, or a CamelCase transition. Case-insensitive. Tokens:
-`Old`, `Copy`, `Bak`, `Archive`, `Tmp`, `Temp`, `Hold`, `Save`,
-`Backup`, `Snapshot`.
+non-letter, or a CamelCase transition. The vocabulary alternation
+is case-insensitive; the boundary character classes are
+case-sensitive (see note below). Tokens: `Old`, `Copy`, `Bak`,
+`Archive`, `Tmp`, `Temp`, `Hold`, `Save`, `Backup`, `Snapshot`.
 
 ```regex
-(?i)(?:^|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))(Old|Copy|Bak|Archive|Tmp|Temp|Hold|Save|Backup|Snapshot)(?:$|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))
+(?:^|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))(?i:Old|Copy|Bak|Archive|Tmp|Temp|Hold|Save|Backup|Snapshot)(?:$|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))
 ```
 
 Matches: `tblClients_OLD`, `frmBackup`, `qryReports_Archive`,
 `OldReports` (CamelCase), `frmCopyOfClients`.
+
+Does **not** match (calibrated against `NorthwindDevEdition` in
+Session 3): `Employee` (would otherwise hit `tEmp`), `Hollander`
+(would otherwise hit `Hold`), `Tempest` (would otherwise hit
+`Temp`). The case-insensitive flag is scoped to the vocabulary
+alternation with `(?i:...)` rather than applied globally with
+`(?i)`. A global flag also case-folds the `[a-z]` / `[A-Z]`
+character classes in the boundary lookarounds, collapsing the
+CamelCase transition check into a generic letter-letter check
+and producing false-positive substring matches.
 
 #### 3.1.2 `year` pattern
 

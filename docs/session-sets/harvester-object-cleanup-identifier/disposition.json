@@ -1,6 +1,6 @@
 {
-  "status": "completed",
-  "summary": "Session 2 of 3 delivered: `AccessHarvester identify-cleanup` subcommand implementing the Session 1 strategy. New files: Pipeline/Cleanup/{CleanupFinding,NamePatternDetector,CrossReferenceDetector,DateMaximaSampler,CleanupChecklistWriter,CleanupAnalyser,ComDateMaximaProbe}.cs; Cli/Commands/IdentifyCleanupCommand.cs; Core/Com/AccessDateMaximaSampler.cs; 5 new test files (NamePatternDetectorTests, CrossReferenceDetectorTests, DateMaximaSamplerTests, ComDateMaximaProbeTests, IrLoaderTests). Additive extensions to IrFormOrReport/IrControl/IrTable (Properties dict on form/report/control; LastUpdated/Connect/DateTimeColumnNames on table) and IrLoader population. Dispatcher entry + usage block added to Program.cs. Verification: gpt-5-4 four rounds. R1 ISSUES_FOUND 2 Major + 3 Minor (per-table date fallback, VBA DoCmd parsing, event-property scope, matchedSubstring boundary, test coverage); all fixed. R2 ISSUES_FOUND 2 Major + 2 Minor including a regression in IrLoader (R1 generic-properties branch swallowed Begin macro-action nodes — caught by R2 verifier; reordered + 2 regression tests added) and incomplete COM-failure degradation (extracted ComDateMaximaProbe helper + 5 tests); also narrowed bare-token module/class scan to Call/Set/qualifier contexts and added RowSource tests. All R2 issues fixed. R3 ISSUES_FOUND 2 Minor (missing usage message on dual-flag, contradictory degradation notes); both fixed. R4 (human-authorized override of 2-retry cap, matching Session 1 precedent) VERIFIED. Total verification cost ~$0.82. dotnet build clean; 582/582 tests pass in Pipeline.Tests (+13 new). Smoke test against samples/GoldenOutput/HomeHealthCare validates cleanly against the JSON schema. Pre-existing 3 HomeHealthCare CLI integration test timeouts persist (42/45, unchanged from Session 1 baseline). Architectural deviation documented: DateMaximaSampler.cs is split between Pipeline/Cleanup (interface + DAO fallback per spec) and Core/Com (COM impl) because Core→Pipeline is the existing project-reference direction; Pipeline cannot reference Core.",
+  "status": "complete",
+  "summary": "Added AccessHarvester identify-cleanup subcommand across 3 sessions. Session 1 designed the multi-signal cleanup schema (name-pattern + date-signal + cross-reference-absence), committed the JSON Schema and a 600+ line strategy document, and verified across 4 rounds. Session 2 implemented the CLI command, three detectors, ComDateMaximaProbe, output writer, and unit + [SkippableFact] integration tests; closed out across 4 verification rounds with a Session-2 R2-introduced IrLoader regression caught and fixed. Session 3 ran the pilot against HomeHealthCare (30 Low findings) and NorthwindDevEdition (41 -> 37 findings after FP fix), identified and fixed a vocabulary-regex false positive (Employee->tEmp caused by global (?i) case-folding the boundary lookarounds), added 6 regression test rows, updated the strategy doc, committed calibrated golden fixtures under cleanup/ subdirs for both DBs, and cross-provider verified VERIFIED in R1 ($0.157, gpt-5-4) with a substantive 7-point prose analysis. Full test suite green: 2127 passing, 2 skipped synthetic-fixture cases.",
   "verification_method": "api",
   "files_changed": [
     "AccessHarvester.Cli/Program.cs",
@@ -13,35 +13,29 @@
     "AccessHarvester.Pipeline/Cleanup/CleanupChecklistWriter.cs",
     "AccessHarvester.Pipeline/Cleanup/CleanupAnalyser.cs",
     "AccessHarvester.Pipeline/Cleanup/ComDateMaximaProbe.cs",
+    "AccessHarvester.Pipeline/Cleanup/object-cleanup-schema.json",
     "AccessHarvester.Pipeline/UsageIdentification/IrDatabase.cs",
     "AccessHarvester.Pipeline/UsageIdentification/IrLoader.cs",
-    "tests/AccessHarvester.Pipeline.Tests/AccessHarvester.Pipeline.Tests.csproj",
+    "docs/planning/object-cleanup-strategy.md",
     "tests/AccessHarvester.Pipeline.Tests/Cleanup/NamePatternDetectorTests.cs",
     "tests/AccessHarvester.Pipeline.Tests/Cleanup/CrossReferenceDetectorTests.cs",
     "tests/AccessHarvester.Pipeline.Tests/Cleanup/DateMaximaSamplerTests.cs",
     "tests/AccessHarvester.Pipeline.Tests/Cleanup/ComDateMaximaProbeTests.cs",
     "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/IrLoaderTests.cs",
+    "samples/GoldenOutput/HomeHealthCare/cleanup/object-cleanup.json",
+    "samples/GoldenOutput/HomeHealthCare/cleanup/object-cleanup-checklist.json",
+    "samples/GoldenOutput/NorthwindDevEdition/cleanup/object-cleanup.json",
+    "samples/GoldenOutput/NorthwindDevEdition/cleanup/object-cleanup-checklist.json",
     "docs/session-sets/harvester-object-cleanup-identifier/session-state.json",
     "docs/session-sets/harvester-object-cleanup-identifier/ai-assignment.md",
-    "docs/session-sets/harvester-object-cleanup-identifier/session-events.jsonl",
-    "docs/session-sets/harvester-object-cleanup-identifier/session-reviews/session-002.md",
-    "docs/session-sets/harvester-object-cleanup-identifier/issue-logs/session-002.json",
+    "docs/session-sets/harvester-object-cleanup-identifier/change-log.md",
     "docs/session-sets/harvester-object-cleanup-identifier/disposition.json",
-    "tools/run_session2_verification.py",
-    "tools/run_session2_verification_r2.py",
-    "tools/run_session2_verification_r3.py",
-    "tools/run_session2_verification_r4.py"
+    "docs/session-sets/harvester-object-cleanup-identifier/next-session-set-recommendation.md"
   ],
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 3 scope is pilot + calibration — running identify-cleanup against HomeHealthCare and NorthwindDevEdition golden outputs, tuning vocabulary/thresholds/templates, and committing calibrated golden fixtures. This is analysis + light tuning work, matching the repo convention of Sonnet at medium effort for analysis tasks. Recommendation routed via gemini-pro analysis task ($0.0024) confirmed Sonnet as the appropriate cost band; iterative refinement is inherent to this project (4 rounds in both Sessions 1 and 2), not a model-capability issue."
-    }
+  "next_session_set": {
+    "slug": "harvester-data-classifier",
+    "summary": "Build the classify subcommand and standalone HTML editor for column data classification. harvester-object-cleanup-identifier is now a soft prereq satisfied: classify can consume the committed cleanup checklists to skip confirmed-stale tables. Completes the third arm of the three-set analytical pipeline (cleanup -> usage -> data-classification)."
   },
   "blockers": []
 }
