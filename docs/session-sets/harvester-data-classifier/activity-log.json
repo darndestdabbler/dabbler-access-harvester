@@ -2,5 +2,159 @@
   "sessionSetName": "harvester-data-classifier",
   "createdDate": "2026-05-28T15:03:42.322129-04:00",
   "totalSessions": 0,
-  "entries": []
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/read-guidance",
+      "dateTime": "2026-05-28T15:29:15.762633-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, and data-classification-plan.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/register-session-start",
+      "dateTime": "2026-05-28T15:29:15.763634-04:00",
+      "description": "Registered session start via ai_router.register_session_start; later patched session-state.json to the canonical v4 shape per CLAUDE.md (and added back v2 top-level fields as a bridge for the installed close_session).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/design-schema",
+      "dateTime": "2026-05-28T15:29:15.763634-04:00",
+      "description": "Designed the classification.json schema in-conversation per the project-guidance convention 'When the orchestrator's model matches the routing target for a given task type, handle the task in-conversation rather than calling route().' Orchestrator is claude-opus-4-7 and architecture routes to opus.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/write-schema-and-fixture",
+      "dateTime": "2026-05-28T15:29:15.764638-04:00",
+      "description": "Wrote AccessHarvester.Pipeline/Classification/classification-schema.json (Draft-07, 10-category ColumnCategory enum, MaskingStrategy enum, single-column FkTarget with explicit v1.0 scope note, FK-authority if/then constraint, valueFormatPattern allOf-of-two-regex constraints) and samples/classification-fixture.json (HomeHealthCare-shape: Person + VisitStatus + Visit covering all 10 categories and the FK/autonumber/memo/audit edge cases).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/validate-fixture",
+      "dateTime": "2026-05-28T15:29:15.764638-04:00",
+      "description": "Validated samples/classification-fixture.json against the schema (Draft-07 Python jsonschema): 0 errors. Ran positive/negative tests on the FK if/then constraint and the valueFormatPattern regex after each fix round.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verification-r1",
+      "dateTime": "2026-05-28T15:29:15.764638-04:00",
+      "description": "Round 1 cross-provider session-verification via route(task_type='session-verification') -> gpt-5-4. Verdict: ISSUES_FOUND. 1 Critical (privacy invariant on valueFormatPattern) + 2 Major (single-column FK scope ambiguity; FK-authority human-override ambiguity).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.2193
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/fix-r1-and-verify-r2",
+      "dateTime": "2026-05-28T15:29:15.764638-04:00",
+      "description": "Applied R1 fixes: regex pattern on valueFormatPattern; FkTarget single-column scope note in schema-root and FkTarget descriptions; allOf if/then constraint on Column humanOverride for isForeignKey=true. R2 verification gpt-5-4 verdict ISSUES_FOUND on residual valueFormatPattern weakness (all-uppercase literals slip past).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.2027
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/fix-r2-and-verify-r3",
+      "dateTime": "2026-05-28T15:29:15.766144-04:00",
+      "description": "Tightened valueFormatPattern: allOf of two regex rules (char-class allowlist + at-least-one-placeholder). Narrowed privacy-invariant scope to scanner-emitted fields and clarified reviewer-discipline expectation for notes. R3 gpt-5-4 verdict ISSUES_FOUND on placeholder-alphabet ambiguity (A/X are both placeholders AND legitimate uppercase letters).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.1255
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/fix-r3-and-verify-r4",
+      "dateTime": "2026-05-28T15:29:15.766144-04:00",
+      "description": "Collapsed placeholder alphabet to non-alphabetic tokens only (# and ?); removed letter-class placeholders. R4 gpt-5-4 verdict ISSUES_FOUND on a contrived all-uppercase + placeholder residual ('APT #B').",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.1421
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/r4-tiebreaker-and-adjudication",
+      "dateTime": "2026-05-28T15:29:15.766648-04:00",
+      "description": "Per Step 7 disagreement procedure: queried gemini-pro for a tiebreaker on the R4 finding; tiebreaker endorsed dismissal ('the significant, certain engineering cost of re-architecting the contract... is not justified by the minimal, theoretical risk reduction'). Operator confirmed option (b) accept-dismissal. Recorded via ai_router.record_adjudication (cause=genuine-split, resolution=accept-dismissal). Issue saved to issue-logs/session-001.json with status=deferred.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "costUsd": 0.003
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/session-2-recommendation",
+      "dateTime": "2026-05-28T15:29:15.766648-04:00",
+      "description": "Routed Session 2 orchestrator recommendation via route(task_type='analysis') -> gemini-pro. Recommendation: claude-sonnet-4-6 at effort=high (mechanical-correspondence pin per project-guidance; key architectural decisions already documented in plan section 3 + 8).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "costUsd": 0.0019
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 12,
+      "stepKey": "session-1/ai-assignment-actuals",
+      "dateTime": "2026-05-28T15:29:15.767654-04:00",
+      "description": "Appended Session 1 actuals to ai-assignment.md (orchestrator used, total routed cost ~$0.69, deviations, calibration notes) and updated the Session 2 block per the routed recommendation.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 13,
+      "stepKey": "session-1/disposition",
+      "dateTime": "2026-05-28T15:29:15.767654-04:00",
+      "description": "Authored docs/session-sets/harvester-data-classifier/disposition.json with status=completed, next_orchestrator block (claude-sonnet-4-6 high, reason=switch-due-to-cost), and the full files_changed list per the lessons-learned 'write disposition before closeout commit' convention.",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
 }
