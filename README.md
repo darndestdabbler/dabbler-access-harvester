@@ -14,7 +14,7 @@ automated build/test plus mandatory cross-provider AI verification.
 
 ## Repository Layout
 
-- `AccessHarvester.Cli/` — Thin CLI exe. Subcommands: `extract`, `translate`, `run`.
+- `AccessHarvester.Cli/` — Thin CLI exe. Subcommands: `extract`, `translate`, `run`, `generate-docs`, `validate`, `parse`.
 - `AccessHarvester.Core/` — Extractors, translators, enrichers, COM session, model.
 - `tests/AccessHarvester.Tests/` — xUnit hermetic unit tests + `[SkippableFact]` integration tests.
 - `tools/` — Python developer utilities (`generate_property_defaults.py`, `validate_against_yaml.py`) and the per-session-set runner scripts under `tools/session-runner/`. The VS Code "Session Set Explorer" extension previously vendored here is now distributed from the canonical [`dabbler-ai-orchestration`](https://github.com/darndestdabbler/dabbler-ai-orchestration) repo (`tools/dabbler-ai-orchestration/dabbler-ai-orchestration-0.12.0.vsix`).
@@ -81,6 +81,28 @@ AccessHarvester run --db <path>.accdb --out <output-dir>/
 
 Runs `extract`, then `translate`, then enrichment, producing `raw/`,
 `kb/`, and `ir/` tiers in `<output-dir>/`. Requires Windows + Access.
+
+### `validate` — schema conformance check
+
+```bash
+AccessHarvester validate --in <output-dir>/
+AccessHarvester validate --manifest <path-to-manifest.json>
+```
+
+Validates a `DatabaseManifest` JSON produced by `run` against the
+harvester-schema v1.0 that is embedded in the binary. `--in` locates
+`manifest.json` recursively under the `run` output root. `--manifest`
+validates a single specified file. Exit code 0 = conforms; 3 = schema
+errors found (details on stderr). Pure file-to-file; no Access required.
+
+### `generate-docs` — markdown schema summary
+
+```bash
+AccessHarvester generate-docs --in <manifest.json> --out <output-dir>/
+```
+
+Reads a `DatabaseManifest` JSON and writes a markdown schema summary to
+`<output-dir>/<database-slug>/schema-summary.md`. Pure file-to-file.
 
 ## Constraints
 

@@ -24,6 +24,7 @@ public sealed class CliUsageTextTests
         Assert.Contains("run", usage);
         Assert.Contains("parse", usage);
         Assert.Contains("generate-docs", usage);
+        Assert.Contains("validate", usage);
         Assert.Contains("bare-file mode", usage);
     }
 
@@ -36,6 +37,7 @@ public sealed class CliUsageTextTests
         Assert.Contains("Exit codes for extract/translate/run:", usage);
         Assert.Contains("Exit codes for parse", usage);
         Assert.Contains("Exit codes for generate-docs:", usage);
+        Assert.Contains("Exit codes for validate:", usage);
     }
 
     [Fact]

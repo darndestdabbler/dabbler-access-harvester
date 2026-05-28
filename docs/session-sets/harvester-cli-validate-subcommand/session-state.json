@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "harvester-cli-validate-subcommand",
+  "status": "in-progress",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Session 1",
+      "status": "in-progress",
+      "startedAt": "2026-05-28T00:00:00Z",
+      "completedAt": null,
+      "orchestrator": "claude-sonnet-4-6",
+      "verificationVerdict": null
+    }
+  ]
+}

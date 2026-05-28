@@ -27,8 +27,8 @@ The exe contains everything except Microsoft Access itself. `extract`
 and `run` subcommands talk to Access via COM and therefore require
 Windows + an installed Microsoft Access (per the `AccessHarvester.Core`
 `[SupportedOSPlatform("windows")]` gating). The `parse`, `translate`,
-and `generate-docs` subcommands are pure file-to-file and run anywhere
-Windows can launch the binary.
+`generate-docs`, and `validate` subcommands are pure file-to-file and
+run anywhere Windows can launch the binary.
 
 ---
 
@@ -86,6 +86,8 @@ AccessHarvester extract       --db <file.accdb> --out <output-root-dir> [--types
 AccessHarvester translate     --in <raw-dir>    --out <kb-dir>          [--types ...] [--json-status]
 AccessHarvester run           --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
 AccessHarvester generate-docs --in <manifest.json> --out <output-dir>
+AccessHarvester validate      --in <output-root-dir> [--json-status]
+AccessHarvester validate      --manifest <manifest.json> [--json-status]
 AccessHarvester parse         <source-file>
 AccessHarvester parse         --in <source-file>
 AccessHarvester               <source-file>              # bare-file mode; equivalent to 'parse'
@@ -94,6 +96,10 @@ AccessHarvester               <source-file>              # bare-file mode; equiv
 `run` is `extract` + `translate` + `enrich` in one invocation.
 `generate-docs` reads a `DatabaseManifest` JSON and writes a markdown
 schema summary to `<output-dir>/<database-slug>/schema-summary.md`.
+`validate` checks a `DatabaseManifest` JSON against the harvester-schema
+v1.0 that is embedded in the binary. `--in` locates `manifest.json`
+recursively under the output root produced by `run`; `--manifest`
+validates a single specified file directly.
 
 Layout under `<output-root-dir>`:
 `AccessMetaData/<dbName>/{raw,kb,ir}/<Category>/...`.
@@ -106,6 +112,9 @@ Exit codes per subcommand group:
   error).
 - `generate-docs`: `0` (summary written), `1` (usage error),
   `2` (unexpected error).
+- `validate`: `0` (manifest conforms to schema v1.0), `1` (usage error /
+  file not found / not valid JSON), `2` (unexpected error),
+  `3` (schema-validation errors found).
 - `--version` / `--help`: `0` (printed).
 
 For the per-subcommand option list, JSON-status envelope shapes, and
@@ -143,7 +152,7 @@ output disagree, trust the runtime output and re-cut the release.
 
 ## Verifying an install
 
-Smoke-check the installed binary with three zero-cost invocations:
+Smoke-check the installed binary with four zero-cost invocations:
 
 ```bash
 AccessHarvester --version
@@ -154,12 +163,21 @@ AccessHarvester --help
 
 AccessHarvester parse path\to\a\sample.bas
 # {"status":"parsed", "errors":[], "tree_stats": {...}}  on stdout
+
+AccessHarvester validate --manifest path\to\a\manifest.json
+# Validation passed (1 manifest(s) checked against schema v1.0).  on stderr; exit 0
 ```
 
-These three calls exercise the dispatcher, the help text, the parse
-pipeline, and the JSON-emit path without touching Microsoft Access. If
-any of them fail, the install is broken; do not proceed to `extract`
-or `run`.
+These four calls exercise the dispatcher, the help text, the parse
+pipeline, the embedded-schema validator, and the JSON-emit path without
+touching Microsoft Access. If any of them fail, the install is broken;
+do not proceed to `extract` or `run`.
+
+For the `validate` smoke check, pass any `manifest.json` produced by a
+prior `run` invocation, or use the `examples/northwind-output.json` file
+from the repository. The embedded schema is the same as
+`docs/test-cases/harvester-schema.v1.0.json` at build time — no schema
+file on disk is required at runtime.
 
 The repository's `tests/AccessHarvester.Integration/Cli/PackagedBinarySmokeTests.cs`
 runs the same checks plus a `generate-docs` round-trip against the

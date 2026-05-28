@@ -81,4 +81,47 @@ public sealed class SchemaValidatorTests
 
         Assert.True(result.IsValid, $"Expected VALID (unknown fields allowed) but got errors: {string.Join("; ", result.Errors)}");
     }
+
+    // ── SchemaValidator.FromText factory ────────────────────────────────────────
+
+    [Fact]
+    public void FromText_ConformantDocument_ReturnsValid()
+    {
+        string schemaJson = File.ReadAllText(SchemaPath, System.Text.Encoding.UTF8);
+        var validator = SchemaValidator.FromText(schemaJson);
+
+        const string json = """
+            {
+              "SchemaType": "DatabaseManifest",
+              "SchemaVersion": "1.0",
+              "HarvesterVersion": "1.0.0",
+              "Database": { "Name": "Test.accdb" }
+            }
+            """;
+
+        var result = validator.Validate(json);
+
+        Assert.True(result.IsValid, $"Expected VALID but got errors: {string.Join("; ", result.Errors)}");
+        Assert.Empty(result.Errors);
+    }
+
+    [Fact]
+    public void FromText_InvalidDocument_ReturnsErrors()
+    {
+        string schemaJson = File.ReadAllText(SchemaPath, System.Text.Encoding.UTF8);
+        var validator = SchemaValidator.FromText(schemaJson);
+
+        const string json = """
+            {
+              "SchemaVersion": "1.0",
+              "HarvesterVersion": "1.0.0",
+              "Database": { "Name": "Test.accdb" }
+            }
+            """;
+
+        var result = validator.Validate(json);
+
+        Assert.False(result.IsValid, "Expected INVALID (missing SchemaType) but got VALID.");
+        Assert.NotEmpty(result.Errors);
+    }
 }

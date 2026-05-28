@@ -37,4 +37,11 @@
     <ProjectReference Include="..\AccessHarvester.Vba.Grammar\AccessHarvester.Vba.Grammar.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Schema embedded so `validate` works without the source tree at runtime. -->
+    <EmbeddedResource Include="..\docs\test-cases\harvester-schema.v1.0.json">
+      <LogicalName>AccessHarvester.Cli.harvester-schema.v1.0.json</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

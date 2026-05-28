@@ -1,0 +1,5 @@
+{
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "1.0.0",
+  "Database": { "Name": "Test.accdb" }
+}

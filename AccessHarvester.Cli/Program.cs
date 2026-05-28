@@ -1,8 +1,10 @@
+using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.Json;
 using AccessHarvester.Core;
 using AccessHarvester.Core.Abstractions;
+using AccessHarvester.Pipeline.Validation;
 using AccessHarvester.Pipeline.DocGen;
 using AccessHarvester.Pipeline.Manifest;
 using AccessHarvester.Vba.Grammar.Generated;
@@ -68,7 +70,7 @@ public static class Program
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
             && !IsVersionFlag(args[0])
-            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs"))
+            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate"))
         {
             return RunParse(args);
         }
@@ -81,6 +83,7 @@ public static class Program
             "run"           => RunRun(rest),
             "parse"         => RunParse(rest),
             "generate-docs" => RunGenerateDocs(rest),
+            "validate"      => RunValidate(rest),
             _               => UnknownCommand(args[0]),
         };
     }
@@ -222,6 +225,166 @@ public static class Program
 
         Console.Error.WriteLine($"Schema summary written to: {targetFile}");
         return 0;
+    }
+
+    // ── validate subcommand ─────────────────────────────────────────────────────
+    // Validates a `run` output (or a standalone manifest file) against the
+    // harvester-schema.v1.0.json embedded in this binary.
+    //
+    // Usage:
+    //   AccessHarvester validate --in <output-root-dir>      (finds manifest.json recursively)
+    //   AccessHarvester validate --manifest <path>           (validates a single file)
+    //   AccessHarvester validate --in <dir> --json-status
+    //
+    // Exit codes:
+    //   0  validation passed
+    //   1  usage error (bad args, file/dir not found, manifest not parseable as JSON)
+    //   2  unexpected error (I/O failure, embedded schema load failure)
+    //   3  schema-validation errors found
+    private static int RunValidate(string[] args)
+    {
+        var opts = ParseOptions(args);
+
+        bool hasIn       = opts.ContainsKey("in");
+        bool hasManifest = opts.ContainsKey("manifest");
+
+        if (!hasIn && !hasManifest)
+            throw new ArgumentException("One of --in <output-root-dir> or --manifest <path> is required.");
+        if (hasIn && hasManifest)
+            throw new ArgumentException("--in and --manifest are mutually exclusive.");
+
+        string[] manifestPaths;
+        if (hasManifest)
+        {
+            string path = Path.GetFullPath(opts["manifest"]);
+            if (!File.Exists(path))
+            {
+                Console.Error.WriteLine($"Manifest file not found: {path}");
+                return 1;
+            }
+            manifestPaths = [path];
+        }
+        else
+        {
+            string inDir = Path.GetFullPath(opts["in"]);
+            if (!Directory.Exists(inDir))
+            {
+                Console.Error.WriteLine($"Input directory not found: {inDir}");
+                return 1;
+            }
+            manifestPaths = Directory.GetFiles(inDir, "manifest.json", SearchOption.AllDirectories);
+            if (manifestPaths.Length == 0)
+            {
+                Console.Error.WriteLine($"No manifest.json found under: {inDir}");
+                return 1;
+            }
+        }
+
+        string schemaJson = LoadEmbeddedSchema();
+        var validator = SchemaValidator.FromText(schemaJson);
+
+        var allErrors = new List<(string Path, IReadOnlyList<string> Errors)>();
+        foreach (string manifestPath in manifestPaths)
+        {
+            string manifestJson;
+            try { manifestJson = File.ReadAllText(manifestPath, System.Text.Encoding.UTF8); }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Cannot read manifest: {ex.Message}");
+                return 1;
+            }
+
+            try { using var _ = JsonDocument.Parse(manifestJson); }
+            catch (JsonException ex)
+            {
+                Console.Error.WriteLine($"Not valid JSON ({manifestPath}): {ex.Message}");
+                return 1;
+            }
+
+            var result = validator.Validate(manifestJson);
+            if (!result.IsValid)
+                allErrors.Add((manifestPath, result.Errors));
+        }
+
+        int exit;
+        if (allErrors.Count == 0)
+        {
+            Console.Error.WriteLine($"Validation passed ({manifestPaths.Length} manifest(s) checked against schema v{SchemaVersionLiteral}).");
+            exit = 0;
+        }
+        else
+        {
+            foreach (var (path, errors) in allErrors)
+            {
+                Console.Error.WriteLine($"Validation errors in: {path}");
+                foreach (var error in errors)
+                {
+                    Console.Error.WriteLine($"  {error}");
+                    string? hint = WellKnownHint(error);
+                    if (hint is not null)
+                        Console.Error.WriteLine($"    Hint: {hint}");
+                }
+            }
+            exit = 3;
+        }
+
+        if (HasJsonStatus(opts))
+        {
+            EmitStatus(new
+            {
+                Command       = "validate",
+                SchemaVersion = SchemaVersionLiteral,
+                Manifests     = manifestPaths,
+                ExitCode      = exit,
+                Errors        = allErrors.Select(e => new
+                {
+                    Path       = e.Path,
+                    ErrorCount = e.Errors.Count,
+                    Messages   = e.Errors,
+                }).ToArray(),
+            });
+        }
+
+        return exit;
+    }
+
+    private static string LoadEmbeddedSchema()
+    {
+        var asm = typeof(Program).Assembly;
+        using var stream = asm.GetManifestResourceStream("AccessHarvester.Cli.harvester-schema.v1.0.json")
+            ?? throw new InvalidOperationException("Embedded schema resource not found in assembly.");
+        using var reader = new StreamReader(stream, System.Text.Encoding.UTF8);
+        return reader.ReadToEnd();
+    }
+
+    // Maps well-known v1.0 error patterns to short actionable hints.
+    private static string? WellKnownHint(string error)
+    {
+        // camelCase key where PascalCase is required (D20 migration gap)
+        if (error.Contains("[required]") &&
+            (error.Contains("schemaType") || error.Contains("schemaVersion") ||
+             error.Contains("harvesterVersion") || error.Contains("database")))
+            return "Keys must be PascalCase (e.g. SchemaType, not schemaType). " +
+                   "Run tools/migrate_v0_to_v1.py to convert a v0 document.";
+
+        // Missing root required fields
+        if (error.Contains("[required]") &&
+            (error.Contains("SchemaType") || error.Contains("SchemaVersion") ||
+             error.Contains("HarvesterVersion") || error.Contains("Database")))
+            return "DatabaseManifest requires: SchemaType (const \"DatabaseManifest\"), " +
+                   "SchemaVersion (const \"1.0\"), HarvesterVersion (string), Database.Name (string).";
+
+        // PredicateNode without NodeKind discriminator
+        if (error.Contains("PredicateNode") || error.Contains("NodeKind"))
+            return "PredicateNode requires a NodeKind discriminator field. " +
+                   "See docs/schema/v1-adr.md § PredicateNode polymorphism.";
+
+        // ParserQueryParameter.Source enum mismatch (fixture 12 known issue)
+        if (error.Contains("Source") && error.Contains("Queries"))
+            return "ParserQueryParameter.Source must be one of: " +
+                   "FormControl | UserPrompt | NamedParameter | VbaExpression | ConcatenatedVariable.";
+
+        return null;
     }
 
     // ── parse subcommand ────────────────────────────────────────────────────────
@@ -379,6 +542,8 @@ public static class Program
               AccessHarvester translate     --in <raw-dir>    --out <kb-dir>          [--types ...] [--json-status]
               AccessHarvester run           --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
               AccessHarvester generate-docs --in <manifest.json> --out <output-dir>
+              AccessHarvester validate      --in <output-root-dir> [--json-status]
+              AccessHarvester validate      --manifest <manifest.json> [--json-status]
               AccessHarvester parse         <source-file>
               AccessHarvester parse         --in <source-file>
               AccessHarvester               <source-file>       (bare-file mode; equivalent to 'parse')
@@ -387,6 +552,9 @@ public static class Program
             `run` is extract + translate + enrich in one invocation.
             `generate-docs` reads a DatabaseManifest JSON and writes a markdown schema summary to
               <output-dir>/<database-slug>/schema-summary.md.
+            `validate` checks a DatabaseManifest JSON against the embedded harvester-schema.v1.0.json.
+              --in locates manifest.json recursively under <output-root-dir> (the --out root from `run`).
+              --manifest validates a single specified manifest file directly.
 
             Layout under <output-root-dir>: AccessMetaData/<dbName>/{raw,kb,ir}/<Category>/...
 
@@ -416,6 +584,12 @@ public static class Program
               0  schema summary written successfully
               1  usage error
               2  unexpected error
+
+            Exit codes for validate:
+              0  validation passed (manifest conforms to schema v1.0)
+              1  usage error (bad args, file/dir not found, manifest not valid JSON)
+              2  unexpected error (I/O or embedded schema failure)
+              3  schema-validation errors found (details on stderr)
             """);
     }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Json.Schema;
 
@@ -13,15 +14,19 @@ namespace AccessHarvester.Pipeline.Validation;
 /// </summary>
 public sealed class SchemaValidator
 {
-    // JsonSchema.FromText registers the schema globally by its $id on first load.
-    // Cache by absolute path to avoid duplicate-registration errors when multiple
-    // instances are created with the same schema file.
+    // Two-level cache strategy to prevent duplicate-registration errors in the
+    // JsonSchema.Net global registry, which forbids re-registering the same $id.
     //
-    // Lazy<T> prevents the race in ConcurrentDictionary.GetOrAdd where the factory
-    // can be called multiple times concurrently: only the first Lazy<T> wins the
-    // slot, and its Value factory runs exactly once even under concurrent access.
-    private static readonly ConcurrentDictionary<string, Lazy<JsonSchema>> _cache =
+    // _pathCache  : file path → Lazy<string> (avoids re-reading the same file;
+    //               OrdinalIgnoreCase is correct for Windows case-insensitive paths)
+    // _schemaCache: schema $id URI (or content hash) → Lazy<JsonSchema> (ensures
+    //               JsonSchema.FromText is called exactly once per unique schema;
+    //               Ordinal because URI comparison is case-sensitive per RFC 3986)
+    private static readonly ConcurrentDictionary<string, Lazy<string>> _pathCache =
         new(StringComparer.OrdinalIgnoreCase);
+
+    private static readonly ConcurrentDictionary<string, Lazy<JsonSchema>> _schemaCache =
+        new(StringComparer.Ordinal);
 
     private readonly JsonSchema _schema;
 
@@ -29,11 +34,42 @@ public sealed class SchemaValidator
     {
         ArgumentException.ThrowIfNullOrEmpty(schemaJsonPath);
         string fullPath = Path.GetFullPath(schemaJsonPath);
-        _schema = _cache.GetOrAdd(fullPath, path => new Lazy<JsonSchema>(() =>
+        string text = _pathCache.GetOrAdd(fullPath, p => new Lazy<string>(() =>
+            File.ReadAllText(p, System.Text.Encoding.UTF8))).Value;
+        _schema = GetOrCreate(text);
+    }
+
+    private SchemaValidator(JsonSchema schema) { _schema = schema; }
+
+    /// <summary>
+    /// Creates a <see cref="SchemaValidator"/> from an in-memory JSON Schema string.
+    /// Use this when the schema is embedded as an assembly resource rather than on disk.
+    /// </summary>
+    public static SchemaValidator FromText(string schemaJson)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(schemaJson);
+        return new SchemaValidator(GetOrCreate(schemaJson));
+    }
+
+    // Ensures the schema is in _schemaCache and returns the shared JsonSchema instance.
+    // Uses the schema's $id as the cache key so path-based and text-based loads of the
+    // same schema content share one entry and JsonSchema.FromText is called exactly once.
+    private static JsonSchema GetOrCreate(string schemaJson)
+    {
+        string key = ExtractId(schemaJson)
+            ?? ("[hash]:" + Convert.ToHexString(MD5.HashData(System.Text.Encoding.UTF8.GetBytes(schemaJson))));
+        return _schemaCache.GetOrAdd(key, _ => new Lazy<JsonSchema>(() =>
+            JsonSchema.FromText(schemaJson))).Value;
+    }
+
+    private static string? ExtractId(string schemaJson)
+    {
+        try
         {
-            var schemaText = File.ReadAllText(path, System.Text.Encoding.UTF8);
-            return JsonSchema.FromText(schemaText);
-        })).Value;
+            using var doc = JsonDocument.Parse(schemaJson);
+            return doc.RootElement.TryGetProperty("$id", out var el) ? el.GetString() : null;
+        }
+        catch { return null; }
     }
 
     /// <summary>
@@ -52,7 +88,7 @@ public sealed class SchemaValidator
             return SchemaValidationResult.Valid();
 
         var errors = new List<string>();
-        foreach (var detail in results.Details)
+        foreach (var detail in results.Details ?? [])
         {
             if (!detail.IsValid && detail.Errors is not null)
             {

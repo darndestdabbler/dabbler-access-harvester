@@ -152,7 +152,7 @@ validators) run anywhere; integration tests against committed
 The intended layout (filled in by Session Set #1):
 
 - `AccessHarvester.Cli/` — thin CLI exe (subcommands: extract,
-  translate, run, parse, etc.)
+  translate, run, generate-docs, validate, parse)
 - `AccessHarvester.Core/` — extractors, translators, enrichers, COM
   session, parser, model
 - `tests/AccessHarvester.Tests/` — xUnit hermetic + `[SkippableFact]`

@@ -92,6 +92,21 @@ public sealed class PackagedBinarySmokeTests
         }
     }
 
+    [SkippableFact]
+    public void PackagedBinary_Validate_ConformantManifest_ReturnsZero()
+    {
+        string? exe = PublishedArtifact.TryLocate();
+        Skip.If(exe is null, "Published artifact absent; run tools/publish/publish.ps1.");
+
+        string manifest = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        Assert.True(File.Exists(manifest), $"Example manifest missing: {manifest}");
+
+        var result = RunPackaged(exe!, "validate", "--manifest", manifest);
+
+        Assert.Equal(0, result.ExitCode);
+        Assert.Contains("Validation passed", result.StdErr);
+    }
+
     private static CliResult RunPackaged(string exePath, params string[] args)
     {
         var psi = new ProcessStartInfo
