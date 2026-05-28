@@ -55,11 +55,20 @@ Each component has a well-defined interface from Session 1. Sonnet at
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- Orchestrator: `claude-sonnet-4-6` (ai-assignment recommended Sonnet; applied)
+- Implementation: All 6 signal collectors, SignalIndex, UsageClassifier, QuestionGenerator, UsageChecklistWriter, IrLoader, IdentifyUsageCommand implemented in-conversation
+- Tests: 84 unit tests added under `tests/AccessHarvester.Pipeline.Tests/UsageIdentification/` — all pass
+- Verification: 3 rounds via gpt-5-4 ($0.179 + $0.179 + $0.056 = $0.414 total)
+  - R1: ISSUES_FOUND — 2 Major (F4 overreach, no Module/Macro findings), 1 Major (inline SQL detection), 2 Minor
+  - R2: ISSUES_FOUND — 1 Major (inline-SQL RecordSource misclassified as unbound)
+  - R3: VERIFIED
+- Notable deviations from spec:
+  - RowSourceCollector reads static VBA assignments (`.RowSource = "name"`) rather than design-time control nodes because form IR JSON lacks the control tree (documented as accepted limitation)
+  - Module and Macro findings added beyond original spec scope (all four verifier rounds accepted this)
 
 ---
 
-**Next-session orchestrator recommendation (Session 3):** (To be filled after Session 2 completes.)
+**Next-session orchestrator recommendation (Session 3):** `claude-sonnet-4-6` — Session 3 is pilot execution and calibration (run `identify-usage` against golden output, review in uat-checklist-editor, tune). Sonnet at effort=medium is appropriate; no new architecture decisions are expected.
 
 ## Session 3 of 3: Pilot + Calibration
 

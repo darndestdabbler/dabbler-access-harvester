@@ -2,6 +2,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.Json;
+using AccessHarvester.Cli.Commands;
 using AccessHarvester.Core;
 using AccessHarvester.Core.Abstractions;
 using AccessHarvester.Pipeline.Validation;
@@ -70,7 +71,7 @@ public static class Program
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
             && !IsVersionFlag(args[0])
-            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate"))
+            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage"))
         {
             return RunParse(args);
         }
@@ -78,13 +79,14 @@ public static class Program
         var rest = args.Skip(1).ToArray();
         return args[0].ToLowerInvariant() switch
         {
-            "extract"       => RunExtract(rest),
-            "translate"     => RunTranslate(rest),
-            "run"           => RunRun(rest),
-            "parse"         => RunParse(rest),
-            "generate-docs" => RunGenerateDocs(rest),
-            "validate"      => RunValidate(rest),
-            _               => UnknownCommand(args[0]),
+            "extract"         => RunExtract(rest),
+            "translate"       => RunTranslate(rest),
+            "run"             => RunRun(rest),
+            "parse"           => RunParse(rest),
+            "generate-docs"   => RunGenerateDocs(rest),
+            "validate"        => RunValidate(rest),
+            "identify-usage"  => IdentifyUsageCommand.Run(rest),
+            _                 => UnknownCommand(args[0]),
         };
     }
 
@@ -538,16 +540,18 @@ public static class Program
             AccessHarvester — extract Access DB metadata and translate into a JSON knowledge base.
 
             Usage:
-              AccessHarvester extract       --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
-              AccessHarvester translate     --in <raw-dir>    --out <kb-dir>          [--types ...] [--json-status]
-              AccessHarvester run           --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
-              AccessHarvester generate-docs --in <manifest.json> --out <output-dir>
-              AccessHarvester validate      --in <output-root-dir> [--json-status]
-              AccessHarvester validate      --manifest <manifest.json> [--json-status]
-              AccessHarvester parse         <source-file>
-              AccessHarvester parse         --in <source-file>
-              AccessHarvester               <source-file>       (bare-file mode; equivalent to 'parse')
-              AccessHarvester --version                          (print version + schema-version, exit 0)
+              AccessHarvester extract         --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
+              AccessHarvester translate       --in <raw-dir>    --out <kb-dir>          [--types ...] [--json-status]
+              AccessHarvester run             --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
+              AccessHarvester generate-docs   --in <manifest.json> --out <output-dir>
+              AccessHarvester validate        --in <output-root-dir> [--json-status]
+              AccessHarvester validate        --manifest <manifest.json> [--json-status]
+              AccessHarvester identify-usage  --in <harvested-output-root> [--exclude-cleanup <path>] [--json-status]
+              AccessHarvester identify-usage  --manifest <manifest.json>   [--exclude-cleanup <path>] [--json-status]
+              AccessHarvester parse           <source-file>
+              AccessHarvester parse           --in <source-file>
+              AccessHarvester                 <source-file>       (bare-file mode; equivalent to 'parse')
+              AccessHarvester --version                            (print version + schema-version, exit 0)
 
             `run` is extract + translate + enrich in one invocation.
             `generate-docs` reads a DatabaseManifest JSON and writes a markdown schema summary to

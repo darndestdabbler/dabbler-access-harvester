@@ -1,0 +1,1313 @@
+Your response MUST begin with a detailed prose analysis for each concern below BEFORE the JSON block. Do not skip the analysis. Both the analysis and the JSON block are required.
+
+You are performing cross-provider session verification for Session 2 of the harvester-object-use-identifier session set.
+
+## Session Summary
+
+Session 2 of 3 (CLI Analysis Code) implemented the `AccessHarvester identify-usage` subcommand. This session adds:
+- Data model: IrDatabase (in-memory IR representation), IrLoader (disk loader), UsageFinding (JSON output model)
+- 6 signal collectors: RecordSourceCollector, RowSourceCollector, NavigationEdgeCollector, VbaReferenceCollector, QueryTableReferenceCollector, RelationshipCollector
+- SignalIndex (cross-reference index), UsageClassifier (classification rules), QuestionGenerator (uncertainty question templates)
+- UsageChecklistWriter (writes object-use.json and object-use-checklist.json)
+- IdentifyUsageCommand wired into Program.cs as the `identify-usage` subcommand
+- 76 unit tests covering each component, all pass
+
+## Verification Questions
+
+1. **Classification rule coverage**: Does UsageClassifier implement the rules from the strategy doc (Forms F1-F8, Reports R1-R3, Queries Q1-Q11, Tables T1-T7)?  Are any rules missing or materially divergent?
+2. **Signal collector correctness**: Do the 6 collectors correctly extract signals from the IrDatabase model? Are any signal extraction patterns obviously wrong?
+3. **Output schema compliance**: Does UsageChecklistWriter produce JSON matching the object-use-schema.json structure? Are the camelCase field names correct?
+4. **Test coverage**: Do the unit tests adequately cover the classification rules, especially the query sub-rules (Q8 vs Q9, Q10 Union handling, Q11)?
+5. **Design note on RowSource**: The form IR JSON files only contain embedded macro action Children nodes, NOT the actual form control tree (ComboBox/ListBox with RowSource properties). RowSourceCollector falls back to scanning VBA code for static `.RowSource = "tableName"` assignments. This is a documented limitation — out of scope for Session 2 per spec stop rules.
+
+## Strategy (authoritative spec)
+
+# Object Use Identification Strategy
+
+> **Status:** Authored in Session 1 of `harvester-object-use-identifier`.
+> **Authority:** This document is the design specification for the
+> `AccessHarvester identify-usage` subcommand. Session 2 implements it
+> exactly as described here; divergences require human approval.
+
+---
+
+## 1. Purpose
+
+The `identify-usage` subcommand analyses KB/IR output from a harvested
+Access database and produces two artefacts:
+
+1. `object-use.json` — intermediate structured findings per object
+   (classification, confidence, fired signals, clarifying questions).
+2. `object-use-checklist.json` — a `uat-checklist-editor`-compatible
+   JSON checklist the developer and user review together.
+
+All input signals come from already-harvested KB/IR files. No Access COM
+is required.
+
+---
+
+## 2. Usage Classification Taxonomy
+
+Seven mutually exclusive categories assigned to each object:
+
+| Category | Description | Typical objects |
+|---|---|---|
+| **MainDataEntry** | Form backed by a transactional table; VBA handlers are CRUD-focused (BeforeUpdate, AfterUpdate, OnDelete) | `frmClientDetail`, `frmProviderDetail` |
+| **LookupReference** | Form or table holding code lists; referenced as RowSource by combo/list controls; few or no FK children | `tlkpStates`, `tlkpPlanStatuses`, combo-only forms |
+| **Reporting** | Report or select-only query not used as the record source for a form; presents data without writing it | `rptClientProfile`, `qryClientList` |
+| **NavigationShell** | Form with no RecordSource; opens other forms or reports via VBA/macros (DoCmd.OpenForm, OpenReport) | `frmSwitchboard`, `frmReportMenu` |
+| **StandaloneUtility** | Table or query not referenced as RecordSource, RowSource, VBA target, macro target, or FK peer; may be used in ad-hoc queries or exports | staging tables, scratch queries |
+| **PossiblyUnused** | Object absent from all six signal types; no reference found anywhere in the KB/IR | — |
+| **Unknown** | Insufficient signals to classify with confidence ≥ 0.2, or classification is contradictory | form with no RecordSource and no VBA |
+
+**Confidence** is a 0.0–1.0 score:
+- ≥ 0.8 = High
+- 0.5–0.8 = Medium
+- 0.2–0.5 = Low
+- < 0.2 = Unknown (category becomes `Unknown` regardless of signals)
+
+---
+
+## 3. Signal Families
+
+Six signal collectors feed the classifier. All read from `ir/` files.
+
+### 3.1 RecordSourceCollector
+
+- **Source:** `ir/Forms/*.ir.json`, `ir/Reports/*.ir.json`
+- **Extraction:** `Properties.RecordSource` string va
+
+## JSON Schema
+
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://dabbler.dev/harvester/schemas/object-use.json",
+  "title": "Object Use Findings",
+  "description": "Per-object usage classification findings produced by AccessHarvester identify-usage.",
+  "type": "object",
+  "required": ["version", "database", "generatedAt", "excludedObjects", "objects"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version. Must be '1.0'."
+    },
+    "database": {
+      "type": "string",
+      "description": "Name of the harvested Access database (without path or extension)."
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when the file was generated."
+    },
+    "excludedObjects": {
+      "type": "array",
+      "description": "Object names excluded via --exclude-cleanup (Passes: true in the cleanup checklist). These objects are not present in the objects array.",
+      "items": { "type": "string" }
+    },
+    "objects": {
+      "type": "array",
+      "description": "One finding per non-excluded, non-system object in the harvested database.",
+      "items": { "$ref": "#/definitions/ObjectUseFinding" }
+    }
+  },
+  "definitions": {
+    "ObjectUseFinding": {
+      "type": "object",
+      "required": ["objectType", "objectName", "classification", "confidence", "usageSummary", "signals", "questions"],
+      "additionalProperties": false,
+      "properties": {
+        "objectType": {
+          "type": "string",
+          "enum": ["Form", "Report", "Query", "Table", "Module", "Macro"],
+          "description": "The Access object type."
+        },
+        "objectName": {
+          "type": "string",
+          "description": "The Access object name exactly as it appears in the database."
+        },
+        "classification": {
+          "type": "string",
+          "enum": [
+            "MainDataEntry",
+            "LookupReference",
+            "Reporting",
+            "NavigationShell",
+            "StandaloneUtility",
+            "PossiblyUnused",
+            "Unknown"
+          ],
+          "description": "Usage category. See object-use-identification-strategy.md §2."
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Classification confidence: >=0.8 High, 0.5-0.8 Medium, 0.2-0.5 Low, <0.2 Unknown."
+        },
+        "usageSummary": {
+          "type": "string",
+          "description": "One-sentence description of how the object is used, suitable for display as ItemLabel in the uat-checklist-editor checklist."
+        },
+        "signals": {
+          "type": "array",
+          "description": "One entry per signal type evaluated. Includes both fired and not-fired signals so readers can see what was checked.",
+          "items": { "$ref": "#/definitions/Signal" }
+        },
+        "questions": {
+          "type": "array",
+          "description": "Clarifying questions generated for this object, one per fired uncertainty signal.",
+          "items": { "$ref": "#/definitions/ClarifyingQuestion" }
+        }
+      }
+    },
+    "Signal": {
+      "type": "object",
+      "required": ["signalType", "fired", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "signalType": {
+          "type": "string",
+          "enum": [
+            "RecordSource",
+            "RowSource",
+            "NavigationEdge",
+            "VbaReference",
+            "QueryTableReference",
+            "FkRelationship",
+            "QueryType",
+            "ObjectNameConvention"
+          ],
+          "description": "Which signal family produced this entry. See strategy doc §3."
+        },
+        "fired": {
+          "type": "boolean",
+          "description": "True if this signal type produced any evidence for this object."
+        },
+        "evidence": {
+          "type": "array",
+          "description": "Specific evidence values: table names, object names, SQL fragments, or relationship identifiers. Empty when fired=false.",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "ClarifyingQuestion": {
+      "type": "object",
+      "required": ["questionText", "uncertaintySignal"],
+      "additionalProperties": false,
+      "properties": {
+        "questionText": {
+          "type": "string",
+          "description": "The clarifying question to display in the checklist step."
+        },
+        "uncertaintySignal": {
+          "type": "string",
+          "enum": [
+            "NoNavigationEntry",
+            "NoRecordSource",
+            "QueryReferencesNoTables",
+            "UnreferencedObject",
+            "LookupTablePattern",
+            "CrosstabQuery",
+            "UnrecognizedVbaPattern",
+            "CrypticObjectName"
+          ],
+          "description": "Which uncertainty signal triggered this question. See strategy doc §5-6."
+        }
+      }
+    }
+  }
+}
+
+
+## UsageClassifier.cs (core classification logic)
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>
+/// Classifies all non-excluded objects in an <see cref="IrDatabase"/> using
+/// the six signal families and the rule tables defined in
+/// <c>docs/planning/object-use-identification-strategy.md</c> §4.
+/// </summary>
+public static class UsageClassifier
+{
+    // QueryTypeCode constants per Access DAO
+    private const int TypeSelect     = 0;
+    private const int TypeCrosstab   = 1;
+    private const int TypeDelete     = 2;
+    private const int TypeUpdate     = 3;
+    private const int TypeAppend     = 4;
+    private const int TypeMakeTable  = 5;
+    private const int TypeDataDef    = 6;
+    private const int TypeUnion      = 64;
+    private const int TypePassThrough = 128;
+
+    /// <summary>
+    /// Produces one <see cref="UsageFinding"/> per object in the database.
+    /// Objects in <paramref name="excludedObjects"/> are skipped.
+    /// </summary>
+    public static IReadOnlyList<UsageFinding> Classify(
+        IrDatabase db,
+        SignalIndex index,
+        IReadOnlySet<string>? excludedObjects = null)
+    {
+        var findings = new List<UsageFinding>();
+
+        foreach (var form in db.Forms)
+        {
+            if (IsExcluded(form.Name, excludedObjects)) continue;
+            findings.Add(ClassifyForm(form, index));
+        }
+        foreach (var report in db.Reports)
+        {
+            if (IsExcluded(report.Name, excludedObjects)) continue;
+            findings.Add(ClassifyReport(report, index));
+        }
+        foreach (var query in db.Queries)
+        {
+            if (IsExcluded(query.Name, excludedObjects)) continue;
+            findings.Add(ClassifyQuery(query, index));
+        }
+        foreach (var table in db.Tables)
+        {
+            if (IsExcluded(table.Name, excludedObjects)) continue;
+            if (IsSystemTable(table.Name)) continue;
+            findings.Add(ClassifyTable(table, index));
+        }
+
+        return findings;
+    }
+
+    // ── Forms ────────────────────────────────────────────────────────────────────
+
+    private static UsageFinding ClassifyForm(IrFormOrReport form, SignalIndex index)
+    {
+        bool hasRecordSource = index.RecordSourceByObject.TryGetValue(form.Name, out string? rs);
+        bool hasCrudHandlers = form.HasBeforeUpdate || form.HasAfterUpdate || form.HasOnDelete;
+        bool hasNavEdgesOut  = index.NavigationSources.Contains(form.Name);
+        bool hasVbaCode      = !string.IsNullOrWhiteSpace(form.VbaCode);
+
+        string category;
+        double confidence;
+        var evidence = new List<string>();
+
+        if (hasRecordSource && rs != null)
+        {
+            evidence.Add($"RecordSource={rs}");
+            bool rsIsTransactional = index.HasFkChildren(rs);
+            bool rsIsLookup = index.IsLookupTable(rs) || IsLookupSource(rs, index);
+
+            if (rsIsTransactional && hasCrudHandlers)
+            {
+                // F1
+                category   = UsageCategory.MainDataEntry;
+                confidence = 0.85;
+                if (hasCrudHandlers) evidence.Add("CRUD-VBA-handlers");
+            }
+            else if (rsIsTransactional)
+            {
+                // F2
+                category   = UsageCategory.MainDataEntry;
+                confidence = 0.65;
+            }
+            else if (rsIsLookup)
+            {
+                // F3
+                category   = UsageCategory.LookupReference;
+                confidence = 0.75;
+            }
+            else
+            {
+                // F4 — RecordSource is a query; sub-classify by query type
+                var q = FindQuery(rs, index);
+                if (q != null && IsActionQueryType(q.QueryTypeCode))
+                {
+                    category   = UsageCategory.MainDataEntry;
+                    confidence = 0.55;
+                }
+                else
+                {
+                    category   = UsageCategory.Reporting;
+                    confidence = 0.55;
+                }
+            }
+        }
+        else if (hasNavEdgesOut)
+        {
+            // F5
+            category   = UsageCategory.NavigationShell;
+            confidence = 0.80;
+            evidence.Add("has-navigation-edges-out");
+        }
+        else if (hasVbaCode)
+        {
+            // F6
+            category   = UsageCategory.Unknown;
+            confidence = 0.30;
+            evidence.Add("has-VBA-no-record-source");
+        }
+        else
+        {
+            // F7
+            category   = UsageCategory.PossiblyUnused;
+            confidence = 0.70;
+        }
+
+        confidence = AdjustConfidence(confidence, form.Name, "Form", index,
+                                      hasRecordSource, hasNavEdgesOut, hasVbaCode, 0);
+        if (confidence < 0.2) category = UsageCategory.Unknown;
+
+        return BuildFinding("Form", form.Name, category, confidence, evidence,
+                            "Form", form.RecordSource, hasRecordSource,
+
+
+## QuestionGenerator.cs
+
+using System.Collections.Generic;
+using System.Linq;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>
+/// Generates clarifying questions for a classified object based on the
+/// uncertainty signals defined in strategy §5-6.
+/// </summary>
+public static class QuestionGenerator
+{
+    /// <summary>
+    /// Returns the set of clarifying questions for this object given its
+    /// classification context and signal entries.
+    /// </summary>
+    public static IReadOnlyList<ClarifyingQuestion> Generate(
+        string objectType, string objectName,
+        string category, double confidence,
+        IReadOnlyList<SignalEntry> signals,
+        string? recordSource, bool hasVbaCode,
+        bool isNavigationTarget, int? queryTypeCode,
+        SignalIndex index)
+    {
+        var questions = new List<ClarifyingQuestion>();
+
+        // NoNavigationEntry — form not present as navigation target and not a nav shell
+        if (objectType == "Form"
+            && !isNavigationTarget
+            && category != UsageCategory.NavigationShell
+            && category != UsageCategory.PossiblyUnused)
+        {
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"No navigation entry found for Form '{objectName}' — is it launched from VBA code, another form, or an external application?",
+                UncertaintySignal = UncertaintySignal.NoNavigationEntry,
+            });
+        }
+
+        // NoRecordSource — form has no record source and is not NavigationShell or PossiblyUnused
+        if (objectType == "Form" && string.IsNullOrWhiteSpace(recordSource)
+            && category is not (UsageCategory.NavigationShell or UsageCategory.PossiblyUnused))
+        {
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"Form '{objectName}' has no record source — is it a navigation panel, a parameter/filter dialog, or a utility form?",
+                UncertaintySignal = UncertaintySignal.NoRecordSource,
+            });
+        }
+
+        // QueryReferencesNoTables — query SQL references only other queries
+        if (objectType == "Query")
+        {
+            bool noDirectTables = signals
+                .FirstOrDefault(s => s.SignalType == UsageSignalType.QueryTableReference)?.Evidence
+                .Any(e => e.Contains("references-no-tables")) ?? false;
+            if (noDirectTables)
+            {
+                questions.Add(new ClarifyingQuestion
+                {
+                    QuestionText    = $"Query '{objectName}' references only other queries — is it an intermediate computation step, a parameter source, or can it be merged into its callers?",
+                    UncertaintySignal = UncertaintySignal.QueryReferencesNoTables,
+                });
+            }
+        }
+
+        // CrosstabQuery — query is crosstab type
+        if (objectType == "Query" && queryTypeCode == 1)
+        {
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"Query '{objectName}' is a crosstab query — is it used for reporting, for driving a form or chart control, or for data exports?",
+                UncertaintySignal = UncertaintySignal.CrosstabQuery,
+            });
+        }
+
+        // UnreferencedObject — object is completely absent from all signals
+        if (category == UsageCategory.PossiblyUnused)
+        {
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"{objectType} '{objectName}' is not referenced by any form, report, query, VBA, or macro — is it still in use or can it be excluded from analysis?",
+                UncertaintySignal = UncertaintySignal.UnreferencedObject,
+            });
+        }
+
+        // LookupTablePattern — table classified as LookupReference
+        if (objectType == "Table" && category == UsageCategory.LookupReference)
+        {
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"Table '{objectName}' appears to hold reference/lookup values — should it migrate as static reference data, or be replaced with application constants?",
+                UncertaintySignal = UncertaintySignal.LookupTablePattern,
+            });
+        }
+
+        // UnrecognizedVbaPattern — form/module has VBA but no parseable DoCmd/DFunction calls
+        if (hasVbaCode && category == UsageCategory.Unknown
+            && objectType is "Form" or "Module")
+        {
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"{objectType} '{objectName}' contains VBA that couldn't be auto-classified — can you describe its primary function?",
+                UncertaintySignal = UncertaintySignal.UnrecognizedVbaPattern,
+            });
+        }
+
+        // CrypticObjectName — object name has no conventional prefix and < 5 chars
+        if (IsCrypticName(objectName))
+        {
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"{objectType} '{objectName}' has a name that doesn't clearly indicate its purpose — can you describe what it is used for?",
+                UncertaintySignal = UncertaintySignal.CrypticObjectName,
+            });
+        }
+
+        return questions;
+    }
+
+    private static bool IsCrypticName(string name)
+        => name.Length < 5 && !name.Contains('_') && !char.IsUpper(name.Length > 1 ? name[1] : '\0');
+}
+
+
+## UsageFinding.cs (output model)
+
+using System.Collections.Generic;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>Top-level output container — serialized to object-use.json.</summary>
+public sealed record ObjectUseFindings
+{
+    public string Version { get; init; } = "1.0";
+    public required string Database { get; init; }
+    public required string GeneratedAt { get; init; }
+    public required IReadOnlyList<string> ExcludedObjects { get; init; }
+    public required IReadOnlyList<UsageFinding> Objects { get; init; }
+}
+
+/// <summary>
+/// Per-object usage classification finding. Field names match the
+/// object-use-schema.json property names (camelCase for JSON serialization).
+/// </summary>
+public sealed record UsageFinding
+{
+    public required string ObjectType { get; init; }
+    public required string ObjectName { get; init; }
+    public required string Classification { get; init; }
+    public required double Confidence { get; init; }
+    public required string UsageSummary { get; init; }
+    public required IReadOnlyList<SignalEntry> Signals { get; init; }
+    public required IReadOnlyList<ClarifyingQuestion> Questions { get; init; }
+}
+
+/// <summary>One signal family's result for a given object.</summary>
+public sealed record SignalEntry
+{
+    public required string SignalType { get; init; }
+    public required bool Fired { get; init; }
+    public required IReadOnlyList<string> Evidence { get; init; }
+}
+
+/// <summary>One clarifying question generated for an uncertain object.</summary>
+public sealed record ClarifyingQuestion
+{
+    public required string QuestionText { get; init; }
+    public required string UncertaintySignal { get; init; }
+}
+
+/// <summary>
+/// Usage category names matching the schema enum values.
+/// </summary>
+public static class UsageCategory
+{
+    public const string MainDataEntry    = "MainDataEntry";
+    public const string LookupReference  = "LookupReference";
+    public const string Reporting        = "Reporting";
+    public const string NavigationShell  = "NavigationShell";
+    public const string StandaloneUtility = "StandaloneUtility";
+    public const string PossiblyUnused   = "PossiblyUnused";
+    public const string Unknown          = "Unknown";
+}
+
+/// <summary>
+/// Signal type names matching the schema enum values.
+/// </summary>
+public static class UsageSignalType
+{
+    public const string RecordSource         = "RecordSource";
+    public const string RowSource            = "RowSource";
+    public const string NavigationEdge       = "NavigationEdge";
+    public const string VbaReference         = "VbaReference";
+    public const string QueryTableReference  = "QueryTableReference";
+    public const string FkRelationship       = "FkRelationship";
+    public const string QueryType            = "QueryType";
+    public const string ObjectNameConvention = "ObjectNameConvention";
+}
+
+/// <summary>
+/// Uncertainty signal names matching the schema enum values.
+/// </summary>
+public static class UncertaintySignal
+{
+    public const string NoNavigationEntry      = "NoNavigationEntry";
+    public const string NoRecordSource         = "NoRecordSource";
+    public const string QueryReferencesNoTables = "QueryReferencesNoTables";
+    public const string UnreferencedObject     = "UnreferencedObject";
+    public const string LookupTablePattern     = "LookupTablePattern";
+    public const string CrosstabQuery          = "CrosstabQuery";
+    public const string UnrecognizedVbaPattern = "UnrecognizedVbaPattern";
+    public const string CrypticObjectName      = "CrypticObjectName";
+}
+
+
+## SignalIndex.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>
+/// Cross-reference index built from all signal collectors over an <see cref="IrDatabase"/>.
+/// Provides O(1) lookup for the classifier's rules.
+/// </summary>
+public sealed class SignalIndex
+{
+    // RecordSource: formOrReportName -> tableName/queryName
+    public IReadOnlyDictionary<string, string> RecordSourceByObject { get; }
+
+    // Objects used AS a RecordSource (by any form/report)
+    public IReadOnlySet<string> UsedAsRecordSource { get; }
+
+    // Objects used AS a RecordSource specifically by a form
+    public IReadOnlySet<string> UsedAsFormRecordSource { get; }
+
+    // Objects used AS a RecordSource specifically by a report
+    public IReadOnlySet<string> UsedAsReportRecordSource { get; }
+
+    // Objects used AS a RowSource (by any form control or VBA assignment)
+    public IReadOnlySet<string> UsedAsRowSource { get; }
+
+    // Forms/objects that ARE navigation targets (opened by another object)
+    public IReadOnlySet<string> NavigationTargets { get; }
+
+    // Forms/objects that emit navigation edges (open other objects)
+    public IReadOnlySet<string> NavigationSources { get; }
+
+    // Tables/queries referenced in VBA domain functions or OpenRecordset
+    public IReadOnlySet<string> VbaReferencedObjects { get; }
+
+    // Query -> set of tables/queries it references in FROM/JOIN
+    public IReadOnlyDictionary<string, IReadOnlySet<string>> QuerySqlTargetsByQuery { get; }
+
+    // Tables/queries that appear in any query's SQL
+    public IReadOnlySet<string> UsedInQuerySql { get; }
+
+    // FK: parent table -> set of child tables
+    public IReadOnlyDictionary<string, IReadOnlySet<string>> FkChildrenByTable { get; }
+
+    // FK: child table -> set of parent tables
+    public IReadOnlyDictionary<string, IReadOnlySet<string>> FkParentsByTable { get; }
+
+    // Tables whose name matches the lookup naming convention
+    public IReadOnlySet<string> LookupNamedTables { get; }
+
+    private SignalIndex(
+        IReadOnlyDictionary<string, string> recordSourceByObject,
+        IReadOnlySet<string> usedAsRecordSource,
+        IReadOnlySet<string> usedAsFormRecordSource,
+        IReadOnlySet<string> usedAsReportRecordSource,
+        IReadOnlySet<string> usedAsRowSource,
+        IReadOnlySet<string> navigationTargets,
+        IReadOnlySet<string> navigationSources,
+        IReadOnlySet<string> vbaReferencedObjects,
+        IReadOnlyDictionary<string, IReadOnlySet<string>> querySqlTargetsByQuery,
+        IReadOnlySet<string> usedInQuerySql,
+        IReadOnlyDictionary<string, IReadOnlySet<string>> fkChildrenByTable,
+        IReadOnlyDictionary<string, IReadOnlySet<string>> fkParentsByTable,
+        IReadOnlySet<string> lookupNamedTables)
+    {
+        RecordSourceByObject    = recordSourceByObject;
+        UsedAsRecordSource      = usedAsRecordSource;
+        UsedAsFormRecordSource  = usedAsFormRecordSource;
+        UsedAsReportRecordSource = usedAsReportRecordSource;
+        UsedAsRowSource         = usedAsRowSource;
+        NavigationTargets       = navigationTargets;
+        NavigationSources       = navigationSources;
+        VbaReferencedObjects    = vbaReferencedObjects;
+        QuerySqlTargetsByQuery  = querySqlTargetsByQuery;
+        UsedInQuerySql          = usedInQuerySql;
+        FkChildrenByTable       = fkChildrenByTable;
+        FkParentsByTable        = fkParentsByTable;
+        LookupNamedTables       = lookupNamedTables;
+    }
+
+    /// <summary>Builds a <see cref="SignalIndex"/> from an <see cref="IrDatabase"/>.</summary>
+    public static SignalIndex Build(IrDatabase db)
+    {
+        // RecordSources — split into form-level and report-level for Q2/Q3 classification
+        var recordSourceByObject = RecordSourceCollector.Collect(db);
+        var usedAsFormRecordSource = new HashSet<string>(
+            db.Forms
+              .Where(f => f.RecordSource != null && !f.RecordSource.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+              .Select(f => f.RecordSource!.Trim()),
+            StringComparer.OrdinalIgnoreCase);
+        var usedAsReportRecordSource = new HashSet<string>(
+            db.Reports
+              .Where(r => r.RecordSource != null && !r.RecordSource.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+              .Select(r => r.RecordSource!.Trim()),
+            StringComparer.OrdinalIgnoreCase);
+        var usedAsRecordSource = new HashSet<string>(
+            recordSourceByObject.Values, StringComparer.OrdinalIgnoreCase);
+
+        // RowSources
+        var rowSourceTriples = RowSourceCollector.Collect(db);
+        var usedAsRowSource = new HashSet<string>(
+            rowSourceTriples.Select(t => t.RowSourceName), StringComparer.OrdinalIgnoreCase);
+
+        // Navigation edges
+        var navEdges = NavigationEdgeCollector.Collect(db);
+        var navigationTargets = new HashSet<string>(
+            navEdges.Select(e => e.Target), StringComparer.OrdinalIgnoreCase);
+        var navigationSources = new HashSet<string>(
+            navEdges.Select(e => e.Source), StringComparer.OrdinalIgnoreCase);
+
+        // VBA references
+        var vbaRefs = VbaReferenceCollector.Collect(db);
+        var vbaReferencedObjects = new HashSet<string>(
+            vbaRefs.Select(r => r.ReferencedObject), StringComparer.OrdinalIgnoreCase);
+
+        // Query SQL references
+        var queryRefs = QueryTableReferenceCollector.Collect(db);
+        var querySqlTargetsByQuery = queryRefs
+            .GroupBy(r => r.QueryName, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => (IReadOnlySet<string>)new HashSet<string>(g.Select(r => r.ReferencedObject),
+                                                                StringComparer.OrdinalIgnoreCase),
+                StringComparer.OrdinalIgnoreCase);
+        var usedInQuerySql = new HashSet<string>(
+            queryRefs.Select(r => r.ReferencedObject), StringComparer.OrdinalIgnoreCase);
+
+        // FK relationships
+        var fkEdges = RelationshipCollector.Collect(db);
+        var fkChildrenByTable = fkEdges
+            .GroupBy(e => e.ParentTable, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => (IReadOnlySet<string>)new HashSet<string>(g.Select(e => e.ChildTable),
+                                                                StringComparer.OrdinalIgnoreCase),
+                StringComparer.OrdinalIgnoreCase);
+        var fkParentsByTable = fkEdges
+            .GroupBy(e => e.ChildTable, StringComparer.OrdinalIgnoreCase)
+            .ToDictionary(
+                g => g.Key,
+                g => (IReadOnlySet<string>)new HashSet<string>(g.Select(e => e.ParentTable),
+                                                                StringComparer.OrdinalIgnoreCase),
+                StringComparer.OrdinalIgnoreCase);
+
+        // Lookup naming convention
+        var lookupNamedTables = new HashSet<string>(
+            db.Tables
+              .Where(t => IsLookupNamed(t.Name))
+              .Select(t => t.Name),
+            StringComparer.OrdinalIgnoreCase);
+
+        return new SignalIndex(
+            recordSourceByObject,
+            usedAsRecordSource,
+            usedAsFormRecordSource,
+            usedAsReportRecordSource,
+            usedAsRowSource,
+            navigationTargets,
+            navigationSources,
+            vbaReferencedObjects,
+            querySqlTargetsByQuery,
+            usedInQuerySql,
+            fkChildrenByTable,
+            fkParentsByTable,
+            lookupNamedTables);
+    }
+
+    // True when a table name matches the conventional lookup/reference naming prefixes.
+    private static bool IsLookupNamed(string name)
+        => name.StartsWith("tlkp", StringComparison.OrdinalIgnoreCase)
+        || name.StartsWith("lkp",  StringComparison.OrdinalIgnoreCase)
+        || name.Contains("_Lookup", StringComparison.OrdinalIgnoreCase)
+        || name.Contains("_Codes",  StringComparison.OrdinalIgnoreCase)
+        || name.Contains("_Types",  StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Returns true when the table has FK children in the index.</summary>
+    public bool HasFkChildren(string tableName)
+        => FkChildrenByTable.ContainsKey(tableName);
+
+    /// <summary>Returns true when the table has FK parents in the index.</summary>
+    public bool HasFkParents(string tableName)
+        => FkParentsByTable.ContainsKey(tableName);
+
+    /// <summary>Returns true when the table is a lookup-named table.</summary>
+    public bool IsLookupTable(string tableName)
+        => LookupNamedTables.Contains(tableName);
+
+    /// <summary>Returns true when no signal references this object anywhere.</summary>
+    public bool IsCompletelyUnreferenced(string objectName)
+        => !UsedAsRecordSource.Contains(objectName)
+        && !UsedAsRowSource.Contains(objectName)
+        && !NavigationTargets.Contains(objectName)
+        && !VbaReferencedObjects.Contains(objectName)
+        && !UsedInQuerySql.Contains(objectName)
+        && !HasFkChildren(objectName)
+        && !HasFkParents(objectName);
+}
+
+
+## UsageChecklistWriter.cs
+
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>
+/// Serializes <see cref="ObjectUseFindings"/> to disk as:
+/// - <c>object-use.json</c> — the intermediate structured findings.
+/// - <c>object-use-checklist.json</c> — the uat-checklist-editor-compatible checklist.
+/// </summary>
+public static class UsageChecklistWriter
+{
+    private static readonly JsonSerializerOptions _jsonOpts = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
+    /// <summary>Writes both output files adjacent to <paramref name="outputDir"/>.</summary>
+    public static void Write(ObjectUseFindings findings, string outputDir)
+    {
+        Directory.CreateDirectory(outputDir);
+        WriteObjectUse(findings, Path.Combine(outputDir, "object-use.json"));
+        WriteChecklist(findings, Path.Combine(outputDir, "object-use-checklist.json"));
+    }
+
+    // ── object-use.json ────────────────────────────────────────────────────────
+
+    private static void WriteObjectUse(ObjectUseFindings findings, string path)
+    {
+        var doc = new ObjectUseJsonDocument(
+            findings.Version,
+            findings.Database,
+            findings.GeneratedAt,
+            findings.ExcludedObjects,
+            findings.Objects.Select(ToJsonFinding).ToArray());
+
+        string json = JsonSerializer.Serialize(doc, _jsonOpts);
+        File.WriteAllText(path, json, System.Text.Encoding.UTF8);
+    }
+
+    private static ObjectUseFindingJson ToJsonFinding(UsageFinding f)
+        => new(f.ObjectType, f.ObjectName, f.Classification, f.Confidence, f.UsageSummary,
+               f.Signals.Select(s => new SignalJson(s.SignalType, s.Fired, s.Evidence.ToArray())).ToArray(),
+               f.Questions.Select(q => new QuestionJson(q.QuestionText, q.UncertaintySignal)).ToArray());
+
+    // ── object-use-checklist.json ──────────────────────────────────────────────
+
+    internal static ChecklistDocument BuildChecklist(ObjectUseFindings findings)
+    {
+        var reviews = new List<ChecklistReview>();
+        foreach (var f in findings.Objects)
+        {
+            var steps = f.Questions.Select((q, i) => new ChecklistStep(
+                StepNumber: i + 1,
+                Action: q.QuestionText,
+                Verifications: []
+            )).ToArray();
+
+            reviews.Add(new ChecklistReview(
+                FunctionalArea: f.ObjectType,
+                Subarea: f.ObjectName,
+                ItemLabel: f.UsageSummary,
+                Steps: steps,
+                IsJudgmentItem: true,
+                Passes: false,
+                Feedback: ""
+            ));
+        }
+
+        return new ChecklistDocument(
+            ProjectName: $"{findings.Database} — Object Use Checklist",
+            Review: reviews.ToArray());
+    }
+
+    private static void WriteChecklist(ObjectUseFindings findings, string path)
+    {
+        var doc = BuildChecklist(findings);
+        string json = JsonSerializer.Serialize(doc, _jsonOpts);
+        File.WriteAllText(path, json, System.Text.Encoding.UTF8);
+    }
+
+    // ── JSON shapes ────────────────────────────────────────────────────────────
+
+    private sealed record ObjectUseJsonDocument(
+        string Version,
+        string Database,
+        string GeneratedAt,
+        IReadOnlyList<string> ExcludedObjects,
+        ObjectUseFindingJson[] Objects);
+
+    private sealed record ObjectUseFindingJson(
+        string ObjectType,
+        string ObjectName,
+        string Classification,
+        double Confidence,
+        string UsageSummary,
+        SignalJson[] Signals,
+        QuestionJson[] Questions);
+
+    private sealed record SignalJson(
+        string SignalType,
+        bool Fired,
+        string[] Evidence);
+
+    private sealed record QuestionJson(
+        string QuestionText,
+        string UncertaintySignal);
+
+    internal sealed record ChecklistDocument(
+        string ProjectName,
+        ChecklistReview[] Review);
+
+    internal sealed record ChecklistReview(
+        string FunctionalArea,
+        string Subarea,
+        string ItemLabel,
+        ChecklistStep[] Steps,
+        bool IsJudgmentItem,
+        bool Passes,
+        string Feedback);
+
+    internal sealed record ChecklistStep(
+        int StepNumber,
+        string Action,
+        string[] Verifications);
+}
+
+
+## NavigationEdgeCollector.cs
+
+using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>
+/// Collects navigation edges from macro IR files and VBA code.
+/// A navigation edge is a directed (source, target, edgeType) triple where
+/// the source object opens the target via DoCmd.OpenForm / DoCmd.OpenReport
+/// or the equivalent macro action.
+/// </summary>
+public static class NavigationEdgeCollector
+{
+    // DoCmd.OpenForm "FormName" or DoCmd.OpenReport "ReportName"
+    private static readonly Regex _doCmdPattern =
+        new(@"DoCmd\.Open(?<verb>Form|Report|Query)\s*\(?\s*""(?<name>[^""]+)""",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    // basListHelpers.OpenDetailFromList ..., "FormName" — common helper in HomeHealthCare
+    private static readonly Regex _helperOpenPattern =
+        new(@"OpenDetailFromList\s+\w+\s*,\s*""(?<name>[^""]+)""",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    public sealed record NavigationEdge(string Source, string Target, string EdgeType);
+
+    /// <summary>
+    /// Returns all directed navigation edges found in macros and VBA code.
+    /// </summary>
+    public static IReadOnlyList<NavigationEdge> Collect(IrDatabase db)
+    {
+        var edges = new List<NavigationEdge>();
+
+        // Macro-level navigation edges
+        foreach (var macro in db.Macros)
+            AddMacroEdges(macro.Name, macro.Actions, edges);
+
+        // Form-level VBA navigation edges (form code-behind)
+        foreach (var form in db.Forms)
+        {
+            if (form.VbaCode is not null)
+                AddVbaEdges(form.Name, form.VbaCode, edges);
+            // Embedded macro action nodes in the form's Children
+            AddMacroEdges(form.Name, form.MacroActions, edges);
+        }
+
+        // Report-level VBA
+        foreach (var report in db.Reports)
+            if (report.VbaCode is not null)
+                AddVbaEdges(report.Name, report.VbaCode, edges);
+
+        // Standalone module VBA
+        foreach (var module in db.Modules)
+            if (module.VbaCode is not null)
+                AddVbaEdges(module.Name, module.VbaCode, edges);
+
+        return edges;
+    }
+
+    private static void AddMacroEdges(string source, IReadOnlyList<IrMacroAction> actions,
+                                      List<NavigationEdge> edges)
+    {
+        foreach (var action in actions)
+        {
+            string? edgeType = action.Action switch
+            {
+                var a when string.Equals(a, "OpenForm",   StringComparison.OrdinalIgnoreCase) => "OpenForm",
+                var a when string.Equals(a, "OpenReport", StringComparison.OrdinalIgnoreCase) => "OpenReport",
+                var a when string.Equals(a, "OpenQuery",  StringComparison.OrdinalIgnoreCase) => "OpenQuery",
+                _ => null
+            };
+            if (edgeType == null) continue;
+            string? target = action.Arguments.Count > 0 ? action.Arguments[0] : null;
+            if (!string.IsNullOrWhiteSpace(target))
+                edges.Add(new NavigationEdge(source, target.Trim(), edgeType));
+        }
+    }
+
+    private static void AddVbaEdges(string source, string vbaCode, List<NavigationEdge> edges)
+    {
+        foreach (Match m in _doCmdPattern.Matches(vbaCode))
+        {
+            string verb   = m.Groups["verb"].Value;
+            string target = m.Groups["name"].Value.Trim();
+            if (!string.IsNullOrEmpty(target))
+                edges.Add(new NavigationEdge(source, target, "Open" + verb));
+        }
+        foreach (Match m in _helperOpenPattern.Matches(vbaCode))
+        {
+            string target = m.Groups["name"].Value.Trim();
+            if (!string.IsNullOrEmpty(target))
+                edges.Add(new NavigationEdge(source, target, "OpenForm"));
+        }
+    }
+}
+
+
+## RecordSourceCollector.cs
+
+using System;
+using System.Collections.Generic;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>
+/// Collects RecordSource bindings from form and report IR files.
+/// Produces a map from object name (form or report) to its RecordSource
+/// (a table or query name). Only non-SQL RecordSources are retained;
+/// inline SQL strings (starting with SELECT) are omitted.
+/// </summary>
+public static class RecordSourceCollector
+{
+    /// <summary>
+    /// Returns a dictionary mapping each form/report name to its RecordSource.
+    /// Objects with no RecordSource or with an inline SQL RecordSource are absent.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string> Collect(IrDatabase db)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var form in db.Forms)
+            AddIfNamedSource(map, form.Name, form.RecordSource);
+        foreach (var report in db.Reports)
+            AddIfNamedSource(map, report.Name, report.RecordSource);
+        return map;
+    }
+
+    private static void AddIfNamedSource(Dictionary<string, string> map, string name, string? source)
+    {
+        if (string.IsNullOrWhiteSpace(source)) return;
+        string trimmed = source.Trim();
+        // Exclude inline SQL strings — they start with SELECT (case-insensitive)
+        if (trimmed.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase)) return;
+        map[name] = trimmed;
+    }
+}
+
+
+## VbaReferenceCollector.cs
+
+using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>
+/// Collects table/query references found in VBA code via domain aggregate
+/// functions (DCount, DLookup, DSum, DMin, DMax, DFirst, DLast, DAvg) and
+/// CurrentDb().OpenRecordset calls. These patterns reveal tables that are
+/// used programmatically without a formal RecordSource binding.
+/// </summary>
+public static class VbaReferenceCollector
+{
+    // DCount/DLookup/etc. with a quoted table/query name as the second argument
+    private static readonly Regex _domainFunctionPattern =
+        new(@"\bD(?:Count|Lookup|Sum|Min|Max|First|Last|Avg)\s*\(\s*[^,]+,\s*""([^""]+)""",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    // CurrentDb.OpenRecordset("tableName") or OpenRecordset("tableName")
+    private static readonly Regex _openRecordsetPattern =
+        new(@"OpenRecordset\s*\(\s*""([^""]+)""",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+    public sealed record VbaReference(string SourceObject, string ReferencedObject);
+
+    /// <summary>
+    /// Returns all VBA-level references to table/query names discovered in
+    /// form, report, and module VBA code.
+    /// </summary>
+    public static IReadOnlyList<VbaReference> Collect(IrDatabase db)
+    {
+        var results = new List<VbaReference>();
+        foreach (var form in db.Forms)
+            if (form.VbaCode is not null)
+                ScanVba(form.Name, form.VbaCode, results);
+        foreach (var report in db.Reports)
+            if (report.VbaCode is not null)
+                ScanVba(report.Name, report.VbaCode, results);
+        foreach (var module in db.Modules)
+            if (module.VbaCode is not null)
+                ScanVba(module.Name, module.VbaCode, results);
+        return results;
+    }
+
+    private static void ScanVba(string sourceObject, string vbaCode, List<VbaReference> results)
+    {
+        foreach (Match m in _domainFunctionPattern.Matches(vbaCode))
+        {
+            string name = m.Groups[1].Value.Trim();
+            if (!string.IsNullOrEmpty(name))
+                results.Add(new VbaReference(sourceObject, name));
+        }
+        foreach (Match m in _openRecordsetPattern.Matches(vbaCode))
+        {
+            string name = m.Groups[1].Value.Trim();
+            // Exclude inline SQL
+            if (!string.IsNullOrEmpty(name)
+                && !name.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+                results.Add(new VbaReference(sourceObject, name));
+        }
+    }
+}
+
+
+## UsageClassifierTests.cs (key tests)
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using AccessHarvester.Pipeline.UsageIdentification;
+using Xunit;
+
+namespace AccessHarvester.Pipeline.Tests.UsageIdentification;
+
+/// <summary>
+/// Unit tests for UsageClassifier classification rules.
+/// Each test builds a minimal IrDatabase + SignalIndex to exercise
+/// a specific rule from the strategy doc §4.
+/// </summary>
+public class UsageClassifierTests
+{
+    // ── Helpers ────────────────────────────────────────────────────────────────
+
+    private static IrDatabase EmptyDb(string name = "TestDb") => new()
+    {
+        Name = name,
+        Forms = [], Reports = [], Queries = [], Tables = [],
+        Relationships = [], Macros = [], Modules = [],
+    };
+
+    private static IrFormOrReport Form(string name, string? recordSource = null,
+        string? vbaCode = null, bool beforeUpdate = false, bool afterUpdate = false,
+        bool onDelete = false, IrMacroAction[]? macroActions = null) => new()
+    {
+        Name = name,
+        ObjectType = "Form",
+        RecordSource = recordSource,
+        VbaCode = vbaCode,
+        Controls = [],
+        HasBeforeUpdate = beforeUpdate,
+        HasAfterUpdate = afterUpdate,
+        HasOnDelete = onDelete,
+        MacroActions = macroActions ?? [],
+    };
+
+    private static IrFormOrReport Report(string name, string? recordSource = null) => new()
+    {
+        Name = name,
+        ObjectType = "Report",
+        RecordSource = recordSource,
+        VbaCode = null,
+        Controls = [],
+        MacroActions = [],
+    };
+
+    private static IrQuery Query(string name, int typeCode, string? sql = null) =>
+        new() { Name = name, QueryTypeCode = typeCode, Sql = sql };
+
+    private static IrTable Table(string name, int colCount) =>
+        new() { Name = name, ColumnCount = colCount };
+
+    private static IrRelationship Rel(string name, string parent, string child) =>
+        new() { Name = name, ParentTable = parent, ChildTable = child };
+
+    private static UsageFinding Classify(IrDatabase db, string objectName)
+    {
+        var index = SignalIndex.Build(db);
+        var findings = UsageClassifier.Classify(db, index);
+        return findings.First(f => f.ObjectName == objectName);
+    }
+
+    // ── Form rules ─────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Form_F1_TransactionalTable_With_CRUD_Is_MainDataEntry_High()
+    {
+        // tblClients has FK children (it's a parent in rel_Client_Orders)
+        var db = EmptyDb() with
+        {
+            Forms = [Form("frmClients", "tblClients", beforeUpdate: true)],
+            Tables = [Table("tblClients", 10), Table("tblOrders", 5)],
+            Relationships = [Rel("rel_Client_Orders", "tblClients", "tblOrders")],
+        };
+        var f = Classify(db, "frmClients");
+        Assert.Equal(UsageCategory.MainDataEntry, f.Classification);
+        Assert.True(f.Confidence >= 0.8);
+    }
+
+    [Fact]
+    public void Form_F2_TransactionalTable_No_CRUD_Is_MainDataEntry_Medium()
+    {
+        var db = EmptyDb() with
+        {
+            Forms = [Form("frmClients", "tblClients")],
+            Tables = [Table("tblClients", 10), Table("tblOrders", 5)],
+            Relationships = [Rel("rel_Client_Orders", "tblClients", "tblOrders")],
+        };
+        var f = Classify(db, "frmClients");
+        Assert.Equal(UsageCategory.MainDataEntry, f.Classification);
+        Assert.True(f.Confidence >= 0.5 && f.Confidence < 0.8);
+    }
+
+    [Fact]
+    public v
+
+## UsageChecklistWriterTests.cs (output format tests)
+
+using System.IO;
+using System.Text.Json;
+using AccessHarvester.Pipeline.UsageIdentification;
+using Xunit;
+
+namespace AccessHarvester.Pipeline.Tests.UsageIdentification;
+
+public class UsageChecklistWriterTests
+{
+    private static ObjectUseFindings SampleFindings() => new()
+    {
+        Database = "TestDb",
+        GeneratedAt = "2026-05-28T00:00:00Z",
+        ExcludedObjects = ["frmOld"],
+        Objects =
+        [
+            new UsageFinding
+            {
+                ObjectType = "Form",
+                ObjectName = "frmClients",
+                Classification = UsageCategory.MainDataEntry,
+                Confidence = 0.85,
+                UsageSummary = "Main data entry form backed by tblClients",
+                Signals = [],
+                Questions =
+                [
+                    new ClarifyingQuestion
+                    {
+                        QuestionText = "No navigation entry found for Form 'frmClients'",
+                        UncertaintySignal = UncertaintySignal.NoNavigationEntry,
+                    }
+                ],
+            },
+            new UsageFinding
+            {
+                ObjectType = "Table",
+                ObjectName = "tlkpStatuses",
+                Classification = UsageCategory.LookupReference,
+                Confidence = 0.75,
+                UsageSummary = "Lookup/reference table 'tlkpStatuses'",
+                Signals = [],
+                Questions = [],
+            },
+        ],
+    };
+
+    [Fact]
+    public void BuildChecklist_ProjectName_Uses_Database_Name()
+    {
+        var doc = UsageChecklistWriter.BuildChecklist(SampleFindings());
+        Assert.Equal("TestDb — Object Use Checklist", doc.ProjectName);
+    }
+
+    [Fact]
+    public void BuildChecklist_One_Review_Per_Finding()
+    {
+        var doc = UsageChecklistWriter.BuildChecklist(SampleFindings());
+        Assert.Equal(2, doc.Review.Length);
+    }
+
+    [Fact]
+    public void BuildChecklist_Review_Maps_ObjectType_To_FunctionalArea()
+    {
+ 
+
+After your analysis, output a JSON block in this exact format:
+```json
+{
+  "verdict": "VERIFIED" | "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Critical" | "Major" | "Minor",
+      "location": "<file or test name>",
+      "summary": "<one-sentence description>",
+      "fix": "<recommended fix>"
+    }
+  ]
+}
+```
+If verdict is VERIFIED, issues must be an empty array [].
+Do not omit this block.

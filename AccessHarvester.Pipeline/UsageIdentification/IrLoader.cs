@@ -1,0 +1,367 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+
+namespace AccessHarvester.Pipeline.UsageIdentification;
+
+/// <summary>
+/// Loads IR JSON files from a harvested output root directory and produces
+/// an <see cref="IrDatabase"/> for the signal collectors and classifier.
+/// Reads ir/Forms, ir/Reports, ir/Queries, ir/Tables, ir/Relationships,
+/// ir/Macros, ir/ModulesAndClasses directories.
+/// </summary>
+public static class IrLoader
+{
+    private static readonly JsonDocumentOptions _jsonOpts = new() { AllowTrailingCommas = true };
+
+    /// <summary>
+    /// Loads an <see cref="IrDatabase"/> from the given output root.
+    /// The root is the directory that contains the ir/ subdirectory.
+    /// </summary>
+    public static IrDatabase Load(string outputRoot)
+    {
+        string irDir = Directory.Exists(Path.Combine(outputRoot, "ir"))
+            ? Path.Combine(outputRoot, "ir")
+            : outputRoot;
+
+        string dbName = InferDatabaseName(outputRoot);
+        return new IrDatabase
+        {
+            Name = dbName,
+            Forms = LoadFormOrReports(Path.Combine(irDir, "Forms"), "Form"),
+            Reports = LoadFormOrReports(Path.Combine(irDir, "Reports"), "Report"),
+            Queries = LoadQueries(Path.Combine(irDir, "Queries")),
+            Tables = LoadTables(Path.Combine(irDir, "Tables")),
+            Relationships = LoadRelationships(Path.Combine(irDir, "Relationships")),
+            Macros = LoadMacros(Path.Combine(irDir, "Macros")),
+            Modules = LoadModules(Path.Combine(irDir, "ModulesAndClasses")),
+        };
+    }
+
+    private static string InferDatabaseName(string outputRoot)
+    {
+        // Try to derive from the directory path: last non-empty segment
+        // that isn't "ir" or "AccessMetaData".
+        var parts = outputRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                              .Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar,
+                                     StringSplitOptions.RemoveEmptyEntries);
+        foreach (var part in parts.Reverse())
+        {
+            if (!string.Equals(part, "ir", StringComparison.OrdinalIgnoreCase)
+                && !string.Equals(part, "AccessMetaData", StringComparison.OrdinalIgnoreCase))
+                return part;
+        }
+        return "Unknown";
+    }
+
+    // ── Forms / Reports ─────────────────────────────────────────────────────────
+
+    private static IReadOnlyList<IrFormOrReport> LoadFormOrReports(string dir, string objectType)
+    {
+        if (!Directory.Exists(dir)) return [];
+        var results = new List<IrFormOrReport>();
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json", SearchOption.TopDirectoryOnly)
+                                      .OrderBy(f => f, StringComparer.Ordinal))
+        {
+            try
+            {
+                string name = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file));
+                string json = File.ReadAllText(file, System.Text.Encoding.UTF8);
+                using var doc = JsonDocument.Parse(json, _jsonOpts);
+                results.Add(ParseFormOrReport(doc.RootElement, name, objectType));
+            }
+            catch { /* skip unparseable files */ }
+        }
+        return results;
+    }
+
+    private static IrFormOrReport ParseFormOrReport(JsonElement root, string name, string objectType)
+    {
+        string? recordSource = null;
+        string? vbaCode = null;
+        bool hasBeforeUpdate = false, hasAfterUpdate = false, hasOnDelete = false;
+        var controls = new List<IrControl>();
+        var macroActions = new List<IrMacroAction>();
+
+        if (root.TryGetProperty("Properties", out var props))
+        {
+            recordSource = GetString(props, "RecordSource");
+            hasBeforeUpdate = HasEventProcedure(props, "BeforeUpdate");
+            hasAfterUpdate  = HasEventProcedure(props, "AfterUpdate");
+            hasOnDelete     = HasEventProcedure(props, "OnDelete");
+        }
+
+        if (root.TryGetProperty("VbaCode", out var vba) && vba.ValueKind == JsonValueKind.String)
+            vbaCode = vba.GetString();
+
+        // Walk Children: extract control nodes (ComboBox/ListBox with RowSource)
+        // and macro action nodes (Begin with Action = OpenForm/OpenReport/etc.)
+        if (root.TryGetProperty("Children", out var children)
+            && children.ValueKind == JsonValueKind.Array)
+        {
+            WalkChildren(children, controls, macroActions);
+        }
+
+        // Detect CRUD VBA handlers from VbaCode procedure names
+        if (vbaCode != null)
+        {
+            hasBeforeUpdate = hasBeforeUpdate || vbaCode.Contains("Form_BeforeUpdate", StringComparison.OrdinalIgnoreCase);
+            hasAfterUpdate  = hasAfterUpdate  || vbaCode.Contains("Form_AfterUpdate",  StringComparison.OrdinalIgnoreCase);
+            hasOnDelete     = hasOnDelete     || vbaCode.Contains("Form_Delete",        StringComparison.OrdinalIgnoreCase);
+        }
+
+        return new IrFormOrReport
+        {
+            Name = name,
+            ObjectType = objectType,
+            RecordSource = NullIfEmpty(recordSource),
+            VbaCode = NullIfEmpty(vbaCode),
+            Controls = controls,
+            HasBeforeUpdate = hasBeforeUpdate,
+            HasAfterUpdate  = hasAfterUpdate,
+            HasOnDelete     = hasOnDelete,
+            MacroActions    = macroActions,
+        };
+    }
+
+    private static void WalkChildren(JsonElement children, List<IrControl> controls,
+                                     List<IrMacroAction> macroActions)
+    {
+        foreach (var child in children.EnumerateArray())
+        {
+            string? type = GetString(child, "Type");
+            if (type is null) continue;
+
+            if (type is "ComboBox" or "ListBox")
+            {
+                string? childName = null;
+                string? rowSource = null, rowSourceType = null;
+                if (child.TryGetProperty("Properties", out var p))
+                {
+                    childName = GetString(p, "Name");
+                    rowSource = GetString(p, "RowSource");
+                    rowSourceType = GetString(p, "RowSourceType");
+                }
+                controls.Add(new IrControl
+                {
+                    Type = type,
+                    Name = childName,
+                    RowSource = NullIfEmpty(rowSource),
+                    RowSourceType = NullIfEmpty(rowSourceType),
+                });
+            }
+            else if (type == "Begin" && child.TryGetProperty("Properties", out var bProps))
+            {
+                string? action = GetString(bProps, "Action");
+                if (action != null)
+                {
+                    var args = ReadArguments(bProps);
+                    macroActions.Add(new IrMacroAction
+                    {
+                        MacroName = GetString(bProps, "MacroName"),
+                        Action = action,
+                        Arguments = args,
+                    });
+                }
+            }
+
+            // Recurse into nested Children
+            if (child.TryGetProperty("Children", out var nested)
+                && nested.ValueKind == JsonValueKind.Array)
+            {
+                WalkChildren(nested, controls, macroActions);
+            }
+        }
+    }
+
+    private static bool HasEventProcedure(JsonElement props, string propertyName)
+    {
+        if (props.TryGetProperty(propertyName, out var val) && val.ValueKind == JsonValueKind.String)
+        {
+            string? s = val.GetString();
+            return s != null && (s.Contains("[Event Procedure]") || s.Contains("Event Procedure"));
+        }
+        return false;
+    }
+
+    // ── Queries ──────────────────────────────────────────────────────────────────
+
+    private static IReadOnlyList<IrQuery> LoadQueries(string dir)
+    {
+        if (!Directory.Exists(dir)) return [];
+        var results = new List<IrQuery>();
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json").OrderBy(f => f, StringComparer.Ordinal))
+        {
+            try
+            {
+                string json = File.ReadAllText(file, System.Text.Encoding.UTF8);
+                using var doc = JsonDocument.Parse(json, _jsonOpts);
+                var root = doc.RootElement;
+                string name = GetString(root, "Name")
+                    ?? Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file));
+                int typeCode = 0;
+                if (root.TryGetProperty("QueryTypeCode", out var tc) && tc.ValueKind == JsonValueKind.Number)
+                    typeCode = tc.GetInt32();
+                string? sql = GetString(root, "Sql");
+                results.Add(new IrQuery { Name = name, QueryTypeCode = typeCode, Sql = NullIfEmpty(sql) });
+            }
+            catch { }
+        }
+        return results;
+    }
+
+    // ── Tables ───────────────────────────────────────────────────────────────────
+
+    private static IReadOnlyList<IrTable> LoadTables(string dir)
+    {
+        if (!Directory.Exists(dir)) return [];
+        var results = new List<IrTable>();
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json").OrderBy(f => f, StringComparer.Ordinal))
+        {
+            try
+            {
+                string json = File.ReadAllText(file, System.Text.Encoding.UTF8);
+                using var doc = JsonDocument.Parse(json, _jsonOpts);
+                var root = doc.RootElement;
+                string name = GetString(root, "Name")
+                    ?? Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file));
+                int colCount = 0;
+                if (root.TryGetProperty("Fields", out var fields) && fields.ValueKind == JsonValueKind.Array)
+                    colCount = fields.GetArrayLength();
+                results.Add(new IrTable { Name = name, ColumnCount = colCount });
+            }
+            catch { }
+        }
+        return results;
+    }
+
+    // ── Relationships ─────────────────────────────────────────────────────────────
+
+    private static IReadOnlyList<IrRelationship> LoadRelationships(string dir)
+    {
+        if (!Directory.Exists(dir)) return [];
+        var results = new List<IrRelationship>();
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json").OrderBy(f => f, StringComparer.Ordinal))
+        {
+            try
+            {
+                string json = File.ReadAllText(file, System.Text.Encoding.UTF8);
+                using var doc = JsonDocument.Parse(json, _jsonOpts);
+                var root = doc.RootElement;
+                string? name    = GetString(root, "Name");
+                string? parent  = GetString(root, "ParentTable");
+                string? child   = GetString(root, "ChildTable");
+                if (name != null && parent != null && child != null)
+                    results.Add(new IrRelationship { Name = name, ParentTable = parent, ChildTable = child });
+            }
+            catch { }
+        }
+        return results;
+    }
+
+    // ── Macros ────────────────────────────────────────────────────────────────────
+
+    private static IReadOnlyList<IrMacro> LoadMacros(string dir)
+    {
+        if (!Directory.Exists(dir)) return [];
+        var results = new List<IrMacro>();
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json").OrderBy(f => f, StringComparer.Ordinal))
+        {
+            try
+            {
+                string macroName = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file));
+                string json = File.ReadAllText(file, System.Text.Encoding.UTF8);
+                using var doc = JsonDocument.Parse(json, _jsonOpts);
+                var actions = new List<IrMacroAction>();
+                if (doc.RootElement.TryGetProperty("Children", out var children)
+                    && children.ValueKind == JsonValueKind.Array)
+                {
+                    CollectMacroActions(children, actions);
+                }
+                results.Add(new IrMacro { Name = macroName, Actions = actions });
+            }
+            catch { }
+        }
+        return results;
+    }
+
+    private static void CollectMacroActions(JsonElement children, List<IrMacroAction> actions)
+    {
+        foreach (var child in children.EnumerateArray())
+        {
+            string? type = GetString(child, "Type");
+            if (type == "Begin" && child.TryGetProperty("Properties", out var p))
+            {
+                string? action = GetString(p, "Action");
+                if (action != null)
+                {
+                    actions.Add(new IrMacroAction
+                    {
+                        MacroName = GetString(p, "MacroName"),
+                        Action = action,
+                        Arguments = ReadArguments(p),
+                    });
+                }
+            }
+            if (child.TryGetProperty("Children", out var nested)
+                && nested.ValueKind == JsonValueKind.Array)
+            {
+                CollectMacroActions(nested, actions);
+            }
+        }
+    }
+
+    // ── Modules ───────────────────────────────────────────────────────────────────
+
+    private static IReadOnlyList<IrModule> LoadModules(string dir)
+    {
+        if (!Directory.Exists(dir)) return [];
+        var results = new List<IrModule>();
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json").OrderBy(f => f, StringComparer.Ordinal))
+        {
+            try
+            {
+                string name = Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(file));
+                string json = File.ReadAllText(file, System.Text.Encoding.UTF8);
+                using var doc = JsonDocument.Parse(json, _jsonOpts);
+                string? vbaCode = null;
+                if (doc.RootElement.TryGetProperty("VbaCode", out var vba)
+                    && vba.ValueKind == JsonValueKind.String)
+                    vbaCode = vba.GetString();
+                results.Add(new IrModule { Name = name, VbaCode = NullIfEmpty(vbaCode) });
+            }
+            catch { }
+        }
+        return results;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────────
+
+    private static string? GetString(JsonElement element, string propertyName)
+    {
+        if (element.TryGetProperty(propertyName, out var p) && p.ValueKind == JsonValueKind.String)
+            return p.GetString();
+        return null;
+    }
+
+    private static IReadOnlyList<string> ReadArguments(JsonElement props)
+    {
+        if (!props.TryGetProperty("Argument", out var argEl)) return [];
+        if (argEl.ValueKind == JsonValueKind.String)
+            return [argEl.GetString() ?? ""];
+        if (argEl.ValueKind == JsonValueKind.Array)
+        {
+            var list = new List<string>();
+            foreach (var item in argEl.EnumerateArray())
+                if (item.ValueKind == JsonValueKind.String)
+                    list.Add(item.GetString() ?? "");
+            return list;
+        }
+        return [];
+    }
+
+    private static string? NullIfEmpty(string? s)
+        => string.IsNullOrWhiteSpace(s) ? null : s;
+}

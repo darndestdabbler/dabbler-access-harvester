@@ -43,6 +43,47 @@ verification — there is no human-UAT layer.
   signal), **the Delegation Discipline rules (when to route vs. handle
   directly)**, and the mandatory rules list. Do not duplicate that
   content here.
+- [`docs/session-state-schema.md`](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/session-state-schema.md)
+  (canonical, lives in `dabbler-ai-orchestration`) — the authoritative
+  schema for `session-state.json`. Required reading before hand-editing
+  any state file. Touching a state file without having read this doc is
+  the most common cause of N−1/N drift in the Session Set Explorer.
+
+### State-file rules every orchestrator must follow (v4 shape; Set 047)
+
+These are inlined here so the orchestrator does not need to fetch the
+canonical doc to get the must-knows. Read the linked schema for the
+full invariant and worked examples.
+
+- `sessions: [{ number, title, status, startedAt, completedAt, ... }, ...]`
+  is the canonical per-session ledger. Legacy top-level fields
+  (`currentSession`, `totalSessions`, `completedSessions`,
+  `lifecycleState`, `startedAt`, `completedAt`) are NOT written to
+  disk in v4 — readers derive them at read time from `sessions[]`
+  via the `normalize_to_v4_shape` shim. Without per-session entries
+  carrying accurate `status` + `completedAt`, the extension cannot
+  reliably derive completion count and will display N−1/N.
+- On **Full tier**, `close_session` writes the per-session entry
+  (`status: "complete"` + `completedAt`) automatically — the
+  orchestrator never edits the array directly.
+- On **Lightweight tier**, the orchestrator (or human) maintains
+  `sessions[i]` **by hand** on every close: set the matching entry's
+  `status` to `"complete"` and populate its `completedAt`. There is
+  no router writer; this per-session ledger is the only authoritative
+  completion signal.
+- Canonical per-session `status` values are `"not-started"`,
+  `"in-progress"`, `"complete"`, `"cancelled"`. Never `"completed"`
+  or `"done"` on a new write. The set's top-level `status` flips to
+  `"complete"` on the final close (Full: `close_session`; Lightweight:
+  the orchestrator).
+- The "in flight" predicate is: any `sessions[i].status` is
+  `"in-progress"`. The extension uses this to distinguish a fresh-start
+  row from a between-sessions row — keep `sessions[]` accurate.
+- **Omit-null (Set 049)**: when creating a new session-set stub or
+  per-session entry, omit fields that are not yet known (`startedAt`,
+  `completedAt`, `orchestrator`, `verificationVerdict`) rather than
+  writing `null`. Readers tolerate missing keys; `null` on disk is
+  never correct.
 
 The human starts a session with one of the trigger phrases listed in
 `docs/ai-led-session-workflow.md` → **Trigger Phrases** (sequential,

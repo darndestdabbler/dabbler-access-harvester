@@ -1,26 +1,47 @@
-This document details the verification of Session 1, Round 3 of the `harvester-object-use-identifier` design. The analysis focuses on the correctness of the updated query classification rules and the overall integrity of the specification.
+1. Boundness vs. named saved-object resolution
 
-### Union Query Classification (Q1)
+Yes. The fix correctly separates two distinct questions that were previously conflated:
 
-The primary change in this round was the re-evaluation of Union queries (`QueryTypeCode` 64). Previously, they had a distinct, and likely incomplete, classification path. The new Rule Q10, in conjunction with the note clarifying that rules Q2-Q7 apply to `QueryTypeCode` in `{0, 64}`, is a correct and robust fix.
+- “Is this form/report bound at all?”
+- “Does its RecordSource resolve to a named saved table/query object?”
 
-This change correctly identifies that both Select and Union queries are fundamentally data-retrieval mechanisms. By routing them through the same logic, the system leverages existing, well-defined rules based on how the query is used, rather than its internal structure. This ensures consistent classification for the most common scenarios:
--   **RecordSource for a Form:** A Union query used as a form's `RecordSource` will now correctly trigger Rule Q2, classifying it as `MainDataEntry`. This is appropriate, as such a form is used to present or interact with transactional-style data, even if it's aggregated from multiple sources.
--   **RecordSource for a Report:** A Union query used as a report's `RecordSource` will correctly trigger Rule Q3, classifying it as `Reporting`. This is the canonical use case for complex retrieval queries.
--   **Unreferenced:** An unreferenced Union query will fall through to Rule Q7, classifying it as `PossiblyUnused`. This is consistent with how unreferenced Select queries are handled.
+Using `!string.IsNullOrWhiteSpace(form.RecordSource)` and `!string.IsNullOrWhiteSpace(report.RecordSource)` for boundness is the right semantic test. In Access, a form or report can be bound by:
+- a table name,
+- a saved query name,
+- or an inline SQL statement.
 
-The introduction of Rule Q11 to handle DDL (`TypeCode` 6) and Pass-through (`TypeCode` 128) queries as `StandaloneUtility` is also a sound addition. It properly categorizes these as infrastructure or utility objects, preventing them from being misclassified as `Reporting` or `Unknown`. The logic is precise and covers the full spectrum of query types correctly.
+Only the first two are named saved objects. Inline SQL is still a valid bound `RecordSource`, so the prior dependence on `index.RecordSourceByObject` for boundness was incorrect. The new structure fixes that by making:
 
-### Overall Specification Integrity (Q2)
+- `hasRecordSource` = “bound to something”
+- `rs` from `RecordSourceByObject` = “bound to a named saved object we can identify”
 
-A comprehensive review of the entire specification reveals a mature, coherent, and well-designed system. No significant issues remain.
+That is exactly the separation the strategy needs. It also cleanly fixes the analogous report problem, because reports should be considered bound whenever `RecordSource` is non-empty, regardless of whether that source is named or inline SQL.
 
--   **Taxonomy and Rules:** The seven classification categories are mutually exclusive and sufficiently comprehensive for typical Access applications. The rule sets for each object type (Forms, Reports, Queries, Tables) are logical, prioritized correctly, and handle primary use cases as well as edge cases (e.g., action queries vs. select queries). The explicit notes on rule priority are clear and aid implementation.
--   **Signal Collection:** The six signal collectors are well-defined, sourcing their information from appropriate IR files. The extraction logic is specific enough (e.g., ignoring value lists in `RowSource`) to be effective. The set of collectors provides a holistic view of object interactions within the database.
--   **Outputs and Schema:** Both the intermediate `object-use.json` and the final `object-use-checklist.json` are fit for purpose. The mapping from the analytical finding to the user-facing checklist item is direct and sensible. The JSON schema is detailed, correct, and aligns perfectly with the structures described in the strategy document. The decision to include all objects in the checklist, even those without questions, is a good design choice that forces explicit review and confirmation.
--   **Degradation and Prerequisites:** The handling of soft prerequisites is a sign of robust design. The specification clearly outlines how the tool should behave gracefully when optional inputs, such as the cleanup checklist or query KB files, are absent. This prevents brittle failures and ensures the tool remains useful even with incomplete harvested data.
+The new form logic is especially important because it prevents a false downgrade from “bound but unnamed source” into the same bucket as truly unbound forms. Conceptually, `hasRecordSource && rs == null` now means “bound, but source identity is not available as a named object,” which is the correct intermediate state for downstream classification.
 
-The design is complete, internally consistent, and ready for implementation.
+2. Appropriateness of `MainDataEntry` at 0.60 for inline-SQL-bound forms
+
+Yes. This fallback classification is appropriate and appears consistent with the strategy’s confidence structure.
+
+Why it fits:
+
+- A bound form is materially different from an unbound/navigation form. Even without a named saved source, the presence of a non-empty `RecordSource` is strong evidence that the form is used to display or edit data.
+- At the same time, inline SQL removes several stronger signals the classifier can use for higher-confidence decisions:
+  - no reliable named source to test for FK-child transactional behavior,
+  - no direct lookup-table/source identification,
+  - no saved-object lineage for richer dependency evidence.
+
+Because of that lost specificity, assigning `MainDataEntry` but at lower confidence than the named-source transactional cases is the right tradeoff.
+
+The chosen score also makes sense relative to the existing rule ladder you described:
+
+- `0.85` for transactional named source + CRUD handlers
+- `0.65` for transactional named source
+- `0.60` for bound via inline SQL / no named-source resolution
+
+That ordering is coherent. The inline-SQL case is weaker than a positively identified transactional source, so it should not equal or exceed `0.65`; but it is still materially stronger than “unbound” or purely navigational evidence, so it should not fall out of `MainDataEntry` entirely. The new regression test supports the intended behavioral correction: the form is no longer misclassified as unbound simply because its source is inline SQL.
+
+Overall: the fix does correctly separate boundness from named-object resolution, and the `MainDataEntry` fallback at `0.60` is an appropriate conservative classification under the stated strategy.
 
 ```json
 {

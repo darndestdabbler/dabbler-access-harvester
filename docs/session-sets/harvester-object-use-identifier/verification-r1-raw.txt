@@ -1,65 +1,46 @@
-This response provides a detailed analysis of each verification concern followed by a concluding JSON block.
+1. **Classification rule coverage:** The visible `UsageClassifier` implementation clearly covers the first seven form branches in spirit: record-source-backed transactional forms with and without CRUD handlers, lookup-backed forms, navigation shells, VBA-only forms, and unreferenced forms. However, I cannot fully verify the complete strategy-table coverage for **Forms F1-F8, Reports R1-R3, Queries Q1-Q11, and Tables T1-T7** from the supplied excerpt because the classifier file is truncated before the report/query/table sections are shown. What *is* visible includes one material divergence: in `ClassifyForm`, the branch commented `// F4 — RecordSource is a query; sub-classify by query type` is entered whenever the record source is **not transactional and not lookup**, regardless of whether the record source is actually a query. If a form is bound to a normal named table that simply has no FK-child evidence and no lookup naming/usage signals, it falls into the F4 branch, `FindQuery(rs, index)` returns null, and the form is classified as `Reporting`. That is not just a low-confidence heuristic; it is semantically wrong for a form and contradicts the branch’s own comment. A second coverage problem is structural rather than rule-table-specific: `Classify` only iterates `db.Forms`, `db.Reports`, `db.Queries`, and `db.Tables`. It does not emit findings for `db.Modules` or `db.Macros`, even though the schema allows those object types and the strategy/schema text describes one finding per non-excluded non-system object. So my answer is: **partial coverage is evident, but full rule coverage is not fully verifiable from the excerpt, and at least one form rule branch is materially divergent.**
 
-### 1. Taxonomy completeness
+2. **Signal collector correctness:** Of the collectors shown, `NavigationEdgeCollector` and `VbaReferenceCollector` are broadly reasonable for the stated Session 2 scope: they intentionally match only simple, static, quoted-name patterns, and they scan forms/reports/modules plus embedded form macros. The hard-coded `OpenDetailFromList` helper is heuristic and somewhat application-specific, but not obviously harmful. `RecordSourceCollector` is mostly correct for the common case of named record sources versus inline `SELECT` SQL. The obvious defect is that its inline-SQL detection is too narrow: Access inline SQL can begin with `PARAMETERS`, `TRANSFORM`, or `WITH`, not just `SELECT`. Those cases would be incorrectly treated as named object references. The same narrow `StartsWith("SELECT")` assumption appears in `SignalIndex.Build` when deriving `UsedAsFormRecordSource` / `UsedAsReportRecordSource`, and similarly in `VbaReferenceCollector` when excluding inline SQL passed to `OpenRecordset`. So the collector family has a real extraction weakness around non-`SELECT` SQL prefixes. I cannot fully verify `RowSourceCollector`, `QueryTableReferenceCollector`, or `RelationshipCollector` because their implementations were not provided. On the specific RowSource design note: I would **not** count that as a Session 2 defect. Given that the form IR lacks the real control tree, the fallback to static VBA `.RowSource = "tableName"` scanning is a documented and acceptable stop-rule-limited approximation.
 
-The seven-category taxonomy (`MainDataEntry`, `LookupReference`, `Reporting`, `NavigationShell`, `StandaloneUtility`, `PossiblyUnused`, `Unknown`) is robust and covers the most common usage patterns for Access objects in business applications. The categories are well-defined, mutually exclusive, and address the primary roles of forms, reports, tables, and queries. The inclusion of `PossiblyUnused` and `Unknown` provides necessary fallbacks for unreferenced objects and ambiguous cases.
+3. **Output schema compliance:** `UsageChecklistWriter` does appear to produce `object-use.json` with the correct **shape** and **camelCase field names**. The writer uses dedicated DTO records plus `JsonNamingPolicy.CamelCase`, so `Version` -> `version`, `GeneratedAt` -> `generatedAt`, `ObjectType` -> `objectType`, `UsageSummary` -> `usageSummary`, `SignalType` -> `signalType`, and `UncertaintySignal` -> `uncertaintySignal` all serialize as the schema requires. Required top-level properties and nested properties are present, and I do not see extra fields being injected. So on the narrow question of schema structure and camelCase naming, the answer is **yes**. The one schema-adjacent problem is not naming but completeness: because the classifier never produces module/macro findings, databases containing those objects will yield an `objects` array that is incomplete relative to the schema description of “one finding per non-excluded, non-system object.”
 
-However, a notable gap exists: the taxonomy and classification rules do not explicitly account for **Action Queries** (e.g., `UPDATE`, `INSERT INTO`, `DELETE`, `MAKE TABLE`). These are a fundamental component of many Access applications, used for batch data processing, and represent a distinct usage pattern from `SELECT` queries (data retrieval/reporting) or `Crosstab` queries. In the current design, an Action Query would likely be classified as `StandaloneUtility` or `PossiblyUnused` if not called directly from a UI object, failing to capture its data-modifying intent.
+4. **Test coverage:** The supplied tests demonstrate a good unit-test style and clearly cover at least some form rules and writer mappings, but the excerpts do **not** let me conclude that classification-rule coverage is adequate for the more delicate query cases. I do not see visible tests for **Q8 vs Q9**, **Q10 Union handling**, or **Q11**. Since the classifier excerpt is truncated, those tests may exist elsewhere in the omitted portion, but they are not evidenced here. More importantly, the visible implementation bug in form classification strongly suggests at least one missing regression test: there does not appear to be a test for “form bound to a named table that is neither lookup-signaled nor FK-transactional.” That case should have exposed the F4 overreach. So my assessment is: **broad coverage is plausible, but adequacy for the requested query sub-rules is not proven from the supplied material, and there is at least one observable branch gap that existing tests did not catch.**
 
-### 2. Signal collector feasibility
-
-The six described signal collectors are feasible and correctly designed to operate on the specified KB/IR file structure without requiring Access COM automation. The extraction logic for each is sound:
-- **RecordSource/RowSource:** Reading `Properties.RecordSource` and `Properties.RowSource` from form/report IR JSON is a direct and reliable method.
-- **NavigationGraph/VbaReference:** Using regex to parse VBA code for `DoCmd.Open*`, domain functions (`DLookup`, etc.), and `OpenRecordset` calls is a standard static analysis technique. While it cannot capture dynamically constructed object names, it is sufficient for a baseline implementation. Similarly, parsing macro IR for `Open*` actions is straightforward.
-- **QueryTableReference:** Parsing the `Sql` field from query IR files using regex for `FROM` and `JOIN` clauses is a practical, though imperfect, approach to discovering table dependencies.
-- **RelationshipGraph:** Reading pre-processed relationship files is the most reliable way to determine foreign key structures.
-
-All specified sources and extraction methods align with the expected output of the harvester, making the signal collection strategy viable.
-
-### 3. Classification rule correctness
-
-The classification rules are logical and correctly handle canonical cases. The "first matching rule wins" approach provides a deterministic classification process. For example:
-- A form with a `RecordSource` pointing to a transactional table and containing CRUD event handlers will correctly match rule F1 and be classified as `MainDataEntry`.
-- A form lacking a `RecordSource` but containing navigation commands (`DoCmd.OpenForm`) will correctly match rule F5 and be classified as `NavigationShell`.
-- A table named `tlkpStates` or having few columns and no foreign key children will correctly match rules T3/T4 and be classified as `LookupReference`.
-- A report with any `RecordSource` will correctly match rule R1 and be classified as `Reporting`.
-
-The rules demonstrate a clear hierarchy from high-confidence, specific patterns to more general ones, which is a sound design.
-
-### 4. uat-checklist-editor mapping
-
-The mapping of `object-use.json` findings to the `uat-checklist-editor` format, as described in Section 8, is correct and complete. The strategy correctly assigns `ProjectName` at the top level and populates the required fields for each `Review` item (`FunctionalArea`, `Subarea`, `ItemLabel`) from the object's type, name, and usage summary. The generation of `Steps` from the clarifying questions is also correctly structured. The plan to include objects even if they have no questions ensures a comprehensive review checklist, which is a good practice. The output specified will be valid for the target tool.
-
-### 5. Schema correctness
-
-The `object-use-schema.json` is internally consistent and accurately reflects the structures detailed in the strategy document.
-- **Structure:** All required top-level and nested properties (`version`, `objects`, `classification`, `confidence`, etc.) are present and correctly typed. The use of `additionalProperties: false` enforces a strict structure.
-- **Enums:** The `enum` values for `classification`, `signalType`, and `uncertaintySignal` precisely match the categories and signals defined in the strategy document, ensuring data integrity.
-- **Cross-references:** The schema correctly references its own definitions (e.g., `ObjectUseFinding`, `Signal`) and aligns with the descriptions provided in sections 2, 3, 5, and 7 of the strategy.
-
-The schema is well-formed and fit for its purpose.
-
-### 6. Soft-prereq degradation
-
-The plan for graceful degradation is mostly sound, but contains one imprecise description.
-- **Missing Cleanup Checklist:** The behavior is correctly defined. If the `--exclude-cleanup` file is absent, all objects are processed, and the `excludedObjects` array in the output is empty. This is a complete and correct degradation path.
-- **Missing Query KB Files:** The description of this degradation path is imprecise. The strategy states that queries will "default to `Unknown` with the `QueryReferencesNoTables` question." However, based on the specified rules, a query without its SQL file could still be classified by other rules (e.g., Q2/Q3 if it's a `RecordSource`, or Q7 if it's unreferenced elsewhere), resulting in a `MainDataEntry` or `PossiblyUnused` classification. The outcome is not a guaranteed default to `Unknown`. The system would function, but its behavior is not as simple as described.
+5. **Design note on RowSource:** I agree with the note and would treat it as an accepted limitation, not a Session 2 failure. If the harvested form IR contains only embedded macro `Children` nodes and not the actual control tree, then true `RowSource` extraction from combo/list controls is impossible from current inputs. Under those constraints, scanning VBA for static `.RowSource = "tableName"` assignments is a reasonable fallback. It will necessarily under-detect lookup/reference usage, so some objects may receive lower confidence or remain `Unknown`/less strongly classified than they would with richer IR, but that is exactly the kind of bounded limitation the Session 2 stop rules are meant to permit. The important thing is not to overstate completeness; the current design note appropriately documents the gap.
 
 ```json
 {
-  "verdict": "REJECTED",
+  "verdict": "ISSUES_FOUND",
   "issues": [
     {
-      "concern": "Taxonomy completeness",
-      "severity": "High",
-      "summary": "The taxonomy and classification rules do not explicitly handle Action Queries (UPDATE, INSERT, DELETE, MAKE TABLE).",
-      "description": "The current taxonomy focuses on objects for data entry, reporting, and navigation. Action Queries, which perform batch data manipulation, are a common and distinct usage pattern in Access. They are not covered by the Query classification rules (Q1-Q7), which only address Select and Crosstab queries. This gap will lead to the misclassification of a key object type."
+      "severity": "Major",
+      "location": "UsageClassifier.cs",
+      "summary": "The form F4 fallback is applied even when the RecordSource is a named table rather than a query, allowing ordinary table-backed forms to be misclassified as Reporting.",
+      "fix": "Only enter the F4 query-specific branch when the RecordSource resolves to a known query; add a separate branch for named tables without transactional or lookup signals and classify them according to the strategy instead of falling through to Reporting."
     },
     {
-      "concern": "Soft-prereq degradation",
-      "severity": "Low",
-      "summary": "The documentation's description of behavior when query KB files are missing is imprecise.",
-      "description": "Section 11 states that if query KB files are absent, queries will 'default to Unknown'. This is not guaranteed by the rule set in Section 4, as other rules based on RecordSource usage or lack of references (e.g., Q2, Q3, Q7) could still fire and assign a different classification. The documentation should be updated to reflect the actual behavior of the rule engine under this condition."
+      "severity": "Major",
+      "location": "UsageClassifier.cs",
+      "summary": "Classification output omits Module and Macro objects entirely even though the schema and strategy describe findings per non-excluded non-system object and collectors already scan those types.",
+      "fix": "Add classification paths for db.Modules and db.Macros, or explicitly narrow the schema/strategy so those object types are excluded consistently across the feature."
+    },
+    {
+      "severity": "Major",
+      "location": "RecordSourceCollector.cs / SignalIndex.cs / VbaReferenceCollector.cs",
+      "summary": "Inline SQL detection only excludes strings starting with SELECT, so Access SQL beginning with PARAMETERS, TRANSFORM, or WITH can be misread as object names and produce false signals.",
+      "fix": "Centralize inline-SQL detection in a shared helper and recognize common Access SQL prefixes such as SELECT, PARAMETERS, TRANSFORM, WITH, INSERT, UPDATE, and DELETE; use that helper in all collectors and index builders."
+    },
+    {
+      "severity": "Minor",
+      "location": "SignalIndex.cs",
+      "summary": "IsCompletelyUnreferenced does not consider NavigationSources, so objects that emit navigation edges are not treated as present in the navigation signal family.",
+      "fix": "Include NavigationSources in the unreferenced predicate and add a unit test covering an object that only opens other objects."
+    },
+    {
+      "severity": "Minor",
+      "location": "UsageClassifierTests.cs",
+      "summary": "The visible tests do not demonstrate coverage for the non-query RecordSource boundary and do not show the requested Q8/Q9/Q10/Q11 query edge cases.",
+      "fix": "Add explicit regression tests for a form bound to a named non-query table, plus targeted query-rule tests for Q8 vs Q9 discrimination, Q10 Union handling, and Q11."
     }
   ]
 }
