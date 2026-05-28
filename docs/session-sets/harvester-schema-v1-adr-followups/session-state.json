@@ -1,16 +1,16 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-schema-v1-adr-followups",
-  "status": "not-started",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
       "title": "Session 1",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
-      "verificationVerdict": null
+      "status": "complete",
+      "startedAt": "2026-05-28T05:55:58.115709-04:00",
+      "completedAt": "2026-05-28T06:40:49.968758-04:00",
+      "orchestrator": "claude-sonnet-4-6",
+      "verificationVerdict": "VERIFIED"
     }
   ]
 }
