@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Access Classification Editor</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: #1f2937;
+    background: #f3f4f6;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Top bar */
+  .top-bar {
+    flex-shrink: 0;
+    background: #1f2937;
+    color: #f9fafb;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .top-bar h1 { margin: 0; font-size: 16px; font-weight: 600; }
+  .top-bar button {
+    padding: 6px 14px; font-size: 13px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.1);
+    color: #f9fafb; border-radius: 4px;
+  }
+  .top-bar button:hover:not(:disabled) { background: rgba(255,255,255,0.2); }
+  .top-bar button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .top-bar label.reviewer { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #d1d5db; }
+  .top-bar label.reviewer input {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #f9fafb; padding: 5px 8px; border-radius: 4px;
+    font-size: 13px; width: 100px;
+  }
+  .top-bar .file-name { font-size: 12px; color: #9ca3af; font-style: italic; max-width: 260px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top-bar .dirty { font-size: 12px; color: #fbbf24; font-weight: 600; }
+  .top-bar .spacer { flex: 1; }
+
+  /* Metadata strip */
+  #metadata {
+    background: #e5e7eb;
+    border-bottom: 1px solid #d1d5db;
+    padding: 8px 20px;
+    font-size: 13px;
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  #metadata strong { color: #1f2937; }
+
+  /* Layout */
+  .layout {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: #f9fafb;
+    border-right: 1px solid #d1d5db;
+    overflow-y: auto;
+    padding: 12px;
+  }
+  .sidebar h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+    margin: 12px 0 4px 0;
+  }
+  .filters label { display: block; font-size: 13px; margin-bottom: 4px; }
+  .table-list { list-style: none; padding: 0; margin: 0; }
+  .table-list li { margin: 1px 0; }
+  .table-link {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 8px; text-decoration: none; color: #1f2937;
+    font-size: 13px; border-radius: 4px;
+  }
+  .table-link:hover { background: #e5e7eb; }
+  .table-link .t-status { font-size: 11px; color: #6b7280; font-variant-numeric: tabular-nums; }
+  .table-link.done .t-status { color: #059669; }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 20px;
+  }
+  .empty-state {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    font-size: 14px;
+    padding: 40px;
+  }
+
+  /* Table section */
+  .table-section {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+  }
+  .table-header { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .table-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #111827;
+  }
+  .badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #e5e7eb;
+    color: #374151;
+  }
+  .badge.linked { background: #fef3c7; color: #92400e; }
+  .badge.hint { background: #dbeafe; color: #1e40af; }
+
+  .table-meta { margin: 10px 0 12px; }
+  .table-meta dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 13px; }
+  .table-meta dt { color: #6b7280; font-weight: 600; }
+  .table-meta dd { margin: 0; color: #1f2937; }
+  .table-meta code {
+    background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 12px;
+    color: #1f2937; margin-right: 2px;
+  }
+  .table-meta .conf { margin-left: 8px; color: #6b7280; font-size: 12px; }
+
+  .table-override {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin: 10px 0 14px;
+  }
+  .table-override h3 { margin: 0 0 8px; font-size: 13px; color: #374151; }
+  .table-override fieldset { border: none; padding: 0; margin: 0 0 8px; }
+  .table-override fieldset legend { font-size: 12px; color: #6b7280; padding: 0; }
+  .table-override fieldset label { display: inline-flex; gap: 4px; margin-right: 16px; font-size: 13px; cursor: pointer; }
+  .table-override .reviewer-row { display: flex; gap: 8px; align-items: center; margin-top: 6px; font-size: 13px; }
+  .table-override .reviewer-row input { flex: 0 0 160px; padding: 4px 6px; font-size: 13px; border: 1px solid #d1d5db; border-radius: 3px; }
+  .table-override .notes-row { display: block; margin-top: 6px; font-size: 13px; }
+  .table-override .notes-row textarea { display: block; width: 100%; margin-top: 3px; padding: 5px 7px;
+    font-family: inherit; font-size: 13px; border: 1px solid #d1d5db; border-radius: 3px; min-height: 40px; resize: vertical; }
+  .table-override .warn { font-size: 11px; color: #92400e; margin: 4px 0 0; }
+  .table-override .clear-btn { font-size: 11px; padding: 2px 8px; margin-left: 8px;
+    background: transparent; border: 1px solid #d1d5db; color: #374151; cursor: pointer; border-radius: 3px; }
+  .table-override .clear-btn:hover { background: #e5e7eb; }
+
+  /* Columns table */
+  .columns-wrap { overflow-x: auto; }
+  table.columns {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  table.columns th, table.columns td {
+    border: 1px solid #e5e7eb;
+    padding: 6px 8px;
+    vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  table.columns th {
+    background: #f3f4f6;
+    text-align: left;
+    color: #374151;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  table.columns tr.unreviewed td:first-child { border-left: 3px solid #fbbf24; }
+  table.columns tr.reviewed td:first-child { border-left: 3px solid #10b981; }
+
+  /* Column widths */
+  table.columns col.c-name { width: 12%; }
+  table.columns col.c-type { width: 11%; }
+  table.columns col.c-sig { width: 14%; }
+  table.columns col.c-guess { width: 14%; }
+  table.columns col.c-cat { width: 18%; }
+  table.columns col.c-mask { width: 9%; }
+  table.columns col.c-pres { width: 6%; }
+  table.columns col.c-rev { width: 16%; }
+
+  table.columns .ord { color: #9ca3af; font-size: 11px; margin-left: 4px; }
+  table.columns .flags { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+  table.columns .flag {
+    display: inline-block; padding: 1px 5px;
+    background: #e5e7eb; color: #374151;
+    border-radius: 3px; font-size: 10px; font-weight: 600;
+  }
+  table.columns .fk { font-size: 11px; color: #1e40af; margin-top: 3px; }
+  table.columns .sig { font-size: 11px; color: #4b5563; line-height: 1.4; }
+  table.columns .sig.hit { color: #b91c1c; font-weight: 600; }
+  table.columns .sig.pattern code {
+    background: #f3f4f6; padding: 1px 4px; border-radius: 3px;
+    font-size: 11px; color: #1f2937;
+  }
+  table.columns .sig.pattern { color: #6b7280; }
+  table.columns .guess {
+    font-weight: 600; color: #1f2937; font-size: 12px;
+  }
+  table.columns .conf { font-size: 11px; color: #6b7280; }
+  table.columns .fired { font-size: 11px; color: #6b7280; margin-top: 3px; }
+  table.columns .fired code { background: #f3f4f6; padding: 1px 4px; border-radius: 3px; margin-right: 2px; font-size: 10px; }
+
+  .radio-group { display: flex; flex-direction: column; gap: 1px; }
+  .radio-group label { display: flex; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; padding: 1px 0; }
+  .radio-group label.disabled { color: #9ca3af; cursor: not-allowed; }
+  .radio-group em { color: #6b7280; }
+  .lock-note { font-size: 10px; color: #92400e; margin: 3px 0 0; font-style: italic; }
+
+  table.columns select {
+    width: 100%; padding: 3px 4px; font-size: 11px;
+    border: 1px solid #d1d5db; border-radius: 3px;
+  }
+  table.columns .preserve-cell { text-align: center; }
+  table.columns input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+  table.columns input[type="text"].reviewer-input {
+    width: 100%; padding: 3px 4px; font-size: 11px;
+    border: 1px solid #d1d5db; border-radius: 3px; margin-bottom: 3px;
+  }
+  table.columns textarea {
+    width: 100%; padding: 3px 4px; font-size: 11px;
+    border: 1px solid #d1d5db; border-radius: 3px;
+    font-family: inherit; resize: vertical;
+  }
+  .col-clear-btn {
+    margin-top: 3px; font-size: 10px; padding: 1px 5px;
+    background: transparent; border: 1px solid #d1d5db;
+    color: #6b7280; border-radius: 3px; cursor: pointer;
+  }
+  .col-clear-btn:hover { background: #f3f4f6; color: #1f2937; }
+
+  /* Toast notification */
+  .toast {
+    position: fixed; bottom: 18px; right: 18px;
+    background: #1f2937; color: #f9fafb;
+    padding: 10px 14px; border-radius: 4px;
+    font-size: 13px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    opacity: 0; transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .toast.show { opacity: 1; }
+  .toast.error { background: #991b1b; }
+</style>
+</head>
+<body>
+
+<header class="top-bar">
+  <h1>Access Classification Editor</h1>
+  <button id="btn-open" type="button">Open JSON</button>
+  <button id="btn-save" type="button" disabled>Save</button>
+  <button id="btn-save-as" type="button" disabled>Save As&hellip;</button>
+  <span class="file-name" id="file-name"></span>
+  <span class="dirty" id="dirty-flag" hidden>&bull; unsaved</span>
+  <span class="spacer"></span>
+  <label class="reviewer">Reviewer
+    <input id="sticky-reviewer" type="text" placeholder="e.g. dconn">
+  </label>
+</header>
+
+<section id="metadata" hidden>
+  <span><strong>Database:</strong> <span id="meta-db"></span></span>
+  <span><strong>Scanned:</strong> <span id="meta-scanned"></span></span>
+  <span id="meta-summary"></span>
+  <span><strong>Schema:</strong> <span id="meta-version"></span></span>
+</section>
+
+<div class="layout" hidden id="layout">
+  <nav class="sidebar">
+    <div class="filters">
+      <h3>Filters</h3>
+      <label><input type="checkbox" id="filter-unreviewed"> Show unreviewed only</label>
+    </div>
+    <h3>Tables</h3>
+    <ul class="table-list" id="table-list"></ul>
+  </nav>
+  <section class="content" id="content"></section>
+</div>
+
+<div class="empty-state" id="empty-state">
+  No classification file loaded. Click <strong>Open JSON</strong> to begin.
+</div>
+
+<input type="file" id="file-input" accept=".json,application/json" hidden>
+<a id="file-download" hidden></a>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+// ===== Domain constants =====
+const SCHEMA_VERSION = "1.0";
+
+const CATEGORIES = [
+  { code: "direct-identifier-pii",     label: "Direct identifier (PII)" },
+  { code: "quasi-identifier",          label: "Quasi-identifier" },
+  { code: "sensitive-non-pii",         label: "Sensitive non-PII" },
+  { code: "free-text-memo",            label: "Free-text / memo" },
+  { code: "lookup-reference",          label: "Lookup / reference" },
+  { code: "system-audit",              label: "System / audit" },
+  { code: "foreign-key",               label: "Foreign key" },
+  { code: "surrogate-autonumber-pk",   label: "Surrogate autonumber PK" },
+  { code: "business-natural-key",      label: "Business / natural key" },
+  { code: "generic-non-sensitive",     label: "Generic / non-sensitive" }
+];
+const MASKING_STRATEGIES = [
+  { code: "mock-replace",     label: "Mock replace" },
+  { code: "generalize",       label: "Generalize" },
+  { code: "redact",           label: "Redact" },
+  { code: "scrub-free-text",  label: "Scrub free-text" },
+  { code: "preserve",         label: "Preserve" },
+  { code: "remap-id",         label: "Remap ID" },
+  { code: "regenerate",       label: "Regenerate" }
+];
+
+// FK authority (schema allOf if/then): when isForeignKey === true the column's
+// humanOverride may only set category to null or "foreign-key", and
+// maskingStrategy to null, "preserve", or "remap-id".
+const FK_ALLOWED_CATEGORIES = new Set(["foreign-key"]);
+const FK_ALLOWED_STRATEGIES = new Set(["preserve", "remap-id"]);
+
+// Scanner-default override blocks (used by clear-override actions).
+function defaultColumnOverride() {
+  return { category: null, maskingStrategy: null, preserveAutonumber: false, reviewedBy: null, notes: "" };
+}
+function defaultTableOverride() {
+  return { isLookup: null, reviewedBy: null, notes: "" };
+}
+
+// ===== Pure helpers (unit-testable; expose for headless verification) =====
+
+// True if a column's humanOverride satisfies the FK-authority schema constraint.
+function isFkAuthorityValid(col) {
+  if (!col.isForeignKey) return true;
+  const cat = col.humanOverride.category;
+  const mask = col.humanOverride.maskingStrategy;
+  if (cat !== null && !FK_ALLOWED_CATEGORIES.has(cat)) return false;
+  if (mask !== null && !FK_ALLOWED_STRATEGIES.has(mask)) return false;
+  return true;
+}
+
+// Walk the whole document and report FK-authority violations.
+function findFkAuthorityViolations(doc) {
+  const out = [];
+  for (const t of doc.tables) {
+    for (const c of t.columns) {
+      if (!isFkAuthorityValid(c)) {
+        out.push({ table: t.name, column: c.name, category: c.humanOverride.category, maskingStrategy: c.humanOverride.maskingStrategy });
+      }
+    }
+  }
+  return out;
+}
+
+// Privacy-discipline check on free-form `notes` fields.
+// The schema can't structurally enforce no-raw-values in human-authored notes
+// (see schema $id description). The editor warns reviewers in the UI; this
+// function lets the verification harness flag any notes that look like they
+// contain SSN / phone / email patterns. Conservative — false positives are
+// fine; the privacy invariant is reviewer discipline.
+const RAW_VALUE_HEURISTICS = [
+  /\b\d{3}-\d{2}-\d{4}\b/,                            // SSN
+  /\b\d{3}\.\d{2}\.\d{4}\b/,                          // SSN dotted
+  /\b\d{3}-\d{3}-\d{4}\b/,                            // US phone
+  /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/ // email
+];
+function findSuspectNotes(doc) {
+  const out = [];
+  for (const t of doc.tables) {
+    if (typeof t.humanOverride?.notes === "string") {
+      for (const re of RAW_VALUE_HEURISTICS) {
+        if (re.test(t.humanOverride.notes)) {
+          out.push({ kind: "table", table: t.name, pattern: re.source });
+          break;
+        }
+      }
+    }
+    for (const c of t.columns) {
+      if (typeof c.humanOverride?.notes === "string") {
+        for (const re of RAW_VALUE_HEURISTICS) {
+          if (re.test(c.humanOverride.notes)) {
+            out.push({ kind: "column", table: t.name, column: c.name, pattern: re.source });
+            break;
+          }
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// Light structural validation of a loaded JSON. The scanner-emitted schema is
+// the source of truth; the editor does just enough to refuse files that are
+// clearly not classification documents.
+function isPlausibleClassificationDoc(doc) {
+  return (
+    doc && typeof doc === "object" &&
+    doc.version === SCHEMA_VERSION &&
+    typeof doc.database === "string" &&
+    typeof doc.scannedUtc === "string" &&
+    Array.isArray(doc.tables)
+  );
+}
+
+// Expose for headless/Node-based verification harnesses.
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    CATEGORIES, MASKING_STRATEGIES,
+    FK_ALLOWED_CATEGORIES, FK_ALLOWED_STRATEGIES,
+    defaultColumnOverride, defaultTableOverride,
+    isFkAuthorityValid, findFkAuthorityViolations,
+    findSuspectNotes, isPlausibleClassificationDoc, SCHEMA_VERSION
+  };
+}
+
+// ===== App state =====
+let state = null;       // parsed classification document
+let fileName = null;
+let dirty = false;
+
+// ===== DOM cache =====
+const dom = {
+  btnOpen:        document.getElementById("btn-open"),
+  btnSave:        document.getElementById("btn-save"),
+  btnSaveAs:      document.getElementById("btn-save-as"),
+  fileNameLabel:  document.getElementById("file-name"),
+  dirtyFlag:      document.getElementById("dirty-flag"),
+  stickyReviewer: document.getElementById("sticky-reviewer"),
+  filterUnrev:    document.getElementById("filter-unreviewed"),
+  metadata:       document.getElementById("metadata"),
+  metaDb:         document.getElementById("meta-db"),
+  metaScanned:    document.getElementById("meta-scanned"),
+  metaSummary:    document.getElementById("meta-summary"),
+  metaVersion:    document.getElementById("meta-version"),
+  layout:         document.getElementById("layout"),
+  emptyState:     document.getElementById("empty-state"),
+  tableList:      document.getElementById("table-list"),
+  content:        document.getElementById("content"),
+  fileInput:      document.getElementById("file-input"),
+  fileDownload:   document.getElementById("file-download"),
+  toast:          document.getElementById("toast")
+};
+
+// Persist sticky reviewer across sessions.
+try {
+  dom.stickyReviewer.value = localStorage.getItem("classification-editor.reviewer") || "";
+} catch { /* localStorage may be unavailable */ }
+dom.stickyReviewer.addEventListener("input", () => {
+  try { localStorage.setItem("classification-editor.reviewer", dom.stickyReviewer.value); } catch { /* noop */ }
+});
+
+// ===== File operations =====
+dom.btnOpen.addEventListener("click", () => dom.fileInput.click());
+
+dom.fileInput.addEventListener("change", async (evt) => {
+  const f = evt.target.files[0];
+  if (!f) return;
+  if (dirty && !confirm("Discard unsaved changes and open a new file?")) {
+    dom.fileInput.value = "";
+    return;
+  }
+  try {
+    const text = await f.text();
+    const parsed = JSON.parse(text);
+    if (!isPlausibleClassificationDoc(parsed)) {
+      showToast(`Not a classification document (need version "${SCHEMA_VERSION}" + tables array).`, true);
+      dom.fileInput.value = "";
+      return;
+    }
+    state = parsed;
+    fileName = f.name;
+    dirty = false;
+    render();
+    showToast(`Loaded ${fileName}`);
+  } catch (e) {
+    showToast("Parse error: " + e.message, true);
+  }
+  dom.fileInput.value = "";
+});
+
+dom.btnSave.addEventListener("click", () => doSave(fileName));
+dom.btnSaveAs.addEventListener("click", () => {
+  const name = prompt("Save as filename", fileName || "classification.json");
+  if (name) doSave(name);
+});
+
+function doSave(name) {
+  if (!state) return;
+  // Belt-and-suspenders: warn if FK-authority constraint would fail.
+  const violations = findFkAuthorityViolations(state);
+  if (violations.length > 0) {
+    const first = violations[0];
+    if (!confirm(
+      `FK-authority constraint violated for ${first.table}.${first.column}` +
+      (violations.length > 1 ? ` and ${violations.length - 1} more.` : ".") +
+      "\n\nThe saved file will not validate against the schema. Save anyway?"
+    )) return;
+  }
+  const text = JSON.stringify(state, null, 2);
+  const blob = new Blob([text], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = dom.fileDownload;
+  a.href = url;
+  a.download = name || "classification.json";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  dirty = false;
+  updateDirtyUI();
+  showToast(`Saved ${a.download}`);
+}
+
+// Keyboard shortcuts.
+window.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+    e.preventDefault();
+    if (state) doSave(fileName);
+  } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "o") {
+    e.preventDefault();
+    dom.fileInput.click();
+  }
+});
+
+// Beforeunload guard for unsaved changes.
+window.addEventListener("beforeunload", (e) => {
+  if (dirty) { e.preventDefault(); e.returnValue = ""; }
+});
+
+// ===== Dirty bit / sticky reviewer =====
+function markDirty() {
+  dirty = true;
+  updateDirtyUI();
+  updateMetaSummary();
+}
+function updateDirtyUI() {
+  dom.dirtyFlag.hidden = !dirty;
+  dom.btnSave.disabled = !state;
+  dom.btnSaveAs.disabled = !state;
+}
+function getStickyReviewer() {
+  const v = dom.stickyReviewer.value.trim();
+  return v === "" ? null : v;
+}
+function ensureReviewerOnEdit(override) {
+  if (override.reviewedBy == null || override.reviewedBy === "") {
+    override.reviewedBy = getStickyReviewer();
+  }
+}
+
+// ===== Render =====
+function render() {
+  if (!state) {
+    dom.metadata.hidden = true;
+    dom.layout.hidden = true;
+    dom.emptyState.hidden = false;
+    dom.fileNameLabel.textContent = "";
+    updateDirtyUI();
+    return;
+  }
+  dom.emptyState.hidden = true;
+  dom.metadata.hidden = false;
+  dom.layout.hidden = false;
+  dom.fileNameLabel.textContent = fileName || "";
+  dom.metaDb.textContent = state.database;
+  dom.metaScanned.textContent = state.scannedUtc;
+  dom.metaVersion.textContent = state.version;
+  updateMetaSummary();
+  renderSidebar();
+  renderContent();
+  updateDirtyUI();
+}
+
+function updateMetaSummary() {
+  if (!state) return;
+  const tableCount = state.tables.length;
+  const colCount = state.tables.reduce((s, t) => s + t.columns.length, 0);
+  const reviewed = state.tables.reduce(
+    (s, t) => s + t.columns.filter(c => c.humanOverride.reviewedBy).length, 0);
+  dom.metaSummary.innerHTML =
+    `<strong>${tableCount}</strong> tables, ` +
+    `<strong>${reviewed}/${colCount}</strong> columns reviewed`;
+}
+
+function isColumnReviewed(c) {
+  return c.humanOverride.reviewedBy != null && c.humanOverride.reviewedBy !== "";
+}
+function isTableFullyReviewed(t) {
+  const tableSet = t.humanOverride.reviewedBy != null && t.humanOverride.reviewedBy !== "";
+  return tableSet && t.columns.every(isColumnReviewed);
+}
+
+function renderSidebar() {
+  const filter = dom.filterUnrev.checked;
+  dom.tableList.innerHTML = "";
+  for (const t of state.tables) {
+    if (filter && isTableFullyReviewed(t)) continue;
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = "#table-" + cssId(t.name);
+    a.className = "table-link";
+    const reviewedCount = t.columns.filter(isColumnReviewed).length;
+    const total = t.columns.length;
+    const done = isTableFullyReviewed(t);
+    if (done) a.classList.add("done");
+    a.innerHTML =
+      `<span class="t-name">${escapeHtml(t.name)}</span>` +
+      `<span class="t-status">${done ? "done" : reviewedCount + "/" + total}</span>`;
+    li.appendChild(a);
+    dom.tableList.appendChild(li);
+  }
+}
+
+function renderContent() {
+  const filter = dom.filterUnrev.checked;
+  dom.content.innerHTML = "";
+  if (state.tables.length === 0) {
+    dom.content.innerHTML = "<p>No tables in this document.</p>";
+    return;
+  }
+  let rendered = 0;
+  for (const t of state.tables) {
+    if (filter && isTableFullyReviewed(t)) continue;
+    dom.content.appendChild(renderTableSection(t));
+    rendered++;
+  }
+  if (rendered === 0) {
+    dom.content.innerHTML = "<p>All tables fully reviewed. Uncheck the filter to see them.</p>";
+  }
+}
+
+function renderTableSection(table) {
+  const wrap = document.createElement("section");
+  wrap.className = "table-section";
+  wrap.id = "table-" + cssId(table.name);
+
+  // Header + badges
+  const hdr = document.createElement("header");
+  hdr.className = "table-header";
+  hdr.innerHTML =
+    `<h2>${escapeHtml(table.name)}</h2>` +
+    `<span class="badges">` +
+      (table.isLinkedTable ? `<span class="badge linked">linked</span>` : "") +
+      `<span class="badge">${formatNumber(table.rowCount)} rows</span>` +
+      `<span class="badge hint">${escapeHtml(table.tableHint)}</span>` +
+    `</span>`;
+  wrap.appendChild(hdr);
+
+  // Table-level signals
+  const meta = document.createElement("div");
+  meta.className = "table-meta";
+  meta.innerHTML =
+    `<dl>` +
+      `<dt>AI guess</dt>` +
+      `<dd>${table.lookupGuess ? "Lookup / reference table" : "NOT a lookup table"}` +
+        `<span class="conf">conf ${(table.confidence * 100).toFixed(0)}%</span></dd>` +
+      `<dt>Fired heuristics</dt>` +
+      `<dd>${(table.firedHeuristics || []).map(h => `<code>${escapeHtml(h)}</code>`).join(" ") || "<em>(none)</em>"}</dd>` +
+      `<dt>Non-key non-system cols</dt>` +
+      `<dd>${table.nonKeyNonSystemColumnCount}</dd>` +
+      `<dt>Referenced by</dt>` +
+      `<dd>${table.referencedByFkCount} foreign key${table.referencedByFkCount === 1 ? "" : "s"} target this table's PK (informational)</dd>` +
+    `</dl>`;
+  wrap.appendChild(meta);
+
+  // Table-level override
+  const ov = document.createElement("div");
+  ov.className = "table-override";
+  const ovName = "tov-" + cssId(table.name);
+  const isLookup = table.humanOverride.isLookup;
+  ov.innerHTML =
+    `<h3>Human override (table-level)` +
+      `<button class="clear-btn" type="button" data-bind="table-clear">Clear override</button>` +
+    `</h3>` +
+    `<fieldset>` +
+      `<legend>Lookup classification</legend>` +
+      `<label><input type="radio" name="${ovName}-lookup" value="null" ${isLookup === null ? "checked" : ""}> ` +
+        `Use AI guess</label>` +
+      `<label><input type="radio" name="${ovName}-lookup" value="true" ${isLookup === true ? "checked" : ""}> ` +
+        `Force lookup = true</label>` +
+      `<label><input type="radio" name="${ovName}-lookup" value="false" ${isLookup === false ? "checked" : ""}> ` +
+        `Force lookup = false</label>` +
+    `</fieldset>` +
+    `<label class="reviewer-row">Reviewer ` +
+      `<input type="text" data-bind="table-reviewer" placeholder="(uses sticky)" value="${escapeAttr(table.humanOverride.reviewedBy || "")}">` +
+    `</label>` +
+    `<label class="notes-row">Notes ` +
+      `<textarea data-bind="table-notes" placeholder="Generic notes only. Never paste raw sampled values, names, or identifiers.">${escapeHtml(table.humanOverride.notes || "")}</textarea>` +
+    `</label>` +
+    `<p class="warn">&#9888; Reviewer notes travel with the JSON. Privacy invariant is reviewer discipline; the schema cannot block raw values from free-text.</p>`;
+
+  // Lookup radios
+  ov.querySelectorAll(`input[name="${ovName}-lookup"]`).forEach(inp => {
+    inp.addEventListener("change", () => {
+      const v = inp.value;
+      table.humanOverride.isLookup = (v === "null") ? null : (v === "true");
+      ensureReviewerOnEdit(table.humanOverride);
+      ov.querySelector('[data-bind="table-reviewer"]').value = table.humanOverride.reviewedBy || "";
+      markDirty();
+    });
+  });
+  // Table reviewer & notes
+  ov.querySelector('[data-bind="table-reviewer"]').addEventListener("input", e => {
+    const v = e.target.value;
+    table.humanOverride.reviewedBy = v === "" ? null : v;
+    markDirty();
+    refreshSidebarRow(table);
+  });
+  ov.querySelector('[data-bind="table-notes"]').addEventListener("input", e => {
+    table.humanOverride.notes = e.target.value;
+    ensureReviewerOnEdit(table.humanOverride);
+    ov.querySelector('[data-bind="table-reviewer"]').value = table.humanOverride.reviewedBy || "";
+    markDirty();
+    refreshSidebarRow(table);
+  });
+  // Clear table override
+  ov.querySelector('[data-bind="table-clear"]').addEventListener("click", () => {
+    table.humanOverride = defaultTableOverride();
+    markDirty();
+    // Re-render this section so radios + inputs reflect the cleared state.
+    const replacement = renderTableSection(table);
+    wrap.replaceWith(replacement);
+    refreshSidebarRow(table);
+  });
+
+  wrap.appendChild(ov);
+
+  // Columns header
+  const colsHdr = document.createElement("h3");
+  colsHdr.textContent = "Columns";
+  colsHdr.style.fontSize = "13px";
+  colsHdr.style.color = "#374151";
+  colsHdr.style.margin = "10px 0 4px";
+  wrap.appendChild(colsHdr);
+
+  // Columns table
+  const colsWrap = document.createElement("div");
+  colsWrap.className = "columns-wrap";
+  const tbl = document.createElement("table");
+  tbl.className = "columns";
+  tbl.innerHTML =
+    `<colgroup>` +
+      `<col class="c-name"><col class="c-type"><col class="c-sig"><col class="c-guess">` +
+      `<col class="c-cat"><col class="c-mask"><col class="c-pres"><col class="c-rev">` +
+    `</colgroup>` +
+    `<thead><tr>` +
+      `<th>Column</th><th>Type &amp; flags</th><th>AI signals</th><th>AI guess</th>` +
+      `<th>Category override</th><th>Masking</th><th>Preserve#</th><th>Reviewer / notes</th>` +
+    `</tr></thead><tbody></tbody>`;
+  const tbody = tbl.querySelector("tbody");
+  table.columns.forEach((col, idx) => tbody.appendChild(renderColumnRow(table, col, idx)));
+  colsWrap.appendChild(tbl);
+  wrap.appendChild(colsWrap);
+
+  return wrap;
+}
+
+function renderColumnRow(table, col, colIdx) {
+  const tr = document.createElement("tr");
+  tr.dataset.tableName = table.name;
+  tr.dataset.colName = col.name;
+  applyReviewedClass(tr, col);
+
+  // Column name
+  const tdName = document.createElement("td");
+  tdName.innerHTML =
+    `<strong>${escapeHtml(col.name)}</strong>` +
+    `<span class="ord">#${col.ordinalPosition}</span>`;
+  tr.appendChild(tdName);
+
+  // Type & flags
+  const tdType = document.createElement("td");
+  const flags = [];
+  if (col.isPrimaryKey) flags.push("PK");
+  if (col.isAutoNumber) flags.push("Auto#");
+  if (col.isForeignKey) flags.push("FK");
+  if (col.isMemo) flags.push("Memo");
+  if (col.isOleObject) flags.push("OLE");
+  if (col.isMultiValue) flags.push("Multi");
+  if (col.isRequired) flags.push("Req");
+  tdType.innerHTML =
+    `<code>${escapeHtml(col.dataType)}</code>` +
+    `<div class="flags">${flags.map(f => `<span class="flag">${escapeHtml(f)}</span>`).join("")}</div>` +
+    (col.isForeignKey && col.fkTarget
+      ? `<div class="fk">&rarr; ${escapeHtml(col.fkTarget.table)}.${escapeHtml(col.fkTarget.column)}</div>`
+      : "");
+  tr.appendChild(tdType);
+
+  // AI signals — explicitly NOT a sample-value rendering.
+  const tdSig = document.createElement("td");
+  tdSig.innerHTML =
+    `<div class="sig">uniq ${col.uniquenessRatio.toFixed(3)}</div>` +
+    `<div class="sig">card ${formatNumber(col.cardinality)} / ${formatNumber(col.rowCount)}</div>` +
+    `<div class="sig">nulls ${formatNumber(col.nullCount)}</div>` +
+    (col.piiNameMatch ? `<div class="sig hit">PII name match</div>` : "") +
+    (col.piiValueMatch ? `<div class="sig hit">PII value match</div>` : "") +
+    (col.valueFormatPattern
+      ? `<div class="sig pattern" title="Structural format pattern only — never a raw sample value.">` +
+          `format: <code>${escapeHtml(col.valueFormatPattern)}</code></div>`
+      : "");
+  tr.appendChild(tdSig);
+
+  // AI guess
+  const tdGuess = document.createElement("td");
+  tdGuess.innerHTML =
+    `<div class="guess">${escapeHtml(categoryLabel(col.guessedCategory))}</div>` +
+    `<div class="conf">conf ${(col.confidence * 100).toFixed(0)}%</div>` +
+    `<div class="fired">${(col.firedHeuristics || []).map(h => `<code>${escapeHtml(h)}</code>`).join(" ")}</div>`;
+  tr.appendChild(tdGuess);
+
+  // Category radio group (10 + AI guess). FK columns: non-FK choices disabled.
+  const tdCat = document.createElement("td");
+  const catGroup = "cat-" + cssId(table.name) + "-" + colIdx;
+  const fkLocked = col.isForeignKey;
+  const catContainer = document.createElement("div");
+  catContainer.className = "radio-group";
+  // "use AI guess" option
+  catContainer.appendChild(makeCatRadio(catGroup, "", "(use AI guess)", col.humanOverride.category === null, false, true));
+  for (const c of CATEGORIES) {
+    const disabled = fkLocked && !FK_ALLOWED_CATEGORIES.has(c.code);
+    const checked = col.humanOverride.category === c.code;
+    catContainer.appendChild(makeCatRadio(catGroup, c.code, c.label, checked, disabled, false));
+  }
+  tdCat.appendChild(catContainer);
+  if (fkLocked) {
+    const note = document.createElement("p");
+    note.className = "lock-note";
+    note.textContent = "FK column — schema restricts override to foreign-key only.";
+    tdCat.appendChild(note);
+  }
+  // Bindings
+  tdCat.querySelectorAll(`input[name="${catGroup}"]`).forEach(inp => {
+    inp.addEventListener("change", () => {
+      col.humanOverride.category = inp.value === "" ? null : inp.value;
+      ensureReviewerOnEdit(col.humanOverride);
+      refreshReviewerCell(tr, col);
+      applyReviewedClass(tr, col);
+      markDirty();
+      refreshSidebarRow(table);
+    });
+  });
+  tr.appendChild(tdCat);
+
+  // Masking strategy
+  const tdMask = document.createElement("td");
+  const maskSel = document.createElement("select");
+  const optDef = document.createElement("option");
+  optDef.value = "";
+  optDef.textContent = "(category default)";
+  maskSel.appendChild(optDef);
+  for (const m of MASKING_STRATEGIES) {
+    const o = document.createElement("option");
+    o.value = m.code;
+    o.textContent = m.label;
+    if (fkLocked && !FK_ALLOWED_STRATEGIES.has(m.code)) o.disabled = true;
+    maskSel.appendChild(o);
+  }
+  maskSel.value = col.humanOverride.maskingStrategy || "";
+  maskSel.addEventListener("change", () => {
+    col.humanOverride.maskingStrategy = maskSel.value === "" ? null : maskSel.value;
+    ensureReviewerOnEdit(col.humanOverride);
+    refreshReviewerCell(tr, col);
+    applyReviewedClass(tr, col);
+    markDirty();
+    refreshSidebarRow(table);
+  });
+  tdMask.appendChild(maskSel);
+  tr.appendChild(tdMask);
+
+  // Preserve autonumber
+  const tdPres = document.createElement("td");
+  tdPres.className = "preserve-cell";
+  const presChk = document.createElement("input");
+  presChk.type = "checkbox";
+  presChk.checked = !!col.humanOverride.preserveAutonumber;
+  presChk.disabled = !col.isAutoNumber;
+  presChk.addEventListener("change", () => {
+    col.humanOverride.preserveAutonumber = presChk.checked;
+    ensureReviewerOnEdit(col.humanOverride);
+    refreshReviewerCell(tr, col);
+    applyReviewedClass(tr, col);
+    markDirty();
+    refreshSidebarRow(table);
+  });
+  tdPres.appendChild(presChk);
+  if (!col.isAutoNumber) {
+    const lab = document.createElement("div");
+    lab.className = "lock-note";
+    lab.textContent = "N/A";
+    tdPres.appendChild(lab);
+  }
+  tr.appendChild(tdPres);
+
+  // Reviewer / notes
+  const tdRev = document.createElement("td");
+  const revInp = document.createElement("input");
+  revInp.type = "text";
+  revInp.className = "reviewer-input";
+  revInp.placeholder = "(uses sticky)";
+  revInp.value = col.humanOverride.reviewedBy || "";
+  revInp.addEventListener("input", () => {
+    col.humanOverride.reviewedBy = revInp.value === "" ? null : revInp.value;
+    applyReviewedClass(tr, col);
+    markDirty();
+    refreshSidebarRow(table);
+  });
+  const notesTa = document.createElement("textarea");
+  notesTa.rows = 2;
+  notesTa.placeholder = "Generic notes only. Never paste raw values.";
+  notesTa.value = col.humanOverride.notes || "";
+  notesTa.addEventListener("input", () => {
+    col.humanOverride.notes = notesTa.value;
+    ensureReviewerOnEdit(col.humanOverride);
+    revInp.value = col.humanOverride.reviewedBy || "";
+    applyReviewedClass(tr, col);
+    markDirty();
+    refreshSidebarRow(table);
+  });
+  const clearBtn = document.createElement("button");
+  clearBtn.type = "button";
+  clearBtn.className = "col-clear-btn";
+  clearBtn.textContent = "Clear override";
+  clearBtn.addEventListener("click", () => {
+    col.humanOverride = defaultColumnOverride();
+    markDirty();
+    // Replace this row in place.
+    const replacement = renderColumnRow(table, col, colIdx);
+    tr.replaceWith(replacement);
+    refreshSidebarRow(table);
+  });
+  tdRev.appendChild(revInp);
+  tdRev.appendChild(notesTa);
+  tdRev.appendChild(clearBtn);
+  tr.appendChild(tdRev);
+
+  return tr;
+}
+
+function makeCatRadio(groupName, value, labelText, checked, disabled, isAiGuess) {
+  const label = document.createElement("label");
+  if (disabled) label.classList.add("disabled");
+  const input = document.createElement("input");
+  input.type = "radio";
+  input.name = groupName;
+  input.value = value;
+  if (checked) input.checked = true;
+  if (disabled) input.disabled = true;
+  label.appendChild(input);
+  if (isAiGuess) {
+    const em = document.createElement("em");
+    em.textContent = " " + labelText;
+    label.appendChild(em);
+  } else {
+    label.appendChild(document.createTextNode(" " + labelText));
+  }
+  return label;
+}
+
+function applyReviewedClass(tr, col) {
+  if (isColumnReviewed(col)) {
+    tr.classList.remove("unreviewed");
+    tr.classList.add("reviewed");
+  } else {
+    tr.classList.add("unreviewed");
+    tr.classList.remove("reviewed");
+  }
+}
+function refreshReviewerCell(tr, col) {
+  const inp = tr.querySelector("td:last-child input.reviewer-input");
+  if (inp) inp.value = col.humanOverride.reviewedBy || "";
+}
+function refreshSidebarRow(table) {
+  // Cheap re-render of just the sidebar (it's small).
+  renderSidebar();
+  updateMetaSummary();
+}
+
+// ===== Toast =====
+let toastTimer = null;
+function showToast(msg, isError) {
+  dom.toast.textContent = msg;
+  dom.toast.classList.toggle("error", !!isError);
+  dom.toast.classList.add("show");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => dom.toast.classList.remove("show"), 1800);
+}
+
+// ===== Misc helpers =====
+function categoryLabel(code) {
+  const c = CATEGORIES.find(x => x.code === code);
+  return c ? c.label : code;
+}
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, m => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[m]));
+}
+function escapeAttr(s) { return escapeHtml(s); }
+function cssId(s) { return String(s).replace(/[^a-zA-Z0-9_-]/g, "_"); }
+function formatNumber(n) {
+  if (typeof n !== "number") return String(n);
+  return n.toLocaleString();
+}
+
+dom.filterUnrev.addEventListener("change", render);
+
+render();
+</script>
+</body>
+</html>

@@ -144,33 +144,77 @@ needed unless an unexpected architecture decision arises during build.
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- **Orchestrator used:** `claude-opus-4-7` at effort=medium (operator override of
+  the routed Sonnet-at-normal recommendation; the human triggered the session
+  with the default trigger phrase, retaining the Anthropic Max window's Opus
+  orchestrator — same pattern as Sessions 1 and 2).
+- **Total routed cost:** ≈$0.35 — R1 session-verification (gpt-5-4) $0.214,
+  R2 (gpt-5-4) $0.133, Session-4 recommendation (gemini-pro) $0.005. A R2
+  prose-first retry was attempted (the initial R2 returned a bare
+  VERIFIED JSON block with no analysis prose) but hit OpenAI HTTP 429
+  rate-limit after the router's three internal retries and was abandoned per
+  the verifier-failure escalation ladder. The R1 fix was mechanically narrow
+  (load schema + assert enum equality + add probes) and is independently
+  confirmed by `node tools/classification-editor-js-test.mjs` returning OK
+  on the post-fix file.
+- **Deviations from recommendation:** Orchestrator. The routed analysis
+  picked Sonnet-at-normal; the operator used Opus-at-medium. The mechanical
+  build itself fit within one round of routing (R1 surfaced one Minor JS-test
+  finding that fixed in ~5 minutes), so the deviation cost was small —
+  $0.35 vs. the original $0.03–$0.10 Sonnet estimate, all driven by
+  verification rounds, not orchestrator inflation.
+- **Notes for next-session calibration:** Two lesson-candidates worth surfacing
+  at Step 9 (deferred to Session 4 close as this is not the final session):
+  (1) **R2 bare-verdict + 429 abandonment pattern** — on a narrow R2 scope
+  (verify a single mechanical fix landed), gpt-5-4 returned a bare JSON block
+  with no prose. The convention's prose-first reminder retry is documented for
+  closeout-grade prompts; this session demonstrates the retry is also useful
+  on bare R2 verdicts, but the verifier-failure escalation ladder must be
+  honoured when the retry hits a provider rate limit. Recommend the existing
+  "Bare JSON Verdict From The Verifier" lesson in `lessons-learned.md`
+  reference the verifier-failure ladder as the fallback when the retry can't
+  reach the provider. (2) **Cross-provider verification reading single-file
+  HTML editors** — the R1 review was strong (clean concern-by-concern audit,
+  one actionable Minor finding) and is a good calibration point for "the
+  verifier can read JS embedded in an HTML script tag and reason about its
+  JSON-schema contract without external infrastructure" — applicable to any
+  future single-file editor or static tool the repo ships.
 
 ---
 
-**Next-session orchestrator recommendation (Session 4):** (To be filled after Session 3 completes.)
+**Next-session orchestrator recommendation (Session 4):** `claude-opus-4-7` at
+effort=high (gemini-pro analysis 2026-05-28: "The task requires synthesizing a
+correctness-critical algorithm for the FK graph builder and lockstep remapping,
+which has a significant correctness risk. This choice aligns with the
+`synthesis-document-Opus-orchestrator-when-large` convention for complex
+synthesis and is consistent with prior sessions being manually escalated to
+Opus for complex tasks."). Estimated routed cost: Moderate ($3.50–$6.00).
 
 ## Session 4 of 4: Test-Data Generator CLI
 
-**Recommended orchestrator:** `claude-sonnet-4-6`
-**Rationale:** The sanitizer is primarily a `mechanical` task — per-category
-masking handlers and FK graph traversal follow a clear specification.
-The FK consistency invariant adds some complexity but is well-defined.
-Sonnet at `effort=medium` is the appropriate band. Route an `architecture`
-sub-task if the chosen output format (`.accdb` vs. CSV) introduces
-unexpected complexity.
-**Estimated routed cost:** Low–Moderate ($0.05–$0.12)
+**Recommended orchestrator:** `claude-opus-4-7` at effort=high
+**Rationale:** Updated post-Session 3 via `route(task_type="analysis")` to
+gemini-pro: the sanitizer is correctness-critical synthesis — the FK graph
+builder + lockstep PK/FK remap have a real correctness risk if remapping
+ordering is wrong or composite-FK degradations are mishandled. The
+masking-handler matrix is mechanical, but the overarching algorithm and the
+output-format decision (`.accdb` vs CSV) are synthesis work. Plus this is the
+final session of the set; final-session closeout (disposition.json,
+change-log.md, next-session-set-recommendation.md, Step 9 reorganization
+proposals) compounds the work. Opus at `effort=high` is the right band.
+**Estimated routed cost:** Moderate ($3.50–$6.00)
 
 | Step | Action | Routing Decision |
 |---|---|---|
 | 1 | Read Session 1 schema and data-classification-plan.md § 3.5 and § 5. | `In-conversation` |
-| 2 | Decide output format (`.accdb` vs. CSV) and document in actuals. | `In-conversation` |
-| 3 | Implement `SanitizeCommand.cs`, `MaskingEngine.cs`, `FkGraphBuilder.cs`, category handlers. | `In-conversation` (task type `mechanical`, matches orchestrator) |
+| 2 | Decide output format (`.accdb` vs. CSV) and document in actuals. | `In-conversation` (task type `architecture`, matches orchestrator) |
+| 3 | Implement `SanitizeCommand.cs`, `MaskingEngine.cs`, `FkGraphBuilder.cs`, category handlers. | `In-conversation` (task type `architecture`, matches orchestrator) |
 | 4 | Write C# files to `AccessHarvester.Pipeline/Sanitization/`. | `tool-use` |
 | 5 | Write unit tests and `[SkippableFact]` integration tests. | `tool-use` |
 | 6 | Run `dotnet build && dotnet test`. | `tool-use` |
-| 7 | Run session verification. | `query("gemini-pro")` (task type `session-verification`) |
-| 8 | Closeout: disposition.json, change-log.md, next-session-set-recommendation.md. | `route(summarization, max_tier=1)` |
+| 7 | Run session verification. | `route(task_type="session-verification")` (gpt-5-4 per task_type_overrides) |
+| 8 | Closeout: disposition.json, change-log.md, next-session-set-recommendation.md. | `route(summarization, max_tier=1)` for change-log; `route(analysis)` for next-set-recommendation. |
+| 9 | Step 9 reorganization review (lessons-learned promotions + project-guidance updates from this set). | In-conversation, human accepts/rejects each candidate per workflow. |
 
 ### Actuals (filled after the session)
 

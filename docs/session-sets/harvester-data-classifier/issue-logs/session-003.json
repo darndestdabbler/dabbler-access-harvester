@@ -1,0 +1,28 @@
+{
+  "sessionSetName": "harvester-data-classifier",
+  "sessionNumber": 3,
+  "rounds": [
+    {
+      "round": 1,
+      "verifier": "gpt-5-4",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Minor",
+          "location": "tools/classification-editor-js-test.mjs",
+          "summary": "The JS headless test did not actually compare the editor's category, masking-strategy, and version constants against classification-schema.json; only counts and a hardcoded SCHEMA_VERSION literal were checked, so an enum/version drift or a misspelled code could have passed the automated substitute.",
+          "fix": "Load AccessHarvester.Pipeline/Classification/classification-schema.json in the JS test; assert exact equality between the editor's CATEGORIES codes and schema.definitions.ColumnCategory.enum, between MASKING_STRATEGIES codes and schema.definitions.MaskingStrategy.enum, and between SCHEMA_VERSION and schema.properties.version.const. Add explicit probes for every entry of RAW_VALUE_HEURISTICS (SSN-dashed, SSN-dotted, US phone, email).",
+          "status": "fixed",
+          "fixSummary": "Rewrote the JS test's 'constants sanity' section to load the schema file, compare editor constants to the schema enums via a setsEqual helper, and assert SCHEMA_VERSION equals schema.properties.version.const. Replaced the single-SSN probe with a four-entry PROBES list covering every regex in RAW_VALUE_HEURISTICS. Tests still pass: 'node tools/classification-editor-js-test.mjs' -> OK: 8 JS check groups passed."
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verifier": "gpt-5-4",
+      "verdict": "VERIFIED",
+      "issues": [],
+      "notes": "Verifier returned a bare JSON block with no preceding prose analysis on the R2 narrow-scope review. A follow-up prose-first reminder call hit OpenAI HTTP 429 (rate-limit) after the router's three internal retries and was abandoned per the verifier-failure escalation ladder rather than continuing to retry. The R1 fix was mechanically narrow (load schema + assert equality + add probes) and is independently confirmed by 'node tools/classification-editor-js-test.mjs' returning OK on the post-fix file."
+    }
+  ]
+}

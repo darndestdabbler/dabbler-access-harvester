@@ -161,7 +161,7 @@
       "stepNumber": 1,
       "stepKey": "session-2/read-guidance-and-register-start",
       "dateTime": "2026-05-28T15:56:11.754470-04:00",
-      "description": "Read project-guidance.md, lessons-learned.md, data-classification-plan.md § 3 + § 8, the Session 1 schema and fixture, and the Session 2 block of ai-assignment.md. Registered session start via ai_router.register_session_start (which wrote v2 shape on disk); restored the hybrid v4+v2 session-state.json shape per the user's installed-router-vs-canonical-router workaround (feedback_session_state_hybrid_shape memory).",
+      "description": "Read project-guidance.md, lessons-learned.md, data-classification-plan.md \u00c2\u00a7 3 + \u00c2\u00a7 8, the Session 1 schema and fixture, and the Session 2 block of ai-assignment.md. Registered session start via ai_router.register_session_start (which wrote v2 shape on disk); restored the hybrid v4+v2 session-state.json shape per the user's installed-router-vs-canonical-router workaround (feedback_session_state_hybrid_shape memory).",
       "status": "complete",
       "routedApiCalls": []
     },
@@ -224,10 +224,14 @@
       "stepNumber": 8,
       "stepKey": "session-2/verification-r1",
       "dateTime": "2026-05-28T16:30:00-04:00",
-      "description": "Round 1 cross-provider session-verification via route(task_type='session-verification') -> gpt-5-4 (cost $0.384). Verdict ISSUES_FOUND: 4 Major + 1 Minor — lookup-reference category never emitted; DAO RCW cleanup incomplete; SQL identifier escaping + over-broad sampler catches; TryRead*Property too broad; fkTarget.column='*' placeholder + Degradations channel unused.",
+      "description": "Round 1 cross-provider session-verification via route(task_type='session-verification') -> gpt-5-4 (cost $0.384). Verdict ISSUES_FOUND: 4 Major + 1 Minor \u00e2\u20ac\u201d lookup-reference category never emitted; DAO RCW cleanup incomplete; SQL identifier escaping + over-broad sampler catches; TryRead*Property too broad; fkTarget.column='*' placeholder + Degradations channel unused.",
       "status": "complete",
       "routedApiCalls": [
-        { "model": "gpt-5-4", "taskType": "session-verification", "costUsd": 0.3838 }
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.3838
+        }
       ]
     },
     {
@@ -235,10 +239,14 @@
       "stepNumber": 9,
       "stepKey": "session-2/fix-r1-and-verify-r2",
       "dateTime": "2026-05-28T16:55:00-04:00",
-      "description": "Applied all 5 R1 fixes: post-pass lookup-reference promotion in HeuristicsEngine; paired finally RCW releases in OleDbDaoSchemaReader.ReadDaoAugmentations (currentDb, tableDefs, fields, td, fd, propsObj, propObj); EscapeIdentifier helper + narrowed per-query catches that surface DegradationKind.SamplingError; TryRead*Property narrowed to catch(COMException); new ClassificationDegradation + IDegradationReporter contract + ResolveImplicitFk that refuses to fabricate column names + DetectCompositeFks for composite-FK degradations + ClassifyCommand exit 3 with full --json-status surface. Added unit tests for the lookup-payload promotion + the identifier escaper. R2 gpt-5-4 verdict ISSUES_FOUND (cost $0.387): 2 Major + 2 Minor — lookup promotion missed sensitive-non-pii-from-format-pattern; rejected identifier aborted scan; TryRead*Property still caught all COMException; composite-FK fallback false-positive.",
+      "description": "Applied all 5 R1 fixes: post-pass lookup-reference promotion in HeuristicsEngine; paired finally RCW releases in OleDbDaoSchemaReader.ReadDaoAugmentations (currentDb, tableDefs, fields, td, fd, propsObj, propObj); EscapeIdentifier helper + narrowed per-query catches that surface DegradationKind.SamplingError; TryRead*Property narrowed to catch(COMException); new ClassificationDegradation + IDegradationReporter contract + ResolveImplicitFk that refuses to fabricate column names + DetectCompositeFks for composite-FK degradations + ClassifyCommand exit 3 with full --json-status surface. Added unit tests for the lookup-payload promotion + the identifier escaper. R2 gpt-5-4 verdict ISSUES_FOUND (cost $0.387): 2 Major + 2 Minor \u00e2\u20ac\u201d lookup promotion missed sensitive-non-pii-from-format-pattern; rejected identifier aborted scan; TryRead*Property still caught all COMException; composite-FK fallback false-positive.",
       "status": "complete",
       "routedApiCalls": [
-        { "model": "gpt-5-4", "taskType": "session-verification", "costUsd": 0.3869 }
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.3869
+        }
       ]
     },
     {
@@ -246,10 +254,14 @@
       "stepNumber": 10,
       "stepKey": "session-2/fix-r2-and-verify-r3",
       "dateTime": "2026-05-28T17:10:00-04:00",
-      "description": "Applied all 4 R2 fixes: lookup-promotion guard switched from positive allowlist to negative exclusion list; EscapeIdentifier calls moved inside per-table/per-column try/catch that converts ArgumentException to SamplingError degradation; TryRead*Property gained a when(DaoPropertyAbsentHResults.Contains(ex.HResult)) filter restricted to DAO HRESULTs 0x800A0CC1 and 0x800A0CB3; DetectCompositeFks fallback removed — composite degradation only emitted when FK_NAME is populated. Added Lookup_payload_promotion_includes_format_pattern_sensitive_columns test. R3 gpt-5-4 verdict VERIFIED (cost $0.233): all four R2 fixes confirmed; no new findings; no regressions; privacy invariant intact.",
+      "description": "Applied all 4 R2 fixes: lookup-promotion guard switched from positive allowlist to negative exclusion list; EscapeIdentifier calls moved inside per-table/per-column try/catch that converts ArgumentException to SamplingError degradation; TryRead*Property gained a when(DaoPropertyAbsentHResults.Contains(ex.HResult)) filter restricted to DAO HRESULTs 0x800A0CC1 and 0x800A0CB3; DetectCompositeFks fallback removed \u00e2\u20ac\u201d composite degradation only emitted when FK_NAME is populated. Added Lookup_payload_promotion_includes_format_pattern_sensitive_columns test. R3 gpt-5-4 verdict VERIFIED (cost $0.233): all four R2 fixes confirmed; no new findings; no regressions; privacy invariant intact.",
       "status": "complete",
       "routedApiCalls": [
-        { "model": "gpt-5-4", "taskType": "session-verification", "costUsd": 0.2326 }
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.2326
+        }
       ]
     },
     {
@@ -269,7 +281,11 @@
       "description": "Routed Session 3 orchestrator recommendation via route(task_type='analysis') -> gemini-pro (cost $0.009). Recommendation: claude-sonnet-4-6 at effort=normal (mechanical correspondence: single-file HTML/JS editor from finalised JSON schema; per project-guidance Pin-mechanical-correspondence-to-Sonnet convention).",
       "status": "complete",
       "routedApiCalls": [
-        { "model": "gemini-pro", "taskType": "analysis", "costUsd": 0.0091 }
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "costUsd": 0.0091
+        }
       ]
     },
     {
@@ -289,6 +305,57 @@
       "description": "Authored docs/session-sets/harvester-data-classifier/disposition.json with status=completed, full files_changed list (15 new + 7 modified), next_orchestrator block (claude-sonnet-4-6 normal, reason=switch-due-to-cost), blockers=[].",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/verification-r1",
+      "dateTime": "2026-05-28T19:10:54.469123-04:00",
+      "description": "Round 1 cross-provider session-verification via route(task_type='session-verification'). Model: gpt-5-4; cost $0.2145. Prompt included the editor HTML, both headless test scripts, the schema, the fixture, the Session 3 spec block, and plan section 3.5+. Out-of-scope disclosures: scanner code from Sessions 1 & 2, sanitizer code from Session 4, browser-based UI tests.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 28211,
+          "outputTokens": 9601,
+          "costUsd": 0.2145425
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/verification-r2",
+      "dateTime": "2026-05-28T19:13:52.762122-04:00",
+      "description": "Round 2 cross-provider session-verification after R1 fix. Updated only tools/classification-editor-js-test.mjs to load the schema and assert exact equality of CATEGORIES/MASKING_STRATEGIES/SCHEMA_VERSION against the schema enums and version const, and to exercise every RAW_VALUE_HEURISTICS pattern (SSN-dashed, SSN-dotted, US phone, email). Model: gpt-5-4; cost $0.1333. R1 review file included in the prompt so the verifier checks the fix landed correctly rather than re-flagging from scratch.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 23143,
+          "outputTokens": 5032,
+          "costUsd": 0.1333375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/session-4-recommendation",
+      "dateTime": "2026-05-28T19:18:49.417520-04:00",
+      "description": "Routed Session 4 orchestrator recommendation via route(task_type='analysis') -> gemini-pro (cost $0.0049). Sent the Session 4 spec block, data-classification-plan sections 3.5+5+8, and the project-guidance excerpt on mechanical-correspondence pinning. Wrote session-4-recommendation.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3076,
+          "outputTokens": 106,
+          "costUsd": 0.0049050000000000005
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,3 @@
+Recommended orchestrator: anthropic claude-opus-4-7 @ effort=high
+Rationale: The task requires synthesizing a correctness-critical algorithm for the FK graph builder and lockstep remapping, which has a significant correctness risk. This choice aligns with the `synthesis-document-Opus-orchestrator-when-large` convention for complex synthesis and is consistent with prior sessions being manually escalated to Opus for complex tasks.
+Estimated routed cost: Moderate ($3.50-$6.00)
