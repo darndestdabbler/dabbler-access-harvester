@@ -1595,6 +1595,12 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Call `log_step` At Each Session-Step Transition To Avoid Backfilling The Activity Log At Closeout
 
+> **Promoted to `project-guidance.md` → Workflow Expectations on
+> 2026-05-29** after `harvester-report-baseline-capture` Session 1
+> hit the same backfill-commit pattern (third occurrence in two
+> days). The action-detail below stays as the reference; the
+> Convention is the binding rule.
+
 - **Context:** `close_session`'s `activity_log_entry` closeout gate
   requires at least one `activity-log.json` entry for the closing
   session. The gate is mechanical — it doesn't care about the

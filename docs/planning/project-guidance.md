@@ -278,7 +278,18 @@ experiments only.
   remains the source of truth for *execution* mechanics.
 - Save verifier output raw and never edit session-review files after
   they are written.
-- Log every AI-led session step in the active session set.
+- Log every AI-led session step in the active session set. Specifically:
+  call `log.log_step()` at every major step transition (initial setup
+  / each Step 4 step / Step 6 verification / Step 7 fixes if any /
+  Step 8 commit). `session-events.jsonl` is a separate ledger written
+  by `start_session` + `close_session` and does NOT satisfy
+  `close_session`'s `activity_log_entry` gate — that gate reads
+  `activity-log.json` specifically, which `log_step` is what populates.
+  Skipping `log_step` forces a backfill commit at closeout that adds
+  noise to git history; the gate caught this pattern three times in
+  two days (`harvester-manifest-index-and-batch-readiness` Sessions
+  3 + 4, then `harvester-report-baseline-capture` Session 1) before
+  it was promoted from a lesson to this Convention.
 - AI instruction documents (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`)
   reference this file and `docs/ai-led-session-workflow.md` so future
   agent runs inherit the same durable expectations.
