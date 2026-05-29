@@ -149,6 +149,84 @@
           "cost_usd": 0.00292
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 1,
+      "stepKey": "session-4/step-4.1-4.3-author-docs",
+      "dateTime": "2026-05-29T12:50:00.000000-04:00",
+      "description": "Authored interpretation-guide.md §5.5 per-field-type semantics subsection (DAO type-code table 1..23 + 101 + 102..109; Hyperlink vs Memo distinguisher; AutoNumber; Lookup; multi-valued; validation rules / defaults; Northwind Employees.Attachments worked example) and the new docs/harvester/batch-operations.md (multi-DB layout, sequential-only operation, MSACCESS / RCW hygiene, --clean / --no-clean semantics, cross-DB roll-up index, --json-status provenance fields with determinism column). Wired new batch-ops doc into install.md, interpretation guide §10, and docs/README.md Running the harvester subsection. In-conversation authoring per the synthesis-document convention (orchestrator model matches the architecture routing target).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/step-4.4b-next-session-set-recommendation",
+      "dateTime": "2026-05-29T13:49:00.000000-04:00",
+      "description": "Routed analysis to gemini-pro recommended harvester-parallel-com-test-cleanup @ sonnet-4.6 effort=medium, Low cost band, as the next maintenance-mode set.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 933,
+          "outputTokens": 163,
+          "costUsd": 0.002796
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/step-6-session-verification-r1",
+      "dateTime": "2026-05-29T13:55:00.000000-04:00",
+      "description": "Cross-provider session-verification R1 routed to gpt-5-4. Verdict: ISSUES_FOUND. Three findings: Minor DDL fallback rows in field-type table (TypeCode 9/10/17/18) omitted unsized spellings; Minor dbVariableField hex value wrong (0x00000001 documented; correct is 0x00000002, 0x00000001 is dbFixedField); Major closeout artifacts (change-log.md + disposition.json) contained 'awaiting fill' / 'fill at close' / 'pending fill' placeholders incompatible with the declared complete status.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 32000,
+          "outputTokens": 2300,
+          "costUsd": 0.27382
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 4,
+      "stepKey": "session-4/step-7-r1-fixes",
+      "dateTime": "2026-05-29T14:00:00.000000-04:00",
+      "description": "Applied R1 fixes in-session: per-field-type table rows for TypeCode 9/10/17/18 now show both sized and unsized DDL spellings to match TableDdlBuilder.MapType; Multi-valued fields paragraph corrected to dbVariableField 0x00000002 and dbFixedField 0x00000001; closeout placeholders replaced with concrete R1 verdict + cost prose in change-log.md and disposition.json.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 5,
+      "stepKey": "session-4/step-6-session-verification-r2",
+      "dateTime": "2026-05-29T14:10:00.000000-04:00",
+      "description": "Cross-provider session-verification R2 routed to gpt-5-4. Verdict: VERIFIED with empty issues array. R2 confirmed all three R1 fixes hold and no new issues were introduced; post-fix narrative-summary sweep clean.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 29000,
+          "outputTokens": 750,
+          "costUsd": 0.105205
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/step-8-closeout-commit",
+      "dateTime": "2026-05-29T14:15:00.000000-04:00",
+      "description": "Staged + committed + pushed the closeout commit (14 files; 1173 insertions; commit 4f6aa6e). Spurious .accdb timestamp diffs from the test run were reverted before staging per the documented sweep.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
