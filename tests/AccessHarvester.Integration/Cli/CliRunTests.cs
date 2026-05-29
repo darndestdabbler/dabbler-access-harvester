@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using AccessHarvester.Integration.TestSupport;
 using Xunit;
 
@@ -98,5 +99,77 @@ public sealed class CliRunTests
             if (Directory.Exists(outRoot))
                 Directory.Delete(outRoot, recursive: true);
         }
+    }
+
+    // Provenance contract from Finding #6
+    // (harvester-manifest-index-and-batch-readiness Session 3): the
+    // `run --json-status` envelope carries HarvesterVersion (deterministic),
+    // StartedAt (UTC ISO-8601, non-deterministic), DurationMs
+    // (non-deterministic), and Clean (the effective per-tier clean mode
+    // for this invocation). Two back-to-back invocations against the same
+    // fixture must produce byte-identical envelopes after StartedAt and
+    // DurationMs are stripped — mirrors GoldenNormalizer's ExportedAt
+    // exclusion in the manifest determinism gate.
+    //
+    // Lives in this test class (rather than its own class) so xUnit's
+    // class-as-collection default keeps it sequential with the existing
+    // CliRunTests, avoiding the parallel-COM contention the lessons-learned
+    // documents for HomeHealthCare-driven CLI tests.
+    [SkippableFact]
+    public void Run_JsonStatusEnvelope_CarriesProvenance_AndIsDeterministicMinusVolatileFields()
+    {
+        AccessAvailability.SkipIfNoAccess();
+
+        string db = Path.Combine(RepoPaths.Samples(), "HomeHealthCare.accdb");
+        Skip.IfNot(File.Exists(db), $"Sample DB not present at {db}.");
+
+        string outRoot = Path.Combine(Path.GetTempPath(), $"ah-cli-run-prov-{Guid.NewGuid():N}");
+        try
+        {
+            var first = CliInvoker.Run("run", "--db", db, "--out", outRoot, "--json-status");
+            var second = CliInvoker.Run("run", "--db", db, "--out", outRoot, "--json-status");
+
+            Assert.Equal(0, first.ExitCode);
+            Assert.Equal(0, second.ExitCode);
+
+            AssertEnvelopeCarriesProvenance(first.StdOut);
+            AssertEnvelopeCarriesProvenance(second.StdOut);
+
+            Assert.Equal(StripVolatile(first.StdOut), StripVolatile(second.StdOut));
+        }
+        finally
+        {
+            if (Directory.Exists(outRoot))
+                Directory.Delete(outRoot, recursive: true);
+        }
+    }
+
+    private static void AssertEnvelopeCarriesProvenance(string envelopeJson)
+    {
+        using var doc = JsonDocument.Parse(envelopeJson);
+        var root = doc.RootElement;
+
+        Assert.True(root.TryGetProperty("HarvesterVersion", out var hv));
+        Assert.Equal(JsonValueKind.String, hv.ValueKind);
+        Assert.False(string.IsNullOrWhiteSpace(hv.GetString()));
+
+        Assert.True(root.TryGetProperty("StartedAt", out var sa));
+        Assert.Equal(JsonValueKind.String, sa.ValueKind);
+        Assert.False(string.IsNullOrWhiteSpace(sa.GetString()));
+
+        Assert.True(root.TryGetProperty("DurationMs", out var dm));
+        Assert.Equal(JsonValueKind.Number, dm.ValueKind);
+        Assert.True(dm.GetInt64() >= 0);
+
+        Assert.True(root.TryGetProperty("Clean", out var clean));
+        Assert.Equal(JsonValueKind.True, clean.ValueKind);
+    }
+
+    private static string StripVolatile(string envelopeJson)
+    {
+        var envelope = JsonNode.Parse(envelopeJson)!.AsObject();
+        envelope.Remove("StartedAt");
+        envelope.Remove("DurationMs");
+        return envelope.ToJsonString(new JsonSerializerOptions { WriteIndented = true });
     }
 }

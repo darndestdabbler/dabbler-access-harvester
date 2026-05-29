@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using AccessHarvester.Access;
@@ -64,6 +65,27 @@ public sealed record DatabaseManifest
     /// lockstep when the schema bumps.
     /// </summary>
     public const string SchemaVersionLiteral = "1.1";
+
+    /// <summary>
+    /// Canonical harvester version string emitted into
+    /// <c>$.HarvesterVersion</c> and into the CLI's <c>--json-status</c>
+    /// envelope + <c>--version</c> output. Sourced from this assembly's
+    /// <see cref="AssemblyInformationalVersionAttribute"/> so every
+    /// surface that reports a version is reading from the same place.
+    /// The SourceLink commit-sha decoration the SDK appends as
+    /// <c>+&lt;sha&gt;</c> is stripped — consumers want the semver, not
+    /// the build provenance.
+    /// </summary>
+    public static string ResolveHarvesterVersion()
+    {
+        var asm = typeof(DatabaseManifest).Assembly;
+        string version =
+            asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+            ?? asm.GetName().Version?.ToString()
+            ?? "0.0.0";
+        int plus = version.IndexOf('+');
+        return plus >= 0 ? version[..plus] : version;
+    }
 
     /// <summary>
     /// Version of the harvester tool that produced this document.

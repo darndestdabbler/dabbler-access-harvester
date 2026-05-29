@@ -107,34 +107,48 @@ low
 | 3.5  | Submit final changeset for verification. | `gpt-5-4` (session-verification) |
 
 ### Actuals (filled after the session)
-- Orchestrator used: `<fill at close>`
-- Total routed cost: `<fill at close>`
-- Deviations from recommendation: `<fill at close>`
-- Notes for next-session calibration: `<fill at close>`
+- Orchestrator used: `claude-code opus-4.7 @ effort=medium`
+- Total routed cost: `$0.4016` (R1 gpt-5-4 session-verification = $0.26272; R2 gpt-5-4 session-verification = $0.13595; gemini-pro Session 4 next-orchestrator analysis = $0.00292). Two-round session-verification; R1 → ISSUES_FOUND, both fixed in-session, R2 → VERIFIED with empty issues array.
+- Deviations from recommendation:
+  - Spec line 178 mentions `--clean` as the candidate flag name; ai-assignment.md line 104-105 says `--no-clean` is the disable-flag. Implementation lands only `--no-clean` (default = clean). Rationale: with default-clean, an explicit `--clean` would be redundant (no-op). Minimises CLI surface; behaviour matches the spec's stated semantics. Disclosed in the verifier prompt.
+  - User explicitly opted in (this session, before Step 4) to the OPTIONAL cross-DB roll-up index per the disposition's "bump to opus only if the optional cross-DB roll-up index is in scope" rule. Effort stayed at medium per the original recommendation; the optional feature did not raise enough architectural complexity to warrant effort=high.
+  - Steps 3.4 (CLI help text) and 3.5 (verification) are not separately routed because Sonnet-cost mechanical-correspondence routes are not load-bearing for help-text edits; the verifier round itself covered both. Avoided redundant route() calls.
+  - **R1 verifier surfaced two findings**, both addressed in-session and re-verified VERIFIED in R2:
+    - **Major (HarvesterVersion provenance mismatch):** `Pipeline.cs.ResolveHarvesterVersion()` and `Program.cs.ResolveHarvesterVersion()` read from different assemblies and applied different `+<commit-sha>` stripping. Manifest's `HarvesterVersion` could disagree with `--json-status` envelope's `HarvesterVersion` for the same run. Fixed by centralising version resolution in `DatabaseManifest.ResolveHarvesterVersion()` (one canonical helper on the manifest-shape-defining assembly; strips the SourceLink `+<sha>` suffix). Pipeline.cs (manifest emission), Program.cs (`--json-status` envelope), and Program.cs (`--version` output via PrintVersion) all now call the same helper — three prior duplicates collapsed to one.
+    - **Minor (--types + default-clean interaction undocumented):** `run --types Forms` against an existing output tree clears all three tiers wholesale, deleting previously-harvested unselected categories. PrintUsage extended with an `IMPORTANT:` paragraph spelling out the hazard and recommending `--no-clean` alongside `--types` for incremental partial re-harvests.
+- Notes for next-session calibration:
+  - Session 4 starts with no schema-corrective debt and a cleanly-validating v1.1 manifest. CanonicalGoldenRegressionTests green for both HHC and Northwind after Session 3's changes (the determinism gate normalises HarvesterVersion via `GoldenNormalizer`, so the new short-form version string is absorbed automatically).
+  - `Pipeline.Run`, `Extract`, `Translate`, `Enrich` all default to `clean=true` now; existing test call sites use fresh-Guid temp dirs so the new default is harmless. Any future test that pre-seeds output before calling `Run` must pass `clean: false` or be rewritten.
+  - `Pipeline.EmitRootIndex(outputRoot)` is the public batch-driver entry point for refreshing `<outputRoot>/AccessMetaData/index.json` after a DB is deleted from disk without a full re-run.
+  - Status envelope provenance fields (HarvesterVersion + StartedAt + DurationMs + Clean) are now part of the public `--json-status` contract; Session 4's batch-operations doc must describe them.
+  - Pre-existing parallel-COM flake in `ClassifyCommandTests.HomeHealthCare_classify_emits_schema_conformant_json` continues to surface when the full Integration suite runs end-to-end (~4-min Classify timeout). Not caused by Session 3 changes (ClassifyCommand is not in Pipeline.Run's call path). Mitigation deferred to a future cleanup session; isolation runs of CanonicalGoldenRegressionTests + CliRunTests + ClassifyCommandTests all pass cleanly.
+  - Test counts: 689 Pipeline.Tests pass; 5 new hermetic PipelineCleanTests pass; CanonicalGoldenRegressionTests + CliRunTests + ManifestSchemaConformanceTests + CliBootstrapTests all pass in isolation against the post-Session-3 binary.
 
 **Next-session orchestrator recommendation (Session 4):**
-`claude opus-4.7 @ effort=medium`
-Rationale: Session 4 requires careful code comprehension and the synthesis of that knowledge into precise technical documentation, a task where Opus excels.
+`claude opus-4.7 @ effort=high`
+Rationale (routed gemini-pro analysis, 2026-05-29): the task combines complex document synthesis (per-field-type semantics in the interpretation guide + a new batch-operations doc) with a holistic project closeout, demanding the maximum reasoning capacity of Opus to ensure a clean final state and minimize verifier-driven rework. This directly addresses the reasoning gaps observed in Session 3's medium-effort run (the R1 Major was a reasoning-level provenance-consistency issue the orchestrator missed but the verifier caught) and aligns with the stated priority of a high-leverage clean closeout over marginal cost savings for the final session.
 
 ---
 
-## Session 4: Document Field-Type Semantics
+## Session 4: Document Field-Type Semantics + Batch Operations Guide + Closeout
 
 ### Recommended orchestrator
-`claude opus-4.7 @ effort=medium`
+`claude opus-4.7 @ effort=high`
 
-### Rationale
-This session closes a documentation gap (Finding #3) by explaining complex field-type semantics. The task requires interpreting C# model definitions (`TableMetadata.cs`) and synthesizing that information into clear, accurate documentation for a downstream consumer, justifying the use of a frontier model.
+### Rationale (routed gemini-pro analysis, 2026-05-29; calibrated against Session 3 actuals)
+This session closes documentation gaps (Finding #3 field-type semantics + Finding #5 batch operations guide) AND carries the set's closeout responsibilities (change-log, next-session-set recommendation, Step 9 reorganization review, ROADMAP row, final session-state flip). The task requires interpreting C# model definitions (`TableMetadata.cs` for field-type representation: `DataType`, `DataTypeCode`, `Attributes` bitmask, `Ddl`) and synthesizing that into precise consumer-facing docs that describe the FINAL post-Session-1-3 behaviour — including the new `--clean`/`--no-clean` semantics, the cross-DB roll-up index, and the status-envelope provenance fields. Session 3's R1 verifier finding (a reasoning-level provenance-consistency Major that the orchestrator missed but the verifier caught) is direct evidence that bumping to opus@high pays for itself when synthesis + closeout responsibilities concentrate in one session.
 
 ### Estimated routed cost
-low
+moderate (session-verification round + closeout artifacts; Step 9 may add a reorg-review analysis route)
 
 | Step | Action | Routing Decision |
 |------|--------|------------------|
-| 4.1  | Analyze `AccessHarvester.Core/Models/TableMetadata.cs` to fully understand the representation of special field types, including `DataTypeCode` for Attachment, OLE Object, and Hyperlink, and the `Attributes` bitmask. | `orchestrator` |
-| 4.2  | Author a new section in `docs/harvester/interpretation-guide.md` that clearly explains these field-type semantics. | `orchestrator` |
-| 4.3  | Ensure the documentation explicitly calls out how to interpret Attachment fields (DAO 101) and distinguishes them from OLE Objects (11), as seen in the Northwind database. | `orchestrator` |
-| 4.4  | Submit the documentation changes for verification. | `gpt-5-4` (session-verification) |
+| 4.1  | Analyze `AccessHarvester.Access/Models/TableMetadata.cs` (the canonical field-type representation) to fully understand `DataType` / `DataTypeCode` / `Attributes` bitmask / `Ddl` for Attachment (101), OLE Object (11), Hyperlink, multi-valued, Lookup, Memo/LongText, Currency, AutoNumber/COUNTER. | `orchestrator` (Opus authors in-conversation per the synthesis-document convention) |
+| 4.2  | Extend `docs/harvester/interpretation-guide.md` with a per-field-type table mapping each type to its `DataType`/`DataTypeCode`/`Attributes`/`Ddl` representation; state explicitly that the harvester is metadata-only and that attachment / multi-valued child schemas are not expanded. Use Northwind's `Employees.Attachments` field as the worked example. | `orchestrator` |
+| 4.3  | Author a new batch-operations doc (or `install.md` operations section) covering: the `<out>/AccessMetaData/<dbName>/` convention for many DBs; sequential-only operation; MSACCESS / RCW hygiene across runs; `--clean` / `--no-clean` semantics (Session 3); the cross-DB roll-up index at `<out>/AccessMetaData/index.json` (Session 3); the new `--json-status` envelope provenance fields (HarvesterVersion, StartedAt, DurationMs, Clean). | `orchestrator` |
+| 4.4  | Author `change-log.md`, `next-session-set-recommendation.md`, and `disposition.json` (final-session contract); flip the set's top-level `status` to `complete`. | `orchestrator` |
+| 4.5  | Submit the documentation changes for cross-provider verification. | `gpt-5-4` (session-verification, routed via `task_type_overrides.session-verification`) |
+| 4.6  | Step 9 reorganization review of `docs/planning/project-guidance.md` + `docs/planning/lessons-learned.md` — propose Convention promotions, relocations, staleness flags. May route an `analysis` call to elicit a second opinion if a promotion candidate is borderline. | `orchestrator` (+ optional `analysis` route for borderline candidates) |
 
 ### Actuals (filled after the session)
 - Orchestrator used: `<fill at close>`

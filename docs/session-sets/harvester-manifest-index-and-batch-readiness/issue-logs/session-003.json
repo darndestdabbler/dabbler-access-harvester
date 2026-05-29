@@ -1,0 +1,16 @@
+[
+  {
+    "severity": "Major",
+    "location": "AccessHarvester.Core/Pipeline.cs; AccessHarvester.Cli/Program.cs",
+    "summary": "Status-envelope HarvesterVersion resolved from a different assembly and with different normalization than manifest.json \u2014 the two provenance surfaces could disagree for the same run.",
+    "fix": "Centralized version resolution in DatabaseManifest.ResolveHarvesterVersion() (one canonical helper on the manifest-shape-defining assembly, strips the SourceLink +<sha> suffix). Both Pipeline.cs (manifest emission) and Program.cs (--json-status envelope + --version output) now call it; the previous in-class duplicates were deleted.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "AccessHarvester.Cli/Program.cs PrintUsage",
+    "summary": "Default-clean combined with --types now deletes previously harvested unselected categories; the help text did not call this out.",
+    "fix": "Extended the --no-clean help block with an IMPORTANT paragraph spelling out the --types + default-clean interaction and recommending --no-clean for incremental partial re-harvests.",
+    "status": "fixed"
+  }
+]

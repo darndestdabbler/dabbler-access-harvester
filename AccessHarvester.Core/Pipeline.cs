@@ -116,11 +116,12 @@ public sealed class Pipeline
     public static string IrDir(string outputRoot, string dbName)
         => Path.Combine(BaseDir(outputRoot, dbName), "ir");
 
-    public ExtractResult Extract(string databasePath, string outputRoot)
+    public ExtractResult Extract(string databasePath, string outputRoot, bool clean = true)
     {
         string dbName = Path.GetFileNameWithoutExtension(databasePath);
         string baseDir = BaseDir(outputRoot, dbName);
         string rawDir = RawDir(outputRoot, dbName);
+        if (clean && Directory.Exists(rawDir)) Directory.Delete(rawDir, recursive: true);
         Directory.CreateDirectory(rawDir);
 
         var categories = new List<CategoryExportResult>();
@@ -135,8 +136,9 @@ public sealed class Pipeline
         return new ExtractResult(baseDir, rawDir, categories);
     }
 
-    public TranslateResult Translate(string rawDir, string kbDir)
+    public TranslateResult Translate(string rawDir, string kbDir, bool clean = true)
     {
+        if (clean && Directory.Exists(kbDir)) Directory.Delete(kbDir, recursive: true);
         Directory.CreateDirectory(kbDir);
         var categories = new List<CategoryTranslateResult>();
         foreach (var translator in _translators)
@@ -149,8 +151,9 @@ public sealed class Pipeline
         return new TranslateResult(rawDir, kbDir, categories);
     }
 
-    public EnrichResult Enrich(string kbDir, string irDir)
+    public EnrichResult Enrich(string kbDir, string irDir, bool clean = true)
     {
+        if (clean && Directory.Exists(irDir)) Directory.Delete(irDir, recursive: true);
         Directory.CreateDirectory(irDir);
         var categories = new List<CategoryEnrichResult>();
 
@@ -213,16 +216,17 @@ public sealed class Pipeline
         File.WriteAllText(Path.Combine(irDir, "Defaults.json"), reader.ReadToEnd());
     }
 
-    public RunResult Run(string databasePath, string outputRoot)
+    public RunResult Run(string databasePath, string outputRoot, bool clean = true)
     {
-        var extract = Extract(databasePath, outputRoot);
+        var extract = Extract(databasePath, outputRoot, clean);
         string dbName = Path.GetFileNameWithoutExtension(databasePath);
         string kbDir = KbDir(outputRoot, dbName);
-        var translate = Translate(extract.RawDir, kbDir);
+        var translate = Translate(extract.RawDir, kbDir, clean);
         string irDir = IrDir(outputRoot, dbName);
-        var enrich = Enrich(translate.KbDir, irDir);
+        var enrich = Enrich(translate.KbDir, irDir, clean);
 
         EmitManifestArtifacts(extract.BaseDir, databasePath, extract.RawDir, enrich.IrDir);
+        EmitRootIndex(outputRoot);
 
         return new RunResult(
             extract.BaseDir, extract.RawDir, translate.KbDir, enrich.IrDir,
@@ -456,6 +460,101 @@ public sealed class Pipeline
         File.WriteAllText(
             Path.Combine(baseDir, "READ-ME-FIRST.md"),
             ReadMeFirstContent);
+    }
+
+    // Cross-DB roll-up index emitted at the AccessMetaData/ root after
+    // every Run, so a batch consumer that points at the same --out root
+    // for many databases gets a single up-to-date enumeration without
+    // having to scan the filesystem itself.
+    //
+    // Determinism: the index is rebuilt from scratch on every Run by
+    // re-scanning <outputRoot>/AccessMetaData/*/manifest.json. Per-DB
+    // entries carry only the database name, the relative manifest path,
+    // and the schema version the manifest declares — no timestamps, no
+    // durations. Entries are sorted by DatabaseName (Ordinal). Manifests
+    // that fail to parse are skipped silently rather than poisoning the
+    // index for the surviving DBs; the per-DB Run that emitted the bad
+    // manifest already surfaced the problem through its own diagnostics.
+    //
+    // Public so a downstream batch driver (or a hermetic test) can
+    // refresh the index without re-running Pipeline.Run against a live
+    // .accdb — useful when a DB has been deleted from disk and the
+    // surviving index needs to drop the stale entry.
+    public static void EmitRootIndex(string outputRoot)
+    {
+        string rootDir = Path.Combine(outputRoot, "AccessMetaData");
+        if (!Directory.Exists(rootDir)) return;
+
+        var entries = new List<RootIndexEntry>();
+        foreach (var dbDir in Directory.GetDirectories(rootDir).OrderBy(d => d, StringComparer.Ordinal))
+        {
+            string manifestPath = Path.Combine(dbDir, "manifest.json");
+            if (!File.Exists(manifestPath)) continue;
+
+            string databaseName;
+            string schemaVersion = DatabaseManifest.SchemaVersionLiteral;
+            try
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(manifestPath, Encoding.UTF8));
+                var root = doc.RootElement;
+                databaseName = root.TryGetProperty("Database", out var db)
+                    && db.TryGetProperty("Name", out var nameEl)
+                    && nameEl.ValueKind == JsonValueKind.String
+                        ? nameEl.GetString() ?? Path.GetFileName(dbDir)
+                        : Path.GetFileName(dbDir);
+                if (root.TryGetProperty("SchemaVersion", out var sv) && sv.ValueKind == JsonValueKind.String)
+                    schemaVersion = sv.GetString() ?? schemaVersion;
+            }
+            catch (JsonException)
+            {
+                continue;
+            }
+
+            // Relative paths use forward slashes regardless of OS so the
+            // index is portable to any tool that consumes it.
+            string relativeManifest =
+                $"{Path.GetFileName(dbDir)}/manifest.json";
+
+            entries.Add(new RootIndexEntry
+            {
+                Name = databaseName,
+                Manifest = relativeManifest,
+                SchemaVersion = schemaVersion,
+            });
+        }
+
+        entries = entries.OrderBy(e => e.Name, StringComparer.Ordinal).ToList();
+
+        var index = new RootIndex
+        {
+            SchemaType = "AccessMetaDataRootIndex",
+            SchemaVersion = "1.0",
+            Databases = entries,
+        };
+
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        };
+
+        File.WriteAllText(
+            Path.Combine(rootDir, "index.json"),
+            JsonSerializer.Serialize(index, options));
+    }
+
+    private sealed class RootIndex
+    {
+        public string SchemaType { get; set; } = "AccessMetaDataRootIndex";
+        public string SchemaVersion { get; set; } = "1.0";
+        public List<RootIndexEntry> Databases { get; set; } = new();
+    }
+
+    private sealed class RootIndexEntry
+    {
+        public string Name { get; set; } = "";
+        public string Manifest { get; set; } = "";
+        public string SchemaVersion { get; set; } = "";
     }
 
     private static FileMap BuildFileMap(
@@ -712,14 +811,12 @@ public sealed class Pipeline
     private sealed record ParsedModuleEntry(
         string Name, ManifestModuleKind Kind, string Category, ResolvedModule Resolved);
 
+    // Manifest provenance is sourced from the single canonical helper on
+    // DatabaseManifest so the version stamped into manifest.json matches
+    // exactly what the CLI's --json-status envelope and --version surface
+    // emit for the same run.
     private static string ResolveHarvesterVersion()
-    {
-        var asm = typeof(Pipeline).Assembly;
-        var info = asm.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-        if (!string.IsNullOrEmpty(info?.InformationalVersion))
-            return info!.InformationalVersion;
-        return asm.GetName().Version?.ToString() ?? "0.0.0";
-    }
+        => DatabaseManifest.ResolveHarvesterVersion();
 }
 
 public sealed record CategoryExportResult(string Category, IReadOnlyList<ExportOutcome> Outcomes);

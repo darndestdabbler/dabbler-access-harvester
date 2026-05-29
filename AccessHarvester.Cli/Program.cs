@@ -21,7 +21,8 @@ public static class Program
 {
     private static readonly HashSet<string> FlagOptions = new(StringComparer.OrdinalIgnoreCase)
     {
-        "json-status"
+        "json-status",
+        "no-clean",
     };
 
     private static readonly JsonSerializerOptions StatusJsonOptions = new() { WriteIndented = true };
@@ -98,9 +99,13 @@ public static class Program
         var opts = ParseOptions(args);
         string db = Path.GetFullPath(Require(opts, "db"));
         string outDir = Path.GetFullPath(Require(opts, "out"));
+        bool clean = !HasNoClean(opts);
         var pipeline = BuildPipeline(opts);
 
-        var result = pipeline.Extract(db, outDir);
+        var startedAt = DateTimeOffset.UtcNow;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var result = pipeline.Extract(db, outDir, clean);
+        sw.Stop();
 
         Console.Error.WriteLine($"Extracted to: {result.RawDir}");
         ReportExtract(result.Categories);
@@ -111,10 +116,14 @@ public static class Program
             EmitStatus(new
             {
                 Command = "extract",
+                HarvesterVersion = ResolveHarvesterVersion(),
+                StartedAt = startedAt.ToString("o", System.Globalization.CultureInfo.InvariantCulture),
+                DurationMs = sw.ElapsedMilliseconds,
                 Database = db,
                 OutputRoot = outDir,
                 BaseDir = result.BaseDir,
                 RawDir = result.RawDir,
+                Clean = clean,
                 ExitCode = exit,
                 Extract = SummarizeExtract(result.Categories),
             });
@@ -127,9 +136,13 @@ public static class Program
         var opts = ParseOptions(args);
         string rawDir = Path.GetFullPath(Require(opts, "in"));
         string kbDir = Path.GetFullPath(Require(opts, "out"));
+        bool clean = !HasNoClean(opts);
         var pipeline = BuildPipeline(opts);
 
-        var result = pipeline.Translate(rawDir, kbDir);
+        var startedAt = DateTimeOffset.UtcNow;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var result = pipeline.Translate(rawDir, kbDir, clean);
+        sw.Stop();
 
         Console.Error.WriteLine($"Translated to: {result.KbDir}");
         ReportTranslate(result.Categories);
@@ -140,8 +153,12 @@ public static class Program
             EmitStatus(new
             {
                 Command = "translate",
+                HarvesterVersion = ResolveHarvesterVersion(),
+                StartedAt = startedAt.ToString("o", System.Globalization.CultureInfo.InvariantCulture),
+                DurationMs = sw.ElapsedMilliseconds,
                 RawDir = rawDir,
                 KbDir = kbDir,
+                Clean = clean,
                 ExitCode = exit,
                 Translate = SummarizeTranslate(result.Categories),
             });
@@ -154,9 +171,13 @@ public static class Program
         var opts = ParseOptions(args);
         string db = Path.GetFullPath(Require(opts, "db"));
         string outDir = Path.GetFullPath(Require(opts, "out"));
+        bool clean = !HasNoClean(opts);
         var pipeline = BuildPipeline(opts);
 
-        var result = pipeline.Run(db, outDir);
+        var startedAt = DateTimeOffset.UtcNow;
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        var result = pipeline.Run(db, outDir, clean);
+        sw.Stop();
 
         Console.Error.WriteLine($"Raw: {result.RawDir}");
         Console.Error.WriteLine($"KB:  {result.KbDir}");
@@ -171,12 +192,16 @@ public static class Program
             EmitStatus(new
             {
                 Command = "run",
+                HarvesterVersion = ResolveHarvesterVersion(),
+                StartedAt = startedAt.ToString("o", System.Globalization.CultureInfo.InvariantCulture),
+                DurationMs = sw.ElapsedMilliseconds,
                 Database = db,
                 OutputRoot = outDir,
                 BaseDir = result.BaseDir,
                 RawDir = result.RawDir,
                 KbDir = result.KbDir,
                 IrDir = result.IrDir,
+                Clean = clean,
                 ExitCode = exit,
                 Extract = SummarizeExtract(result.Extract),
                 Translate = SummarizeTranslate(result.Translate),
@@ -185,6 +210,8 @@ public static class Program
         }
         return exit;
     }
+
+    private static string ResolveHarvesterVersion() => DatabaseManifest.ResolveHarvesterVersion();
 
     private static CorePipeline BuildPipeline(Dictionary<string, string> opts)
     {
@@ -607,9 +634,9 @@ public static class Program
             AccessHarvester — extract Access DB metadata and translate into a JSON knowledge base.
 
             Usage:
-              AccessHarvester extract         --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
-              AccessHarvester translate       --in <raw-dir>    --out <kb-dir>          [--types ...] [--json-status]
-              AccessHarvester run             --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
+              AccessHarvester extract         --db <file.accdb> --out <output-root-dir> [--types ...] [--no-clean] [--json-status]
+              AccessHarvester translate       --in <raw-dir>    --out <kb-dir>          [--types ...] [--no-clean] [--json-status]
+              AccessHarvester run             --db <file.accdb> --out <output-root-dir> [--types ...] [--no-clean] [--json-status]
               AccessHarvester generate-docs   --in <manifest.json> --out <output-dir>
               AccessHarvester validate        --in <output-root-dir> [--json-status]
               AccessHarvester validate        --manifest <manifest.json> [--json-status]
@@ -637,7 +664,25 @@ public static class Program
                               Forms, Reports, Macros, ModulesAndClasses,
                               Queries, Tables, Relationships
                             Default: all.
+            --no-clean      Skip the default per-tier clean. By default `run`/`extract`/`translate`
+                            delete the target tier directory (raw/ for extract, kb/ for translate,
+                            raw+kb+ir for run) before writing, so a re-harvest of a database whose
+                            source objects have been removed does not leave orphan files behind.
+                            Pass --no-clean to merge-overwrite the prior output in place (the
+                            legacy file-by-file overwrite behaviour); orphan files from objects
+                            removed since the prior run will remain.
+                            IMPORTANT: --types combined with the default clean deletes the entire
+                            tier directory before writing, INCLUDING previously-harvested
+                            unselected categories. For example, `run --types Forms` against an
+                            existing output tree clears raw/, kb/, and ir/ wholesale and then
+                            repopulates only Forms-related content; Reports / Queries / Tables
+                            etc. from prior runs disappear. To do an incremental partial re-harvest
+                            that preserves prior categories, pass --no-clean alongside --types.
             --json-status   Emit a JSON summary to stdout at end (human messages go to stderr).
+                            For run/extract/translate the envelope carries provenance fields:
+                            HarvesterVersion (deterministic), StartedAt (UTC ISO-8601,
+                            non-deterministic), DurationMs (non-deterministic), Clean (the
+                            effective per-tier clean mode for this invocation).
 
             `parse` emits harness-format JSON to stdout:
               { "status": "parsed"|"failed",
@@ -683,20 +728,8 @@ public static class Program
 
     private static void PrintVersion()
     {
-        var harvesterAsm = typeof(DatabaseManifest).Assembly;
-        string harvesterVersion =
-            harvesterAsm.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-            ?? harvesterAsm.GetName().Version?.ToString()
-            ?? "0.0.0";
-
-        // Strip the trailing "+<commit-sha>" SourceLink decoration the SDK
-        // appends to InformationalVersion when the build is in a git tree;
-        // the version string the consumer pins should be the semver, not
-        // the build provenance.
-        int plus = harvesterVersion.IndexOf('+');
-        if (plus >= 0) harvesterVersion = harvesterVersion[..plus];
-
-        Console.Out.WriteLine($"AccessHarvester {harvesterVersion} (schema v{SchemaVersionLiteral})");
+        Console.Out.WriteLine(
+            $"AccessHarvester {DatabaseManifest.ResolveHarvesterVersion()} (schema v{SchemaVersionLiteral})");
     }
 
     private static Dictionary<string, string> ParseOptions(string[] args)
@@ -731,6 +764,9 @@ public static class Program
 
     private static bool HasJsonStatus(Dictionary<string, string> opts)
         => opts.ContainsKey("json-status");
+
+    private static bool HasNoClean(Dictionary<string, string> opts)
+        => opts.ContainsKey("no-clean");
 
     private static void EmitStatus(object status)
     {
