@@ -1,25 +1,32 @@
 {
   "status": "completed",
-  "summary": "Session 1 of 2 wired the deterministic release-bundle path for the harvester. The publish script (tools/publish/publish.ps1) now produces, in addition to the pre-existing publish/win-x64/AccessHarvester.exe, a release-ready zip + SHA-256 sidecar at publish/release/AccessHarvester-1.0.0-schema-v1.0-win-x64.zip (.sha256). The bundle contains AccessHarvester.exe + RELEASE-NOTES.md + LICENSE.txt at the archive root. Determinism was verified empirically: two consecutive publishes produced byte-identical zips with identical SHA-256 575bd2129ca2a5bb6e4faef77ffd2b2e264aa5bd73a515baff08e6605f67ba3a, satisfying the spec's stop rule on bundle determinism. The implementation rejects PowerShell's Compress-Archive (non-deterministic — it inherits source-file LastWriteTime which dotnet publish rewrites on every run) in favor of System.IO.Compression.ZipFile with entry-level LastWriteTime pinned to 2000-01-01T00:00:00Z, alphabetical entry ordering, and a fixed compression level. The filename encodes harvester semver + schema-version read at publish time from the binary's --version output (the runtime is the authority per install.md). Smoke validation passed: SHA-256 sidecar matched zip, unzip produced the three expected files, --version returned the canonical string, --help exited 0. Channel decision was routed cross-engine per the consensus-before-asking-human convention: gemini-pro confirmed the spec default (GitHub Releases on this repo), with the orchestrator (Claude Opus) standing in as the cross-provider counterpart since OpenAI was 429-blocked across both gpt-5-4 and gpt-5-4-mini. dotnet build clean (0 errors); dotnet test parallel run hit 3 transient COM-contention failures in AccessHarvester.Integration CLI HHC extract/translate/run tests, but each passes in isolation and the full suite passes with xUnit parallelization disabled — a pre-existing repo flake unrelated to publish-script changes, disclosed to the verifier. Cross-provider session-verification: gpt-5-4 returned 429 (consistent with the recurring pattern surfaced in harvester-finish-cli-packaging Session 2 actuals); fell back to gemini-pro via query() per verifier-failure escalation ladder step 2. Round 1 VERIFIED with substantive 7-point prose analysis and empty issues array. Session 2 next: CI release workflow + install.md / AI-instruction-file rewrites + cut first GitHub Release. Two carry-overs surfaced for Session 2 to handle: (1) the repo lacks a LICENSE file at root — Session 1 generated a reference-style LICENSE.txt in the bundle as a stopgap; a real LICENSE-decision is human-only and should be made before cutting the first release; (2) the repo has zero existing tags, so the spec's v*.*.* scheme is unambiguous and Session 2 will tag v1.0.0 absent other instruction.",
-  "verification_method": "api",
+  "summary": "Session set harvester-cli-distribution completed all 2 sessions (Final). Session 1 extended tools/publish/publish.ps1 to bundle the existing self-contained AccessHarvester.exe into a deterministic AccessHarvester-<semver>-schema-v<schema>-win-x64.zip with a matching .sha256 sidecar (pinned LastWriteTime epoch, sorted-by-name entries, .NET ZipFile API not PowerShell Compress-Archive); two consecutive publishes produced byte-identical zip + identical SHA-256. Session 2 authored .github/workflows/release.yml on windows-latest triggered by v*.*.* tag push (runs publish.ps1, attaches zip + sha256 to a draft GitHub Release at the tag's commit, draft state is the manual-approval gate), rewrote docs/harvester/install.md 'Where to get it' section to lead with the GitHub Releases channel + PowerShell + sha256sum verify recipes + a maintainer-only local-clone escape hatch, updated README.md install paragraph, added an identical one-paragraph release-channel pointer to CLAUDE.md / AGENTS.md / GEMINI.md (scope expansion at user request to prevent future 'where does the binary live?' lookups), and cut + published the first real release: tag v1.0.0 at commit edccc8f, workflow run 26629055594 in 2m33s, release URL https://github.com/darndestdabbler/dabbler-access-harvester/releases/tag/v1.0.0, SHA-256 4c81f2426f56e2d8343241531c56bd74ed0903a367db4657bf24d97623b5e97e. Consumer-perspective transcript verified: gh release download + sha256sum -c OK + unzip -l confirms deterministic 2000-01-01 epoch + four smoke checks (--version 'AccessHarvester 1.0.0 (schema v1.0)', --help full usage text, parse <sample.bas> {status:parsed, errors:0}, validate --manifest 'Validation passed') all green. dotnet build = 0 errors / 331 pre-existing CA1416 warnings; dotnet test = all suites pass after killing 6 hung MSACCESS COM zombies from prior session-set work (then AccessHarvester.Integration: 51/51). Session 2 cross-provider verification VERIFIED on R1 by gpt-5-4: 1 Major sequencing observation resolved by closeout, 2 Minors (1 fixed inline = install.md Versioning-convention filename example .exe -> .zip, 1 dismissed with empirical adjudication = install.md --help stderr documentation is correct per stream-isolation test). Total set routed cost ~$1.38 ($0.02 Session 1 + ~$1.36 Session 2 including a $0.73 wasted-on-print-crash architecture call). The first published GitHub Release v1.0.0 is live; a downstream consumer can install the harvester binary without contacting the maintainer.",
   "files_changed": [
+    ".github/workflows/release.yml",
+    "docs/harvester/install.md",
+    "README.md",
+    "CLAUDE.md",
+    "AGENTS.md",
+    "GEMINI.md",
     "tools/publish/publish.ps1",
-    "docs/session-sets/harvester-cli-distribution/session-state.json",
+    "docs/session-sets/harvester-cli-distribution/spec.md",
     "docs/session-sets/harvester-cli-distribution/ai-assignment.md",
     "docs/session-sets/harvester-cli-distribution/activity-log.json",
+    "docs/session-sets/harvester-cli-distribution/session-state.json",
     "docs/session-sets/harvester-cli-distribution/session-events.jsonl",
+    "docs/session-sets/harvester-cli-distribution/change-log.md",
     "docs/session-sets/harvester-cli-distribution/disposition.json",
-    "docs/session-sets/harvester-cli-distribution/session-reviews/session-001.md"
+    "docs/session-sets/harvester-cli-distribution/next-session-set-recommendation.md",
+    "docs/session-sets/harvester-cli-distribution/session-reviews/session-001.md",
+    "docs/session-sets/harvester-cli-distribution/session-reviews/session-002.md",
+    "docs/session-sets/harvester-cli-distribution/issue-logs/session-002.json",
+    "docs/session-sets/ROADMAP.md"
   ],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 2's YAML-authoring + extensive technical documentation rewrite (install.md, README, three AI instruction files, cross-repo docs) align with Claude Opus's strengths and continue the trajectory set by Session 1's successful publish-script implementation. Effort bumps to high because Session 2 is closeout-grade and cuts the first real GitHub Release."
-    }
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_session_set": {
+    "slug": "harvester-sql-migration-generator",
+    "summary": "Author the explicitly-deferred Phase 4 of docs/planning/data-classification-plan.md: a SQL Server CREATE-TABLE/INSERT generator that converts the sanitize subcommand's CSV-per-table output into a runnable migration script. Tier-3 (Opus @ medium), Moderate cost band ($0.50-$2.00), ~3 sessions. Stop-rule flag: stop if classification.json v1.0 + sanitized CSV output prove insufficient to generate an FK-consistent SQL migration without additional schema metadata (e.g., collation, identity-seed, computed columns). See next-session-set-recommendation.md."
   },
   "blockers": []
 }

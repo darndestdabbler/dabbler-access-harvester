@@ -159,6 +159,40 @@
       "description": "dotnet build (0 errors, 331 pre-existing CA1416 warnings) + dotnet test (all suites passed after killing 6 hung MSACCESS COM zombies from prior session-set work). Re-ran AccessHarvester.Integration: 51/51 passed.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-05-29T05:34:04.874503-04:00",
+      "description": "End-of-session cross-provider verification",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7364,
+          "outputTokens": 9599,
+          "costUsd": 0.162395
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/next-set-analysis",
+      "dateTime": "2026-05-29T05:52:08.531941-04:00",
+      "description": "Routed analysis for next-session-set recommendation",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1364,
+          "outputTokens": 245,
+          "costUsd": 0.004155
+        }
+      ]
     }
   ]
 }

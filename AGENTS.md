@@ -22,6 +22,12 @@ There is **no UI surface** in this repo. End-of-session quality is
 guarded by automated build/test plus mandatory cross-provider AI
 verification — there is no human-UAT layer.
 
+The released binary ships on
+[GitHub Releases](https://github.com/darndestdabbler/dabbler-access-harvester/releases)
+(zip + `.sha256` per release, tagged `v<semver>`); see
+[`docs/harvester/install.md`](docs/harvester/install.md) for the
+consumer download + checksum-verify procedure.
+
 ## Required reading before every session
 
 - `README.md` — repo layout and build entry points (when present)

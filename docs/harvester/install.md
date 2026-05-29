@@ -186,7 +186,9 @@ AccessHarvester 1.0.0 (schema v1.0)
 
 A release artifact filename should encode both the harvester semver and
 the schema version it produces, e.g.,
-`AccessHarvester-1.0.0-schema-v1.0-win-x64.exe`. The CLI's `--version`
+`AccessHarvester-1.0.0-schema-v1.0-win-x64.zip` (the published release
+bundle; the extracted executable inside is simply `AccessHarvester.exe`).
+The CLI's `--version`
 output is the runtime authority — if the filename and the runtime
 output disagree, trust the runtime output and re-cut the release.
 

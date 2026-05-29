@@ -43,9 +43,11 @@
 
 ## Currently in-progress
 
-| Status | Slug | What it is |
-|---|---|---|
-| `[~]` | [`remaining-work-planner`](remaining-work-planner/spec.md) | The meta-planning set that produced this ROADMAP. Session 3 of 3 is the one authoring this document; on commit, this row flips to `[x]`. See [`gap-audit.md`](remaining-work-planner/gap-audit.md), [`remaining-work-tree.md`](remaining-work-planner/remaining-work-tree.md), and the soon-to-land [`change-log.md`](remaining-work-planner/change-log.md). |
+No session sets are currently in progress. Phase 4 closed
+[2026-05-29](harvester-cli-distribution/change-log.md); the next
+natural set is
+[`harvester-sql-migration-generator`](harvester-cli-distribution/next-session-set-recommendation.md)
+(not yet specced).
 
 ---
 
@@ -70,11 +72,27 @@ parse-success-report goldens F2 reconciles against.
 | Order | Status | Slug | Phase 4 criterion | Prereqs | Sessions |
 |---|---|---|---|---|---|
 | F1 | `[x]` | [`harvester-finish-canonical-parse-success-report`](harvester-finish-canonical-parse-success-report/change-log.md) | #1 Parser coverage finality | None new (uses existing parser + `UnresolvedItemAggregator`) | 2 |
-| F1.5 | `[ ]` | [`vba-attribute-header-strip`](vba-attribute-header-strip/spec.md) | #1 Parser coverage finality (tightens F1's signal — strips the canonical `Attribute VB_*` header before parsing, regenerates F1's goldens) | F1 (this set regenerates its goldens) | 1–2 |
-| F2 | `[ ]` | [`harvester-finish-canonical-golden-output`](harvester-finish-canonical-golden-output/spec.md) | #3 Sample-corpus validation **+ #5 Unresolved-record reporting (folded in)** | F1 + F1.5 (parse counts must agree with golden manifest counts, and post-strip counts are the gate-relevant ones) | 4 |
-| F3 | `[ ]` | [`harvester-finish-cli-e2e-test-audit`](harvester-finish-cli-e2e-test-audit/spec.md) | #4 CLI surface | F2 (determinism gate reuses F2's normalization layer) | 2 |
-| F4 | `[ ]` | [`harvester-finish-operations-and-interpretation-docs`](harvester-finish-operations-and-interpretation-docs/spec.md) | #6 Documentation (downstream-AI-consumer-facing portion) | F1 + F1.5 + F2 (docs reference ground-truth output and per-reason narratives) | 3 |
-| F5 | `[ ]` | [`harvester-finish-cli-packaging`](harvester-finish-cli-packaging/spec.md) | #7 Packaging | F3 (CLI is feature-stable with black-box coverage before cutting a release) | 2 |
+| F1.5 | `[x]` | [`vba-attribute-header-strip`](vba-attribute-header-strip/change-log.md) | #1 Parser coverage finality (tightens F1's signal — strips the canonical `Attribute VB_*` header before parsing, regenerates F1's goldens) | F1 (this set regenerates its goldens) | 1–2 |
+| F2 | `[x]` | [`harvester-finish-canonical-golden-output`](harvester-finish-canonical-golden-output/change-log.md) | #3 Sample-corpus validation **+ #5 Unresolved-record reporting (folded in)** | F1 + F1.5 (parse counts must agree with golden manifest counts, and post-strip counts are the gate-relevant ones) | 4 |
+| F3 | `[x]` | [`harvester-finish-cli-e2e-test-audit`](harvester-finish-cli-e2e-test-audit/change-log.md) | #4 CLI surface | F2 (determinism gate reuses F2's normalization layer) | 2 |
+| F4 | `[x]` | [`harvester-finish-operations-and-interpretation-docs`](harvester-finish-operations-and-interpretation-docs/change-log.md) | #6 Documentation (downstream-AI-consumer-facing portion) | F1 + F1.5 + F2 (docs reference ground-truth output and per-reason narratives) | 3 |
+| F5 | `[x]` | [`harvester-finish-cli-packaging`](harvester-finish-cli-packaging/change-log.md) | #7 Packaging | F3 (CLI is feature-stable with black-box coverage before cutting a release) | 2 |
+
+**Phase 4 closed 2026-05-29.** All six F-sets (F1–F5 plus the inserted
+F1.5) shipped. Two post-Phase-4 extensions followed:
+
+- [`harvester-data-classifier`](harvester-data-classifier/change-log.md)
+  added the `classify` + `sanitize` subcommands and the
+  `classification.json` v1.0 schema; Phase 4 of the
+  data-classification-plan (SQL Server migration generator) is
+  deferred to the recommended next set.
+- [`harvester-cli-distribution`](harvester-cli-distribution/change-log.md)
+  shipped the GitHub Actions release workflow, rewrote
+  [`install.md`](../harvester/install.md) for the GitHub Releases
+  channel, and cut + published the first real release
+  ([v1.0.0](https://github.com/darndestdabbler/dabbler-access-harvester/releases/tag/v1.0.0)).
+  A downstream consumer can now install the harvester binary without
+  contacting the maintainer.
 
 **Parallel-eligibility (advisory, not a schedule):**
 

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "session-2-r1-major-1",
+    "severity": "Major",
+    "title": "Required Session 2 closeout artifacts are not evidenced",
+    "description": "The spec explicitly requires session-reviews/session-002.md, change-log.md, disposition.json, next-session-set-recommendation.md, commit/push, mark_session_complete(), notify. The delivery summary shows the release URL and transcript, but does not show or mention those required closeout artifacts.",
+    "status": "fixed",
+    "resolution": "Sequencing observation. Verification (Step 6) precedes closeout (Step 8) per workflow; closeout artifacts (disposition.json, change-log.md, next-session-set-recommendation.md, session-reviews/session-002.md is this file) are authored immediately after verification completes. session-reviews/session-002.md now exists as this file. Remaining artifacts are authored in the same closeout commit."
+  },
+  {
+    "id": "session-2-r1-minor-1",
+    "severity": "Minor",
+    "title": "install.md still shows the release artifact as a versioned .exe",
+    "description": "In the Versioning convention section, the example said 'AccessHarvester-1.0.0-schema-v1.0-win-x64.exe', which contradicts the new documented release channel where the published artifact is the .zip bundle.",
+    "status": "fixed",
+    "resolution": "Edited docs/harvester/install.md Versioning convention section: changed example filename to AccessHarvester-1.0.0-schema-v1.0-win-x64.zip with a clarifying parenthetical that the extracted executable is simply AccessHarvester.exe."
+  },
+  {
+    "id": "session-2-r1-minor-2",
+    "severity": "Minor",
+    "title": "install.md misstates the --help output stream",
+    "description": "The verification section says AccessHarvester --help writes the full usage text to stderr, but the supplied consumer transcript pipes --help through head -1, which the verifier interpreted as evidence that the help text is on stdout.",
+    "status": "dismissed",
+    "resolution": "Verifier misread the transcript. Empirical test: AccessHarvester.exe --help 2>/dev/null | head -3 produces empty stdout; --help 2>&1 >/dev/null | head -3 produces the usage text. --help writes to stderr only; the doc is correct. In the consumer transcript, the visible 'AccessHarvester - extract Access DB metadata...' line in the | head -1 invocation came from stderr printing directly to the terminal (bypassing the pipe) while head -1 received an empty stdout. Adjudication recorded via record_adjudication(cause='orchestrator-error', resolution='accept-dismissal') \u2014 user confirmed dismissal."
+  }
+]
