@@ -78,7 +78,7 @@ public sealed class CliValidateTests
             string manifestJson = """
                 {
                   "SchemaType": "DatabaseManifest",
-                  "SchemaVersion": "1.0",
+                  "SchemaVersion": "1.1",
                   "HarvesterVersion": "1.0.0",
                   "Database": { "Name": "Test.accdb" }
                 }
@@ -109,7 +109,7 @@ public sealed class CliValidateTests
             string manifestJson = """
                 {
                   "SchemaType": "DatabaseManifest",
-                  "SchemaVersion": "1.0",
+                  "SchemaVersion": "1.1",
                   "HarvesterVersion": "1.0.0",
                   "Database": { "Name": "TestDb.accdb" }
                 }
@@ -120,6 +120,89 @@ public sealed class CliValidateTests
 
             Assert.Equal(0, result.ExitCode);
             Assert.Contains("Validation passed", result.StdErr);
+        }
+        finally
+        {
+            if (Directory.Exists(tmpDir))
+                Directory.Delete(tmpDir, recursive: true);
+        }
+    }
+
+    // ── per-document schema dispatch (backward-compat v1.0 + v1.1) ──────────────
+
+    // v1.1 additive bump's backward-compat policy: a manifest declaring
+    // SchemaVersion="1.0" must still validate against the current
+    // `validate` subcommand because the v1.0 schema is bundled
+    // alongside v1.1 and dispatch happens per-document.
+    [Fact]
+    public void Validate_V1_0_Manifest_DispatchesToV1_0_Schema_AndReturnsZero()
+    {
+        string tmpDir = Path.Combine(Path.GetTempPath(), $"ah-val-v10-{Guid.NewGuid():N}");
+        try
+        {
+            Directory.CreateDirectory(tmpDir);
+            string manifestJson = """
+                {
+                  "SchemaType": "DatabaseManifest",
+                  "SchemaVersion": "1.0",
+                  "HarvesterVersion": "1.0.0",
+                  "Database": { "Name": "Legacy.accdb" }
+                }
+                """;
+            File.WriteAllText(Path.Combine(tmpDir, "manifest.json"), manifestJson, System.Text.Encoding.UTF8);
+
+            var result = CliInvoker.Run("validate", "--in", tmpDir);
+
+            Assert.Equal(0, result.ExitCode);
+            Assert.Contains("Validation passed", result.StdErr);
+            // The "checked against schema vX" line should mention the
+            // dispatched version, not the CLI's current literal.
+            Assert.Contains("v1.0", result.StdErr);
+        }
+        finally
+        {
+            if (Directory.Exists(tmpDir))
+                Directory.Delete(tmpDir, recursive: true);
+        }
+    }
+
+    // Mixed-version input set: a v1.0 manifest and a v1.1 manifest in
+    // the same --in tree should both pass via per-document dispatch
+    // and the "checked against schema vX, vY" line should mention both.
+    [Fact]
+    public void Validate_Mixed_V1_0_And_V1_1_Manifests_BothDispatchedAndPass()
+    {
+        string tmpDir = Path.Combine(Path.GetTempPath(), $"ah-val-mixed-{Guid.NewGuid():N}");
+        try
+        {
+            string v10Dir = Path.Combine(tmpDir, "AccessMetaData", "LegacyDb.accdb");
+            string v11Dir = Path.Combine(tmpDir, "AccessMetaData", "CurrentDb.accdb");
+            Directory.CreateDirectory(v10Dir);
+            Directory.CreateDirectory(v11Dir);
+
+            File.WriteAllText(Path.Combine(v10Dir, "manifest.json"), """
+                {
+                  "SchemaType": "DatabaseManifest",
+                  "SchemaVersion": "1.0",
+                  "HarvesterVersion": "1.0.0",
+                  "Database": { "Name": "LegacyDb.accdb" }
+                }
+                """, System.Text.Encoding.UTF8);
+            File.WriteAllText(Path.Combine(v11Dir, "manifest.json"), """
+                {
+                  "SchemaType": "DatabaseManifest",
+                  "SchemaVersion": "1.1",
+                  "HarvesterVersion": "1.0.0",
+                  "Database": { "Name": "CurrentDb.accdb" }
+                }
+                """, System.Text.Encoding.UTF8);
+
+            var result = CliInvoker.Run("validate", "--in", tmpDir);
+
+            Assert.Equal(0, result.ExitCode);
+            Assert.Contains("Validation passed", result.StdErr);
+            Assert.Contains("v1.0", result.StdErr);
+            Assert.Contains("v1.1", result.StdErr);
         }
         finally
         {

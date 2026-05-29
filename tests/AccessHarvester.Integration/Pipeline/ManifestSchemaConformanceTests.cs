@@ -13,10 +13,10 @@ using CorePipeline = AccessHarvester.Core.Pipeline;
 namespace AccessHarvester.Integration.Pipeline;
 
 // Manifest-side schema-conformance gate. Closes Gap A from the prior
-// integration-testing-and-acceptance set: until Session 2 wired
-// Pipeline.Run() to emit a rolled-up DatabaseManifest, there was no
-// document for SchemaValidator to consume against
-// harvester-schema.v1.0.json. This class validates both the
+// integration-testing-and-acceptance set: until the integration set
+// wired Pipeline.Run() to emit a rolled-up DatabaseManifest, there
+// was no document for SchemaValidator to consume against
+// harvester-schema.v1.1.json. This class validates both the
 // aggregator-produced shape (hermetic) and the production-pipeline-
 // produced manifest.json on disk (SkippableFact integration check).
 //
@@ -91,48 +91,20 @@ public sealed class ManifestSchemaConformanceTests
     }
 
     /// <summary>
-    /// Full pipeline run against HomeHealthCare validates the complete manifest
-    /// (Modules + Forms + Reports + Queries) against the v1.0 schema.
-    /// Closes D14: the Queries array now holds QueryItem objects with
-    /// Sql.Parsed populated by the Jet SQL parser.
+    /// Full pipeline run against HomeHealthCare validates the complete
+    /// post-Session-1 manifest (Modules + Forms + Reports + Queries +
+    /// Tables + Relationships) against the v1.1 schema. Closes the
+    /// Session-1-handoff: Session 2 absorbed the three drift fixes
+    /// (ParserOutput.Items branch selection via ItemKind discriminator,
+    /// RelationshipDefinition Parent/Child rename, TableIndex
+    /// IsPrimary/IsUnique/IsRequired + Fields-as-objects) into the
+    /// additive v1.0 → v1.1 bump, and added the navigation index
+    /// (Documentation + FileMap) per Finding #2.
     /// </summary>
-    /// <remarks>
-    /// Currently <see cref="Skip.If(bool, string)"/>'d pending the Session 2
-    /// schema-corrective bump in
-    /// <c>docs/session-sets/harvester-manifest-index-and-batch-readiness</c>.
-    /// The Session 1 wiring fix (populating Tables / Relationships /
-    /// Modules in the manifest) exposed three pre-existing
-    /// schema-vs-typed-record drifts that were latent while those arrays
-    /// stayed empty:
-    /// <list type="bullet">
-    ///   <item><c>$defs/ParserOutput.Items</c> currently requires
-    ///   <c>QueryType</c> / <c>Sql</c> — a Query shape rather than the
-    ///   VBA-procedure shape <c>ParserOutputProjector</c> produces (~1099
-    ///   of 1174 errors).</item>
-    ///   <item><c>$defs/RelationshipDefinition</c> requires
-    ///   <c>Table</c> / <c>ForeignTable</c> while
-    ///   <see cref="AccessHarvester.Access.RelationshipMetadata"/> emits
-    ///   <c>ParentTable</c> / <c>ChildTable</c> (~12 errors).</item>
-    ///   <item><c>$defs/TableIndex.Fields</c> expects strings while
-    ///   <see cref="AccessHarvester.Access.TableIndex"/> emits objects
-    ///   (~29 errors).</item>
-    /// </list>
-    /// These are schema-side corrections rather than behavioural
-    /// changes; Session 2 absorbs them into the additive v1.0 → v1.1
-    /// bump it already plans. See <c>disposition.json</c>'s
-    /// <c>blockers[]</c> for the handoff record.
-    /// </remarks>
     [SkippableFact]
     [SupportedOSPlatform("windows")]
     public void HomeHealthCare_FullRun_ManifestValidatesAgainstSchema()
     {
-        Skip.If(true,
-            "Deferred to harvester-manifest-index-and-batch-readiness " +
-            "Session 2 schema-corrective bump. The Session 1 populate fix " +
-            "exposed three pre-existing schema-vs-typed-record drifts " +
-            "(ParserOutput.Items shape, RelationshipDefinition naming, " +
-            "TableIndex.Fields type). See disposition.json blockers[].");
-
         AccessAvailability.SkipIfNoAccess();
 
         string db = Path.Combine(RepoPaths.Samples(), "HomeHealthCare.accdb");
@@ -153,6 +125,68 @@ public sealed class ManifestSchemaConformanceTests
                 result.IsValid,
                 $"HomeHealthCare full-run manifest {manifestPath} failed schema validation:\n  - " +
                 string.Join("\n  - ", result.Errors));
+        }
+        finally
+        {
+            if (Directory.Exists(outRoot))
+                Directory.Delete(outRoot, recursive: true);
+        }
+    }
+
+    // v1.1 (Session 2 backward-compat): a v1.0-shaped document (no
+    // Documentation, no FileMap, all per-category arrays empty) must
+    // continue to validate against v1.1, modulo the SchemaVersion
+    // const bump. examples/northwind-output.json is the smoke fixture
+    // the CLI's `validate` subcommand exercises; if it stops
+    // validating, the additive-policy guarantee is broken.
+    [Fact]
+    public void V1_0_Shaped_SmokeFixture_ValidatesAgainstSchema()
+    {
+        string fixturePath = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        Assert.True(File.Exists(fixturePath),
+            $"Smoke fixture missing: {fixturePath}");
+
+        string json = File.ReadAllText(fixturePath);
+        var result = ValidatorAgainstHarvesterSchema().Validate(json);
+
+        Assert.True(
+            result.IsValid,
+            "examples/northwind-output.json (v1.0-shape, no Documentation/FileMap) "
+                + "must validate against v1.1:\n  - "
+                + string.Join("\n  - ", result.Errors));
+    }
+
+    // v1.1 (Session 2 — Finding #2): Pipeline.Run() must emit a
+    // READ-ME-FIRST.md alongside manifest.json so a binary-only
+    // consumer who opens the output folder cold finds the entry
+    // point. Content is static — same bytes across runs — so the
+    // determinism gate stays green. This test only runs when Access
+    // is present (it drives the real pipeline rather than building a
+    // synthetic shape).
+    [SkippableFact]
+    [SupportedOSPlatform("windows")]
+    public void PipelineRun_EmitsReadMeFirstAlongsideManifest()
+    {
+        AccessAvailability.SkipIfNoAccess();
+
+        string db = Path.Combine(RepoPaths.Samples(), "HomeHealthCare.accdb");
+        Skip.IfNot(File.Exists(db), $"Sample DB not present at {db}.");
+
+        string outRoot = Path.Combine(Path.GetTempPath(), $"ah-int-readme-{Guid.NewGuid():N}");
+        try
+        {
+            var pipeline = CorePipeline.Default().WithCategories(new[] { "Forms" });
+            var runResult = pipeline.Run(db, outRoot);
+
+            string manifestPath = Path.Combine(runResult.BaseDir, "manifest.json");
+            string readMePath = Path.Combine(runResult.BaseDir, "READ-ME-FIRST.md");
+            Assert.True(File.Exists(manifestPath), $"Manifest not produced at {manifestPath}.");
+            Assert.True(File.Exists(readMePath), $"READ-ME-FIRST.md not produced at {readMePath}.");
+
+            string content = File.ReadAllText(readMePath);
+            Assert.Contains("manifest.json", content);
+            Assert.Contains("harvester-schema", content);
+            Assert.Contains("interpretation-guide", content);
         }
         finally
         {

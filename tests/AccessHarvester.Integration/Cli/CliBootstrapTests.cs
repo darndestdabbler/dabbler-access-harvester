@@ -37,7 +37,7 @@ public sealed class CliBootstrapTests
         var result = CliInvoker.Run(flag);
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("AccessHarvester", result.StdOut);
-        Assert.Contains("schema v1.0", result.StdOut);
+        Assert.Contains("schema v1.1", result.StdOut);
     }
 
     [Fact]

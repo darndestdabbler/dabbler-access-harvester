@@ -1,0 +1,1241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.gov/harvester-schema.v1.1.json",
+  "title": "Access Migration Harvester Output v1.1",
+  "description": "Stable schema for the full harvester pipeline output. v1.1 is additive over v1.0: adds the DatabaseManifest.Documentation pointer + DatabaseManifest.FileMap navigation index (Session 2 of harvester-manifest-index-and-batch-readiness, Finding #2), aligns RelationshipDefinition with the typed-record ParentTable/ChildTable shape, aligns TableIndex with IsPrimary/IsUnique/IsRequired + Fields-as-objects, and adds a Body $def + ItemKind-driven branch selection to HarvestedItem so cascaded validation terminates. Old v1.0 documents stay valid against v1.1 — the new fields are optional, and the drift renames mirror the shapes the typed records have shipped all along.",
+  "$ref": "#/$defs/DatabaseManifest",
+  "$defs": {
+
+    "DatabaseManifest": {
+      "type": "object",
+      "description": "Root document for a full database export. Wraps all harvested metadata and enrichment output for one Access database.",
+      "required": ["SchemaType", "SchemaVersion", "HarvesterVersion", "Database"],
+      "properties": {
+        "SchemaType": { "const": "DatabaseManifest" },
+        "SchemaVersion": { "const": "1.1", "description": "Schema version this document conforms to. Exactly '1.1' for this schema file." },
+        "HarvesterVersion": { "type": "string", "description": "Version of the harvester tool that produced this document." },
+        "Database": { "$ref": "#/$defs/DatabaseInfo" },
+        "Documentation": { "$ref": "#/$defs/DocumentationPointer", "description": "v1.1 additive: pointer to the interpretation guide + the schema version this document conforms to. Optional so v1.0 documents remain valid against v1.1." },
+        "FileMap": { "$ref": "#/$defs/FileMap", "description": "v1.1 additive: per-category navigation index (count + glob) into the on-disk ir/ tier — lets a binary-only consumer find every per-object file without prior knowledge of the layout. Optional so v1.0 documents remain valid against v1.1." },
+        "Summary": { "$ref": "#/$defs/DatabaseSummary" },
+        "Forms": { "type": "array", "items": { "$ref": "#/$defs/FormExport" }, "description": "Form-level enrichment output. One entry per harvested form." },
+        "Reports": { "type": "array", "items": { "$ref": "#/$defs/FormExport" }, "description": "Report-level enrichment output. Same shape as forms." },
+        "Queries": { "type": "array", "items": { "$ref": "#/$defs/QueryItem" }, "description": "Query-level enrichment output (D14). One entry per saved query; each includes Sql.Parsed and Sql.Parameters from the Jet SQL parser." },
+        "Modules": { "type": "array", "items": { "$ref": "#/$defs/ModuleExport" }, "description": "VBA module-level output. One entry per standard or class module." },
+        "Tables": { "type": "array", "items": { "$ref": "#/$defs/TableSchema" }, "description": "Table schema metadata. One entry per table." },
+        "Relationships": { "type": "array", "items": { "$ref": "#/$defs/RelationshipDefinition" }, "description": "Table-level relationships from Access's DAO Relation objects." },
+        "ValidationRules": { "type": "array", "items": { "$ref": "#/$defs/ValidationRule" }, "description": "Aggregated validation rules from all tables and forms." },
+        "RowSourceSpecs": { "type": "array", "items": { "$ref": "#/$defs/RowSourceSpec" }, "description": "Row-source specifications for all combo and list controls." },
+        "FunctionClassifications": { "type": "array", "items": { "$ref": "#/$defs/FunctionClassification" }, "description": "Translation-strategy classifications for all VBA procedures." },
+        "EventHandlerClassifications": { "type": "array", "items": { "$ref": "#/$defs/EventHandlerClassification" }, "description": "Event-handler classifications for all form and report event procedures." },
+        "NavigationGraph": { "anyOf": [{ "$ref": "#/$defs/NavigationGraph" }, { "type": "null" }], "description": "Application-wide navigation graph. Null when navigation data was not available." },
+        "UnresolvedItems": { "type": "array", "items": { "$ref": "#/$defs/UnresolvedItem" }, "description": "Aggregated manual-review queue across all phases." },
+        "Diagnostics": { "type": "array", "items": { "$ref": "#/$defs/HarvesterDiagnostic" }, "description": "Non-blocking harvester-level warnings and informational messages." }
+      }
+    },
+
+    "DatabaseInfo": {
+      "type": "object",
+      "required": ["Name"],
+      "properties": {
+        "Name": { "type": "string", "description": "Database file name without path (e.g., NorthwindDevEdition.accdb)." },
+        "FilePath": { "type": "string", "description": "Absolute path to the .accdb / .mdb file as harvested." },
+        "ExportedAt": { "type": "string", "description": "ISO 8601 timestamp of the harvest run." }
+      }
+    },
+
+    "DocumentationPointer": {
+      "type": "object",
+      "description": "v1.1 additive. Public pointer to the interpretation guide so a binary-only consumer (no access to the harvester repo) can find documentation for the schema this document conforms to.",
+      "required": ["Url", "SchemaVersion"],
+      "properties": {
+        "Url": { "type": "string", "format": "uri", "description": "Public URL of the interpretation guide." },
+        "SchemaVersion": { "type": "string", "description": "The schema version this document conforms to (mirrors the root SchemaVersion const; redundant on purpose so the pointer is self-contained)." }
+      }
+    },
+
+    "FileMap": {
+      "type": "object",
+      "description": "v1.1 additive. Per-category navigation index. For each manifest category, surfaces the count of per-object IR files and the relative glob to find them. The glob is relative to the directory containing manifest.json. Modules are surfaced at manifest.Modules but live on disk under ir/ModulesAndClasses/ — the glob reflects the on-disk path.",
+      "required": ["Forms", "Reports", "Queries", "Modules", "Tables", "Relationships"],
+      "properties": {
+        "Forms":         { "$ref": "#/$defs/FileMapEntry" },
+        "Reports":       { "$ref": "#/$defs/FileMapEntry" },
+        "Queries":       { "$ref": "#/$defs/FileMapEntry" },
+        "Modules":       { "$ref": "#/$defs/FileMapEntry" },
+        "Tables":        { "$ref": "#/$defs/FileMapEntry" },
+        "Relationships": { "$ref": "#/$defs/FileMapEntry" }
+      }
+    },
+
+    "FileMapEntry": {
+      "type": "object",
+      "required": ["Count", "Glob"],
+      "properties": {
+        "Count": { "type": "integer", "minimum": 0, "description": "Number of per-object IR files on disk for this category." },
+        "Glob":  { "type": "string", "description": "Relative glob (relative to the directory containing manifest.json) to locate the per-object IR files." }
+      }
+    },
+
+    "DatabaseSummary": {
+      "type": "object",
+      "properties": {
+        "FormCount": { "type": "integer" },
+        "ReportCount": { "type": "integer" },
+        "QueryCount": { "type": "integer" },
+        "ModuleCount": { "type": "integer" },
+        "TableCount": { "type": "integer" },
+        "UnresolvedItemCount": { "type": "integer" }
+      }
+    },
+
+    "FormExport": {
+      "type": "object",
+      "description": "Combined form/report enrichment export: the form spec plus its per-procedure parser output.",
+      "required": ["Spec"],
+      "properties": {
+        "Spec": { "$ref": "#/$defs/FormComponentSpec" },
+        "ParserOutput": { "anyOf": [{ "$ref": "#/$defs/ParserOutput" }, { "type": "null" }], "description": "Parser output for the form/report's VBA class module. Null when the form has no code-behind." }
+      }
+    },
+
+    "ModuleExport": {
+      "type": "object",
+      "description": "VBA standard or class module: its parser output plus function classifications.",
+      "required": ["ModuleName", "ModuleKind"],
+      "properties": {
+        "ModuleName": { "type": "string" },
+        "ModuleKind": { "enum": ["Standard", "ClassModule"] },
+        "ParserOutput": { "anyOf": [{ "$ref": "#/$defs/ParserOutput" }, { "type": "null" }] }
+      }
+    },
+
+    "TableSchema": {
+      "type": "object",
+      "required": ["Name"],
+      "properties": {
+        "Name": { "type": "string" },
+        "Type": { "type": "string" },
+        "Attributes": { "type": "integer", "description": "DAO Attributes constant." },
+        "DateCreated": { "type": "string" },
+        "LastUpdated": { "type": "string" },
+        "RecordCount": { "type": "integer" },
+        "Fields": { "type": "array", "items": { "$ref": "#/$defs/TableField" } },
+        "Indexes": { "type": "array", "items": { "$ref": "#/$defs/TableIndex" } }
+      }
+    },
+
+    "TableField": {
+      "type": "object",
+      "required": ["Name"],
+      "properties": {
+        "Name": { "type": "string" },
+        "TypeCode": { "type": "integer", "description": "DAO DataTypeEnum constant." },
+        "TypeName": { "type": "string" },
+        "Size": { "type": "integer" },
+        "Required": { "type": "boolean" },
+        "AllowZeroLength": { "type": "boolean" },
+        "DefaultValue": { "type": "string" },
+        "ValidationRule": { "type": "string" },
+        "ValidationText": { "type": "string" },
+        "Description": { "type": "string" }
+      }
+    },
+
+    "TableIndex": {
+      "type": "object",
+      "description": "v1.1 corrective: renamed Primary/Unique/Foreign to IsPrimary/IsUnique/IsRequired matching the long-shipping TableIndex typed record; Fields items are now objects (IndexField) rather than bare strings to carry per-column IsDescending + Attributes.",
+      "required": ["Name"],
+      "properties": {
+        "Name": { "type": "string" },
+        "IsPrimary":  { "type": "boolean" },
+        "IsUnique":   { "type": "boolean" },
+        "IsRequired": { "type": "boolean" },
+        "Fields": { "type": "array", "items": { "$ref": "#/$defs/IndexField" } }
+      }
+    },
+
+    "IndexField": {
+      "type": "object",
+      "description": "v1.1 corrective: one column reference inside a TableIndex; matches the AccessHarvester.Access.IndexField typed record.",
+      "required": ["Name"],
+      "properties": {
+        "Name":         { "type": "string", "description": "Column name; matches a TableField.Name on the parent table." },
+        "IsDescending": { "type": "boolean", "description": "True when this column is sorted descending in the index (decoded from DAO dbDescending, 0x1)." },
+        "Attributes":   { "type": "integer", "description": "Raw per-index-column Attributes bitmask, preserved so consumers can decode bits this schema does not promote." }
+      }
+    },
+
+    "RelationshipDefinition": {
+      "type": "object",
+      "description": "v1.1 corrective: required keys are now Name + ParentTable + ChildTable matching the long-shipping RelationshipMetadata typed record. The per-field pair inside Fields is also renamed (Name/ForeignName -> ParentField/ChildField). v1.1 additive properties (IsEnforced/CascadeUpdate/CascadeDelete/IsInherited/IsUnique/JoinType) surface the derived flags the typed record already emits, so consumers can read them without re-decoding the raw Attributes bitmask.",
+      "required": ["Name", "ParentTable", "ChildTable"],
+      "properties": {
+        "Name": { "type": "string" },
+        "ParentTable": { "type": "string", "description": "The parent (primary-key-side) table name." },
+        "ChildTable":  { "type": "string", "description": "The child (foreign-key-side) table name." },
+        "Fields": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/RelationshipFieldPair" }
+        },
+        "IsEnforced":    { "type": "boolean" },
+        "CascadeUpdate": { "type": "boolean" },
+        "CascadeDelete": { "type": "boolean" },
+        "IsInherited":   { "type": "boolean" },
+        "IsUnique":      { "type": "boolean" },
+        "JoinType":      { "type": "string", "description": "One of Inner / LeftOuter / RightOuter (decoded from DAO Attributes bitmask)." },
+        "Attributes":    { "type": "integer", "description": "Raw DAO Attributes bitmask, preserved verbatim." }
+      }
+    },
+
+    "RelationshipFieldPair": {
+      "type": "object",
+      "description": "v1.1 corrective: one pair of joined columns in a RelationshipDefinition. Matches the AccessHarvester.Access.RelationshipFieldPair typed record.",
+      "required": ["ParentField", "ChildField"],
+      "properties": {
+        "ParentField": { "type": "string", "description": "Column name on the parent (primary-key-side) table." },
+        "ChildField":  { "type": "string", "description": "Column name on the child (foreign-key-side) table that references the parent column." }
+      }
+    },
+
+    "HarvesterDiagnostic": {
+      "type": "object",
+      "required": ["Severity", "Message"],
+      "properties": {
+        "Severity": { "enum": ["Info", "Warning", "Error"] },
+        "Message": { "type": "string" },
+        "Code": { "type": "string" }
+      }
+    },
+
+    "ParserOutput": {
+      "type": "object",
+      "description": "VBA parser output for one module invocation. Replaces the v0 root envelope; renamed to PascalCase (v0→v1 D21).",
+      "required": ["SchemaVersion", "Source", "Items"],
+      "properties": {
+        "SchemaVersion": { "type": "string", "pattern": "^\\d+\\.\\d+(\\.\\d+)?$" },
+        "Source": { "$ref": "#/$defs/ParserSource" },
+        "Items": { "type": "array", "items": { "$ref": "#/$defs/HarvestedItem" } },
+        "UnresolvedItems": { "type": "array", "items": { "$ref": "#/$defs/ParserUnresolvedItem" } },
+        "Diagnostics": { "type": "array", "items": { "$ref": "#/$defs/ParserDiagnostic" } }
+      }
+    },
+
+    "ParserSource": {
+      "type": "object",
+      "required": ["Kind", "Location"],
+      "properties": {
+        "Kind": { "enum": ["Procedure", "Query", "Expression", "Form", "Report", "Database"] },
+        "Location": { "$ref": "#/$defs/SourceLocation" },
+        "HostContext": {
+          "type": "object",
+          "properties": {
+            "HostKind": { "enum": ["Form", "Report", "Class", "Standard"] },
+            "HostName": { "type": "string" },
+            "ControlsAvailable": { "type": "array", "items": { "$ref": "#/$defs/ControlMetadata" } }
+          }
+        },
+        "OriginalSource": { "type": "string" }
+      }
+    },
+
+    "SourceLocation": {
+      "type": "object",
+      "required": ["StartLine", "StartColumn"],
+      "properties": {
+        "File": { "type": "string" },
+        "Module": { "type": "string" },
+        "StartLine": { "type": "integer", "minimum": 1 },
+        "StartColumn": { "type": "integer", "minimum": 1 },
+        "EndLine": { "type": "integer", "minimum": 1 },
+        "EndColumn": { "type": "integer", "minimum": 1 }
+      }
+    },
+
+    "ControlMetadata": {
+      "type": "object",
+      "required": ["Name", "ControlType"],
+      "properties": {
+        "Name": { "type": "string" },
+        "ControlType": {
+          "enum": ["TextBox", "ComboBox", "ListBox", "CheckBox", "OptionButton", "OptionGroup",
+                   "Label", "CommandButton", "Subform", "Subreport", "TabControl", "Page",
+                   "Image", "BoundObjectFrame", "UnboundObjectFrame", "Line", "Rectangle",
+                   "Hyperlink", "AttachmentControl", "NavigationControl", "WebBrowser"]
+        },
+        "BoundField": { "type": "string" },
+        "ControlSource": { "type": "string" },
+        "RowSource": { "type": "string" },
+        "RowSourceType": { "enum": ["Table/Query", "Value List", "Field List"] },
+        "BoundColumn": { "type": "integer" },
+        "ColumnCount": { "type": "integer" }
+      }
+    },
+
+    "HarvestedItem": {
+      "type": "object",
+      "description": "v1.1 corrective: discriminator-driven branch selection via ItemKind. The v1.0 oneOf evaluated every branch and (with OutputFormat.List) surfaced per-branch failures even when one branch matched, inflating the validator's error count. The allOf+if/then form below short-circuits to the matching branch, so a Procedure item is validated only against ProcedureItem, etc. Required ItemKind discriminator ensures one branch always selects.",
+      "required": ["ItemKind"],
+      "properties": {
+        "ItemKind": { "enum": ["Procedure", "Query", "Expression"] }
+      },
+      "allOf": [
+        {
+          "if":   { "properties": { "ItemKind": { "const": "Procedure" } } },
+          "then": { "$ref": "#/$defs/ProcedureItem" }
+        },
+        {
+          "if":   { "properties": { "ItemKind": { "const": "Query" } } },
+          "then": { "$ref": "#/$defs/QueryItem" }
+        },
+        {
+          "if":   { "properties": { "ItemKind": { "const": "Expression" } } },
+          "then": { "$ref": "#/$defs/ExpressionItem" }
+        }
+      ]
+    },
+
+    "ProcedureItem": {
+      "type": "object",
+      "required": ["ItemKind", "Name", "ProcedureKind", "Signature", "Body"],
+      "properties": {
+        "ItemKind": { "const": "Procedure" },
+        "Name": { "type": "string" },
+        "ProcedureKind": {
+          "enum": ["Sub", "Function", "PropertyGet", "PropertyLet", "PropertySet",
+                   "EventHandler", "DeclareFunction", "DeclareSub"],
+          "description": "D3: DeclareFunction and DeclareSub added (v0→v1 gap v0-G5)."
+        },
+        "Visibility": {
+          "enum": ["Public", "Private", "Friend"],
+          "description": "D4: renamed from 'visibility' to 'Visibility' (PascalCase, v0→v1 D4)."
+        },
+        "IsStatic": { "type": "boolean" },
+        "StartLine": { "type": "integer", "minimum": 1, "description": "D8: flat StartLine shorthand added at procedure level." },
+        "Lib": { "type": "string", "description": "D9: Declare statement Lib argument." },
+        "Alias": { "type": "string", "description": "D9: Declare statement Alias argument." },
+        "EventBinding": {
+          "type": "object",
+          "properties": {
+            "ControlName": { "type": "string" },
+            "EventName": { "type": "string" },
+            "ResolvedControl": { "$ref": "#/$defs/ResolvedReference" }
+          }
+        },
+        "Signature": {
+          "type": "object",
+          "properties": {
+            "Parameters": { "type": "array", "items": { "$ref": "#/$defs/Parameter" } },
+            "ReturnType": { "type": "string" }
+          }
+        },
+        "Classification": {
+          "type": "object",
+          "properties": {
+            "PurposeTags": {
+              "type": "array",
+              "items": {
+                "enum": ["Validation", "CascadingUpdate", "FilterSearch", "Navigation",
+                         "SideEffect", "Calculation", "FormattingDisplay", "DataAccess",
+                         "ExternalIO", "Mixed", "DeadCode", "Utility"]
+              }
+            },
+            "Purity": { "enum": ["Pure", "DataAccess", "UIBound", "ExternalIO", "LateBound", "Mixed", "Unknown"], "description": "v1.1 corrective: added 'LateBound' to match the AccessHarvester.Pipeline.Enrichment.ClassificationCategory enum that ParserOutputProjector emits via PrimaryCategory.ToString(). v1.0 schema omitted it, so any procedure with a LateBound classification failed validation." },
+            "Complexity": { "type": "integer" },
+            "LinesOfCode": { "type": "integer" },
+            "Translatability": { "enum": ["Mechanical", "Structured", "Ambiguous", "ManualReview"] }
+          }
+        },
+        "Body": {
+          "type": "object",
+          "properties": {
+            "Statements": { "type": "array", "items": { "$ref": "#/$defs/Statement" } },
+            "References": { "type": "array", "items": { "$ref": "#/$defs/ResolvedReference" } },
+            "Calls": { "type": "array", "items": { "$ref": "#/$defs/CallSite" } },
+            "SqlStrings": { "type": "array", "items": { "$ref": "#/$defs/SqlReference" } }
+          }
+        }
+      }
+    },
+
+    "Parameter": {
+      "type": "object",
+      "required": ["Name"],
+      "properties": {
+        "Name": { "type": "string" },
+        "Type": { "type": "string" },
+        "PassingMechanism": {
+          "enum": ["ByRef", "ByVal", "ByRefDefault"],
+          "description": "D10: replaces the v0 'byRef: boolean'. ByRefDefault = ByRef with no keyword written."
+        },
+        "Optional": { "type": "boolean" },
+        "ParamArray": { "type": "boolean" },
+        "IsArray": { "type": "boolean", "description": "True for array-typed parameters (e.g., myArr() As String). Distinct from ParamArray. Added in v0 patch (v0-G1); retained at v1." },
+        "DefaultValue": { "type": "string" },
+        "DerivedFrom": { "type": "string" }
+      }
+    },
+
+    "Statement": {
+      "type": "object",
+      "required": ["Kind", "Location"],
+      "properties": {
+        "Kind": {
+          "enum": ["Assignment", "Set", "Call", "If", "Select", "For", "ForEach", "DoLoop", "While",
+                   "With", "Exit", "Return", "ErrorHandler", "RaiseError", "Declaration", "Comment",
+                   "Directive", "PreprocessorStatement", "Labelled", "GoSub", "GoTo", "Stop", "End", "Raw"]
+        },
+        "Location": { "$ref": "#/$defs/SourceLocation" },
+        "Summary": { "type": "string" },
+        "Details": { "type": "object" }
+      }
+    },
+
+    "ResolvedReference": {
+      "type": "object",
+      "required": ["OriginalText", "Location", "ResolutionStatus"],
+      "properties": {
+        "OriginalText": { "type": "string" },
+        "Location": { "$ref": "#/$defs/SourceLocation" },
+        "ResolutionStatus": { "enum": ["Resolved", "PartiallyResolved", "Unresolved", "Ambiguous"] },
+        "ReferenceKind": {
+          "enum": ["Control", "Form", "Report", "Field", "Table", "Query",
+                   "Procedure", "Function", "Variable", "Parameter", "Constant",
+                   "Enum", "Type", "Module", "BuiltIn", "DomainFunction",
+                   "ObjectModel", "External", "Implicit"]
+        },
+        "ResolvedTarget": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "Kind": { "type": "string" },
+                "Name": { "type": "string" },
+                "Container": { "type": "string" },
+                "FullyQualifiedName": { "type": "string" },
+                "Type": { "type": "string" }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "ImplicitContext": {
+          "type": "object",
+          "properties": {
+            "ImplicitOf": { "type": "string" },
+            "ViaWithBlock": { "type": "boolean" },
+            "ViaDefaultMember": { "type": "boolean" }
+          }
+        },
+        "Confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+        "Notes": { "type": "string" }
+      }
+    },
+
+    "CallSite": {
+      "type": "object",
+      "required": ["CalleeText", "Location"],
+      "properties": {
+        "CalleeText": { "type": "string" },
+        "Location": { "$ref": "#/$defs/SourceLocation" },
+        "ResolvedCallee": { "$ref": "#/$defs/ResolvedReference" },
+        "Arguments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "OriginalText": { "type": "string" },
+              "Named": { "type": "string" },
+              "Parsed": { "$ref": "#/$defs/ExpressionAst" }
+            }
+          }
+        }
+      }
+    },
+
+    "SqlReference": {
+      "type": "object",
+      "required": ["OriginalText", "Location", "ConstructionMode"],
+      "properties": {
+        "OriginalText": { "type": "string" },
+        "Location": { "$ref": "#/$defs/SourceLocation" },
+        "ConstructionMode": { "enum": ["Literal", "Concatenated", "Dynamic", "FromQueryDef", "External"] },
+        "Parsed": { "$ref": "#/$defs/ParsedSql" },
+        "TemplateCandidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "Template": { "type": "string" },
+              "ParameterBindings": { "type": "array", "items": { "$ref": "#/$defs/ParserQueryParameter" } },
+              "Confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+            }
+          }
+        }
+      }
+    },
+
+    "ParsedSql": {
+      "type": "object",
+      "properties": {
+        "QueryType": { "type": "string" },
+        "Select": { "type": "array", "items": { "type": "object" } },
+        "From": { "type": "array", "items": { "type": "object" } },
+        "Joins": { "type": "array", "items": { "type": "object" } },
+        "Where": { "type": "object" },
+        "GroupBy": { "type": "array", "items": { "type": "object" } },
+        "Having": { "type": "object" },
+        "OrderBy": { "type": "array", "items": { "type": "object" } },
+        "TransformPivot": { "type": "object" },
+        "Raw": { "type": "string" }
+      }
+    },
+
+    "ParserQueryParameter": {
+      "type": "object",
+      "required": ["Name", "Source"],
+      "properties": {
+        "Name": { "type": "string" },
+        "Type": { "type": "string" },
+        "Source": { "enum": ["FormControl", "UserPrompt", "NamedParameter", "VbaExpression", "ConcatenatedVariable"] },
+        "ResolvedReference": { "$ref": "#/$defs/ResolvedReference" }
+      }
+    },
+
+    "ExpressionAst": {
+      "type": "object",
+      "required": ["Kind"],
+      "properties": {
+        "Kind": {
+          "enum": ["Literal", "Identifier", "MemberAccess", "IndexAccess", "BangAccess",
+                   "Call", "BinaryOp", "UnaryOp", "Parens", "TernaryFn", "NewExpr", "TypeOf",
+                   "Between", "In", "IsNull", "Or", "And", "Not", "ImplicitField", "Subquery"]
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "QueryItem": {
+      "type": "object",
+      "required": ["ItemKind", "Name", "QueryType", "Sql"],
+      "properties": {
+        "ItemKind": { "const": "Query" },
+        "Name": { "type": "string" },
+        "QueryType": { "enum": ["Select", "MakeTable", "Update", "Delete", "Insert", "Crosstab", "Union", "DataDefinition", "PassThrough"] },
+        "QueryTypeCode": { "type": "integer", "description": "D13: DAO QueryTypeCode numeric constant." },
+        "Connect": { "type": "string", "description": "D13: DAO Connect string (for pass-through queries)." },
+        "ReturnsRecords": { "type": "boolean", "description": "D13: DAO ReturnsRecords flag." },
+        "OdbcTimeout": { "type": "integer", "description": "D13: DAO OdbcTimeout seconds." },
+        "Sql": {
+          "type": "object",
+          "properties": {
+            "OriginalText": { "type": "string" },
+            "Parsed": { "$ref": "#/$defs/ParsedSql" },
+            "Parameters": { "type": "array", "items": { "$ref": "#/$defs/ParserQueryParameter" } }
+          }
+        },
+        "Abstraction": {
+          "type": "object",
+          "properties": {
+            "SuggestedMethodName": { "type": "string" },
+            "SuggestedParameters": { "type": "array", "items": { "$ref": "#/$defs/Parameter" } },
+            "ReturnShape": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "Name": { "type": "string" },
+                  "Type": { "type": "string" },
+                  "Nullable": { "type": "boolean" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "ExpressionItem": {
+      "type": "object",
+      "required": ["ItemKind", "Expression"],
+      "properties": {
+        "ItemKind": { "const": "Expression" },
+        "Context": { "enum": ["ControlSource", "ValidationRule", "DefaultValue", "RowSource", "QueryColumn", "CalculatedField", "ConditionalFormat"] },
+        "Expression": {
+          "type": "object",
+          "properties": {
+            "OriginalText": { "type": "string" },
+            "Parsed": { "$ref": "#/$defs/ExpressionAst" },
+            "References": { "type": "array", "items": { "$ref": "#/$defs/ResolvedReference" } },
+            "InferredType": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "ParserUnresolvedItem": {
+      "type": "object",
+      "required": ["Reason", "Location"],
+      "properties": {
+        "Reason": { "enum": ["UnresolvedReference", "DynamicSqlTooComplex", "AmbiguousResolution", "UnsupportedConstruct", "ParseFailure", "MissingMetadata", "CircularReference"] },
+        "Location": { "$ref": "#/$defs/SourceLocation" },
+        "OriginalText": { "type": "string" },
+        "Context": { "type": "string" },
+        "SuggestedNextStep": { "type": "string" }
+      }
+    },
+
+    "ParserDiagnostic": {
+      "type": "object",
+      "required": ["Severity", "Message"],
+      "properties": {
+        "Severity": { "enum": ["Info", "Warning", "Error"] },
+        "Message": { "type": "string" },
+        "Location": { "$ref": "#/$defs/SourceLocation" },
+        "Code": { "type": "string" }
+      }
+    },
+
+    "LabelInfo": {
+      "type": "object",
+      "required": ["Source"],
+      "properties": {
+        "Source": { "enum": ["Attached", "Proximity", "FromName", "FromBinding", "Unresolved"] },
+        "Text": { "type": "string" }
+      }
+    },
+
+    "GeometryInches": {
+      "type": "object",
+      "properties": {
+        "X": { "type": "number" },
+        "Y": { "type": "number" },
+        "W": { "type": "number" },
+        "H": { "type": "number" }
+      }
+    },
+
+    "FormComponentSpec": {
+      "type": "object",
+      "required": ["SourceFormName"],
+      "properties": {
+        "SourceFormName": { "type": "string" },
+        "ModuleName": { "type": "string" },
+        "SuggestedComponentName": { "type": "string" },
+        "DataSource": { "$ref": "#/$defs/FormDataSourceBinding" },
+        "DefaultView": { "type": "string" },
+        "GeometryIn": { "$ref": "#/$defs/GeometryInches" },
+        "Sections": { "type": "array", "items": { "$ref": "#/$defs/FormSectionDescriptor" } },
+        "Controls": { "type": "array", "items": { "$ref": "#/$defs/FormControlSpec" } },
+        "Subforms": { "type": "array", "items": { "$ref": "#/$defs/SubformRelationship" } },
+        "EventHandlers": { "type": "array", "items": { "$ref": "#/$defs/EventHandlerReference" } },
+        "ValidationRules": { "type": "array", "items": { "$ref": "#/$defs/ValidationRuleReference" } },
+        "Purpose": { "type": "string" },
+        "Intent": { "type": "string" },
+        "Notes": { "type": "string" }
+      }
+    },
+
+    "FormDataSourceBinding": {
+      "type": "object",
+      "required": ["Kind"],
+      "properties": {
+        "Kind": { "enum": ["NamedReference", "InlineSql", "None", "Unknown"] },
+        "TargetName": { "type": "string" },
+        "InlineSql": { "type": "string" },
+        "Filter": { "type": "string" },
+        "OrderBy": { "type": "string" },
+        "QueryAbstractionRef": { "type": "string" }
+      }
+    },
+
+    "FormSectionDescriptor": {
+      "type": "object",
+      "required": ["Name", "Kind"],
+      "properties": {
+        "Name": { "type": "string" },
+        "Kind": { "enum": ["FormHeader", "Detail", "FormFooter", "PageHeader", "PageFooter", "GroupLevelHeader", "GroupLevelFooter", "Other"] },
+        "GeometryIn": { "$ref": "#/$defs/GeometryInches" },
+        "ControlNames": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "FormControlSpec": {
+      "type": "object",
+      "required": ["Name", "SourceType", "ComponentKind"],
+      "properties": {
+        "Name": { "type": "string" },
+        "SourceType": { "type": "string" },
+        "ComponentKind": { "enum": ["TextInput", "MultilineTextInput", "Dropdown", "ListBox", "Toggle", "Button", "Label", "Image", "SubformHost", "TabControl", "Decoration", "Other"] },
+        "SectionName": { "type": "string" },
+        "Label": { "$ref": "#/$defs/LabelInfo" },
+        "GeometryIn": { "$ref": "#/$defs/GeometryInches" },
+        "Binding": { "$ref": "#/$defs/ControlBinding" },
+        "RenderHints": { "$ref": "#/$defs/ControlRenderHints" },
+        "NonDefaultProperties": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "ControlBinding": {
+      "type": "object",
+      "required": ["Kind"],
+      "properties": {
+        "Kind": { "enum": ["TableField", "ComputedExpression", "RowSourceList", "Unbound", "Unknown"] },
+        "ControlSource": { "type": "string" },
+        "RowSource": { "type": "string" },
+        "RowSourceType": { "type": "string" },
+        "BoundColumn": { "type": "integer" },
+        "ColumnCount": { "type": "integer" },
+        "ColumnWidths": { "type": "string" },
+        "QueryAbstractionRef": { "type": "string" }
+      }
+    },
+
+    "ControlRenderHints": {
+      "type": "object",
+      "properties": {
+        "Caption": { "type": "string" },
+        "Format": { "type": "string" },
+        "InputMask": { "type": "string" },
+        "DefaultValue": { "type": "string" },
+        "IsVisible": { "type": "boolean" },
+        "IsEnabled": { "type": "boolean" },
+        "IsLocked": { "type": "boolean" },
+        "TabIndex": { "type": "integer" }
+      }
+    },
+
+    "SubformRelationship": {
+      "type": "object",
+      "required": ["SubformControlName"],
+      "properties": {
+        "SubformControlName": { "type": "string" },
+        "ContainedObjectName": { "type": "string" },
+        "LinkChildFields": { "type": "array", "items": { "type": "string" } },
+        "LinkMasterFields": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "EventHandlerReference": {
+      "type": "object",
+      "required": ["HostKind", "PropertyName", "EventName"],
+      "properties": {
+        "HostKind": { "enum": ["Form", "Control"] },
+        "ControlName": { "type": "string" },
+        "PropertyName": { "type": "string" },
+        "EventName": { "type": "string" },
+        "VbaProcedureName": { "type": "string" },
+        "Classification": { "type": "string" }
+      }
+    },
+
+    "ValidationRuleReference": {
+      "type": "object",
+      "required": ["HostKind", "Source"],
+      "properties": {
+        "HostKind": { "enum": ["Form", "Control"] },
+        "ControlName": { "type": "string" },
+        "Source": { "enum": ["ControlValidationRule", "RecordValidationRule", "RequiredField", "LimitToList", "BeforeUpdateHandler"] },
+        "RuleExpression": { "type": "string" },
+        "ValidationText": { "type": "string" },
+        "Classification": { "type": "string" }
+      }
+    },
+
+    "QueryAbstraction": {
+      "type": "object",
+      "required": ["SourceQueryName", "Shape"],
+      "properties": {
+        "SourceQueryName": { "type": "string" },
+        "Shape": { "enum": ["Select", "Union", "Transform", "Insert", "Update", "Delete", "Unknown"] },
+        "SuggestedMethodName": { "type": "string" },
+        "Parameters": { "type": "array", "items": { "$ref": "#/$defs/QueryParameterAbstraction" } },
+        "ReturnShape": { "type": "array", "items": { "$ref": "#/$defs/ReturnColumn" } },
+        "PrimaryFrom": { "$ref": "#/$defs/TableSourceDescriptor" },
+        "Joins": { "type": "array", "items": { "$ref": "#/$defs/JoinDescriptor" } },
+        "Where": { "$ref": "#/$defs/PredicateNode" },
+        "GroupBy": { "type": "array", "items": { "$ref": "#/$defs/ExpressionDescriptor" } },
+        "Having": { "$ref": "#/$defs/PredicateNode" },
+        "OrderBy": { "type": "array", "items": { "$ref": "#/$defs/OrderByDescriptor" } },
+        "Aggregation": { "$ref": "#/$defs/AggregationMarkers" },
+        "Purpose": { "type": "string" },
+        "Intent": { "type": "string" },
+        "Notes": { "type": "string" }
+      }
+    },
+
+    "QueryParameterAbstraction": {
+      "type": "object",
+      "required": ["Name", "SourceName", "Origin"],
+      "properties": {
+        "Name": { "type": "string" },
+        "SourceName": { "type": "string" },
+        "Type": { "type": "string" },
+        "IsByRef": { "type": "boolean" },
+        "IsOptional": { "type": "boolean" },
+        "Origin": { "enum": ["Declared", "FormReference", "ReportReference", "Unknown"] },
+        "DerivedFrom": { "type": "string" },
+        "UsageCount": { "type": "integer" }
+      }
+    },
+
+    "ReturnColumn": {
+      "type": "object",
+      "required": ["Name", "Origin", "SourceExpression"],
+      "properties": {
+        "Name": { "type": "string" },
+        "Type": { "type": "string" },
+        "Nullable": { "type": "boolean" },
+        "Origin": { "enum": ["Direct", "Computed", "Aggregate", "Constant", "Unknown"] },
+        "SourceExpression": { "type": "string" },
+        "HasSyntheticName": { "type": "boolean" }
+      }
+    },
+
+    "TableSourceDescriptor": {
+      "type": "object",
+      "properties": {
+        "TableName": { "type": "string" },
+        "Alias": { "type": "string" },
+        "IsSubquery": { "type": "boolean" }
+      }
+    },
+
+    "JoinDescriptor": {
+      "type": "object",
+      "required": ["Kind", "RightSource", "On"],
+      "properties": {
+        "Kind": { "enum": ["Inner", "Left", "Right"] },
+        "RightSource": { "$ref": "#/$defs/TableSourceDescriptor" },
+        "On": { "$ref": "#/$defs/PredicateNode" }
+      }
+    },
+
+    "OrderByDescriptor": {
+      "type": "object",
+      "required": ["Expression", "Direction"],
+      "properties": {
+        "Expression": { "$ref": "#/$defs/ExpressionDescriptor" },
+        "Direction": { "enum": ["Ascending", "Descending"] }
+      }
+    },
+
+    "AggregationMarkers": {
+      "type": "object",
+      "properties": {
+        "IsDistinct": { "type": "boolean" },
+        "IsDistinctRow": { "type": "boolean" },
+        "TopN": { "type": "integer" },
+        "TopIsPercent": { "type": "boolean" },
+        "HasAggregates": { "type": "boolean" },
+        "HasGrouping": { "type": "boolean" }
+      }
+    },
+
+    "PredicateNode": {
+      "type": "object",
+      "description": "A node in the structured predicate tree (WHERE / HAVING / JOIN ON). NodeKind discriminates the concrete shape. NOTE: The C# PredicateNode hierarchy requires [JsonPolymorphic] / [JsonDerivedType] attributes to emit this discriminator field; see v1-adr.md §Known Issues.",
+      "required": ["NodeKind"],
+      "properties": {
+        "NodeKind": {
+          "enum": ["And", "Or", "Not", "Comparison", "In", "IsNull", "Between", "Like", "Opaque"]
+        },
+        "Operands": { "type": "array", "items": { "$ref": "#/$defs/PredicateNode" }, "description": "And / Or: list of operands." },
+        "Operand": { "$ref": "#/$defs/PredicateNode", "description": "Not: single operand." },
+        "Operator": { "type": "string", "description": "Comparison: =, <>, <, <=, >, >=." },
+        "Left": { "$ref": "#/$defs/ExpressionDescriptor" },
+        "Right": { "$ref": "#/$defs/ExpressionDescriptor" },
+        "Expression": { "$ref": "#/$defs/ExpressionDescriptor", "description": "In / IsNull / Between / Like / Opaque: subject expression." },
+        "Values": { "type": "array", "items": { "$ref": "#/$defs/ExpressionDescriptor" }, "description": "In: value list." },
+        "Low": { "$ref": "#/$defs/ExpressionDescriptor", "description": "Between: lower bound." },
+        "High": { "$ref": "#/$defs/ExpressionDescriptor", "description": "Between: upper bound." },
+        "Pattern": { "$ref": "#/$defs/ExpressionDescriptor", "description": "Like: pattern expression." },
+        "Negated": { "type": "boolean", "description": "In / IsNull / Between / Like: true when NOT modifier is present." }
+      }
+    },
+
+    "ExpressionDescriptor": {
+      "type": "object",
+      "required": ["Display", "Kind"],
+      "properties": {
+        "Display": { "type": "string" },
+        "Kind": { "enum": ["Column", "Literal", "FormReference", "ReportReference", "Parameter", "FunctionCall", "Compound", "Subquery", "Unknown"] },
+        "ColumnName": { "type": "string" },
+        "TableQualifier": { "type": "string" },
+        "LiteralKind": { "enum": ["String", "Number", "Date", "Boolean", "Null"] },
+        "FormReferencePath": { "type": "string" },
+        "FunctionName": { "type": "string" }
+      }
+    },
+
+    "EventHandlerClassification": {
+      "type": "object",
+      "required": ["ProcedureName", "Categories", "Mixed", "Signals"],
+      "properties": {
+        "ProcedureName": { "type": "string" },
+        "Categories": {
+          "type": "array",
+          "items": { "enum": ["Validation", "CascadingUpdate", "FilterSearch", "Navigation", "SideEffect", "Calculation", "FormattingDisplay"] }
+        },
+        "Mixed": { "type": "boolean" },
+        "Signals": { "type": "array", "items": { "$ref": "#/$defs/EventHandlerClassificationSignal" } }
+      }
+    },
+
+    "EventHandlerClassificationSignal": {
+      "type": "object",
+      "required": ["Category", "Kind", "Line", "Column"],
+      "properties": {
+        "Category": { "enum": ["Validation", "CascadingUpdate", "FilterSearch", "Navigation", "SideEffect", "Calculation", "FormattingDisplay"] },
+        "Kind": {
+          "enum": ["CancelAssignment", "BareVariableAssignment", "ControlAssignment", "AppearanceAssignment",
+                   "FilterAssignment", "FormRequeryCall", "SubformRequeryCall", "ControlRequeryCall",
+                   "DoCmdNavigationCall", "ApplicationQuitCall", "FollowHyperlinkCall", "RunCommandCall", "DatabaseExecuteCall"]
+        },
+        "Line": { "type": "integer" },
+        "Column": { "type": "integer" },
+        "TargetExpression": { "type": "string" }
+      }
+    },
+
+    "FunctionClassification": {
+      "type": "object",
+      "required": ["ModuleName", "ProcedureName", "Kind", "IsPublic", "IsStatic", "ParameterCount", "HasReturnValue", "Categories", "PrimaryCategory", "IsMixed", "Metrics", "DirectDependencies", "TransitiveDependencies", "Callers"],
+      "properties": {
+        "ModuleName": { "type": "string" },
+        "ProcedureName": { "type": "string" },
+        "Kind": { "enum": ["Sub", "Function", "PropertyGet", "PropertyLet", "PropertySet", "Declare"] },
+        "IsPublic": { "type": "boolean" },
+        "IsStatic": { "type": "boolean" },
+        "ParameterCount": { "type": "integer" },
+        "HasReturnValue": { "type": "boolean" },
+        "Categories": { "type": "array", "items": { "enum": ["Pure", "DataAccess", "UIBound", "ExternalIO", "LateBound"] } },
+        "PrimaryCategory": { "enum": ["Pure", "DataAccess", "UIBound", "ExternalIO", "LateBound"] },
+        "IsMixed": { "type": "boolean" },
+        "Metrics": { "$ref": "#/$defs/ComplexityMetrics" },
+        "DirectDependencies": { "type": "array", "items": { "$ref": "#/$defs/DependencyEdge" } },
+        "TransitiveDependencies": { "type": "array", "items": { "$ref": "#/$defs/DependencyEdge" } },
+        "Callers": { "type": "array", "items": { "$ref": "#/$defs/DependencyEdge" } },
+        "UnresolvedReferences": { "type": "array", "items": { "$ref": "#/$defs/UnresolvedReferenceFact" } }
+      }
+    },
+
+    "ComplexityMetrics": {
+      "type": "object",
+      "required": ["CyclomaticComplexity", "LinesOfCode", "StatementCount"],
+      "properties": {
+        "CyclomaticComplexity": { "type": "integer" },
+        "LinesOfCode": { "type": "integer" },
+        "StatementCount": { "type": "integer" }
+      }
+    },
+
+    "DependencyEdge": {
+      "type": "object",
+      "required": ["ModuleName", "ProcedureName", "Kind"],
+      "properties": {
+        "ModuleName": { "type": "string" },
+        "ProcedureName": { "type": "string" },
+        "Kind": { "enum": ["Sub", "Function", "PropertyGet", "PropertyLet", "PropertySet", "Declare"] }
+      }
+    },
+
+    "UnresolvedReferenceFact": {
+      "type": "object",
+      "required": ["Reason", "Line", "Column"],
+      "properties": {
+        "Reason": { "type": "string" },
+        "Line": { "type": "integer" },
+        "Column": { "type": "integer" },
+        "MemberName": { "type": "string" }
+      }
+    },
+
+    "NavigationGraph": {
+      "type": "object",
+      "required": ["EntryPoints", "Edges", "UnresolvedTargets", "Macros"],
+      "properties": {
+        "EntryPoints": { "type": "array", "items": { "$ref": "#/$defs/NavigationEntryPoint" } },
+        "Edges": { "type": "array", "items": { "$ref": "#/$defs/NavigationEdge" } },
+        "UnresolvedTargets": { "type": "array", "items": { "$ref": "#/$defs/UnresolvedNavigationTarget" } },
+        "Ribbon": { "$ref": "#/$defs/RibbonStructure" },
+        "Switchboard": { "$ref": "#/$defs/SwitchboardStructure" },
+        "Macros": { "type": "array", "items": { "$ref": "#/$defs/MacroChain" } }
+      }
+    },
+
+    "NavigationEntryPoint": {
+      "type": "object",
+      "required": ["Kind", "Name"],
+      "properties": {
+        "Kind": { "enum": ["AutoExec", "DefaultForm", "SwitchboardRoot"] },
+        "Name": { "type": "string" },
+        "OpensFormName": { "type": "string" },
+        "CallsProcedure": { "$ref": "#/$defs/ProcedureReference" }
+      }
+    },
+
+    "NavigationEdge": {
+      "type": "object",
+      "required": ["SourceModule", "SourceProcedure", "SourceProcedureKind", "SourceLine", "SourceColumn", "Action", "TargetKind"],
+      "properties": {
+        "SourceModule": { "type": "string" },
+        "SourceProcedure": { "type": "string" },
+        "SourceProcedureKind": { "enum": ["Sub", "Function", "PropertyGet", "PropertyLet", "PropertySet", "Declare"] },
+        "SourceLine": { "type": "integer" },
+        "SourceColumn": { "type": "integer" },
+        "Action": { "enum": ["OpenForm", "OpenReport", "Close", "BrowseTo"] },
+        "TargetKind": { "enum": ["Form", "Report", "Unknown"] },
+        "TargetName": { "type": "string" },
+        "WhereCondition": { "type": "string" },
+        "OpenArgs": { "type": "string" }
+      }
+    },
+
+    "UnresolvedNavigationTarget": {
+      "type": "object",
+      "required": ["SourceModule", "SourceProcedure", "SourceProcedureKind", "SourceLine", "SourceColumn", "Action", "Reason"],
+      "properties": {
+        "SourceModule": { "type": "string" },
+        "SourceProcedure": { "type": "string" },
+        "SourceProcedureKind": { "enum": ["Sub", "Function", "PropertyGet", "PropertyLet", "PropertySet", "Declare"] },
+        "SourceLine": { "type": "integer" },
+        "SourceColumn": { "type": "integer" },
+        "Action": { "enum": ["OpenForm", "OpenReport", "Close", "BrowseTo"] },
+        "Reason": { "type": "string" },
+        "TargetExpressionText": { "type": "string" }
+      }
+    },
+
+    "RibbonStructure": {
+      "type": "object",
+      "required": ["Tabs"],
+      "properties": {
+        "Tabs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["Id", "Label", "Groups"],
+            "properties": {
+              "Id": { "type": "string" },
+              "Label": { "type": "string" },
+              "Groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["Id", "Label", "Controls"],
+                  "properties": {
+                    "Id": { "type": "string" },
+                    "Label": { "type": "string" },
+                    "Controls": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["Id", "Label"],
+                        "properties": {
+                          "Id": { "type": "string" },
+                          "Label": { "type": "string" },
+                          "OnAction": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "SwitchboardStructure": {
+      "type": "object",
+      "required": ["Pages"],
+      "properties": {
+        "Pages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["SwitchboardId", "Name", "Items"],
+            "properties": {
+              "SwitchboardId": { "type": "integer" },
+              "Name": { "type": "string" },
+              "Items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["Text", "Command"],
+                  "properties": {
+                    "Text": { "type": "string" },
+                    "Command": { "type": "integer" },
+                    "Argument": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "MacroChain": {
+      "type": "object",
+      "required": ["Name", "Actions"],
+      "properties": {
+        "Name": { "type": "string" },
+        "Actions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ActionName", "Arguments"],
+            "properties": {
+              "ActionName": { "type": "string" },
+              "Arguments": { "type": "object", "additionalProperties": { "type": "string" } },
+              "CallsProcedureName": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "ProcedureReference": {
+      "type": "object",
+      "required": ["ProcedureName"],
+      "properties": {
+        "ModuleName": { "type": "string" },
+        "ProcedureName": { "type": "string" }
+      }
+    },
+
+    "ValidationRule": {
+      "type": "object",
+      "required": ["Scope", "SourceObject", "Origin", "Kind"],
+      "properties": {
+        "Scope": { "enum": ["TableField", "Table", "Form", "Control"] },
+        "SourceObject": { "type": "string" },
+        "FieldOrControlName": { "type": "string" },
+        "Origin": {
+          "enum": ["TableFieldValidationRule", "TableFieldRequired", "TableValidationRule",
+                   "ControlValidationRule", "ControlRequired", "ControlLimitToList",
+                   "ControlInputMask", "FormValidationRule", "BeforeUpdateHandler"]
+        },
+        "Kind": { "enum": ["Required", "Range", "Pattern", "Membership", "CustomPredicate", "Unstructured"] },
+        "Expression": { "type": "string" },
+        "Message": { "type": "string" },
+        "Range": { "$ref": "#/$defs/ValidationRangeConstraint" },
+        "Pattern": { "$ref": "#/$defs/ValidationPatternConstraint" },
+        "Membership": { "$ref": "#/$defs/ValidationMembershipConstraint" },
+        "Location": { "$ref": "#/$defs/ValidationRuleLocation" }
+      }
+    },
+
+    "ValidationRangeConstraint": {
+      "type": "object",
+      "properties": {
+        "Minimum": { "type": "string" },
+        "MinimumInclusive": { "type": "boolean" },
+        "Maximum": { "type": "string" },
+        "MaximumInclusive": { "type": "boolean" }
+      }
+    },
+
+    "ValidationPatternConstraint": {
+      "type": "object",
+      "required": ["InputMask"],
+      "properties": {
+        "InputMask": { "type": "string" }
+      }
+    },
+
+    "ValidationMembershipConstraint": {
+      "type": "object",
+      "required": ["SourceControlName"],
+      "properties": {
+        "SourceControlName": { "type": "string" }
+      }
+    },
+
+    "ValidationRuleLocation": {
+      "type": "object",
+      "required": ["Line", "Column", "ProcedureName"],
+      "properties": {
+        "Line": { "type": "integer" },
+        "Column": { "type": "integer" },
+        "ProcedureName": { "type": "string" }
+      }
+    },
+
+    "RowSourceSpec": {
+      "type": "object",
+      "required": ["SourceFormName", "ControlName", "ControlType", "Kind"],
+      "properties": {
+        "SourceFormName": { "type": "string" },
+        "ControlName": { "type": "string" },
+        "ControlType": { "type": "string" },
+        "Kind": { "enum": ["TableOrQueryNamed", "TableOrQueryInlineSql", "ValueList", "FieldList", "Empty", "Unknown"] },
+        "RowSourceText": { "type": "string" },
+        "RowSourceType": { "type": "string" },
+        "TargetName": { "type": "string" },
+        "InlineSql": { "type": "string" },
+        "ValueListItems": { "type": "array", "items": { "type": "string" } },
+        "FieldListSourceTable": { "type": "string" },
+        "BoundColumn": { "type": "integer" },
+        "ColumnCount": { "type": "integer" },
+        "Columns": { "type": "array", "items": { "$ref": "#/$defs/RowSourceColumnDescriptor" } },
+        "LimitToList": { "type": "boolean" },
+        "CascadingDrivers": { "type": "array", "items": { "$ref": "#/$defs/RowSourceCascadingDriver" } },
+        "QueryAbstractionRef": { "type": "string" },
+        "Purpose": { "type": "string" },
+        "Notes": { "type": "string" }
+      }
+    },
+
+    "RowSourceColumnDescriptor": {
+      "type": "object",
+      "required": ["Index"],
+      "properties": {
+        "Index": { "type": "integer" },
+        "WidthTwips": { "type": "integer" },
+        "WidthInches": { "type": "number" },
+        "Hidden": { "type": "boolean" }
+      }
+    },
+
+    "RowSourceCascadingDriver": {
+      "type": "object",
+      "required": ["DriverProcedureName", "Line", "Column"],
+      "properties": {
+        "DriverControlName": { "type": "string" },
+        "DriverProcedureName": { "type": "string" },
+        "Line": { "type": "integer" },
+        "Column": { "type": "integer" }
+      }
+    },
+
+    "UnresolvedItem": {
+      "type": "object",
+      "required": ["Source", "Reason", "ConstructDescription", "Location", "SuggestedNextSteps"],
+      "properties": {
+        "Source": { "enum": ["Resolver", "SqlFormReference", "DynamicSqlSite", "NavigationTarget", "FunctionClassification"] },
+        "Reason": { "type": "string" },
+        "ConstructDescription": { "type": "string" },
+        "Location": { "$ref": "#/$defs/UnresolvedLocation" },
+        "SurroundingText": { "type": "string" },
+        "SuggestedNextSteps": { "type": "array", "items": { "type": "string" } },
+        "AdditionalContext": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+
+    "UnresolvedLocation": {
+      "type": "object",
+      "properties": {
+        "File": { "type": "string" },
+        "ModuleName": { "type": "string" },
+        "ProcedureName": { "type": "string" },
+        "Line": { "type": "integer" },
+        "Column": { "type": "integer" }
+      }
+    }
+
+  }
+}

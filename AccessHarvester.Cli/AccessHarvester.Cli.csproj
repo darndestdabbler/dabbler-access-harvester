@@ -38,9 +38,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Schema embedded so `validate` works without the source tree at runtime. -->
+    <!--
+      Schemas embedded so `validate` works without the source tree at
+      runtime. Both v1.0 and v1.1 are bundled so backward compatibility
+      with v1.0-shaped manifests (per the v1.1 additive bump's
+      backward-compat policy) lands transparently — `validate` reads
+      the document's $.SchemaVersion and dispatches to the matching
+      embedded schema.
+    -->
     <EmbeddedResource Include="..\docs\test-cases\harvester-schema.v1.0.json">
       <LogicalName>AccessHarvester.Cli.harvester-schema.v1.0.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\docs\test-cases\harvester-schema.v1.1.json">
+      <LogicalName>AccessHarvester.Cli.harvester-schema.v1.1.json</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

@@ -14,7 +14,7 @@ public sealed class SchemaDocGeneratorTests
         const string json = """
             {
               "SchemaType": "DatabaseManifest",
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "TestDb.accdb" },
               "Summary": {
@@ -44,7 +44,7 @@ public sealed class SchemaDocGeneratorTests
         const string json = """
             {
               "SchemaType": "DatabaseManifest",
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "CatalogDb.accdb" },
               "Summary": { "FormCount": 1, "QueryCount": 1 },
@@ -82,7 +82,7 @@ public sealed class SchemaDocGeneratorTests
         const string json = """
             {
               "SchemaType": "DatabaseManifest",
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "SubDb.accdb" },
               "Forms": [
@@ -118,7 +118,7 @@ public sealed class SchemaDocGeneratorTests
         const string json = """
             {
               "SchemaType": "DatabaseManifest",
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "NoSubDb.accdb" },
               "Forms": [

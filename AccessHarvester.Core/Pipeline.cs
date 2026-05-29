@@ -394,6 +394,32 @@ public sealed class Pipeline
         // ── 5. Assemble and write ──────────────────────────────────────
         IReadOnlyList<UnresolvedItem> unresolvedItems = Array.Empty<UnresolvedItem>();
 
+        // v1.1 (Session 2 of harvester-manifest-index-and-batch-readiness):
+        // build the navigation index AFTER the per-object ir/ files have
+        // been written. Counts come straight from the in-memory
+        // collections that produced those files, so FileMap.<X>.Count
+        // stays equal to manifest.<X>.Length by construction. Globs are
+        // static — the on-disk layout is fixed by the three-tier output
+        // model. Modules live under ir/ModulesAndClasses/ on disk but
+        // surface at manifest.Modules; the glob reflects the on-disk
+        // path so a consumer can find the files. Relationships have no
+        // Summary count (DatabaseSummary intentionally omits one), but
+        // their FileMap entry mirrors the manifest array length —
+        // ManifestCompletenessTests pins both invariants.
+        var fileMap = BuildFileMap(
+            formExports.Count,
+            reportExports.Count,
+            queryExports.Count,
+            moduleExports.Count,
+            tableExports.Count,
+            relationshipExports.Count);
+
+        var documentation = new DocumentationPointer
+        {
+            Url = InterpretationGuideUrl,
+            SchemaVersion = DatabaseManifest.SchemaVersionLiteral,
+        };
+
         var manifest = DatabaseManifestAggregator.Build(
             database: database,
             harvesterVersion: ResolveHarvesterVersion(),
@@ -404,7 +430,9 @@ public sealed class Pipeline
             tables: tableExports,
             relationships: relationshipExports,
             unresolvedItems: unresolvedItems,
-            diagnostics: diagnostics);
+            diagnostics: diagnostics,
+            documentation: documentation,
+            fileMap: fileMap);
 
         var options = new JsonSerializerOptions
         {
@@ -418,7 +446,65 @@ public sealed class Pipeline
         File.WriteAllText(
             Path.Combine(baseDir, "unresolved-items.json"),
             JsonSerializer.Serialize(unresolvedItems, options));
+
+        // v1.1 (Finding #2 — per the human-ratified open decision):
+        // emit a tiny human pointer next to manifest.json so a consumer
+        // who opens the output folder cold finds the entry point
+        // without prior knowledge of the schema. Content is static and
+        // byte-identical across runs — no timestamps, no fixture-specific
+        // data — so it does not perturb the determinism gate.
+        File.WriteAllText(
+            Path.Combine(baseDir, "READ-ME-FIRST.md"),
+            ReadMeFirstContent);
     }
+
+    private static FileMap BuildFileMap(
+        int formsCount,
+        int reportsCount,
+        int queriesCount,
+        int modulesCount,
+        int tablesCount,
+        int relationshipsCount)
+        => new()
+        {
+            Forms         = new() { Count = formsCount,         Glob = "ir/Forms/*.ir.json" },
+            Reports       = new() { Count = reportsCount,       Glob = "ir/Reports/*.ir.json" },
+            Queries       = new() { Count = queriesCount,       Glob = "ir/Queries/*.ir.json" },
+            // On-disk category is ModulesAndClasses; manifest surfaces it
+            // as Modules. Per ManifestCompletenessTests, the glob below
+            // reflects the on-disk path so the consumer can actually find
+            // the files.
+            Modules       = new() { Count = modulesCount,       Glob = "ir/ModulesAndClasses/*.ir.json" },
+            Tables        = new() { Count = tablesCount,        Glob = "ir/Tables/*.ir.json" },
+            Relationships = new() { Count = relationshipsCount, Glob = "ir/Relationships/*.ir.json" },
+        };
+
+    // Public canonical URL of the interpretation guide. Points at the
+    // default branch (main); intentionally a public HTTPS URL rather
+    // than a relative path so a binary-only consumer (no source repo)
+    // can resolve it.
+    private const string InterpretationGuideUrl =
+        "https://github.com/darndestdabbler/dabbler-access-harvester/blob/main/docs/harvester/interpretation-guide.md";
+
+    // READ-ME-FIRST.md content. Static — no timestamps, no fixture
+    // data — so the determinism gate stays green. Use LF line endings
+    // explicitly (the StringBuilder-free verbatim literal would adopt
+    // the source file's line endings, which differ across platforms).
+    private static readonly string ReadMeFirstContent =
+        string.Join("\n",
+            "# Dabbler Access Harvester output",
+            "",
+            "The canonical entry point for this dataset is `manifest.json`.",
+            "",
+            "This output conforms to `harvester-schema` version 1.1. The",
+            "manifest's `Documentation.Url` field points at the interpretation",
+            "guide so a binary-only consumer can read the schema without the",
+            "source repo. The manifest's `FileMap` field lists the on-disk",
+            "globs for every per-object file under `ir/`.",
+            "",
+            "Interpretation guide:",
+            "https://github.com/darndestdabbler/dabbler-access-harvester/blob/main/docs/harvester/interpretation-guide.md",
+            "");
 
     // Loads form/report specs from ir/ and merges with parser outputs
     // from the raw/ category. Returns one FormExport per form/report that

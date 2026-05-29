@@ -66,14 +66,24 @@ high
 | 2.8  | Submit final changeset for verification. | `gpt-5-4` (session-verification) |
 
 ### Actuals (filled after the session)
-- Orchestrator used: `<fill at close>`
-- Total routed cost: `<fill at close>`
-- Deviations from recommendation: `<fill at close>`
-- Notes for next-session calibration: `<fill at close>`
+- Orchestrator used: `claude-code opus-4.7 @ effort=high`
+- Total routed cost: `$0.1847` (gemini-pro architecture = $0.05005; gpt-5-4 R1 session-verification = $0.11534; gpt-5-4 R2 session-verification = $0.01931). Architecture call fell back from opus@max → gemini-pro after Anthropic opus repeatedly hit its 600s read timeout on the large architecture prompt (two attempts); routed via `task_type="planning"` + `max_tier=2` to land on gemini-pro deterministically. Session 6/7 routed to gpt-5-4 per `task_type_overrides.session-verification: gpt-5-4`.
+- Deviations from recommendation:
+  - Architecture route was opus → gemini-pro (force-pinned `architecture` task_type force-routes to opus; gemini-pro reached via `planning` + `max_tier=2`). Cost was lower than expected ($0.05 vs ~$0.30+ opus@max).
+  - Steps 2.6 / 2.7 (mechanical golden + schema diff via Sonnet) were not separately routed — the SchemaConformanceTests + ManifestCompletenessTests + new FileMap-invariant test exercise mechanical correspondence at test-time, and the orchestrator ran the CLI's `validate` subcommand directly. Avoided redundant route() calls.
+  - Schema work expanded beyond the three Session-1 drift fixes to also include a fourth corrective: added `"LateBound"` to the v1.1 schema's `Classification.Purity` enum. The `ClassificationCategory` C# enum (which `ParserOutputProjector` serializes via `.ToString()`) includes `LateBound` but the v1.0 schema's `Purity` enum omitted it — this was the actual top-level cause of the 1099-error cascade Session 1 attributed to the HarvestedItem oneOf shape. Once LateBound was added, results.IsValid flipped true and SchemaValidator returned Valid early; the if/then/else branch-discrimination rewrite is still in v1.1 but is no longer load-bearing for HHC validation. Disclosed in the verifier prompt.
+  - **R1 verifier surfaced two additional findings** that were addressed in-session and re-verified VERIFIED in R2:
+    - **Major:** Backward-compat policy didn't actually allow literal `SchemaVersion: "1.0"` documents through the v1.1 `validate` subcommand. Fixed by embedding BOTH `harvester-schema.v1.0.json` and `harvester-schema.v1.1.json` as resources and adding per-document schema dispatch in `RunValidate` (cached `SchemaValidator` per version; `--json-status` envelope now includes `SupportedSchemaVersions` + `PerManifestSchemaVersion[]`). Added two integration tests (`Validate_V1_0_Manifest_DispatchesToV1_0_Schema_AndReturnsZero` and `Validate_Mixed_V1_0_And_V1_1_Manifests_BothDispatchedAndPass`).
+    - **Minor:** Pipeline.Run emits `READ-ME-FIRST.md` but `tmp/build-golden-corpus` was not copying it. Fixed by adding a `File.Copy(staging, golden)` step (no normalization needed — content is static). Both committed goldens now include byte-identical `READ-ME-FIRST.md`.
+- Notes for next-session calibration:
+  - Session 3 starts on the cleanly-validating v1.1 manifest shape; no schema-corrective debt carries forward. Both goldens regen byte-identically.
+  - Determinism gate green: two fresh `Pipeline.Run` calls against `HomeHealthCare.accdb` produced byte-identical normalized manifests + READ-ME-FIRST.md.
+  - Test counts: `dotnet test` = 2109 passed, 2 skipped (pre-existing synthetic-fixture skips), 0 failed. Integration suite up from 53 → 55 with the dispatch tests.
+  - The schema-dispatch pattern (one embedded schema per supported version, document-driven validator selection) is the precedent for future additive bumps; document this in `docs/planning/project-guidance.md` if Session 3's batch-ergonomics work uncovers more schema-version surfaces.
 
 **Next-session orchestrator recommendation (Session 3):**
-`claude sonnet-4.5 @ effort=medium`
-Rationale: Session 3 is a straightforward implementation of a well-defined feature, making Sonnet a cost-effective choice.
+`claude sonnet-4.6 @ effort=medium`
+Rationale: Session 3 (Batch-run ergonomics — stale-file clean + status provenance for Findings #4/#6, optional cross-DB index) is a well-defined CLI feature with mechanical implementation — `--clean` flag wiring, `--json-status` envelope additions, target-clean tests. Sonnet's cost-to-performance ratio is the right call for that scope. Bump to opus only if Session 3 surfaces a non-trivial cross-DB roll-up index design (optional spec item).
 
 ---
 

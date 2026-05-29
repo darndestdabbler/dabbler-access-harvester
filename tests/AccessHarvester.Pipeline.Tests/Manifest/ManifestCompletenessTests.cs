@@ -56,6 +56,86 @@ public sealed class ManifestCompletenessTests
         AssertCategoryNoSummary(root, irRoot, "Relationships", "Relationships");
     }
 
+    // v1.1 (Session 2): the FileMap navigation index added in
+    // harvester-schema v1.1 must reflect the same on-disk reality as
+    // the per-category content arrays. For each FileMap entry the
+    // invariant is:
+    //
+    //   manifest.FileMap.<X>.Count == manifest.<X>.Length
+    //                              == count of files matching
+    //                                 manifest.FileMap.<X>.Glob
+    //                                 (relative to the manifest
+    //                                  directory)
+    //
+    // If FileMap drifts away from the inlined arrays or the on-disk
+    // files, the navigation index lies and the downstream consumer
+    // that trusts it (the entire reason Finding #2 was filed) sees a
+    // different shape than what is actually on disk. This test pins
+    // the invariant for every category surfaced in FileMap on the
+    // committed goldens.
+    [Theory]
+    [InlineData("HomeHealthCare")]
+    [InlineData("NorthwindDevEdition")]
+    public void Manifest_FileMap_counts_and_globs_match_arrays_and_on_disk(string fixture)
+    {
+        string repoRoot = FindRepoRoot();
+        string fixtureRoot = Path.Combine(repoRoot, "samples", "GoldenOutput", fixture);
+        string manifestPath = Path.Combine(fixtureRoot, "manifest.json");
+
+        Assert.True(File.Exists(manifestPath),
+            $"Committed golden manifest is missing: {manifestPath}");
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(manifestPath));
+        var root = doc.RootElement;
+
+        Assert.True(root.TryGetProperty("FileMap", out var fileMap),
+            "Golden manifest is missing the v1.1 FileMap field.");
+
+        AssertFileMapEntry(root, fileMap, fixtureRoot, "Forms");
+        AssertFileMapEntry(root, fileMap, fixtureRoot, "Reports");
+        AssertFileMapEntry(root, fileMap, fixtureRoot, "Queries");
+        AssertFileMapEntry(root, fileMap, fixtureRoot, "Modules");
+        AssertFileMapEntry(root, fileMap, fixtureRoot, "Tables");
+        AssertFileMapEntry(root, fileMap, fixtureRoot, "Relationships");
+    }
+
+    private static void AssertFileMapEntry(
+        JsonElement root,
+        JsonElement fileMap,
+        string fixtureRoot,
+        string category)
+    {
+        var entry = fileMap.GetProperty(category);
+        int mapCount = entry.GetProperty("Count").GetInt32();
+        string glob = entry.GetProperty("Glob").GetString()!;
+        int arrayCount = root.GetProperty(category).GetArrayLength();
+        int onDiskCount = CountFilesByGlob(fixtureRoot, glob);
+
+        Assert.True(
+            mapCount == arrayCount && arrayCount == onDiskCount,
+            $"FileMap.{category}: Count={mapCount}, manifest.{category}.Length={arrayCount}, "
+                + $"files matching '{glob}'={onDiskCount} — all three must match.");
+    }
+
+    // The FileMap globs are intentionally simple — directory + suffix.
+    // We split the glob into a directory and a search pattern rather
+    // than pull in a globbing library; this keeps the test hermetic
+    // and mirrors how a downstream consumer would resolve the glob
+    // (System.IO.Directory.EnumerateFiles or its equivalent).
+    private static int CountFilesByGlob(string baseDir, string glob)
+    {
+        int lastSlash = glob.LastIndexOfAny(new[] { '/', '\\' });
+        if (lastSlash < 0) return 0;
+
+        string relDir = glob[..lastSlash];
+        string pattern = glob[(lastSlash + 1)..];
+        string absDir = Path.Combine(baseDir, relDir.Replace('/', Path.DirectorySeparatorChar));
+
+        return Directory.Exists(absDir)
+            ? Directory.GetFiles(absDir, pattern).Length
+            : 0;
+    }
+
     private static void AssertCategory(
         JsonElement root,
         JsonElement summary,

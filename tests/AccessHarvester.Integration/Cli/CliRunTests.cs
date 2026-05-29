@@ -85,7 +85,7 @@ public sealed class CliRunTests
             {
                 var root = manifestDoc.RootElement;
                 Assert.Equal("DatabaseManifest", root.GetProperty("SchemaType").GetString());
-                Assert.Equal("1.0", root.GetProperty("SchemaVersion").GetString());
+                Assert.Equal("1.1", root.GetProperty("SchemaVersion").GetString());
             }
 
             using (var unresolvedDoc = JsonDocument.Parse(File.ReadAllText(unresolvedPath)))

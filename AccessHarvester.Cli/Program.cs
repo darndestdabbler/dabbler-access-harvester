@@ -234,7 +234,7 @@ public static class Program
 
     // ── validate subcommand ─────────────────────────────────────────────────────
     // Validates a `run` output (or a standalone manifest file) against the
-    // harvester-schema.v1.0.json embedded in this binary.
+    // harvester-schema.v1.1.json embedded in this binary.
     //
     // Usage:
     //   AccessHarvester validate --in <output-root-dir>      (finds manifest.json recursively)
@@ -285,10 +285,16 @@ public static class Program
             }
         }
 
-        string schemaJson = LoadEmbeddedSchema();
-        var validator = SchemaValidator.FromText(schemaJson);
-
+        // Per-document schema dispatch (v1.1 additive bump's
+        // backward-compat policy: v1.0 manifests still validate via
+        // their own embedded schema; v1.1 manifests validate against
+        // v1.1; documents without a SchemaVersion fall back to the
+        // current schema and the validator will report the missing
+        // field as a normal validation error).
+        var validators = new Dictionary<string, SchemaValidator>(StringComparer.Ordinal);
         var allErrors = new List<(string Path, IReadOnlyList<string> Errors)>();
+        var perManifestSchemaVersion = new List<(string Path, string SchemaVersion)>();
+
         foreach (string manifestPath in manifestPaths)
         {
             string manifestJson;
@@ -299,12 +305,35 @@ public static class Program
                 return 1;
             }
 
-            try { using var _ = JsonDocument.Parse(manifestJson); }
+            string documentSchemaVersion;
+            try
+            {
+                using var probe = JsonDocument.Parse(manifestJson);
+                documentSchemaVersion = probe.RootElement.TryGetProperty("SchemaVersion", out var v)
+                    && v.ValueKind == JsonValueKind.String
+                        ? v.GetString() ?? SchemaVersionLiteral
+                        : SchemaVersionLiteral;
+            }
             catch (JsonException ex)
             {
                 Console.Error.WriteLine($"Not valid JSON ({manifestPath}): {ex.Message}");
                 return 1;
             }
+
+            if (!validators.TryGetValue(documentSchemaVersion, out var validator))
+            {
+                if (!TryLoadEmbeddedSchemaForVersion(documentSchemaVersion, out var schemaJson))
+                {
+                    Console.Error.WriteLine(
+                        $"No embedded schema for SchemaVersion '{documentSchemaVersion}' in: {manifestPath}. "
+                        + $"Supported versions: {string.Join(", ", SupportedSchemaVersions)}.");
+                    return 1;
+                }
+                validator = SchemaValidator.FromText(schemaJson);
+                validators[documentSchemaVersion] = validator;
+            }
+
+            perManifestSchemaVersion.Add((manifestPath, documentSchemaVersion));
 
             var result = validator.Validate(manifestJson);
             if (!result.IsValid)
@@ -314,7 +343,11 @@ public static class Program
         int exit;
         if (allErrors.Count == 0)
         {
-            Console.Error.WriteLine($"Validation passed ({manifestPaths.Length} manifest(s) checked against schema v{SchemaVersionLiteral}).");
+            // Describe what was actually validated against: usually one
+            // schema, but per-document dispatch means a mixed input set
+            // can light up both versions in a single run.
+            string versionsChecked = string.Join(", ", validators.Keys.OrderBy(v => v, StringComparer.Ordinal).Select(v => "v" + v));
+            Console.Error.WriteLine($"Validation passed ({manifestPaths.Length} manifest(s) checked against schema {versionsChecked}).");
             exit = 0;
         }
         else
@@ -339,7 +372,13 @@ public static class Program
             {
                 Command       = "validate",
                 SchemaVersion = SchemaVersionLiteral,
+                SupportedSchemaVersions = SupportedSchemaVersions,
                 Manifests     = manifestPaths,
+                PerManifestSchemaVersion = perManifestSchemaVersion.Select(e => new
+                {
+                    Path = e.Path,
+                    SchemaVersion = e.SchemaVersion,
+                }).ToArray(),
                 ExitCode      = exit,
                 Errors        = allErrors.Select(e => new
                 {
@@ -353,13 +392,38 @@ public static class Program
         return exit;
     }
 
-    private static string LoadEmbeddedSchema()
+    // The schema versions this CLI knows how to validate. v1.0 is
+    // retained alongside v1.1 so old manifests stay valid input to
+    // the current `validate` subcommand (per the v1.1 additive bump's
+    // backward-compat policy). When a new version lands, add the
+    // string here and bundle the matching <EmbeddedResource> entry in
+    // AccessHarvester.Cli.csproj — TryLoadEmbeddedSchemaForVersion
+    // resolves the resource name from the version string.
+    private static readonly string[] SupportedSchemaVersions = ["1.0", "1.1"];
+
+    // Returns the embedded schema JSON matching <paramref name="version"/>;
+    // returns false (with schemaJson = "") when no embedded schema for
+    // that version exists. Caller is responsible for surfacing a usage
+    // error to the operator.
+    private static bool TryLoadEmbeddedSchemaForVersion(string version, out string schemaJson)
     {
+        if (Array.IndexOf(SupportedSchemaVersions, version) < 0)
+        {
+            schemaJson = "";
+            return false;
+        }
+
         var asm = typeof(Program).Assembly;
-        using var stream = asm.GetManifestResourceStream("AccessHarvester.Cli.harvester-schema.v1.0.json")
-            ?? throw new InvalidOperationException("Embedded schema resource not found in assembly.");
+        string resourceName = $"AccessHarvester.Cli.harvester-schema.v{version}.json";
+        using var stream = asm.GetManifestResourceStream(resourceName);
+        if (stream is null)
+        {
+            schemaJson = "";
+            return false;
+        }
         using var reader = new StreamReader(stream, System.Text.Encoding.UTF8);
-        return reader.ReadToEnd();
+        schemaJson = reader.ReadToEnd();
+        return true;
     }
 
     // Maps well-known v1.0 error patterns to short actionable hints.
@@ -563,7 +627,7 @@ public static class Program
             `run` is extract + translate + enrich in one invocation.
             `generate-docs` reads a DatabaseManifest JSON and writes a markdown schema summary to
               <output-dir>/<database-slug>/schema-summary.md.
-            `validate` checks a DatabaseManifest JSON against the embedded harvester-schema.v1.0.json.
+            `validate` checks a DatabaseManifest JSON against the embedded harvester-schema.v1.1.json.
               --in locates manifest.json recursively under <output-root-dir> (the --out root from `run`).
               --manifest validates a single specified manifest file directly.
 
@@ -597,7 +661,7 @@ public static class Program
               2  unexpected error
 
             Exit codes for validate:
-              0  validation passed (manifest conforms to schema v1.0)
+              0  validation passed (manifest conforms to its declared schema version — v1.0 or v1.1)
               1  usage error (bad args, file/dir not found, manifest not valid JSON)
               2  unexpected error (I/O or embedded schema failure)
               3  schema-validation errors found (details on stderr)
@@ -610,12 +674,12 @@ public static class Program
     private static bool IsVersionFlag(string arg)
         => arg is "--version" or "version";
 
-    // Schema version the CLI's pipeline produces — must match the constant
-    // initialiser on DatabaseManifest.SchemaVersion (the value emitted into
+    // Schema version the CLI's pipeline produces — sourced from
+    // DatabaseManifest.SchemaVersionLiteral (the value emitted into
     // manifest.json's $.SchemaVersion). Surfacing it via --version lets a
     // downstream consumer pin their integration to a specific schema shape
     // without parsing a sample manifest first.
-    private const string SchemaVersionLiteral = "1.0";
+    private const string SchemaVersionLiteral = DatabaseManifest.SchemaVersionLiteral;
 
     private static void PrintVersion()
     {

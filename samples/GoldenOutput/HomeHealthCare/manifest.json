@@ -1,11 +1,41 @@
 {
   "SchemaType": "DatabaseManifest",
-  "SchemaVersion": "1.0",
+  "SchemaVersion": "1.1",
   "HarvesterVersion": "\u003CNORMALIZED:HarvesterVersion\u003E",
   "Database": {
     "Name": "HomeHealthCare.accdb",
     "FilePath": "\u003CNORMALIZED:Database.FilePath\u003E",
     "ExportedAt": "\u003CNORMALIZED:Database.ExportedAt\u003E"
+  },
+  "Documentation": {
+    "Url": "https://github.com/darndestdabbler/dabbler-access-harvester/blob/main/docs/harvester/interpretation-guide.md",
+    "SchemaVersion": "1.1"
+  },
+  "FileMap": {
+    "Forms": {
+      "Count": 19,
+      "Glob": "ir/Forms/*.ir.json"
+    },
+    "Reports": {
+      "Count": 12,
+      "Glob": "ir/Reports/*.ir.json"
+    },
+    "Queries": {
+      "Count": 22,
+      "Glob": "ir/Queries/*.ir.json"
+    },
+    "Modules": {
+      "Count": 4,
+      "Glob": "ir/ModulesAndClasses/*.ir.json"
+    },
+    "Tables": {
+      "Count": 13,
+      "Glob": "ir/Tables/*.ir.json"
+    },
+    "Relationships": {
+      "Count": 12,
+      "Glob": "ir/Relationships/*.ir.json"
+    }
   },
   "Summary": {
     "FormCount": 19,

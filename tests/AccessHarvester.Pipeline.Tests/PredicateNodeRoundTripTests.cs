@@ -32,14 +32,14 @@ public sealed class PredicateNodeRoundTripTests
         string dir = AppContext.BaseDirectory;
         for (int i = 0; i < 12; i++)
         {
-            string candidate = Path.Combine(dir, "docs", "test-cases", "harvester-schema.v1.0.json");
+            string candidate = Path.Combine(dir, "docs", "test-cases", "harvester-schema.v1.1.json");
             if (File.Exists(candidate)) return candidate;
             string? parent = Directory.GetParent(dir)?.FullName;
             if (parent is null || parent == dir) break;
             dir = parent;
         }
         throw new FileNotFoundException(
-            $"Could not locate harvester-schema.v1.0.json walking up from '{AppContext.BaseDirectory}'.");
+            $"Could not locate harvester-schema.v1.1.json walking up from '{AppContext.BaseDirectory}'.");
     }
 
     private static string WrapInManifest(PredicateNode where)
@@ -52,7 +52,7 @@ public sealed class PredicateNodeRoundTripTests
         var manifest = new
         {
             SchemaType = "DatabaseManifest",
-            SchemaVersion = "1.0",
+            SchemaVersion = "1.1",
             HarvesterVersion = "test",
             Database = new { Name = "RoundTripTest.accdb" },
             Queries = new[]
@@ -172,7 +172,7 @@ public sealed class PredicateNodeRoundTripTests
     }
 
     // (d) Schema validation: a DatabaseManifest containing a PredicateNode
-    // validates against harvester-schema.v1.0.json. This is the concrete
+    // validates against harvester-schema.v1.1.json. This is the concrete
     // proof that [JsonPolymorphic] produces output the schema accepts.
     [Fact]
     public void PredicateNodeInManifest_ValidatesAgainstV1Schema()

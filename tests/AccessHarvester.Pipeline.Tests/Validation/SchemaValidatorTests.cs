@@ -12,14 +12,14 @@ public sealed class SchemaValidatorTests
         string dir = AppContext.BaseDirectory;
         for (int i = 0; i < 12; i++)
         {
-            string candidate = Path.Combine(dir, "docs", "test-cases", "harvester-schema.v1.0.json");
+            string candidate = Path.Combine(dir, "docs", "test-cases", "harvester-schema.v1.1.json");
             if (File.Exists(candidate)) return candidate;
             string? parent = Directory.GetParent(dir)?.FullName;
             if (parent is null || parent == dir) break;
             dir = parent;
         }
         throw new FileNotFoundException(
-            $"Could not locate harvester-schema.v1.0.json walking up from '{AppContext.BaseDirectory}'.");
+            $"Could not locate harvester-schema.v1.1.json walking up from '{AppContext.BaseDirectory}'.");
     }
 
     private static readonly string SchemaPath = LocateSchemaPath();
@@ -33,7 +33,7 @@ public sealed class SchemaValidatorTests
         const string json = """
             {
               "SchemaType": "DatabaseManifest",
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "Test.accdb" }
             }
@@ -51,7 +51,7 @@ public sealed class SchemaValidatorTests
     {
         const string json = """
             {
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "Test.accdb" }
             }
@@ -70,7 +70,7 @@ public sealed class SchemaValidatorTests
         const string json = """
             {
               "SchemaType": "DatabaseManifest",
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "Test.accdb" },
               "UnknownFutureField": "some-value"
@@ -93,7 +93,7 @@ public sealed class SchemaValidatorTests
         const string json = """
             {
               "SchemaType": "DatabaseManifest",
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "Test.accdb" }
             }
@@ -113,7 +113,7 @@ public sealed class SchemaValidatorTests
 
         const string json = """
             {
-              "SchemaVersion": "1.0",
+              "SchemaVersion": "1.1",
               "HarvesterVersion": "1.0.0",
               "Database": { "Name": "Test.accdb" }
             }

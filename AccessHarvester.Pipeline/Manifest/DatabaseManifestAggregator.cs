@@ -58,7 +58,9 @@ public static class DatabaseManifestAggregator
         IEnumerable<EventHandlerClassification>? eventHandlerClassifications = null,
         NavigationGraph? navigationGraph = null,
         IEnumerable<UnresolvedItem>? unresolvedItems = null,
-        IEnumerable<HarvesterDiagnostic>? diagnostics = null)
+        IEnumerable<HarvesterDiagnostic>? diagnostics = null,
+        DocumentationPointer? documentation = null,
+        FileMap? fileMap = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         if (string.IsNullOrEmpty(harvesterVersion))
@@ -93,6 +95,8 @@ public static class DatabaseManifestAggregator
         {
             HarvesterVersion              = harvesterVersion,
             Database                      = database,
+            Documentation                 = documentation,
+            FileMap                       = fileMap,
             Summary                       = summary,
             Forms                         = formsList,
             Reports                       = reportsList,

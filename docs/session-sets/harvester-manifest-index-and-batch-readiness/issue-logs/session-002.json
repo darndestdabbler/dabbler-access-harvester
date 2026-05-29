@@ -1,0 +1,20 @@
+[
+  {
+    "round": 1,
+    "title": "Backward-compatibility proof does not cover actual v1.0 manifests",
+    "severity": "Major",
+    "location": "docs/test-cases/harvester-schema.v1.1.json#/properties/SchemaVersion; ManifestSchemaConformanceTests.V1_0_Shaped_SmokeFixture_ValidatesAgainstSchema",
+    "verifier_detail": "The v1.1 schema constrains SchemaVersion to the literal \"1.1\", so a real manifest emitted under v1.0 remains invalid under the latest validator. The added smoke test only proves that a v1.0-shaped document validates after changing its SchemaVersion to 1.1. That is shape compatibility, not true input compatibility.",
+    "status": "fixed",
+    "fix_summary": "Implemented per-document schema dispatch in CLI's `validate` subcommand. Both harvester-schema.v1.0.json and harvester-schema.v1.1.json are now embedded as resources (AccessHarvester.Cli.csproj). The validate command reads each document's $.SchemaVersion, loads the matching embedded schema (via TryLoadEmbeddedSchemaForVersion), caches a SchemaValidator per version, and validates each document against its declared schema. Mixed-version input sets light up both validators in one run. Added two integration tests: Validate_V1_0_Manifest_DispatchesToV1_0_Schema_AndReturnsZero and Validate_Mixed_V1_0_And_V1_1_Manifests_BothDispatchedAndPass. The --json-status envelope now includes SupportedSchemaVersions and a PerManifestSchemaVersion[] array so consumers can audit dispatch."
+  },
+  {
+    "round": 1,
+    "title": "Committed goldens do not include the new READ-ME-FIRST artifact",
+    "severity": "Minor",
+    "location": "samples/GoldenOutput/{HomeHealthCare,NorthwindDevEdition}",
+    "verifier_detail": "Session 2's ratified entry-point decision was BOTH manifest.json and READ-ME-FIRST.md, and Pipeline.Run now emits the README. However, the regenerated committed goldens only changed manifest.json; no READ-ME-FIRST.md was added.",
+    "status": "fixed",
+    "fix_summary": "Updated tmp/build-golden-corpus/Program.cs to copy READ-ME-FIRST.md from the staging directory into the golden directory (no normalization needed \u2014 it is static across runs). Regenerated both goldens; samples/GoldenOutput/HomeHealthCare/READ-ME-FIRST.md and samples/GoldenOutput/NorthwindDevEdition/READ-ME-FIRST.md are now committed (byte-identical between the two fixtures, as expected for static content)."
+  }
+]

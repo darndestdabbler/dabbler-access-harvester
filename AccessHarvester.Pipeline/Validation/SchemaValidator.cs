@@ -9,7 +9,7 @@ using Json.Schema;
 namespace AccessHarvester.Pipeline.Validation;
 
 /// <summary>
-/// Validates harvester output documents against harvester-schema.v1.0.json.
+/// Validates harvester output documents against harvester-schema.v1.1.json.
 /// Hard-fails the caller on schema non-conformance; conformant documents pass silently.
 /// </summary>
 public sealed class SchemaValidator

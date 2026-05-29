@@ -69,7 +69,7 @@ public sealed class DatabaseManifestAggregatorTests
         var manifest = DatabaseManifestAggregator.Build(MinimalDatabase(), "1.2.3");
 
         Assert.Equal("DatabaseManifest", manifest.SchemaType);
-        Assert.Equal("1.0", manifest.SchemaVersion);
+        Assert.Equal("1.1", manifest.SchemaVersion);
         Assert.Equal("1.2.3", manifest.HarvesterVersion);
     }
 

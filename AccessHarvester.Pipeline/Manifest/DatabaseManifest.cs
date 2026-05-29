@@ -7,7 +7,7 @@ using AccessHarvester.Pipeline.Enrichment;
 namespace AccessHarvester.Pipeline.Manifest;
 
 /// <summary>
-/// Root document for a full database export per the v1.0 schema's
+/// Root document for a full database export per the v1.1 schema's
 /// <c>DatabaseManifest</c> definition. Wraps all harvested metadata
 /// and enrichment output for one Access database.
 /// </summary>
@@ -23,10 +23,19 @@ namespace AccessHarvester.Pipeline.Manifest;
 /// types from <c>AccessHarvester.Access</c> /
 /// <c>AccessHarvester.Pipeline.Enrichment</c> rather than
 /// re-modelled wrappers. JSON property-name conformance against
-/// <c>harvester-schema.v1.0.json</c> is exercised by the
-/// schema-conformance test landing in Session 2 of the
-/// <c>harvester-finish-canonical-golden-output</c> set; any
-/// in-memory-type-vs-schema mismatch surfaces there.
+/// <c>harvester-schema.v1.1.json</c> is exercised by
+/// <c>ManifestSchemaConformanceTests</c>; any in-memory-type-vs-schema
+/// mismatch surfaces there.
+/// </para>
+/// <para>
+/// v1.1 (Session 2 of
+/// <c>harvester-manifest-index-and-batch-readiness</c>) adds two
+/// additive top-level fields — <see cref="Documentation"/> and
+/// <see cref="FileMap"/> — so a binary-only consumer can find the
+/// interpretation guide and the per-object IR files without prior
+/// knowledge of the repo layout. Both are nullable on the record so
+/// existing test surfaces that construct a manifest without them keep
+/// compiling; the production pipeline always populates them.
 /// </para>
 /// </remarks>
 public sealed record DatabaseManifest
@@ -40,11 +49,21 @@ public sealed record DatabaseManifest
 
     /// <summary>
     /// Constant schema version the schema requires at
-    /// <c>$.SchemaVersion</c>. Always <c>"1.0"</c> for documents
-    /// produced against <c>harvester-schema.v1.0.json</c>.
+    /// <c>$.SchemaVersion</c>. Always <c>"1.1"</c> for documents
+    /// produced against <c>harvester-schema.v1.1.json</c>. Pinned via
+    /// <see cref="SchemaVersionLiteral"/> so the CLI's <c>--version</c>
+    /// emission and any other code path that needs the version string
+    /// can read it from one place.
     /// </summary>
     [JsonPropertyOrder(-99)]
-    public string SchemaVersion { get; } = "1.0";
+    public string SchemaVersion { get; } = SchemaVersionLiteral;
+
+    /// <summary>
+    /// The schema version literal emitted into <c>$.SchemaVersion</c>.
+    /// Mirrors the schema file's <c>SchemaVersion</c> const. Bumped in
+    /// lockstep when the schema bumps.
+    /// </summary>
+    public const string SchemaVersionLiteral = "1.1";
 
     /// <summary>
     /// Version of the harvester tool that produced this document.
@@ -55,6 +74,24 @@ public sealed record DatabaseManifest
 
     [JsonPropertyOrder(-97)]
     public required DatabaseInfo Database { get; init; }
+
+    /// <summary>
+    /// v1.1 additive: pointer to the public interpretation guide + the
+    /// schema version this document conforms to. Null in legacy / test
+    /// fixtures; the production pipeline always emits it.
+    /// </summary>
+    [JsonPropertyOrder(-96)]
+    public DocumentationPointer? Documentation { get; init; }
+
+    /// <summary>
+    /// v1.1 additive: per-category navigation index pointing at the
+    /// on-disk <c>ir/</c> tier. Null in hermetic aggregator unit tests
+    /// that exercise pure assembly contracts; the production pipeline
+    /// always emits it after the per-object files have been written
+    /// (so counts reflect what is actually on disk).
+    /// </summary>
+    [JsonPropertyOrder(-95)]
+    public FileMap? FileMap { get; init; }
 
     public DatabaseSummary Summary { get; init; } = new();
 

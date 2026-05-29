@@ -11,7 +11,7 @@ internal static class RepoPaths
     public static string Examples() => Locate("examples");
     public static string Samples() => Locate("samples");
     public static string SchemaFile()
-        => Path.Combine(TestCases(), "harvester-schema.v1.0.json");
+        => Path.Combine(TestCases(), "harvester-schema.v1.1.json");
 
     /// <summary>
     /// Walks up from <see cref="AppContext.BaseDirectory"/> until it finds
