@@ -34,12 +34,12 @@ consumer download + checksum-verify procedure.
 - `docs/planning/project-guidance.md` — durable principles + conventions
 - `docs/planning/lessons-learned.md` — repo-specific failure patterns
   and tactics learned from prior sessions
-- [`session-set-authoring-guide.md`](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/planning/session-set-authoring-guide.md)
+- [`session-set-authoring-guide.md`](https://raw.githubusercontent.com/darndestdabbler/dabbler-ai-orchestration/master/docs/planning/session-set-authoring-guide.md)
   (canonical, lives in `dabbler-ai-orchestration`) — how to author or
   update a session-set spec (slug naming, sizing, Session Set
   Configuration block including `requiresUAT` / `requiresE2E` / `tier`
   / `prerequisites`)
-- [`ai-led-session-workflow.md`](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/ai-led-session-workflow.md)
+- [`ai-led-session-workflow.md`](https://raw.githubusercontent.com/darndestdabbler/dabbler-ai-orchestration/master/docs/ai-led-session-workflow.md)
   (canonical, lives in `dabbler-ai-orchestration`) — the authoritative
   session-set workflow. Single source of truth for the step-by-step
   procedure, the AI router usage, cross-provider verification, **the
@@ -49,11 +49,13 @@ consumer download + checksum-verify procedure.
   signal), **the Delegation Discipline rules (when to route vs. handle
   directly)**, and the mandatory rules list. Do not duplicate that
   content here.
-- [`docs/session-state-schema.md`](https://github.com/darndestdabbler/dabbler-ai-orchestration/blob/master/docs/session-state-schema.md)
+- [`docs/session-state-schema.md`](https://raw.githubusercontent.com/darndestdabbler/dabbler-ai-orchestration/master/docs/session-state-schema.md)
   (canonical, lives in `dabbler-ai-orchestration`) — the authoritative
   schema for `session-state.json`. Required reading before hand-editing
   any state file. Touching a state file without having read this doc is
   the most common cause of N−1/N drift in the Session Set Explorer.
+  (Links are **raw** GitHub URLs so a fetch returns the doc itself, not
+  the HTML page.)
 
 ### State-file rules every orchestrator must follow (v4 shape; Set 047)
 
@@ -90,6 +92,14 @@ full invariant and worked examples.
   `completedAt`, `orchestrator`, `verificationVerdict`) rather than
   writing `null`. Readers tolerate missing keys; `null` on disk is
   never correct.
+- **Stamp `"schemaVersion": 4` on every write.** The current canonical
+  schema is v4. A file written without this stamp (or stamped `< 4`) is
+  flagged "needs migration" by the Session Set Explorer — this is exactly
+  what happened to two sets on 2026-05-29 when they were hand-authored
+  from stale memory as `v2`. If you are hand-authoring a state file and
+  are not certain these inlined rules are current, **fetch the canonical
+  schema doc (raw URL above) first** rather than writing from memory; the
+  linked doc is authoritative if the canonical version has advanced past 4.
 
 The human starts a session with one of the trigger phrases listed in
 `docs/ai-led-session-workflow.md` → **Trigger Phrases** (sequential,

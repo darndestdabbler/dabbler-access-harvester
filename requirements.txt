@@ -8,4 +8,10 @@
 #
 # Pin to a minimum version rather than an exact version: 0.x signals API
 # may change between minor versions, so adopters bump intentionally.
-dabbler-ai-router>=0.1.0
+#
+# Floor raised to >=0.10.0 (2026-05-29): the v4 state-file writers and the
+# v3->v4 / lightweight-to-v4 migrators land in 0.9.0/0.10.0. An older
+# resolved version (this repo had 0.1.1) writes the legacy v2 schema, which
+# the Session Set Explorer flags as "needs migration". 0.10.0 is the latest
+# published release at time of writing.
+dabbler-ai-router>=0.10.0

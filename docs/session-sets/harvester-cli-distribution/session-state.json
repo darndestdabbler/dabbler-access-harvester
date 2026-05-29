@@ -1,20 +1,7 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "sessionSetName": "harvester-cli-distribution",
-  "currentSession": 2,
-  "totalSessions": 2,
   "status": "complete",
-  "lifecycleState": "closed",
-  "startedAt": "2026-05-28T21:22:57.901520-04:00",
-  "completedAt": "2026-05-29T05:58:46.166823-04:00",
-  "verificationVerdict": "VERIFIED",
-  "orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "medium"
-  },
-  "completedSessions": [1, 2],
   "sessions": [
     {
       "number": 1,
