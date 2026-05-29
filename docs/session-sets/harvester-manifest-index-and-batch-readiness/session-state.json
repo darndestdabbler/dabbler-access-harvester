@@ -37,9 +37,9 @@
     {
       "number": 3,
       "title": "Batch-run ergonomics \u2014 stale-file clean + status provenance (Findings #4, #6, opt. cross-DB index)",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-05-29T11:39:09.050302-04:00",
-      "completedAt": null,
+      "completedAt": "2026-05-29T12:31:08.711610-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
