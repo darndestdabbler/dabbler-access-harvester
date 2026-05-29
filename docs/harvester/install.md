@@ -261,5 +261,9 @@ rather than shipping a degraded artifact.
 - [README](../../README.md) — repo overview and source-build path.
 - [Interpretation Guide](interpretation-guide.md) — how a downstream
   AI consumer reads a harvester run's output.
+- [Batch Operations Guide](batch-operations.md) — driving
+  `AccessHarvester run` across many databases (multi-DB layout,
+  `--clean` / `--no-clean`, cross-DB roll-up index, status-envelope
+  provenance, MSACCESS hygiene).
 - [Session set: `harvester-finish-cli-packaging`](../session-sets/harvester-finish-cli-packaging/spec.md)
   — the planning and acceptance criteria behind this distribution.

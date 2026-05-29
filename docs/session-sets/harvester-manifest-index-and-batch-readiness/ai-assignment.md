@@ -151,10 +151,17 @@ moderate (session-verification round + closeout artifacts; Step 9 may add a reor
 | 4.6  | Step 9 reorganization review of `docs/planning/project-guidance.md` + `docs/planning/lessons-learned.md` — propose Convention promotions, relocations, staleness flags. May route an `analysis` call to elicit a second opinion if a promotion candidate is borderline. | `orchestrator` (+ optional `analysis` route for borderline candidates) |
 
 ### Actuals (filled after the session)
-- Orchestrator used: `<fill at close>`
-- Total routed cost: `<fill at close>`
-- Deviations from recommendation: `<fill at close>`
-- Notes for next-session calibration: `<fill at close>`
+- Orchestrator used: `claude-code opus-4.7 @ effort=high`
+- Total routed cost: `$0.3818` (gemini-pro next-set analysis $0.0028 + R1 gpt-5-4 session-verification $0.2738 + R2 gpt-5-4 session-verification $0.1052; R1 ISSUES_FOUND with 1 Major closeout-placeholder + 2 Minor doc-accuracy findings, all fixed in-session; R2 VERIFIED with empty issues array)
+- Deviations from recommendation:
+  - Step 4.1–4.3 (per-field-type semantics + batch-operations doc) authored entirely in-conversation by the Opus orchestrator per the synthesis-document convention ("when the orchestrator's model matches the routing target, handle in-conversation"). No `route(task_type="architecture")` call needed.
+  - Step 4.5 (cross-provider session-verification) routed via `route(task_type="session-verification")` per the `task_type_overrides.session-verification: gpt-5-4` override.
+  - Step 4.6 (Step 9 reorganization review) proposals authored in-conversation; no routed `analysis` call (no borderline promotion candidates that needed a second opinion).
+  - **Test posture disclosed in the verifier prompt**: 1611 hermetic tests pass cleanly across all four hermetic suites; the Integration suite's 3 CLI-test failures (`CliExtractTests`, `CliRunTests`, `CliTranslateTests` against `HomeHealthCare.accdb`, 60s timeouts) are the documented xUnit parallel-COM contention pattern Session 3 first noted on `ClassifyCommandTests`. All three pass in isolation (33s wall-clock); this is **not** caused by Session 4's docs-only edits. Mitigation is the recommended next set's scope.
+- Notes for next-session calibration:
+  - The next session set this set recommends — `harvester-parallel-com-test-cleanup` — is a Sonnet @ medium target per the routed gemini-pro analysis. Mechanical work (xUnit Collection serialisation or pre-staged inputs); no synthesis. Routed cost band Low (<$0.50).
+  - Both committed goldens regenerate byte-identically against the v1.1 manifest shape; the determinism gate stayed green throughout the set.
+  - The set as a whole is **maintenance-coherent**: it answered the first real downstream consumer's six findings, and the recommended follow-up keeps the project in maintenance mode (close a CI-flake, not ship a new feature).
 
 **Next-session orchestrator recommendation (Session 5):**
 None. This is the final planned session for this set.

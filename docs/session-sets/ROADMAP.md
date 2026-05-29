@@ -44,10 +44,17 @@
 ## Currently in-progress
 
 No session sets are currently in progress. Phase 4 closed
-[2026-05-29](harvester-cli-distribution/change-log.md); the next
-natural set is
-[`harvester-sql-migration-generator`](harvester-cli-distribution/next-session-set-recommendation.md)
-(not yet specced).
+[2026-05-29](harvester-cli-distribution/change-log.md); the most
+recent maintenance set
+([`harvester-manifest-index-and-batch-readiness`](harvester-manifest-index-and-batch-readiness/change-log.md))
+closed 2026-05-29 after answering the first real downstream
+consumer's six findings. The next natural set is
+[`harvester-parallel-com-test-cleanup`](harvester-manifest-index-and-batch-readiness/next-session-set-recommendation.md)
+(not yet specced) — closing the xUnit parallel-COM CI flake the
+maintenance set surfaced. `harvester-sql-migration-generator`
+([`harvester-cli-distribution`'s recommendation](harvester-cli-distribution/next-session-set-recommendation.md))
+remains a candidate but is feature work, not maintenance — defer
+until the CI is reliable.
 
 ---
 
@@ -93,6 +100,24 @@ F1.5) shipped. Two post-Phase-4 extensions followed:
   ([v1.0.0](https://github.com/darndestdabbler/dabbler-access-harvester/releases/tag/v1.0.0)).
   A downstream consumer can now install the harvester binary without
   contacting the maintainer.
+- [`harvester-manifest-index-and-batch-readiness`](harvester-manifest-index-and-batch-readiness/change-log.md)
+  answered the first real downstream consumer's six findings from the
+  2026-05-29 harvest of `NorthwindDevEdition.accdb`. Closed:
+  manifest completeness (Tables / Relationships / Modules now
+  populated); manifest restructured as a self-describing index
+  (per-category `FileMap`, `Documentation` pointer with public HTTPS
+  URL, static `READ-ME-FIRST.md`); additive schema bump v1.0 → v1.1
+  with per-document dispatch in `validate`; `--no-clean` opt-out for
+  the new default-clean re-harvest semantics; `--json-status`
+  provenance fields (`HarvesterVersion`, `StartedAt`, `DurationMs`,
+  `Clean`); cross-DB roll-up index at
+  `<out>/AccessMetaData/index.json`; per-field-type semantics
+  documented in `interpretation-guide.md` §5.5; new
+  [`batch-operations.md`](../harvester/batch-operations.md) covering
+  many-DB layout, sequential-only operation, MSACCESS hygiene, and
+  the status-envelope provenance contract. The set surfaced the
+  xUnit parallel-COM Integration-suite contention pattern as the
+  recommended follow-up.
 
 **Parallel-eligibility (advisory, not a schedule):**
 

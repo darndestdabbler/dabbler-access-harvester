@@ -38,6 +38,18 @@
   Why HomeHealthCare and NorthwindDevEdition are the canonical fixtures
   and which exhibits which structural characteristic.
 
+## Running the harvester (downstream-AI consumer / operator)
+
+- [`harvester/install.md`](harvester/install.md) — Installing the
+  self-contained Windows binary from the GitHub Releases channel,
+  smoke-checking the install, and the per-subcommand surface.
+- [`harvester/batch-operations.md`](harvester/batch-operations.md) —
+  Driving `AccessHarvester run` across many `.accdb` files in one pass:
+  multi-DB output layout, sequential-only operation, MSACCESS / RCW
+  hygiene across runs, `--clean` / `--no-clean` semantics, the cross-DB
+  roll-up index at `<out>/AccessMetaData/index.json`, and the
+  `--json-status` provenance envelope.
+
 ## Project mechanics (orchestrator)
 
 - [`ai-led-session-workflow.md`](ai-led-session-workflow.md) — Single

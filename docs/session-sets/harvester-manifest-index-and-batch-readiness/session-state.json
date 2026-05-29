@@ -54,10 +54,18 @@
     {
       "number": 4,
       "title": "Interpretation docs \u2014 field-type semantics + batch operations guide (Findings #3, #5) + closeout",
-      "status": "not-started",
-      "startedAt": null,
+      "status": "in-progress",
+      "startedAt": "2026-05-29T12:36:45.590700-04:00",
       "completedAt": null,
-      "orchestrator": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-7",
+        "effort": "high",
+        "chatSessionId": null,
+        "checkedOutAt": "2026-05-29T12:36:45.590700-04:00",
+        "lastActivityAt": "2026-05-29T12:36:45.590700-04:00"
+      },
       "verificationVerdict": null
     }
   ]

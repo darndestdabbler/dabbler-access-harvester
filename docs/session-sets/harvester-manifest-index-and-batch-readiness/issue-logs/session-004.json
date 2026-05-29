@@ -1,0 +1,23 @@
+[
+  {
+    "severity": "Minor",
+    "location": "docs/harvester/interpretation-guide.md (§5.5, per-field type table rows for TypeCode 9, 10, 17, 18)",
+    "summary": "The DDL column omitted the unsized fallback spellings that TableDdlBuilder.MapType actually emits for Binary, Text, VarBinary, and Char when Size is null.",
+    "fix": "Updated the four affected rows to show both the sized and unsized forms (BINARY(<size>) or BINARY, TEXT(<size>) or TEXT, VARBINARY(<size>) or VARBINARY, CHAR(<size>) or CHAR) so the table matches MapType exactly. Added a per-row note that the parens are omitted when Size is null.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "docs/harvester/interpretation-guide.md (§5.5, Multi-valued fields paragraph)",
+    "summary": "The doc stated DAO dbVariableField is 0x00000001; the correct public DAO constant is 0x00000002, and 0x00000001 is dbFixedField.",
+    "fix": "Rewrote the paragraph to name all three flag values correctly: dbMultiValueField = 0x00001000, dbVariableField = 0x00000002, dbFixedField = 0x00000001.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Major",
+    "location": "docs/session-sets/harvester-manifest-index-and-batch-readiness/change-log.md; docs/session-sets/harvester-manifest-index-and-batch-readiness/disposition.json",
+    "summary": "Closeout artifacts contained unresolved placeholder text (awaiting fill, fill at close, pending fill) incompatible with the declared complete status.",
+    "fix": "Replaced every placeholder with concrete factual prose: the final-verdict header now describes the R1 ISSUES_FOUND outcome plus all three in-session fixes plus R2 VERIFIED; the Session 4 block names the routed cost actuals ($0.3818 total across R1, R2, and the next-set analysis); the disposition summary mirrors the same narrative.",
+    "status": "fixed"
+  }
+]

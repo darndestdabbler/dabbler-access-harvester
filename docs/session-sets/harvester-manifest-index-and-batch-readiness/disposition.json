@@ -1,31 +1,50 @@
 {
-  "status": "completed",
-  "summary": "Session 3 closed Findings #4 (stale-file clean) + #6 (status-envelope provenance) + the optional cross-DB roll-up index per the user's explicit opt-in. Pipeline.cs: Extract/Translate/Enrich/Run gained a trailing `bool clean = true` parameter that deletes the target tier directory (raw/, kb/, ir/) before re-emission, matching the spec's clean-by-default contract; orphan IR files from objects removed between runs no longer survive. New `public static Pipeline.EmitRootIndex(string outputRoot)` scans `<outputRoot>/AccessMetaData/*/manifest.json` and writes a deterministic name-sorted `<outputRoot>/AccessMetaData/index.json` with shape `{SchemaType:AccessMetaDataRootIndex, SchemaVersion:1.0, Databases:[{Name, Manifest, SchemaVersion}, ...]}`; called from Run after EmitManifestArtifacts so every harvester run refreshes the cross-DB roll-up. Program.cs: new `--no-clean` flag (default = clean), new `RunRun`/`RunExtract`/`RunTranslate` envelope fields HarvesterVersion (deterministic) + StartedAt (UTC ISO-8601, non-deterministic) + DurationMs (non-deterministic) + Clean (effective per-tier clean mode); PrintUsage updated with `--no-clean` documentation and an `IMPORTANT:` paragraph spelling out the `--types` + default-clean interaction. DatabaseManifest.cs: new `public static ResolveHarvesterVersion()` helper centralises version resolution (reads `typeof(DatabaseManifest).Assembly`'s InformationalVersion, strips the SourceLink `+<sha>` suffix); Pipeline.cs (manifest emission), Program.cs (--json-status envelope), and Program.cs PrintVersion (--version output) all now call this single helper — three prior duplicates collapsed to one. 5 new hermetic PipelineCleanTests cover Enrich clean=true orphan removal, Enrich clean=false orphan preservation, EmitRootIndex shape + sort + determinism + bad-manifest-skip. 1 new integration test method in CliRunTests (co-located in the existing class per the parallel-COM lesson) exercises the --json-status envelope's provenance contract and asserts byte-identical output across two back-to-back runs after StartedAt + DurationMs are stripped. No schema change, no golden regeneration: CanonicalGoldenRegressionTests pass byte-identically against committed v1.1 goldens for both HHC and Northwind (the new root index lives at `<stagingRoot>/AccessMetaData/index.json`, OUTSIDE the per-DB BaseDir comparison scope; the GoldenNormalizer's HarvesterVersion placeholder absorbs the new short-form version string). dotnet build = 0 errors / pre-existing CA1416 + NU1903 warnings only. R1 cross-provider verification by gpt-5-4 returned ISSUES_FOUND (1 Major HarvesterVersion provenance mismatch + 1 Minor --types-interaction docs gap); both fixed in-session; R2 verification by gpt-5-4 returned VERIFIED with empty issues array. Total Session 3 routed cost $0.4016 (R1 gpt-5-4 session-verification $0.26272 + R2 gpt-5-4 session-verification $0.13595 + gemini-pro Session 4 next-orchestrator analysis $0.00292). Pre-existing parallel-COM flake in ClassifyCommandTests (full Integration suite end-to-end) is NOT in Session 3's call path and is documented in the issue log; mitigation deferred to a future cleanup session.",
+  "status": "complete",
+  "summary": "Session set harvester-manifest-index-and-batch-readiness completed all 4 sessions (Final) and closed every finding the first real downstream consumer raised when running AccessHarvester run against NorthwindDevEdition.accdb on 2026-05-29 (the same day Phase 4 closed and v1.0.0 cut). Session 1 fixed Finding #1 (manifest omitting Tables/Relationships/Modules) by populating the call site in Pipeline.cs that constructed DatabaseManifestAggregator without the typed collections, root-caused the Modules-empty case independently, added the ManifestCompletenessTests per-category invariant test, and regenerated both committed goldens; three pre-existing schema-vs-typed-record drifts that surfaced once the empty arrays got populated were deferred to Session 2's planned v1.1 bump per user direction. Session 2 closed Finding #2 (manifest is not a navigation index) by adding a top-level FileMap (per-category {count, glob} records), a top-level Documentation block (public HTTPS URL to interpretation-guide.md + the schema version), and a static READ-ME-FIRST.md emitted alongside manifest.json. The same session shipped the additive harvester-schema v1.0 to v1.1 bump with per-document schema dispatch in RunValidate (both schemas embedded, cached per version; --json-status grew SupportedSchemaVersions[] + PerManifestSchemaVersion[]), absorbing Session 1's three schema drifts plus a fourth corrective (LateBound enum value missing from Classification.Purity — the actual root cause of Session 1's 1099-error cascade). Session 3 closed Findings #4 and #6 plus the optional cross-DB roll-up index: --no-clean wiring with default-clean per-tier semantics; HarvesterVersion/StartedAt/DurationMs/Clean provenance on the --json-status envelope (non-deterministic fields excluded from the determinism gate the same way ExportedAt is); cross-DB roll-up emitted at <out>/AccessMetaData/index.json at the end of every Pipeline.Run with the public EmitRootIndex entry point for batch drivers; centralization of HarvesterVersion resolution into a single canonical DatabaseManifest.ResolveHarvesterVersion() helper (in response to a R1 Major finding about manifest-vs-envelope version drift). Session 4 closed Findings #3 (per-field-type semantics in interpretation-guide.md §5.5 — DAO type-code table from 1 through 23 plus 101 Attachment and the 102-109 multi-valued family, mapped to TypeCode/TypeName/Attributes/DDL representation with Northwind's Employees.Attachments as the worked example, plus prose on Hyperlink-vs-Memo via Attributes & 0x8000, AutoNumber, Lookup, multi-valued, and validation rules/defaults) and #5 (new batch-operations guide at docs/harvester/batch-operations.md covering the multi-DB layout, sequential-only operation, MSACCESS/RCW hygiene across runs, --clean/--no-clean semantics, the cross-DB roll-up index, and the status-envelope provenance fields with a determinism column). The batch-operations doc is wired into install.md, the interpretation guide's §10, and docs/README.md under a new Running the harvester subsection. Test posture at close: 400 Resolver + 70 SymbolDb + 689 Pipeline + 452 AccessHarvester = 1611 hermetic tests pass; 2 pre-existing synthetic-fixture skips. Integration suite: 53/56 in the full sequential dotnet test run; the three failures (CliExtract/CliRun/CliTranslate against HomeHealthCare.accdb at 60s timeout) are the documented xUnit parallel-COM contention pattern Session 3's notes flagged for ClassifyCommandTests, with the victim rotating across runs. All three pass cleanly in isolation (dotnet test --filter for the three tests completed in 33s); mitigation is the scope of the recommended next session set (harvester-parallel-com-test-cleanup). Total set routed cost ~$1.09 across the four sessions (S1 $0.13 + S2 $0.18 + S3 $0.40 + S4 $0.3818: R1 gpt-5-4 session-verification $0.2738 surfaced one Major closeout-placeholder finding plus two Minor doc-accuracy findings (DDL fallback rows for BINARY/TEXT/VARBINARY/CHAR omitted the unsized spellings; dbVariableField hex value 0x00000001 was wrong — correct is 0x00000002, 0x00000001 is dbFixedField); all three fixed in-session and R2 gpt-5-4 VERIFIED for $0.1052; plus gemini-pro next-set analysis $0.0028). The set ships every gap the first real downstream consumer hit: a binary-only consumer that opens <out>/AccessMetaData/index.json cold can now discover every harvested DB, traverse its manifest.json, follow the schema-version-stamped Documentation.Url to the interpretation guide, read the per-category FileMap.<Category>.Glob to find the per-object IR files, and run the harvester safely across hundreds of DBs in one batch per the new batch-operations guide.",
   "files_changed": [
     "AccessHarvester.Core/Pipeline.cs",
+    "AccessHarvester.Core/DatabaseManifest.cs",
+    "AccessHarvester.Core/Resources/harvester-schema.v1.0.json",
+    "AccessHarvester.Core/Resources/harvester-schema.v1.1.json",
     "AccessHarvester.Cli/Program.cs",
-    "AccessHarvester.Pipeline/Manifest/DatabaseManifest.cs",
-    "tests/AccessHarvester.Tests/PipelineCleanTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliRunTests.cs",
+    "docs/test-cases/harvester-schema.v1.0.json",
+    "docs/test-cases/harvester-schema.v1.1.json",
+    "docs/harvester/interpretation-guide.md",
+    "docs/harvester/batch-operations.md",
+    "docs/harvester/install.md",
+    "docs/README.md",
+    "examples/northwind-output.json",
+    "samples/GoldenOutput/HomeHealthCare/manifest.json",
+    "samples/GoldenOutput/HomeHealthCare/READ-ME-FIRST.md",
+    "samples/GoldenOutput/NorthwindDevEdition/manifest.json",
+    "samples/GoldenOutput/NorthwindDevEdition/READ-ME-FIRST.md",
+    "tests/AccessHarvester.Pipeline.Tests/ManifestCompletenessTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/PipelineCleanTests.cs",
+    "tests/AccessHarvester.Integration/Cli/ValidateDispatchTests.cs",
+    "tmp/build-golden-corpus/Program.cs",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/spec.md",
     "docs/session-sets/harvester-manifest-index-and-batch-readiness/ai-assignment.md",
     "docs/session-sets/harvester-manifest-index-and-batch-readiness/activity-log.json",
     "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-state.json",
     "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-events.jsonl",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-2-arch-design.md",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/change-log.md",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/disposition.json",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/next-session-set-recommendation.md",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-reviews/session-001.md",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-reviews/session-002.md",
     "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-reviews/session-003.md",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-reviews/session-004.md",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/issue-logs/session-002.json",
     "docs/session-sets/harvester-manifest-index-and-batch-readiness/issue-logs/session-003.json",
-    "docs/session-sets/harvester-manifest-index-and-batch-readiness/disposition.json"
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/issue-logs/session-004.json",
+    "docs/session-sets/ROADMAP.md"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-7",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 4 (Findings #3 field-type semantics + #5 batch operations guide + the set closeout) combines synthesis-document authoring (interpretation-guide extension covering Attachment 101 / OLE Object 11 / Hyperlink / multi-valued / Lookup / Memo / Currency / AutoNumber semantics with the Northwind Attachments worked example, plus a new batch-operations doc covering the Session 3 --clean / cross-DB-index / status-envelope-provenance additions) with the holistic set closeout (change-log.md, next-session-set-recommendation.md, Step 9 reorganization review, ROADMAP row, final session-state flip). Per the routed gemini-pro analysis: the task demands the maximum reasoning capacity of Opus to ensure a clean final state and minimise verifier-driven rework, directly responding to the Session 3 R1 reasoning-level Major (HarvesterVersion provenance unification) that opus@medium missed. Opus authors in-conversation for both documents per the synthesis-document-above-3K-tokens convention; routed cost concentrated in the mandatory cross-provider session-verification round + a potential Step 9 reorg-review analysis."
-    }
+  "next_session_set": {
+    "slug": "harvester-parallel-com-test-cleanup",
+    "summary": "Close the documented xUnit parallel-COM contention pattern in the Integration test suite. The flake manifests as 60s timeouts on whichever CLI test class wins the bad slot at the same time another class drives MSACCESS against the same .accdb (Session 3 saw ClassifyCommandTests; Session 4 saw CliExtract/CliRun/CliTranslate). Mitigation: xUnit Collection serialisation across COM-using CLI test classes, or pre-staged inputs replacing chained classify-driven setup. Recommended orchestrator: claude sonnet-4.6 @ effort=medium per the routed gemini-pro analysis on 2026-05-29 — maintenance-mode work, mechanical implementation, no synthesis. Estimated routed cost band: Low (<$0.50). Currently a stub (no spec); author the spec as part of the set."
   },
   "blockers": []
 }

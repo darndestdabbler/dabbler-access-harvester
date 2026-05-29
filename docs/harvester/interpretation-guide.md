@@ -639,6 +639,160 @@ wants "all validation rules in the database" the manifest array is
 the answer; the per-table `ir/` file is the answer when the consumer
 wants "all validation rules on this specific table."
 
+#### Per-field type semantics
+
+The harvester is **metadata-only**: every column's type, size,
+attribute bitmask, validation strings, and slot in the table's
+reconstructed DDL are captured; row-level data is **never** harvested.
+Attachment, OLE Object, and multi-valued field *child schemas* (the
+hidden tables Access uses to store attachment blobs or multi-value
+rows) are likewise not expanded — the parent column's type code plus
+its `Attributes` bitmask is the full extent of what a consumer sees.
+
+A column's type surfaces on each `Fields[]` entry of
+`ir/Tables/<name>.ir.json` as the pair
+`("TypeCode": <int>, "TypeName": "<string>")`, plus the raw DAO
+`Attributes` bitmask integer and the column's slot in the table's
+top-level `Ddl` string. The codes are the DAO `dbType*` constants.
+
+| TypeCode | TypeName | DDL rendering | Notes |
+|---|---|---|---|
+| 1   | `Boolean`         | `BIT`                                  | Access "Yes/No". |
+| 2   | `Byte`            | `BYTE`                                 |  |
+| 3   | `Integer`         | `SHORT`                                | 16-bit. |
+| 4   | `Long`            | `LONG` or `COUNTER`                    | DDL emits `COUNTER` when the column is an AutoNumber (`IsAutoIncrement: true`); otherwise `LONG`. |
+| 5   | `Currency`        | `CURRENCY`                             | Fixed-precision decimal (4 fractional digits). |
+| 6   | `Single`          | `SINGLE`                               |  |
+| 7   | `Double`          | `DOUBLE`                               |  |
+| 8   | `DateTime`        | `DATETIME`                             | Access "Date/Time". |
+| 9   | `Binary`          | `BINARY(<size>)` or `BINARY`           | Fixed-width binary; rare in user databases. DDL omits the parenthesised size when `Size` is null. |
+| 10  | `Text`            | `TEXT(<size>)` or `TEXT`               | Short text (up to 255 chars). `Size` is the declared maximum length; DDL omits the parens when `Size` is null. |
+| 11  | `LongBinary`      | `LONGBINARY`                           | **OLE Object** — binary blob. Metadata only; payload not harvested. |
+| 12  | `Memo`            | `LONGTEXT`                             | Access "Long Text". **Hyperlink columns also surface as TypeCode 12** — they are a Memo with the DAO `dbHyperlinkField` flag set in `Attributes`; see *Distinguishing Hyperlink from Memo* below. |
+| 15  | `GUID`            | `GUID`                                 | 16-byte UUID. |
+| 16  | `BigInt`          | `BIGINT`                               |  |
+| 17  | `VarBinary`       | `VARBINARY(<size>)` or `VARBINARY`     | DDL omits the parens when `Size` is null. |
+| 18  | `Char`            | `CHAR(<size>)` or `CHAR`               | DDL omits the parens when `Size` is null. |
+| 19  | `Numeric`         | `NUMERIC`                              |  |
+| 20  | `Decimal`         | `DECIMAL`                              |  |
+| 21  | `Float`           | `FLOAT`                                |  |
+| 22  | `Time`            | `UNKNOWN(22)`                          | DDL builder has no Jet spelling for this code. |
+| 23  | `TimeStamp`       | `UNKNOWN(23)`                          | DDL builder has no Jet spelling for this code. |
+| 101 | `AttachmentField` | `UNKNOWN(101)`                         | Access "Attachment" column. The column's presence is captured; the attached blobs themselves live in a hidden child table the harvester does **not** expand. |
+| 102 | `ComplexByte`     | `UNKNOWN(102)`                         | Multi-valued Byte. |
+| 103 | `ComplexInteger`  | `UNKNOWN(103)`                         | Multi-valued Integer. |
+| 104 | `ComplexLong`     | `UNKNOWN(104)`                         | Multi-valued Long. |
+| 105 | `ComplexSingle`   | `UNKNOWN(105)`                         | Multi-valued Single. |
+| 106 | `ComplexDouble`   | `UNKNOWN(106)`                         | Multi-valued Double. |
+| 107 | `ComplexGUID`     | `UNKNOWN(107)`                         | Multi-valued GUID. |
+| 108 | `ComplexDecimal`  | `UNKNOWN(108)`                         | Multi-valued Decimal. |
+| 109 | `ComplexText`     | `UNKNOWN(109)`                         | Multi-valued Text — the typical Lookup-driven multi-value column shape. |
+| any other | `Unknown(<N>)` | `UNKNOWN(<N>)`                         | An unmapped DAO code; surface to a human before consuming. |
+
+The `Ddl` column above shows the JET spelling the harvester's
+`TableDdlBuilder` emits into the table's `Ddl` string. The string is
+a reconstruction, not a verbatim Access export — DAO does not expose
+a `TableDef.DDL` property; the harvester builds it from the `Fields`,
+`Indexes`, and relation metadata at extraction time so downstream
+consumers can read the schema as SQL without re-deriving it from the
+structural collections.
+
+**Distinguishing Hyperlink from Memo.** Access stores Hyperlink
+columns as `TypeCode 12` (`Memo` / `LONGTEXT`) and signals
+"this is a Hyperlink" via a bit in the per-field `Attributes`
+bitmask — the DAO `dbHyperlinkField` flag (`0x00008000`). A consumer
+that needs to distinguish Hyperlink columns from plain Long Text
+reads `Attributes & 0x8000`; the harvester preserves the raw
+`Attributes` integer for exactly this purpose. The wire-format inside
+a Hyperlink string column is Access's `<display>#<address>#<sub-address>`
+encoding — that decoding is a consumer-side concern, not the
+harvester's.
+
+**AutoNumber columns.** AutoNumber surfaces as a regular `Long`
+(`TypeCode: 4`) plus `IsAutoIncrement: true` — a typed boolean the
+harvester derives from the DAO `dbAutoIncrField` bit in
+`Attributes`. The DDL builder reads the same bit and renders the
+column as `COUNTER` rather than `LONG`. A consumer can switch on
+`IsAutoIncrement` directly without re-decoding the `Attributes` bit.
+
+**Lookup columns.** Access "Lookup" columns are not a separate type
+code — they are a regular column (typically a `Long` foreign key or
+a `Text` value) plus a `DisplayControl` value of `111` (combo box)
+or `110` (list box) plus a `RowSource` entry in the field's raw
+property bag. The harvester surfaces `DisplayControl` as a
+first-class typed field on `TableField`; the `RowSource` + bound /
+display column plumbing remains in the raw property bag (the same
+shape forms' combo controls expose via `manifest.RowSourceSpecs`).
+A consumer reconstructing a Lookup column's behaviour reads
+`DisplayControl` first, then opens the underlying row-source query
+or value list to follow the displayed-vs-stored split.
+
+**Multi-valued fields.** Type codes 102–109 cover Access's
+multi-valued field family — a column that stores a *set* of values
+per row, surfaced in the Access UI as a multi-select checkbox or
+combo list. The harvester captures the parent column's type code,
+its slot in the table's `Ddl`, and the `Attributes` bitmask (which
+carries multi-value flag bits including DAO `dbMultiValueField`
+`0x00001000` plus the variable-length flag `dbVariableField`
+`0x00000002`; the complementary `dbFixedField` is `0x00000001`)
+but does **not** expand the hidden child table that backs the
+column. A consumer
+that needs the actual member values has to query the live database
+directly; the harvester does not exfiltrate row-level data, and the
+metadata that would describe the child table's columns is hidden by
+Access itself.
+
+**Validation rules and defaults.** All three surface as per-field
+strings: `ValidationRule` is a Jet SQL boolean expression evaluated
+over the candidate value, `ValidationText` is the user-visible
+message Access shows on rejection, and `DefaultValue` is the
+literal or `=`-prefixed expression Access uses when the row is
+created. The harvester preserves these verbatim — structural
+parsing of the embedded expressions is the
+[Jet SQL parser](../../AccessHarvester.Sql.Parser/) and
+[VBA-expression grammar](../../AccessHarvester.Vba.Grammar/) work,
+not the harvester's job. Empty strings (`""`) mean "Access stored
+an empty entry" — a meaningful Access-level signal distinct from
+`null` (the harvester read no value at all).
+
+**Worked example — `Employees.Attachments` (Northwind).** The
+column lands in
+[`ir/Tables/Employees.ir.json`](../../samples/GoldenOutput/NorthwindDevEdition/ir/Tables/Employees.ir.json)
+as:
+
+```json
+{
+  "Name": "Attachments",
+  "TypeCode": 101,
+  "TypeName": "AttachmentField",
+  "Size": 4,
+  "Required": false,
+  "AllowZeroLength": false,
+  "DefaultValue": "",
+  "ValidationRule": "",
+  "ValidationText": "",
+  "InputMask": null,
+  "Format": null,
+  "DisplayControl": 126,
+  "Attributes": 1,
+  "OrdinalPosition": 9,
+  "ForeignName": null
+}
+```
+
+The same table's top-level `Ddl` string includes
+`[Attachments] UNKNOWN(101)` — the DDL builder has no Jet spelling
+for code 101 and falls back to the `UNKNOWN(<code>)` form. Both
+signals — the typed `TypeName: "AttachmentField"` on the field and
+the `UNKNOWN(101)` slot in the table's `Ddl` — tell a consumer the
+same thing: this is an Access Attachment column. The harvester
+captured its presence; the attached blobs themselves are not in the
+output, and the hidden child table Access uses to store them is not
+expanded. A migration consumer is expected to plan a per-row
+attachment-extraction pass against the live `.accdb` if the
+attachments need to be moved, not to look in the harvester's `ir/`
+for them.
+
 ### 5.6 Macros — standalone and embedded
 
 Standalone macros (objects in the Access nav pane) live in
@@ -901,6 +1055,10 @@ this guide and needs the next stop without leaving the file:
   documents the v0 schema and the three-tier model; [`docs/schema/v1-adr.md`](../schema/v1-adr.md)
   carries the v1 architecture decision record.
 - **IR shape for forms and reports specifically.** [`docs/ir-schema-forms-reports.md`](../ir-schema-forms-reports.md).
+- **Running the harvester across many databases.** [`docs/harvester/batch-operations.md`](batch-operations.md) —
+  multi-DB layout, `--clean` / `--no-clean`, the cross-DB roll-up
+  index, MSACCESS / RCW hygiene, and the `--json-status`
+  provenance envelope.
 - **Unresolved-reason narrative (authoritative).** [`docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md`](../session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md).
 - **CLI usage and project orientation.** [`README.md`](../../README.md).
 - **Parser test cases (canonical input / expected pairs).** [`docs/test-cases/`](../test-cases/).
