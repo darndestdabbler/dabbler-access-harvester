@@ -71,7 +71,7 @@ public static class Program
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
             && !IsVersionFlag(args[0])
-            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage" or "identify-cleanup" or "classify"))
+            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage" or "identify-cleanup" or "classify" or "sanitize"))
         {
             return RunParse(args);
         }
@@ -88,6 +88,7 @@ public static class Program
             "identify-usage"  => IdentifyUsageCommand.Run(rest),
             "identify-cleanup" => IdentifyCleanupCommand.Run(rest),
             "classify"        => ClassifyCommand.Run(rest),
+            "sanitize"        => SanitizeCommand.Run(rest),
             _                 => UnknownCommand(args[0]),
         };
     }
@@ -553,6 +554,7 @@ public static class Program
               AccessHarvester identify-cleanup --in <harvested-output-root> [--harvest-date <YYYY-MM-DD>] [--threshold-days <N>] [--no-com] [--json-status]
               AccessHarvester identify-cleanup --manifest <manifest.json>   [--harvest-date <YYYY-MM-DD>] [--threshold-days <N>] [--no-com] [--json-status]
               AccessHarvester classify        --in <file.accdb> --out <output-dir> [--exclude-cleanup <path>] [--json-status]
+              AccessHarvester sanitize        --classification <classification.json> --in <file.accdb> --out <output-dir> [--json-status]
               AccessHarvester parse           <source-file>
               AccessHarvester parse           --in <source-file>
               AccessHarvester                 <source-file>       (bare-file mode; equivalent to 'parse')

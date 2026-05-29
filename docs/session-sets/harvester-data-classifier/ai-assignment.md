@@ -218,4 +218,64 @@ proposals) compounds the work. Opus at `effort=high` is the right band.
 
 ### Actuals (filled after the session)
 
-- (To be filled after the session completes.)
+- **Orchestrator used:** `claude-opus-4-7` at effort=high (matched the
+  recommendation — the FK graph builder + lockstep PK/FK remap was the
+  correctness-critical synthesis the recommendation called out, and final-
+  session closeout work compounded the synthesis count).
+- **Total routed cost:** ≈$0.08 — R1 session-verification (gemini-pro after
+  gpt-5-4 429 fall-back per the verifier-failure escalation ladder) $0.074,
+  next-session-set recommendation (gemini-pro analysis) $0.003. The original
+  $3.50–$6.00 estimate was conservative against the synthesis-document
+  timeout convention; in practice, the orchestrator handled the synthesis
+  in-conversation (the "When the orchestrator's model matches the routing
+  target" convention) so the only routed traffic was the mandatory cross-
+  provider verification + the next-set analysis.
+- **Output-format decision:** **CSV per table** (single decision made at
+  session start, before any code was written). Rationale documented in
+  the change-log.md and in `SanitizeCommand`'s class summary. Two reasons,
+  in order of weight: (1) the spec's own FK-remap stop rule names `.accdb`
+  lockstep remap via DAO as fragile and points at CSV as the safe default;
+  (2) CSV is hermetically testable — the unit-test suite exercises every
+  masking handler and the FK consistency invariant against an in-memory
+  row source with zero COM, while `.accdb` mutation would have required
+  integration-test-only coverage. CSV also serves both downstream uses
+  (test-data + the deferred Phase 4 SQL Server migration generator).
+- **Deviations from recommendation:** None on orchestrator choice. The
+  recommendation called for the per-strategy handlers to live under
+  `MaskingHandlers/*.cs`; the implementation collapses them into a single
+  `MaskingHandlers.cs` file because each handler's body is 3-15 lines and
+  a per-strategy folder would not pay for the file-overhead. The R1
+  verifier examined this and confirmed it (concern #10): "a reasonable
+  choice for code organization and does not affect functionality." The
+  decision is reversible if a future masker grows into a multi-file shape.
+- **Notes for next-session calibration:** Three observations worth logging
+  at Step 9 (this is the final session, so Step 9 lessons get proposed
+  here and the human accepts/rejects each):
+  (1) **The verifier-failure escalation ladder works in practice.** R1
+  hit a 429 on the configured gpt-5-4 verifier on the first attempt. Per
+  the ladder (project-guidance.md → Conventions → Workflow Expectations),
+  step 2 is "switch to the other remaining cross-provider verifier" —
+  fall-back to gemini-pro via `query("gemini-pro", ...)`. That call
+  succeeded immediately with substantive 10-concern prose at $0.07. The
+  ladder paid for itself in a session that would otherwise have stalled
+  on a transient OpenAI rate limit. Worth recording so future sessions
+  with the same transient-failure shape execute the fall-back
+  mechanically.
+  (2) **Avoid chaining COM-using integration tests against the same .accdb
+  in parallel xUnit fixtures.** The first SanitizeCommandTests draft
+  chained `classify` → `sanitize` against `HomeHealthCare.accdb` and hit
+  a 4-10 minute timeout from xUnit parallelizing the new test class
+  against the existing `ClassifyCommandTests`. Direct CLI runs of either
+  subcommand finished in 6 seconds. The fix was to use a synthesized
+  minimal classification.json (one small lookup table) so the new test
+  doesn't need to chain classify at all — the integration test stays
+  focused on what it's actually proving (CLI wire-up + OLE DB row source),
+  not on classify's behaviour which is already tested elsewhere. Promotion-
+  trigger: a second xUnit-parallel COM contention pattern in this repo.
+  (3) **`OleDbRowSource.ReadRows` connection-per-call pattern works because
+  the row reader is iterator-driven**. Each table read opens a connection,
+  streams via `CommandBehavior.SequentialAccess`, and closes the connection
+  when the enumeration ends. Worth recording so a future `migrate`
+  subcommand that needs cross-table transactions does NOT inherit the
+  same pattern — transactional row reading needs a connection that lives
+  across multiple SELECTs.

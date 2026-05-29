@@ -1441,3 +1441,84 @@ reference; if it proves out twice in *this* repo, propose promotion to
   propose promoting it to a Convention in `project-guidance.md` →
   Conventions → Workflow Expectations alongside the existing
   "session-state.json is the single source of truth" entry.
+
+## Do Not Chain Parallel xUnit Integration Tests That Both Drive Access COM Against The Same `.accdb`
+
+- **Context:** Adding a new `[SkippableFact]` integration test in a
+  test class that lives alongside another integration-test class
+  whose tests also drive `AccessHarvester.exe` (or any COM-using
+  subcommand) against the same sample `.accdb`. First hit in
+  `harvester-data-classifier` Session 4 (2026-05-28): the new
+  `SanitizeCommandTests` class chained `classify` → `sanitize`
+  against `HomeHealthCare.accdb` while `ClassifyCommandTests` ran in
+  parallel, also driving classify against the same DB.
+- **Failure or friction:** Both processes opened the `.accdb` via
+  the ACE OLE DB provider concurrently. Even though both queries
+  were read-only SELECTs, ACE's file-level locking serialised the
+  effective work and the test's `CliInvoker.RunWithTimeout` budget
+  expired well before the underlying CLI processes finished. The
+  first run timed out at 4 minutes (240s budget); a second run with
+  a 10-minute budget timed out at 10 minutes. Direct CLI runs of
+  either subcommand against the same DB finished in 6 seconds —
+  the timeout was entirely about parallel COM contention, not
+  classifier perf. xUnit by default runs *test classes* in
+  parallel within an assembly, so two `[SkippableFact]` tests that
+  each spawn a CLI process touching the same `.accdb` will race
+  unless explicitly serialised.
+- **Lesson:** A new integration test that needs a classified or
+  sanitized view of a sample `.accdb` should NOT chain the
+  classifier as a setup step inside the test. Either pre-stage the
+  required input (e.g., synthesize a minimal hand-authored
+  `classification.json` that targets one small table — the
+  classifier's behaviour is already covered by the classifier's own
+  test class), put the new test into the same `[Collection(...)]`
+  as the conflicting class to serialise them, or factor the shared
+  setup into an `ICollectionFixture` that runs once and is reused.
+  The cheapest of the three is usually "synthesize the input";
+  collection serialisation works but trades parallelism for
+  simplicity.
+- **Action for future sessions:** Before writing a new
+  `[SkippableFact]` that opens a sample `.accdb`, grep
+  `tests/AccessHarvester.Integration/` for other test classes that
+  open the same DB. If a peer exists, synthesize a minimal input
+  rather than chaining the peer's CLI as setup. If a second context
+  hits this same xUnit-parallel COM contention pattern, propose
+  promoting it to a Convention in `project-guidance.md` → Conventions
+  → Testing Conventions ("integration tests that drive COM against a
+  shared `.accdb` must be hermetic of each other's setup").
+
+## `OleDbRowSource.ReadRows` Connection-Per-Call Is Fine For Iterator Row Reads — Not For Cross-Table Transactions
+
+- **Context:** Authoring an `IRowSource` implementation that hands
+  the sanitizer a stream of rows for a single table. First hit in
+  `harvester-data-classifier` Session 4 (2026-05-28).
+- **Failure or friction:** None observed in the sanitize use case;
+  the lesson is forward-looking. `OleDbRowSource.ReadRows` opens a
+  fresh `OleDbConnection` per table, executes one
+  `SELECT col1, col2 FROM [Table]`, and streams via
+  `CommandBehavior.SequentialAccess`. The connection's `using`
+  scope closes the connection (and its underlying COM RCWs) when
+  the enumeration ends. This is correct, clean, and performs well
+  for the sanitizer because each table read is short and
+  independent of every other table read.
+- **Lesson:** A future `migrate` subcommand (or any subcommand that
+  needs to read row data from multiple tables inside a single
+  transaction, e.g., a snapshot-consistent dump or a destructive
+  rewrite-in-place flow) MUST NOT inherit the connection-per-call
+  pattern. Cross-table transactions need a single
+  `OleDbConnection` + `OleDbTransaction` that lives across multiple
+  `SELECT`s, with explicit lifetime management (an
+  `IDisposable`-shaped "session" object the row source borrows
+  from). The split is mechanical — keep the existing
+  `OleDbRowSource` for use cases that benefit from short-lived
+  isolated reads, and introduce an `IRowSourceSession` /
+  `OleDbRowSourceSession` shape for transactional readers.
+- **Action for future sessions:** If a downstream session asks for
+  cross-table transactional row reading, do NOT extend
+  `OleDbRowSource` in place — introduce a new session-shaped type
+  alongside it. If a second context in this repo asks for
+  transactional row reading (the migrate subcommand or a
+  consistency-snapshot flow), promote the design choice to a
+  Convention in `project-guidance.md` → Conventions → Code Style
+  ("COM-driven row sources expose `IDisposable`-shaped sessions
+  when they need cross-call transactional state").

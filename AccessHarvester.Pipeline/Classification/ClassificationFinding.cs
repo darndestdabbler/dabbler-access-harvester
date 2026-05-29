@@ -115,4 +115,34 @@ public static class ColumnCategoryWire
 
     public static string ToWire(this ColumnCategory category) => ToWireMap[category];
     public static string ToWire(this TableHint hint)          => HintToWireMap[hint];
+
+    private static readonly Dictionary<string, ColumnCategory> FromWireMap =
+        new(StringComparer.Ordinal)
+    {
+        ["direct-identifier-pii"]    = ColumnCategory.DirectIdentifierPii,
+        ["quasi-identifier"]         = ColumnCategory.QuasiIdentifier,
+        ["sensitive-non-pii"]        = ColumnCategory.SensitiveNonPii,
+        ["free-text-memo"]           = ColumnCategory.FreeTextMemo,
+        ["lookup-reference"]         = ColumnCategory.LookupReference,
+        ["system-audit"]             = ColumnCategory.SystemAudit,
+        ["foreign-key"]              = ColumnCategory.ForeignKey,
+        ["surrogate-autonumber-pk"]  = ColumnCategory.SurrogateAutonumberPk,
+        ["business-natural-key"]     = ColumnCategory.BusinessNaturalKey,
+        ["generic-non-sensitive"]    = ColumnCategory.GenericNonSensitive,
+    };
+
+    /// <summary>
+    /// Reverse of <see cref="ToWire(ColumnCategory)"/>. Used by the
+    /// sanitizer's <see cref="AccessHarvester.Pipeline.Sanitization.ClassificationReader"/>
+    /// to parse the kebab-case enum strings in <c>classification.json</c>.
+    /// Throws when the wire string is not one of the 10 canonical values.
+    /// </summary>
+    public static ColumnCategory FromWire(string wire)
+    {
+        if (wire is null) throw new ArgumentNullException(nameof(wire));
+        if (!FromWireMap.TryGetValue(wire, out var category))
+            throw new ArgumentException(
+                $"Unknown column category wire value: '{wire}'.", nameof(wire));
+        return category;
+    }
 }
