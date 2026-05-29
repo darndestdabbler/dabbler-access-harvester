@@ -1,0 +1,34 @@
+{
+  "status": "completed",
+  "summary": "Session 1 fixed Finding #1 (manifest omits Tables / Relationships / Modules). AccessHarvester.Core/Pipeline.cs EmitManifestArtifacts now loads ir/Tables/*.ir.json and ir/Relationships/*.ir.json into typed TableMetadata / RelationshipMetadata lists and passes them to DatabaseManifestAggregator.Build, plus the on-disk category string ('ModulesAndClasses') replaces the hard-coded 'Modules' in the parse loop, the isClassModule header check, and the moduleExports filter — root-cause of the Modules-empty symptom. Parse-failed standalone/class modules (e.g. HHC's basResetFixture) surface as stub ModuleExports with ParserOutput=null so per-category counts stay equal to the on-disk ir/ tally. New regression test tests/AccessHarvester.Pipeline.Tests/Manifest/ManifestCompletenessTests.cs pins the Summary.<X>Count == manifest.<X>.Length == ir/<DiskCategory>/*.ir.json invariant for Forms / Reports / Queries / Modules / Tables, plus the manifest-vs-ir parity for Relationships (DatabaseSummary intentionally lacks a RelationshipCount field — no schema change in Session 1). Both samples/GoldenOutput/{HomeHealthCare,NorthwindDevEdition}/ were regenerated via tmp/build-golden-corpus from a fresh CLI run; HHC manifest now shows Summary.ModuleCount=4 / TableCount=13 / Relationships.length=12, Northwind shows 18 / 29 / 29. Determinism gate green: two fresh Pipeline.Run invocations against HomeHealthCare.accdb produced byte-identical normalised manifests. examples/northwind-output.json was kept as the empty-arrays smoke fixture (reverting an interim populate) so the validate smoke tests stay schema-conformant. The Session 1 populate fix exposed three pre-existing schema-vs-typed-record drifts in harvester-schema.v1.0.json that were latent while the arrays stayed empty — ParserOutput.Items shape requires QueryType/Sql instead of the VBA-procedure shape ParserOutputProjector produces (~1099 of 1174 errors), RelationshipDefinition requires Table/ForeignTable while typed records emit ParentTable/ChildTable (~12 errors), TableIndex.Fields expects strings while typed records emit objects (~29 errors). Per user direction (AskUserQuestion 2026-05-29), these schema-corrective fixes defer to Session 2's already-planned v1.0 -> v1.1 bump; tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.HomeHealthCare_FullRun_ManifestValidatesAgainstSchema is Skip'd with a precise pointer to that handoff. dotnet build = 0 errors / pre-existing CA1416 warnings only. dotnet test sequential = 0 failed, 2242 passed, 3 skipped (1 new Session-2 handoff + 2 pre-existing). Session 6 cross-provider verification VERIFIED on R1 by gpt-5-4 (input=5396 / output=6602 / cost=$0.1125) — substantive 4-concern prose analysis with empty issues array, explicit endorsement of the schema-handoff pattern.",
+  "files_changed": [
+    "AccessHarvester.Core/Pipeline.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Manifest/ManifestCompletenessTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs",
+    "samples/GoldenOutput/HomeHealthCare/",
+    "samples/GoldenOutput/NorthwindDevEdition/",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/ai-assignment.md",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/activity-log.json",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-state.json",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/session-reviews/session-001.md",
+    "docs/session-sets/harvester-manifest-index-and-batch-readiness/disposition.json"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 designs the additive harvester-schema v1.0 -> v1.1 bump (file-map index per category + documentation pointer per Finding #2) AND folds in the three corrective schema-vs-typed-record drift fixes Session 1 surfaced (ParserOutput.Items VBA-procedure shape, RelationshipDefinition Parent/Child rename, TableIndex.Fields object shape). Synthesis-grade architecture work earns Opus at effort=high per ai-assignment.md's per-session recommendation."
+    }
+  },
+  "blockers": [
+    {
+      "title": "Schema-vs-typed-record drift in harvester-schema.v1.0.json — three latent bugs exposed by Session 1 populate fix",
+      "details": "Once Modules/Tables/Relationships are populated in the manifest, harvester-schema.v1.0.json rejects the production output with 1174 errors clustered around three root issues: (1) ParserOutput.Items requires QueryType/Sql — a Query-item shape rather than the VBA-procedure shape ParserOutputProjector emits (root cause of ~1099 errors via cascaded Items/Body/Calls/References validation), (2) RelationshipDefinition.required is ['Name','Table','ForeignTable'] but typed records emit ParentTable/ChildTable (12 errors), (3) TableIndex.Fields items are typed as 'string' but the typed records emit field objects (29 errors). These are corrective schema edits (align the schema with the long-shipping typed record shapes), not behaviour changes; Session 2 should absorb them into the additive v1.0 -> v1.1 bump it already plans. Until Session 2 lands, the production `validate` subcommand will report errors on real-world manifests — disclosure-only, not a behaviour regression."
+    }
+  ]
+}

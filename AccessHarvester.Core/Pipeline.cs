@@ -260,8 +260,19 @@ public sealed class Pipeline
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
         // ── 1. Parse VBA text from all three raw categories ──────────
+        // On-disk category name is "ModulesAndClasses" (matches the
+        // SaveAsTextExporter / Translator / VbaSignatureEnricher
+        // category strings). The standalone-module category branches
+        // off the SaveAsText "VERSION 1.0 CLASS" header below.
         var parsed = new List<ParsedModuleEntry>();
-        foreach (var category in new[] { "Modules", "Forms", "Reports" })
+        // Side-list of ModulesAndClasses entries whose VBA parse threw.
+        // The kind is still recoverable from the SaveAsText header so a
+        // kind-correct stub ModuleExport can surface at step 3, keeping
+        // the per-category count invariant
+        // (manifest.Modules.length == ir/ModulesAndClasses/*.ir.json).
+        var moduleParseFailures =
+            new List<(string Name, ManifestModuleKind Kind)>();
+        foreach (var category in new[] { "ModulesAndClasses", "Forms", "Reports" })
         {
             var categoryDir = Path.Combine(rawDir, category);
             if (!Directory.Exists(categoryDir)) continue;
@@ -269,15 +280,27 @@ public sealed class Pipeline
             foreach (var file in Directory.GetFiles(categoryDir, "*.txt").OrderBy(f => f, StringComparer.Ordinal))
             {
                 var name = Path.GetFileNameWithoutExtension(file);
+                // Kind detection is lifted out of the parse try-block so a
+                // parse failure can still surface a kind-correct stub
+                // below. A file-read failure leaves isClassModule at its
+                // category default (false for ModulesAndClasses,
+                // true elsewhere) — the worst case is one stub with the
+                // standalone-vs-class flag wrong, which is materially
+                // better than dropping the module from the manifest.
+                bool isClassModule = category != "ModulesAndClasses";
                 try
                 {
                     var text = File.ReadAllText(file, Encoding.GetEncoding(1252));
-                    var (ast, _) = VbaModuleBodyLoader.LoadAndParse(text);
 
-                    // Class modules have "VERSION 1.0 CLASS" in the SaveAsText header.
-                    bool isClassModule = category != "Modules"
+                    // Within ModulesAndClasses, class modules carry the
+                    // "VERSION 1.0 CLASS" SaveAsText header; standalone
+                    // modules do not. Forms / Reports are always class
+                    // modules.
+                    isClassModule = category != "ModulesAndClasses"
                         || text.Contains("VERSION 1.0 CLASS\r\n", StringComparison.Ordinal)
                         || text.Contains("VERSION 1.0 CLASS\n", StringComparison.Ordinal);
+
+                    var (ast, _) = VbaModuleBodyLoader.LoadAndParse(text);
 
                     var manifestKind = isClassModule
                         ? ManifestModuleKind.ClassModule
@@ -304,6 +327,13 @@ public sealed class Pipeline
                         Message = $"VBA parse failed for '{name}': {ex.Message}",
                         Code = "VBA_PARSE_FAILURE",
                     });
+                    if (category == "ModulesAndClasses")
+                    {
+                        moduleParseFailures.Add((name,
+                            isClassModule
+                                ? ManifestModuleKind.ClassModule
+                                : ManifestModuleKind.Standard));
+                    }
                 }
             }
         }
@@ -314,8 +344,16 @@ public sealed class Pipeline
         var classifications = FunctionClassificationBuilder.BuildAll(resolvedModules, crossRefs);
 
         // ── 3. Standalone module exports ───────────────────────────────
+        // Emits one ModuleExport per standalone module AND per
+        // class module discovered under raw/ModulesAndClasses/.
+        // Form / Report class modules surface via formExports /
+        // reportExports below, so they are excluded here. Parse-failed
+        // modules surface as stub ModuleExports with ParserOutput=null
+        // so per-category counts stay equal to the on-disk ir/ tally.
+        // The final OrderBy preserves byte-deterministic ordering
+        // regardless of which list a given module came from.
         var moduleExports = parsed
-            .Where(p => p.Category == "Modules")
+            .Where(p => p.Category == "ModulesAndClasses")
             .Select(p =>
             {
                 var parserOutput = ParserOutputProjector.Project(
@@ -327,6 +365,13 @@ public sealed class Pipeline
                     ParserOutput = parserOutput,
                 };
             })
+            .Concat(moduleParseFailures.Select(f => new ModuleExport
+            {
+                ModuleName = f.Name,
+                ModuleKind = f.Kind,
+                ParserOutput = null,
+            }))
+            .OrderBy(m => m.ModuleName, StringComparer.Ordinal)
             .ToList();
 
         // ── 4. Form and report exports (merge spec + parser output) ────
@@ -338,6 +383,14 @@ public sealed class Pipeline
         // ── 4b. Query exports (D14: Sql.Parsed + Sql.Parameters) ──────
         var queryExports = BuildQueryExports(rawDir, diagnostics);
 
+        // ── 4c. Table + Relationship exports (loaded from ir/) ────────
+        // Tables and Relationships pass through the kb/ → ir/ pipeline
+        // via JsonPassthroughTranslator with no enricher, so the ir/
+        // files are byte-equivalent to the typed records and can be
+        // deserialized directly.
+        var tableExports = BuildTableExports(irDir, diagnostics);
+        var relationshipExports = BuildRelationshipExports(irDir, diagnostics);
+
         // ── 5. Assemble and write ──────────────────────────────────────
         IReadOnlyList<UnresolvedItem> unresolvedItems = Array.Empty<UnresolvedItem>();
 
@@ -348,6 +401,8 @@ public sealed class Pipeline
             reports: reportExports,
             queries: queryExports,
             modules: moduleExports,
+            tables: tableExports,
+            relationships: relationshipExports,
             unresolvedItems: unresolvedItems,
             diagnostics: diagnostics);
 
@@ -477,6 +532,81 @@ public sealed class Pipeline
                     Severity = HarvesterDiagnosticSeverity.Warning,
                     Message = $"Query export failed for '{name}': {ex.Message}",
                     Code = "QUERY_EXPORT_FAILURE",
+                });
+            }
+        }
+
+        return exports;
+    }
+
+    // Reads ir/Tables/*.ir.json (byte-equivalent to TableMetadata since
+    // the kb/ → ir/ pipeline is a JsonPassthrough with no enricher) and
+    // deserialises each into a TableMetadata record.
+    private static List<TableMetadata> BuildTableExports(
+        string irDir,
+        List<HarvesterDiagnostic> diagnostics)
+    {
+        var dir = Path.Combine(irDir, "Tables");
+        var exports = new List<TableMetadata>();
+        if (!Directory.Exists(dir)) return exports;
+
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json")
+                                       .OrderBy(f => f, StringComparer.Ordinal))
+        {
+            string name = Path.GetFileNameWithoutExtension(
+                Path.GetFileNameWithoutExtension(file));
+            try
+            {
+                var record = JsonSerializer.Deserialize<TableMetadata>(
+                    File.ReadAllText(file, Encoding.UTF8), options)
+                    ?? throw new InvalidDataException("Null JSON root.");
+                exports.Add(record);
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add(new HarvesterDiagnostic
+                {
+                    Severity = HarvesterDiagnosticSeverity.Warning,
+                    Message = $"Table IR load failed for '{name}': {ex.Message}",
+                    Code = "TABLE_IR_LOAD_FAILURE",
+                });
+            }
+        }
+
+        return exports;
+    }
+
+    // Reads ir/Relationships/*.ir.json (byte-equivalent to
+    // RelationshipMetadata) and deserialises each into a typed record.
+    private static List<RelationshipMetadata> BuildRelationshipExports(
+        string irDir,
+        List<HarvesterDiagnostic> diagnostics)
+    {
+        var dir = Path.Combine(irDir, "Relationships");
+        var exports = new List<RelationshipMetadata>();
+        if (!Directory.Exists(dir)) return exports;
+
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json")
+                                       .OrderBy(f => f, StringComparer.Ordinal))
+        {
+            string name = Path.GetFileNameWithoutExtension(
+                Path.GetFileNameWithoutExtension(file));
+            try
+            {
+                var record = JsonSerializer.Deserialize<RelationshipMetadata>(
+                    File.ReadAllText(file, Encoding.UTF8), options)
+                    ?? throw new InvalidDataException("Null JSON root.");
+                exports.Add(record);
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add(new HarvesterDiagnostic
+                {
+                    Severity = HarvesterDiagnosticSeverity.Warning,
+                    Message = $"Relationship IR load failed for '{name}': {ex.Message}",
+                    Code = "RELATIONSHIP_IR_LOAD_FAILURE",
                 });
             }
         }

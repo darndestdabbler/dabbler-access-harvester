@@ -1,0 +1,41 @@
+{
+  "sessionSetName": "harvester-manifest-index-and-batch-readiness",
+  "createdDate": "2026-05-29T08:30:32.162774-04:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/step-3.5-author-ai-assignment",
+      "dateTime": "2026-05-29T08:30:32.162774-04:00",
+      "description": "Routed analysis authored ai-assignment.md for the 4-session plan.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 2139,
+          "outputTokens": 1923,
+          "costUsd": 0.02190375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/step-6-session-verification",
+      "dateTime": "2026-05-29T08:56:23.842411-04:00",
+      "description": "Cross-provider session verification routed to gpt-5-4",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 5396,
+          "outputTokens": 6602,
+          "costUsd": 0.11252000000000001
+        }
+      ]
+    }
+  ]
+}
