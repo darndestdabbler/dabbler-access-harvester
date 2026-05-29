@@ -1,0 +1,40 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 3 landed the Core layer for the new report-baseline harvester capability: RecordSource resolver (recognizes SELECT / PARAMETERS / TRANSFORM inline-SQL prefixes; bracket-quotes object names after rejecting bracket-unsafe characters), an ACE OLE DB execution seam (IReportQueryExecutor + Windows-only OleDbReportQueryExecutor implementing it with positional parameter binding), the RecordSourceResultSet aggregate computer (typed-value bucket identity via TypedValueComparer normalizing numeric CLR types and DateTime, row-order-invariant canonical Keys with trailing zeros after decimal stripped, ImmutableSortedDictionary-everywhere for byte-stable JSON, deterministic Skipped ordering at end of Compute), a canonical aggregates.json writer (System.Text.Json indented, snapshotted ParametersUsed, parent-directory creation), and the end-to-end ReportBaselineService that composes them as the single API S2 wires from CLI code. 45 new hermetic xUnit tests cover the contract end-to-end (resolver classification + safety, computer's row count / numeric sums / per-group bucket counts and subtotals / null-key bucketing / literal-(null)-string-collision-guard / expression-skip / missing-column-skip / overflow-skip / typed-numeric-equality bucket merge / row-order-invariant Key + Skipped, writer's shape + determinism + sort + file IO, service composition over a fake executor). Full suite at close: 499 pass / 2 skip (COM-required, expected) / 0 fail. Spec was finalized at session start via cross-provider consensus (Gemini Pro tier 2 + Opus tier 3, GPT-5-4 verifier on each): four open maintainer decisions resolved as report-baseline standalone subcommand; query-result aggregates not footer-expression evaluation; hybrid parameter strategy (manifest binding-source analysis + unfiltered runtime default + identify-usage escalation for required-param reports); default-all-reports with --reports allowlist. Session-verification took four rounds (R1/R2/R3 ISSUES_FOUND with all must-fix items addressed in-session, R4 VERIFIED with empty must_fix); cumulative remediations: broaden resolver beyond SELECT, IsNull flag for null-key collision, ordinal-sorted dictionaries with snapshotted ParametersUsed, positional OLE DB binding, ReportBaselineService orchestrator, TypedValueComparer for numeric bucket identity, canonical row-order-invariant Key, sorted Skipped order, plus reverting inherited HomeHealthCare.accdb working-tree drift before commit. Three minor nice-to-haves filed for S2/S3 (ParametersUsed mutation regression test, opportunistic XML-doc nits, future bundled positional+provenance parameter shape). S1 routed cost ~$1.05 (spec-finalization consensus $0.218; ai-assignment.md authoring $0.020; 4x session-verification $0.814). Closes spec.md Session 1 deliverables (resolve + execute + compute + emit + hermetic tests); no CLI wiring this session (S2 scope).",
+  "files_changed": [
+    "AccessHarvester.Core/ReportBaseline/RecordSourceKind.cs",
+    "AccessHarvester.Core/ReportBaseline/ResolvedRecordSource.cs",
+    "AccessHarvester.Core/ReportBaseline/RecordSourceResolver.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportAggregateInput.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportAggregates.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportAggregateComputer.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportAggregatesWriter.cs",
+    "AccessHarvester.Core/ReportBaseline/IReportQueryExecutor.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportBaselineService.cs",
+    "AccessHarvester.Core/Com/OleDbReportQueryExecutor.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/RecordSourceResolverTests.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/ReportAggregateComputerTests.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/ReportAggregatesWriterTests.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineServiceTests.cs",
+    "docs/session-sets/harvester-report-baseline-capture/spec.md",
+    "docs/session-sets/harvester-report-baseline-capture/ai-assignment.md",
+    "docs/session-sets/harvester-report-baseline-capture/change-log.md",
+    "docs/session-sets/harvester-report-baseline-capture/session-state.json",
+    "docs/session-sets/harvester-report-baseline-capture/session-events.jsonl",
+    "docs/session-sets/harvester-report-baseline-capture/disposition.json",
+    "docs/session-sets/ROADMAP.md"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-7",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 wires the report-baseline standalone CLI subcommand (--db / --out / --reports / --params / --json-status), adds the DoCmd.OutputTo COM PDF render, implements exit codes 0/1/2/3 mirroring run, emits baseline-manifest.json index over all processed reports, and ships a [SkippableFact] integration test against a committed fixture DB. S2 spans CLI surface + COM render + determinism-gate handling for binary PDFs + multi-report index emission; multiple coordinated concerns benefit from claude-opus-4-7 frontier-model synthesis at effort=high."
+    }
+  },
+  "blockers": []
+}
