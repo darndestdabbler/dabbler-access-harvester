@@ -87,6 +87,68 @@
           "costUsd": 0.0193075
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-verification-r1",
+      "dateTime": "2026-05-29T12:30:42.400531-04:00",
+      "description": "Routed task_type=session-verification to gpt-5-4. R1 returned ISSUES_FOUND with 1 Major (HarvesterVersion provenance mismatch between Pipeline.cs manifest emission and Program.cs --json-status envelope) + 1 Minor (--types + default-clean interaction undocumented).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "task_type": "session-verification",
+          "input_tokens": 27200,
+          "output_tokens": 4200,
+          "cost_usd": 0.26272,
+          "round": 1
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "r1-fixes",
+      "dateTime": "2026-05-29T12:30:42.401536-04:00",
+      "description": "Major: centralised version resolution in DatabaseManifest.ResolveHarvesterVersion() and collapsed three prior duplicates (Pipeline.cs manifest emission, Program.cs --json-status envelope, Program.cs PrintVersion --version output). Minor: extended PrintUsage --no-clean help block with an IMPORTANT paragraph on the --types + default-clean interaction.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-verification-r2",
+      "dateTime": "2026-05-29T12:30:42.401536-04:00",
+      "description": "Re-routed task_type=session-verification to gpt-5-4 at complexity_hint=85 per workflow Step 7's Major-issue retry guidance. R2 returned VERIFIED with empty issues array. Both R1 findings cleanly closed; no new issues introduced by the fixes; residual caveats (Extract/Translate orphan tests, EmitRootIndex IOException catch, --no-clean envelope flip test) classified as non-blocking polish.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "task_type": "session-verification",
+          "input_tokens": 24570,
+          "output_tokens": 4968,
+          "cost_usd": 0.13595,
+          "round": 2
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "next-orchestrator-recommendation",
+      "dateTime": "2026-05-29T12:30:42.401536-04:00",
+      "description": "Routed task_type=analysis with complexity_hint=55 for the Session 4 orchestrator pick. gemini-pro recommended claude-code/anthropic/opus-4-7 @ effort=high, citing synthesis-document + closeout responsibilities + Session 3 R1 reasoning-level Major as evidence the bump pays for itself on the final session.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-2.5-pro",
+          "task_type": "analysis",
+          "input_tokens": 900,
+          "output_tokens": 170,
+          "cost_usd": 0.00292
+        }
+      ]
     }
   ]
 }

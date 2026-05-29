@@ -23,7 +23,7 @@
     "model": "claude-opus-4-7",
     "effort": "high",
     "reason": {
-      "code": "synthesis-document-and-closeout",
+      "code": "continue-current-trajectory",
       "specifics": "Session 4 (Findings #3 field-type semantics + #5 batch operations guide + the set closeout) combines synthesis-document authoring (interpretation-guide extension covering Attachment 101 / OLE Object 11 / Hyperlink / multi-valued / Lookup / Memo / Currency / AutoNumber semantics with the Northwind Attachments worked example, plus a new batch-operations doc covering the Session 3 --clean / cross-DB-index / status-envelope-provenance additions) with the holistic set closeout (change-log.md, next-session-set-recommendation.md, Step 9 reorganization review, ROADMAP row, final session-state flip). Per the routed gemini-pro analysis: the task demands the maximum reasoning capacity of Opus to ensure a clean final state and minimise verifier-driven rework, directly responding to the Session 3 R1 reasoning-level Major (HarvesterVersion provenance unification) that opus@medium missed. Opus authors in-conversation for both documents per the synthesis-document-above-3K-tokens convention; routed cost concentrated in the mandatory cross-provider session-verification round + a potential Step 9 reorg-review analysis."
     }
   },
