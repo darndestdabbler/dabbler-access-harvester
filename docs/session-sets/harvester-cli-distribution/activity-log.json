@@ -1,0 +1,121 @@
+{
+  "sessionSetName": "harvester-cli-distribution",
+  "createdDate": "2026-05-28T21:25:07.726619-04:00",
+  "totalSessions": 2,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/read-guidance-and-install-md",
+      "dateTime": "2026-05-28T21:25:07.727621-04:00",
+      "description": "Read project-guidance.md, lessons-learned.md, and docs/harvester/install.md per Session 1 step 1.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/author-ai-assignment",
+      "dateTime": "2026-05-28T21:25:07.727621-04:00",
+      "description": "Authored ai-assignment.md via route(task_type=analysis) on gemini-pro (Step 3.5 of the workflow).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3791,
+          "outputTokens": 856,
+          "costUsd": 0.01329875
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/channel-decision-consult",
+      "dateTime": "2026-05-28T21:29:22.855030-04:00",
+      "description": "Channel-decision cross-engine consult per consensus-before-asking-human Convention. Gemini Pro confirmed spec default (GitHub Releases + zip + sha256). OpenAI consult blocked by recurring 429 on both gpt-5-4 and gpt-5-4-mini. Claude Opus orchestrator stood in as cross-provider counterpart. Synthesis written to tmp/channel_decision_synthesis.md. Material spec revision: replace PowerShell Compress-Archive with System.IO.Compression.ZipFile + explicit LastWriteTime normalization to satisfy the spec stop rule on bundle determinism.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3765,
+          "outputTokens": 472,
+          "costUsd": 0.00942625
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/update-publish-script",
+      "dateTime": "2026-05-28T21:37:37.021811-04:00",
+      "description": "Updated tools/publish/publish.ps1 to add deterministic zip bundle + SHA-256 sidecar. New outputs: publish/release/AccessHarvester-1.0.0-schema-v1.0-win-x64.zip + .sha256. Pre-existing publish/win-x64/AccessHarvester.exe path preserved. Bundle uses System.IO.Compression.ZipFile with LastWriteTime pinned to 2000-01-01T00Z and alphabetical entry ordering; sha256 sidecar uses standard sha256sum-compatible format.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/verify-determinism",
+      "dateTime": "2026-05-28T21:37:37.021811-04:00",
+      "description": "Verified bundle determinism: two consecutive publishes produced byte-identical zips with identical SHA-256 (575bd2129ca2a5bb6e4faef77ffd2b2e264aa5bd73a515baff08e6605f67ba3a). Spec stop-rule on bundle determinism passes.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/smoke-validate-bundle",
+      "dateTime": "2026-05-28T21:37:37.021811-04:00",
+      "description": "Smoke-validated bundle: SHA-256 sidecar matched zip, unzipped to temp dir, ran AccessHarvester.exe --version successfully (returned \"AccessHarvester 1.0.0 (schema v1.0)\"), --help exit 0.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/build-and-test",
+      "dateTime": "2026-05-28T21:37:37.021811-04:00",
+      "description": "dotnet build clean: 0 errors, 331 warnings (pre-existing). dotnet test: parallel run shows 3 transient COM-contention failures in AccessHarvester.Integration CLI HHC extract/translate/run tests, but rerun in isolation passes; full suite passes with xUnit parallelization disabled (0 failed, 2241+ passed, 2 skipped). Pre-existing repo flake unrelated to Session 1 publish-script changes; disclosed in verification prompt.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/cross-provider-verification",
+      "dateTime": "2026-05-28T21:42:05.750894-04:00",
+      "description": "Cross-provider session-verification Round 1: VERIFIED with substantive 7-point prose analysis covering spec adherence, determinism correctness, stop-rule coverage, filename/version honesty, LICENSE-reference choice, Lean-By-Default audit, and session-state hybrid shape. Empty issues array. First-choice gpt-5-4 returned 429s (recurring repo pattern); fell back to gemini-pro via query() per verifier-failure escalation ladder step 2. Cross-provider property preserved (Claude orchestrator -> Gemini verifier).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "session-verification",
+          "inputTokens": 9690,
+          "outputTokens": 984,
+          "costUsd": 0.0219525,
+          "note": "Fallback from gpt-5-4 (429-blocked) per verifier-failure escalation ladder step 2"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/next-orchestrator-recommendation",
+      "dateTime": "2026-05-28T21:45:59.345384-04:00",
+      "description": "Routed next-orchestrator recommendation for Session 2 via route(task_type=analysis) on gemini-pro per the never-self-opine rule. Recommendation: claude-code claude-opus-4-7 @ effort=high (continue-current-trajectory). Recorded in disposition.next_orchestrator.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3908,
+          "outputTokens": 209,
+          "costUsd": 0.006975
+        }
+      ]
+    }
+  ]
+}
