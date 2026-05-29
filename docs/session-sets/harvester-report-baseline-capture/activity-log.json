@@ -1,0 +1,177 @@
+{
+  "sessionSetName": "harvester-report-baseline-capture",
+  "createdDate": "2026-05-29T17:46:36.341343-04:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/step-0-spec-finalization-consensus-call-1",
+      "dateTime": "2026-05-29T20:51:44-04:00",
+      "description": "Spec-finalization cross-provider consensus, first route (task_type=analysis). Routed to gemini-pro. Returned a structured JSON recommendation on all 4 open spec decisions.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1998,
+          "outputTokens": 626,
+          "costUsd": 0.008757
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/step-0-spec-finalization-consensus-verify-1",
+      "dateTime": "2026-05-29T20:51:58-04:00",
+      "description": "Verifier on the first consensus call (auto-verify task_type=analysis). Routed to gpt-5-4-mini.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4-mini",
+          "taskType": "analysis",
+          "inputTokens": 2610,
+          "outputTokens": 1623,
+          "costUsd": 0.009261
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/step-0-spec-finalization-consensus-call-2",
+      "dateTime": "2026-05-29T20:53:00-04:00",
+      "description": "Spec-finalization cross-provider consensus, second route (task_type=architecture). Pinned to opus per config. Returned a structured JSON recommendation triangulating Gemini's answer.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "architecture",
+          "inputTokens": 2163,
+          "outputTokens": 2148,
+          "costUsd": 0.193545
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/step-0-spec-finalization-consensus-verify-2",
+      "dateTime": "2026-05-29T20:53:59-04:00",
+      "description": "Verifier on the second consensus call (auto-verify task_type=architecture), first round. Routed to gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "architecture",
+          "inputTokens": 2855,
+          "outputTokens": 3508,
+          "costUsd": 0.059757
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/step-0-spec-finalization-consensus-verify-2-retry",
+      "dateTime": "2026-05-29T20:54:48-04:00",
+      "description": "Verifier retry on the second consensus call. Routed to gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "architecture",
+          "inputTokens": 2846,
+          "outputTokens": 2775,
+          "costUsd": 0.04874
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/step-3.5-author-ai-assignment",
+      "dateTime": "2026-05-29T20:59:03-04:00",
+      "description": "Routed analysis authored ai-assignment.md for the 3-session plan against the finalized spec. Routed to gemini-pro.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 4601,
+          "outputTokens": 1399,
+          "costUsd": 0.019741
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/step-6-session-verification-r1",
+      "dateTime": "2026-05-29T21:21:14-04:00",
+      "description": "Cross-provider session-verification R1 against the initial implementation pass. Routed to gpt-5-4. Returned ISSUES_FOUND with four must-fix items (broaden resolver beyond SELECT, IsNull flag for null-key collision, ordinal-sort emitted dictionaries, positional OLE DB binding). All four addressed in-session.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14507,
+          "outputTokens": 13220,
+          "costUsd": 0.234568
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/step-6-session-verification-r2",
+      "dateTime": "2026-05-29T21:29:47-04:00",
+      "description": "Cross-provider session-verification R2 after R1 remediations. Routed to gpt-5-4. Returned ISSUES_FOUND with two must-fix items (add ReportBaselineService orchestrator over IReportQueryExecutor seam; switch group bucket identity from formatted-string to typed-value via TypedValueComparer). Both addressed in-session; inherited HomeHealthCare.accdb working-tree drift also reverted per nice-to-have.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 17075,
+          "outputTokens": 10563,
+          "costUsd": 0.201132
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/step-6-session-verification-r3",
+      "dateTime": "2026-05-29T21:36:23-04:00",
+      "description": "Cross-provider session-verification R3 after R2 remediations. Routed to gpt-5-4. Returned ISSUES_FOUND with two must-fix items (canonicalize numeric GroupBucket.Key so 1m/1.00m/1.0m emit identical Key regardless of row order; sort Skipped at end of Compute so multi-overflow scenarios serialize identically across row permutations). Both addressed in-session.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20883,
+          "outputTokens": 8445,
+          "costUsd": 0.178882
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/step-6-session-verification-r4",
+      "dateTime": "2026-05-29T21:41:27-04:00",
+      "description": "Cross-provider session-verification R4 after R3 remediations. Routed to gpt-5-4. Returned VERIFIED with empty must_fix; three minor nice-to-haves filed for S2/S3 (ParametersUsed mutation regression test, opportunistic XML-doc nits, future bundled positional+provenance parameter shape).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 22192,
+          "outputTokens": 9574,
+          "costUsd": 0.19909
+        }
+      ]
+    }
+  ]
+}
