@@ -193,6 +193,23 @@
           "costUsd": 0.004155
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/step-9-reorg-scan",
+      "dateTime": "2026-05-29T06:02:05.960668-04:00",
+      "description": "Routed Step 9 reorganization review scan",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 32803,
+          "outputTokens": 459,
+          "costUsd": 0.04559375
+        }
+      ]
     }
   ]
 }
