@@ -5,30 +5,44 @@
   "sessions": [
     {
       "number": 1,
-      "title": "Manifest completeness — populate Tables, Relationships, Modules (Finding #1)",
-      "status": "in-progress",
+      "title": "Manifest completeness \u2014 populate Tables, Relationships, Modules (Finding #1)",
+      "status": "complete",
       "startedAt": "2026-05-29T08:21:05.013950-04:00",
+      "completedAt": "2026-05-29T09:02:03.293902-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
         "model": "claude-opus-4-7",
         "effort": "medium"
-      }
+      },
+      "verificationVerdict": "VERIFIED"
     },
     {
       "number": 2,
       "title": "Manifest as a self-describing index (Finding #2)",
-      "status": "not-started"
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     },
     {
       "number": 3,
-      "title": "Batch-run ergonomics — stale-file clean + status provenance (Findings #4, #6, opt. cross-DB index)",
-      "status": "not-started"
+      "title": "Batch-run ergonomics \u2014 stale-file clean + status provenance (Findings #4, #6, opt. cross-DB index)",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     },
     {
       "number": 4,
-      "title": "Interpretation docs — field-type semantics + batch operations guide (Findings #3, #5) + closeout",
-      "status": "not-started"
+      "title": "Interpretation docs \u2014 field-type semantics + batch operations guide (Findings #3, #5) + closeout",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     }
   ]
 }
