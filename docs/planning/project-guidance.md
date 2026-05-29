@@ -221,6 +221,53 @@ experiments only.
 - Build and test should be run **sequentially**, not in parallel —
   file-lock contention against the same worktree on Windows
   obscures the real validation result.
+- **Integration tests that drive COM against a shared `.accdb`
+  must be hermetic of each other's setup.** xUnit runs test
+  *classes* in parallel within an assembly. Two
+  `[SkippableFact]` tests that each spawn a CLI process touching
+  the same sample `.accdb` will race on ACE OLE DB's file-level
+  lock; the per-test budget (typically 60s) expires before the
+  contention clears and one or both tests time out. The victim
+  rotates non-deterministically across runs — first observed on
+  `ClassifyCommandTests` in `harvester-data-classifier` Session 4
+  (2026-05-28), then on `CliExtractTests` / `CliRunTests` /
+  `CliTranslateTests` in
+  `harvester-manifest-index-and-batch-readiness` Session 4
+  (2026-05-29). Three mitigations, in order of preference:
+  (a) pre-stage the required input (synthesize a minimal
+  hand-authored `classification.json` / `manifest.json` / etc.
+  for a small table — the upstream subcommand's behaviour is
+  already covered by its own test class); (b) put the new test
+  into the same `[Collection(...)]` as the conflicting class
+  to serialise them; (c) factor the shared setup into an
+  `ICollectionFixture` that runs once and is reused. The
+  cheapest is usually (a); (b) works but trades parallelism for
+  simplicity. Action-detail reference is preserved in
+  `lessons-learned.md` →
+  "Do Not Chain Parallel xUnit Integration Tests That Both
+  Drive Access COM Against The Same `.accdb`".
+- **Sweep spurious `.accdb` binary diffs before staging the
+  closeout commit.** `dotnet test` runs that open a sample
+  `.accdb` via Access COM (read-only at the SQL/DAO level)
+  cause Access to mutate internal timestamps and persistence-
+  state fields on close. The resulting `git status --short --
+  samples/*.accdb` mods carry no semantic content — only
+  Access-managed timestamp metadata — and must not be
+  committed. As part of the Step 8 closeout pre-commit pass,
+  run `git status --short -- samples/*.accdb` and
+  `git checkout -- samples/*.accdb` for any `.accdb` shown as
+  modified, BEFORE `git add` so the spurious touches are never
+  staged. If a stale `MSACCESS.EXE` from the test run is
+  holding the file (git checkout reports "unable to unlink"),
+  `Stop-Process -Id <pid> -Force` first, then retry the
+  checkout. Confirmed in two contexts:
+  `harvester-object-cleanup-identifier` Session 3 (2026-05-28,
+  original hit) and
+  `harvester-manifest-index-and-batch-readiness` Session 4
+  (2026-05-29, set-spanning confirmation). Action-detail
+  reference is preserved in `lessons-learned.md` →
+  "Sweep Spurious `.accdb` Binary Diffs After `dotnet test`
+  Before Staging The Closeout Commit".
 
 ### Workflow Expectations
 

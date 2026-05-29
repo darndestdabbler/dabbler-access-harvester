@@ -1406,6 +1406,18 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Sweep Spurious `.accdb` Binary Diffs After `dotnet test` Before Staging The Closeout Commit
 
+> **Promoted to `project-guidance.md` → Conventions → Testing
+> Conventions** on 2026-05-29 (after
+> `harvester-manifest-index-and-batch-readiness` Session 4
+> observed the same `.accdb` timestamp diffs from `dotnet test`
+> in a different session set — set-spanning confirmation per the
+> existing promotion trigger). Retained here as the action-detail
+> reference; the rule itself is now a Convention. Session 4 added
+> one operational detail to the Convention: when `git checkout`
+> fails with "unable to unlink" because a stale `MSACCESS.EXE`
+> from the test run is holding the file, `Stop-Process -Force`
+> first, then retry the checkout.
+
 - **Context:** `harvester-object-cleanup-identifier` Session 3 (2026-05-28),
   preparing the Session 3 closeout commit after the full sequential
   `dotnet test` run.
@@ -1443,6 +1455,19 @@ reference; if it proves out twice in *this* repo, propose promotion to
   "session-state.json is the single source of truth" entry.
 
 ## Do Not Chain Parallel xUnit Integration Tests That Both Drive Access COM Against The Same `.accdb`
+
+> **Promoted to `project-guidance.md` → Conventions → Testing
+> Conventions** on 2026-05-29 (after
+> `harvester-manifest-index-and-batch-readiness` Session 4 hit
+> the same parallel-COM contention pattern with the victim test
+> classes rotated from `ClassifyCommandTests` to
+> `CliExtractTests` / `CliRunTests` / `CliTranslateTests` —
+> second-context confirmation per the existing promotion trigger).
+> Retained here as the action-detail reference; the rule itself is
+> now a Convention. The non-deterministic victim rotation
+> validates the *general* parallel-COM-contention pattern, not the
+> specific test class the original lesson named — the Convention
+> captures the broader rule.
 
 - **Context:** Adding a new `[SkippableFact]` integration test in a
   test class that lives alongside another integration-test class
@@ -1522,3 +1547,93 @@ reference; if it proves out twice in *this* repo, propose promotion to
   Convention in `project-guidance.md` → Conventions → Code Style
   ("COM-driven row sources expose `IDisposable`-shaped sessions
   when they need cross-call transactional state").
+
+### Don't Write `VERIFIED After N Rounds` Prose Before Round N Actually Verifies
+
+- **Context:** Final-session cross-provider verification (Step 6 →
+  Step 7 → Step 8) where R1 returns `ISSUES_FOUND`, the orchestrator
+  fixes the findings in-session, and the change-log / disposition
+  copy needs to describe the verification outcome before the closeout
+  commit lands. First hit in
+  `harvester-manifest-index-and-batch-readiness` Session 4
+  (2026-05-29).
+- **Failure or friction:** Session 4 wrote
+  `Final verdict: VERIFIED after two rounds (R1 ISSUES_FOUND ... R2
+  VERIFIED)` in the change-log header BEFORE R2 actually ran. R2
+  happened to return VERIFIED, so the bet paid off — but the verifier
+  itself explicitly flagged the circularity in its R2 analysis
+  ("Potential circularity in the change-log's 'R2 ... VERIFIED'
+  wording: this is only a problem if R2 finds issues. If R2 verifies,
+  the statement becomes true ex post and does not require correction.
+  In this review, the fixes hold up, so that anticipatory wording is
+  not a defect."). If R2 had surfaced new issues, the change-log
+  would have asserted "VERIFIED after two rounds" while the actual
+  state was "ISSUES_FOUND at R2 — R3 needed", forcing an extra
+  amendment commit. The bet was small but unnecessary.
+- **Lesson:** Don't write final-verdict prose that anticipates a
+  not-yet-completed verifier round. Use factual placeholder-free
+  language that describes only what has actually happened ("R1
+  ISSUES_FOUND with three findings — all addressed in-session; R2 in
+  progress on the fixes"). Update the prose once R_N actually
+  VERIFIES, in the same Step 8 closeout commit. The verifier prompt
+  itself can quote the R1 verdict + the in-session fix narrative as
+  evidence for the R2 round; the change-log doesn't need to
+  pre-state R_N's outcome.
+- **Action for future sessions:** When R1 returns `ISSUES_FOUND`
+  and the orchestrator is iterating before the closeout commit,
+  the change-log / disposition copy should describe R1's actual
+  state ("R1 ISSUES_FOUND; <N> findings addressed in-session") and
+  the *intent* to re-verify (not the outcome). Write the final
+  "VERIFIED after N rounds" language only AFTER R_N's response
+  arrives and shows VERIFIED. If R_N surfaces new issues, update
+  the prose to describe the new state and re-verify; the
+  closeout commit lands once the prose and the actual verifier
+  outcome are aligned. If a second session set hits this same
+  anticipatory-prose pattern (same orchestrator or different),
+  propose promoting to a Convention in `project-guidance.md` →
+  Workflow Expectations.
+
+### Call `log_step` At Each Session-Step Transition To Avoid Backfilling The Activity Log At Closeout
+
+- **Context:** `close_session`'s `activity_log_entry` closeout gate
+  requires at least one `activity-log.json` entry for the closing
+  session. The gate is mechanical — it doesn't care about the
+  session's actual work, only that the in-set ledger names the
+  session. First observed in
+  `harvester-manifest-index-and-batch-readiness` Session 3
+  closeout-gate fixups (commit `915f4ed`, 2026-05-29) and again at
+  Session 4 closeout-gate fixups (commit `4752070`, 2026-05-29).
+- **Failure or friction:** The orchestrator authored every step's
+  content directly (synthesis docs, route() calls, etc.) without
+  calling `log.log_step()` at any step transition. The session's
+  events still landed in `session-events.jsonl` (start_session +
+  close_session both write to it), but `activity-log.json` stayed
+  empty for the active session. `close_session` ran, the
+  `activity_log_entry` gate failed, and a backfill commit was
+  required to populate the missing entries from the change-log
+  narrative. Two sessions in one set, same pattern, same extra
+  commit — the gate caught it twice in a row because the
+  orchestrator wasn't calling `log_step`.
+- **Lesson:** `session-events.jsonl` records the closeout-gate-
+  relevant events (`closeout_requested`, `closeout_succeeded`,
+  start_session writes its own entry) but does NOT satisfy the
+  `activity_log_entry` gate — that gate reads `activity-log.json`
+  specifically. Treat `log.log_step()` as a mandatory transition
+  signal at each major step (Step 4 step transitions, Step 6
+  verification, Step 7 fixes if any, Step 8 commit). The script
+  call is short and idempotent against re-runs; the alternative
+  is a backfill commit at closeout that adds noise to the git
+  history.
+- **Action for future sessions:** Call `log.log_step()` at each
+  major step transition. The minimal payload is
+  `session_number`, `step_key` (e.g. `step-4.1-author-docs`),
+  `description`, `status`, plus any `routed_api_calls`. The
+  orchestrator can wrap each `route()` call in a `log_step`
+  block that also records the routed cost — that pattern
+  pre-empts both the `activity_log_entry` gate and the
+  per-session-cost telemetry separately. If a third session
+  hits the same backfill-commit pattern in any orchestrator,
+  propose promoting to a Convention in `project-guidance.md` →
+  Workflow Expectations and consider adding a step-transition
+  helper to `ai-router/session_log.py` so the call is one line
+  per step.
