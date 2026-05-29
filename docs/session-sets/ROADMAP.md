@@ -43,18 +43,26 @@
 
 ## Currently in-progress
 
-No session sets are currently in progress. Phase 4 closed
-[2026-05-29](harvester-cli-distribution/change-log.md); the most
-recent maintenance set
+| Status | Slug | Why now |
+|---|---|---|
+| `[~]` | [`harvester-report-baseline-capture`](harvester-report-baseline-capture/spec.md) | Consumption-triggered (Dabbler.NorthwindToBlazor Set 001 Session 3, 2026-05-29). Adds a `report-baseline` subcommand that captures each Access report's PDF + RecordSource-derived aggregates so downstream Blazor-migration projects verify ported-report parity against Access ground truth without a human exporting PDFs by hand. Eliminates the only remaining manual step in the harvest → migrate pipeline. Spec finalized 2026-05-29 via cross-provider consensus. **3 sessions**; Full tier, no UAT/E2E. |
+
+Phase 4 closed [2026-05-29](harvester-cli-distribution/change-log.md); the
+most recent maintenance set
 ([`harvester-manifest-index-and-batch-readiness`](harvester-manifest-index-and-batch-readiness/change-log.md))
-closed 2026-05-29 after answering the first real downstream
-consumer's six findings. The next natural set is
+closed 2026-05-29 after answering the first real downstream consumer's six
+findings, and surfaced two consumption-triggered draft specs:
+[`harvester-report-baseline-capture`](harvester-report-baseline-capture/spec.md)
+(now in-progress, row above) and
+[`harvester-consumer-workflow-instructions`](harvester-consumer-workflow-instructions/spec.md)
+(still DRAFT, awaiting maintainer finalization).
+
+Other candidates remain on deck but are not active:
 [`harvester-parallel-com-test-cleanup`](harvester-manifest-index-and-batch-readiness/next-session-set-recommendation.md)
-(not yet specced) — closing the xUnit parallel-COM CI flake the
-maintenance set surfaced. `harvester-sql-migration-generator`
+(not yet specced) — closing the xUnit parallel-COM CI flake the manifest
+set surfaced. `harvester-sql-migration-generator`
 ([`harvester-cli-distribution`'s recommendation](harvester-cli-distribution/next-session-set-recommendation.md))
-remains a candidate but is feature work, not maintenance — defer
-until the CI is reliable.
+is feature work, not maintenance — defer until the CI is reliable.
 
 ---
 

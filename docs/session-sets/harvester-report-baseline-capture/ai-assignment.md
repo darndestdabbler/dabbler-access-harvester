@@ -1,0 +1,98 @@
+# AI Assignment: `harvester-report-baseline-capture`
+
+This assignment guides the three sessions to implement a new harvester capability for capturing Access report baselines (rendered PDF + query aggregates). This eliminates the final manual step in the harvest-to-migrate pipeline, enabling fully automated parity checks for downstream consumers.
+
+---
+
+## Session 1: Aggregates from the report's RecordSource query
+### Recommended orchestrator
+`claude-opus-4-7 @ effort=medium`
+
+### Rationale
+This session establishes the core data-extraction logic and output contract for report aggregates. It involves database interaction via ACE OLEDB, data processing, and authoring hermetic tests, justifying a capable model for the initial implementation of the feature's data layer. This recommendation reflects the model already used for the session's boundary write.
+
+### Estimated routed cost
+moderate
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1.1  | In a new Core-layer service, resolve each report's `RecordSource` (saved query or inline SQL) from the input IR. | `orchestrator` |
+| 1.2  | Using the existing ACE OLEDB connector, execute the `RecordSource` query and load the result set. | `orchestrator` |
+| 1.3  | Implement logic to compute aggregates from the result set: total row count, subtotals for each group level, and a grand total. | `orchestrator` |
+| 1.4  | Emit an `aggregates.json` file containing the computed aggregates and provenance data (parameters used, harvester version, RecordSource shape). Explicitly include a note that aggregates reflect the RecordSource result set, not rendered footer controls. | `orchestrator` |
+| 1.5  | Author hermetic xUnit tests that provide a fixture query result (`DataTable`) and assert the correctness of the aggregate computation logic. | `orchestrator` |
+| 1.6  | Submit final changeset for verification. | `gpt-5-4` |
+
+### Actuals (filled after the session)
+- Orchestrator used: `claude-code opus-4.7 @ effort=medium`
+- Total routed cost: `$1.05` — spec-finalization consensus (Gemini Pro + Opus + 2× GPT-5-4 verifiers) $0.218; ai-assignment.md authoring (Gemini Pro analysis) $0.020; session-verification R1+R2+R3+R4 (4× GPT-5-4) $0.235 + $0.201 + $0.179 + $0.199.
+- Deviations from recommendation:
+  - **Spec-finalization phase added before Session 1.** The spec was a DRAFT authored by a downstream consumer with four open maintainer decisions. Per the user's "finalize spec first, then start S1" direction, the maintainer resolved all four via cross-provider consensus (subcommand name = `report-baseline`; aggregate contract = query-result totals; parameter strategy = hybrid; scope = default-all-reports + `--reports` allowlist) before the boundary write. Spec, ROADMAP, and ai-assignment.md were updated to reflect resolutions; the DRAFT banner was removed.
+  - **Steps 1.1–1.5 collapsed into a single orchestrator-driven implementation pass** (no per-step routed call) — Core-layer code is mechanical per the resolved contract and falls under Delegation Discipline's "orchestrator-direct" threshold.
+  - **Step 1.6 took four rounds, not one.** R1 / R2 / R3 each returned ISSUES_FOUND with concrete must-fix items; every item was addressed in-session and re-verified. R4 returned VERIFIED with empty must_fix. The four-round trajectory was driven by the verifier's standards on determinism (canonical numeric Key, sorted Skipped order), API completeness (the Core-layer service was implicit in S1 scope but not exposed until R2 surfaced it), and edge cases (literal `(null)` string vs DBNull collision, PARAMETERS / TRANSFORM prefix coverage, typed-value bucket identity).
+  - **R2 nice-to-have applied:** the inherited `samples/HomeHealthCare.accdb` working-tree drift (from a prior harvest run's COM-side metadata mutation, unrelated to S1) was reverted via `git checkout HEAD --` before R3 so it would not be staged in the closeout commit.
+- Notes for next-session calibration:
+  - The Core-layer service `ReportBaselineService` is the single API S2 wires from CLI code. It composes `RecordSourceResolver` → `IReportQueryExecutor` → `ReportAggregateComputer` → `ReportAggregatesWriter` and exposes `Capture` (returns the document) and `CaptureAndWrite` (writes `aggregates.json` to a caller-supplied directory).
+  - `OleDbReportQueryExecutor` already implements `IReportQueryExecutor`. S2's CLI code constructs one executor per `--db` argument and passes it into the service.
+  - The S2-scope items deferred from S1 are explicit and bounded: COM PDF render via `DoCmd.OutputTo`; CLI subcommand wiring (`--db`, `--out`, `--reports`, `--params`, `--json-status`); exit-code contract mirroring `run` (0/1/2/3); `baseline-manifest.json` index emission; PDF-binary determinism handling; `[SkippableFact]` integration test against a committed fixture DB.
+  - Three minor nice-to-haves filed for future opportunism: a `ParametersUsed` mutation-after-Compute regression test; minor XML-doc cleanups; a future positional+provenance-bundled parameter input shape.
+
+**Next-session orchestrator recommendation (Session 2):**
+`claude opus-4.7 @ effort=high`
+Rationale: S2 spans COM PDF render, CLI subcommand wiring, exit-code contract, the `baseline-manifest.json` index, and determinism-gate handling for binary PDFs — multiple coordinated concerns benefit from frontier-model synthesis.
+
+---
+
+## Session 2: COM PDF render + CLI subcommand wiring + determinism
+### Recommended orchestrator
+`opus @ effort=high`
+
+### Rationale
+This session integrates the new capability into the user-facing CLI and adds complex COM interop for PDF rendering. Wiring a new subcommand, handling its arguments, managing process exit codes, and ensuring determinism across outputs requires architectural synthesis and a deep understanding of the existing application structure.
+
+### Estimated routed cost
+high
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 2.1  | Integrate a `DoCmd.OutputTo acOutputReport` call into the existing COM session manager to render a specified report to a PDF file. | `orchestrator` |
+| 2.2  | Wire the new `report-baseline` standalone subcommand, including flags: `--db`, `--out`, `--reports`, `--params`, `--json-status`. | `orchestrator` |
+| 2.3  | Implement the specified process exit codes (0/1/2/3) to mirror the behavior of the `run` subcommand for batch-operation consistency. | `orchestrator` |
+| 2.4  | Generate the top-level `baseline-manifest.json` index, iterating over all processed reports and recording their status, paths, and any skipped reason. | `orchestrator` |
+| 2.5  | Author a `[SkippableFact]` integration test that runs the `report-baseline` command against a committed fixture database. | `orchestrator` |
+| 2.6  | Update the determinism gate to exclude PDF binary content and timestamps from the byte-for-byte comparison, similar to how `ExportedAt` is handled. | `orchestrator` |
+| 2.7  | Submit final changeset for verification. | `gpt-5-4` |
+
+### Actuals (filled after the session)
+- Orchestrator used:
+- Total routed cost:
+- Deviations from recommendation:
+- Notes for next-session calibration:
+- Next-session orchestrator recommendation:
+
+---
+
+## Session 3: Goldens, docs, parameter elicitation, and closeout
+### Recommended orchestrator
+`gemini-pro @ effort=medium`
+
+### Rationale
+The primary work in this session is documentation drafting, running the now-complete tool to generate golden files, and performing mechanical project closeout tasks. A cost-effective model is well-suited for generating initial documentation drafts and handling checklist-driven file modifications, with the orchestrator handling the file I/O and tool execution.
+
+### Estimated routed cost
+moderate
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 3.1  | Run the new `report-baseline` subcommand to capture golden artifacts for `NorthwindDevEdition` (rptInvoice, rptSalesByEmployee, rptSalesByProduct) and all in-scope reports for `HomeHealthCare`. | `orchestrator` |
+| 3.2  | Draft documentation for the new subcommand in `docs/harvester/install.md` (CLI reference) and `docs/harvester/interpretation-guide.md`. | `gemini-pro` |
+| 3.3  | Ensure the documentation explicitly covers the parameter selection strategy (unfiltered default, `identify-usage` for required params) and the `--params` JSON file shape. | `gemini-pro` |
+| 3.4  | Update the `READ-ME-FIRST.md` template to include the new `reports-baseline` artifact, ensuring downstream agents can discover it. | `orchestrator` |
+| 3.5  | Perform project closeout: update the change-log, flip the ROADMAP status from *in-progress* to *complete*, and conduct the Step 9 reorganization review. | `orchestrator` |
+| 3.6  | Submit final changeset for verification. | `gpt-5-4` |
+
+### Actuals (filled after the session)
+- Orchestrator used:
+- Total routed cost:
+- Deviations from recommendation:
+- Notes for next-session calibration:
