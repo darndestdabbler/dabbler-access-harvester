@@ -34,26 +34,68 @@ run anywhere Windows can launch the binary.
 
 ## Where to get it
 
-The artifact is **not** committed to the repository. The repo's
-`.gitignore` excludes the publish output (`/publish/`); the binary is
-produced on demand from a known source revision and is published to the
-distribution channel a consumer pulls from.
+The recommended way to get the harvester is from the official GitHub
+Releases page for the `dabbler-access-harvester` repository:
 
-The current convention (subject to change as a real downstream consumer
-materialises):
+- **<https://github.com/darndestdabbler/dabbler-access-harvester/releases>**
 
-- **From a local clone:** run the publish script
-  (`tools/publish/publish.ps1`) — produces
-  `publish/win-x64/AccessHarvester.exe` at the repo root. This is the
-  reference path the integration tests check against.
-- **From a release drop:** when a versioned release is cut, the
-  artifact lands as an attachment on a tagged GitHub release; a
-  downstream consumer downloads the exe directly.
+Each release is created by a CI workflow on a tag push (`v<semver>`,
+e.g., `v1.0.0`) on `main`. The workflow runs the deterministic publish
+script and creates the release as a draft; the maintainer reviews and
+publishes. Consumers only see published releases.
 
-If you are a downstream consumer and no release channel is documented
-here, ask the harvester maintainer for the artifact rather than building
-from source. Building from source defeats the point of the
-self-contained distribution.
+Each published release ships two assets:
+
+1. The bundle: `AccessHarvester-<semver>-schema-v<schema>-win-x64.zip`
+   (e.g., `AccessHarvester-1.0.0-schema-v1.0-win-x64.zip`), containing
+   `AccessHarvester.exe`, `RELEASE-NOTES.md`, and `LICENSE.txt` at the
+   archive root.
+2. A `.sha256` sidecar (`<bundle-filename>.zip.sha256`) for integrity
+   verification. The sidecar is a single line in the standard
+   `<hash>  <filename>` format with two spaces between the hash and
+   the filename, LF-terminated.
+
+### Download and verify
+
+1. From the releases URL above, open the latest published release and
+   download both the `.zip` bundle and the matching `.zip.sha256`
+   sidecar into the same directory.
+
+2. Verify the integrity of the bundle against the sidecar. Substitute
+   the version you downloaded for `1.0.0` / `v1.0` below.
+
+   **PowerShell (native Windows):**
+   ```powershell
+   $zip = "AccessHarvester-1.0.0-schema-v1.0-win-x64.zip"
+   $expected = ((Get-Content "$zip.sha256" -Raw) -split '\s+')[0].ToLower()
+   $actual   = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+   if ($actual -ne $expected) { throw "Checksum mismatch: $actual != $expected" }
+   "OK: $zip"
+   ```
+
+   **Git Bash / WSL:**
+   ```bash
+   sha256sum -c AccessHarvester-1.0.0-schema-v1.0-win-x64.zip.sha256
+   # AccessHarvester-1.0.0-schema-v1.0-win-x64.zip: OK
+   ```
+
+3. Extract the `.zip`. The exe is at the archive root alongside
+   `RELEASE-NOTES.md` and `LICENSE.txt`; there is no leading folder.
+
+After extraction, run the "Verifying an install" smoke check (below)
+to confirm the binary loads and the parse pipeline works.
+
+### Maintainer-only: from a local clone
+
+The publish output is gitignored (`/publish/`). Maintainers can produce
+the same artifacts locally by running `tools/publish/publish.ps1` from
+the repo root; outputs land at `publish/win-x64/AccessHarvester.exe`
+(bare exe — the reference path the integration tests check against)
+and `publish/release/AccessHarvester-<semver>-schema-v<schema>-win-x64.zip`
+plus the matching `.sha256` sidecar. This path is **not** the
+recommended install path for downstream consumers — pull from the
+release channel instead so the integrity-verified, deterministic
+artifact reaches you.
 
 ---
 

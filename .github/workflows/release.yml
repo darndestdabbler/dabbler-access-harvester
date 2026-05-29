@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Publish & Draft Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Run publish script
+        shell: pwsh
+        run: ./tools/publish/publish.ps1
+
+      - name: Verify release artifacts
+        id: meta
+        shell: pwsh
+        run: |
+          $zips = @(Get-ChildItem publish/release/AccessHarvester-*.zip -Exclude *.sha256)
+          $shas = @(Get-ChildItem publish/release/AccessHarvester-*.zip.sha256)
+
+          if ($zips.Count -ne 1) { throw "Expected exactly 1 zip in publish/release/, found $($zips.Count)." }
+          if ($shas.Count -ne 1) { throw "Expected exactly 1 sha256 in publish/release/, found $($shas.Count)." }
+
+          $checksum = (Get-Content $shas[0].FullName -Raw).Trim().Split()[0]
+
+          if ($zips[0].Name -match 'schema-(v[\d\.]+)') {
+            $schema = $Matches[1]
+          } else {
+            throw "Cannot parse schema version from filename: $($zips[0].Name)"
+          }
+
+          Write-Host "--- Release Artifact Summary ---"
+          Write-Host "File     : $($zips[0].Name)"
+          Write-Host "SHA-256  : $checksum"
+          Write-Host "Schema   : $schema"
+
+          "checksum=$checksum" >> $env:GITHUB_OUTPUT
+          "schema=$schema"     >> $env:GITHUB_OUTPUT
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          name: AccessHarvester ${{ github.ref_name }}
+          body: |
+            **Schema version:** ${{ steps.meta.outputs.schema }}
+
+            ### Install
+
+            See [`docs/harvester/install.md`](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/docs/harvester/install.md) for setup instructions.
+
+            ### Verify
+
+            ```text
+            SHA-256: ${{ steps.meta.outputs.checksum }}
+            ```
+          files: |
+            publish/release/AccessHarvester-*.zip
+            publish/release/AccessHarvester-*.zip.sha256

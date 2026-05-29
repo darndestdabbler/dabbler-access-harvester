@@ -45,12 +45,16 @@ unavailable.
 
 ## CLI Usage
 
-For downstream consumers who want to install the CLI without cloning
-the repo or running `dotnet build`, see
-[the install guide](docs/harvester/install.md) — the harvester also
-ships as a self-contained Windows binary (`AccessHarvester.exe`,
-~36 MB) produced by `tools/publish/publish.ps1`. Run
-`AccessHarvester --help` for the full usage text.
+Downstream consumers install the CLI from the
+[GitHub Releases page](https://github.com/darndestdabbler/dabbler-access-harvester/releases) —
+each release ships a self-contained Windows binary
+(`AccessHarvester.exe`, ~36 MB) inside a versioned zip bundle with a
+matching `.sha256` sidecar. See
+[the install guide](docs/harvester/install.md) for the download +
+checksum-verification procedure and the smoke check. Maintainers can
+also produce the same artifact locally with
+`tools/publish/publish.ps1`. Run `AccessHarvester --help` for the
+full usage text.
 
 The pipeline-driving subcommands:
 
