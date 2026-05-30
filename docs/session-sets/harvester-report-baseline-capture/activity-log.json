@@ -224,6 +224,24 @@
           "costUsd": 0.12541
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/step-8-closeout",
+      "dateTime": "2026-05-30T06:28:43.297773-04:00",
+      "description": "Step 8 closeout: appended S2 section to change-log.md (orchestrator, verification verdict, routed cost, Closed/Created/Changed inventory, Test results, R1/R2 remediation matrix, Deferred items, Notes for S3 calibration, next-orchestrator recommendation = gemini-pro @ medium); updated ai-assignment.md S2 Actuals; rewrote disposition.json (status=in-progress, S2 summary, files_changed[], next_orchestrator=gemini-pro/google/medium for S3); reverted samples/HomeHealthCare.accdb COM-side-effect drift before staging; staged 29 files (+2167/-36) covering S2 implementation + tests + Integration drift-gate fix + Collection serialization + session-set ledger updates; committed as 75faf77. Skipped from this commit: pre-existing .claude/scheduled_tasks.lock deletion (local-only, unrelated to S2) and untracked docs/session-sets/harvester-consumer-workflow-instructions/ DRAFT (pre-existing sibling consumer set).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/step-8-closeout",
+      "dateTime": "2026-05-30T06:29:19.945440-04:00",
+      "description": "Step 8 closeout: appended S2 section to change-log.md; updated ai-assignment.md S2 Actuals; rewrote disposition.json (status=in-progress, S2 summary, next_orchestrator=gemini-pro/google/medium for S3); reverted samples/HomeHealthCare.accdb COM-side-effect drift; staged 29 files (+2167/-36); committed as 75faf77.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
