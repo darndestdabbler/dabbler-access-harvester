@@ -18,6 +18,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\AccessHarvester.Core\AccessHarvester.Core.csproj" />
     <ProjectReference Include="..\..\AccessHarvester.Access\AccessHarvester.Access.csproj" />
+    <!-- Cli reference enables the report-baseline integration test to drive
+         ReportBaselineCommand.Run end-to-end in-process. -->
+    <ProjectReference Include="..\..\AccessHarvester.Cli\AccessHarvester.Cli.csproj" />
   </ItemGroup>
 
   <ItemGroup>

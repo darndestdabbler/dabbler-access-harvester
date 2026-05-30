@@ -11,6 +11,7 @@ namespace AccessHarvester.Integration.Cli;
 /// Skipped on hosts without Microsoft Access (including non-Windows
 /// agents and CI runners without the ACE redistributable installed).
 /// </summary>
+[Collection("HomeHealthCareCom")]
 public class ClassifyCommandTests
 {
     [SkippableFact]

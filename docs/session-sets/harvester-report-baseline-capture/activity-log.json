@@ -172,6 +172,58 @@
           "costUsd": 0.19909
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/step-4-implementation-pass",
+      "dateTime": "2026-05-29T20:52:27.566709-04:00",
+      "description": "S2 implementation pass: new ReportBaseline seams (IReportSource, IReportPdfRenderer, ReportLiveSpec, BaselineManifest{,Entry}, BaselineManifestWriter, ReportBaselineRunner), Windows-only COM impls (AccessReportSpecReader, AccessReportPdfRenderer), CLI subcommand (ReportBaselineCommand) + Program.cs dispatch/usage/exit-codes, hermetic tests (Runner 9, Writer 4, ParametersUsed mutation regression 1), [SkippableFact] integration test against HomeHealthCare.accdb (gated by Collection HomeHealthCareCom). No routed calls; orchestrator-direct mechanical wiring per Delegation Discipline (orchestrator matches default tier for this task type).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/step-5-build-and-test",
+      "dateTime": "2026-05-30T05:28:57.580168-04:00",
+      "description": "Solution build (0 errors). Targeted test run on AccessHarvester.Tests: 514 passed, 2 skipped (COM-required), 0 failed (was 499 in S1; +15 new tests). Full-solution test run after Cli usage-text fix: 9 projects green; AccessHarvester.Integration: 55 passed / 1 failed. The single Integration failure (SanitizeCommandTests.HomeHealthCare_sanitize) times out at the 120-second test budget even in true isolation \u2014 pre-existing, unrelated to S2 (manual sanitize CLI invocation against the same fixture also took 4+ minutes; not a parallelism issue). My S2 work fixed a CliUsageTextTests heading-string assertion (added \"report-baseline\" to the exit-code-heading + subcommand list per drift-gate semantics) and applied the existing [Collection] convention to 5 pre-existing parallel-COM-CLI Integration test classes (knocked failures 3->1). Reverted samples/HomeHealthCare.accdb + samples/MiniComplex.accdb Access-COM-side-effect drift before staging. No routed calls; mechanical orchestrator-direct work.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/step-6-session-verification-r1",
+      "dateTime": "2026-05-30T06:21:02.588031-04:00",
+      "description": "Cross-provider session-verification R1. Routed task_type=session-verification to gpt-5-4. Returned ISSUES_FOUND with two Major items: (1) positional-parameter binding relied on Dictionary enumeration order (unsound contract for the documented --params shape); (2) no stale-output cleanup on rerun. Plus coverage gap (no both-fail test) and two minor doc nits (Reason XML, PrintUsage wording).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 37200,
+          "outputTokens": 6850,
+          "costUsd": 0.32014
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/step-7-fix-r1-and-reverify-r2",
+      "dateTime": "2026-05-30T06:21:02.589028-04:00",
+      "description": "Addressed R1 must-fixes in-session: (a) IReadOnlyList<KeyValuePair<string,object?>> replaces the per-report parameter Dictionary in IReportSource / Runner / CLI parameter contract; positional binding is now the list-index, not dictionary-enumeration-order; name-keyed provenance is derived from the list. (b) ReportBaselineRunner.Run gets cleanRoot:true default + --no-clean CLI opt-out (mirrors extract/run/translate); per-report dir is unconditionally recreated each capture. (c) Added Run_WithBothRenderAndAggregateFailure + Run_DefaultClean_RemovesStaleArtifacts + Run_NoCleanRoot_PreservesUnprocessedReports hermetic tests (+3, total 517 passing). (d) BaselineManifestEntry.Reason XML mentions ReadSpecFailed; PrintUsage updated. Reroute to gpt-5-4 task_type=session-verification: VERIFIED with empty issues. R2 cost /usr/bin/bash.125, 78s.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 21644,
+          "outputTokens": 4753,
+          "costUsd": 0.12541
+        }
+      ]
     }
   ]
 }

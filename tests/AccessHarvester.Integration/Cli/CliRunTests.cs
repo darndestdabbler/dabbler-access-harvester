@@ -26,6 +26,7 @@ namespace AccessHarvester.Integration.Cli;
 /// </para>
 /// </summary>
 [SupportedOSPlatform("windows")]
+[Collection("HomeHealthCareCom")]
 public sealed class CliRunTests
 {
     [SkippableFact]

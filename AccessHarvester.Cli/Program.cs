@@ -72,7 +72,7 @@ public static class Program
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
             && !IsVersionFlag(args[0])
-            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage" or "identify-cleanup" or "classify" or "sanitize"))
+            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage" or "identify-cleanup" or "classify" or "sanitize" or "report-baseline"))
         {
             return RunParse(args);
         }
@@ -90,6 +90,7 @@ public static class Program
             "identify-cleanup" => IdentifyCleanupCommand.Run(rest),
             "classify"        => ClassifyCommand.Run(rest),
             "sanitize"        => SanitizeCommand.Run(rest),
+            "report-baseline" => ReportBaselineCommand.Run(rest),
             _                 => UnknownCommand(args[0]),
         };
     }
@@ -646,6 +647,7 @@ public static class Program
               AccessHarvester identify-cleanup --manifest <manifest.json>   [--harvest-date <YYYY-MM-DD>] [--threshold-days <N>] [--no-com] [--json-status]
               AccessHarvester classify        --in <file.accdb> --out <output-dir> [--exclude-cleanup <path>] [--json-status]
               AccessHarvester sanitize        --classification <classification.json> --in <file.accdb> --out <output-dir> [--json-status]
+              AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir> [--reports <name,name>] [--params <params.json>] [--no-clean] [--json-status]
               AccessHarvester parse           <source-file>
               AccessHarvester parse           --in <source-file>
               AccessHarvester                 <source-file>       (bare-file mode; equivalent to 'parse')
@@ -654,6 +656,23 @@ public static class Program
             `run` is extract + translate + enrich in one invocation.
             `generate-docs` reads a DatabaseManifest JSON and writes a markdown schema summary to
               <output-dir>/<database-slug>/schema-summary.md.
+            `report-baseline` captures rendered PDF + RecordSource-query aggregates for every
+              report in the database (or a --reports allowlist) under
+              <output-root-dir>/AccessMetaData/<dbName>/reports-baseline/<report>/. The PDF is
+              rendered via DoCmd.OutputTo over the live COM session; aggregates reflect the
+              report's RecordSource result set, NOT the rendered footer expressions. Default is
+              all reports; pass --reports <name,name> to scope. --params accepts a JSON file with
+              the shape {"ReportName": {"ParamName": value}} for parametrized reports;
+              parameter ORDER in each ReportName object is the positional binding order against
+              the SQL's `?` placeholders (Access OLE DB ignores parameter names for text
+              commands); unmentioned reports run unfiltered. A top-level baseline-manifest.json
+              index lists every processed report with Name / Status / Paths / Reason fields,
+              where Status is one of Captured / Skipped / Failed and Reason is non-null for
+              non-Captured entries.
+              By default the reports-baseline/ output root is cleaned before capture so a
+              re-run cannot inherit stale PDFs from reports that are no longer being captured;
+              pass --no-clean to preserve prior artifacts (the per-report dir for each report
+              processed this run is still recreated fresh).
             `validate` checks a DatabaseManifest JSON against the embedded harvester-schema.v1.1.json.
               --in locates manifest.json recursively under <output-root-dir> (the --out root from `run`).
               --manifest validates a single specified manifest file directly.
@@ -690,11 +709,11 @@ public static class Program
                 "tree_stats": {"node_count":N,"max_depth":null,"rule_counts":{},
                                "error_token_count":N} }
 
-            Exit codes for extract/translate/run:
+            Exit codes for extract/translate/run/report-baseline:
               0  all objects processed successfully
               1  usage error
               2  unexpected error
-              3  completed with per-object failures
+              3  completed with per-object failures (or for report-baseline, per-report failures)
 
             Exit codes for parse / bare-file:
               0  file parsed successfully

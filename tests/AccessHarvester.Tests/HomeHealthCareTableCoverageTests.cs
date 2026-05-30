@@ -16,6 +16,7 @@ namespace AccessHarvester.Tests;
 /// expected values in the raw JSON. Skipped when Access is not installed.
 /// </summary>
 [SupportedOSPlatform("windows")]
+[Collection("HomeHealthCareCom")]
 public class HomeHealthCareTableCoverageTests
 {
     [SkippableFact]

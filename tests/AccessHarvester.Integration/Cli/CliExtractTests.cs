@@ -18,6 +18,7 @@ namespace AccessHarvester.Integration.Cli;
 /// found in the core pipeline and extractor-specific test suites.
 /// </summary>
 [SupportedOSPlatform("windows")]
+[Collection("HomeHealthCareCom")]
 public sealed class CliExtractTests
 {
     [SkippableFact]

@@ -64,11 +64,24 @@ high
 | 2.7  | Submit final changeset for verification. | `gpt-5-4` |
 
 ### Actuals (filled after the session)
-- Orchestrator used:
-- Total routed cost:
+- Orchestrator used: `claude-code opus-4.7 @ effort=high` (matches the recommendation).
+- Total routed cost: `$0.45` — session-verification R1 (gpt-5-4) $0.320; session-verification R2 (gpt-5-4) $0.125. No routed calls for implementation work — orchestrator-direct per the Delegation Discipline Convention "When the orchestrator's model matches the routing target for a given task type, handle the task in-conversation rather than calling route()".
 - Deviations from recommendation:
+  - **All seven planned steps (2.1–2.7) handled by the orchestrator directly** (mechanical CLI/COM wiring + hermetic test authoring fall under orchestrator-direct per Delegation Discipline). Only step 2.7 (verification) was routed, matching the plan.
+  - **Three additional pieces of work landed beyond the planned 2.1–2.7 set:**
+    1. The S1-deferred-R4 `ParametersUsed` mutation regression test (an explicit "land in S2 alongside CLI tests" note from S1's Notes for Session 2 calibration).
+    2. A drift-gate fix to `CliUsageTextTests.cs` (necessary regression — adding `report-baseline` to the dispatcher and exit-code legend broke a string-match assertion that pinned the prior heading verbatim; the fix updated the assertions to include the new subcommand).
+    3. Convention-prescribed `[Collection("HomeHealthCareCom")]` applied to five pre-existing Integration test classes that drive Access COM against `samples/HomeHealthCare.accdb` (per project-guidance.md → Testing Conventions → "Do Not Chain Parallel xUnit Integration Tests"). Knocked the Integration project's failure count from 3 → 1; the remaining failure (`SanitizeCommandTests.HomeHealthCare_sanitize` timeout) reproduces in true isolation and is pre-existing, not introduced by S2 — logged as a follow-up.
+  - **Step 2.7 took two rounds, not one.** R1 returned ISSUES_FOUND with two Majors: (1) positional parameter binding via `Dictionary<string, object?>` enumeration order — fragile contract; switched to `IReadOnlyList<KeyValuePair<string, object?>>` for explicit ordering, name-keyed dict derived from the list ONLY for provenance; (2) no stale-output cleanup on rerun — added `cleanRoot:true` default + `--no-clean` CLI opt-out, plus unconditional per-report dir recreate. Plus a both-fail coverage gap (added a test) and minor doc tightening (Reason XML doc mentions ReadSpecFailed; PrintUsage wording matches the actual JSON field names). R2 returned VERIFIED with empty issues.
+  - **Integration test scoped via `--reports` to four `srpt*` sub-reports.** HomeHealthCare's eight `rpt*` top-level reports reference `Forms!`/`Reports!`/`PARAMETERS [X]` parameter bindings and `DoCmd.OutputTo` pops a modal parameter prompt for those when run standalone (confirmed empirically during the first integration-test run — 14-minute manual-cancellation slog). The spec's resolved decision routes required-param reports through `identify-usage` in Session 3 ("parameter elicitation"), explicitly NOT in S2 scope. Scoping the integration test to `srpt*` makes it run unattended in ~3 seconds while still exercising both `Captured` and `Failed/AggregateFailed` branches of the runner.
 - Notes for next-session calibration:
-- Next-session orchestrator recommendation:
+  - **S2 produced the end-to-end pipeline through aggregates + PDF render + manifest.** S3 work is documentation (`install.md` CLI reference; interpretation guide), parameter elicitation design (see below), golden capture, and closeout.
+  - **Parameter elicitation design.** Maintainer-validated this session: Access COM can resolve parameter-required reports without modifying the `.accdb` — via `TempVars` + hidden-form binding shimming, or via in-memory `RecordSource` substitution closed with `acSaveNo`. The `acSaveNo` literal-substitution approach is the universal fallback (works regardless of binding kind). S3's `identify-usage` integration should design around one of these.
+  - **PDF necessity / opt-in design question (S3 maintainer call).** Maintainer raised whether PDFs are pulling their weight given the aggregate contract is RecordSourceResultSet, not footer-expression evaluation. Arguments for keeping PDFs: footer-expression values (not in aggregates.json), visual layout fidelity, hedge against metadata-extraction gaps, human-stakeholder validation artifact. Arguments against: cost, modal-prompt exposure, non-deterministic binary. Possible S3 spec revisit: default to aggregates-only with `--include-pdf` opt-in. Flagged here for S3 maintainer consideration.
+  - **One minor nice-to-have from R2** (not in scope for S2 closeout): narrow the broad-catch in `AccessReportSpecReader` around `RecordSource` + `GroupLevel.Count` reads — currently flattens COM read failures into "unbound/no groups" rather than surfacing as a distinct failure. Opportunistic for S3 or a later set.
+
+**Next-session orchestrator recommendation (Session 3):**
+`gemini-pro @ effort=medium` (matches the original ai-assignment.md recommendation below; S3 is mostly documentation drafting + golden capture + mechanical closeout, which is the cost-effective profile for gemini-pro). The orchestrator should route docs drafting through `route(task_type="summarization")` (NOT `documentation`, per the convention) and handle file mechanics directly.
 
 ---
 

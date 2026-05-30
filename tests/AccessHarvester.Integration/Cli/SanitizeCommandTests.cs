@@ -27,6 +27,7 @@ namespace AccessHarvester.Integration.Cli;
 ///       work against a real database — one table is enough for that.
 /// </para>
 /// </summary>
+[Collection("HomeHealthCareCom")]
 public class SanitizeCommandTests
 {
     [SkippableFact]

@@ -1,9 +1,10 @@
 # Harvester Report-Baseline Capture — Session Set Change Log
 
-**Sessions:** 1 of 3 (S1 complete; S2-S3 not started)
+**Sessions:** 2 of 3 (S1 + S2 complete; S3 not started)
 **Started:** 2026-05-29
-**Latest close:** 2026-05-29 (Session 1)
+**Latest close:** 2026-05-29 (Session 2)
 **Final verdict (S1):** VERIFIED after four rounds of cross-provider session-verification (R1/R2/R3 ISSUES_FOUND, all must-fix items addressed in-session; R4 gpt-5-4 VERIFIED, must_fix empty, three minor nice-to-haves filed).
+**Final verdict (S2):** VERIFIED on R2 (R1 returned ISSUES_FOUND with two Major items + a coverage gap + minor doc nits; all addressed in-session; R2 gpt-5-4 VERIFIED with empty issues).
 
 This session set was authored as a DRAFT by a downstream consumer
 (`Dabbler.NorthwindToBlazor` Set 001 Session 3, 2026-05-29) and
@@ -220,3 +221,287 @@ Rationale: S2 spans COM PDF render, CLI subcommand wiring, exit-code
 contract alignment with `run`, the `baseline-manifest.json` index,
 and determinism-gate handling for binary PDFs — multiple coordinated
 concerns benefit from frontier-model synthesis.
+
+
+---
+
+## Session 2 of 3: COM PDF render + CLI subcommand wiring + determinism
+
+**Orchestrator:** `claude-code opus-4.7 @ effort=high` (matches the S1
+next-orchestrator recommendation; the four-concern synthesis surface —
+CLI wiring + COM PDF render + exit-code contract + determinism —
+benefits from frontier-model coherence per the S1 closing rationale).
+**Verification:** VERIFIED on R2 (R1 returned ISSUES_FOUND with two
+Major items + a both-fail coverage gap + minor doc tightening; every
+item addressed in-session; R2 gpt-5-4 VERIFIED with empty issues).
+**Routed cost (S2 total):** ~$0.45
+- Session-verification R1 (gpt-5-4): $0.320
+- Session-verification R2 (gpt-5-4): $0.125
+
+### Closed (S2 scope)
+
+Session 2 lands the `report-baseline` standalone CLI subcommand
+end-to-end, composing the S1 `ReportBaselineService` with three new
+seams (`IReportSource`, `IReportPdfRenderer`, `ReportBaselineRunner`)
+plus Windows-only COM implementations for the seams.
+
+CLI shape (matches the spec verbatim):
+
+```
+AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir>
+                                [--reports <name,name>] [--params <params.json>]
+                                [--no-clean] [--json-status]
+```
+
+Exit codes mirror `run`: 0 (all captured/skipped cleanly) / 1 (usage
+error) / 2 (unexpected error) / 3 (one or more per-report failures).
+
+Per-report artifacts land at
+`<out>/AccessMetaData/<dbName>/reports-baseline/<report>/{output.pdf,aggregates.json}`,
+with the top-level `baseline-manifest.json` index at the parent.
+
+### Created
+
+- [`AccessHarvester.Core/ReportBaseline/IReportSource.cs`](../../../AccessHarvester.Core/ReportBaseline/IReportSource.cs)
+  - enumerate-all + per-report (RecordSource + group-level keys)
+  seam. Hermetic tests pass a fake; production uses
+  `AccessReportSpecReader`.
+- [`AccessHarvester.Core/ReportBaseline/IReportPdfRenderer.cs`](../../../AccessHarvester.Core/ReportBaseline/IReportPdfRenderer.cs)
+  - render seam over `DoCmd.OutputTo`.
+- [`AccessHarvester.Core/ReportBaseline/ReportLiveSpec.cs`](../../../AccessHarvester.Core/ReportBaseline/ReportLiveSpec.cs)
+  - DTO carrying the report name, RecordSource (nullable for
+  unbound), and outermost-first group-level keys.
+- [`AccessHarvester.Core/ReportBaseline/BaselineManifest.cs`](../../../AccessHarvester.Core/ReportBaseline/BaselineManifest.cs)
+  - top-level index record + per-report entry (`Name`, `Status` in
+  {Captured, Skipped, Failed}, ordinal-sorted `Paths` dict,
+  `Reason`). No wall-clock fields - participates in the harvester's
+  determinism gate alongside `aggregates.json`; the PDF binary is
+  excluded from byte-comparison the way `ExportedAt` is, per the
+  spec's Session 2 determinism note.
+- [`AccessHarvester.Core/ReportBaseline/BaselineManifestWriter.cs`](../../../AccessHarvester.Core/ReportBaseline/BaselineManifestWriter.cs)
+  - deterministic JSON serializer + file IO with parent-dir
+  creation, matching the S1 `ReportAggregatesWriter` shape.
+- [`AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs`](../../../AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs)
+  - end-to-end orchestrator composing `IReportSource` +
+  `IReportPdfRenderer` + `ReportBaselineService` over a batch of
+  reports. Sorted manifest output (ordinal-ascending by Name);
+  per-report dir always recreated each capture so re-runs cannot
+  inherit stale per-report artifacts; default `cleanRoot:true`
+  wipes the reports-baseline root before capture to drop stale
+  dirs for reports no longer being processed; `--no-clean` opts
+  out. Failure matrix recorded as: Captured / Skipped(UnboundReport)
+  / Failed(ReadSpecFailed) / Failed(RenderFailed) /
+  Failed(AggregateFailed) / Failed(both, joined "; "). Positional
+  parameter binding comes from an explicitly ordered
+  `IReadOnlyList<KeyValuePair<string, object?>>` rather than any
+  dictionary enumeration (R1 verifier flagged the dictionary-
+  enumeration-order assumption as unsound for a user-visible
+  contract - fixed).
+- [`AccessHarvester.Core/Com/AccessReportSpecReader.cs`](../../../AccessHarvester.Core/Com/AccessReportSpecReader.cs)
+  - Windows-only live-COM implementation: opens each report in
+  hidden design view, reads `Reports!Name.RecordSource` +
+  `GroupLevel(i).ControlSource` off the live collection, closes
+  with `acSaveNo`. Enumerates the database's reports via
+  `CurrentProject.AllReports`.
+- [`AccessHarvester.Core/Com/AccessReportPdfRenderer.cs`](../../../AccessHarvester.Core/Com/AccessReportPdfRenderer.cs)
+  - Windows-only COM wrapper around
+  `DoCmd.OutputTo acOutputReport, name, "PDF Format (*.pdf)", path`.
+- [`AccessHarvester.Cli/Commands/ReportBaselineCommand.cs`](../../../AccessHarvester.Cli/Commands/ReportBaselineCommand.cs)
+  - CLI surface. Parses options, validates the `--reports` allowlist
+  against the database's actual reports (returns exit 1 for unknown
+  names), parses `--params` JSON into ordered per-report lists with
+  duplicate-name detection, wires the COM seams +
+  `OleDbReportQueryExecutor`, invokes the runner, prints summary +
+  `--json-status` envelope, returns the correct exit code based on
+  the manifest's `Failed` count.
+- [`tests/AccessHarvester.Tests/ReportBaseline/BaselineManifestWriterTests.cs`](../../../tests/AccessHarvester.Tests/ReportBaseline/BaselineManifestWriterTests.cs)
+  - 4 hermetic tests: canonical JSON shape, sorted Paths, byte
+  stability, file-write round-trip + parent-dir creation.
+- [`tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineRunnerTests.cs`](../../../tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineRunnerTests.cs)
+  - 11 hermetic tests covering every Status branch (Captured /
+  Skipped(UnboundReport) / Failed(RenderFailed) /
+  Failed(AggregateFailed) / Failed(ReadSpecFailed) / Failed(both,
+  joined reason)), manifest sort-order invariance, parameter
+  forwarding in list order, byte-stable output across input
+  permutations, default cleanRoot stale-removal, `cleanRoot:false`
+  preserves unprocessed reports while still recreating processed
+  ones, constructor argument validation.
+- [`tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineServiceParametersUsedMutationTests.cs`](../../../tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineServiceParametersUsedMutationTests.cs)
+  - the deferred-from-S1-R4 mutation regression test (mutating the
+  input `ParametersUsed` after `Capture` does not change the
+  serialized aggregates).
+- [`tests/AccessHarvester.Tests/ReportBaselineCommandIntegrationTests.cs`](../../../tests/AccessHarvester.Tests/ReportBaselineCommandIntegrationTests.cs)
+  - `[SkippableFact]` integration test against the committed
+  `samples/HomeHealthCare.accdb` fixture. Scoped via `--reports` to
+  four `srpt*` sub-reports (two expected `Captured`, two expected
+  `Failed/AggregateFailed`) because HomeHealthCare's eight `rpt*`
+  top-level reports reference `Forms!` / `Reports!` / `PARAMETERS [X]`
+  bindings and `DoCmd.OutputTo` pops a modal parameter prompt for
+  those when run standalone - the spec's resolved decision routes
+  required-param reports through the existing `identify-usage`
+  mechanism in Session 3 ("parameter elicitation"), explicitly NOT
+  in S2 scope. The scoped set exercises both Status branches of
+  the runner's `CaptureOne` path in ~3 seconds without manual modal
+  dismissal. Also defines `HomeHealthCareComCollection` so this
+  test serializes against `HomeHealthCareTableCoverageTests` (both
+  open the same `.accdb` via Access COM).
+- [`tests/AccessHarvester.Integration/Cli/HomeHealthCareComCollection.cs`](../../../tests/AccessHarvester.Integration/Cli/HomeHealthCareComCollection.cs)
+  - sibling collection definition for the AccessHarvester.Integration
+  project, scoped to the five pre-existing parallel-COM-CLI test
+  classes that touch HomeHealthCare.accdb (see Changed below).
+
+### Changed
+
+- [`AccessHarvester.Cli/Program.cs`](../../../AccessHarvester.Cli/Program.cs)
+  - added `report-baseline` to the dispatch switch, the bare-file
+  mode exclusion list, the `PrintUsage()` text (with the new
+  `--no-clean` + parameter-order semantics + manifest-shape
+  disclosure), and the exit-code legend.
+- [`tests/AccessHarvester.Integration/Cli/CliUsageTextTests.cs`](../../../tests/AccessHarvester.Integration/Cli/CliUsageTextTests.cs)
+  - drift gate updated: asserts `report-baseline` is listed in the
+  usage and the new
+  `Exit codes for extract/translate/run/report-baseline:` heading
+  is present.
+- [`tests/AccessHarvester.Integration/Cli/{Classify,Sanitize,CliExtract,CliRun,CliTranslate}CommandTests.cs`](../../../tests/AccessHarvester.Integration/Cli/)
+  - added `[Collection("HomeHealthCareCom")]` to the five
+  pre-existing CLI integration test classes that each spawn the
+  CLI against `samples/HomeHealthCare.accdb`. Convention-prescribed
+  mitigation per `project-guidance.md` -> Testing Conventions ->
+  "Do Not Chain Parallel xUnit Integration Tests That Both Drive
+  Access COM Against The Same `.accdb`". Knocked the Integration
+  project's failure count from 3 (in the run that surfaced this)
+  down to 1; the remaining Integration failure
+  (`SanitizeCommandTests.HomeHealthCare_sanitize` timing out at the
+  120-second test budget) is **pre-existing latent slowness in the
+  sanitize CLI path against HomeHealthCare.accdb**, confirmed by
+  reproducing the same timeout when running the test in true
+  isolation (not a parallelism artifact); not introduced by S2 and
+  not blocking this closeout. Logged as a follow-up for a future
+  set.
+- [`tests/AccessHarvester.Tests/AccessHarvester.Tests.csproj`](../../../tests/AccessHarvester.Tests/AccessHarvester.Tests.csproj)
+  - added `ProjectReference` to `AccessHarvester.Cli` so the
+  integration test can drive `ReportBaselineCommand.Run`
+  end-to-end in-process.
+- [`tests/AccessHarvester.Tests/HomeHealthCareTableCoverageTests.cs`](../../../tests/AccessHarvester.Tests/HomeHealthCareTableCoverageTests.cs)
+  - added `[Collection("HomeHealthCareCom")]` so the
+  AccessHarvester.Tests assembly's two HomeHealthCare-COM-driving
+  test classes serialize against each other.
+
+### Test results
+
+- `dotnet build AccessHarvester.sln -c Debug` - 0 errors.
+- `dotnet test tests/AccessHarvester.Tests/` - **517 passed, 2
+  skipped (COM-required, expected), 0 failed in 14 s.** Up from the
+  S1 baseline of 499 passing (+18: the 15 originally-planned S2
+  tests plus the 3 R1-remediation tests).
+- ReportBaseline-namespace tests alone (`--filter
+  FullyQualifiedName~ReportBaseline`): 65 passed in 3.2 s
+  (includes the `[SkippableFact]` integration test against the
+  committed fixture).
+- Full solution test run (other test projects): all green except
+  the pre-existing Integration `SanitizeCommandTests` timeout
+  disclosed above.
+
+### Verifier remediations (must-fix items addressed in-session)
+
+**R1** (gpt-5-4): ISSUES_FOUND - two Major items + a coverage gap
++ minor doc nits. All addressed.
+
+1. **Positional-parameter contract** - R1 flagged that the runner
+   relied on `Dictionary<string, object?>` enumeration order for
+   positional binding to the SQL's `?` placeholders, which is not a
+   sound contract boundary (current .NET preserves insertion order
+   but `IReadOnlyDictionary` does not promise this, and a future
+   refactor could silently drift). Fixed: the parameter type
+   changed from
+   `IReadOnlyDictionary<string, IReadOnlyDictionary<string, object?>>?`
+   to
+   `IReadOnlyDictionary<string, IReadOnlyList<KeyValuePair<string, object?>>>?`;
+   the list's index is the source of truth for positional binding;
+   the runner derives a name-keyed dictionary from the list for
+   `ParametersUsed` provenance only. CLI `--params` parser emits
+   the ordered list per report and rejects duplicate parameter
+   names with a clear error.
+2. **Stale-output cleanup on rerun** - R1 flagged that
+   `Directory.CreateDirectory` is idempotent, so a re-run into the
+   same `--out` could leave stale `output.pdf` / `aggregates.json`
+   from a prior run whose reports are now `Skipped` or
+   `Failed(partial)`. Fixed: `ReportBaselineRunner.Run` gained a
+   `cleanRoot` parameter (default `true`) that deletes + recreates
+   the `reports-baseline/` root before capture; the per-report
+   directory is ALWAYS recreated fresh for each processed report
+   (even under `cleanRoot:false`) so current-run captures cannot
+   contaminate. CLI exposes `--no-clean` opt-out mirroring
+   `extract`/`run`/`translate`. Usage text updated to disclose the
+   behavior.
+3. **Coverage gap (both-fail)** - added
+   `Run_WithBothRenderAndAggregateFailure_RecordsFailedWithJoinedReasonAndEmptyPaths`
+   plus the two cleanup tests
+   `Run_DefaultClean_RemovesStaleArtifactsFromReportsNoLongerProcessed`
+   and
+   `Run_NoCleanRoot_PreservesUnprocessedReports_ButRecreatesProcessedReportDirs`.
+4. **Minor doc nits** - `BaselineManifestEntry.Reason` XML now
+   mentions `ReadSpecFailed`; `PrintUsage` describes the manifest
+   fields as `Name / Status / Paths / Reason` matching the actual
+   JSON shape (the prior phrasing was
+   `status / paths / skipped_reason` which mis-named the actual
+   JSON key).
+
+**R2** (gpt-5-4): **VERIFIED**, must_fix empty. Confirmed all R1
+items closed; one minor nice-to-have noted for opportunistic future
+work (narrow the broad-catch in `AccessReportSpecReader` around
+`RecordSource` + `GroupLevel.Count` reads - currently flattens any
+COM read failure into "unbound/no groups" rather than surfacing as
+a distinct failure).
+
+### Deferred / out-of-scope items disclosed to the verifier
+
+- **Parameter elicitation for required-param reports** is explicit
+  Session 3 scope (spec's Resolved Decision #3 - required-param
+  reports surface as a clarifying question through the existing
+  `identify-usage` mechanism). S2 honours this by NOT suppressing
+  `DoCmd.OutputTo`'s modal parameter prompts; the integration test
+  scopes around them via `--reports`.
+- **AccessReportSpecReader's broad-catch around COM reads** -
+  verifier-noted nice-to-have; not touched this round.
+- **Sanitize CLI timeout against HomeHealthCare** - pre-existing
+  latent slowness, confirmed via isolation; not introduced by S2
+  and not in this set's scope.
+
+### Notes for Session 3 calibration
+
+- The end-to-end `report-baseline` pipeline is contract-stable
+  through aggregates + PDF render + manifest. S3 work is mostly
+  documentation (CLI reference in `install.md`, interpretation
+  guide, parameter selection strategy), golden capture for
+  `NorthwindDevEdition` (rptInvoice, rptSalesByEmployee,
+  rptSalesByProduct) and HomeHealthCare's in-scope reports
+  (`srpt*` for the modal-free subset; `rpt*` requires the
+  parameter elicitation work below), plus the closeout pieces.
+- **Parameter elicitation design (S3 prerequisite for `rpt*`
+  goldens):** the maintainer discussion this session validated
+  that Access COM can resolve parameter-required reports without
+  modifying the `.accdb` - via `TempVars` + hidden-form binding
+  shimming, or via in-memory `RecordSource` substitution closed
+  with `acSaveNo`. S3's `identify-usage` route should design
+  around one of these (the `acSaveNo` literal-substitution
+  approach is the universal fallback). See the maintainer
+  transcript for the full trade-off discussion.
+- **PDF necessity / opt-in design question** - maintainer raised
+  whether PDFs are pulling their weight given the spec's
+  RecordSourceResultSet contract for aggregates. The argument for
+  keeping PDFs: footer-expression values (not in aggregates.json),
+  visual layout fidelity, hedge against metadata-extraction gaps,
+  human-stakeholder validation artifact, bug-faithful capture of
+  the original output. The argument against: cost, modal-prompt
+  exposure, non-deterministic binary. Possible S3 spec revisit:
+  default to aggregates-only with `--include-pdf` opt-in. Not
+  addressed in S2; flagged here for S3 maintainer consideration.
+
+**Next-session orchestrator recommendation (Session 3):**
+`gemini-pro @ effort=medium` (matches the S1 ai-assignment.md
+recommendation; S3 is mostly documentation drafting + golden
+capture + mechanical closeout, which is the cost-effective profile
+for gemini-pro). The orchestrator should route docs drafting
+through `route(task_type="summarization")` (NOT `documentation`,
+per the convention) and handle file mechanics directly.

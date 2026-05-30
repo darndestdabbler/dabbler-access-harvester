@@ -26,6 +26,7 @@ namespace AccessHarvester.Integration.Cli;
 /// CLI exe's public contract for the `translate` verb.
 /// </summary>
 [SupportedOSPlatform("windows")]
+[Collection("HomeHealthCareCom")]
 public sealed class CliTranslateTests : IClassFixture<CliTranslateTests.ExtractFixture>
 {
     private readonly ExtractFixture _fixture;
