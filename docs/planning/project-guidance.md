@@ -246,6 +246,18 @@ experiments only.
   `lessons-learned.md` →
   "Do Not Chain Parallel xUnit Integration Tests That Both
   Drive Access COM Against The Same `.accdb`".
+  *Fix-forward tactic when picking up a session whose Integration
+  test gate is red on multiple HomeHealthCare CLI classes:* apply
+  `[Collection("HomeHealthCareCom")]` to every `*CommandTests.cs`
+  under `tests/AccessHarvester.Integration/Cli/` that touches
+  `samples/HomeHealthCare.accdb` AND open the shared
+  `HomeHealthCareComCollection` definition (or create one if the
+  project doesn't have it yet). Done in
+  `harvester-report-baseline-capture` Session 2 (2026-05-29 —
+  sixth-context confirmation of the underlying race) — knocked
+  the project's failure count from 3 to 1. Mechanical; should be
+  the orchestrator's first move before debugging individual
+  timeouts.
 - **Sweep spurious `.accdb` binary diffs before staging the
   closeout commit.** `dotnet test` runs that open a sample
   `.accdb` via Access COM (read-only at the SQL/DAO level)

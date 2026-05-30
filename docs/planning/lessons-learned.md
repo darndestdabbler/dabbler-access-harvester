@@ -1643,3 +1643,121 @@ reference; if it proves out twice in *this* repo, propose promotion to
   Workflow Expectations and consider adding a step-transition
   helper to `ai-router/session_log.py` so the call is one line
   per step.
+
+
+## Dictionary<,> Enumeration Order Is Not A Contract Surface For User-Visible Binding Semantics
+
+- **Context:** `harvester-report-baseline-capture` Session 2 R1 (2026-05-29).
+  `ReportBaselineRunner` derived positional SQL `?` placeholder binding
+  for the `--params` CLI option from `Dictionary<string, object?>`
+  enumeration order. The CLI parsed the `--params` JSON into a
+  `Dictionary` and the runner enumerated `.Values` to build the
+  positional list, relying on .NET's current insertion-order-preserving
+  implementation.
+- **Failure or friction:** Cross-provider verifier (gpt-5-4) flagged this
+  as a Major correctness gap. The `IReadOnlyDictionary<K, V>` contract
+  does not promise enumeration order, and a refactor swapping in
+  `ImmutableDictionary` (no guaranteed order) or `SortedDictionary`
+  (sorted-by-key order, not insertion order) would silently bind the
+  wrong values to the wrong `?` placeholders. The user's CLI promise
+  ("declare parameters in the SQL's placeholder order") rests on an
+  implementation detail of the carrier type, not an explicit ordering
+  surface.
+- **Lesson:** When the order of a name → value collection is part of a
+  user-visible contract — CLI parameter declaration order, SQL `?`
+  placeholder binding, positional argument lists, output column order,
+  any cross-process serialization where order survives the boundary —
+  the carrier type must make ordering explicit:
+  `IReadOnlyList<KeyValuePair<K, V>>`, an `Ordered<X>` record, or a
+  tuple. Dictionaries should be reserved for lookup-by-key semantics
+  where order is irrelevant. When both ordering AND lookup are needed,
+  carry the ordered list as the contract and derive the lookup
+  dictionary from it; never the reverse.
+- **Action for future sessions:** When designing a public surface
+  (CLI option, IR field, JSON shape, public API parameter) that carries
+  multiple named values whose ORDER matters to the consumer, use an
+  explicitly-ordered carrier and pin the order invariant with a test
+  that proves it survives across the contract boundary (e.g. JSON
+  parse → bind → re-serialize round-trip). If a second session hits
+  the same dictionary-enumeration-order trap on a user-visible
+  contract, propose promoting to `project-guidance.md` →
+  Conventions → Code Style.
+
+## Live-COM Integration Tests Must Scope To A Known-Modal-Free Subset Of Fixture Objects
+
+- **Context:** `harvester-report-baseline-capture` Session 2 (2026-05-29).
+  The `[SkippableFact]` integration test for `ReportBaselineCommand` was
+  authored without a `--reports` scope, intending to exercise the
+  command against all 12 reports in `samples/HomeHealthCare.accdb`.
+- **Failure or friction:** Eight of HomeHealthCare's twelve reports
+  (`rpt*` top-level reports) reference `Forms!` / `Reports!` /
+  `PARAMETERS [X]` parameter bindings. `DoCmd.OutputTo acOutputReport,
+  ..., acFormatPDF, ...` pops a modal parameter prompt when those
+  bindings can't be resolved at runtime, and the test process blocks on
+  user dismissal of each. The first run required ~14 minutes of manual
+  modal cancellation across eight prompts, with the runner correctly
+  recording each as `Failed: RenderFailed: The OutputTo action was
+  canceled` — but the human burden made the test unusable for CI or
+  hands-off runs. (The same operation runs cleanly against the four
+  `srpt*` sub-reports, which either render to empty PDFs with parent-
+  context binding unresolved, or fail at the OLE DB aggregate query
+  without popping a modal.)
+- **Lesson:** Integration tests that exercise live Access COM
+  operations capable of triggering modal UI — parameter prompts via
+  `DoCmd.OutputTo` / `DoCmd.OpenReport`, security warnings on macro-
+  enabled files, "Linked table not found" recovery dialogs, "Convert
+  database to current version?" prompts on older `.accdb` formats —
+  must scope explicitly to a curated modal-free subset of fixture
+  objects, OR pre-stage a synthetic fixture that is known to be
+  modal-free under the operation under test. Class-level remarks
+  should document *which* subset and *why* the scoping is intentional,
+  so a future maintainer doesn't widen the scope and get blocked.
+- **Action for future sessions:** Before writing an Access-COM-driving
+  `[SkippableFact]`, enumerate the candidate fixture objects: which
+  subset is guaranteed not to trigger a modal under the COM operation
+  being tested? If you can't name one confidently from the fixture
+  catalog, the test design needs to change — either pre-stage a
+  synthetic fixture (matches the existing convention's preferred
+  mitigation (a)) or scope via `--reports` / equivalent. If a second
+  session hits this pattern with a different COM operation (not just
+  `DoCmd.OutputTo`), propose promoting to `project-guidance.md` →
+  Testing Conventions.
+
+## SanitizeCommandTests.HomeHealthCare Timeout Is A Pre-Existing Latent Issue Deserving Its Own Investigation Set
+
+- **Context:** `harvester-report-baseline-capture` Session 2 (2026-05-29)
+  observed it in passing while running the full solution test suite.
+  `AccessHarvester.Integration.Cli.SanitizeCommandTests.HomeHealthCare_sanitize_against_synthesized_classification_emits_csv_and_report`
+  times out at the 120-second test budget. Reproduced in true xUnit
+  isolation (no parallelism), so it is NOT the existing parallel-COM-
+  CLI race documented in `project-guidance.md` → Testing Conventions.
+  Manual repro of the same CLI invocation against the same fixture
+  also takes minutes — the slowness is in the sanitize CLI path
+  itself, not the test infrastructure.
+- **Failure or friction:** Pre-existing; S2 did not introduce it.
+  Confirmed not a regression by reverting S2's source changes and
+  reproducing the same timeout. The convention-prescribed
+  `[Collection("HomeHealthCareCom")]` serialization knocked the
+  Integration project's failure count from 3 to 1 (the other two
+  WERE the parallel-COM-CLI race), leaving this one as the residual.
+  The root cause is unknown at S2 closeout time; the sanitize
+  pipeline against the canonical HomeHealthCare fixture either has
+  a latent performance regression, an Access COM cleanup hang, an
+  OLE DB connection pool exhaustion, or all of the above.
+- **Lesson:** Not a tactic per se — this is a discovered latent issue
+  that needs its own dedicated investigation set with a separate
+  workflow trigger. Surface it at the next session-set planning
+  meeting as a candidate "investigative spike" set (small scope:
+  reproduce, instrument, isolate; ideally <2 sessions). Out of scope
+  for `harvester-report-baseline-capture`; out of scope for any
+  current set.
+- **Action for future sessions:** When picking up a future Phase 4
+  set, check whether the test gate is still green; if the sanitize
+  timeout is still firing, raise it as a planning candidate. The
+  investigation set should reproduce the timeout, instrument the
+  sanitize CLI path (OleDbValueSampler? OleDbRowSource? COM session
+  Quit cleanup?), and either fix the root cause or quarantine the
+  test with a `Skip.If` gate and an issue link. Until then,
+  `AccessHarvester.Integration` will reliably fail one test against
+  HomeHealthCare; do not let that mask a real regression by getting
+  numb to the red.
