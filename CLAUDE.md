@@ -129,6 +129,18 @@ print('API keys OK')
 
 If keys are missing, stop and tell the human.
 
+> **`No module named ai_router…` is NOT a missing-keys problem — do not
+> stop and ask the human for it.** It means the router CLI was launched
+> with the wrong interpreter (a bare `python` resolving to a system
+> interpreter without `ai_router`; the config-only `ai_router/` folder in
+> the repo root then shadows as an empty namespace package, so the error
+> names the submodule, e.g. `No module named ai_router.close_session`).
+> The keys can be perfectly present. **Always run the router CLIs through
+> the workspace venv** — `.venv/Scripts/python.exe -m ai_router.<module>`
+> — never a bare `python -m ai_router.<module>`. Only stop for missing
+> keys once the venv interpreter (the key check above) actually reports a
+> key absent.
+
 ### AI router import
 
 The router is the `dabbler-ai-router` PyPI package (canonical
