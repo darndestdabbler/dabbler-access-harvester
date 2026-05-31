@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-report-baseline-capture",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -40,9 +40,9 @@
     {
       "number": 3,
       "title": "Session 3",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-05-30T07:33:33.365822-04:00",
-      "completedAt": null,
+      "completedAt": "2026-05-31T17:57:15.798475-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
