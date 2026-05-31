@@ -1,7 +1,8 @@
 {
   "schemaVersion": 1,
   "sessionSetName": "harvester-report-baseline-capture",
-  "status": "in-progress",
+  "status": "completed",
+  "verificationVerdict": "VERIFIED",
   "summary": "Sessions 1-2: aggregates engine + COM PDF render + CLI subcommand wired end-to-end. Session 3: property decode (section BackStyle/BorderStyle/SpecialEffect, control TextAlign/FontWeight) + --include-pdf opt-in (aggregates-only default) shipped and hermetically tested; report-baseline documented in install.md + interpretation-guide. DEFERRED: the committed golden reports-baseline corpus + regression gate (spec decision #7) and its READ-ME-FIRST (Step 3.4) — blocked by an Access design-view/ACE-OLEDB exclusive-lock contention; moved to the follow-up set, which will make aggregate capture lock-free.",
   "files_changed": [
     "AccessHarvester.Cli/Commands/ReportBaselineCommand.cs",
