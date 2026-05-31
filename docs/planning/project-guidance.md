@@ -221,6 +221,20 @@ experiments only.
 - Build and test should be run **sequentially**, not in parallel —
   file-lock contention against the same worktree on Windows
   obscures the real validation result.
+- **Never background (`run_in_background`) a `dotnet build`/`test`/`run`,
+  and never start one while another is still alive.** This is the
+  specific trigger that spawns COM-RPC-wedged `testhost` / `.NET Host`
+  zombies which hold the project DLL locks and fail every subsequent
+  build with `MSB3027 … file is locked by: testhost`. A `PreToolUse`
+  guard hook at
+  [`.claude/hooks/guard-dotnet-parallel.ps1`](../../.claude/hooks/guard-dotnet-parallel.ps1)
+  (wired in [`.claude/settings.json`](../../.claude/settings.json))
+  enforces this mechanically — it blocks a backgrounded `dotnet
+  build|test|run` and blocks a new one while a repo `testhost` is
+  already running. **Do not remove it.** It activates on the next
+  `/hooks` open or Claude Code restart after a fresh checkout. Recovery
+  and root-cause detail: `lessons-learned.md` → "Never Background Or
+  Parallelize `dotnet build`/`test`".
 - **Integration tests that drive COM against a shared `.accdb`
   must be hermetic of each other's setup.** xUnit runs test
   *classes* in parallel within an assembly. Two
