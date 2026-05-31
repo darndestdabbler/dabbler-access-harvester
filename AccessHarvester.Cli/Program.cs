@@ -661,17 +661,17 @@ public static class Program
               <output-root-dir>/AccessMetaData/<dbName>/reports-baseline/<report>/. aggregates.json
               reflects the report's RecordSource result set, NOT the rendered footer expressions,
               and is the deterministic parity ground truth. By default the PDF is NOT rendered;
-              pass --include-pdf to additionally render output.pdf via DoCmd.OutputTo over the
-              live COM session (a non-deterministic binary for human visual review; note that
-              required-parameter reports may pop a modal prompt under DoCmd.OutputTo when rendered
-              without --params). Default scope is all reports; pass --reports <name,name> to
+              pass --include-pdf to additionally render output.pdf for reports whose aggregates
+              captured successfully via DoCmd.OutputTo over the live COM session (a non-deterministic
+              binary for human visual review). Reports whose RecordSource needs a parameter that was
+              not supplied surface as a Failed entry (Reason "AggregateFailed: ...") in the manifest
+              rather than entering the render path; supply values via --params to capture them.
+              Default scope is all reports; pass --reports <name,name> to
               scope. --params accepts a JSON file with the shape
               {"ReportName": {"ParamName": value}} for parametrized reports; parameter ORDER in
               each ReportName object is the positional binding order against the SQL's `?`
               placeholders (Access OLE DB ignores parameter names for text commands); unmentioned
-              reports run unfiltered. Reports whose RecordSource needs a parameter that was not
-              supplied surface as a Failed entry (Reason "AggregateFailed: ...") in the manifest
-              rather than blocking the batch; supply values via --params to capture them. A
+              reports run unfiltered. A
               top-level baseline-manifest.json index lists every processed report with
               Name / Status / Paths / Reason fields, where Status is one of
               Captured / Skipped / Failed and Reason is non-null for non-Captured entries.
@@ -703,11 +703,10 @@ public static class Program
                             repopulates only Forms-related content; Reports / Queries / Tables
                             etc. from prior runs disappear. To do an incremental partial re-harvest
                             that preserves prior categories, pass --no-clean alongside --types.
-            --include-pdf   (report-baseline only) Also render each report to output.pdf via
-                            DoCmd.OutputTo. Off by default: the default capture is the
-                            deterministic aggregates.json alone. The PDF is a non-deterministic
-                            binary intended for human visual review, and rendering a
-                            required-parameter report without --params can pop a modal prompt.
+            --include-pdf   (report-baseline only) Also render each successfully aggregated
+                            report to output.pdf via DoCmd.OutputTo. Off by default: the
+                            default capture is the deterministic aggregates.json alone. The
+                            PDF is a non-deterministic binary intended for human visual review.
             --json-status   Emit a JSON summary to stdout at end (human messages go to stderr).
                             For run/extract/translate the envelope carries provenance fields:
                             HarvesterVersion (deterministic), StartedAt (UTC ISO-8601,

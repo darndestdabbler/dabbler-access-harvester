@@ -105,7 +105,13 @@ moderate
 | 3.6  | Submit final changeset for verification. | `gpt-5-4` |
 
 ### Actuals (filled after the session)
-- Orchestrator used:
-- Total routed cost:
+- Orchestrator used: `github-copilot gpt-5.4` for the successful recovery/closeout pass on a Session 3 run that had previously been started under `claude-code opus-4.8` and left in a bad state.
+- Total routed cost: `$0.169` — Session-verification R1 (same-provider `gpt-5-4` via the repo's Claude-calibrated `session-verification` override) $0.1553; Session-verification R2 (forced `gemini-pro`, the counting cross-provider review for this OpenAI-orchestrated recovery) $0.0136.
 - Deviations from recommendation:
+  - **Session 3 became an implementation-recovery session before it could be a goldens/closeout session.** A prior closeout attempt left the set with a real correctness defect (`--include-pdf` could render before aggregate success was known) plus forged verification state. The recovered implementation keeps `report-baseline` aggregates-first, makes PDF capture opt-in, and suppresses rendering when aggregate capture fails.
+  - **The originally planned golden corpus / regression-gate / `READ-ME-FIRST` propagation work did not ship here.** The maintained follow-up decision from the Session 3 addendum held: `AccessReportSpecReader.ReadSpec` opens reports in hidden design view, which collides with concurrent ACE OLE DB aggregate capture and reproduced as a hang. With maintainer approval, that work remains deferred to `harvester-report-baseline-golden-corpus`.
+  - **Verification took two rounds, but only Round 2 is the valid cross-provider closeout review.** Round 1 used `route(task_type='session-verification')` and landed on `gpt-5-4` because `router-config.yaml` pins that task type for Claude orchestrators; for this GitHub Copilot / OpenAI recovery pass, Round 1 was same-provider and therefore informational only. Round 2 forced `query(model='gemini-pro', task_type='session-verification')` and returned `VERIFIED` with empty issues.
+  - **Docs drafting was handled directly rather than routed.** The changed `install.md` / `interpretation-guide.md` text was part of the implementation-recovery diff and was tightened alongside the code/tests so the shipped behavior and docs stayed aligned.
 - Notes for next-session calibration:
+  - No further sessions remain in this set.
+  - The named follow-up set `harvester-report-baseline-golden-corpus` owns the deferred lock-free aggregate capture work, committed `reports-baseline/` corpus, regression gate, and `READ-ME-FIRST` propagation.

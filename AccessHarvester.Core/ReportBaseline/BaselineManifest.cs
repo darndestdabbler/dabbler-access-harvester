@@ -67,9 +67,10 @@ public sealed record BaselineManifestEntry
     /// <see cref="Status"/> is <c>Captured</c>. Skip reasons:
     /// <c>UnboundReport</c>. Failure reasons are
     /// <c>ReadSpecFailed: &lt;message&gt;</c> (the live spec read threw
-    /// — neither artifact attempted), <c>RenderFailed: &lt;message&gt;</c>,
-    /// and / or <c>AggregateFailed: &lt;message&gt;</c>; render + aggregate
-    /// failures from the same report are joined with <c>"; "</c>.
+    /// — neither artifact attempted), <c>AggregateFailed: &lt;message&gt;</c>
+    /// (the deterministic aggregate capture failed, so the optional PDF
+    /// render was skipped), and <c>RenderFailed: &lt;message&gt;</c>
+    /// (aggregates succeeded but the opt-in PDF render failed).
     /// </summary>
     public string? Reason { get; init; }
 }

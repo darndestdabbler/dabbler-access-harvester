@@ -93,7 +93,11 @@ public sealed class ReportBaselineRunner
     /// parity ground truth; the rendered PDF is a non-deterministic
     /// binary whose only consumer is human visual review, so it is
     /// opt-in. When <c>true</c>, each captured report additionally
-    /// renders <c>output.pdf</c> via <see cref="IReportPdfRenderer"/>.
+    /// renders <c>output.pdf</c> via <see cref="IReportPdfRenderer"/>. Aggregate capture remains the
+    /// gate: if the report's RecordSource cannot run (for example,
+    /// required parameters were not supplied), the runner records the
+    /// aggregate failure and skips PDF rendering so the batch does not
+    /// enter a modal COM render path for a report that already failed.
     /// The CLI surfaces this as the <c>--include-pdf</c> flag.
     /// </param>
     public BaselineManifest Run(
@@ -179,25 +183,6 @@ public sealed class ReportBaselineRunner
 
         var pathsBuilder = ImmutableSortedDictionary.CreateBuilder<string, string>(StringComparer.Ordinal);
 
-        // PDF render is opt-in (--include-pdf). When off, the renderer is
-        // never invoked: the default capture is the deterministic
-        // aggregates.json only. Render first when enabled; a render
-        // failure does not block aggregates.
-        string? renderFailure = null;
-        if (includePdf)
-        {
-            string pdfPath = Path.Combine(reportDir, "output.pdf");
-            try
-            {
-                _renderer.Render(reportName, pdfPath);
-                pathsBuilder["pdf"] = RelativeForward(pdfPath, reportsBaselineRoot);
-            }
-            catch (Exception ex)
-            {
-                renderFailure = $"RenderFailed: {ex.Message}";
-            }
-        }
-
         IReadOnlyList<KeyValuePair<string, object?>> orderedParams =
             parametersByReport != null
                 && parametersByReport.TryGetValue(reportName, out var p)
@@ -235,6 +220,26 @@ public sealed class ReportBaselineRunner
         catch (Exception ex)
         {
             aggregateFailure = $"AggregateFailed: {ex.Message}";
+        }
+
+        // PDF render is opt-in (--include-pdf). When off, the renderer is
+        // never invoked: the default capture is the deterministic
+        // aggregates.json only. Aggregate capture is the gate so reports
+        // that already failed deterministically do not enter the COM
+        // render path.
+        string? renderFailure = null;
+        if (aggregateFailure is null && includePdf)
+        {
+            string pdfPath = Path.Combine(reportDir, "output.pdf");
+            try
+            {
+                _renderer.Render(reportName, pdfPath);
+                pathsBuilder["pdf"] = RelativeForward(pdfPath, reportsBaselineRoot);
+            }
+            catch (Exception ex)
+            {
+                renderFailure = $"RenderFailed: {ex.Message}";
+            }
         }
 
         if (renderFailure is null && aggregateFailure is null)

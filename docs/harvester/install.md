@@ -188,7 +188,7 @@ AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir>
 | `--out` | yes | Output root; artifacts land under `<out>/AccessMetaData/<dbName>/reports-baseline/` |
 | `--reports` | no | Comma-separated allowlist of report names. Default: **all** reports in the database |
 | `--params` | no | Path to a JSON file of per-report parameter values (see below) |
-| `--include-pdf` | no | Also render `output.pdf` per report. **Default: off** — aggregates only |
+| `--include-pdf` | no | Also render `output.pdf` for reports whose aggregates captured successfully. **Default: off** — aggregates only |
 | `--no-clean` | no | Do not wipe the `reports-baseline` root first (default is a clean capture) |
 | `--json-status` | no | Emit a machine-readable JSON status summary to stdout |
 
@@ -201,9 +201,10 @@ AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir>
   the RecordSource **result set** — Access's own query engine on the
   data — *not* the rendered footer-control expressions. This is the
   deterministic parity ground truth.
-- `<report>/output.pdf` — **only with `--include-pdf`**. A
-  `DoCmd.OutputTo` render for human visual review. Non-deterministic
-  binary; excluded from any byte-comparison gate.
+- `<report>/output.pdf` — **only with `--include-pdf`** and only for
+  reports whose aggregate capture succeeded. A `DoCmd.OutputTo` render
+  for human visual review. Non-deterministic binary; excluded from any
+  byte-comparison gate.
 - `baseline-manifest.json` — top-level index of every report processed:
   `{name, status, paths, reason?}`. `status` is `Captured`, `Skipped`
   (e.g. an unbound report), or `Failed` (with a `reason` such as
@@ -214,7 +215,7 @@ AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir>
 default path never renders a PDF, a required-parameter report that
 cannot run unattended surfaces as an explicit `Failed`
 (`AggregateFailed`) manifest entry rather than blocking on a modal
-prompt — the batch continues.
+prompt or entering `DoCmd.OutputTo` — the batch continues.
 
 **Parameters (`--params`).** Supply values for reports whose
 `RecordSource` requires them. The JSON is keyed by report, then by

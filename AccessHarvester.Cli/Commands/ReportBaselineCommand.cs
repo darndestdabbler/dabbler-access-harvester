@@ -93,32 +93,40 @@ public static class ReportBaselineCommand
         string reportsBaselineRoot = Path.Combine(outDir, "AccessMetaData", dbName, "reports-baseline");
         string harvesterVersion = DatabaseManifest.ResolveHarvesterVersion();
 
-        using var session = new AccessComSession(db);
-        var source = new AccessReportSpecReader(session);
-        var renderer = new AccessReportPdfRenderer(session);
+        IReadOnlyList<string> allReports;
+        IReadOnlyList<string> toProcess;
+        PreloadedReportSource source;
+        using (var specSession = new AccessComSession(db))
+        {
+            var liveSource = new AccessReportSpecReader(specSession);
+            allReports = liveSource.EnumerateAll();
+            if (reportFilter is null)
+            {
+                toProcess = allReports;
+            }
+            else
+            {
+                var availableSet = new HashSet<string>(allReports, StringComparer.Ordinal);
+                var unknown = reportFilter.Where(n => !availableSet.Contains(n)).ToArray();
+                if (unknown.Length > 0)
+                {
+                    Console.Error.WriteLine(
+                        "The following --reports name(s) were not found in the database: "
+                        + string.Join(", ", unknown));
+                    return 1;
+                }
+                toProcess = allReports.Where(reportFilter.Contains).ToArray();
+            }
+
+            source = PreloadedReportSource.Load(liveSource, toProcess);
+        }
+
+        IReportPdfRenderer renderer = includePdf
+            ? new SessionPerRenderPdfRenderer(db)
+            : DisabledReportPdfRenderer.Instance;
         using var executor = new OleDbReportQueryExecutorScope(db);
         var service = new ReportBaselineService(executor.Executor, harvesterVersion);
         var runner = new ReportBaselineRunner(source, renderer, service, harvesterVersion);
-
-        var allReports = source.EnumerateAll();
-        IReadOnlyList<string> toProcess;
-        if (reportFilter is null)
-        {
-            toProcess = allReports;
-        }
-        else
-        {
-            var availableSet = new HashSet<string>(allReports, StringComparer.Ordinal);
-            var unknown = reportFilter.Where(n => !availableSet.Contains(n)).ToArray();
-            if (unknown.Length > 0)
-            {
-                Console.Error.WriteLine(
-                    "The following --reports name(s) were not found in the database: "
-                    + string.Join(", ", unknown));
-                return 1;
-            }
-            toProcess = allReports.Where(reportFilter.Contains).ToArray();
-        }
 
         var manifest = runner.Run(db, toProcess, reportsBaselineRoot, parametersByReport, cleanRoot: clean, includePdf: includePdf);
 
@@ -268,5 +276,97 @@ public static class ReportBaselineCommand
             Executor = new OleDbReportQueryExecutor(databasePath);
         }
         public void Dispose() { /* no-op; per-call connection lifetime */ }
+    }
+
+    /// <summary>
+    /// Preloads live report specs into memory so design-view reads happen
+    /// before aggregate capture begins. This releases the spec-reading
+    /// Access session before the OLE DB executor starts opening the same
+    /// database, avoiding design-view lock interference in the batch path.
+    /// Read failures are preserved and replayed through <see cref="ReadSpec"/>
+    /// so the runner's existing per-report failure handling still applies.
+    /// </summary>
+    private sealed class PreloadedReportSource : IReportSource
+    {
+        private readonly IReadOnlyList<string> _all;
+        private readonly IReadOnlyDictionary<string, ReportLiveSpec> _specs;
+        private readonly IReadOnlyDictionary<string, Exception> _failures;
+
+        private PreloadedReportSource(
+            IReadOnlyList<string> all,
+            IReadOnlyDictionary<string, ReportLiveSpec> specs,
+            IReadOnlyDictionary<string, Exception> failures)
+        {
+            _all = all;
+            _specs = specs;
+            _failures = failures;
+        }
+
+        public static PreloadedReportSource Load(IReportSource source, IReadOnlyList<string> reportNames)
+        {
+            var specs = new Dictionary<string, ReportLiveSpec>(StringComparer.Ordinal);
+            var failures = new Dictionary<string, Exception>(StringComparer.Ordinal);
+            foreach (var reportName in reportNames)
+            {
+                try
+                {
+                    specs[reportName] = source.ReadSpec(reportName);
+                }
+                catch (Exception ex)
+                {
+                    failures[reportName] = ex;
+                }
+            }
+
+            return new PreloadedReportSource(
+                reportNames.ToImmutableArray(),
+                specs.ToImmutableDictionary(StringComparer.Ordinal),
+                failures.ToImmutableDictionary(StringComparer.Ordinal));
+        }
+
+        public IReadOnlyList<string> EnumerateAll() => _all;
+
+        public ReportLiveSpec ReadSpec(string reportName)
+        {
+            if (_failures.TryGetValue(reportName, out var ex))
+                throw ex;
+
+            if (_specs.TryGetValue(reportName, out var spec))
+                return spec;
+
+            throw new KeyNotFoundException($"Preloaded report spec not found: {reportName}");
+        }
+    }
+
+    private sealed class DisabledReportPdfRenderer : IReportPdfRenderer
+    {
+        public static DisabledReportPdfRenderer Instance { get; } = new();
+
+        public void Render(string reportName, string outputPdfPath)
+            => throw new InvalidOperationException("PDF rendering is disabled when --include-pdf is not set.");
+    }
+
+    /// <summary>
+    /// Opens a fresh shared Access session for each opt-in PDF render so
+    /// the batch's aggregate phase runs without a concurrent live Access
+    /// database handle. This keeps the default aggregate-first path clear
+    /// of Access/OLE DB lock interference while still supporting on-demand
+    /// PDF output for successfully aggregated reports.
+    /// </summary>
+    private sealed class SessionPerRenderPdfRenderer : IReportPdfRenderer
+    {
+        private readonly string _databasePath;
+
+        public SessionPerRenderPdfRenderer(string databasePath)
+        {
+            _databasePath = databasePath ?? throw new ArgumentNullException(nameof(databasePath));
+        }
+
+        public void Render(string reportName, string outputPdfPath)
+        {
+            using var session = new AccessComSession(_databasePath);
+            var renderer = new AccessReportPdfRenderer(session);
+            renderer.Render(reportName, outputPdfPath);
+        }
     }
 }

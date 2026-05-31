@@ -47,11 +47,12 @@ public class HomeHealthCareComCollection { }
 /// The scoped set deliberately includes both <c>Captured</c> reports
 /// (srptClientBudgets, srptClientCurrentNeeds — bound, parameter-free at
 /// the OLE DB layer) and <c>Failed</c> reports (srptServicePlanEntries,
-/// srptServiceShortfall — render PDF with empty data because the parent-
-/// context binding is unresolved, then fail at the aggregate OLE DB query
-/// with <c>"No value given for one or more required parameters."</c>).
-/// Both Status branches of the runner's <c>CaptureOne</c> path are
-/// exercised, so the integration test catches regressions in either.
+/// srptServiceShortfall — the parent-context binding is unresolved, so
+/// the aggregate OLE DB query fails with <c>"No value given for one or
+/// more required parameters."</c>). Because aggregate capture now gates
+/// the optional PDF render, those failed reports never enter
+/// <c>DoCmd.OutputTo</c>; the integration test proves that
+/// <c>--include-pdf</c> still stays unattended on this mixed set.
 /// Exit code 3 is expected (some Failed entries).
 /// </para>
 /// </summary>
@@ -60,8 +61,8 @@ public class HomeHealthCareComCollection { }
 public class ReportBaselineCommandIntegrationTests
 {
     // Sub-reports only; see class-level remarks. Two are expected to Capture
-    // cleanly, two to Fail at the OLE DB aggregate step without popping a
-    // modal in DoCmd.OutputTo.
+    // cleanly, two to Fail at the OLE DB aggregate step and therefore skip
+    // the opt-in PDF render path entirely.
     private static readonly string[] ScopedReports =
     {
         "srptClientBudgets",
@@ -136,11 +137,14 @@ public class ReportBaselineCommandIntegrationTests
                 {
                     failed++;
                     // The scoped Failed reports fail at the OLE DB aggregate
-                    // step (parent-context bindings unresolved); the PDF
-                    // should still render with empty data.
+                    // step (parent-context bindings unresolved). Aggregate
+                    // failure suppresses the opt-in PDF render path.
                     var reason = entry.GetProperty("Reason").GetString();
+                    var paths = entry.GetProperty("Paths");
                     Assert.NotNull(reason);
                     Assert.Contains("AggregateFailed", reason);
+                    Assert.False(paths.TryGetProperty("pdf", out _));
+                    Assert.False(paths.TryGetProperty("aggregates", out _));
                 }
                 else
                 {

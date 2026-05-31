@@ -41,21 +41,25 @@
 
 ---
 
-## Currently in-progress
+## Recently closed / on deck
 
 | Status | Slug | Why now |
 |---|---|---|
-| `[~]` | [`harvester-report-baseline-capture`](harvester-report-baseline-capture/spec.md) | Consumption-triggered (Dabbler.NorthwindToBlazor Set 001 Session 3, 2026-05-29). Adds a `report-baseline` subcommand that captures each Access report's PDF + RecordSource-derived aggregates so downstream Blazor-migration projects verify ported-report parity against Access ground truth without a human exporting PDFs by hand. Eliminates the only remaining manual step in the harvest → migrate pipeline. Spec finalized 2026-05-29 via cross-provider consensus. **3 sessions**; Full tier, no UAT/E2E. |
+| `[x]` | [`harvester-report-baseline-capture`](harvester-report-baseline-capture/change-log.md) | Closed 2026-05-31. Recovered Session 3 honestly after a bad prior closeout attempt: `report-baseline` now stays aggregates-first, optional PDF render runs only after aggregate success, and the shipped docs/help text match the runtime contract. The committed golden corpus + regression gate + `READ-ME-FIRST` propagation remain explicitly deferred to the named follow-up stub [`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/spec.md). |
 
 Phase 4 closed [2026-05-29](harvester-cli-distribution/change-log.md); the
 most recent maintenance set
 ([`harvester-manifest-index-and-batch-readiness`](harvester-manifest-index-and-batch-readiness/change-log.md))
 closed 2026-05-29 after answering the first real downstream consumer's six
-findings, and surfaced two consumption-triggered draft specs:
-[`harvester-report-baseline-capture`](harvester-report-baseline-capture/spec.md)
-(now in-progress, row above) and
+findings, and surfaced two consumption-triggered follow-ons. The first,
+[`harvester-report-baseline-capture`](harvester-report-baseline-capture/change-log.md),
+closed 2026-05-31 after repairing the Session 3 closeout and locking the
+shipped `report-baseline` contract. The follow-up stub
+[`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/spec.md)
+is on deck for the deferred lock-free aggregate capture + golden corpus /
+regression-gate work. The sibling
 [`harvester-consumer-workflow-instructions`](harvester-consumer-workflow-instructions/spec.md)
-(still DRAFT, awaiting maintainer finalization).
+remains DRAFT, awaiting maintainer finalization.
 
 Other candidates remain on deck but are not active:
 [`harvester-parallel-com-test-cleanup`](harvester-manifest-index-and-batch-readiness/next-session-set-recommendation.md)

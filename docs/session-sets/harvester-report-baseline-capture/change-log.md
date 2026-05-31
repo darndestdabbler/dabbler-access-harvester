@@ -1,10 +1,11 @@
 # Harvester Report-Baseline Capture — Session Set Change Log
 
-**Sessions:** 2 of 3 (S1 + S2 complete; S3 not started)
+**Sessions:** 3 of 3 (complete)
 **Started:** 2026-05-29
-**Latest close:** 2026-05-29 (Session 2)
+**Latest close:** 2026-05-31 (Session 3)
 **Final verdict (S1):** VERIFIED after four rounds of cross-provider session-verification (R1/R2/R3 ISSUES_FOUND, all must-fix items addressed in-session; R4 gpt-5-4 VERIFIED, must_fix empty, three minor nice-to-haves filed).
 **Final verdict (S2):** VERIFIED on R2 (R1 returned ISSUES_FOUND with two Major items + a coverage gap + minor doc nits; all addressed in-session; R2 gpt-5-4 VERIFIED with empty issues).
+**Final verdict (S3):** VERIFIED on R2. R1 routed to gpt-5-4 because `router-config.yaml`'s `session-verification` override is calibrated for Claude orchestrators; for this GitHub Copilot / OpenAI recovery pass, the counting cross-provider closeout review is R2 via forced `gemini-pro`, which returned VERIFIED with empty issues.
 
 This session set was authored as a DRAFT by a downstream consumer
 (`Dabbler.NorthwindToBlazor` Set 001 Session 3, 2026-05-29) and
@@ -505,3 +506,89 @@ capture + mechanical closeout, which is the cost-effective profile
 for gemini-pro). The orchestrator should route docs drafting
 through `route(task_type="summarization")` (NOT `documentation`,
 per the convention) and handle file mechanics directly.
+
+
+---
+
+## Session 3 of 3: Recovery, docs alignment, and honest closeout
+
+**Orchestrator:** `github-copilot gpt-5.4` (recovery/closeout pass on a Session 3 run that had previously been started under `claude-code opus-4.8` and left in a bad state).
+**Verification:** VERIFIED on R2. R1 (`gpt-5-4`) was same-provider for the current OpenAI orchestrator and is recorded only as an informational first attempt caused by the repo's Claude-calibrated router override; R2 forced `gemini-pro` and is the counting cross-provider closeout review.
+**Routed cost (S3 total):** ~$0.169
+- Session-verification R1 (`gpt-5-4`, same-provider / informational only): $0.1553
+- Session-verification R2 (`gemini-pro`, final cross-provider verdict): $0.0136
+
+### Closed (S3 actual scope)
+
+Session 3 did not end up being the originally-planned "goldens and closeout"
+session. It first had to recover a bad prior closeout attempt plus the real
+behavioral defect in the shipped `report-baseline` slice: with `--include-pdf`,
+the runner could enter the render path before aggregate success was definitively
+known.
+
+The recovered implementation keeps the contract honest and narrow:
+
+- aggregate capture remains authoritative and runs first;
+- PDF capture is opt-in via `--include-pdf`;
+- aggregate failure suppresses rendering for that report instead of partially
+  succeeding and obscuring the failure;
+- CLI/report-source lifetime handling was tightened for the validated COM / ACE
+  OLE DB lock scenario in this slice;
+- install/help/interpretation docs were updated to match the shipped behavior;
+- the forged Session 3 review artifact from the failed closeout attempt was
+  removed and replaced with a real verifier-backed review.
+
+The originally-planned committed `reports-baseline/` golden corpus,
+regression-gate wiring, and `READ-ME-FIRST` propagation did **not** ship in
+this set. Those items remain explicitly deferred, with maintainer approval, to
+[`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/spec.md)
+after reproducing the design-view/ACE-OLEDB lock conflict.
+
+### Changed
+
+- [`AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs`](../../../AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs)
+  - enforces the recovered aggregates-first invariant so optional rendering
+  never runs before aggregate success is known.
+- [`AccessHarvester.Cli/Commands/ReportBaselineCommand.cs`](../../../AccessHarvester.Cli/Commands/ReportBaselineCommand.cs)
+  - aligns the CLI surface with the recovered runtime behavior and opt-in PDF
+  semantics.
+- [`AccessHarvester.Cli/Program.cs`](../../../AccessHarvester.Cli/Program.cs)
+  - updates usage/help text to reflect the shipped `report-baseline` contract.
+- [`AccessHarvester.Core/ReportBaseline/BaselineManifest.cs`](../../../AccessHarvester.Core/ReportBaseline/BaselineManifest.cs)
+  - keeps the manifest shape aligned with the recovered success/failure contract.
+- [`tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineRunnerTests.cs`](../../../tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineRunnerTests.cs)
+  - locks the aggregate-first / render-suppression invariant with hermetic coverage.
+- [`tests/AccessHarvester.Tests/ReportBaselineCommandIntegrationTests.cs`](../../../tests/AccessHarvester.Tests/ReportBaselineCommandIntegrationTests.cs)
+  - verifies the CLI/user-facing status surface for the recovered behavior.
+- [`docs/harvester/install.md`](../../../docs/harvester/install.md)
+  - documents `--include-pdf` as opt-in and reflects the final capture semantics.
+- [`docs/harvester/interpretation-guide.md`](../../../docs/harvester/interpretation-guide.md)
+  - explains how to interpret `Captured` vs `AggregateFailed` outcomes after the recovery.
+- [`docs/session-sets/harvester-report-baseline-capture/session-reviews/session-003.md`](session-reviews/session-003.md)
+  - canonical Session 3 review file now contains the real verifier output, ending with the valid Gemini Pro round.
+
+### Test results
+
+- `dotnet build AccessHarvester.sln` - success.
+- Focused runner tests (`AccessHarvester.Tests.ReportBaseline.ReportBaselineRunnerTests`) - 13 passed, 0 failed.
+- Usage/help text test slice (`CliUsageTextTests`) - pass.
+- Live `report-baseline` run against `samples/HomeHealthCare.accdb` - 2 `Captured` (`srptClientBudgets`, `srptClientCurrentNeeds`) and 2 `AggregateFailed` (`srptServicePlanEntries`, `srptServiceShortfall`, both surfacing `No value given for one or more required parameters.`).
+
+### Verifier notes
+
+- **R1** (`gpt-5-4`): returned `VERIFIED`, but this did **not** satisfy the
+  workflow's cross-provider requirement for the current GitHub Copilot / OpenAI
+  orchestrator because the repo's `session-verification` override is tuned for
+  Claude sessions.
+- **R2** (`gemini-pro` forced via direct query): `VERIFIED`, issues `[]`. This
+  is the counting closeout review.
+
+### Deferred / follow-up items
+
+- The design-view lock collision remains the blocker for the committed golden
+  corpus and regression gate: `AccessReportSpecReader.ReadSpec` opens reports in
+  hidden design view while aggregate capture concurrently uses ACE OLE DB.
+- The named follow-up set
+  [`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/spec.md)
+  owns the lock-free aggregate-capture refactor, the committed `reports-baseline/`
+  corpus, the regression gate, and `READ-ME-FIRST` propagation.

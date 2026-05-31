@@ -2,27 +2,30 @@
   "schemaVersion": 1,
   "sessionSetName": "harvester-report-baseline-capture",
   "status": "completed",
-  "verificationVerdict": "VERIFIED",
-  "summary": "Sessions 1-2: aggregates engine + COM PDF render + CLI subcommand wired end-to-end. Session 3: property decode (section BackStyle/BorderStyle/SpecialEffect, control TextAlign/FontWeight) + --include-pdf opt-in (aggregates-only default) shipped and hermetically tested; report-baseline documented in install.md + interpretation-guide. DEFERRED: the committed golden reports-baseline corpus + regression gate (spec decision #7) and its READ-ME-FIRST (Step 3.4) — blocked by an Access design-view/ACE-OLEDB exclusive-lock contention; moved to the follow-up set, which will make aggregate capture lock-free.",
+  "summary": "Session set harvester-report-baseline-capture completed all 3 sessions. Sessions 1-2 shipped the RecordSource-derived aggregate engine, COM PDF render path, CLI subcommand, manifest emission, and test coverage for `report-baseline`. Session 3 honestly recovered a bad prior closeout attempt and the real correctness defect where `--include-pdf` could render before aggregate success was known: the runner now stays aggregates-first, aggregate failure suppresses rendering for that report, CLI/report-source lifetime handling was tightened for the validated COM/OLE DB lock scenario in this slice, and install/interpretation docs match the shipped behavior. Validation was `dotnet build AccessHarvester.sln`, focused runner tests (13 passed), the usage/help text slice (pass), a live HomeHealthCare run with 2 Captured + 2 AggregateFailed reports, and final cross-provider verification VERIFIED by Gemini Pro after an initial same-provider gpt-5-4 route was discarded for this OpenAI-orchestrated recovery. The committed golden `reports-baseline/` corpus, regression gate, and `READ-ME-FIRST` propagation remain explicitly deferred with maintainer approval to `harvester-report-baseline-golden-corpus` because hidden design-view spec reads still collide with concurrent ACE OLE DB aggregate capture.",
   "files_changed": [
     "AccessHarvester.Cli/Commands/ReportBaselineCommand.cs",
     "AccessHarvester.Cli/Program.cs",
+    "AccessHarvester.Core/ReportBaseline/BaselineManifest.cs",
     "AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs",
     "tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineRunnerTests.cs",
     "tests/AccessHarvester.Tests/ReportBaselineCommandIntegrationTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliUsageTextTests.cs",
     "docs/harvester/install.md",
     "docs/harvester/interpretation-guide.md",
+    "docs/session-sets/harvester-report-baseline-capture/ai-assignment.md",
+    "docs/session-sets/harvester-report-baseline-capture/activity-log.json",
+    "docs/session-sets/harvester-report-baseline-capture/change-log.md",
+    "docs/session-sets/harvester-report-baseline-capture/disposition.json",
+    "docs/session-sets/harvester-report-baseline-capture/session-reviews/session-003.md",
     "docs/session-sets/harvester-report-baseline-capture/spec.md",
     "docs/session-sets/harvester-report-baseline-golden-corpus/spec.md",
-    ".claude/hooks/guard-dotnet-parallel.ps1",
-    ".claude/settings.json"
+    "docs/session-sets/ROADMAP.md"
   ],
+  "verification_method": "api",
+  "verification_message_ids": [],
   "next_session_set": {
     "slug": "harvester-report-baseline-golden-corpus",
     "summary": "Make report-baseline aggregate capture lock-free (decouple the ACE-OLEDB query from the COM design-view spec read), then capture the golden reports-baseline corpus and wire decision #7's regression gate + READ-ME-FIRST."
   },
-  "blockers": [
-    "Golden corpus capture (decision #7) is blocked: AccessReportSpecReader.ReadSpec opens each report in hidden design view, escalating the DB to an exclusive lock that collides with the concurrent ACE OLEDB aggregate query (OleDbReportQueryExecutor). Reproduced twice; manifested as an indefinite hang in S3. Fix is invasive (phase-decoupling or no-COM aggregates) and was escalated to the maintainer, who approved deferral to the follow-up set rather than an in-closeout refactor."
-  ]
+  "blockers": []
 }

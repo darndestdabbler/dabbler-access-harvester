@@ -555,8 +555,9 @@ not part of a normal `run`; capture it explicitly (see
   visual diff instead. `ParametersUsed` records the exact parameter
   values applied.
 - **`<report>/output.pdf`** — present only when captured with
-  `--include-pdf`; a non-deterministic binary for *human* visual review,
-  not part of any automated gate.
+  `--include-pdf` and the report's aggregate capture succeeded; a
+  non-deterministic binary for *human* visual review, not part of any
+  automated gate.
 
 To *understand* a report, read its `ir/Reports/` node; to *check a
 migration*, compare against these baselines. (A committed golden corpus +

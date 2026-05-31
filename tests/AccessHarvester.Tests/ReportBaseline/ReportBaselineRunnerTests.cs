@@ -220,7 +220,7 @@ public class ReportBaselineRunnerTests
     }
 
     [Fact]
-    public void Run_RecordsAggregateFailure_AsFailed_ButStillWritesPdf()
+    public void Run_RecordsAggregateFailure_AsFailed_WithoutInvokingRenderer()
     {
         var source = new FakeSource();
         source.Specs["rptBad"] = BoundSpec("rptBad", "Orders");
@@ -240,8 +240,10 @@ public class ReportBaselineRunnerTests
             Assert.Equal("Failed", entry.Status);
             Assert.NotNull(entry.Reason);
             Assert.Contains("AggregateFailed", entry.Reason);
-            Assert.Equal("rptBad/output.pdf", entry.Paths["pdf"]);
+            Assert.Empty(renderer.Calls);
+            Assert.False(entry.Paths.ContainsKey("pdf"));
             Assert.False(entry.Paths.ContainsKey("aggregates"));
+            Assert.False(File.Exists(Path.Combine(root, "rptBad", "output.pdf")));
             Assert.False(File.Exists(Path.Combine(root, "rptBad", "aggregates.json")));
         }
         finally
@@ -342,7 +344,7 @@ public class ReportBaselineRunnerTests
     }
 
     [Fact]
-    public void Run_WithBothRenderAndAggregateFailure_RecordsFailedWithJoinedReasonAndEmptyPaths()
+    public void Run_WhenAggregateWouldFail_DoesNotAttemptRender_AndRecordsAggregateFailureOnly()
     {
         var source = new FakeSource();
         source.Specs["rptBad"] = BoundSpec("rptBad", "Orders");
@@ -361,12 +363,10 @@ public class ReportBaselineRunnerTests
 
             var entry = Assert.Single(manifest.Reports);
             Assert.Equal("Failed", entry.Status);
+            Assert.Empty(renderer.Calls);
             Assert.Empty(entry.Paths);
             Assert.NotNull(entry.Reason);
-            Assert.Contains("RenderFailed", entry.Reason);
             Assert.Contains("AggregateFailed", entry.Reason);
-            // The joined-reason separator is "; ".
-            Assert.Contains("; ", entry.Reason);
             Assert.False(File.Exists(Path.Combine(root, "rptBad", "output.pdf")));
             Assert.False(File.Exists(Path.Combine(root, "rptBad", "aggregates.json")));
         }
