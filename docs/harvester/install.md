@@ -127,6 +127,7 @@ AccessHarvester --help                                   # full usage text
 AccessHarvester extract       --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
 AccessHarvester translate     --in <raw-dir>    --out <kb-dir>          [--types ...] [--json-status]
 AccessHarvester run           --db <file.accdb> --out <output-root-dir> [--types ...] [--json-status]
+AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir> [--reports name,name] [--params <params.json>] [--include-pdf] [--no-clean] [--json-status]
 AccessHarvester generate-docs --in <manifest.json> --out <output-dir>
 AccessHarvester validate      --in <output-root-dir> [--json-status]
 AccessHarvester validate      --manifest <manifest.json> [--json-status]
@@ -150,6 +151,10 @@ Exit codes per subcommand group:
 
 - `extract` / `translate` / `run`: `0` (all OK), `1` (usage error),
   `2` (unexpected error), `3` (completed with per-object failures).
+- `report-baseline`: `0` (all considered reports captured or harmlessly
+  skipped), `1` (usage error), `2` (unexpected error), `3` (completed
+  with per-report failures). COM-based — requires Windows + Access, like
+  `extract` / `run`.
 - `parse` / bare-file: `0` (parsed), `1` (failed / not found / usage
   error).
 - `generate-docs`: `0` (summary written), `1` (usage error),
@@ -163,6 +168,77 @@ For the per-subcommand option list, JSON-status envelope shapes, and
 the parse output schema, run `AccessHarvester --help`.
 
 ---
+
+## `report-baseline` — report parity baselines
+
+`report-baseline` captures a per-report **parity baseline** so a
+downstream migration can verify a ported report against the original
+Access report's ground truth. It is COM-based (Windows + Microsoft
+Access required), like `extract` / `run`.
+
+```
+AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir>
+    [--reports <name,name>] [--params <params.json>] [--include-pdf]
+    [--no-clean] [--json-status]
+```
+
+| Option | Required | Meaning |
+|---|---|---|
+| `--db` | yes | The `.accdb` / `.mdb` to capture against |
+| `--out` | yes | Output root; artifacts land under `<out>/AccessMetaData/<dbName>/reports-baseline/` |
+| `--reports` | no | Comma-separated allowlist of report names. Default: **all** reports in the database |
+| `--params` | no | Path to a JSON file of per-report parameter values (see below) |
+| `--include-pdf` | no | Also render `output.pdf` per report. **Default: off** — aggregates only |
+| `--no-clean` | no | Do not wipe the `reports-baseline` root first (default is a clean capture) |
+| `--json-status` | no | Emit a machine-readable JSON status summary to stdout |
+
+**What it writes**, under
+`<out>/AccessMetaData/<dbName>/reports-baseline/`:
+
+- `<report>/aggregates.json` — **always**. The report's `RecordSource`
+  query result aggregates (row count, group subtotals, grand total),
+  plus provenance (parameters used, harvester version). These reflect
+  the RecordSource **result set** — Access's own query engine on the
+  data — *not* the rendered footer-control expressions. This is the
+  deterministic parity ground truth.
+- `<report>/output.pdf` — **only with `--include-pdf`**. A
+  `DoCmd.OutputTo` render for human visual review. Non-deterministic
+  binary; excluded from any byte-comparison gate.
+- `baseline-manifest.json` — top-level index of every report processed:
+  `{name, status, paths, reason?}`. `status` is `Captured`, `Skipped`
+  (e.g. an unbound report), or `Failed` (with a `reason` such as
+  `AggregateFailed` / `RenderFailed`) — failed/skipped reports are
+  explicit, never silently omitted.
+
+**Default capture is aggregates-only and modal-free.** Because the
+default path never renders a PDF, a required-parameter report that
+cannot run unattended surfaces as an explicit `Failed`
+(`AggregateFailed`) manifest entry rather than blocking on a modal
+prompt — the batch continues.
+
+**Parameters (`--params`).** Supply values for reports whose
+`RecordSource` requires them. The JSON is keyed by report, then by
+parameter:
+
+```json
+{
+  "rptInvoice":       { "OrderID": 10250 },
+  "rptSalesByPeriod": { "StartDate": "2026-01-01", "EndDate": "2026-03-31" }
+}
+```
+
+Parameters bind **positionally, in the order declared** for each report,
+to the SQL's `?` placeholders (Access OLE DB ignores parameter names for
+text commands); the values used are recorded verbatim in
+`aggregates.json` provenance so two runs reproduce exactly.
+
+> **Status (`harvester-report-baseline-capture` S3):** the subcommand,
+> aggregates engine, PDF render, and parameter handling are shipped. A
+> committed **golden reports-baseline corpus + regression gate** (spec
+> decision #7) is **deferred** to the follow-up set
+> `harvester-report-baseline-golden-corpus` — capturing it currently
+> trips an Access design-view / ACE-OLEDB exclusive-lock contention, and
+> the follow-up will make aggregate capture lock-free.
 
 ## Versioning convention
 

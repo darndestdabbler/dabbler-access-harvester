@@ -9,9 +9,11 @@ namespace AccessHarvester.Core.ReportBaseline;
 /// <summary>
 /// Composes <see cref="IReportSource"/> + <see cref="IReportPdfRenderer"/>
 /// + <see cref="ReportBaselineService"/> to capture baselines for a batch
-/// of reports. Writes per-report <c>output.pdf</c> + <c>aggregates.json</c>
-/// and a top-level <c>baseline-manifest.json</c>. Returns the manifest so
-/// the CLI can emit its summary into <c>--json-status</c>.
+/// of reports. Writes per-report <c>aggregates.json</c> (always) and
+/// <c>output.pdf</c> (only when <c>includePdf</c> is set — see
+/// <see cref="Run"/>), plus a top-level <c>baseline-manifest.json</c>.
+/// Returns the manifest so the CLI can emit its summary into
+/// <c>--json-status</c>.
 ///
 /// <para>
 /// All file writes go under <c>reportsBaselineRoot</c>; the per-report
@@ -84,12 +86,23 @@ public sealed class ReportBaselineRunner
     /// captured-this-run artifacts are not contaminated by prior-run
     /// state — but un-captured reports' prior artifacts remain.
     /// </param>
+    /// <param name="includePdf">
+    /// When <c>false</c> (the default), only the deterministic
+    /// <c>aggregates.json</c> is written and the COM PDF render is
+    /// skipped entirely. Aggregates are the RecordSource-result-set
+    /// parity ground truth; the rendered PDF is a non-deterministic
+    /// binary whose only consumer is human visual review, so it is
+    /// opt-in. When <c>true</c>, each captured report additionally
+    /// renders <c>output.pdf</c> via <see cref="IReportPdfRenderer"/>.
+    /// The CLI surfaces this as the <c>--include-pdf</c> flag.
+    /// </param>
     public BaselineManifest Run(
         string databasePath,
         IReadOnlyList<string> reportNames,
         string reportsBaselineRoot,
         IReadOnlyDictionary<string, IReadOnlyList<KeyValuePair<string, object?>>>? parametersByReport = null,
-        bool cleanRoot = true)
+        bool cleanRoot = true,
+        bool includePdf = false)
     {
         if (reportNames is null) throw new ArgumentNullException(nameof(reportNames));
         if (string.IsNullOrWhiteSpace(reportsBaselineRoot))
@@ -102,7 +115,7 @@ public sealed class ReportBaselineRunner
         var entries = new List<BaselineManifestEntry>(reportNames.Count);
         foreach (var name in reportNames)
         {
-            entries.Add(CaptureOne(name, reportsBaselineRoot, parametersByReport));
+            entries.Add(CaptureOne(name, reportsBaselineRoot, parametersByReport, includePdf));
         }
 
         var manifest = new BaselineManifest
@@ -124,7 +137,8 @@ public sealed class ReportBaselineRunner
     private BaselineManifestEntry CaptureOne(
         string reportName,
         string reportsBaselineRoot,
-        IReadOnlyDictionary<string, IReadOnlyList<KeyValuePair<string, object?>>>? parametersByReport)
+        IReadOnlyDictionary<string, IReadOnlyList<KeyValuePair<string, object?>>>? parametersByReport,
+        bool includePdf)
     {
         var reportDir = Path.Combine(reportsBaselineRoot, reportName);
         // Recreate the per-report dir from scratch each capture so a
@@ -165,17 +179,23 @@ public sealed class ReportBaselineRunner
 
         var pathsBuilder = ImmutableSortedDictionary.CreateBuilder<string, string>(StringComparer.Ordinal);
 
-        // Render PDF first; a render failure does not block aggregates.
-        string pdfPath = Path.Combine(reportDir, "output.pdf");
+        // PDF render is opt-in (--include-pdf). When off, the renderer is
+        // never invoked: the default capture is the deterministic
+        // aggregates.json only. Render first when enabled; a render
+        // failure does not block aggregates.
         string? renderFailure = null;
-        try
+        if (includePdf)
         {
-            _renderer.Render(reportName, pdfPath);
-            pathsBuilder["pdf"] = RelativeForward(pdfPath, reportsBaselineRoot);
-        }
-        catch (Exception ex)
-        {
-            renderFailure = $"RenderFailed: {ex.Message}";
+            string pdfPath = Path.Combine(reportDir, "output.pdf");
+            try
+            {
+                _renderer.Render(reportName, pdfPath);
+                pathsBuilder["pdf"] = RelativeForward(pdfPath, reportsBaselineRoot);
+            }
+            catch (Exception ex)
+            {
+                renderFailure = $"RenderFailed: {ex.Message}";
+            }
         }
 
         IReadOnlyList<KeyValuePair<string, object?>> orderedParams =

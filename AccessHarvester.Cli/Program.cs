@@ -647,7 +647,7 @@ public static class Program
               AccessHarvester identify-cleanup --manifest <manifest.json>   [--harvest-date <YYYY-MM-DD>] [--threshold-days <N>] [--no-com] [--json-status]
               AccessHarvester classify        --in <file.accdb> --out <output-dir> [--exclude-cleanup <path>] [--json-status]
               AccessHarvester sanitize        --classification <classification.json> --in <file.accdb> --out <output-dir> [--json-status]
-              AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir> [--reports <name,name>] [--params <params.json>] [--no-clean] [--json-status]
+              AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir> [--reports <name,name>] [--params <params.json>] [--include-pdf] [--no-clean] [--json-status]
               AccessHarvester parse           <source-file>
               AccessHarvester parse           --in <source-file>
               AccessHarvester                 <source-file>       (bare-file mode; equivalent to 'parse')
@@ -656,19 +656,25 @@ public static class Program
             `run` is extract + translate + enrich in one invocation.
             `generate-docs` reads a DatabaseManifest JSON and writes a markdown schema summary to
               <output-dir>/<database-slug>/schema-summary.md.
-            `report-baseline` captures rendered PDF + RecordSource-query aggregates for every
-              report in the database (or a --reports allowlist) under
-              <output-root-dir>/AccessMetaData/<dbName>/reports-baseline/<report>/. The PDF is
-              rendered via DoCmd.OutputTo over the live COM session; aggregates reflect the
-              report's RecordSource result set, NOT the rendered footer expressions. Default is
-              all reports; pass --reports <name,name> to scope. --params accepts a JSON file with
-              the shape {"ReportName": {"ParamName": value}} for parametrized reports;
-              parameter ORDER in each ReportName object is the positional binding order against
-              the SQL's `?` placeholders (Access OLE DB ignores parameter names for text
-              commands); unmentioned reports run unfiltered. A top-level baseline-manifest.json
-              index lists every processed report with Name / Status / Paths / Reason fields,
-              where Status is one of Captured / Skipped / Failed and Reason is non-null for
-              non-Captured entries.
+            `report-baseline` captures RecordSource-query aggregates (and, with --include-pdf,
+              the rendered PDF) for every report in the database (or a --reports allowlist) under
+              <output-root-dir>/AccessMetaData/<dbName>/reports-baseline/<report>/. aggregates.json
+              reflects the report's RecordSource result set, NOT the rendered footer expressions,
+              and is the deterministic parity ground truth. By default the PDF is NOT rendered;
+              pass --include-pdf to additionally render output.pdf via DoCmd.OutputTo over the
+              live COM session (a non-deterministic binary for human visual review; note that
+              required-parameter reports may pop a modal prompt under DoCmd.OutputTo when rendered
+              without --params). Default scope is all reports; pass --reports <name,name> to
+              scope. --params accepts a JSON file with the shape
+              {"ReportName": {"ParamName": value}} for parametrized reports; parameter ORDER in
+              each ReportName object is the positional binding order against the SQL's `?`
+              placeholders (Access OLE DB ignores parameter names for text commands); unmentioned
+              reports run unfiltered. Reports whose RecordSource needs a parameter that was not
+              supplied surface as a Failed entry (Reason "AggregateFailed: ...") in the manifest
+              rather than blocking the batch; supply values via --params to capture them. A
+              top-level baseline-manifest.json index lists every processed report with
+              Name / Status / Paths / Reason fields, where Status is one of
+              Captured / Skipped / Failed and Reason is non-null for non-Captured entries.
               By default the reports-baseline/ output root is cleaned before capture so a
               re-run cannot inherit stale PDFs from reports that are no longer being captured;
               pass --no-clean to preserve prior artifacts (the per-report dir for each report
@@ -697,6 +703,11 @@ public static class Program
                             repopulates only Forms-related content; Reports / Queries / Tables
                             etc. from prior runs disappear. To do an incremental partial re-harvest
                             that preserves prior categories, pass --no-clean alongside --types.
+            --include-pdf   (report-baseline only) Also render each report to output.pdf via
+                            DoCmd.OutputTo. Off by default: the default capture is the
+                            deterministic aggregates.json alone. The PDF is a non-deterministic
+                            binary intended for human visual review, and rendering a
+                            required-parameter report without --params can pop a modal prompt.
             --json-status   Emit a JSON summary to stdout at end (human messages go to stderr).
                             For run/extract/translate the envelope carries provenance fields:
                             HarvesterVersion (deterministic), StartedAt (UTC ISO-8601,

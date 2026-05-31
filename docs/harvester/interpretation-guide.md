@@ -535,6 +535,35 @@ expression. The report's `RowSource` / `RecordSource` is the source
 of the row data; report-bound queries surface in the manifest's
 `RowSourceSpecs` like form-bound queries do.
 
+**Report parity baselines (separate from `ir/`).** The `ir/Reports/`
+record describes a report; the `report-baseline` subcommand produces a
+different artifact — **parity ground truth for verifying a *ported*
+report** — under `<out>/AccessMetaData/<dbName>/reports-baseline/`. It is
+not part of a normal `run`; capture it explicitly (see
+[`install.md`](install.md)). To read it:
+
+- **`baseline-manifest.json`** — start here: `{name, status, paths,
+  reason?}` per report. `status` is `Captured`, `Skipped` (e.g.
+  `reason: "UnboundReport"`), or `Failed` (e.g. `reason:
+  "AggregateFailed: ..."` — usually a report whose query needs a
+  parameter that was not supplied). Nothing is silently omitted.
+- **`<report>/aggregates.json`** — the numbers: the `RecordSource`
+  **query result-set** aggregates (row count, group subtotals, grand
+  total) from Access's own query engine — *not* the rendered footer's
+  `=Sum(...)` controls. For a parity check that is the right comparison
+  (same engine, same data); footer-only divergence shows up in the PDF
+  visual diff instead. `ParametersUsed` records the exact parameter
+  values applied.
+- **`<report>/output.pdf`** — present only when captured with
+  `--include-pdf`; a non-deterministic binary for *human* visual review,
+  not part of any automated gate.
+
+To *understand* a report, read its `ir/Reports/` node; to *check a
+migration*, compare against these baselines. (A committed golden corpus +
+automated regression gate for these baselines is deferred to the
+`harvester-report-baseline-golden-corpus` follow-up set; today they are
+produced on demand.)
+
 ### 5.3 Queries (`ir/Queries/*.ir.json`)
 
 A query record carries:

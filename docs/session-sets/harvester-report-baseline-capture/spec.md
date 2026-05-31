@@ -57,15 +57,19 @@ decisions*):
 
 ```
 AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir>
-    [--reports <name,name>] [--params <params.json>] [--json-status]
+    [--reports <name,name>] [--params <params.json>] [--include-pdf] [--json-status]
 ```
 
 Per report, under `<out>/AccessMetaData/<dbName>/reports-baseline/<report>/`:
-- `output.pdf` — `DoCmd.OutputTo` render.
 - `aggregates.json` — the report's RecordSource query result aggregates
   (row count, group subtotals, grand total), plus the parameters used and the
   harvester version (deterministic provenance). Aggregates reflect the
   RecordSource **result set**, not rendered footer-control expressions.
+  **Always written** (the deterministic parity ground truth).
+- `output.pdf` — `DoCmd.OutputTo` render. **Opt-in** via `--include-pdf`
+  (Session-3 revision — see *Resolved decisions — Session 3 addendum*).
+  Default capture is aggregates-only; the PDF is a non-deterministic binary
+  for human visual review.
 
 Plus a top-level index at
 `<out>/AccessMetaData/<dbName>/reports-baseline/baseline-manifest.json`
@@ -166,6 +170,68 @@ question each resolution closes.
    top-level `baseline-manifest.json` index lists every report processed —
    `{name, status, paths, skipped_reason?}` — so failed/skipped reports
    are explicit, not silently omitted.
+
+## Resolved decisions — Session 3 addendum (2026-05-30)
+
+Three open questions that Sessions 1–2 explicitly escalated "for S3
+maintainer consideration" were resolved at the start of Session 3 (the
+maintainer chose #1 directly via `AskUserQuestion`; #2 and #3 by
+accepting the orchestrator's recommendation). They refine — not
+overturn — the four original Resolved decisions above.
+
+5. **PDF capture is opt-in (`--include-pdf`), default aggregates-only.**
+   Was: PDF rendered for every report (S2 shipped it always-on). The
+   aggregate contract is `RecordSourceResultSet` (Resolved decision #2),
+   so `aggregates.json` — not the PDF — is the parity ground truth. The
+   PDF adds modal-prompt exposure for required-parameter reports (it is
+   `DoCmd.OutputTo` that pops the modal) and is a non-deterministic
+   binary that cannot participate in a byte-comparison golden gate.
+   **Resolved:** `aggregates.json` is always written; `output.pdf` is
+   rendered only when `--include-pdf` is passed. This makes the default
+   path deterministic and modal-free (an unsupplied parameter now
+   surfaces as a `Failed`/`AggregateFailed` manifest entry from the OLE
+   DB layer — no UI — rather than a blocking modal), which is exactly
+   what lets the golden corpus + regression gate stay clean. The PDF
+   remains available on demand for visual-fidelity / footer-expression
+   review.
+
+6. **Parameter elicitation is surface-only this session.** Resolved
+   decision #3 routes required-parameter reports through the
+   `identify-usage` clarifying-question mechanism "rather than blocking"
+   — which is itself a surfacing, not an auto-resolution, contract.
+   **Resolved:** the `baseline-manifest.json` records required-parameter
+   reports as explicit `Failed` (`AggregateFailed`) entries (non-blocking;
+   the batch continues), and the docs spell out the resolution path
+   (supply values via `--params`, whose JSON shape and positional-binding
+   order are documented). The in-Access `acSaveNo` RecordSource-
+   substitution auto-render (validated in S2) and a dedicated
+   report-parameter question type in `QuestionGenerator` are a **named
+   follow-up set**, not S3 scope — `QuestionGenerator` today emits no
+   report-parameter question, and building the COM auto-resolver in the
+   closeout session would violate lean-by-default and risk the final
+   session.
+
+7. **Goldens are wired into the regression gate.** Because the default
+   capture is deterministic (aggregates-only), the committed
+   `reports-baseline/` corpus participates in the same byte-comparison
+   regression pattern as `kb/ir/cleanup/usage`. **Resolved:** golden
+   `reports-baseline/` artifacts are committed under
+   `samples/GoldenOutput/<fixture>/` and a regression test reproduces +
+   diffs them, with the volatile `HarvesterVersion` / database-path
+   provenance normalized (mirroring `GoldenNormalizer`'s existing
+   manifest handling). The golden is scoped to reports that capture
+   cleanly aggregates-only so the corpus carries deterministic aggregate
+   numbers (from the fixed committed fixture data) and no
+   locale/version-volatile OLE DB error text.
+
+### Deferred to a follow-up set (out of S3 scope)
+
+- **`acSaveNo` in-memory RecordSource substitution** so required-
+  parameter reports render/aggregate unattended (the universal-fallback
+  COM technique S2 validated).
+- **A report-parameter clarifying-question type in `QuestionGenerator`**
+  so `identify-usage` actively elicits the parameter values, closing the
+  loop with `--params`.
 
 ## Finalization checklist (maintainer)
 

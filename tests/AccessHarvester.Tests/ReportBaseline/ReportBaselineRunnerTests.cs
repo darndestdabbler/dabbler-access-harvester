@@ -95,7 +95,7 @@ public class ReportBaselineRunnerTests
         var root = FreshRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root);
+            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true);
 
             Assert.True(File.Exists(Path.Combine(root, "rptA", "output.pdf")));
             Assert.True(File.Exists(Path.Combine(root, "rptA", "aggregates.json")));
@@ -107,6 +107,41 @@ public class ReportBaselineRunnerTests
             Assert.Null(entry.Reason);
             Assert.Equal("rptA/output.pdf", entry.Paths["pdf"]);
             Assert.Equal("rptA/aggregates.json", entry.Paths["aggregates"]);
+        }
+        finally
+        {
+            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void Run_WithoutIncludePdf_WritesAggregatesOnly_AndNeverCallsRenderer()
+    {
+        var source = new FakeSource();
+        source.Specs["rptA"] = BoundSpec("rptA", "Orders");
+        source.All.Add("rptA");
+        var renderer = new FakeRenderer();
+        var executor = new FakeExecutor();
+        var service = new ReportBaselineService(executor, "v-test");
+        var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
+
+        var root = FreshRoot();
+        try
+        {
+            // Default includePdf:false — aggregates-only, deterministic.
+            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root);
+
+            var entry = Assert.Single(manifest.Reports);
+            Assert.Equal("rptA", entry.Name);
+            Assert.Equal("Captured", entry.Status);
+            Assert.Null(entry.Reason);
+            // aggregates.json written; output.pdf is NOT — and the
+            // renderer was never invoked at all.
+            Assert.Equal("rptA/aggregates.json", entry.Paths["aggregates"]);
+            Assert.False(entry.Paths.ContainsKey("pdf"));
+            Assert.True(File.Exists(Path.Combine(root, "rptA", "aggregates.json")));
+            Assert.False(File.Exists(Path.Combine(root, "rptA", "output.pdf")));
+            Assert.Empty(renderer.Calls);
         }
         finally
         {
@@ -167,7 +202,7 @@ public class ReportBaselineRunnerTests
         var root = FreshRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root);
+            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true);
 
             var entry = Assert.Single(manifest.Reports);
             Assert.Equal("Failed", entry.Status);
@@ -199,7 +234,7 @@ public class ReportBaselineRunnerTests
         var root = FreshRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root);
+            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root, includePdf: true);
 
             var entry = Assert.Single(manifest.Reports);
             Assert.Equal("Failed", entry.Status);
@@ -322,7 +357,7 @@ public class ReportBaselineRunnerTests
         var root = FreshRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root);
+            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root, includePdf: true);
 
             var entry = Assert.Single(manifest.Reports);
             Assert.Equal("Failed", entry.Status);
@@ -356,15 +391,16 @@ public class ReportBaselineRunnerTests
         var root = FreshRoot();
         try
         {
-            // First run: capture both.
-            runner.Run("/some.accdb", new[] { "rptStale", "rptKeep" }, root);
+            // First run: capture both (with PDF so the stale-PDF clearing
+            // assertion below has an artifact to clear).
+            runner.Run("/some.accdb", new[] { "rptStale", "rptKeep" }, root, includePdf: true);
             Assert.True(File.Exists(Path.Combine(root, "rptStale", "output.pdf")));
             Assert.True(File.Exists(Path.Combine(root, "rptKeep", "output.pdf")));
 
             // Second run scoped to rptKeep only — rptStale's stale dir + PDF
             // must be cleared. Default cleanRoot=true is the policy that
             // delivers this.
-            runner.Run("/some.accdb", new[] { "rptKeep" }, root);
+            runner.Run("/some.accdb", new[] { "rptKeep" }, root, includePdf: true);
             Assert.False(Directory.Exists(Path.Combine(root, "rptStale")),
                 "Stale per-report dir should be removed when default cleanRoot=true.");
             Assert.True(File.Exists(Path.Combine(root, "rptKeep", "output.pdf")));
@@ -390,8 +426,8 @@ public class ReportBaselineRunnerTests
         var root = FreshRoot();
         try
         {
-            // First run: capture both.
-            runner.Run("/some.accdb", new[] { "rptStale", "rptKeep" }, root);
+            // First run: capture both (with PDF).
+            runner.Run("/some.accdb", new[] { "rptStale", "rptKeep" }, root, includePdf: true);
             Assert.True(File.Exists(Path.Combine(root, "rptStale", "output.pdf")));
             Assert.True(File.Exists(Path.Combine(root, "rptKeep", "output.pdf")));
 
@@ -404,7 +440,7 @@ public class ReportBaselineRunnerTests
 
             // Second run scoped to rptKeep with cleanRoot=false — rptStale
             // is preserved as-is; rptKeep's sentinel is removed.
-            runner.Run("/some.accdb", new[] { "rptKeep" }, root, cleanRoot: false);
+            runner.Run("/some.accdb", new[] { "rptKeep" }, root, cleanRoot: false, includePdf: true);
             Assert.True(Directory.Exists(Path.Combine(root, "rptStale")),
                 "Unprocessed report's prior dir should be preserved when cleanRoot=false.");
             Assert.True(File.Exists(Path.Combine(root, "rptStale", "output.pdf")));

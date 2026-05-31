@@ -28,7 +28,9 @@ public class HomeHealthCareComCollection { }
 /// (in-process via <see cref="ReportBaselineCommand.Run"/>) against the
 /// committed <c>HomeHealthCare.accdb</c> fixture: opens a real Access COM
 /// session, renders PDFs, computes aggregates, and emits the
-/// <c>baseline-manifest.json</c> index.
+/// <c>baseline-manifest.json</c> index. Passes <c>--include-pdf</c>
+/// explicitly so the COM PDF-render path stays covered — PDF rendering is
+/// opt-in as of Session 3 (the default capture is aggregates-only).
 ///
 /// <para>
 /// Scoped via <c>--reports</c> to four <c>srpt*</c> sub-reports because
@@ -86,6 +88,7 @@ public class ReportBaselineCommandIntegrationTests
                 "--db", db!,
                 "--out", outRoot,
                 "--reports", string.Join(",", ScopedReports),
+                "--include-pdf",
                 "--json-status",
             });
 

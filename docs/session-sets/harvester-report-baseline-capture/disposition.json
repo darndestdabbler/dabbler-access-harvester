@@ -1,49 +1,27 @@
 {
+  "schemaVersion": 1,
   "sessionSetName": "harvester-report-baseline-capture",
   "status": "in-progress",
-  "summary": "Session 2 of 3 landed the report-baseline standalone CLI subcommand end-to-end. Composes the S1 ReportBaselineService with three new seams (IReportSource, IReportPdfRenderer, ReportBaselineRunner) plus Windows-only live-COM implementations (AccessReportSpecReader opens reports in hidden design view to read RecordSource + group-level keys via the live Reports collection; AccessReportPdfRenderer wraps DoCmd.OutputTo acOutputReport, name, 'PDF Format (*.pdf)', path). CLI surface matches the spec verbatim: report-baseline --db --out [--reports name,name] [--params <params.json>] [--no-clean] [--json-status]. Exit codes mirror run (0/1/2/3). Per-report artifacts at <out>/AccessMetaData/<dbName>/reports-baseline/<report>/{output.pdf,aggregates.json} plus top-level baseline-manifest.json (deterministic, ordinal-sorted, no wall-clock fields). 18 new tests over the S1 baseline (15 originally planned + 3 R1-remediation), bringing AccessHarvester.Tests to 517 passing / 2 skipped (COM-required) / 0 failed. Cross-provider session-verification took two rounds: R1 ISSUES_FOUND with two Major items (Dictionary-enumeration-order positional binding contract; no stale-output cleanup on rerun) + a both-fail coverage gap + minor doc nits, all addressed in-session; R2 VERIFIED with empty issues. Also landed the deferred-from-S1-R4 ParametersUsed mutation regression test, drift-gate fix to CliUsageTextTests for the new report-baseline heading, and convention-prescribed [Collection('HomeHealthCareCom')] applied to five pre-existing parallel-COM-CLI Integration test classes (knocked Integration project failures 3->1; the remaining SanitizeCommandTests.HomeHealthCare timeout is pre-existing latent slowness in the sanitize CLI path, confirmed via isolation, not introduced by S2). S2 routed cost ~$0.45 (R1+R2 session-verification only; orchestrator-direct for all mechanical implementation work per Delegation Discipline). Integration test scoped via --reports to four srpt* sub-reports because HomeHealthCare's rpt* top-level reports pop modal parameter prompts via DoCmd.OutputTo (parameter elicitation deferred to S3 per Resolved Decision #3). Closes spec.md Session 2 deliverables; ready for S3 (docs, parameter elicitation, golden capture, closeout).",
+  "summary": "Sessions 1-2: aggregates engine + COM PDF render + CLI subcommand wired end-to-end. Session 3: property decode (section BackStyle/BorderStyle/SpecialEffect, control TextAlign/FontWeight) + --include-pdf opt-in (aggregates-only default) shipped and hermetically tested; report-baseline documented in install.md + interpretation-guide. DEFERRED: the committed golden reports-baseline corpus + regression gate (spec decision #7) and its READ-ME-FIRST (Step 3.4) — blocked by an Access design-view/ACE-OLEDB exclusive-lock contention; moved to the follow-up set, which will make aggregate capture lock-free.",
   "files_changed": [
-    "AccessHarvester.Core/ReportBaseline/IReportSource.cs",
-    "AccessHarvester.Core/ReportBaseline/IReportPdfRenderer.cs",
-    "AccessHarvester.Core/ReportBaseline/ReportLiveSpec.cs",
-    "AccessHarvester.Core/ReportBaseline/BaselineManifest.cs",
-    "AccessHarvester.Core/ReportBaseline/BaselineManifestWriter.cs",
-    "AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs",
-    "AccessHarvester.Core/Com/AccessReportSpecReader.cs",
-    "AccessHarvester.Core/Com/AccessReportPdfRenderer.cs",
     "AccessHarvester.Cli/Commands/ReportBaselineCommand.cs",
     "AccessHarvester.Cli/Program.cs",
-    "tests/AccessHarvester.Tests/AccessHarvester.Tests.csproj",
-    "tests/AccessHarvester.Tests/HomeHealthCareTableCoverageTests.cs",
-    "tests/AccessHarvester.Tests/ReportBaseline/BaselineManifestWriterTests.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs",
     "tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineRunnerTests.cs",
-    "tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineServiceParametersUsedMutationTests.cs",
     "tests/AccessHarvester.Tests/ReportBaselineCommandIntegrationTests.cs",
-    "tests/AccessHarvester.Integration/Cli/HomeHealthCareComCollection.cs",
     "tests/AccessHarvester.Integration/Cli/CliUsageTextTests.cs",
-    "tests/AccessHarvester.Integration/Cli/ClassifyCommandTests.cs",
-    "tests/AccessHarvester.Integration/Cli/SanitizeCommandTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliExtractTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliRunTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliTranslateTests.cs",
-    "docs/session-sets/harvester-report-baseline-capture/ai-assignment.md",
-    "docs/session-sets/harvester-report-baseline-capture/change-log.md",
-    "docs/session-sets/harvester-report-baseline-capture/disposition.json",
-    "docs/session-sets/harvester-report-baseline-capture/session-state.json",
-    "docs/session-sets/harvester-report-baseline-capture/session-events.jsonl",
-    "docs/session-sets/harvester-report-baseline-capture/activity-log.json"
+    "docs/harvester/install.md",
+    "docs/harvester/interpretation-guide.md",
+    "docs/session-sets/harvester-report-baseline-capture/spec.md",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/spec.md",
+    ".claude/hooks/guard-dotnet-parallel.ps1",
+    ".claude/settings.json"
   ],
-  "verification_method": "api",
-  "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "google",
-    "model": "gemini-pro",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 3 wraps the set: documentation drafting (CLI reference in install.md, interpretation-guide notes on the new subcommand, parameter selection strategy and --params shape), parameter elicitation design + implementation (Forms!/Reports!/TempVars binding shimming OR in-memory RecordSource literal substitution closed with acSaveNo, per the maintainer-validated COM patterns; routes through the existing identify-usage mechanism per Resolved Decision #3), golden capture for NorthwindDevEdition (rptInvoice, rptSalesByEmployee, rptSalesByProduct) plus HomeHealthCare's in-scope reports (srpt* immediately; rpt* after parameter elicitation lands), and the closeout pieces (ROADMAP flip, change-log, disposition.json status=complete, Step 9 reorganization review). The recommended orchestrator is gemini-pro at effort=medium per the original ai-assignment.md plan: docs drafting + mechanical golden capture is the cost-effective profile. The orchestrator should route docs drafting through route(task_type='summarization') (NOT 'documentation', per the convention) and handle file mechanics directly. Open maintainer call to surface during S3 planning: whether to revisit the spec so PDF capture becomes opt-in (--include-pdf) with aggregates-only as the default, given the modal-prompt exposure and non-deterministic-binary trade-offs that surfaced empirically in S2."
-    }
+  "next_session_set": {
+    "slug": "harvester-report-baseline-golden-corpus",
+    "summary": "Make report-baseline aggregate capture lock-free (decouple the ACE-OLEDB query from the COM design-view spec read), then capture the golden reports-baseline corpus and wire decision #7's regression gate + READ-ME-FIRST."
   },
-  "blockers": []
+  "blockers": [
+    "Golden corpus capture (decision #7) is blocked: AccessReportSpecReader.ReadSpec opens each report in hidden design view, escalating the DB to an exclusive lock that collides with the concurrent ACE OLEDB aggregate query (OleDbReportQueryExecutor). Reproduced twice; manifested as an indefinite hang in S3. Fix is invasive (phase-decoupling or no-COM aggregates) and was escalated to the maintainer, who approved deferral to the follow-up set rather than an in-closeout refactor."
+  ]
 }

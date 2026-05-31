@@ -12,12 +12,16 @@ using AccessHarvester.Pipeline.Manifest;
 namespace AccessHarvester.Cli.Commands;
 
 /// <summary>
-/// Implements the <c>report-baseline</c> subcommand: captures the rendered
-/// PDF and RecordSource-query aggregates for every report (or a
-/// <c>--reports</c> allowlist) in a single Access database. Writes
-/// per-report <c>output.pdf</c> + <c>aggregates.json</c> and a top-level
-/// <c>baseline-manifest.json</c> under
+/// Implements the <c>report-baseline</c> subcommand: captures the
+/// RecordSource-query aggregates (and, with <c>--include-pdf</c>, the
+/// rendered PDF) for every report (or a <c>--reports</c> allowlist) in a
+/// single Access database. Writes per-report <c>aggregates.json</c>
+/// (always) and <c>output.pdf</c> (only under <c>--include-pdf</c>), plus
+/// a top-level <c>baseline-manifest.json</c> under
 /// <c>&lt;out&gt;/AccessMetaData/&lt;dbName&gt;/reports-baseline/</c>.
+/// The aggregates are the deterministic RecordSource-result-set parity
+/// ground truth; the PDF is a non-deterministic binary for human visual
+/// review, so it is opt-in.
 ///
 /// <para>
 /// Exit codes (mirror <c>run</c>): 0 = all considered reports captured
@@ -33,6 +37,7 @@ public static class ReportBaselineCommand
     {
         "json-status",
         "no-clean",
+        "include-pdf",
     };
 
     public static int Run(string[] args)
@@ -82,6 +87,7 @@ public static class ReportBaselineCommand
         }
 
         bool clean = !opts.ContainsKey("no-clean");
+        bool includePdf = opts.ContainsKey("include-pdf");
 
         string dbName = Path.GetFileNameWithoutExtension(db);
         string reportsBaselineRoot = Path.Combine(outDir, "AccessMetaData", dbName, "reports-baseline");
@@ -114,7 +120,7 @@ public static class ReportBaselineCommand
             toProcess = allReports.Where(reportFilter.Contains).ToArray();
         }
 
-        var manifest = runner.Run(db, toProcess, reportsBaselineRoot, parametersByReport, cleanRoot: clean);
+        var manifest = runner.Run(db, toProcess, reportsBaselineRoot, parametersByReport, cleanRoot: clean, includePdf: includePdf);
 
         ReportSummary(manifest);
 

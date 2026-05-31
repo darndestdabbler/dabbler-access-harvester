@@ -49,6 +49,7 @@ public sealed class CliUsageTextTests
 
         Assert.Contains("--types", usage);
         Assert.Contains("--json-status", usage);
+        Assert.Contains("--include-pdf", usage);
     }
 
     [Fact]

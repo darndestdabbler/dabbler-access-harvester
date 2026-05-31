@@ -1,0 +1,156 @@
+# Harvester Consumer-Workflow & Feedback-Tool Instructions Spec
+
+> **Purpose:** Make the harvester output *self-instructing* so a consuming AI
+> agent knows the full workflow (including the `identify-usage` /
+> `identify-cleanup` feedback tools) without prior knowledge, AND so the agent
+> can walk a non-expert **developer** through the human-review artifacts — what
+> each JSON file means, how to act on it, and which zero-install editor opens
+> it. Closes the "the capability exists but nothing told the agent/developer to
+> use it" gap.
+> **Created:** 2026-05-29
+> **Session Set:** `docs/session-sets/harvester-consumer-workflow-instructions/`
+> **Prerequisite:** `harvester-manifest-index-and-batch-readiness` (the
+> self-describing manifest + `Documentation` pointer + auto-emitted
+> `READ-ME-FIRST.md` this set extends); `harvester-object-use-identifier` +
+> `harvester-object-cleanup-identifier` (the feedback tools being documented).
+> **Workflow:** Orchestrator -> AI Router -> Cross-provider verification. Full
+> tier; no UI, so no UAT/E2E.
+> **Status:** **DRAFT authored by a downstream consumer**
+> (`Dabbler.NorthwindToBlazor`, Set 001 Session 3). Maintainer finalizes — see
+> *Finalization checklist*.
+
+---
+
+## Session Set Configuration
+
+```yaml
+requiresUAT: false
+requiresE2E: false
+uatScope: none
+tier: full
+prerequisites: [harvester-manifest-index-and-batch-readiness, harvester-object-use-identifier, harvester-object-cleanup-identifier]
+totalSessions: 2   # provisional — see Finalization checklist
+```
+
+---
+
+## Why This Set, Why Now
+
+The first real downstream consumer (`Dabbler.NorthwindToBlazor`, 2026-05-29)
+**re-derived the entire object inventory by hand** — classifying 197 objects by
+eyeballing RecordSources and names — because nothing in the harvester output
+told the consuming agent that `identify-usage` already does exactly that, with
+**confidence scores** and **auto-generated clarifying questions**, and that
+`identify-cleanup` flags stale objects. The tools existed (and worked: on that
+DB, `identify-usage` classified 167 objects and generated 50 questions;
+`identify-cleanup` flagged 37) — they were simply undiscoverable from the
+agent's vantage point.
+
+Same root cause as the manifest-completeness miss this consumer hit earlier:
+**the output must instruct the agent**, because there will be an agent per
+database across *hundreds* of migrations, and "the agent should just know" does
+not scale.
+
+A second, equally important gap: even once the agent runs the feedback tools,
+the artifacts (`object-use.json`, `object-use-checklist.json`,
+`object-cleanup.json`, `object-cleanup-checklist.json`, and `classification.json`
+from classify/sanitize) are **opaque to a developer** who has never seen them.
+The agent must be instructed to explain them and point the developer at the
+right editor — and the harvester's consumer docs currently mention **no editor
+at all**.
+
+---
+
+## Sessions
+
+### Session 1 of 2: AI-consumer workflow in the self-describing entry point
+
+**Goal:** A consuming agent, reading only the harvest output, learns the full
+canonical workflow and the role of every tool.
+
+**Steps:**
+1. Add a **"Workflow for AI consumers"** section to
+   `docs/harvester/interpretation-guide.md` and mirror a concise pointer into
+   the auto-emitted `READ-ME-FIRST.md` template (and the manifest
+   `Documentation` block) so it travels with the output. The canonical sequence:
+   - `run` → read `manifest.json` (use `FileMap` to locate per-object IR;
+     verify counts).
+   - **`identify-usage`** → read `object-use.json` for per-object
+     classification + confidence; do **not** re-derive the inventory by hand.
+   - **`identify-cleanup`** → read `object-cleanup.json` for stale-object flags.
+   - Present the **`*-checklist.json`** files to the developer (Session 2),
+     collect answers, and treat the annotated result as authoritative intent.
+2. State the **correct `--in` target** explicitly (the per-database base dir
+   `…/AccessMetaData/<dbName>/`, not the `--out` root) — the consumer wasted a
+   run pointing `identify-usage --in` at the output root and got 0 objects.
+3. Cross-provider verify; keep determinism + schema validation green.
+
+**Ends with:** the workflow is discoverable from the output itself; an agent no
+longer hand-rolls work the tools already do.
+
+### Session 2 of 2: Developer-facing guide for the feedback artifacts + editor pointers
+
+**Goal:** Make the human-review step **super easy** for a developer who has
+never seen these JSON files, and instruct the AI agent to deliver that guidance
+whenever the feedback tools are used.
+
+**Steps:**
+1. Author a **"For developers: reviewing the feedback artifacts"** doc (in
+   `docs/harvester/`) — for each artifact, in plain language:
+   | Artifact | What it is | What the developer does | Editor |
+   |---|---|---|---|
+   | `object-use.json` | machine-readable usage classification + confidence | (nothing — it's for the AI) | — |
+   | `object-use-checklist.json` | one review item per object; questions where the tool is unsure | open it, answer the questions, mark items reviewed | **uat-checklist-editor** |
+   | `object-cleanup.json` | machine-readable stale-object flags | (for the AI) | — |
+   | `object-cleanup-checklist.json` | review items for objects flagged stale | confirm keep/remove | **uat-checklist-editor** |
+   | `classification.json` (classify/sanitize) | per-column data sensitivity | set categories | **classification-editor** |
+2. **Add an explicit AI-agent instruction** (in the interpretation-guide
+   "Workflow for AI consumers" + READ-ME-FIRST): *when any feedback tool is
+   run, the agent MUST tell the developer, in plain language, what the produced
+   JSON means, exactly how to act on it, and the URL of the editor that opens
+   it — never just hand over a raw JSON file.* Include a short copy-paste
+   script the agent can adapt.
+3. **Wire the editor URLs into the output** so they travel with the data: have
+   each `*-checklist.json` (or the READ-ME-FIRST) carry the editor URL that
+   opens it, so neither agent nor developer has to hunt.
+4. Cross-provider verify; closeout (change-log, ROADMAP/state, Step 9).
+
+**Ends with:** the agent always explains the artifacts + links the editor; a
+developer can review with one click and no JSON literacy.
+
+---
+
+## Open decision: where do the editors live? (needs a maintainer call)
+
+The two editors are inconsistently hosted today, which undercuts "one-click for
+the developer":
+
+- **uat-checklist-editor** — its own repo, **hosted** zero-install on GitHub
+  Pages (`https://darndestdabbler.github.io/uat-checklist-editor/`). Opens the
+  `*-checklist.json` files.
+- **classification-editor** — lives **only** as `tools/classification-editor.html`
+  in this repo; **not hosted**. Opens `classification.json`.
+
+**Recommendation:** host the `classification-editor` the same way (GitHub Pages,
+zero-install) so every feedback artifact has a one-click hosted editor, and have
+the docs/output reference the hosted URLs (not in-repo file paths a consumer
+won't have). Decide in Session 2:
+- (a) publish `classification-editor` to GitHub Pages (its own repo, or alongside
+  uat-checklist-editor), and
+- (b) confirm `uat-checklist-editor` is the canonical editor for **both**
+  `object-use-checklist.json` and `object-cleanup-checklist.json` (verify the
+  format matches; the consumer's run produced the `{projectName, review[…]}`
+  shape the editor expects).
+
+## Finalization checklist (maintainer)
+
+- [ ] Confirm slug, `totalSessions`, Session Set Configuration block.
+- [ ] Resolve the editor-hosting decision above (or schedule it as the set's S2 open).
+- [ ] Author `ai-assignment.md`; create `session-state.json` stub (v4, omit-null).
+- [ ] Add a ROADMAP row (maintenance / consumption-triggered).
+
+---
+
+> **Provenance:** `Dabbler.NorthwindToBlazor` Set 001 Session 3 (2026-05-29),
+> where the agent hand-built an inventory the tools would have produced, and the
+> feedback-artifact JSONs had no developer-facing instructions or editor links.
