@@ -47,6 +47,7 @@
 |---|---|---|
 | `[x]` | [`harvester-report-baseline-capture`](harvester-report-baseline-capture/change-log.md) | Closed 2026-05-31. Recovered Session 3 honestly after a bad prior closeout attempt: `report-baseline` now stays aggregates-first, optional PDF render runs only after aggregate success, and the shipped docs/help text match the runtime contract. The committed golden corpus + regression gate + `READ-ME-FIRST` propagation remain explicitly deferred to the named follow-up stub [`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/spec.md). |
 | `[x]` | [`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/change-log.md) | Closed 2026-06-01. Committed the canonical `reports-baseline/` corpus for HomeHealthCare and Northwind, wired those artifacts into the canonical regression gate, repaired the report-baseline CLI teardown path in `CliInvoker`, and updated both fixture guides so downstream agents can discover the new artifact tier. |
+| `[~]` | [`harvester-access-com-graceful-shutdown`](harvester-access-com-graceful-shutdown/spec.md) | Started 2026-06-01 (maintainer: claude-code). Root-cause fix for the on-deck `harvester-parallel-com-test-cleanup` candidate: hardens the single COM chokepoint `AccessComSession` to capture its Access PID up front and force-kill only that exact PID if a graceful `Quit()` leaves a zombie `msaccess.exe`. Session 1 (hermetic, in progress) adds the `IProcessController` seam + force-kill decision logic under hermetic unit tests; Session 2 verifies against real Access and removes the blunt `CliInvoker` `taskkill` teardown. **Absorbs** the on-deck `harvester-parallel-com-test-cleanup` candidate. |
 
 Phase 4 closed [2026-05-29](harvester-cli-distribution/change-log.md); the
 most recent maintenance set
@@ -67,10 +68,13 @@ discovers the `identify-usage` / `identify-cleanup` feedback workflow, and
 giving developers a plain-language guide to the feedback artifacts.
 
 
-Other candidates remain on deck but are not active:
-[`harvester-parallel-com-test-cleanup`](harvester-manifest-index-and-batch-readiness/next-session-set-recommendation.md)
-(not yet specced) — closing the xUnit parallel-COM CI flake the manifest
-set surfaced. `harvester-sql-migration-generator`
+The on-deck `harvester-parallel-com-test-cleanup` candidate
+([recommendation](harvester-manifest-index-and-batch-readiness/next-session-set-recommendation.md))
+is now **absorbed** by the in-progress
+[`harvester-access-com-graceful-shutdown`](harvester-access-com-graceful-shutdown/spec.md),
+which fixes the same parallel-COM zombie flake at the root cause (the
+`AccessComSession` COM-lifecycle chokepoint) rather than papering over it
+with a blunt teardown. `harvester-sql-migration-generator`
 ([`harvester-cli-distribution`'s recommendation](harvester-cli-distribution/next-session-set-recommendation.md))
 is feature work, not maintenance — defer until the CI is reliable.
 

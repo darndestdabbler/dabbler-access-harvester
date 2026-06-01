@@ -1,0 +1,32 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 2 (hermetic) hardened AccessHarvester.Core/Com/AccessComSession.cs — the single COM instantiation chokepoint — so it terminates the exact Access instance it created. Captured the Access PID up front via Application.hWndAccessApp -> GetWindowThreadProcessId (user32.dll P/Invoke), zero-guarded with a PidCaptureWarning diagnostic so a failed capture degrades to a no-op rather than killing PID 0. Strengthened the teardown: Quit(acQuitSaveNone=2) in an inner try with Marshal.FinalReleaseComObject in finally, doubled GC.Collect()+WaitForPendingFinalizers(), then a bounded WaitForExit before an exact-PID force-kill. Extracted the kill-decision logic behind an injectable IProcessController seam (IsRunning/WaitForExit/Kill) with a production System.Diagnostics.Process-backed SystemProcessController (treats ArgumentException + InvalidOperationException as already-exited success) and a hermetic ComProcessReaper; 9 hermetic unit tests (ComProcessReaperTests) cover all four required decision cases plus the null-controller guard and the production ArgumentException paths. Dispose() and the constructor-failure path share an idempotent TeardownCom(). Built AccessHarvester.Tests (0 errors) and ran ONLY the filtered ComProcessReaperTests (9/9 passed); the Access-COM/PDF integration tier was deliberately NOT run (Session 2 scope). Cross-provider verified VERIFIED on round 3 (gpt-5-4, OpenAI) after fixing three accepted Major findings across rounds 1-2 (Dispose Quit/FinalRelease share-a-try; Kill missing InvalidOperationException catch; constructor leak on OpenCurrentDatabase failure). A pre-existing wedged testhost zombie (PID 8772) that blocked the first build was reaped via WMI Win32_Process.Terminate after taskkill/Stop-Process failed.",
+  "files_changed": [
+    "AccessHarvester.Core/Com/AccessComSession.cs",
+    "AccessHarvester.Core/Com/IProcessController.cs",
+    "AccessHarvester.Core/Com/ComProcessReaper.cs",
+    "AccessHarvester.Core/Com/SystemProcessController.cs",
+    "tests/AccessHarvester.Tests/Com/ComProcessReaperTests.cs",
+    "docs/session-sets/ROADMAP.md",
+    "docs/session-sets/harvester-access-com-graceful-shutdown/ai-assignment.md",
+    "docs/session-sets/harvester-access-com-graceful-shutdown/disposition.json",
+    "docs/session-sets/harvester-access-com-graceful-shutdown/session-state.json",
+    "docs/session-sets/harvester-access-com-graceful-shutdown/activity-log.json",
+    "docs/session-sets/harvester-access-com-graceful-shutdown/session-events.jsonl",
+    "docs/session-sets/harvester-access-com-graceful-shutdown/session-reviews/session-001.md",
+    "docs/session-sets/harvester-access-com-graceful-shutdown/issue-logs/session-001.json"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "gemini-cli",
+    "provider": "google",
+    "model": "gemini-2.5-pro",
+    "effort": "medium",
+    "reason": {
+      "code": "switch-due-to-cost",
+      "specifics": "The Step 3.5 routed analysis (gemini-pro, unbiased) recommends Gemini Pro for Session 2 on economics: its work is mostly environment interaction and file management (run the real Access COM/PDF integration tier and assert no surviving msaccess.exe, narrow the blunt CliInvoker taskkill teardown, and wire docs/access-com-zombie-cleanup.md into project-guidance.md + the three agent-instruction files), not novel system-level code generation. HARD PRECONDITION: Session 2 MUST run on a Windows host with Microsoft Access installed — the integration tier cannot be verified otherwise; confirm this before starting. Note: the session-verification override is gpt-5-4 (OpenAI), which stays cross-provider for a Gemini orchestrator, so no override swap is needed; if instead a Codex/OpenAI orchestrator is chosen, swap the override to opus first (per lessons-learned)."
+    }
+  },
+  "blockers": []
+}

@@ -1,0 +1,95 @@
+{
+  "sessionSetName": "harvester-access-com-graceful-shutdown",
+  "createdDate": "2026-06-01T09:10:00.295325-04:00",
+  "totalSessions": 2,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-06-01T09:21:18.237241-04:00",
+      "description": "Routed Step 3.5 analysis and authored ai-assignment.md; added in-progress ROADMAP row absorbing harvester-parallel-com-test-cleanup.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1023,
+          "outputTokens": 636,
+          "costUsd": 0.00763875
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/seam",
+      "dateTime": "2026-06-01T09:21:18.238245-04:00",
+      "description": "Implemented IProcessController seam, SystemProcessController (Process-backed), and the hermetic ComProcessReaper kill-decision logic.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/harden-session",
+      "dateTime": "2026-06-01T09:21:18.238245-04:00",
+      "description": "Hardened AccessComSession: early PID capture via hWndAccessApp->GetWindowThreadProcessId (zero-guarded), inner-try Quit(2)/finally FinalReleaseComObject, doubled GC, bounded WaitForExit, exact-PID reaper; shared idempotent TeardownCom for Dispose + constructor-failure.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/tests",
+      "dateTime": "2026-06-01T09:21:18.239243-04:00",
+      "description": "Routed test-generation for the hermetic ComProcessReaperTests (9 tests: 4 decision cases + null-guard + 3 SystemProcessController ArgumentException paths).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "test-generation",
+          "inputTokens": 962,
+          "outputTokens": 1374,
+          "costUsd": 0.0149425
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-06-01T09:21:18.239243-04:00",
+      "description": "Built AccessHarvester.Tests (0 errors) and ran ONLY the filtered ComProcessReaperTests (9/9 passed); Access-COM/PDF tier deliberately not run. Reaped a pre-existing wedged testhost zombie (PID 8772) via WMI Terminate.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-06-01T09:21:18.240243-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4): round 1 + 2 ISSUES_FOUND (3 Major, all accepted+fixed), round 3 VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4986,
+          "outputTokens": 8342,
+          "costUsd": 0.137595
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.1427
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.14872
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "severity": "Major",
+    "location": "AccessHarvester.Core/Com/AccessComSession.cs constructor",
+    "summary": "If OpenCurrentDatabase threw after Access.Application was created, the constructor exited without releasing/terminating the created COM server (leaked msaccess.exe).",
+    "fix": "Capture PID immediately after CreateInstance; wrap OpenCurrentDatabase in try/catch that routes failure through the shared TeardownCom() (Quit+FinalRelease+double GC+exact-PID reaper) then rethrows. Re-capture PID after a successful open if the early attempt was empty.",
+    "status": "fixed",
+    "round": 2
+  }
+]
