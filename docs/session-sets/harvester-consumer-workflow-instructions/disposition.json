@@ -1,0 +1,31 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 2 made the harvester output self-instructing for AI consumers. Finalized the previously-DRAFT spec (maintainer decisions: totalSessions=2 confirmed, editor-hosting open decision deferred to Session 2, NO new manifest schema field). Added section 3 'Workflow for AI consumers' to docs/harvester/interpretation-guide.md by expanding the former section 3 'Reading order' into 3.2 and inserting 3.1 'The canonical consumer workflow: run -> feedback tools -> developer review' (keeping every existing section-2-6 cross-reference valid). 3.1 documents the canonical sequence (run -> read manifest.json with Summary/FileMap + verify counts -> identify-usage -> read object-use.json, do NOT re-derive the inventory by hand -> identify-cleanup -> read object-cleanup.json -> present *-checklist.json to the developer as authoritative intent), with exact commands/flags verified against the C# source and a prominent callout for the correct --in target (the per-database base dir .../AccessMetaData/<dbName>/ that contains ir/, not the --out root that yields 0 objects). Mirrored a concise 'AI consumers: read the workflow first' pointer into the auto-emitted READ-ME-FIRST.md template (Pipeline.cs ReadMeFirstContent) and into both committed golden-corpus READ-ME-FIRST.md copies. Cross-provider verified VERIFIED on round 2 (gpt-5-4, OpenAI) after fixing a Minor self-contradiction and a Major premature-claim finding from round 1.",
+  "files_changed": [
+    "docs/harvester/interpretation-guide.md",
+    "AccessHarvester.Core/Pipeline.cs",
+    "samples/GoldenOutput/HomeHealthCare/READ-ME-FIRST.md",
+    "samples/GoldenOutput/NorthwindDevEdition/READ-ME-FIRST.md",
+    "docs/session-sets/harvester-consumer-workflow-instructions/spec.md",
+    "docs/session-sets/ROADMAP.md",
+    "docs/session-sets/harvester-consumer-workflow-instructions/ai-assignment.md",
+    "docs/session-sets/harvester-consumer-workflow-instructions/session-state.json",
+    "docs/session-sets/harvester-consumer-workflow-instructions/activity-log.json",
+    "docs/session-sets/harvester-consumer-workflow-instructions/session-events.jsonl",
+    "docs/session-sets/harvester-consumer-workflow-instructions/session-reviews/session-001.md",
+    "docs/session-sets/harvester-consumer-workflow-instructions/disposition.json"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "medium",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 is a documentation-authoring session (developer-facing feedback-artifact guide + an explicit AI-agent 'always explain + link the editor' instruction + wiring editor URLs into the output) plus the one reasoned editor-hosting decision Session 1 deferred (publish classification-editor to GitHub Pages; confirm uat-checklist-editor opens both checklists). The same orchestrator that finalized the spec and authored 3.1 carries that context; routed sub-tasks pick cheaper balanced-writer models per ai-assignment.md. Resolve the editor decision via cross-provider consensus before any AskUserQuestion."
+    }
+  },
+  "blockers": []
+}

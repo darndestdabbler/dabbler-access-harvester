@@ -1,0 +1,91 @@
+{
+  "sessionSetName": "harvester-consumer-workflow-instructions",
+  "createdDate": "2026-06-01T07:30:05.391216-04:00",
+  "totalSessions": 2,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "ai-assignment",
+      "dateTime": "2026-06-01T07:30:05.395716-04:00",
+      "description": "Routed cheapest-capable model recommendation for both sessions; wrote ai-assignment.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "modelId": "gemini-2.5-pro",
+          "tier": 2,
+          "taskType": "analysis",
+          "inputTokens": 523,
+          "outputTokens": 668,
+          "costUsd": 0.00733375,
+          "complexityScore": 47,
+          "escalated": false
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "author-workflow-section",
+      "dateTime": "2026-06-01T07:34:22.216351-04:00",
+      "description": "Routed documentation authoring of new section 3.1 (canonical consumer workflow) for interpretation-guide.md; draft saved for orchestrator reconciliation + apply. (Re-run after a first attempt routed successfully but crashed on console-encoding before saving.)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "modelId": "gemini-2.5-pro",
+          "tier": 2,
+          "taskType": "documentation",
+          "inputTokens": 1331,
+          "outputTokens": 590,
+          "costUsd": 0.02320275,
+          "complexityScore": 48,
+          "escalated": false
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "cross-provider-verification",
+      "dateTime": "2026-06-01T07:46:08.919977-04:00",
+      "description": "Routed Session 1 cross-provider verification (gpt-5-4); saved authoritative review artifact.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "modelId": "gpt-5.4",
+          "tier": 3,
+          "taskType": "session-verification",
+          "inputTokens": 4542,
+          "outputTokens": 12507,
+          "costUsd": 0.19896000000000003,
+          "complexityScore": 68,
+          "escalated": false
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "cross-provider-verification-r2",
+      "dateTime": "2026-06-01T07:50:16.872703-04:00",
+      "description": "Re-ran Session 1 cross-provider verification (gpt-5-4) after fixing the round-1 Minor + Major findings; saved round-2 review artifact.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "modelId": "gpt-5.4",
+          "tier": 3,
+          "taskType": "session-verification",
+          "inputTokens": 4592,
+          "outputTokens": 13611,
+          "costUsd": 0.21564499999999998,
+          "complexityScore": 68,
+          "escalated": false
+        }
+      ]
+    }
+  ]
+}

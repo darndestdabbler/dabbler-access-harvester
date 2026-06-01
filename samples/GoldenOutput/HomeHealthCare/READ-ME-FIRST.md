@@ -11,6 +11,18 @@ guide so a binary-only consumer can read the schema without the
 source repo. The manifest's `FileMap` field lists the on-disk
 globs for every per-object file under `ir/`.
 
+## AI consumers: read the workflow first
+
+If you are an AI agent consuming this output, do NOT hand-derive an
+object inventory. Read section 3.1 "The canonical consumer workflow"
+in the interpretation guide first: after `run`, the `identify-usage`
+and `identify-cleanup` subcommands already classify every object (with
+confidence scores and clarifying questions) and flag stale ones,
+writing `object-use.json` / `object-cleanup.json` plus
+`*-checklist.json` review files for a developer to confirm. Point those
+tools' `--in` at this per-database directory (the one that contains
+`ir/`) — not the output root.
+
 The `reports-baseline/` tier captures only the clean unattended
 HomeHealthCare subset currently locked by regression:
 

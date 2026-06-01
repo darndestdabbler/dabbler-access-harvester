@@ -15,9 +15,10 @@
 > `harvester-object-cleanup-identifier` (the feedback tools being documented).
 > **Workflow:** Orchestrator -> AI Router -> Cross-provider verification. Full
 > tier; no UI, so no UAT/E2E.
-> **Status:** **DRAFT authored by a downstream consumer**
-> (`Dabbler.NorthwindToBlazor`, Set 001 Session 3). Maintainer finalizes — see
-> *Finalization checklist*.
+> **Status:** **FINALIZED 2026-06-01** by the maintainer (claude-code). Authored
+> as a DRAFT by a downstream consumer (`Dabbler.NorthwindToBlazor`, Set 001
+> Session 3); the *Finalization checklist* below records the maintainer
+> decisions. Ready to run.
 
 ---
 
@@ -71,8 +72,14 @@ canonical workflow and the role of every tool.
 **Steps:**
 1. Add a **"Workflow for AI consumers"** section to
    `docs/harvester/interpretation-guide.md` and mirror a concise pointer into
-   the auto-emitted `READ-ME-FIRST.md` template (and the manifest
-   `Documentation` block) so it travels with the output. The canonical sequence:
+   the auto-emitted `READ-ME-FIRST.md` template so it travels with the output.
+   **Finalization decision (2026-06-01):** the manifest `Documentation` block is
+   *not* given a new schema field — its existing `Documentation.Url` already
+   resolves to `interpretation-guide.md`, which now carries the workflow
+   section, and `READ-ME-FIRST.md` (which ships next to `manifest.json`) points
+   a cold consumer straight at it. A dedicated manifest field would be redundant
+   and would force a schema-version bump + golden-corpus regen for no added
+   discoverability. The canonical sequence:
    - `run` → read `manifest.json` (use `FileMap` to locate per-object IR;
      verify counts).
    - **`identify-usage`** → read `object-use.json` for per-object
@@ -142,12 +149,19 @@ won't have). Decide in Session 2:
   format matches; the consumer's run produced the `{projectName, review[…]}`
   shape the editor expects).
 
-## Finalization checklist (maintainer)
+## Finalization checklist (maintainer) — completed 2026-06-01
 
-- [ ] Confirm slug, `totalSessions`, Session Set Configuration block.
-- [ ] Resolve the editor-hosting decision above (or schedule it as the set's S2 open).
-- [ ] Author `ai-assignment.md`; create `session-state.json` stub (v4, omit-null).
-- [ ] Add a ROADMAP row (maintenance / consumption-triggered).
+- [x] Confirm slug, `totalSessions`, Session Set Configuration block. Slug and
+  the two-session split are sound; `totalSessions: 2` confirmed (no longer
+  provisional). Config block (full tier, no UAT/E2E, three prerequisites)
+  accepted as-is.
+- [x] Resolve the editor-hosting decision above → **deferred to Session 2's open**
+  (the decision is squarely about S2's deliverables — which editor opens which
+  checklist and whether `classification-editor` gets hosted). S2 resolves (a)
+  and (b) before wiring URLs into the output.
+- [x] Author `ai-assignment.md` (routed at Session 1 Step 3 per the workflow);
+  `session-state.json` stub already present (v4).
+- [x] ROADMAP row already present; updated from "remains DRAFT" to finalized.
 
 ---
 

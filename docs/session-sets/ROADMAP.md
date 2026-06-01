@@ -61,7 +61,10 @@ closed 2026-06-01, landing the deferred golden corpus, regression gate,
 fixture-guide propagation, and Windows-specific regression-harness cleanup
 for the CLI-backed validation path. The sibling
 [`harvester-consumer-workflow-instructions`](harvester-consumer-workflow-instructions/spec.md)
-remains DRAFT, awaiting maintainer finalization.
+was finalized 2026-06-01 (maintainer: claude-code) and is in progress —
+making the harvester output self-instructing so a consuming AI agent
+discovers the `identify-usage` / `identify-cleanup` feedback workflow, and
+giving developers a plain-language guide to the feedback artifacts.
 
 
 Other candidates remain on deck but are not active:

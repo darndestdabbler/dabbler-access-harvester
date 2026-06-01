@@ -44,8 +44,11 @@ underlying table, how to interpret the `UnresolvedItems` array, and
 what the harvester does and does not promise.
 
 If you are a downstream AI consumer reading a harvester run output
-for the first time, start at §3 (Reading order) and let the typed
-links in §4–§5 carry you to the per-category detail you need.
+for the first time, start at §3 (Workflow for AI consumers) — §3.1 is
+the end-to-end tool sequence (`run` → `identify-usage` →
+`identify-cleanup` → developer review), §3.2 the reading order within a
+single run — and let the typed links in §4–§5 carry you to the
+per-category detail you need.
 
 ---
 
@@ -99,7 +102,96 @@ the golden corpus carries `kb/`, `ir/`, `manifest.json`, and
 
 ---
 
-## 3. Reading order: where to start
+## 3. Workflow for AI consumers
+
+This section is the orientation an agent needs before reading any
+individual record. §3.1 is the **end-to-end workflow** — the sequence
+of harvester subcommands that turns a raw `run` into a classified,
+human-reviewable picture of the database, and the one mistake (the
+`--in` target) that silently produces empty output. §3.2 is the
+**reading order** within a single run's output once you have it.
+
+### 3.1 The canonical consumer workflow: run → feedback tools → developer review
+
+A consuming agent that has only the harvest output in front of it
+should follow this sequence rather than re-deriving any of it by hand.
+The harvester ships two **feedback tools** — `identify-usage` and
+`identify-cleanup` — that already produce the per-object usage
+classification (with confidence scores and auto-generated clarifying
+questions) and the stale-object flags an agent would otherwise spend a
+long time reconstructing from `RecordSource` values and naming
+conventions. They were easy to miss in earlier outputs; the
+auto-emitted `READ-ME-FIRST.md` now points a cold consumer at this
+section, and this is the full workflow it points to.
+
+**1. `run`, then read `manifest.json`.** Start from the per-database
+manifest at `<out-root>/AccessMetaData/<dbName>/manifest.json`. Read
+its `Summary` block for the per-category counts, use the `FileMap`
+globs to locate the per-object `ir/` files, and **verify** that the
+counts match what the globs resolve to on disk before trusting the run.
+The manifest's full shape is §4; the within-run reading order is §3.2.
+
+**2. `identify-usage` → `object-use.json`.** Run the usage classifier
+over that same per-database directory. It classifies every object's
+probable usage with a confidence score and writes `object-use.json`
+(machine-readable, for the agent) plus `object-use-checklist.json` (one
+review item per object, with a question wherever the classifier is
+unsure). **Do not re-derive the object inventory by hand** — read
+`object-use.json`. (On one real database this tool classified 167
+objects and generated 50 clarifying questions; an agent that hand-built
+the same inventory did the tool's work over again for nothing.)
+
+**3. `identify-cleanup` → `object-cleanup.json`.** Run the cleanup
+identifier over the same directory. It flags objects that look stale —
+no activity within a date threshold — and writes `object-cleanup.json`
+(machine-readable flags) plus `object-cleanup-checklist.json` (a
+keep/remove review item per flagged object). The date signal comes from
+Access via COM when available, falling back to the DAO `LastUpdated`
+metadata carried in the IR.
+
+**4. Present the `*-checklist.json` files to the developer.** The two
+checklists — `object-use-checklist.json` and
+`object-cleanup-checklist.json` — are the human-review surface. Present
+them to the developer, collect the answers, and treat the annotated
+result as the **authoritative statement of intent** for any downstream
+migration or modernisation. A forthcoming developer-facing guide (this
+set's Session 2) will explain each artifact in plain language and name
+the zero-install editor that opens it; until it lands, an agent should
+still tell the developer, in plain language, what each checklist is and
+how to act on it — never just hand over a raw JSON file.
+
+```bash
+# The per-database base dir produced by `run` is the dir that CONTAINS
+# ir/ — NOT the --out root, and NOT the AccessMetaData/ parent. See the
+# trap below.
+DB=out/AccessMetaData/Northwind
+
+AccessHarvester run --db Northwind.accdb --out out          # harvest -> DB/{manifest.json,ir/,kb/,raw/}
+AccessHarvester identify-usage   --in "$DB"                 # -> DB/object-use.json + object-use-checklist.json
+AccessHarvester identify-cleanup --in "$DB"                 # -> DB/object-cleanup.json + object-cleanup-checklist.json
+```
+
+Both feedback tools also accept `--manifest <DB>/manifest.json` as an
+equivalent to `--in <DB>` (the output directory is inferred as the
+manifest's parent), and both take `--json-status` for a machine-readable
+summary on stdout. `identify-cleanup` additionally accepts
+`--harvest-date <YYYY-MM-DD>` (default: today), `--threshold-days <N>`
+(default: 90), and `--no-com` (skip COM date sampling, rely on the DAO
+`LastUpdated` fallback). `identify-usage` accepts `--exclude-cleanup
+<object-cleanup-checklist.json>` so objects the developer has already
+confirmed for removal drop out of the usage classification — run
+`identify-cleanup` first if you intend to use it.
+
+> **The `--in` target is the per-database base dir, not the `--out`
+> root.** `--in` must point at the directory that *directly contains*
+> the `ir/` subdirectory — `<out-root>/AccessMetaData/<dbName>/`.
+> Pointing it at the `--out` root (the directory that *contains*
+> `AccessMetaData/`) or at the `AccessMetaData/` parent makes the loader
+> find no `ir/` and classify **zero** objects, with no error raised.
+> This is the single most common first-run mistake; a real consumer lost
+> a run to it.
+
+### 3.2 Reading order: where to start
 
 A consumer that walks the output top-down sees an inventory before
 any detail:
