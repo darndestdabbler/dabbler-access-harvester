@@ -97,6 +97,117 @@
           "costUsd": 0.117075
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/spot-check-design-consensus",
+      "dateTime": "2026-06-01T13:56:25.230645-04:00",
+      "description": "Routed the PDF-spot-check output-location design fork to cross-provider consensus; both GPT-5.4 and Gemini Pro independently chose Option A (non-gated reports-baseline-spot-check sibling).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "analysis",
+          "inputTokens": 656,
+          "outputTokens": 2784,
+          "costUsd": 0.0434
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 689,
+          "outputTokens": 525,
+          "costUsd": 0.0061112
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/optional-pdf-spot-check",
+      "dateTime": "2026-06-01T13:56:25.231702-04:00",
+      "description": "Implemented Option A: ReportBaselineRunner writes PDFs + spot-check-manifest.json into a separate non-gated spotCheckRoot (new SpotCheckManifest/Writer); gated baseline-manifest.json stays PDF-free; render failure non-blocking; added a PathsOverlap disjointness guard. Updated CLI command + help + BaselineManifest docs.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/regen-corpus-display-totals",
+      "dateTime": "2026-06-01T13:56:25.232698-04:00",
+      "description": "Regenerated the committed reports-baseline/ golden corpus for both fixtures via the new guarded GoldenCorpusRegenerator (AH_REGEN_GOLDEN env + Skip.IfNot) reusing the exact GoldenNormalizer; each aggregates.json now carries DisplayTotals + the updated ContractNote.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/confirm-regression-parity",
+      "dateTime": "2026-06-01T13:56:25.232698-04:00",
+      "description": "Confirmed CanonicalGoldenRegressionTests passes 2/2 byte-for-byte against the regenerated corpus; rewrote hermetic ReportBaselineRunnerTests (18/18) and updated the COM integration test for the sibling spot-check; full hermetic suites green (1,747).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/docs",
+      "dateTime": "2026-06-01T13:56:25.232698-04:00",
+      "description": "Updated both fixture READ-ME-FIRST.md, interpretation-guide section 5.2 (DisplayTotals + spot-check sibling, fixed stale deferred note), and the ROADMAP; updated ai-assignment.md Session 2 actuals.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/verification-r1",
+      "dateTime": "2026-06-01T13:56:25.233693-04:00",
+      "description": "Cross-provider session verification round 1; ISSUES_FOUND with two Minor findings (spotCheckRoot/reportsBaselineRoot disjointness not enforced at API boundary; missing includePdf+ReadSpecFailed spot-check test).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 20433,
+          "outputTokens": 12356,
+          "costUsd": 0.2364225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verification-r2",
+      "dateTime": "2026-06-01T13:56:25.234695-04:00",
+      "description": "Fixed both Minor findings (PathsOverlap guard + 3 new tests) and re-verified; round 2 returned VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11110,
+          "outputTokens": 7055,
+          "costUsd": 0.1336
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/next-set-recommendation",
+      "dateTime": "2026-06-01T13:56:25.234695-04:00",
+      "description": "Routed the next-session-set recommendation (Rule 17): re-measured the flaky COM tests (classify HHC persistent 240s timeout; sanitize HHC one-off flake, passed on retry); recommendation = harvester-fix-classify-timeout.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.002855
+        }
+      ]
     }
   ]
 }
