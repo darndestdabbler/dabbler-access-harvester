@@ -22,6 +22,13 @@ public sealed record ReportAggregateInput
     public required string RecordSource { get; init; }
 
     /// <summary>
+    /// Optional raw SQL for a saved-query-backed <see cref="RecordSource"/>,
+    /// preloaded while the short-lived Access session is open. Null for
+    /// table-backed RecordSources and inline SQL.
+    /// </summary>
+    public string? SavedQuerySql { get; init; }
+
+    /// <summary>
     /// The report's group levels, as projected from
     /// <c>ReportMetadata.GroupLevels</c>. Levels whose
     /// <see cref="ReportGroupLevelKey.GroupOn"/> is an Access expression

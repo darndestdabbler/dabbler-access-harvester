@@ -203,6 +203,7 @@ public sealed class ReportBaselineRunner
             {
                 ReportName = reportName,
                 RecordSource = spec.RecordSource!,
+                SavedQuerySql = spec.SavedQuerySql,
                 GroupLevels = spec.GroupLevels,
                 ParametersUsed = nameKeyed,
             };

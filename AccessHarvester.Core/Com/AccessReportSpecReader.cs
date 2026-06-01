@@ -66,6 +66,7 @@ public sealed class AccessReportSpecReader : IReportSource
             dynamic report = _session.Application.Reports[reportName];
 
             string? recordSource = TryReadString(() => (string?)report.RecordSource);
+            string? savedQuerySql = TryReadSavedQuerySql(recordSource);
 
             var groupLevels = ImmutableArray.CreateBuilder<ReportGroupLevelKey>();
             // GroupLevel is a sparse collection — iterating Count is the
@@ -87,6 +88,7 @@ public sealed class AccessReportSpecReader : IReportSource
             {
                 ReportName = reportName,
                 RecordSource = string.IsNullOrEmpty(recordSource) ? null : recordSource,
+                SavedQuerySql = string.IsNullOrEmpty(savedQuerySql) ? null : savedQuerySql,
                 GroupLevels = groupLevels.ToImmutable(),
             };
         }
@@ -111,5 +113,22 @@ public sealed class AccessReportSpecReader : IReportSource
     {
         try { return read(); }
         catch { return null; }
+    }
+
+    private string? TryReadSavedQuerySql(string? recordSource)
+    {
+        if (string.IsNullOrWhiteSpace(recordSource))
+            return null;
+
+        try
+        {
+            dynamic currentDb = _session.Application.CurrentDb();
+            dynamic queryDef = currentDb.QueryDefs[recordSource];
+            return TryReadString(() => (string?)queryDef.SQL);
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

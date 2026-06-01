@@ -24,6 +24,18 @@ public class RecordSourceResolverTests
         Assert.Equal($"SELECT * FROM [{name}]", resolved.SqlToExecute);
     }
 
+    [Fact]
+    public void Resolve_UsesSavedQuerySql_WhenProvided_ForQueryBackedRecordSource()
+    {
+        const string savedQuerySql = "SELECT OrderID, CustomerID FROM Orders";
+
+        var resolved = RecordSourceResolver.Resolve("qryOrders", savedQuerySql);
+
+        Assert.Equal(RecordSourceKind.TableOrQueryName, resolved.Kind);
+        Assert.Equal("qryOrders", resolved.Original);
+        Assert.Equal(savedQuerySql, resolved.SqlToExecute);
+    }
+
     [Theory]
     [InlineData("SELECT * FROM Orders")]
     [InlineData("select OrderID, CustomerID from Orders where ShipCountry = 'USA'")]

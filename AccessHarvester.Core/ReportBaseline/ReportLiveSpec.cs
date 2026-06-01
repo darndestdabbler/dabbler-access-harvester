@@ -22,6 +22,14 @@ public sealed record ReportLiveSpec
     public string? RecordSource { get; init; }
 
     /// <summary>
+    /// When <see cref="RecordSource"/> names a saved query, the query's
+    /// raw SQL as read from <c>CurrentDb().QueryDefs</c> during the
+    /// short-lived COM preload phase. Null for inline SQL, table-backed
+    /// RecordSources, and query names that could not be resolved.
+    /// </summary>
+    public string? SavedQuerySql { get; init; }
+
+    /// <summary>
     /// Group-level keys, outermost first. Empty when the report has no
     /// group levels.
     /// </summary>

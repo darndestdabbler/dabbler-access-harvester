@@ -1,5 +1,33 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-report-baseline-golden-corpus",
-  "status": "not-started"
+  "status": "in-progress",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Deterministic Northwind Date-Helper Support + Capture Proof",
+      "status": "in-progress",
+      "startedAt": "2026-05-31T18:13:09.057091-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "github-copilot",
+        "provider": "openai",
+        "model": "gpt-5.4",
+        "effort": "high",
+        "chatSessionId": null,
+        "checkedOutAt": "2026-05-31T18:13:09.057091-04:00",
+        "lastActivityAt": "2026-05-31T18:13:09.057091-04:00"
+      },
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Commit Corpus + Regression Gate + READ-ME-FIRST + Closeout",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    }
+  ]
 }

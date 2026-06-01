@@ -6,8 +6,9 @@ namespace AccessHarvester.Core.ReportBaseline;
 /// <summary>
 /// Classifies a raw report <c>RecordSource</c> string as either an inline
 /// SQL statement or an Access object name (table or saved query), and
-/// wraps object-name values in <c>SELECT * FROM [name]</c> so the executor
-/// always receives a runnable SQL string.
+/// shapes object-name values into runnable SQL. Table-backed names are
+/// wrapped in <c>SELECT * FROM [name]</c>; saved-query-backed names can
+/// optionally supply their preloaded query SQL.
 ///
 /// <para>
 /// Classification heuristic: if the trimmed value's first SQL token is
@@ -32,7 +33,7 @@ public static class RecordSourceResolver
     /// null, empty, or whitespace-only — an unbound report has no
     /// RecordSource at all and should be filtered out by the caller.
     /// </summary>
-    public static ResolvedRecordSource Resolve(string recordSource)
+    public static ResolvedRecordSource Resolve(string recordSource, string? savedQuerySql = null)
     {
         if (recordSource is null) throw new ArgumentNullException(nameof(recordSource));
         if (string.IsNullOrWhiteSpace(recordSource))
@@ -63,7 +64,9 @@ public static class RecordSourceResolver
         {
             Original = recordSource,
             Kind = RecordSourceKind.TableOrQueryName,
-            SqlToExecute = $"SELECT * FROM [{name}]",
+            SqlToExecute = string.IsNullOrWhiteSpace(savedQuerySql)
+                ? $"SELECT * FROM [{name}]"
+                : savedQuerySql,
         };
     }
 }

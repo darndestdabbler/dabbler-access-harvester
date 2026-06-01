@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace AccessHarvester.Core.ReportBaseline;
 
@@ -22,6 +24,14 @@ namespace AccessHarvester.Core.ReportBaseline;
 /// </summary>
 public sealed class ReportBaselineService
 {
+    private const string MaxOrderDateSql = "SELECT Max([OrderDate]) AS [MaxOrderDate] FROM [Orders]";
+    private static readonly Regex ReportParameterStartDateFunction = new(
+        @"\breportParameterStartDate\s*\(\s*\)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex ReportParameterEndDateFunction = new(
+        @"\breportParameterEndDate\s*\(\s*\)",
+        RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     private readonly IReportQueryExecutor _executor;
     private readonly string _harvesterVersion;
 
@@ -58,9 +68,24 @@ public sealed class ReportBaselineService
     {
         if (input is null) throw new ArgumentNullException(nameof(input));
 
-        var resolved = RecordSourceResolver.Resolve(input.RecordSource);
+        var resolved = RecordSourceResolver.Resolve(input.RecordSource, input.SavedQuerySql);
+        var effectiveInput = input;
+
+        var derivedDefaults = ResolveSupportedDefaultParameters(resolved.SqlToExecute);
+        if (derivedDefaults.Count > 0)
+        {
+            resolved = resolved with
+            {
+                SqlToExecute = InlineSupportedDefaultParameters(resolved.SqlToExecute, derivedDefaults),
+            };
+            effectiveInput = effectiveInput with
+            {
+                ParametersUsed = MergeParameters(input.ParametersUsed, derivedDefaults),
+            };
+        }
+
         var table = _executor.Execute(resolved.SqlToExecute, positionalParameters);
-        return ReportAggregateComputer.Compute(input, resolved, table, _harvesterVersion);
+        return ReportAggregateComputer.Compute(effectiveInput, resolved, table, _harvesterVersion);
     }
 
     /// <summary>
@@ -89,4 +114,83 @@ public sealed class ReportBaselineService
         ReportAggregatesWriter.WriteToFile(aggregates, path);
         return path;
     }
+
+    private IReadOnlyDictionary<string, object?> ResolveSupportedDefaultParameters(string sql)
+    {
+        bool needsStart = ReportParameterStartDateFunction.IsMatch(sql);
+        bool needsEnd = ReportParameterEndDateFunction.IsMatch(sql);
+        if (!needsStart && !needsEnd)
+            return ImmutableSortedDictionary<string, object?>.Empty;
+
+        DateTime endDate = ReadMaxOrderDate().Date;
+        DateTime startDate = endDate.AddMonths(-3);
+
+        var builder = ImmutableSortedDictionary.CreateBuilder<string, object?>(StringComparer.Ordinal);
+        if (needsStart)
+            builder["reportParameterStartDate"] = startDate;
+        if (needsEnd)
+            builder["reportParameterEndDate"] = endDate;
+        return builder.ToImmutable();
+    }
+
+    private DateTime ReadMaxOrderDate()
+    {
+        var table = _executor.Execute(MaxOrderDateSql, positionalParameters: null);
+        if (table.Rows.Count == 0 || table.Columns.Count == 0)
+        {
+            throw new InvalidOperationException(
+                "Could not derive reportParameterStartDate/reportParameterEndDate defaults: " +
+                "MAX(OrderDate) returned no rows.");
+        }
+
+        object? value = table.Rows[0][0];
+        if (value is null || value is DBNull)
+        {
+            throw new InvalidOperationException(
+                "Could not derive reportParameterStartDate/reportParameterEndDate defaults: " +
+                "MAX(OrderDate) returned null.");
+        }
+
+        if (value is DateTime dt)
+            return dt;
+
+        return Convert.ToDateTime(value, CultureInfo.InvariantCulture);
+    }
+
+    private static string InlineSupportedDefaultParameters(
+        string sql,
+        IReadOnlyDictionary<string, object?> derivedDefaults)
+    {
+        if (derivedDefaults.TryGetValue("reportParameterStartDate", out var startObj)
+            && startObj is DateTime startDate)
+        {
+            sql = ReportParameterStartDateFunction.Replace(sql, AccessDateLiteral(startDate));
+        }
+
+        if (derivedDefaults.TryGetValue("reportParameterEndDate", out var endObj)
+            && endObj is DateTime endDate)
+        {
+            sql = ReportParameterEndDateFunction.Replace(sql, AccessDateLiteral(endDate));
+        }
+
+        return sql;
+    }
+
+    private static IReadOnlyDictionary<string, object?> MergeParameters(
+        IReadOnlyDictionary<string, object?> existing,
+        IReadOnlyDictionary<string, object?> derivedDefaults)
+    {
+        if (derivedDefaults.Count == 0)
+            return existing;
+
+        var builder = ImmutableSortedDictionary.CreateBuilder<string, object?>(StringComparer.Ordinal);
+        foreach (var kv in existing)
+            builder[kv.Key] = kv.Value;
+        foreach (var kv in derivedDefaults)
+            builder.TryAdd(kv.Key, kv.Value);
+        return builder.ToImmutable();
+    }
+
+    private static string AccessDateLiteral(DateTime date)
+        => $"#{date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}#";
 }
