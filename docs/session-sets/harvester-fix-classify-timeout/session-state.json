@@ -6,9 +6,9 @@
     {
       "number": 1,
       "title": "Reproduce, Instrument, Root-Cause",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-01T14:18:53.076869-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-01T15:19:26.815291-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
