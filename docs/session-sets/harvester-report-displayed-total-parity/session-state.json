@@ -6,9 +6,9 @@
     {
       "number": 1,
       "title": "Footer-Expression Display Totals (Core + capture proof)",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-01T11:40:45.451924-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-01T12:33:26.971843-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
