@@ -58,3 +58,44 @@ effort=low — Rationale: the work is primarily documentation (narrative prose),
 simple CLI wiring, and mechanical byte-diff parity checks, which Sonnet handles
 cost-effectively; the mandatory cross-provider session-verification stays on
 GPT-5.4.
+
+---
+
+## Session 2: Corpus Regen + Regression + Optional PDF Spot-Check + Closeout
+
+### Recommended orchestrator
+Claude Sonnet 4.6 @ effort=low (from Session 1's routed recommendation above).
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| 1.0 | Spot-check output-location design fork (Option A/B/C) | cross-provider consensus → `query(gpt-5-4)` + `query(gemini-pro)`, both `analysis` |
+| 2.0 | Implement Option A spot-check (Core runner + new SpotCheckManifest + CLI) | orchestrator (deterministic single-feature C#) |
+| 3.0 | Refactor hermetic runner + CLI integration tests for sibling spot-check | orchestrator (test authoring against in-context types) |
+| 4.0 | Regenerate committed `reports-baseline/` corpus (guarded COM regen helper) | orchestrator (single CLI-subprocess capture, no parallel dotnet) |
+| 5.0 | Confirm `CanonicalGoldenRegressionTests` byte parity | orchestrator (mechanical gate run) |
+| 6.0 | READMEs + interpretation guide §5.2 + ROADMAP | orchestrator (mechanical doc edits) |
+| 7.0 | End-of-session cross-provider verification | `route(session-verification)` → gpt-5-4 (mandatory) |
+
+### Actuals (filled after the session)
+- Orchestrator used: **Claude Opus 4.8 @ effort=high** (human-selected via "Start
+  the next session" — Rule 7; deviates from the routed Sonnet recommendation).
+- Total routed cost: spot-check design consensus (`analysis` × 2:
+  gpt-5-4 $0.0434 + gemini-pro $0.0061) + final `session-verification`
+  (see Step 8 cost report).
+- Deviations from recommendation: orchestrator engine (Claude Opus, not Sonnet)
+  per the human's session-start choice. Implementation handled in-conversation
+  under the Delegation-Discipline "deterministic single-feature C#" bar; the one
+  genuine design fork (where to put the non-gated PDF spot-check) WAS routed to
+  cross-provider consensus — **both GPT-5.4 and Gemini Pro independently chose
+  Option A** (sibling `reports-baseline-spot-check/` root, gated manifest kept
+  PDF-free, separate `spot-check-manifest.json`), which is what shipped.
+- Notes for next-session calibration: the spec's "Touches" list omitted
+  `AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs` and the two new
+  Core files (`SpotCheckManifest.cs`, `SpotCheckManifestWriter.cs`); honoring the
+  non-gated requirement required the runner refactor (PDF render no longer affects
+  gated status). A guarded `GoldenCorpusRegenerator` dev tool was added to the
+  Integration test project to make corpus regen mechanical (the prior set left no
+  regen mechanism — see change-log). The Windows `dotnet test` wrapper hung after
+  xUnit finished on the COM-driven runs (documented prior-set lesson); pass/fail
+  was read from the TRX and wedged `testhost` reaped via WMI
+  `Win32_Process.Terminate`.

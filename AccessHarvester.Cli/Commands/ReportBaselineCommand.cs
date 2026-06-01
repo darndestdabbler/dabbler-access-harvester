@@ -13,15 +13,21 @@ namespace AccessHarvester.Cli.Commands;
 
 /// <summary>
 /// Implements the <c>report-baseline</c> subcommand: captures the
-/// RecordSource-query aggregates (and, with <c>--include-pdf</c>, the
-/// rendered PDF) for every report (or a <c>--reports</c> allowlist) in a
-/// single Access database. Writes per-report <c>aggregates.json</c>
-/// (always) and <c>output.pdf</c> (only under <c>--include-pdf</c>), plus
-/// a top-level <c>baseline-manifest.json</c> under
-/// <c>&lt;out&gt;/AccessMetaData/&lt;dbName&gt;/reports-baseline/</c>.
-/// The aggregates are the deterministic RecordSource-result-set parity
-/// ground truth; the PDF is a non-deterministic binary for human visual
-/// review, so it is opt-in.
+/// RecordSource-query aggregates for every report (or a <c>--reports</c>
+/// allowlist) in a single Access database. Writes per-report
+/// <c>aggregates.json</c> plus a top-level <c>baseline-manifest.json</c>
+/// under <c>&lt;out&gt;/AccessMetaData/&lt;dbName&gt;/reports-baseline/</c> —
+/// the deterministic RecordSource-result-set parity ground truth.
+///
+/// <para>
+/// With <c>--include-pdf</c>, each successfully-aggregated report's rendered
+/// <c>output.pdf</c> is additionally written into the SEPARATE, non-gated
+/// sibling <c>&lt;out&gt;/AccessMetaData/&lt;dbName&gt;/reports-baseline-spot-check/</c>
+/// (indexed by its own <c>spot-check-manifest.json</c>). The PDF is a
+/// non-deterministic binary for human visual review only; it lives outside the
+/// byte-diffed corpus so it never enters the determinism gate, and the gated
+/// capture is byte-identical whether or not <c>--include-pdf</c> is passed.
+/// </para>
 ///
 /// <para>
 /// Exit codes (mirror <c>run</c>): 0 = all considered reports captured
@@ -91,6 +97,10 @@ public static class ReportBaselineCommand
 
         string dbName = Path.GetFileNameWithoutExtension(db);
         string reportsBaselineRoot = Path.Combine(outDir, "AccessMetaData", dbName, "reports-baseline");
+        // The optional PDF visual spot-check is written to this sibling root,
+        // OUTSIDE the byte-diffed reports-baseline/ corpus, so it never enters
+        // the determinism gate.
+        string spotCheckRoot = Path.Combine(outDir, "AccessMetaData", dbName, "reports-baseline-spot-check");
         string harvesterVersion = DatabaseManifest.ResolveHarvesterVersion();
 
         IReadOnlyList<string> allReports;
@@ -128,9 +138,14 @@ public static class ReportBaselineCommand
         var service = new ReportBaselineService(executor.Executor, harvesterVersion);
         var runner = new ReportBaselineRunner(source, renderer, service, harvesterVersion);
 
-        var manifest = runner.Run(db, toProcess, reportsBaselineRoot, parametersByReport, cleanRoot: clean, includePdf: includePdf);
+        var manifest = runner.Run(db, toProcess, reportsBaselineRoot, parametersByReport, cleanRoot: clean, includePdf: includePdf, spotCheckRoot: spotCheckRoot);
 
         ReportSummary(manifest);
+        if (includePdf)
+        {
+            Console.Error.WriteLine(
+                $"Optional PDF visual spot-check written to (non-gated): {spotCheckRoot}");
+        }
 
         int captured = manifest.Reports.Count(r => r.Status == "Captured");
         int skipped = manifest.Reports.Count(r => r.Status == "Skipped");
@@ -146,6 +161,9 @@ public static class ReportBaselineCommand
                 Database = db,
                 OutputRoot = outDir,
                 ReportsBaselineDir = reportsBaselineRoot,
+                // The non-gated PDF visual spot-check location, surfaced only
+                // when --include-pdf rendered into it.
+                SpotCheckDir = includePdf ? spotCheckRoot : null,
                 ExitCode = exit,
                 ReportBaseline = new
                 {

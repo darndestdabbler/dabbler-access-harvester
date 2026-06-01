@@ -21,11 +21,12 @@
     "ServiceID": 240
   },
   "GroupLevels": [],
+  "DisplayTotals": [],
   "Skipped": [],
   "Provenance": {
     "HarvesterVersion": "\u003CNORMALIZED:HarvesterVersion\u003E",
     "AggregateContract": "RecordSourceResultSet",
-    "ContractNote": "Aggregates reflect the report\u0027s RecordSource query result set (executed via ACE OLE DB), not the rendered report\u0027s footer-control expressions. Parity comparisons must compare like-for-like.",
+    "ContractNote": "Aggregates (GrandTotals, GroupLevels) reflect the report\u0027s RecordSource query result set (executed via ACE OLE DB), not the rendered report\u0027s footer-control expressions. DisplayTotals separately captures the supported report-footer aggregate expressions (Sum over numeric result-set columns) \u2014 the number a human reads in the footer \u2014 evaluated over that same result set; un-derivable footer controls are recorded in Skipped. Parity comparisons must compare like-for-like.",
     "ParametersUsed": {}
   }
 }

@@ -38,10 +38,25 @@ The committed `reports-baseline/` sibling captures deterministic
 report `RecordSource` result-set aggregates for the canonical
 unattended report subset in this fixture. Use
 `reports-baseline/baseline-manifest.json` as the index and each
-`<report>/aggregates.json` as the parity artifact for the report's
-underlying query results, not for rendered footer expressions or PDF
-layout. For HomeHealthCare, the committed subset is
-`srptClientBudgets` and `srptClientCurrentNeeds`.
+`<report>/aggregates.json` as the parity artifact. For HomeHealthCare,
+the committed subset is `srptClientBudgets` and
+`srptClientCurrentNeeds`.
+
+Each `aggregates.json` now carries two parity signals: `GrandTotals` /
+`GroupLevels` (the `RecordSource` query result-set aggregates) and
+`DisplayTotals` — the **number a human reads in the report footer**,
+computed for the supported closed set of footer `Sum` expressions.
+These two sub-reports have no derivable report-footer `Sum` control, so
+their `DisplayTotals` array is empty; footer controls that are not a
+pure function of the flat result set are recorded in `Skipped` with a
+grounded reason, never silently dropped. See interpretation-guide §5.2
+for the full contract.
+
+The optional, non-blocking PDF visual spot-check (`--include-pdf`) is
+written to the SEPARATE, non-gated `reports-baseline-spot-check/`
+sibling — never inside this byte-diffed corpus. It is for human visual
+review of layout/format/grouping only and is not committed here nor
+part of any regression gate.
 
 Interpretation guide:
 https://github.com/darndestdabbler/dabbler-access-harvester/blob/main/docs/harvester/interpretation-guide.md

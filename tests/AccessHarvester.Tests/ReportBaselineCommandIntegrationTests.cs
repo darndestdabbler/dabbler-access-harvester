@@ -30,7 +30,11 @@ public class HomeHealthCareComCollection { }
 /// session, renders PDFs, computes aggregates, and emits the
 /// <c>baseline-manifest.json</c> index. Passes <c>--include-pdf</c>
 /// explicitly so the COM PDF-render path stays covered — PDF rendering is
-/// opt-in as of Session 3 (the default capture is aggregates-only).
+/// opt-in as of Session 3 (the default capture is aggregates-only). The
+/// rendered PDFs land in the non-gated <c>reports-baseline-spot-check/</c>
+/// sibling (indexed by <c>spot-check-manifest.json</c>), never inside the
+/// gated corpus, so the test asserts the gated manifest is PDF-free and the
+/// PDFs exist in the sibling.
 ///
 /// <para>
 /// Scoped via <c>--reports</c> to four <c>srpt*</c> sub-reports because
@@ -93,7 +97,9 @@ public class ReportBaselineCommandIntegrationTests
                 "--json-status",
             });
 
-            string baselineDir = Path.Combine(outRoot, "AccessMetaData", "HomeHealthCare", "reports-baseline");
+            string dbRootDir = Path.Combine(outRoot, "AccessMetaData", "HomeHealthCare");
+            string baselineDir = Path.Combine(dbRootDir, "reports-baseline");
+            string spotCheckDir = Path.Combine(dbRootDir, "reports-baseline-spot-check");
             string manifestPath = Path.Combine(baselineDir, "baseline-manifest.json");
             Assert.True(File.Exists(manifestPath), $"Expected baseline-manifest.json at {manifestPath}.");
 
@@ -105,6 +111,18 @@ public class ReportBaselineCommandIntegrationTests
             var reports = root.GetProperty("Reports");
             Assert.Equal(ScopedReports.Length, reports.GetArrayLength());
 
+            // The gated corpus tree must be entirely PDF-free regardless of
+            // --include-pdf: PDFs only ever live in the spot-check sibling.
+            Assert.Empty(Directory.EnumerateFiles(baselineDir, "*.pdf", SearchOption.AllDirectories));
+
+            // The opt-in spot-check sibling must carry its own manifest.
+            string spotManifestPath = Path.Combine(spotCheckDir, "spot-check-manifest.json");
+            Assert.True(File.Exists(spotManifestPath), $"Expected spot-check-manifest.json at {spotManifestPath}.");
+            using var spotDoc = JsonDocument.Parse(File.ReadAllText(spotManifestPath));
+            var spotByName = spotDoc.RootElement.GetProperty("Reports").EnumerateArray()
+                .ToDictionary(e => e.GetProperty("Name").GetString()!, e => e);
+            Assert.Equal(ScopedReports.Length, spotByName.Count);
+
             int captured = 0;
             int failed = 0;
             for (int i = 0; i < reports.GetArrayLength(); i++)
@@ -112,26 +130,33 @@ public class ReportBaselineCommandIntegrationTests
                 var entry = reports[i];
                 string name = entry.GetProperty("Name").GetString()!;
                 string status = entry.GetProperty("Status").GetString()!;
+                var paths = entry.GetProperty("Paths");
+                // No gated entry, in any status, references a PDF.
+                Assert.False(paths.TryGetProperty("pdf", out _));
+
+                var spotEntry = spotByName[name];
+                string spotStatus = spotEntry.GetProperty("Status").GetString()!;
 
                 if (status == "Captured")
                 {
                     captured++;
-                    var paths = entry.GetProperty("Paths");
-                    string pdfRel = paths.GetProperty("pdf").GetString()!;
                     string aggRel = paths.GetProperty("aggregates").GetString()!;
-
-                    string pdfPath = Path.Combine(baselineDir, pdfRel.Replace('/', Path.DirectorySeparatorChar));
                     string aggPath = Path.Combine(baselineDir, aggRel.Replace('/', Path.DirectorySeparatorChar));
-
-                    Assert.True(File.Exists(pdfPath), $"PDF not found on disk for {name}: {pdfPath}");
                     Assert.True(File.Exists(aggPath), $"aggregates.json not found on disk for {name}: {aggPath}");
-                    Assert.True(new FileInfo(pdfPath).Length > 0, $"PDF for {name} was empty.");
 
                     // aggregates.json must parse as JSON with the expected provenance contract.
                     using var aggDoc = JsonDocument.Parse(File.ReadAllText(aggPath));
                     Assert.Equal(name, aggDoc.RootElement.GetProperty("ReportName").GetString());
                     Assert.Equal("RecordSourceResultSet",
                         aggDoc.RootElement.GetProperty("Provenance").GetProperty("AggregateContract").GetString());
+
+                    // The PDF for a captured report lives in the spot-check
+                    // sibling and is recorded as Rendered there.
+                    Assert.Equal("Rendered", spotStatus);
+                    string pdfRel = spotEntry.GetProperty("Path").GetString()!;
+                    string pdfPath = Path.Combine(spotCheckDir, pdfRel.Replace('/', Path.DirectorySeparatorChar));
+                    Assert.True(File.Exists(pdfPath), $"PDF not found in spot-check sibling for {name}: {pdfPath}");
+                    Assert.True(new FileInfo(pdfPath).Length > 0, $"PDF for {name} was empty.");
                 }
                 else if (status == "Failed")
                 {
@@ -140,11 +165,14 @@ public class ReportBaselineCommandIntegrationTests
                     // step (parent-context bindings unresolved). Aggregate
                     // failure suppresses the opt-in PDF render path.
                     var reason = entry.GetProperty("Reason").GetString();
-                    var paths = entry.GetProperty("Paths");
                     Assert.NotNull(reason);
                     Assert.Contains("AggregateFailed", reason);
-                    Assert.False(paths.TryGetProperty("pdf", out _));
                     Assert.False(paths.TryGetProperty("aggregates", out _));
+
+                    // The spot-check manifest surfaces it as Skipped (render
+                    // not attempted for a report that already failed the gate).
+                    Assert.Equal("Skipped", spotStatus);
+                    Assert.Contains("AggregateFailed", spotEntry.GetProperty("Reason").GetString());
                 }
                 else
                 {

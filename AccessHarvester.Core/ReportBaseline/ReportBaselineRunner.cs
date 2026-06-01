@@ -9,17 +9,21 @@ namespace AccessHarvester.Core.ReportBaseline;
 /// <summary>
 /// Composes <see cref="IReportSource"/> + <see cref="IReportPdfRenderer"/>
 /// + <see cref="ReportBaselineService"/> to capture baselines for a batch
-/// of reports. Writes per-report <c>aggregates.json</c> (always) and
-/// <c>output.pdf</c> (only when <c>includePdf</c> is set — see
-/// <see cref="Run"/>), plus a top-level <c>baseline-manifest.json</c>.
-/// Returns the manifest so the CLI can emit its summary into
-/// <c>--json-status</c>.
+/// of reports. Writes per-report <c>aggregates.json</c> (always) into the
+/// deterministic <c>reportsBaselineRoot</c> corpus, plus a top-level
+/// <c>baseline-manifest.json</c>. Returns the manifest so the CLI can emit
+/// its summary into <c>--json-status</c>.
 ///
 /// <para>
-/// All file writes go under <c>reportsBaselineRoot</c>; the per-report
-/// directory is <c>&lt;root&gt;/&lt;reportName&gt;/</c>. Paths recorded on
-/// the manifest are forward-slashed relative paths so the JSON is
-/// byte-identical across OS path separators.
+/// The gated corpus under <c>reportsBaselineRoot</c> is PDF-free: the
+/// optional <c>output.pdf</c> visual spot-check (only when <c>includePdf</c>
+/// is set — see <see cref="Run"/>) is written into a SEPARATE
+/// <c>spotCheckRoot</c> sibling, never inside the byte-diffed corpus, so a
+/// report's gated capture is byte-identical whether or not PDFs were
+/// rendered and a PDF can never contaminate the determinism gate. The
+/// per-report directory is <c>&lt;root&gt;/&lt;reportName&gt;/</c> under each
+/// root. Paths recorded on the manifests are forward-slashed relative paths
+/// so the JSON is byte-identical across OS path separators.
 /// </para>
 /// </summary>
 public sealed class ReportBaselineRunner
@@ -89,16 +93,28 @@ public sealed class ReportBaselineRunner
     /// <param name="includePdf">
     /// When <c>false</c> (the default), only the deterministic
     /// <c>aggregates.json</c> is written and the COM PDF render is
-    /// skipped entirely. Aggregates are the RecordSource-result-set
-    /// parity ground truth; the rendered PDF is a non-deterministic
-    /// binary whose only consumer is human visual review, so it is
-    /// opt-in. When <c>true</c>, each captured report additionally
-    /// renders <c>output.pdf</c> via <see cref="IReportPdfRenderer"/>. Aggregate capture remains the
-    /// gate: if the report's RecordSource cannot run (for example,
+    /// skipped entirely; <paramref name="spotCheckRoot"/> is left untouched
+    /// and no <c>spot-check-manifest.json</c> is written. Aggregates are the
+    /// RecordSource-result-set parity ground truth; the rendered PDF is a
+    /// non-deterministic binary whose only consumer is human visual review,
+    /// so it is opt-in. When <c>true</c>, each captured report additionally
+    /// renders <c>output.pdf</c> via <see cref="IReportPdfRenderer"/> into the
+    /// SEPARATE <paramref name="spotCheckRoot"/> sibling — never inside the
+    /// gated <paramref name="reportsBaselineRoot"/> corpus — and a
+    /// <c>spot-check-manifest.json</c> is written there. Aggregate capture
+    /// remains the gate: if the report's RecordSource cannot run (for example,
     /// required parameters were not supplied), the runner records the
-    /// aggregate failure and skips PDF rendering so the batch does not
-    /// enter a modal COM render path for a report that already failed.
-    /// The CLI surfaces this as the <c>--include-pdf</c> flag.
+    /// aggregate failure and skips PDF rendering so the batch does not enter a
+    /// modal COM render path for a report that already failed. A PDF render
+    /// failure is non-blocking: it is recorded only on the spot-check manifest
+    /// and never changes the report's gated capture status. The CLI surfaces
+    /// this as the <c>--include-pdf</c> flag.
+    /// </param>
+    /// <param name="spotCheckRoot">
+    /// The per-database <c>reports-baseline-spot-check</c> directory, a sibling
+    /// of <paramref name="reportsBaselineRoot"/>. Required (non-empty) when
+    /// <paramref name="includePdf"/> is <c>true</c>; ignored otherwise. PDFs
+    /// and the spot-check manifest live here, outside the determinism gate.
     /// </param>
     public BaselineManifest Run(
         string databasePath,
@@ -106,20 +122,46 @@ public sealed class ReportBaselineRunner
         string reportsBaselineRoot,
         IReadOnlyDictionary<string, IReadOnlyList<KeyValuePair<string, object?>>>? parametersByReport = null,
         bool cleanRoot = true,
-        bool includePdf = false)
+        bool includePdf = false,
+        string? spotCheckRoot = null)
     {
         if (reportNames is null) throw new ArgumentNullException(nameof(reportNames));
         if (string.IsNullOrWhiteSpace(reportsBaselineRoot))
             throw new ArgumentException("reportsBaselineRoot is empty.", nameof(reportsBaselineRoot));
+        if (includePdf && string.IsNullOrWhiteSpace(spotCheckRoot))
+            throw new ArgumentException(
+                "spotCheckRoot is required when includePdf is true.", nameof(spotCheckRoot));
+        // The non-gated spot-check tree must be physically disjoint from the
+        // gated corpus, or a non-deterministic PDF could land inside the
+        // byte-diffed reports-baseline/ tree and contaminate the determinism
+        // gate. The CLI always computes a proper sibling, but enforce it at the
+        // API boundary so a direct library caller cannot reintroduce the leak.
+        if (includePdf && PathsOverlap(reportsBaselineRoot, spotCheckRoot!))
+            throw new ArgumentException(
+                "spotCheckRoot must be disjoint from reportsBaselineRoot (equal, nested, " +
+                $"or containing paths are rejected so PDFs never enter the gated corpus): " +
+                $"reportsBaselineRoot='{reportsBaselineRoot}', spotCheckRoot='{spotCheckRoot}'.",
+                nameof(spotCheckRoot));
 
         if (cleanRoot && Directory.Exists(reportsBaselineRoot))
             Directory.Delete(reportsBaselineRoot, recursive: true);
         Directory.CreateDirectory(reportsBaselineRoot);
 
+        // The spot-check root is the report-baseline corpus's non-gated
+        // sibling. Clean it on every opt-in run so stale PDFs from a prior
+        // run (different --reports scope, a report that now fails) do not
+        // linger and mislead a human reviewer.
+        if (includePdf && cleanRoot && Directory.Exists(spotCheckRoot!))
+            Directory.Delete(spotCheckRoot!, recursive: true);
+
         var entries = new List<BaselineManifestEntry>(reportNames.Count);
+        var spotEntries = new List<SpotCheckManifestEntry>(includePdf ? reportNames.Count : 0);
         foreach (var name in reportNames)
         {
-            entries.Add(CaptureOne(name, reportsBaselineRoot, parametersByReport, includePdf));
+            var (gated, spot) = CaptureOne(name, reportsBaselineRoot, spotCheckRoot, parametersByReport, includePdf);
+            entries.Add(gated);
+            if (spot is not null)
+                spotEntries.Add(spot);
         }
 
         var manifest = new BaselineManifest
@@ -135,21 +177,37 @@ public sealed class ReportBaselineRunner
             manifest,
             Path.Combine(reportsBaselineRoot, "baseline-manifest.json"));
 
+        if (includePdf)
+        {
+            var spotManifest = new SpotCheckManifest
+            {
+                Database = databasePath ?? string.Empty,
+                HarvesterVersion = _harvesterVersion,
+                Reports = spotEntries
+                    .OrderBy(e => e.Name, StringComparer.Ordinal)
+                    .ToImmutableArray(),
+            };
+            Directory.CreateDirectory(spotCheckRoot!);
+            SpotCheckManifestWriter.WriteToFile(
+                spotManifest,
+                Path.Combine(spotCheckRoot!, "spot-check-manifest.json"));
+        }
+
         return manifest;
     }
 
-    private BaselineManifestEntry CaptureOne(
+    private (BaselineManifestEntry Gated, SpotCheckManifestEntry? Spot) CaptureOne(
         string reportName,
         string reportsBaselineRoot,
+        string? spotCheckRoot,
         IReadOnlyDictionary<string, IReadOnlyList<KeyValuePair<string, object?>>>? parametersByReport,
         bool includePdf)
     {
         var reportDir = Path.Combine(reportsBaselineRoot, reportName);
         // Recreate the per-report dir from scratch each capture so a
-        // re-run cannot leave stale output.pdf / aggregates.json behind
-        // when the current run's outcome differs (Captured -> Failed,
-        // Captured -> Skipped, partial-Captured this run that did not
-        // emit one of the two artifacts the prior run did, etc.).
+        // re-run cannot leave a stale aggregates.json behind when the
+        // current run's outcome differs (Captured -> Failed,
+        // Captured -> Skipped, etc.). PDFs live in spotCheckRoot, not here.
         if (Directory.Exists(reportDir))
             Directory.Delete(reportDir, recursive: true);
         Directory.CreateDirectory(reportDir);
@@ -161,24 +219,28 @@ public sealed class ReportBaselineRunner
         }
         catch (Exception ex)
         {
-            return new BaselineManifestEntry
-            {
-                Name = reportName,
-                Status = "Failed",
-                Paths = ImmutableSortedDictionary<string, string>.Empty,
-                Reason = $"ReadSpecFailed: {ex.Message}",
-            };
+            return (
+                new BaselineManifestEntry
+                {
+                    Name = reportName,
+                    Status = "Failed",
+                    Paths = ImmutableSortedDictionary<string, string>.Empty,
+                    Reason = $"ReadSpecFailed: {ex.Message}",
+                },
+                SkippedSpot(reportName, includePdf, $"ReadSpecFailed: {ex.Message}"));
         }
 
         if (string.IsNullOrWhiteSpace(spec.RecordSource))
         {
-            return new BaselineManifestEntry
-            {
-                Name = reportName,
-                Status = "Skipped",
-                Paths = ImmutableSortedDictionary<string, string>.Empty,
-                Reason = "UnboundReport",
-            };
+            return (
+                new BaselineManifestEntry
+                {
+                    Name = reportName,
+                    Status = "Skipped",
+                    Paths = ImmutableSortedDictionary<string, string>.Empty,
+                    Reason = "UnboundReport",
+                },
+                SkippedSpot(reportName, includePdf, "UnboundReport"));
         }
 
         var pathsBuilder = ImmutableSortedDictionary.CreateBuilder<string, string>(StringComparer.Ordinal);
@@ -224,53 +286,84 @@ public sealed class ReportBaselineRunner
             aggregateFailure = $"AggregateFailed: {ex.Message}";
         }
 
-        // PDF render is opt-in (--include-pdf). When off, the renderer is
-        // never invoked: the default capture is the deterministic
-        // aggregates.json only. Aggregate capture is the gate so reports
-        // that already failed deterministically do not enter the COM
-        // render path.
-        string? renderFailure = null;
-        if (aggregateFailure is null && includePdf)
+        if (aggregateFailure is not null)
         {
-            string pdfPath = Path.Combine(reportDir, "output.pdf");
-            try
-            {
-                _renderer.Render(reportName, pdfPath);
-                pathsBuilder["pdf"] = RelativeForward(pdfPath, reportsBaselineRoot);
-            }
-            catch (Exception ex)
-            {
-                renderFailure = $"RenderFailed: {ex.Message}";
-            }
+            return (
+                new BaselineManifestEntry
+                {
+                    Name = reportName,
+                    Status = "Failed",
+                    Paths = pathsBuilder.ToImmutable(),
+                    Reason = aggregateFailure,
+                },
+                SkippedSpot(reportName, includePdf, aggregateFailure));
         }
 
-        if (renderFailure is null && aggregateFailure is null)
-        {
-            return new BaselineManifestEntry
-            {
-                Name = reportName,
-                Status = "Captured",
-                Paths = pathsBuilder.ToImmutable(),
-                Reason = null,
-            };
-        }
-
-        string reason = (renderFailure, aggregateFailure) switch
-        {
-            (not null, not null) => $"{renderFailure}; {aggregateFailure}",
-            (not null, null) => renderFailure!,
-            (null, not null) => aggregateFailure!,
-            _ => "",
-        };
-
-        return new BaselineManifestEntry
+        // Aggregate capture (the gate) succeeded. The PDF visual spot-check is
+        // opt-in (--include-pdf), non-deterministic, and non-blocking: it is
+        // rendered into spotCheckRoot — NEVER the gated corpus — and its
+        // outcome is recorded only on the spot-check manifest, never on the
+        // gated entry. So a render failure leaves the report Captured.
+        var gatedEntry = new BaselineManifestEntry
         {
             Name = reportName,
-            Status = "Failed",
+            Status = "Captured",
             Paths = pathsBuilder.ToImmutable(),
-            Reason = reason,
+            Reason = null,
         };
+
+        if (!includePdf)
+            return (gatedEntry, null);
+
+        var spotReportDir = Path.Combine(spotCheckRoot!, reportName);
+        if (Directory.Exists(spotReportDir))
+            Directory.Delete(spotReportDir, recursive: true);
+        Directory.CreateDirectory(spotReportDir);
+
+        string pdfPath = Path.Combine(spotReportDir, "output.pdf");
+        try
+        {
+            _renderer.Render(reportName, pdfPath);
+            return (
+                gatedEntry,
+                new SpotCheckManifestEntry
+                {
+                    Name = reportName,
+                    Status = "Rendered",
+                    Path = RelativeForward(pdfPath, spotCheckRoot!),
+                    Reason = null,
+                });
+        }
+        catch (Exception ex)
+        {
+            return (
+                gatedEntry,
+                new SpotCheckManifestEntry
+                {
+                    Name = reportName,
+                    Status = "Failed",
+                    Path = null,
+                    Reason = $"RenderFailed: {ex.Message}",
+                });
+        }
     }
+
+    /// <summary>
+    /// Build the spot-check entry for a report whose PDF was not attempted
+    /// because its deterministic aggregate capture did not succeed (unbound,
+    /// aggregate failure, or spec-read failure). Returns <c>null</c> when PDFs
+    /// were not requested so the spot-check manifest is omitted entirely.
+    /// </summary>
+    private static SpotCheckManifestEntry? SkippedSpot(string reportName, bool includePdf, string reason)
+        => includePdf
+            ? new SpotCheckManifestEntry
+            {
+                Name = reportName,
+                Status = "Skipped",
+                Path = null,
+                Reason = reason,
+            }
+            : null;
 
     /// <summary>
     /// Returns the path of <paramref name="absolute"/> relative to
@@ -279,4 +372,25 @@ public sealed class ReportBaselineRunner
     /// </summary>
     private static string RelativeForward(string absolute, string root)
         => Path.GetRelativePath(root, absolute).Replace(Path.DirectorySeparatorChar, '/');
+
+    /// <summary>
+    /// True when <paramref name="a"/> and <paramref name="b"/> resolve to the
+    /// same directory, or one is nested under the other. Compared on
+    /// canonicalized full paths with a trailing separator so a shared name
+    /// prefix (e.g. <c>reports-baseline</c> vs <c>reports-baseline-spot-check</c>)
+    /// is NOT treated as an overlap. Ordinal-ignore-case to match Windows path
+    /// semantics (the only platform the COM capture runs on).
+    /// </summary>
+    private static bool PathsOverlap(string a, string b)
+    {
+        static string Normalize(string p)
+            => Path.GetFullPath(p)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+               + Path.DirectorySeparatorChar;
+
+        string an = Normalize(a);
+        string bn = Normalize(b);
+        return an.StartsWith(bn, StringComparison.OrdinalIgnoreCase)
+            || bn.StartsWith(an, StringComparison.OrdinalIgnoreCase);
+    }
 }

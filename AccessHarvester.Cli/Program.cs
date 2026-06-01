@@ -656,14 +656,18 @@ public static class Program
             `run` is extract + translate + enrich in one invocation.
             `generate-docs` reads a DatabaseManifest JSON and writes a markdown schema summary to
               <output-dir>/<database-slug>/schema-summary.md.
-            `report-baseline` captures RecordSource-query aggregates (and, with --include-pdf,
-              the rendered PDF) for every report in the database (or a --reports allowlist) under
+            `report-baseline` captures RecordSource-query aggregates for every report in the
+              database (or a --reports allowlist) under
               <output-root-dir>/AccessMetaData/<dbName>/reports-baseline/<report>/. aggregates.json
-              reflects the report's RecordSource result set, NOT the rendered footer expressions,
-              and is the deterministic parity ground truth. By default the PDF is NOT rendered;
-              pass --include-pdf to additionally render output.pdf for reports whose aggregates
-              captured successfully via DoCmd.OutputTo over the live COM session (a non-deterministic
-              binary for human visual review). Reports whose RecordSource needs a parameter that was
+              reflects the report's RecordSource result set, NOT the rendered footer expressions
+              (those supported footer display totals are captured separately in the DisplayTotals
+              field), and is the deterministic parity ground truth. By default the PDF is NOT
+              rendered; pass --include-pdf to additionally render output.pdf for reports whose
+              aggregates captured successfully via DoCmd.OutputTo over the live COM session — a
+              non-deterministic binary for human visual review written to the SEPARATE, non-gated
+              sibling <output-root-dir>/AccessMetaData/<dbName>/reports-baseline-spot-check/<report>/
+              (indexed by its own spot-check-manifest.json), never inside the byte-diffed corpus.
+              Reports whose RecordSource needs a parameter that was
               not supplied surface as a Failed entry (Reason "AggregateFailed: ...") in the manifest
               rather than entering the render path; supply values via --params to capture them.
               Default scope is all reports; pass --reports <name,name> to
@@ -704,9 +708,13 @@ public static class Program
                             etc. from prior runs disappear. To do an incremental partial re-harvest
                             that preserves prior categories, pass --no-clean alongside --types.
             --include-pdf   (report-baseline only) Also render each successfully aggregated
-                            report to output.pdf via DoCmd.OutputTo. Off by default: the
-                            default capture is the deterministic aggregates.json alone. The
-                            PDF is a non-deterministic binary intended for human visual review.
+                            report to output.pdf via DoCmd.OutputTo, into the non-gated
+                            reports-baseline-spot-check/ sibling (NOT the byte-diffed corpus).
+                            Off by default: the default capture is the deterministic
+                            aggregates.json alone. The PDF is a non-deterministic binary
+                            intended for human visual review only and never enters the
+                            regression gate; a render failure is non-blocking and recorded on
+                            spot-check-manifest.json without affecting the report's gated status.
             --json-status   Emit a JSON summary to stdout at end (human messages go to stderr).
                             For run/extract/translate the envelope carries provenance fields:
                             HarvesterVersion (deterministic), StartedAt (UTC ISO-8601,

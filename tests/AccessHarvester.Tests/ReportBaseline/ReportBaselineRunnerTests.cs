@@ -16,6 +16,14 @@ namespace AccessHarvester.Tests.ReportBaseline;
 /// <see cref="IReportQueryExecutor"/> so the full
 /// resolve → render → execute → compute → write → manifest path is
 /// exercised without any COM or OLE DB dependency.
+///
+/// <para>
+/// The optional PDF visual spot-check (<c>includePdf</c>) writes PDFs and a
+/// <c>spot-check-manifest.json</c> into a SEPARATE <c>spotCheckRoot</c> sibling,
+/// never into the gated <c>reports-baseline</c> root. These tests assert that
+/// the gated capture is byte-identical regardless of PDF rendering and that a
+/// render failure is non-blocking (the report stays <c>Captured</c>).
+/// </para>
 /// </summary>
 public class ReportBaselineRunnerTests
 {
@@ -73,6 +81,7 @@ public class ReportBaselineRunnerTests
     }
 
     private static string FreshRoot() => Path.Combine(Path.GetTempPath(), $"ae-runner-{Guid.NewGuid():N}");
+    private static string FreshSpotRoot() => Path.Combine(Path.GetTempPath(), $"ae-runner-spot-{Guid.NewGuid():N}");
 
     private static ReportLiveSpec BoundSpec(string name, string rs) => new()
     {
@@ -81,8 +90,21 @@ public class ReportBaselineRunnerTests
         GroupLevels = ImmutableArray<ReportGroupLevelKey>.Empty,
     };
 
+    private static SpotCheckManifest ReadSpotManifest(string spotRoot)
+    {
+        string path = Path.Combine(spotRoot, "spot-check-manifest.json");
+        Assert.True(File.Exists(path), $"spot-check-manifest.json missing at {path}");
+        return JsonSerializer.Deserialize<SpotCheckManifest>(File.ReadAllText(path))!;
+    }
+
+    private static void Cleanup(params string[] roots)
+    {
+        foreach (var r in roots)
+            if (Directory.Exists(r)) Directory.Delete(r, recursive: true);
+    }
+
     [Fact]
-    public void Run_WritesPdf_Aggregates_AndManifest_ForCapturedReport()
+    public void Run_WithIncludePdf_WritesPdfToSpotCheckSibling_NotGatedTree()
     {
         var source = new FakeSource();
         source.Specs["rptA"] = BoundSpec("rptA", "Orders");
@@ -93,29 +115,72 @@ public class ReportBaselineRunnerTests
         var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
 
         var root = FreshRoot();
+        var spot = FreshSpotRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true);
+            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true, spotCheckRoot: spot);
 
-            Assert.True(File.Exists(Path.Combine(root, "rptA", "output.pdf")));
+            // Gated tree: aggregates + manifest only, NO pdf anywhere under it.
             Assert.True(File.Exists(Path.Combine(root, "rptA", "aggregates.json")));
             Assert.True(File.Exists(Path.Combine(root, "baseline-manifest.json")));
+            Assert.False(File.Exists(Path.Combine(root, "rptA", "output.pdf")));
 
             var entry = Assert.Single(manifest.Reports);
             Assert.Equal("rptA", entry.Name);
             Assert.Equal("Captured", entry.Status);
             Assert.Null(entry.Reason);
-            Assert.Equal("rptA/output.pdf", entry.Paths["pdf"]);
             Assert.Equal("rptA/aggregates.json", entry.Paths["aggregates"]);
+            Assert.False(entry.Paths.ContainsKey("pdf"));
+
+            // PDF + spot-check manifest live in the sibling root only.
+            Assert.True(File.Exists(Path.Combine(spot, "rptA", "output.pdf")));
+            var spotEntry = Assert.Single(ReadSpotManifest(spot).Reports);
+            Assert.Equal("rptA", spotEntry.Name);
+            Assert.Equal("Rendered", spotEntry.Status);
+            Assert.Equal("rptA/output.pdf", spotEntry.Path);
+            Assert.Null(spotEntry.Reason);
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root, spot);
         }
     }
 
     [Fact]
-    public void Run_WithoutIncludePdf_WritesAggregatesOnly_AndNeverCallsRenderer()
+    public void Run_GatedTree_IsByteIdentical_WithAndWithoutIncludePdf()
+    {
+        string Render(bool includePdf)
+        {
+            var source = new FakeSource();
+            source.Specs["rptA"] = BoundSpec("rptA", "Orders");
+            source.All.Add("rptA");
+            var renderer = new FakeRenderer();
+            var executor = new FakeExecutor();
+            var service = new ReportBaselineService(executor, "v-test");
+            var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
+
+            var root = FreshRoot();
+            var spot = FreshSpotRoot();
+            try
+            {
+                runner.Run("/some.accdb", new[] { "rptA" }, root,
+                    includePdf: includePdf, spotCheckRoot: includePdf ? spot : null);
+                // The gated manifest + aggregates must not change at all.
+                return File.ReadAllText(Path.Combine(root, "baseline-manifest.json"))
+                       + "\n----\n"
+                       + File.ReadAllText(Path.Combine(root, "rptA", "aggregates.json"));
+            }
+            finally
+            {
+                Cleanup(root, spot);
+            }
+        }
+
+        Assert.Equal(Render(includePdf: false), Render(includePdf: true));
+    }
+
+    [Fact]
+    public void Run_WithoutIncludePdf_WritesAggregatesOnly_AndNeverTouchesSpotCheckRoot()
     {
         var source = new FakeSource();
         source.Specs["rptA"] = BoundSpec("rptA", "Orders");
@@ -135,8 +200,8 @@ public class ReportBaselineRunnerTests
             Assert.Equal("rptA", entry.Name);
             Assert.Equal("Captured", entry.Status);
             Assert.Null(entry.Reason);
-            // aggregates.json written; output.pdf is NOT — and the
-            // renderer was never invoked at all.
+            // aggregates.json written; the renderer was never invoked and no
+            // pdf path was recorded.
             Assert.Equal("rptA/aggregates.json", entry.Paths["aggregates"]);
             Assert.False(entry.Paths.ContainsKey("pdf"));
             Assert.True(File.Exists(Path.Combine(root, "rptA", "aggregates.json")));
@@ -145,7 +210,129 @@ public class ReportBaselineRunnerTests
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root);
+        }
+    }
+
+    [Fact]
+    public void Run_IncludePdf_WithoutSpotCheckRoot_Throws()
+    {
+        var source = new FakeSource();
+        source.Specs["rptA"] = BoundSpec("rptA", "Orders");
+        source.All.Add("rptA");
+        var renderer = new FakeRenderer();
+        var executor = new FakeExecutor();
+        var service = new ReportBaselineService(executor, "v-test");
+        var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
+
+        var root = FreshRoot();
+        try
+        {
+            Assert.Throws<ArgumentException>(() =>
+                runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true, spotCheckRoot: null));
+        }
+        finally
+        {
+            Cleanup(root);
+        }
+    }
+
+    [Fact]
+    public void Run_IncludePdf_WithSpotCheckRootOverlappingGatedRoot_Throws()
+    {
+        var source = new FakeSource();
+        source.Specs["rptA"] = BoundSpec("rptA", "Orders");
+        source.All.Add("rptA");
+        var renderer = new FakeRenderer();
+        var executor = new FakeExecutor();
+        var service = new ReportBaselineService(executor, "v-test");
+        var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
+
+        var root = FreshRoot();
+        try
+        {
+            // spotCheckRoot equal to the gated root.
+            Assert.Throws<ArgumentException>(() =>
+                runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true, spotCheckRoot: root));
+            // spotCheckRoot nested under the gated root.
+            Assert.Throws<ArgumentException>(() =>
+                runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true,
+                    spotCheckRoot: Path.Combine(root, "spot")));
+            // gated root nested under spotCheckRoot (the other direction).
+            Assert.Throws<ArgumentException>(() =>
+                runner.Run("/some.accdb", new[] { "rptA" }, Path.Combine(root, "gated"),
+                    includePdf: true, spotCheckRoot: root));
+        }
+        finally
+        {
+            Cleanup(root);
+        }
+    }
+
+    [Fact]
+    public void Run_IncludePdf_WithSiblingSharingNamePrefix_DoesNotTreatAsOverlap()
+    {
+        // reports-baseline vs reports-baseline-spot-check share a name prefix
+        // but are NOT nested; the disjointness guard must allow this (it is the
+        // exact layout the CLI produces).
+        var source = new FakeSource();
+        source.Specs["rptA"] = BoundSpec("rptA", "Orders");
+        source.All.Add("rptA");
+        var renderer = new FakeRenderer();
+        var executor = new FakeExecutor();
+        var service = new ReportBaselineService(executor, "v-test");
+        var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
+
+        string baseDir = FreshRoot();
+        string root = Path.Combine(baseDir, "reports-baseline");
+        string spot = Path.Combine(baseDir, "reports-baseline-spot-check");
+        try
+        {
+            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true, spotCheckRoot: spot);
+            Assert.Equal("Captured", Assert.Single(manifest.Reports).Status);
+            Assert.True(File.Exists(Path.Combine(spot, "rptA", "output.pdf")));
+        }
+        finally
+        {
+            Cleanup(baseDir);
+        }
+    }
+
+    [Fact]
+    public void Run_IncludePdf_ReadSpecFailure_GatedFailed_SpotCheckSkippedWithReadSpecReason()
+    {
+        var source = new FakeSource();
+        source.Throws["rptBad"] = new InvalidOperationException("opening rptBad blew up");
+        source.All.Add("rptBad");
+        var renderer = new FakeRenderer();
+        var executor = new FakeExecutor();
+        var service = new ReportBaselineService(executor, "v-test");
+        var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
+
+        var root = FreshRoot();
+        var spot = FreshSpotRoot();
+        try
+        {
+            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root, includePdf: true, spotCheckRoot: spot);
+
+            // Gated: Failed with ReadSpecFailed, renderer never reached.
+            var entry = Assert.Single(manifest.Reports);
+            Assert.Equal("Failed", entry.Status);
+            Assert.Contains("ReadSpecFailed", entry.Reason);
+            Assert.Empty(entry.Paths);
+            Assert.Empty(renderer.Calls);
+
+            // Spot-check: the same report is surfaced as Skipped with the same
+            // ReadSpecFailed reason — both manifests, no silent drop.
+            var spotEntry = Assert.Single(ReadSpotManifest(spot).Reports);
+            Assert.Equal("rptBad", spotEntry.Name);
+            Assert.Equal("Skipped", spotEntry.Status);
+            Assert.Contains("ReadSpecFailed", spotEntry.Reason);
+            Assert.Null(spotEntry.Path);
+        }
+        finally
+        {
+            Cleanup(root, spot);
         }
     }
 
@@ -166,9 +353,10 @@ public class ReportBaselineRunnerTests
         var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
 
         var root = FreshRoot();
+        var spot = FreshSpotRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptUnbound" }, root);
+            var manifest = runner.Run("/some.accdb", new[] { "rptUnbound" }, root, includePdf: true, spotCheckRoot: spot);
 
             var entry = Assert.Single(manifest.Reports);
             Assert.Equal("Skipped", entry.Status);
@@ -176,19 +364,26 @@ public class ReportBaselineRunnerTests
             Assert.Empty(entry.Paths);
             Assert.Empty(renderer.Calls);
             Assert.Empty(executor.Calls);
-            // Per-report dir is created up-front; that's fine, but the
-            // PDF + aggregates files must not exist.
             Assert.False(File.Exists(Path.Combine(root, "rptUnbound", "output.pdf")));
             Assert.False(File.Exists(Path.Combine(root, "rptUnbound", "aggregates.json")));
+            Assert.False(File.Exists(Path.Combine(spot, "rptUnbound", "output.pdf")));
+
+            // The unbound report is surfaced on the spot-check manifest as
+            // Skipped, never silently dropped.
+            var spotEntry = Assert.Single(ReadSpotManifest(spot).Reports);
+            Assert.Equal("rptUnbound", spotEntry.Name);
+            Assert.Equal("Skipped", spotEntry.Status);
+            Assert.Equal("UnboundReport", spotEntry.Reason);
+            Assert.Null(spotEntry.Path);
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root, spot);
         }
     }
 
     [Fact]
-    public void Run_RecordsRenderFailure_AsFailed_ButStillWritesAggregates()
+    public void Run_RenderFailure_IsNonBlocking_ReportStaysCaptured_SpotCheckRecordsFailure()
     {
         var source = new FakeSource();
         source.Specs["rptA"] = BoundSpec("rptA", "Orders");
@@ -200,22 +395,29 @@ public class ReportBaselineRunnerTests
         var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
 
         var root = FreshRoot();
+        var spot = FreshSpotRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true);
+            var manifest = runner.Run("/some.accdb", new[] { "rptA" }, root, includePdf: true, spotCheckRoot: spot);
 
+            // Render failure must NOT change the gated capture status.
             var entry = Assert.Single(manifest.Reports);
-            Assert.Equal("Failed", entry.Status);
-            Assert.NotNull(entry.Reason);
-            Assert.Contains("RenderFailed", entry.Reason);
-            // No PDF on render failure; aggregates still written.
+            Assert.Equal("Captured", entry.Status);
+            Assert.Null(entry.Reason);
             Assert.False(entry.Paths.ContainsKey("pdf"));
             Assert.Equal("rptA/aggregates.json", entry.Paths["aggregates"]);
             Assert.True(File.Exists(Path.Combine(root, "rptA", "aggregates.json")));
+
+            // The render failure is surfaced on the spot-check manifest only.
+            var spotEntry = Assert.Single(ReadSpotManifest(spot).Reports);
+            Assert.Equal("rptA", spotEntry.Name);
+            Assert.Equal("Failed", spotEntry.Status);
+            Assert.Contains("RenderFailed", spotEntry.Reason);
+            Assert.Null(spotEntry.Path);
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root, spot);
         }
     }
 
@@ -232,9 +434,10 @@ public class ReportBaselineRunnerTests
         var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
 
         var root = FreshRoot();
+        var spot = FreshSpotRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root, includePdf: true);
+            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root, includePdf: true, spotCheckRoot: spot);
 
             var entry = Assert.Single(manifest.Reports);
             Assert.Equal("Failed", entry.Status);
@@ -245,10 +448,17 @@ public class ReportBaselineRunnerTests
             Assert.False(entry.Paths.ContainsKey("aggregates"));
             Assert.False(File.Exists(Path.Combine(root, "rptBad", "output.pdf")));
             Assert.False(File.Exists(Path.Combine(root, "rptBad", "aggregates.json")));
+            Assert.False(File.Exists(Path.Combine(spot, "rptBad", "output.pdf")));
+
+            // Aggregate failure routes the spot-check entry to Skipped (no
+            // render attempted for a report that already failed the gate).
+            var spotEntry = Assert.Single(ReadSpotManifest(spot).Reports);
+            Assert.Equal("Skipped", spotEntry.Status);
+            Assert.Contains("AggregateFailed", spotEntry.Reason);
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root, spot);
         }
     }
 
@@ -277,7 +487,7 @@ public class ReportBaselineRunnerTests
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root);
         }
     }
 
@@ -301,7 +511,7 @@ public class ReportBaselineRunnerTests
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root);
         }
     }
 
@@ -339,7 +549,7 @@ public class ReportBaselineRunnerTests
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root);
         }
     }
 
@@ -357,9 +567,10 @@ public class ReportBaselineRunnerTests
         var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
 
         var root = FreshRoot();
+        var spot = FreshSpotRoot();
         try
         {
-            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root, includePdf: true);
+            var manifest = runner.Run("/some.accdb", new[] { "rptBad" }, root, includePdf: true, spotCheckRoot: spot);
 
             var entry = Assert.Single(manifest.Reports);
             Assert.Equal("Failed", entry.Status);
@@ -369,15 +580,16 @@ public class ReportBaselineRunnerTests
             Assert.Contains("AggregateFailed", entry.Reason);
             Assert.False(File.Exists(Path.Combine(root, "rptBad", "output.pdf")));
             Assert.False(File.Exists(Path.Combine(root, "rptBad", "aggregates.json")));
+            Assert.False(File.Exists(Path.Combine(spot, "rptBad", "output.pdf")));
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root, spot);
         }
     }
 
     [Fact]
-    public void Run_DefaultClean_RemovesStaleArtifactsFromReportsNoLongerProcessed()
+    public void Run_DefaultClean_RemovesStaleSpotCheckPdfsFromReportsNoLongerProcessed()
     {
         var source = new FakeSource();
         source.Specs["rptStale"] = BoundSpec("rptStale", "Orders");
@@ -389,30 +601,33 @@ public class ReportBaselineRunnerTests
         var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
 
         var root = FreshRoot();
+        var spot = FreshSpotRoot();
         try
         {
-            // First run: capture both (with PDF so the stale-PDF clearing
-            // assertion below has an artifact to clear).
-            runner.Run("/some.accdb", new[] { "rptStale", "rptKeep" }, root, includePdf: true);
-            Assert.True(File.Exists(Path.Combine(root, "rptStale", "output.pdf")));
-            Assert.True(File.Exists(Path.Combine(root, "rptKeep", "output.pdf")));
+            // First run: capture both with PDF so the stale-PDF clearing
+            // assertion below has an artifact to clear.
+            runner.Run("/some.accdb", new[] { "rptStale", "rptKeep" }, root, includePdf: true, spotCheckRoot: spot);
+            Assert.True(File.Exists(Path.Combine(spot, "rptStale", "output.pdf")));
+            Assert.True(File.Exists(Path.Combine(spot, "rptKeep", "output.pdf")));
 
-            // Second run scoped to rptKeep only — rptStale's stale dir + PDF
-            // must be cleared. Default cleanRoot=true is the policy that
-            // delivers this.
-            runner.Run("/some.accdb", new[] { "rptKeep" }, root, includePdf: true);
+            // Second run scoped to rptKeep only — rptStale's stale spot-check
+            // dir + PDF must be cleared (default cleanRoot=true cleans both
+            // the gated root and the spot-check sibling).
+            runner.Run("/some.accdb", new[] { "rptKeep" }, root, includePdf: true, spotCheckRoot: spot);
             Assert.False(Directory.Exists(Path.Combine(root, "rptStale")),
-                "Stale per-report dir should be removed when default cleanRoot=true.");
-            Assert.True(File.Exists(Path.Combine(root, "rptKeep", "output.pdf")));
+                "Stale gated per-report dir should be removed when default cleanRoot=true.");
+            Assert.False(Directory.Exists(Path.Combine(spot, "rptStale")),
+                "Stale spot-check per-report dir should be removed when default cleanRoot=true.");
+            Assert.True(File.Exists(Path.Combine(spot, "rptKeep", "output.pdf")));
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root, spot);
         }
     }
 
     [Fact]
-    public void Run_NoCleanRoot_PreservesUnprocessedReports_ButRecreatesProcessedReportDirs()
+    public void Run_NoCleanRoot_PreservesUnprocessedSpotCheckReports_ButRecreatesProcessedReportDirs()
     {
         var source = new FakeSource();
         source.Specs["rptStale"] = BoundSpec("rptStale", "Orders");
@@ -424,33 +639,32 @@ public class ReportBaselineRunnerTests
         var runner = new ReportBaselineRunner(source, renderer, service, "v-test");
 
         var root = FreshRoot();
+        var spot = FreshSpotRoot();
         try
         {
             // First run: capture both (with PDF).
-            runner.Run("/some.accdb", new[] { "rptStale", "rptKeep" }, root, includePdf: true);
-            Assert.True(File.Exists(Path.Combine(root, "rptStale", "output.pdf")));
-            Assert.True(File.Exists(Path.Combine(root, "rptKeep", "output.pdf")));
+            runner.Run("/some.accdb", new[] { "rptStale", "rptKeep" }, root, includePdf: true, spotCheckRoot: spot);
+            Assert.True(File.Exists(Path.Combine(spot, "rptStale", "output.pdf")));
+            Assert.True(File.Exists(Path.Combine(spot, "rptKeep", "output.pdf")));
 
-            // Plant a sentinel file inside rptKeep's dir; it must be removed
-            // by the per-report directory recreate (which always runs, even
-            // under cleanRoot:false, to keep this-run-Captured artifacts
-            // uncontaminated).
-            var sentinel = Path.Combine(root, "rptKeep", "stale.txt");
+            // Plant a sentinel inside rptKeep's spot dir; it must be removed
+            // by the per-report directory recreate (which always runs).
+            var sentinel = Path.Combine(spot, "rptKeep", "stale.txt");
             File.WriteAllText(sentinel, "stale-from-prior-run");
 
-            // Second run scoped to rptKeep with cleanRoot=false — rptStale
-            // is preserved as-is; rptKeep's sentinel is removed.
-            runner.Run("/some.accdb", new[] { "rptKeep" }, root, cleanRoot: false, includePdf: true);
-            Assert.True(Directory.Exists(Path.Combine(root, "rptStale")),
-                "Unprocessed report's prior dir should be preserved when cleanRoot=false.");
-            Assert.True(File.Exists(Path.Combine(root, "rptStale", "output.pdf")));
+            // Second run scoped to rptKeep with cleanRoot=false — rptStale is
+            // preserved as-is; rptKeep's sentinel is removed.
+            runner.Run("/some.accdb", new[] { "rptKeep" }, root, cleanRoot: false, includePdf: true, spotCheckRoot: spot);
+            Assert.True(Directory.Exists(Path.Combine(spot, "rptStale")),
+                "Unprocessed report's prior spot-check dir should be preserved when cleanRoot=false.");
+            Assert.True(File.Exists(Path.Combine(spot, "rptStale", "output.pdf")));
             Assert.False(File.Exists(sentinel),
-                "Per-report dir is always recreated for processed reports to keep current-run outputs clean.");
-            Assert.True(File.Exists(Path.Combine(root, "rptKeep", "output.pdf")));
+                "Per-report spot-check dir is recreated for processed reports to keep current-run outputs clean.");
+            Assert.True(File.Exists(Path.Combine(spot, "rptKeep", "output.pdf")));
         }
         finally
         {
-            if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+            Cleanup(root, spot);
         }
     }
 
@@ -478,7 +692,7 @@ public class ReportBaselineRunnerTests
             }
             finally
             {
-                if (Directory.Exists(root)) Directory.Delete(root, recursive: true);
+                Cleanup(root);
             }
         }
 

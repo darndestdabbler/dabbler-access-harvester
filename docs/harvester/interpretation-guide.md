@@ -696,23 +696,51 @@ not part of a normal `run`; capture it explicitly (see
   `reason: "UnboundReport"`), or `Failed` (e.g. `reason:
   "AggregateFailed: ..."` — usually a report whose query needs a
   parameter that was not supplied). Nothing is silently omitted.
-- **`<report>/aggregates.json`** — the numbers: the `RecordSource`
-  **query result-set** aggregates (row count, group subtotals, grand
-  total) from Access's own query engine — *not* the rendered footer's
-  `=Sum(...)` controls. For a parity check that is the right comparison
-  (same engine, same data); footer-only divergence shows up in the PDF
-  visual diff instead. `ParametersUsed` records the exact parameter
-  values applied.
-- **`<report>/output.pdf`** — present only when captured with
-  `--include-pdf` and the report's aggregate capture succeeded; a
-  non-deterministic binary for *human* visual review, not part of any
-  automated gate.
+- **`<report>/aggregates.json`** — the numbers. Two complementary
+  parity signals live here:
+  - **`GrandTotals` / `GroupLevels`** — the `RecordSource` **query
+    result-set** aggregates (row count, group subtotals, per-column
+    grand totals) from Access's own query engine, *not* the rendered
+    footer controls. For a column-level parity check that is the right
+    like-for-like comparison (same engine, same data).
+  - **`DisplayTotals`** — the **number a human actually reads in the
+    report footer**, for the supported closed set of footer aggregate
+    expressions. Each entry is `{Control, Section, Expression,
+    ComputedValue}`, where `Expression` is the footer text box's raw
+    `=Sum(...)` `ControlSource` and `ComputedValue` is that aggregate
+    evaluated over the same result set. Only whole-result-set
+    **report-footer `Sum`** expressions over numeric result-set columns
+    are computed (e.g. `rptInvoice`'s
+    `=Sum((1-[Discount])*[Quantity]*[UnitPrice])` → the invoice
+    subtotal). Every footer control that is *not* a pure function of
+    the flat result set — group-footer aggregates (evaluated per group
+    at runtime), `RunningSum` totals, unsupported functions like
+    `IIf`, control references like `=[txtSubTotal]+[txtTax]`, bare
+    column references — is recorded in `Skipped` with a grounded
+    `DisplayTotal*` reason, never silently dropped. This is the parity
+    artifact for the displayed total without depending on a rendered
+    PDF.
+  - `ParametersUsed` records the exact parameter values applied.
+- **`reports-baseline-spot-check/<report>/output.pdf`** — present only
+  when captured with `--include-pdf` and the report's aggregate capture
+  succeeded; written to the SEPARATE, non-gated
+  `reports-baseline-spot-check/` sibling (indexed by its own
+  `spot-check-manifest.json`), never inside the byte-diffed
+  `reports-baseline/` corpus. A non-deterministic binary for *human*
+  visual review of layout/format/grouping only — never part of any
+  automated gate. A render failure is non-blocking: it is recorded on
+  the spot-check manifest and never changes the report's gated capture
+  status, so the gated corpus is byte-identical with or without
+  `--include-pdf`.
 
 To *understand* a report, read its `ir/Reports/` node; to *check a
-migration*, compare against these baselines. (A committed golden corpus +
-automated regression gate for these baselines is deferred to the
-`harvester-report-baseline-golden-corpus` follow-up set; today they are
-produced on demand.)
+migration*, compare against these baselines: assert the ported report's
+displayed total equals `DisplayTotals[].ComputedValue` and its
+underlying query results match `GrandTotals` / `GroupLevels`. A committed
+golden corpus for the canonical report subset is checked in under
+`samples/GoldenOutput/<fixture>/reports-baseline/` and byte-diffed by the
+`CanonicalGoldenRegressionTests` gate; capture fresh baselines for other
+databases on demand (see [`install.md`](install.md)).
 
 ### 5.3 Queries (`ir/Queries/*.ir.json`)
 

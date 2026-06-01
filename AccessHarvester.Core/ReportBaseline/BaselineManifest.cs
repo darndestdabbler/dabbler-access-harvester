@@ -12,10 +12,12 @@ namespace AccessHarvester.Core.ReportBaseline;
 /// JSON is byte-stable: <see cref="Reports"/> is sorted ordinal-ascending
 /// by <see cref="BaselineManifestEntry.Name"/>, per-entry
 /// <see cref="BaselineManifestEntry.Paths"/> dictionaries are
-/// ordinal-sorted, and no wall-clock timestamps are recorded. The PDF
-/// binaries written alongside this manifest are excluded from the
-/// determinism gate's byte comparison the way <c>ExportedAt</c> is for
-/// the other tiers.
+/// ordinal-sorted, and no wall-clock timestamps are recorded. This manifest
+/// indexes only the deterministic gated corpus and never references a PDF:
+/// the optional <c>--include-pdf</c> visual spot-check writes its PDFs and a
+/// separate <see cref="SpotCheckManifest"/> into the non-gated
+/// <c>reports-baseline-spot-check/</c> sibling, so the gated capture is
+/// byte-identical whether or not PDFs were rendered.
 /// </para>
 /// </summary>
 public sealed record BaselineManifest
@@ -42,23 +44,25 @@ public sealed record BaselineManifestEntry
     public required string Name { get; init; }
 
     /// <summary>
-    /// One of <c>Captured</c>, <c>Skipped</c>, <c>Failed</c>:
+    /// One of <c>Captured</c>, <c>Skipped</c>, <c>Failed</c>. Status reflects
+    /// the deterministic aggregate capture ONLY — the optional PDF spot-check
+    /// never affects it (its outcome lives on the <see cref="SpotCheckManifest"/>):
     /// <list type="bullet">
-    ///   <item><c>Captured</c> — PDF and aggregates both written.</item>
+    ///   <item><c>Captured</c> — <c>aggregates.json</c> was written.</item>
     ///   <item><c>Skipped</c> — nothing to capture (e.g. unbound report);
     ///   see <see cref="Reason"/>.</item>
-    ///   <item><c>Failed</c> — one or both artifacts could not be produced;
-    ///   see <see cref="Reason"/>. Any artifacts that did succeed are still
-    ///   listed in <see cref="Paths"/>.</item>
+    ///   <item><c>Failed</c> — the aggregate capture could not be produced;
+    ///   see <see cref="Reason"/>.</item>
     /// </list>
     /// </summary>
     public required string Status { get; init; }
 
     /// <summary>
     /// Per-artifact paths relative to the run's reports-baseline root,
-    /// keyed by artifact kind (<c>pdf</c>, <c>aggregates</c>) and
+    /// keyed by artifact kind (only <c>aggregates</c> today) and
     /// ordinal-sorted for byte-stable JSON. Empty when no artifact was
-    /// produced.
+    /// produced. PDFs are never listed here — they live in the non-gated
+    /// spot-check sibling and are indexed by <see cref="SpotCheckManifest"/>.
     /// </summary>
     public required IReadOnlyDictionary<string, string> Paths { get; init; }
 
@@ -66,11 +70,10 @@ public sealed record BaselineManifestEntry
     /// Why a report was skipped or failed. <c>null</c> when
     /// <see cref="Status"/> is <c>Captured</c>. Skip reasons:
     /// <c>UnboundReport</c>. Failure reasons are
-    /// <c>ReadSpecFailed: &lt;message&gt;</c> (the live spec read threw
-    /// — neither artifact attempted), <c>AggregateFailed: &lt;message&gt;</c>
-    /// (the deterministic aggregate capture failed, so the optional PDF
-    /// render was skipped), and <c>RenderFailed: &lt;message&gt;</c>
-    /// (aggregates succeeded but the opt-in PDF render failed).
+    /// <c>ReadSpecFailed: &lt;message&gt;</c> (the live spec read threw)
+    /// and <c>AggregateFailed: &lt;message&gt;</c> (the deterministic
+    /// aggregate capture failed). A PDF render failure is non-blocking and
+    /// recorded on the spot-check manifest, never here.
     /// </summary>
     public string? Reason { get; init; }
 }
