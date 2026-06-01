@@ -86,6 +86,98 @@
           "escalated": false
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/consensus-editor-decision",
+      "dateTime": "2026-06-01T10:31:33.938834-04:00",
+      "description": "Resolved spec open-decision (editor hosting) via cross-provider consensus (gpt-5-4 + gemini-pro): defer classification-editor GitHub Pages hosting; confirm uat-checklist-editor for both checklists.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "analysis",
+          "costUsd": 0.0215
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "costUsd": 0.0031
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/fix-usage-checklist-pascalcase",
+      "dateTime": "2026-06-01T10:31:33.938834-04:00",
+      "description": "Fixed UsageChecklistWriter to emit object-use-checklist.json in PascalCase (split _camelOpts/_pascalOpts mirroring CleanupChecklistWriter); object-use.json stays camelCase. Updated the unit test that encoded the bug; regenerated 2 golden samples via hermetic identify-usage (casing-only).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/developer-guide",
+      "dateTime": "2026-06-01T10:31:33.938834-04:00",
+      "description": "Authored docs/harvester/reviewing-the-feedback-artifacts.md (routed draft -> gemini-pro, assembled); added interpretation-guide 3.3 mandatory AI-agent rule + copy-paste script; updated 3.1, 10, docs/README.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "documentation",
+          "costUsd": 0.0111
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/wire-editor-urls",
+      "dateTime": "2026-06-01T10:31:33.938834-04:00",
+      "description": "Wired editor URLs into the emitted READ-ME-FIRST.md template (Pipeline.cs) and both golden copies.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/build-and-test",
+      "dateTime": "2026-06-01T10:31:33.938834-04:00",
+      "description": "Incremental validation: solution build 0 errors; AccessHarvester.Pipeline.Tests (excl. COM probe) 684 passed/0 failed. COM/PDF tier intentionally not run (hermetic changes).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-06-01T10:31:33.938834-04:00",
+      "description": "Cross-provider session verification routed to gpt-5-4: VERIFIED round 1, no issues.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.104
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/next-set-recommendation",
+      "dateTime": "2026-06-01T10:31:33.938834-04:00",
+      "description": "Routed next-set recommendation (gemini-pro): sanitize-timeout investigative spike next (re-measure first); SQL migration generator as capstone after.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "costUsd": 0.005
+        }
+      ]
     }
   ]
 }
