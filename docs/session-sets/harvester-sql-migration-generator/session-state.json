@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "harvester-sql-migration-generator",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Input contract + Access->SQL Server DDL generation",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Data-load + identity + FK-safe ordering",
+      "status": "not-started"
+    },
+    {
+      "number": 3,
+      "title": "CLI subcommand + end-to-end emit + docs + closeout",
+      "status": "not-started"
+    }
+  ]
+}
