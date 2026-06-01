@@ -54,4 +54,4 @@ This session set addresses the issue of orphaned `msaccess.exe` processes and as
 ## Notes
 *   Lock-file (`.laccdb/.ldb`) cleanup decision DEFERRED: force-kill is a rare failsafe, samples open read-only, Access auto-recovers stale `.laccdb`, and no disposable per-run DBs require recreation.
 *   The orchestrator used was Claude Code (Opus 4.8) by human choice, despite a routed recommendation for Gemini Pro.
-*   Step 9 reorganization review: (to be appended at closeout).
+*   Step 9 reorganization review: no Lesson->Convention/Principle promotions qualified (the parallel-COM and "orchestrator==routing-target -> in-conversation" rules are already Conventions; the new "let the self-cleaning CLI exit rather than blunt-kill" tactic is one context and already captured by the Convention added this session). One accepted refinement: broadened the existing parallel-COM Testing Convention's fix-forward tactic in `project-guidance.md` to cover in-process `CorePipeline` (`Pipeline/`) classes, not just CLI-spawning `Cli/*CommandTests.cs`, citing this session as the confirming context.

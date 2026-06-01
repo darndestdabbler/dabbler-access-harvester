@@ -261,17 +261,29 @@ experiments only.
   "Do Not Chain Parallel xUnit Integration Tests That Both
   Drive Access COM Against The Same `.accdb`".
   *Fix-forward tactic when picking up a session whose Integration
-  test gate is red on multiple HomeHealthCare CLI classes:* apply
-  `[Collection("HomeHealthCareCom")]` to every `*CommandTests.cs`
-  under `tests/AccessHarvester.Integration/Cli/` that touches
-  `samples/HomeHealthCare.accdb` AND open the shared
+  test gate is red on multiple HomeHealthCare COM classes:* apply
+  `[Collection("HomeHealthCareCom")]` to **every Integration test
+  class that drives COM against `samples/HomeHealthCare.accdb`** —
+  whether it spawns the CLI process (`*CommandTests.cs` under
+  `tests/AccessHarvester.Integration/Cli/`) **or opens the database
+  in-process via `CorePipeline`** (the `Pipeline/` classes:
+  `CanonicalGoldenRegressionTests`, `EndToEndPipelineTests`,
+  `ManifestSchemaConformanceTests`) — AND open the shared
   `HomeHealthCareComCollection` definition (or create one if the
-  project doesn't have it yet). Done in
+  project doesn't have it yet). The contention is on ACE OLE DB's
+  file-level lock, so an in-process CorePipeline class starves a
+  CLI-spawning class just as surely as two CLI classes starve each
+  other; scoping the fix to `Cli/*CommandTests.cs` alone leaves the
+  race able to rotate to an in-process victim. Done in
   `harvester-report-baseline-capture` Session 2 (2026-05-29 —
   sixth-context confirmation of the underlying race) — knocked
-  the project's failure count from 3 to 1. Mechanical; should be
-  the orchestrator's first move before debugging individual
-  timeouts.
+  the project's failure count from 3 to 1. Broadened to the
+  in-process Pipeline classes in
+  `harvester-access-com-graceful-shutdown` Session 2 (2026-06-01)
+  after `ClassifyCommandTests` timed out at 240s in the full tier
+  run (7s in isolation) while a Pipeline class held the lock. 
+  Mechanical; should be the orchestrator's first move before
+  debugging individual timeouts.
 - **Sweep spurious `.accdb` binary diffs before staging the
   closeout commit.** `dotnet test` runs that open a sample
   `.accdb` via Access COM (read-only at the SQL/DAO level)
