@@ -2,3 +2,5 @@
 {"timestamp": "2026-06-01T19:19:26.514241Z", "session_number": 1, "event_type": "closeout_requested", "force": false, "manual_verify": false}
 {"timestamp": "2026-06-01T19:19:26.814009Z", "session_number": 1, "event_type": "closeout_succeeded", "method": "api", "chatSessionId": null, "engine": "claude-code", "provider": "anthropic", "model": "claude-opus-4-8"}
 {"timestamp": "2026-06-01T19:31:58.397838Z", "session_number": 2, "event_type": "work_started"}
+{"timestamp": "2026-06-01T19:51:06.472128Z", "session_number": 2, "event_type": "closeout_requested", "force": false, "manual_verify": false}
+{"timestamp": "2026-06-01T19:51:08.079929Z", "session_number": 2, "event_type": "closeout_failed", "failed_checks": ["pushed_to_remote", "activity_log_entry", "change_log_fresh"]}

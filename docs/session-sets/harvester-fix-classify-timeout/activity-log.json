@@ -48,6 +48,40 @@
           "costUsd": 0.0077
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/remediate",
+      "dateTime": "2026-06-01T15:51:45.376072-04:00",
+      "description": "Implemented the human-locked Option-2-scoped fix: AccessComSession latches a process-static ActivatedInThisProcess flag on COM-server activation; Program.Main routes all exits through FinalizeExit, which flushes stdout/stderr and calls kernel32 TerminateProcess(GetCurrentProcess(), exitCode) ONLY when that flag is set (scoped to COM-activating command paths, not every subcommand). Folded in E5: added DAO HRESULT 0x800A0CC6 (=3270 Property not found, captured empirically across all 93 degradations) to DaoPropertyAbsentHResults via a new internal IsDaoPropertyAbsentHResult predicate (InternalsVisibleTo) + hermetic test.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/verify-com-tier",
+      "dateTime": "2026-06-01T15:51:45.376072-04:00",
+      "description": "Build clean; 15 hermetic tests pass (6 new HRESULT + 9 reaper). Direct classify against HomeHealthCare: ~9s clean exit, exit code 0 (degradations 93->0), 13 tables classified, zero orphaned AccessHarvester.exe/msaccess.exe. Full AccessHarvester.Integration COM tier TRX-verified: 56 passed / 1 skipped (guarded GoldenCorpusRegenerator dev tool) / 0 failed, 0 zombies. The 240s-timeout target test now passes in ~7s.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/closeout",
+      "dateTime": "2026-06-01T15:51:45.377070-04:00",
+      "description": "Cross-provider session verification (gpt-5-4, session-verification) VERIFIED round 1, zero issues across all five concerns; sole non-issue maintainability caveat documented in the flag XML comment. Updated lessons-learned.md (RESOLVED note) + ROADMAP.md row to [x]; authored disposition.json, issue-logs/session-002.json ([]), ai-assignment.md Session 2 actuals, and change-log.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "purpose": "cross-provider session verification (VERIFIED r1)",
+          "costUsd": 0.111255
+        }
+      ]
     }
   ]
 }
