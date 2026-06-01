@@ -1725,6 +1725,32 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ## SanitizeCommandTests.HomeHealthCare Timeout Is A Pre-Existing Latent Issue Deserving Its Own Investigation Set
 
+> **RESOLVED (2026-06-01, `harvester-fix-classify-timeout` Sessions 1–2).**
+> The persistent offender was `classify`, not `sanitize`. Session 1 overturned
+> the value-sampling premise with evidence: the `classify` work completes in
+> **~7 s** (value sampling 0.16 s; the suspected `DISTINCT` cardinality 0.06 s
+> total). The 240 s timeout was the **CLI process never terminating** — it
+> wedged in native process shutdown (consistent with COM apartment
+> un-initialization after the Access interop) *after* writing all output, so
+> the test's `WaitForExit(240 s)` blew through. `Environment.Exit` still wedged;
+> a hard `TerminateProcess` after flushing exited cleanly in 7 s. Session 2
+> shipped the fix: a **scoped flush-then-`TerminateProcess` guard** in
+> `Program.cs` that fires only when an Access COM apartment was actually
+> activated (`AccessComSession.ActivatedInThisProcess`) — not for every
+> subcommand, which narrows the blast radius. The `classify`-against-HHC test
+> now passes in **~7 s** with the correct exit code and zero orphaned
+> `AccessHarvester.exe`/`msaccess.exe`. A folded-in collateral fix (E5) added
+> the DAO "Property not found" HRESULT (`0x800A0CC6` = error 3270) to
+> `OleDbDaoSchemaReader.DaoPropertyAbsentHResults`, eliminating 93 spurious
+> `SchemaReadError` degradations that had been forcing exit code 3 on the
+> rebuilt fixture. **Lesson for next time:** a COM-tier test "timeout" is not
+> automatically slow product compute — attribute the wall-clock to phases AND
+> confirm the process actually *exits* before assuming the work is the cost; a
+> never-terminating CLI presents identically to a slow one through
+> `WaitForExit`. See
+> [`harvester-fix-classify-timeout/root-cause-findings.md`](../session-sets/harvester-fix-classify-timeout/root-cause-findings.md).
+> The sanitize-framed history below is retained for the record.
+
 > **Re-measurement update (2026-06-01, `harvester-report-displayed-total-parity`
 > Session 2, after the COM graceful-shutdown hardening landed):** re-running the
 > two HomeHealthCare COM timeouts twice each on a Windows+Access host changed the

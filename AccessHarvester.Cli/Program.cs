@@ -1,10 +1,12 @@
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text.Json;
 using AccessHarvester.Cli.Commands;
 using AccessHarvester.Core;
 using AccessHarvester.Core.Abstractions;
+using AccessHarvester.Core.Com;
 using AccessHarvester.Pipeline.Validation;
 using AccessHarvester.Pipeline.DocGen;
 using AccessHarvester.Pipeline.Manifest;
@@ -31,21 +33,63 @@ public static class Program
     {
         // Required for Encoding.GetEncoding(1252) on .NET Core / .NET 5+.
         System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+        int exitCode;
         try
         {
-            return Dispatch(args);
+            exitCode = Dispatch(args);
         }
         catch (ArgumentException ex)
         {
             Console.Error.WriteLine($"Usage error: {ex.Message}");
             PrintUsage();
-            return 1;
+            exitCode = 1;
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Error: {ex.Message}");
-            return 2;
+            exitCode = 2;
         }
+
+        return FinalizeExit(exitCode);
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool TerminateProcess(IntPtr hProcess, uint uExitCode);
+
+    [DllImport("kernel32.dll")]
+    private static extern IntPtr GetCurrentProcess();
+
+    /// <summary>
+    /// Hard-exits the process when, and only when, this run activated an Access
+    /// COM apartment. Such a run otherwise wedges in native process shutdown
+    /// (consistent with COM apartment un-initialization following the Access
+    /// interop) AFTER all classification work and output files are written and
+    /// the exact <c>msaccess.exe</c> child has been gracefully reaped — so the
+    /// process never terminates and a downstream consumer's <c>classify</c>
+    /// (or any other Access-backed subcommand) hangs indefinitely. Root cause
+    /// and the validating probes (Environment.Exit still wedges;
+    /// <c>TerminateProcess</c> exits cleanly in ~7&#160;s with the right exit
+    /// code and no zombie) are documented in
+    /// <c>docs/session-sets/harvester-fix-classify-timeout/root-cause-findings.md</c>.
+    /// </summary>
+    /// <remarks>
+    /// Scope: the guard fires only on <see cref="AccessComSession.ActivatedInThisProcess"/>,
+    /// i.e. exactly the COM-activating command paths — NOT unconditionally for
+    /// every subcommand (parse / validate / translate / generate-docs and any
+    /// usage-error early return take the normal managed return path). The CLI's
+    /// only buffered output sinks are stdout/stderr; both are flushed before the
+    /// hard exit, and all artifact files are written synchronously by the
+    /// command before it returns, so skipping finalizers loses nothing.
+    /// </remarks>
+    private static int FinalizeExit(int exitCode)
+    {
+        if (!AccessComSession.ActivatedInThisProcess)
+            return exitCode;
+
+        Console.Out.Flush();
+        Console.Error.Flush();
+        TerminateProcess(GetCurrentProcess(), unchecked((uint)exitCode));
+        return exitCode; // unreachable: TerminateProcess does not return.
     }
 
     private static int Dispatch(string[] args)

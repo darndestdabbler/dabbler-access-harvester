@@ -14,6 +14,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Exposes internal helpers (e.g. OleDbDaoSchemaReader.IsDaoPropertyAbsentHResult)
+         to the hermetic test assembly so DAO HRESULT mappings can be asserted
+         without a live Access/COM instance. -->
+    <InternalsVisibleTo Include="AccessHarvester.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AccessHarvester.Pipeline\AccessHarvester.Pipeline.csproj" />
   </ItemGroup>
 

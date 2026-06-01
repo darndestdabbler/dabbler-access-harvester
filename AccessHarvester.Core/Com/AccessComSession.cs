@@ -24,6 +24,32 @@ public sealed class AccessComSession : IDisposable
     [DllImport("user32.dll", SetLastError = true)]
     private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
+    // Set once any Access COM apartment has been activated in THIS process.
+    // The CLI reads AccessComSession.ActivatedInThisProcess on exit to decide
+    // whether it must hard-terminate: activating Access COM interop wedges the
+    // process in native shutdown (consistent with COM apartment un-initialization)
+    // even after all managed work and output have completed and the exact
+    // msaccess.exe child has been reaped — see
+    // docs/session-sets/harvester-fix-classify-timeout/root-cause-findings.md.
+    // A run that never activated Access COM (usage error, non-COM subcommand)
+    // exits through the normal managed path. This scopes the hard-exit to the
+    // actual COM-activating code paths rather than every CLI subcommand.
+    private static volatile bool _activatedInThisProcess;
+
+    /// <summary>
+    /// True once any <see cref="AccessComSession"/> has activated an Access COM
+    /// server in the current process. Latches on first activation and never
+    /// resets (the wedge is a per-process COM-runtime condition). Read by the
+    /// CLI's exit path; harmless to read from in-process test hosts, which never
+    /// invoke the CLI's hard-exit. NOTE: because the latch is process-sticky, any
+    /// future code that embeds the CLI assembly and calls <c>Program.Main</c>
+    /// IN-PROCESS after an Access COM session has been activated would route
+    /// through the CLI's hard-exit guard and terminate its own host. The CLI exe
+    /// is the only sanctioned caller of that exit path; drive command logic
+    /// directly (as the integration tests do) when running in-process.
+    /// </summary>
+    public static bool ActivatedInThisProcess => _activatedInThisProcess;
+
     public dynamic Application { get; }
     public string DatabaseName { get; }
 
@@ -66,6 +92,13 @@ public sealed class AccessComSession : IDisposable
         var app = Activator.CreateInstance(accessType)
                   ?? throw new InvalidOperationException("Failed to instantiate Access.Application.");
         Application = app;
+
+        // An Access COM apartment is now live in this process. Latch the flag so
+        // the CLI's exit path knows it must hard-terminate to avoid the native
+        // COM-un-init shutdown wedge (see field comment above). Set it the moment
+        // activation succeeds — before OpenCurrentDatabase — so even a run that
+        // fails after this point still exits cleanly instead of wedging.
+        _activatedInThisProcess = true;
 
         // Capture the PID as early as possible — right after the COM server is created —
         // so that even a failure during OpenCurrentDatabase can be cleaned up by the

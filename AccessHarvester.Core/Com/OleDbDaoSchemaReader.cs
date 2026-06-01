@@ -531,12 +531,33 @@ public sealed class OleDbDaoSchemaReader : ISchemaReader, IDegradationReporter
     /// which DAO sometimes returns when probing properties on a field whose
     /// type has no notion of that property (e.g. <c>RowSource</c> on a
     /// plain Long column).
+    /// 0x800A0CC6 = 3270 = DAO error "Property not found." DAO returns this
+    /// (rather than 3265) when the field object exists but the named property
+    /// is simply not present in its <c>Properties</c> collection — the common
+    /// case for probing <c>Required</c> / <c>RowSource</c> on a field that
+    /// never had them set. Observed on every field of the rebuilt
+    /// <c>HomeHealthCare.accdb</c> fixture (93/93), which had been recording
+    /// each as a spurious <see cref="DegradationKind.SchemaReadError"/> and
+    /// forcing exit code 3; see
+    /// docs/session-sets/harvester-fix-classify-timeout/root-cause-findings.md (E5).
     /// </remarks>
     private static readonly HashSet<int> DaoPropertyAbsentHResults = new()
     {
         unchecked((int)0x800A0CC1),
         unchecked((int)0x800A0CB3),
+        unchecked((int)0x800A0CC6),
     };
+
+    /// <summary>
+    /// True when <paramref name="hresult"/> is a DAO HRESULT that means
+    /// "this property does not exist on this field" rather than a genuine
+    /// reader fault. This is the exact predicate the per-property
+    /// <c>catch … when</c> filters use, exposed (via InternalsVisibleTo) so the
+    /// absent-property HRESULT mapping can be asserted hermetically without a
+    /// live Access/COM instance.
+    /// </summary>
+    internal static bool IsDaoPropertyAbsentHResult(int hresult)
+        => DaoPropertyAbsentHResults.Contains(hresult);
 
     /// <summary>
     /// Reads a typed DAO property. Catches only the specific DAO HRESULTs
@@ -558,7 +579,7 @@ public sealed class OleDbDaoSchemaReader : ISchemaReader, IDegradationReporter
             dynamic prop = propObj!;
             return (bool)prop.Value;
         }
-        catch (COMException ex) when (DaoPropertyAbsentHResults.Contains(ex.HResult))
+        catch (COMException ex) when (IsDaoPropertyAbsentHResult(ex.HResult))
         {
             return null;
         }
@@ -582,7 +603,7 @@ public sealed class OleDbDaoSchemaReader : ISchemaReader, IDegradationReporter
             object? v = prop.Value;
             return v?.ToString();
         }
-        catch (COMException ex) when (DaoPropertyAbsentHResults.Contains(ex.HResult))
+        catch (COMException ex) when (IsDaoPropertyAbsentHResult(ex.HResult))
         {
             return null;
         }

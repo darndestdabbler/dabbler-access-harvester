@@ -1,7 +1,7 @@
 {
   "sessionSetName": "harvester-fix-classify-timeout",
   "createdDate": "2026-06-01T14:21:02.621632-04:00",
-  "totalSessions": 0,
+  "totalSessions": 2,
   "entries": [
     {
       "sessionNumber": 1,
@@ -29,9 +29,24 @@
       "description": "Authored root-cause-findings.md (evidence-anchored, spec premise overturned) and ai-assignment.md (routed analysis). Root cause: classify CLI process wedges in native COM un-initialization at managed shutdown after completing all work (~7s). Routed a cross-provider consensus on fix-vs-quarantine: gpt-5-4 -> Option 3 (quarantine for the bounded spike, blast-radius concern), gemini-pro -> Option 2 (hard-terminate, fixes test+consumer). Both confirmed the root cause sound. Split escalated to the human, who chose Option 2 SCOPED (flush-then-TerminateProcess on the COM command path, quarantine fallback) and folded in the E5 'Property not found' DAO HRESULT fix. Spec Session 2 + likely-root-cause-area corrected to match the evidence.",
       "status": "complete",
       "routedApiCalls": [
-        {"model": "gpt-5-4", "taskType": "analysis", "purpose": "fix-vs-quarantine consensus #1", "costUsd": 0.0519},
-        {"model": "gemini-pro", "taskType": "analysis", "purpose": "fix-vs-quarantine consensus #2", "costUsd": 0.0092},
-        {"model": "gemini-pro", "taskType": "analysis", "purpose": "ai-assignment.md authoring", "costUsd": 0.0077}
+        {
+          "model": "gpt-5-4",
+          "taskType": "analysis",
+          "purpose": "fix-vs-quarantine consensus #1",
+          "costUsd": 0.0519
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "purpose": "fix-vs-quarantine consensus #2",
+          "costUsd": 0.0092
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "purpose": "ai-assignment.md authoring",
+          "costUsd": 0.0077
+        }
       ]
     }
   ]

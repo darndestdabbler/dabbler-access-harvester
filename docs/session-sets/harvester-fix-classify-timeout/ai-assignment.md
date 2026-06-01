@@ -62,3 +62,32 @@
   recommended Session 2 stay on Claude Opus, which matches the consumer-driven
   trajectory. The cross-provider consensus split (1 quarantine / 1 fix) was
   escalated to the human per the decision-consensus rule.
+
+### Session 2 — closed 2026-06-01
+
+- **Orchestrator used:** Claude Code / Opus 4.8 (`claude-opus-4-8`), effort `high`
+  — matches the routing plan's recommendation.
+- **Routed calls (1, ~$0.111):**
+  - `session-verification` → `gpt-5-4` ($0.1113, 119.5s, complexity 66, not
+    escalated) — cross-provider review of the remediation. **VERIFIED round 1,
+    zero issues** across all five concerns.
+- **Done directly (not routed), per the plan's Step→Routing table:** the E5 HRESULT
+  fold-in + hermetic test, the scoped shutdown guard in `Program.cs` +
+  `AccessComSession` flag, and the test execution / TRX reading. These are the
+  mechanical + critical-path code tasks the plan assigned to the Opus orchestrator
+  directly. The `lessons-learned.md` / `ROADMAP.md` updates (plan Step 4 suggested
+  routing to a cheaper model for cost optimization) were authored directly — both
+  are short, high-context narrative edits tightly coupled to this session's
+  evidence, below the ~50-line route threshold, and routing `documentation` for
+  narrative prose is a known false economy (lessons-learned: use `summarization`,
+  not `documentation`, for prose; the marginal value here did not justify the call).
+- **Headline outcome:** the classify timeout is **fixed**, not quarantined — the
+  scoped flush-then-`TerminateProcess` guard (fires only on
+  `AccessComSession.ActivatedInThisProcess`) makes the target test pass in ~7s with
+  the correct exit code and zero zombies; the E5 fix drops 93 spurious degradations
+  to 0 (exit 3 → 0). Full COM tier 56 pass / 1 skip / 0 fail. The fallback
+  (Option 3 quarantine) was **not** needed.
+- **Deviations from plan:** the "scoped" requirement was realized via a
+  COM-activation flag rather than a subcommand-name allowlist — a tighter and more
+  maintainable interpretation that the gpt-5-4 verification explicitly judged a
+  faithful/better realization of the human's intent.
