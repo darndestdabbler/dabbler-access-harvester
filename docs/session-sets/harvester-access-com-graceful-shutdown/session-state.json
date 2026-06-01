@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-access-com-graceful-shutdown",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -23,9 +23,9 @@
     {
       "number": 2,
       "title": "Verify against real Access, simplify test teardown, document",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-01T09:27:49.514896-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-01T09:59:23.902516-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
