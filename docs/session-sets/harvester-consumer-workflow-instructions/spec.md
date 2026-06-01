@@ -127,7 +127,7 @@ developer can review with one click and no JSON literacy.
 
 ---
 
-## Open decision: where do the editors live? (needs a maintainer call)
+## Open decision: where do the editors live? — RESOLVED 2026-06-01 (Session 2)
 
 The two editors are inconsistently hosted today, which undercuts "one-click for
 the developer":
@@ -138,16 +138,31 @@ the developer":
 - **classification-editor** — lives **only** as `tools/classification-editor.html`
   in this repo; **not hosted**. Opens `classification.json`.
 
-**Recommendation:** host the `classification-editor` the same way (GitHub Pages,
-zero-install) so every feedback artifact has a one-click hosted editor, and have
-the docs/output reference the hosted URLs (not in-repo file paths a consumer
-won't have). Decide in Session 2:
-- (a) publish `classification-editor` to GitHub Pages (its own repo, or alongside
-  uat-checklist-editor), and
-- (b) confirm `uat-checklist-editor` is the canonical editor for **both**
-  `object-use-checklist.json` and `object-cleanup-checklist.json` (verify the
-  format matches; the consumer's run produced the `{projectName, review[…]}`
-  shape the editor expects).
+**Resolution (Session 2, by cross-provider consensus — gpt-5-4 + gemini-pro —
+recorded in `ai_router/consensus-decisions.jsonl`):**
+
+- **(a) classification-editor hosting → DEFER.** Do **not** publish
+  classification-editor to GitHub Pages now. This repo is at its Phase-4
+  "mechanical finish line"; new hosting is a new maintenance surface and is not
+  needed to complete it. The docs/output instruct the developer to download
+  `tools/classification-editor.html` and open it locally (it runs fully
+  client-side). A hosted version is logged as a deferred follow-up. (Note: a raw
+  GitHub `.html` URL is **not** a substitute — it does not render as a running
+  app, so "open locally" is the supported route, not a raw URL.)
+- **(b) uat-checklist-editor for both checklists → CONFIRMED, with a bug fix.**
+  The editor's committed schema requires **PascalCase** `{ "ProjectName",
+  "Review": [...] }`. `object-cleanup-checklist.json` was already PascalCase and
+  loaded correctly. But `object-use-checklist.json` was being serialized
+  **camelCase** (`UsageChecklistWriter` reused one camelCase options object for
+  both `object-use.json` and the checklist), so it loaded as an **empty**
+  checklist in the editor — the opposite of the spec's original premise. Session
+  2 fixed `UsageChecklistWriter` to emit the checklist in PascalCase (mirroring
+  `CleanupChecklistWriter`), updated the unit test that had encoded the bug, and
+  regenerated the two committed golden `object-use-checklist.json` samples
+  (hermetic — `identify-usage` reads `ir/` with no COM dependency; the
+  usage/cleanup golden files are not under the golden-corpus regression gate).
+  After the fix, uat-checklist-editor is confirmed canonical for **both**
+  checklists.
 
 ## Finalization checklist (maintainer) — completed 2026-06-01
 

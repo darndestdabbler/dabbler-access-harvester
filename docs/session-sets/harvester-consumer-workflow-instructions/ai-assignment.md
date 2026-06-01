@@ -15,6 +15,14 @@ low
 | 6 | Run determinism and schema tests to confirm correctness. | `local/agent-executor` |
 
 ### Actuals (filled after the session)
+Orchestrator: claude-code / Opus 4.8 @ effort=medium (Session 1, 2026-06-01).
+Workflow section authored in-conversation by the Opus orchestrator (full context
+on the exact `--in` path and the C# template literal). Cross-provider verification
+routed to gpt-5-4 (OpenAI): ISSUES_FOUND round 1 (one Minor self-contradiction,
+one Major premature-claim), VERIFIED round 2 after fixes. The "balanced-writer for
+prose" recommendation was not used because the section's value was correctness on
+exact details, which the orchestrator already held — consistent with the
+"Opus authors synthesis docs in-conversation" convention.
 
 ## Session 2: Author Artifact Review Guide and Wire Editor Links
 ### Recommended orchestrator
@@ -31,3 +39,30 @@ moderate
 | 4 | Draft the code/JSON modifications to wire the chosen editor URLs into the output. | `medium/balanced-writer` |
 | 5 | Apply all file changes. | `local/agent-executor` |
 | 6 | Verify the new document's clarity and the correctness of the wired links. | `medium/balanced-writer` |
+
+### Actuals (filled after the session)
+Orchestrator: claude-code / Opus 4.8 @ effort=medium (2026-06-01).
+
+The "editor-hosting open decision" was escalated to **cross-provider consensus**
+(gpt-5-4 + gemini-pro, bias-cautions preamble; journal in
+`ai_router/consensus-decisions.jsonl`) rather than AskUserQuestion — both
+providers agreed on every point, so no human call was needed. Outcomes: (a) defer
+classification-editor GitHub Pages hosting, document local-open; (b) confirm
+uat-checklist-editor for both checklists, after fixing a discovered bug.
+
+Scope expanded beyond pure documentation: investigation of open-decision (b)
+("verify the format matches") surfaced that `object-use-checklist.json` was
+serialized camelCase and would load empty in the PascalCase-only editor. Fixed
+`UsageChecklistWriter` (mechanical, hermetic — handled directly, ~15 lines),
+updated the unit test that encoded the bug, regenerated the two golden samples via
+the hermetic `identify-usage` path.
+
+Routing actuals:
+- Developer guide draft → `route(documentation)` → gemini-pro ($0.0111); the
+  routed draft's own auto-verification (gpt-5-4-mini) flagged two minor misses
+  (omit `sanitize`, missing "same format" note) which were folded into the final
+  hand-assembled file.
+- Next-set recommendation → `route(analysis)` → gemini-pro ($0.0034).
+- Consensus → 2× `query(analysis)` → gpt-5-4 ($0.0215) + gemini-pro ($0.0031).
+- §3.3 AI-agent instruction + READ-ME-FIRST wiring authored in-conversation
+  (exact URLs / mandatory-rule phrasing the orchestrator held).

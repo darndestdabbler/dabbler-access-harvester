@@ -1761,3 +1761,66 @@ reference; if it proves out twice in *this* repo, propose promotion to
   `AccessHarvester.Integration` will reliably fail one test against
   HomeHealthCare; do not let that mask a real regression by getting
   numb to the red.
+
+## Run Tests Incrementally By Project; Isolate The Access-COM / PDF Integration Tests
+
+- **Context:** End-of-session validation (Step 5). The default
+  instinct — and the literal reading of the CLAUDE.md "Building &
+  Testing" snippet — is `dotnet test` against the whole solution.
+  First raised by the human on 2026-06-01 during
+  `harvester-consumer-workflow-instructions` Session 2, after noting
+  that "several other AI instances have had to kill the tests —
+  especially the ones related to the newest PDF-extraction
+  functionality."
+- **Failure or friction:** A whole-solution `dotnet test` pulls in the
+  fragile Access-COM-driven suites — `AccessHarvester.Integration/`
+  (all CLI + pipeline integration tests), the report-baseline / PDF
+  tests in `AccessHarvester.Tests/ReportBaseline/*` and
+  `ReportBaselineCommandIntegrationTests`, the `Synthetic*Integration`
+  tests, and `AccessHarvester.Pipeline.Tests/Cleanup/ComDateMaximaProbeTests`.
+  These drive Microsoft Access over COM; they hang (the residual
+  sanitize-against-HomeHealthCare timeout documented in the entry
+  above, COM cleanup hangs, OLE DB pool exhaustion, the parallel-COM
+  race) and leave orphan `testhost.exe` / `dotnet.exe` / `conhost.exe`
+  that survive a `Ctrl-C` / TaskStop of the parent. Multiple
+  orchestrators have burned wall-clock waiting on a buffered
+  `dotnet test -v q` that never returns, then had to hunt and kill the
+  zombies. In Session 2 the whole-solution run was killed after it
+  stalled on the COM path; the relevant hermetic project
+  (`AccessHarvester.Pipeline.Tests`, 684 tests) then ran green in
+  **6 seconds**.
+- **Lesson:** Match the test scope to the change surface, and run
+  hermetic projects incrementally rather than firing the whole
+  solution at once. The hermetic projects (parser, resolver, grammar,
+  `Pipeline.Tests` minus the COM probe, schema/manifest unit tests)
+  run anywhere in seconds and cover the vast majority of logic. The
+  Access-COM / PDF integration tests are a separate, fragile tier:
+  run them deliberately, by themselves, only when a change actually
+  touches the COM extraction / report-baseline / PDF surface — and
+  expect to babysit them.
+- **Action for future sessions:**
+  1. **Classify the change first.** If the session's edits are
+     hermetic (parsers, enrichers, writers, docs, static templates,
+     golden-sample regen), validate with `dotnet build` of the
+     solution plus `dotnet test` of only the affected hermetic
+     project(s). Do **not** run `AccessHarvester.Integration` or the
+     `AccessHarvester.Tests` ReportBaseline/Synthetic classes for a
+     hermetic change.
+  2. **Exclude the COM probe even within a hermetic project:**
+     `dotnet test tests/AccessHarvester.Pipeline.Tests/... --filter "FullyQualifiedName!~ComDateMaxima"`.
+  3. **Run the Access-COM / PDF tier separately and last,** only when
+     the change touches that surface, and only on a host with Access
+     installed. Treat a hang as expected fragility, not a mystery.
+  4. **When a COM run hangs,** stop the task, then clear the orphans
+     with `.venv/Scripts/python.exe -m ai_router.utils
+     cleanup-dev-orphans --match-path dabbler-access-harvester`, and
+     `taskkill //PID <id> //T //F` any residual `testhost.exe` /
+     `dotnet.exe` (standing authorization to kill these zombies is on
+     record). Never run build and test in parallel against the same
+     worktree (see the seeded lesson above) — that compounds the
+     lock/COM contention.
+  5. If a second session independently adopts this staged-execution
+     tactic, propose promoting it to a Convention in
+     `project-guidance.md` and consider encoding the project split as
+     named test "lanes" (a hermetic lane vs. a COM/PDF lane) the
+     CLAUDE.md "Building & Testing" section points at directly.

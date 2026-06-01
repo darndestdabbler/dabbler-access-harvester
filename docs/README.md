@@ -25,6 +25,12 @@
   Decisions of record (doc-home, length budget, section ordering) plus
   the outline the body follows. Read when a body section's framing is in
   question or when revising the guide.
+- [`harvester/reviewing-the-feedback-artifacts.md`](harvester/reviewing-the-feedback-artifacts.md) —
+  Plain-language developer guide for the human-review step: per artifact
+  (`object-use-checklist.json`, `object-cleanup-checklist.json`,
+  `classification.json`), what it is, what the developer does, and the
+  zero-install editor that opens it. The AI-agent-facing rule for
+  delivering this guidance is interpretation-guide §3.3.
 - [`schema/v0-vs-tiers.md`](schema/v0-vs-tiers.md) — Field-by-field
   reference for the v0 schema and the three-tier model (`raw/`, `kb/`,
   `ir/`). Read for "what does this field hold?" questions.

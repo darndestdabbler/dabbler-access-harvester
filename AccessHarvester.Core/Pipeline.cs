@@ -616,6 +616,23 @@ public sealed class Pipeline
             "",
             "Interpretation guide (start at section 3.1):",
             "https://github.com/darndestdabbler/dabbler-access-harvester/blob/main/docs/harvester/interpretation-guide.md",
+            "",
+            "## Developer review: opening the checklists",
+            "",
+            "The `*-checklist.json` files are the human-review surface. When you",
+            "present them, do NOT hand over raw JSON — tell the developer what",
+            "each file is, what to do, and which zero-install editor opens it",
+            "(interpretation guide section 3.3 is the mandatory instruction):",
+            "",
+            "- `object-use-checklist.json` and `object-cleanup-checklist.json`",
+            "  open in the uat-checklist-editor (hosted, zero-install):",
+            "  https://darndestdabbler.github.io/uat-checklist-editor/",
+            "- `classification.json` (from `classify` / `sanitize`) opens in the",
+            "  classification-editor — not hosted yet; the developer downloads",
+            "  and opens `tools/classification-editor.html` locally.",
+            "",
+            "Plain-language developer guide for the review step:",
+            "https://github.com/darndestdabbler/dabbler-access-harvester/blob/main/docs/harvester/reviewing-the-feedback-artifacts.md",
             "");
 
     // Loads form/report specs from ir/ and merges with parser outputs

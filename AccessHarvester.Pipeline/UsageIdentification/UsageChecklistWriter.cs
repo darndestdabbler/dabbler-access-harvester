@@ -13,11 +13,21 @@ namespace AccessHarvester.Pipeline.UsageIdentification;
 /// </summary>
 public static class UsageChecklistWriter
 {
-    private static readonly JsonSerializerOptions _jsonOpts = new()
+    // object-use.json is the schema-aligned camelCase findings document.
+    private static readonly JsonSerializerOptions _camelOpts = new()
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    };
+
+    // object-use-checklist.json must be PascalCase so it loads in the
+    // uat-checklist-editor (its schema requires {"ProjectName","Review":[...]}).
+    // Mirrors CleanupChecklistWriter's _pascalOpts for object-cleanup-checklist.json.
+    private static readonly JsonSerializerOptions _pascalOpts = new()
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
     /// <summary>Writes both output files adjacent to <paramref name="outputDir"/>.</summary>
@@ -39,7 +49,7 @@ public static class UsageChecklistWriter
             findings.ExcludedObjects,
             findings.Objects.Select(ToJsonFinding).ToArray());
 
-        string json = JsonSerializer.Serialize(doc, _jsonOpts);
+        string json = JsonSerializer.Serialize(doc, _camelOpts);
         File.WriteAllText(path, json, System.Text.Encoding.UTF8);
     }
 
@@ -80,7 +90,7 @@ public static class UsageChecklistWriter
     private static void WriteChecklist(ObjectUseFindings findings, string path)
     {
         var doc = BuildChecklist(findings);
-        string json = JsonSerializer.Serialize(doc, _jsonOpts);
+        string json = JsonSerializer.Serialize(doc, _pascalOpts);
         File.WriteAllText(path, json, System.Text.Encoding.UTF8);
     }
 

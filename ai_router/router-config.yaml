@@ -17,7 +17,7 @@
 #                         this, config.py prints a warning at load
 #                         time (does not block execution).
 metadata:
-  pricing_reviewed: "2026-04-20"
+  pricing_reviewed: "2026-06-01"
   review_frequency_days: 30
 
 # --- Provider Configuration ---
@@ -78,8 +78,11 @@ models:
     tier: 1
     is_enabled: true
     is_enabled_as_verifier: true
-    input_cost_per_1m: 0.15
-    output_cost_per_1m: 0.60
+    # 2026-06-01 review: standard paid-tier text pricing is $0.30/$2.50.
+    # The previous $0.15/$0.60 was the preview-era non-thinking rate
+    # ($0.15 is now the Batch/Flex input rate, not standard interactive).
+    input_cost_per_1m: 0.30
+    output_cost_per_1m: 2.50
     max_context_tokens: 1048576
     max_output_tokens: 65536
     system_prompt_file: prompt-templates/system-prompts.md
@@ -135,8 +138,10 @@ models:
     tier: 3
     is_enabled: true
     is_enabled_as_verifier: true
-    input_cost_per_1m: 15.00
-    output_cost_per_1m: 75.00
+    # 2026-06-01 review: Opus 4.6/4.7 list at $5/$25 — the 67% cut landed
+    # at Opus 4.5. The previous $15/$75 was the legacy Opus 4/4.1 rate.
+    input_cost_per_1m: 5.00
+    output_cost_per_1m: 25.00
     max_context_tokens: 200000
     max_output_tokens: 32000
     system_prompt_file: prompt-templates/system-prompts.md

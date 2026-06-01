@@ -109,7 +109,9 @@ individual record. §3.1 is the **end-to-end workflow** — the sequence
 of harvester subcommands that turns a raw `run` into a classified,
 human-reviewable picture of the database, and the one mistake (the
 `--in` target) that silently produces empty output. §3.2 is the
-**reading order** within a single run's output once you have it.
+**reading order** within a single run's output once you have it. §3.3 is
+the **mandatory rule** for explaining the feedback artifacts to the
+developer rather than handing over raw JSON.
 
 ### 3.1 The canonical consumer workflow: run → feedback tools → developer review
 
@@ -154,11 +156,11 @@ checklists — `object-use-checklist.json` and
 `object-cleanup-checklist.json` — are the human-review surface. Present
 them to the developer, collect the answers, and treat the annotated
 result as the **authoritative statement of intent** for any downstream
-migration or modernisation. A forthcoming developer-facing guide (this
-set's Session 2) will explain each artifact in plain language and name
-the zero-install editor that opens it; until it lands, an agent should
-still tell the developer, in plain language, what each checklist is and
-how to act on it — never just hand over a raw JSON file.
+migration or modernisation. Do not just hand over a raw JSON file:
+§3.3 below is the mandatory instruction for how an agent explains each
+artifact and points the developer at the editor that opens it, and
+[`reviewing-the-feedback-artifacts.md`](reviewing-the-feedback-artifacts.md)
+is the plain-language developer guide you direct them to.
 
 ```bash
 # The per-database base dir produced by `run` is the dir that CONTAINS
@@ -253,6 +255,61 @@ is the canonical "what does this UI surface depend on" answer; the
 manifest's `RowSourceSpecs` (for combo / list controls) and the
 per-query `ir/` file (for the form's main `RecordSource`) carry the
 edges.
+
+### 3.3 Always explain the feedback artifacts to the developer (mandatory)
+
+Whenever you run a feedback tool (`identify-usage`, `identify-cleanup`,
+or `classify` / `sanitize`), you **must not** simply hand the developer
+a raw JSON file. For each artifact you produce, tell the developer, in
+plain language: **(1)** what the file is, **(2)** exactly what they do
+with it, and **(3)** the URL or local path of the zero-install editor
+that opens it. The full developer-facing reference is
+[`reviewing-the-feedback-artifacts.md`](reviewing-the-feedback-artifacts.md);
+point them at it and summarise the relevant rows.
+
+The editors and the artifacts they open:
+
+- **`object-use-checklist.json`** and **`object-cleanup-checklist.json`**
+  → the **uat-checklist-editor**, hosted zero-install at
+  <https://darndestdabbler.github.io/uat-checklist-editor/>. Both files
+  share that editor and the same PascalCase
+  `{ "ProjectName", "Review": [...] }` format. The developer ticks
+  `Passes` / writes `Feedback` per item and saves; the answers travel
+  back inside the same file.
+- **`classification.json`** (from `classify` / `sanitize`) → the
+  **classification-editor**, which is **not hosted** today: the
+  developer downloads [`tools/classification-editor.html`](../../tools/classification-editor.html)
+  and opens it locally (it runs fully client-side). Do not point them at
+  a raw GitHub `.html` URL — it will not render as a running app.
+- **`object-use.json`** and **`object-cleanup.json`** are the
+  machine-readable findings for *you*, the agent — there is no developer
+  editor for them; read them directly and do not ask the developer to.
+
+A copy-paste script you can adapt when you deliver the checklists (fill
+in the bracketed counts from the tool's own output):
+
+> I ran the harvester's usage and cleanup classifiers on your database.
+> They produced two review files for you — you don't need to read any
+> JSON.
+>
+> 1. **`object-use-checklist.json`** — I classified how each of
+>    [N] objects is used. For the [M] where I wasn't sure, I left you a
+>    question. Open this file in the checklist editor at
+>    <https://darndestdabbler.github.io/uat-checklist-editor/> (click
+>    *Open JSON*), answer the questions, tick the ones you confirm, and
+>    Save. In Chrome/Edge it saves in place; in Firefox it downloads a
+>    copy you send back to me.
+> 2. **`object-cleanup-checklist.json`** — [K] objects look possibly
+>    unused. Open it in the **same** editor and, for each, confirm keep
+>    or remove (tick *Passes* or write a note in *Feedback*), then Save.
+>
+> Whatever you mark is what I'll treat as the final word on intent.
+> Anything left blank I treat as "not reviewed yet."
+
+If you also ran `classify` / `sanitize`, add: *I produced
+`classification.json` for column data-sensitivity. Download
+`tools/classification-editor.html` from the repo, open it in your
+browser, load that file, set the category per column, and Save.*
 
 ---
 
@@ -1177,6 +1234,10 @@ this guide and needs the next stop without leaving the file:
   documents the v0 schema and the three-tier model; [`docs/schema/v1-adr.md`](../schema/v1-adr.md)
   carries the v1 architecture decision record.
 - **IR shape for forms and reports specifically.** [`docs/ir-schema-forms-reports.md`](../ir-schema-forms-reports.md).
+- **Walking a developer through the review artifacts.** [`docs/harvester/reviewing-the-feedback-artifacts.md`](reviewing-the-feedback-artifacts.md) —
+  the plain-language guide you direct a developer to when presenting the
+  `*-checklist.json` / `classification.json` files (see §3.3 for the
+  agent-facing rule).
 - **Running the harvester across many databases.** [`docs/harvester/batch-operations.md`](batch-operations.md) —
   multi-DB layout, `--clean` / `--no-clean`, the cross-DB roll-up
   index, MSACCESS / RCW hygiene, and the `--json-status`

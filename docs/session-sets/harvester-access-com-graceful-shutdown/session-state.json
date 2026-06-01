@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "harvester-access-com-graceful-shutdown",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Harden AccessComSession with PID capture + force-kill failsafe (hermetic)",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Verify against real Access, simplify test teardown, document",
+      "status": "not-started"
+    }
+  ]
+}

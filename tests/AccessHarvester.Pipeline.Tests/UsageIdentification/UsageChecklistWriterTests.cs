@@ -156,9 +156,17 @@ public class UsageChecklistWriterTests
             UsageChecklistWriter.Write(SampleFindings(), tempDir);
             string json = File.ReadAllText(Path.Combine(tempDir, "object-use-checklist.json"));
             using var doc = JsonDocument.Parse(json);
-            Assert.True(doc.RootElement.TryGetProperty("review", out var review));
+            // The checklist must be PascalCase to load in the uat-checklist-editor
+            // (its schema requires {"ProjectName","Review":[...]}). A camelCase
+            // "review" key would load as an empty checklist. See CleanupChecklistWriter.
+            Assert.False(doc.RootElement.TryGetProperty("review", out _),
+                "object-use-checklist.json must not use camelCase 'review' — the editor requires PascalCase 'Review'.");
+            Assert.True(doc.RootElement.TryGetProperty("ProjectName", out _));
+            Assert.True(doc.RootElement.TryGetProperty("Review", out var review));
             Assert.Equal(JsonValueKind.Array, review.ValueKind);
             Assert.Equal(2, review.GetArrayLength());
+            Assert.True(review[0].TryGetProperty("FunctionalArea", out _));
+            Assert.True(review[0].TryGetProperty("Passes", out _));
         }
         finally
         {
