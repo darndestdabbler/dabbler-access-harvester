@@ -1725,6 +1725,21 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ## SanitizeCommandTests.HomeHealthCare Timeout Is A Pre-Existing Latent Issue Deserving Its Own Investigation Set
 
+> **Re-measurement update (2026-06-01, `harvester-report-displayed-total-parity`
+> Session 2, after the COM graceful-shutdown hardening landed):** re-running the
+> two HomeHealthCare COM timeouts twice each on a Windows+Access host changed the
+> picture. `SanitizeCommandTests.HomeHealthCare_sanitize...` FAILED once at its
+> 120s budget in the full-tier batch but PASSED in **0.5s** on a targeted retry —
+> it is now an **intermittent contention flake, not a persistent timeout** (the
+> COM-graceful-shutdown work likely resolved the persistent part as a side
+> effect). `ClassifyCommandTests.HomeHealthCare_classify_emits_schema_conformant_json`
+> timed out at **240s in both** the batch run AND the targeted retry — it is the
+> **persistent, reproducible** offender (classify value-samples every non-key
+> column across hundreds of tables). So the investigation set should be **scoped
+> to `classify`**, not sanitize; the routed next-set recommendation names it
+> `harvester-fix-classify-timeout`. The original (sanitize-framed) analysis below
+> predates the hardening and is retained for history.
+
 - **Context:** `harvester-report-baseline-capture` Session 2 (2026-05-29)
   observed it in passing while running the full solution test suite.
   `AccessHarvester.Integration.Cli.SanitizeCommandTests.HomeHealthCare_sanitize_against_synthesized_classification_emits_csv_and_report`
@@ -1763,6 +1778,17 @@ reference; if it proves out twice in *this* repo, propose promotion to
   numb to the red.
 
 ## Run Tests Incrementally By Project; Isolate The Access-COM / PDF Integration Tests
+
+> **Promoted to `project-guidance.md` → Conventions → Testing Conventions**
+> on 2026-06-01 (after `harvester-report-displayed-total-parity` Session 2
+> independently adopted the staged execution — AccessHarvester.Tests →
+> Integration → 8 hermetic projects run separately, TRX-as-truth, WMI-reap —
+> the second-context trigger this lesson's action #5 named). Retained here as
+> the action-detail reference (per-project `--filter` recipes, orphan-cleanup
+> commands); the rule itself is now a Convention. The promoted form also folds
+> in the TRX-as-truth signal and the WMI `Win32_Process.Terminate` reap, which
+> Session 2 confirmed is what actually clears a COM-RPC-wedged `testhost` that
+> `taskkill` / `Stop-Process` cannot.
 
 - **Context:** End-of-session validation (Step 5). The default
   instinct — and the literal reading of the CLAUDE.md "Building &

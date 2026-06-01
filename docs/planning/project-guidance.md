@@ -328,6 +328,35 @@ experiments only.
   [`docs/access-com-zombie-cleanup.md`](../access-com-zombie-cleanup.md)
   (added by the maintainer 2026-06-01; implemented in
   `harvester-access-com-graceful-shutdown` Sessions 1-2).
+- **Run tests incrementally by project; isolate the Access-COM / PDF
+  integration tier, and read the TRX (not the wrapper) for truth.**
+  Do not fire a whole-solution `dotnet test`. Classify the change: a
+  hermetic change (parsers, enrichers, writers, docs, golden-sample
+  regen) validates with `dotnet build` of the solution plus
+  `dotnet test` of only the affected hermetic project(s); the
+  Access-COM / PDF tier (`AccessHarvester.Integration`, the
+  `ReportBaseline`/`Synthetic*` COM classes in `AccessHarvester.Tests`,
+  `Pipeline.Tests/Cleanup/ComDateMaximaProbeTests`) is run deliberately,
+  by itself, last, and only when the change touches that surface — on a
+  host with Access installed, expecting to babysit it. For a COM run,
+  pass a TRX logger (`--logger "trx;LogFileName=..."`) and read the TRX
+  `<Counters>` for pass/fail: the `dotnet test` wrapper frequently hangs
+  *after* xUnit has finished and written the TRX (a COM-teardown stall),
+  so the wrapper's exit is not a reliable completion signal. When the
+  wrapper hangs (or a COM test wedges), reap the orphaned `testhost.exe`
+  / `msaccess.exe` / `AccessHarvester.exe` with WMI
+  `Get-CimInstance Win32_Process | Invoke-CimMethod -MethodName Terminate`
+  — a COM-RPC-wedged `testhost` does not respond to `taskkill` /
+  `Stop-Process`, but WMI `Terminate` reaps it (standing authorization to
+  kill these zombies is on record). Confirmed in two contexts:
+  `harvester-consumer-workflow-instructions` Session 2 (2026-06-01,
+  original) and `harvester-report-displayed-total-parity` Session 2
+  (2026-06-01, staged AccessHarvester.Tests → Integration → 8 hermetic
+  projects separately, TRX-as-truth, WMI-reap throughout). Action-detail
+  reference (including the per-project `--filter` recipes and the
+  `cleanup-dev-orphans` path) is preserved in `lessons-learned.md` →
+  "Run Tests Incrementally By Project; Isolate The Access-COM / PDF
+  Integration Tests".
 
 ### Workflow Expectations
 
