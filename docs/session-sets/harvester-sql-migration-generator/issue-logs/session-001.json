@@ -1,0 +1,30 @@
+[
+  {
+    "severity": "Major",
+    "location": "AccessHarvester.Pipeline/Migration/SqlServerDdlGenerator.cs",
+    "summary": "SQL assembly used AppendLine() (Environment.NewLine), so output was not byte-stable across OSes.",
+    "fix": "Introduced a fixed NL='\\n' constant + Line() helper; all script assembly now emits explicit LF. Added a test asserting no CRLF in output.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Major",
+    "location": "AccessHarvester.Pipeline/Migration/DefaultValueTranslator.cs",
+    "summary": "Arbitrary #...# date literals were quoted blindly, risking silent locale-dependent meaning changes.",
+    "fix": "#...# is now translated only when the inner value matches a strict ISO date/date-time regex; otherwise returns false (omitted + flagged). Added ISO-success and locale-ambiguous-failure tests.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Major",
+    "location": "tests/AccessHarvester.Pipeline.Tests/Migration/MigrationDdlGeneratorTests.cs",
+    "summary": "Hermetic tests missed several implemented branches/paths (binary/varbinary, missing-column FK drop, duplicate FK naming, identifier escaping; sanitize contract under-pinned).",
+    "fix": "Added type-map InlineData for binary(9)/varbinary(17 sized+max); added FK missing-column-drop, duplicate-FK-name, identifier-escaping, and LF-newline tests; extended SanitizeCsvContractTests to pin RFC4180 quoting, header row, and file extension.",
+    "status": "fixed"
+  },
+  {
+    "severity": "Minor",
+    "location": "AccessHarvester.Pipeline/Migration/SqlServerDdlGenerator.cs",
+    "summary": "Empty-FieldPairs relationship was silently skipped; CompareDegradations ignored Reason (unstable order for same Table/Column/Kind).",
+    "fix": "Empty-FieldPairs relationships now produce a ForeignKeyDropped degradation; CompareDegradations now adds Reason as a final tiebreaker for a total order.",
+    "status": "fixed"
+  }
+]

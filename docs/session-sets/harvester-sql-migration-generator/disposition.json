@@ -1,0 +1,37 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 3 complete. Delivered the Session-1 input contract + Access->SQL Server DDL generation surface in a new AccessHarvester.Pipeline/Migration/ feature: a small MigrationInputs model + a thin migration-facing IR reader (MigrationIrReader, reads ir/Tables + ir/Relationships from structured field metadata, NOT by re-parsing the reconstructed Ddl string); SqlServerTypeMapper (Access DAO type -> SQL Server type per the data-classification-plan section 8 / SSMA map, with multi-value/Attachment + unknown codes flagged as unmappable degradations and Numeric/Decimal as an assumed-precision note); DefaultValueTranslator (Date()/Now()/True/False/Yes/No/numeric/double-quoted-string, plus strict-ISO #...# only); SqlServerDdlGenerator (CREATE TABLE + types/nullability/translated-defaults/IDENTITY/PK, then post-CREATE ALTER TABLE FOREIGN KEYs cross-checked against surviving columns, with honest degradation flagging and fixed-LF byte determinism); SanitizeCsvContract (the sanitize CSV input contract, pinned against CsvWriter). Stop-rule re-confirmed against the real committed HomeHealthCare + NorthwindDevEdition golden IR by a hermetic test: the only unmappable columns are 2 Attachment/multi-value fields (honest degradations) -> the stop-rule does not fire. Build green; AccessHarvester.Pipeline.Tests = 743 hermetic tests pass (0 failed, 0 skipped), incl. ~50 new Migration cases + the fixture-coverage stop-rule test. Cross-provider verification: gpt-5-4 R1 ISSUES_FOUND (3 Major: platform-dependent newlines; unsafe #...# default translation; test-coverage gaps) -> all fixed in-session + 2 minor honesty/determinism fixes -> R2 VERIFIED with no regressions.",
+  "files_changed": [
+    "AccessHarvester.Pipeline/Migration/MigrationModel.cs",
+    "AccessHarvester.Pipeline/Migration/MigrationDegradation.cs",
+    "AccessHarvester.Pipeline/Migration/SqlServerTypeMapper.cs",
+    "AccessHarvester.Pipeline/Migration/DefaultValueTranslator.cs",
+    "AccessHarvester.Pipeline/Migration/MigrationIrReader.cs",
+    "AccessHarvester.Pipeline/Migration/SanitizeCsvContract.cs",
+    "AccessHarvester.Pipeline/Migration/SqlServerDdlGenerator.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Migration/MigrationDdlGeneratorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Migration/MigrationFixtureCoverageTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Migration/SanitizeCsvContractTests.cs",
+    "docs/session-sets/harvester-sql-migration-generator/ai-assignment.md",
+    "docs/session-sets/harvester-sql-migration-generator/activity-log.json",
+    "docs/session-sets/harvester-sql-migration-generator/session-state.json",
+    "docs/session-sets/harvester-sql-migration-generator/session-events.jsonl",
+    "docs/session-sets/harvester-sql-migration-generator/session-reviews/session-001.md",
+    "docs/session-sets/harvester-sql-migration-generator/session-reviews/session-001.round-2.md",
+    "docs/session-sets/harvester-sql-migration-generator/issue-logs/session-001.json",
+    "docs/session-sets/harvester-sql-migration-generator/disposition.json"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 (data-load + FK-safe topological ordering with cycle detection + SET IDENTITY_INSERT per preserveAutonumber) is algorithmic and builds directly on this session's generator; the routed ai-assignment.md recommends Opus at high effort. Re-using the OleDbRowSource caveat from lessons-learned: do NOT extend OleDbRowSource for cross-table transactional reads."
+    }
+  },
+  "blockers": []
+}
