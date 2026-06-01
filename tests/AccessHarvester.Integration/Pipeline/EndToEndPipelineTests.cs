@@ -30,6 +30,10 @@ namespace AccessHarvester.Integration.Pipeline;
 // harvester-schema.v1.0.json") lives in ManifestSchemaConformanceTests
 // — kept separate so a schema regression and a tier-shape regression
 // surface as distinct failures.
+// Serialized with the other HomeHealthCare COM tests: drives in-process
+// COM against samples/HomeHealthCare.accdb, so it shares the file lock
+// with the Cli command tests (project-guidance.md -> Testing Conventions).
+[Collection("HomeHealthCareCom")]
 [SupportedOSPlatform("windows")]
 public sealed class EndToEndPipelineTests
 {

@@ -28,6 +28,12 @@ namespace AccessHarvester.Integration.Pipeline;
 // canonical fixture; CI/test suite verifies the harvester reproduces
 // that golden output") and extends the same regression discipline to the
 // committed reports-baseline corpus.
+// Serialized with the other HomeHealthCare COM tests: this class drives
+// COM against samples/HomeHealthCare.accdb both in-process (CorePipeline)
+// and via the report-baseline CLI. Without the shared collection it races
+// the Cli command tests on ACE OLE DB's file lock and starves them into
+// per-test timeouts (project-guidance.md -> Testing Conventions).
+[Collection("HomeHealthCareCom")]
 [SupportedOSPlatform("windows")]
 public sealed class CanonicalGoldenRegressionTests
 {

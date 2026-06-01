@@ -1,32 +1,30 @@
 {
   "status": "completed",
-  "summary": "Session 1 of 2 (hermetic) hardened AccessHarvester.Core/Com/AccessComSession.cs — the single COM instantiation chokepoint — so it terminates the exact Access instance it created. Captured the Access PID up front via Application.hWndAccessApp -> GetWindowThreadProcessId (user32.dll P/Invoke), zero-guarded with a PidCaptureWarning diagnostic so a failed capture degrades to a no-op rather than killing PID 0. Strengthened the teardown: Quit(acQuitSaveNone=2) in an inner try with Marshal.FinalReleaseComObject in finally, doubled GC.Collect()+WaitForPendingFinalizers(), then a bounded WaitForExit before an exact-PID force-kill. Extracted the kill-decision logic behind an injectable IProcessController seam (IsRunning/WaitForExit/Kill) with a production System.Diagnostics.Process-backed SystemProcessController (treats ArgumentException + InvalidOperationException as already-exited success) and a hermetic ComProcessReaper; 9 hermetic unit tests (ComProcessReaperTests) cover all four required decision cases plus the null-controller guard and the production ArgumentException paths. Dispose() and the constructor-failure path share an idempotent TeardownCom(). Built AccessHarvester.Tests (0 errors) and ran ONLY the filtered ComProcessReaperTests (9/9 passed); the Access-COM/PDF integration tier was deliberately NOT run (Session 2 scope). Cross-provider verified VERIFIED on round 3 (gpt-5-4, OpenAI) after fixing three accepted Major findings across rounds 1-2 (Dispose Quit/FinalRelease share-a-try; Kill missing InvalidOperationException catch; constructor leak on OpenCurrentDatabase failure). A pre-existing wedged testhost zombie (PID 8772) that blocked the first build was reaped via WMI Win32_Process.Terminate after taskkill/Stop-Process failed.",
+  "summary": "Session 2 of 2 (final) verified the Session 1 COM-shutdown hardening against real Microsoft Access and removed the blunt test teardown so the fragile COM/PDF tier stops needing babysitting. Confirmed Access was installed (MSACCESS.EXE App Path + Access.Application ProgID) before running the tier. Ran the full Access-COM/PDF integration tier (AccessHarvester.Integration, 56/56 passed, incl. the report-baseline/PDF surface and the in-process CorePipeline runs) on a Windows+Access host with a before/after process census: msaccess=0 and testhost=0 both PRE and POST every run -- the hardened AccessComSession leaves no orphaned msaccess.exe and no leaked testhost. Simplified tests/AccessHarvester.Integration/TestSupport/CliInvoker.cs: replaced the blunt external `taskkill /PID <pid> /T /F` subprocess with a narrow managed PID-scoped Process.Kill last-resort, and -- now that AccessComSession self-reaps its exact msaccess PID on Dispose -- made the report-baseline path (RunUntilFilesExist) let the CLI exit on its own (bounded 15s) so that self-cleanup runs instead of being blunt-killed mid-teardown (msaccess via COM is a DCOM-activated LocalServer, not in the CLI process tree, so a tree-kill never reaped it anyway). Found and fixed a pre-existing parallel-COM file-lock race the tier run surfaced: ClassifyCommandTests timed out at 240s in the full run but passed in 7s isolated because CanonicalGoldenRegressionTests / EndToEndPipelineTests / ManifestSchemaConformanceTests drive in-process COM against HomeHealthCare.accdb but were not in the serializing [Collection(\"HomeHealthCareCom\")] -- added them per the documented project-guidance fix-forward tactic, making the tier deterministic. Wired docs/access-com-zombie-cleanup.md into durable guidance: a new Testing Convention in project-guidance.md and a test-lane paragraph in the Building & Testing section of CLAUDE.md / AGENTS.md / GEMINI.md (keep-in-sync rule). Lock-file (.laccdb/.ldb) cleanup was a maintainer call and was DEFERRED (force-kill is a rare failsafe; samples open read-only and Access auto-recovers a stale lock; no disposable per-run DBs need recreation). Build 0 errors; hermetic ComProcessReaperTests 9/9; cross-provider VERIFIED round 1 (gpt-5-4, OpenAI). Orchestrated by Claude Code (Opus 4.8) per the human's choice rather than the routed Gemini recommendation -- the gpt-5-4 verification override stayed cross-provider so no override swap was needed.",
   "files_changed": [
-    "AccessHarvester.Core/Com/AccessComSession.cs",
-    "AccessHarvester.Core/Com/IProcessController.cs",
-    "AccessHarvester.Core/Com/ComProcessReaper.cs",
-    "AccessHarvester.Core/Com/SystemProcessController.cs",
-    "tests/AccessHarvester.Tests/Com/ComProcessReaperTests.cs",
+    "tests/AccessHarvester.Integration/TestSupport/CliInvoker.cs",
+    "tests/AccessHarvester.Integration/Cli/HomeHealthCareComCollection.cs",
+    "tests/AccessHarvester.Integration/Pipeline/CanonicalGoldenRegressionTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/EndToEndPipelineTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs",
+    "docs/planning/project-guidance.md",
+    "CLAUDE.md",
+    "AGENTS.md",
+    "GEMINI.md",
     "docs/session-sets/ROADMAP.md",
     "docs/session-sets/harvester-access-com-graceful-shutdown/ai-assignment.md",
+    "docs/session-sets/harvester-access-com-graceful-shutdown/next-session-set-recommendation.md",
     "docs/session-sets/harvester-access-com-graceful-shutdown/disposition.json",
     "docs/session-sets/harvester-access-com-graceful-shutdown/session-state.json",
     "docs/session-sets/harvester-access-com-graceful-shutdown/activity-log.json",
     "docs/session-sets/harvester-access-com-graceful-shutdown/session-events.jsonl",
-    "docs/session-sets/harvester-access-com-graceful-shutdown/session-reviews/session-001.md",
-    "docs/session-sets/harvester-access-com-graceful-shutdown/issue-logs/session-001.json"
+    "docs/session-sets/harvester-access-com-graceful-shutdown/session-reviews/session-002.md"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "gemini-cli",
-    "provider": "google",
-    "model": "gemini-2.5-pro",
-    "effort": "medium",
-    "reason": {
-      "code": "switch-due-to-cost",
-      "specifics": "The Step 3.5 routed analysis (gemini-pro, unbiased) recommends Gemini Pro for Session 2 on economics: its work is mostly environment interaction and file management (run the real Access COM/PDF integration tier and assert no surviving msaccess.exe, narrow the blunt CliInvoker taskkill teardown, and wire docs/access-com-zombie-cleanup.md into project-guidance.md + the three agent-instruction files), not novel system-level code generation. HARD PRECONDITION: Session 2 MUST run on a Windows host with Microsoft Access installed — the integration tier cannot be verified otherwise; confirm this before starting. Note: the session-verification override is gpt-5-4 (OpenAI), which stays cross-provider for a Gemini orchestrator, so no override swap is needed; if instead a Codex/OpenAI orchestrator is chosen, swap the override to opus first (per lessons-learned)."
-    }
+  "next_session_set": {
+    "slug": "harvester-sql-migration-generator",
+    "summary": "Routed analysis (gemini-pro) recommends harvester-sql-migration-generator next: its ROADMAP deferral 'until the CI is reliable' is now satisfied by this set's deterministic, zombie-free COM test tier. Recommended orchestrator: Opus-class for the complex SQL migration code-generation. Precondition the next orchestrator must check first: run the full COM/Access integration tier and confirm 100% pass with zero orphaned msaccess.exe/testhost before generating feature code. Note the in-progress sibling harvester-consumer-workflow-instructions is unblocked and may be finished first at the human's discretion. See next-session-set-recommendation.md."
   },
   "blockers": []
 }

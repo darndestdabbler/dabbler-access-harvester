@@ -294,6 +294,28 @@ experiments only.
   reference is preserved in `lessons-learned.md` →
   "Sweep Spurious `.accdb` Binary Diffs After `dotnet test`
   Before Staging The Closeout Commit".
+- **COM-driven runs self-terminate the exact Access instance they
+  create — never reintroduce a blunt by-name `taskkill`.**
+  [`AccessHarvester.Core/Com/AccessComSession.cs`](../../AccessHarvester.Core/Com/AccessComSession.cs)
+  is the single COM instantiation chokepoint. On teardown it attempts a
+  graceful `Quit(acQuitSaveNone)` with `Marshal.FinalReleaseComObject` in
+  a `finally` (so the RCW is released even if `Quit` throws), runs
+  `GC.Collect()` / `GC.WaitForPendingFinalizers()` **twice**, then
+  bounded-waits and force-kills **only the exact PID** it captured up
+  front via `hWndAccessApp` → `GetWindowThreadProcessId` (zero-guarded so
+  a failed capture degrades to a no-op rather than targeting PID 0).
+  Test teardown must **not** reintroduce a blunt by-name
+  `taskkill /IM msaccess.exe` — it risks unrelated Access instances a
+  user or parallel test owns and bypasses the graceful path. Rely on the
+  chokepoint's exact-PID self-cleanup, and let an out-of-process CLI exit
+  on its own (do not blunt-kill it mid-`Dispose`) so that self-cleanup
+  can run; `msaccess.exe` spawned via COM is a DCOM-activated LocalServer
+  and is **not** in the CLI's process tree, so a `taskkill /T` tree-kill
+  could never reap it anyway. The pattern, the PID-capture mechanics, and
+  the force-kill / `.laccdb` lock-file caveats are documented in
+  [`docs/access-com-zombie-cleanup.md`](../access-com-zombie-cleanup.md)
+  (added by the maintainer 2026-06-01; implemented in
+  `harvester-access-com-graceful-shutdown` Sessions 1-2).
 
 ### Workflow Expectations
 

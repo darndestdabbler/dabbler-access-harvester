@@ -23,6 +23,13 @@ namespace AccessHarvester.Integration.Pipeline;
 // Distinct from SchemaConformanceTests in this same directory: that
 // class validates the committed example fixtures under examples/.
 // This one validates manifests the harvester itself produces.
+//
+// Serialized with the other HomeHealthCare COM tests: its SkippableFact
+// integration checks drive in-process COM against
+// samples/HomeHealthCare.accdb, so it shares the ACE file lock with the
+// Cli command tests (project-guidance.md -> Testing Conventions). The
+// hermetic aggregator tests in this class are unaffected by the collection.
+[Collection("HomeHealthCareCom")]
 public sealed class ManifestSchemaConformanceTests
 {
     [Fact]

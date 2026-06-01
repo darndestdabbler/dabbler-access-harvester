@@ -22,6 +22,14 @@ internal static class CliInvoker
 {
     private static readonly string ExePath = LocateExe();
 
+    // Grace period for a lingering CLI process to exit on its own once its
+    // output is materialized. The CLI's AccessComSession self-reaps the exact
+    // msaccess.exe it created on Dispose (graceful Quit + doubled GC +
+    // bounded exact-PID failsafe; see docs/access-com-zombie-cleanup.md), so
+    // the harness lets that run to completion rather than blunt-killing the
+    // CLI out from under it. Comfortably exceeds the in-CLI 5s exact-PID wait.
+    private const int GracefulCliExitMs = 15_000;
+
     public static CliResult Run(params string[] args) => RunWithTimeout(60_000, args);
 
     /// <summary>
@@ -85,8 +93,8 @@ internal static class CliInvoker
         {
             if (proc.HasExited)
             {
-                KillProcessTreeBestEffort(proc.Id);
-                try { proc.WaitForExit(5_000); } catch { /* best-effort */ }
+                // The CLI exited on its own — its AccessComSession.Dispose() ran
+                // and reaped the msaccess.exe it created. Nothing to kill.
                 try { stdoutTask.Wait(5_000); } catch { /* best-effort */ }
                 try { stderrTask.Wait(5_000); } catch { /* best-effort */ }
 
@@ -107,13 +115,19 @@ internal static class CliInvoker
                     stablePolls++;
                     if (stablePolls >= 2)
                     {
-                        KillProcessTreeBestEffort(proc.Id);
-                        try { proc.WaitForExit(5_000); } catch { /* best-effort */ }
+                        // Required output is materialized and stable. Give the CLI a
+                        // bounded chance to exit on its own so its AccessComSession
+                        // reaps the exact msaccess.exe it created. Only force-kill the
+                        // CLI *process* (managed, PID-scoped) as a last resort if it
+                        // overruns — never blunt-kill it mid-cleanup, which would abort
+                        // the in-CLI exact-PID reaper and orphan msaccess.
+                        if (!proc.WaitForExit(GracefulCliExitMs))
+                            KillCliProcessBestEffort(proc);
                         try { stdoutTask.Wait(5_000); } catch { /* best-effort */ }
                         try { stderrTask.Wait(5_000); } catch { /* best-effort */ }
 
                         return new CliResult(
-                            0,
+                            proc.HasExited ? proc.ExitCode : 0,
                             stdoutTask.IsCompletedSuccessfully ? stdoutTask.Result : string.Empty,
                             stderrTask.IsCompletedSuccessfully ? stderrTask.Result : string.Empty);
                     }
@@ -133,7 +147,7 @@ internal static class CliInvoker
 
             if (Environment.TickCount64 >= deadline)
             {
-                KillProcessTreeBestEffort(proc.Id);
+                KillCliProcessBestEffort(proc);
                 throw new TimeoutException($"CLI process did not produce stable required files within {timeoutMs}ms. args=[{string.Join(' ', args)}]");
             }
 
@@ -219,37 +233,19 @@ internal static class CliInvoker
         return sizes;
     }
 
-    private static void KillProcessTreeBestEffort(int pid)
+    // Last-resort termination of the lingering CLI *process* only. Narrowed
+    // from a blunt external `taskkill /PID <pid> /T /F`: the msaccess.exe the
+    // CLI spawns via COM is a DCOM-activated LocalServer, so it is NOT in this
+    // process tree and an external tree-kill could never reap it anyway. Since
+    // Session 1 hardened AccessComSession to self-reap that exact msaccess PID
+    // on Dispose, the harness only needs to terminate the CLI process itself if
+    // it overruns the graceful window — and only after that Dispose has had its
+    // chance to run. The managed Process.Kill keeps this PID-scoped with no
+    // external taskkill subprocess and cannot touch unrelated Access instances.
+    private static void KillCliProcessBestEffort(Process proc)
     {
-        try
-        {
-            if (OperatingSystem.IsWindows())
-            {
-                var psi = new ProcessStartInfo
-                {
-                    FileName = "taskkill",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true,
-                };
-                psi.ArgumentList.Add("/PID");
-                psi.ArgumentList.Add(pid.ToString());
-                psi.ArgumentList.Add("/T");
-                psi.ArgumentList.Add("/F");
-
-                using var killer = Process.Start(psi);
-                try { killer?.WaitForExit(5_000); } catch { /* best-effort */ }
-                return;
-            }
-
-            using var proc = Process.GetProcessById(pid);
-            proc.Kill(entireProcessTree: true);
-        }
-        catch
-        {
-            // Best-effort test cleanup.
-        }
+        try { proc.Kill(entireProcessTree: true); }
+        catch { /* best-effort test cleanup */ }
     }
 
     private static string LocateExe()

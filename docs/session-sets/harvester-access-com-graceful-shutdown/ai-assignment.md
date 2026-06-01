@@ -68,4 +68,37 @@ For Session 2, orchestrate with **Gemini Pro** for economic efficiency, as the t
   leak if `OpenCurrentDatabase` throws — all fixed, with `Dispose()` and the constructor-failure
   path now sharing an idempotent `TeardownCom()`.
 
-### Session 2 — _(not yet started)_
+### Session 2 — closed 2026-06-01
+
+- **Orchestrator used:** Claude Code / Opus 4.8 (`claude-opus-4-8`), effort `medium`.
+  **Deviation from recommendation:** the Step 3.5 routed analysis recommended
+  **Gemini Pro** for Session 2 on economics; the human chose Claude Code instead.
+  No verifier-override swap was needed — the `session-verification` override is
+  `gpt-5-4` (OpenAI), which stays cross-provider for a Claude orchestrator.
+- **Routed calls (3, total ~$0.16):**
+  - `session-verification` → `gpt-5-4` ($0.1551) — round 1, **VERIFIED** (substantive
+    5-step prose analysis, empty issues; no retry needed).
+  - `analysis` → `gemini-pro` ($0.0027) — next-session-set recommendation
+    (`harvester-sql-migration-generator`); see `next-session-set-recommendation.md`.
+  - (`close_session` may append one more routed call for the change-log / actuals.)
+- **Work done vs. plan:** Steps 1–5 all completed. Verified on a Windows+Access host
+  that the full COM/PDF integration tier (`AccessHarvester.Integration`, 56/56) leaves
+  **no orphaned `msaccess.exe` and no leaked `testhost`** (process census 0/0 PRE and
+  POST every run). Simplified `CliInvoker` teardown (dropped the blunt external
+  `taskkill /T /F` for a narrow managed PID-scoped last-resort kill; let the CLI exit
+  on its own so the hardened `AccessComSession.Dispose()` self-reaps its exact msaccess
+  PID). Wired `docs/access-com-zombie-cleanup.md` into `project-guidance.md` (new
+  Testing Convention) and the Building & Testing section of all three agent files.
+- **Deviations / additions:** (1) **Lock-file cleanup (step 3) DEFERRED** — maintainer
+  call per the spec Finalization checklist (rare failsafe, read-only samples,
+  Access auto-recovers a stale `.laccdb`, no per-run disposable DBs). (2) **Fixed a
+  pre-existing parallel-COM file-lock race** the tier run surfaced (not in the original
+  plan): `CanonicalGoldenRegressionTests` / `EndToEndPipelineTests` /
+  `ManifestSchemaConformanceTests` drive in-process COM against `HomeHealthCare.accdb`
+  but were missing from the serializing `[Collection("HomeHealthCareCom")]` — adding
+  them (the documented project-guidance fix-forward tactic) turned a 240s
+  `ClassifyCommandTests` timeout (7s in isolation) into a deterministic green tier.
+- **Notes:** Single verification round (no retries). The Gemini-Pro routed
+  recommendation was sound on economics, but the work touched the fragile COM tier and
+  surfaced a non-trivial test-isolation race, which an Opus orchestrator handled
+  in-conversation without routing (orchestrator's model == the tier-3 synthesis target).

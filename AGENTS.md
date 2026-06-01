@@ -139,6 +139,20 @@ Access installed. Hermetic unit tests (parser, enrichers, schema
 validators) run anywhere; integration tests against committed
 `.accdb` fixtures are gated as `[SkippableFact]` when Access is absent.
 
+COM-driven test and extraction runs terminate the **exact** Access
+instance they create — graceful `Quit(acQuitSaveNone)` + doubled
+`GC.Collect()` / `WaitForPendingFinalizers()`, then a bounded wait and an
+exact-PID force-kill failsafe — so a hung run no longer leaves an
+orphaned `msaccess.exe` (or the `testhost` / `dotnet` waiting on it)
+behind. The single COM chokepoint that implements this is
+[`AccessHarvester.Core/Com/AccessComSession.cs`](AccessHarvester.Core/Com/AccessComSession.cs);
+the pattern, the `hWndAccessApp` → `GetWindowThreadProcessId` PID capture,
+and the force-kill / lock-file caveats are documented in
+[`docs/access-com-zombie-cleanup.md`](docs/access-com-zombie-cleanup.md).
+Do not reintroduce a blunt by-name `taskkill` of `msaccess.exe` in test
+teardown — it risks unrelated Access instances; rely on the chokepoint's
+exact-PID self-cleanup instead.
+
 ## Solution Structure
 
 The intended layout (filled in by Session Set #1):

@@ -14,9 +14,15 @@ namespace AccessHarvester.Integration.Cli;
 /// turn instead of competing for the lock.
 ///
 /// <para>
-/// Applied to: <see cref="ClassifyCommandTests"/>,
+/// Applied to the Cli command tests <see cref="ClassifyCommandTests"/>,
 /// <see cref="SanitizeCommandTests"/>, <see cref="CliExtractTests"/>,
-/// <see cref="CliRunTests"/>, <see cref="CliTranslateTests"/>.
+/// <see cref="CliRunTests"/>, <see cref="CliTranslateTests"/>, and to the
+/// Pipeline tests that drive in-process COM against the same fixture —
+/// <c>CanonicalGoldenRegressionTests</c>, <c>EndToEndPipelineTests</c>,
+/// and <c>ManifestSchemaConformanceTests</c> (added in
+/// <c>harvester-access-com-graceful-shutdown</c> Session 2 after
+/// <see cref="ClassifyCommandTests"/> timed out at 240s while a Pipeline
+/// class held the HomeHealthCare.accdb lock in parallel).
 /// </para>
 /// </summary>
 [CollectionDefinition("HomeHealthCareCom")]

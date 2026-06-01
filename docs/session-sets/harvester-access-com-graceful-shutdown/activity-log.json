@@ -90,6 +90,51 @@
           "costUsd": 0.14872
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/lockfile-scope",
+      "dateTime": "2026-06-01T09:48:21.480927-04:00",
+      "description": "Resolved maintainer call (spec Finalization checklist): lock-file (.laccdb/.ldb) cleanup DEFERRED \u2014 force-kill is a rare failsafe, samples open read-only and Access auto-recovers a stale .laccdb, no disposable per-run DBs need recreation.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/simplify-cliinvoker",
+      "dateTime": "2026-06-01T09:48:21.481976-04:00",
+      "description": "Simplified CliInvoker teardown: replaced the blunt external taskkill /PID /T /F with a narrow managed Process.Kill last-resort on the CLI process only; once required output is stable, let the CLI exit on its own (bounded 15s) so its hardened AccessComSession.Dispose reaps the exact msaccess PID instead of being blunt-killed mid-cleanup. msaccess via COM is DCOM-activated (not in the CLI tree), so a tree-kill never reaped it anyway.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/wire-docs",
+      "dateTime": "2026-06-01T09:48:21.481976-04:00",
+      "description": "Wired docs/access-com-zombie-cleanup.md into durable guidance: new Testing Convention in project-guidance.md (exact-PID self-cleanup, no by-name taskkill) and a test-lane paragraph in the Building & Testing section of all three agent files (CLAUDE.md/AGENTS.md/GEMINI.md, keep-in-sync rule).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/fix-com-test-race",
+      "dateTime": "2026-06-01T09:48:21.482978-04:00",
+      "description": "Fixed a pre-existing parallel-COM file-lock race surfaced by the tier run: added [Collection(\"HomeHealthCareCom\")] to the three Pipeline classes that drive in-process COM against HomeHealthCare.accdb (CanonicalGoldenRegressionTests, EndToEndPipelineTests, ManifestSchemaConformanceTests). Documented fix-forward tactic from project-guidance Testing Conventions. ClassifyCommandTests passed in 7s isolated vs 240s timeout in parallel.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/build-test-tier",
+      "dateTime": "2026-06-01T09:48:21.482978-04:00",
+      "description": "Built solution (0 errors). Hermetic ComProcessReaperTests 9/9 green. Ran the full Access-COM/PDF integration tier (AccessHarvester.Integration) on a Windows host with Access installed: 56/56 passed. Process census msaccess=0/testhost=0 both PRE and POST the run \u2014 no surviving msaccess.exe and no leaked testhost created by the run. Swept spurious samples/*.accdb timestamp diffs before staging.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
