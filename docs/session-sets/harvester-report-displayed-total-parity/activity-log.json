@@ -1,0 +1,102 @@
+{
+  "sessionSetName": "harvester-report-displayed-total-parity",
+  "createdDate": "2026-06-01T11:46:36.080041-04:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/survey-footer-aggregates",
+      "dateTime": "2026-06-01T11:46:36.081199-04:00",
+      "description": "Surveyed 5 canonical reports' footer aggregate controls (closed set = Sum only) and routed the parser-vs-evaluator design fork to cross-provider analysis.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 921,
+          "outputTokens": 492,
+          "costUsd": 0.006071250000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-06-01T11:52:41.874802-04:00",
+      "description": "Routed ai-assignment.md orchestrator recommendations (Step 3.5).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 610,
+          "outputTokens": 596,
+          "costUsd": 0.0067225
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/read-footer-controls",
+      "dateTime": "2026-06-01T12:19:27.406963-04:00",
+      "description": "Added FooterAggregateControl + DisplayTotal types; extended ReportLiveSpec / ReportAggregateInput / ReportAggregates; extended AccessReportSpecReader to capture footer-section text boxes (report footer + group footers) via COM; threaded FooterAggregates through ReportBaselineRunner.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/evaluate-display-totals",
+      "dateTime": "2026-06-01T12:19:27.406963-04:00",
+      "description": "Implemented SumAggregateEvaluator (tokenizer + recursive-descent parser + decimal evaluator for the closed Sum(<arith>) grammar) and wired ReportAggregateComputer.ComputeDisplayTotals to emit DisplayTotals for derivable report-footer Sum aggregates and route everything else (group footers, RunningSum, IIf/unsupported functions, control refs, unresolved/non-numeric columns, parse errors, overflow) to Skipped with grounded reasons. Kept AggregateContract='RecordSourceResultSet' (additive DisplayTotals field), updated ContractNote.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/tests-and-build",
+      "dateTime": "2026-06-01T12:19:27.406963-04:00",
+      "description": "Added hermetic xUnit tests (SumAggregateEvaluatorTests + DisplayTotals cases in ReportAggregateComputerTests + writer serialization). Full-solution build succeeded (0 errors). Hermetic suites green: 100 ReportBaseline tests, 684 Pipeline.Tests. Live COM capture slice against rptInvoice computed txtSubTotal=Sum((1-[Discount])*[Quantity]*[UnitPrice])=50313.622 over 130 rows; txtShipping/txtTotal/txtTax (IIf) correctly routed to Skipped.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-06-01T12:23:58.749882-04:00",
+      "description": "Cross-provider session verification (round 1).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 30686,
+          "outputTokens": 11989,
+          "costUsd": 0.25655
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/verification-r2",
+      "dateTime": "2026-06-01T12:31:11.771935-04:00",
+      "description": "Cross-provider session verification round 2 (fixes for R1 Major/Major/Minor).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7482,
+          "outputTokens": 6558,
+          "costUsd": 0.117075
+        }
+      ]
+    }
+  ]
+}

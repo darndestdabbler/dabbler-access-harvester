@@ -598,4 +598,234 @@ public class ReportAggregateComputerTests
         Assert.Throws<ArgumentException>(() =>
             ReportAggregateComputer.Compute(input, ObjectNameResolved("t"), table, " "));
     }
+
+    // ── Display totals (footer aggregate expressions) ────────────────────
+
+    private static FooterAggregateControl ReportFooterControl(
+        string name, string expression, bool runningSum = false) =>
+        new()
+        {
+            ControlName = name,
+            Section = "ReportFooter",
+            IsReportFooter = true,
+            Expression = expression,
+            RunningSum = runningSum,
+        };
+
+    [Fact]
+    public void Compute_ReportFooterSumExpression_EmitsDisplayTotal()
+    {
+        // The rptInvoice footer subtotal: =Sum((1-[Discount])*[Quantity]*[UnitPrice]).
+        // Row1: (1-0.1)*2*100 = 180 ; Row2: (1-0)*3*10 = 30 → 210.
+        var table = BuildTable(
+            new[]
+            {
+                ("UnitPrice", typeof(decimal)),
+                ("Quantity", typeof(int)),
+                ("Discount", typeof(double)),
+            },
+            new object?[] { 100m, 2, 0.1 },
+            new object?[] { 10m, 3, 0.0 });
+
+        var input = new ReportAggregateInput
+        {
+            ReportName = "rptInvoice",
+            RecordSource = "qryInvoice",
+            FooterAggregates = ImmutableArray.Create(
+                ReportFooterControl("txtSubTotal", "=Sum((1-[Discount])*[Quantity]*[UnitPrice])")),
+        };
+
+        var result = ReportAggregateComputer.Compute(
+            input, ObjectNameResolved("qryInvoice"), table, Version);
+
+        var displayTotal = Assert.Single(result.DisplayTotals);
+        Assert.Equal("txtSubTotal", displayTotal.Control);
+        Assert.Equal("ReportFooter", displayTotal.Section);
+        Assert.Equal("=Sum((1-[Discount])*[Quantity]*[UnitPrice])", displayTotal.Expression);
+        Assert.Equal(210m, displayTotal.ComputedValue);
+        Assert.Empty(result.Skipped);
+    }
+
+    [Fact]
+    public void Compute_ReportFooterSumOfColumn_MatchesGrandTotalOfThatColumn()
+    {
+        // rptSalesByEmployee / rptSalesByProduct footer: =Sum([OrderTotal]).
+        // The derived display total must equal the result-set grand total of
+        // the same column — the like-for-like cross-check.
+        var table = BuildTable(
+            new[] { ("OrderTotal", typeof(decimal)) },
+            new object?[] { 100.25m }, new object?[] { 50.75m }, new object?[] { 9.00m });
+
+        var input = new ReportAggregateInput
+        {
+            ReportName = "rptSalesByEmployee",
+            RecordSource = "qrySales",
+            FooterAggregates = ImmutableArray.Create(
+                ReportFooterControl("GrandTotalSum", "=Sum([OrderTotal])")),
+        };
+
+        var result = ReportAggregateComputer.Compute(
+            input, ObjectNameResolved("qrySales"), table, Version);
+
+        var displayTotal = Assert.Single(result.DisplayTotals);
+        Assert.Equal(result.GrandTotals["OrderTotal"], displayTotal.ComputedValue);
+        Assert.Equal(160.00m, displayTotal.ComputedValue);
+    }
+
+    [Fact]
+    public void Compute_GroupFooterAggregate_RoutedToSkipped()
+    {
+        var table = BuildTable(
+            new[] { ("OrderTotal", typeof(decimal)) }, new object?[] { 1m });
+
+        var input = new ReportAggregateInput
+        {
+            ReportName = "rptSalesByProduct",
+            RecordSource = "qrySales",
+            FooterAggregates = ImmutableArray.Create(new FooterAggregateControl
+            {
+                ControlName = "SumOfOrderTotal",
+                Section = "GroupFooter1",
+                IsReportFooter = false,
+                Expression = "=Sum([OrderTotal])",
+            }),
+        };
+
+        var result = ReportAggregateComputer.Compute(
+            input, ObjectNameResolved("qrySales"), table, Version);
+
+        Assert.Empty(result.DisplayTotals);
+        var skipped = Assert.Single(result.Skipped);
+        Assert.Equal("DisplayTotalGroupFooter", skipped.Kind);
+        Assert.Contains("SumOfOrderTotal", skipped.Detail);
+    }
+
+    [Fact]
+    public void Compute_RunningSumFooter_RoutedToSkipped_EvenWhenExpressionWouldParse()
+    {
+        var table = BuildTable(
+            new[] { ("OrderTotal", typeof(decimal)) }, new object?[] { 1m });
+
+        var input = new ReportAggregateInput
+        {
+            ReportName = "rptRunning",
+            RecordSource = "qrySales",
+            FooterAggregates = ImmutableArray.Create(
+                ReportFooterControl("txtRunning", "=Sum([OrderTotal])", runningSum: true)),
+        };
+
+        var result = ReportAggregateComputer.Compute(
+            input, ObjectNameResolved("qrySales"), table, Version);
+
+        Assert.Empty(result.DisplayTotals);
+        var skipped = Assert.Single(result.Skipped);
+        Assert.Equal("DisplayTotalRunningSum", skipped.Kind);
+    }
+
+    [Fact]
+    public void Compute_UnsupportedFunctionFooter_RoutedToSkipped()
+    {
+        var table = BuildTable(
+            new[] { ("TaxStatusID", typeof(int)), ("taxrate", typeof(double)),
+                    ("Discount", typeof(double)), ("Quantity", typeof(int)), ("UnitPrice", typeof(decimal)) },
+            new object?[] { 1, 0.1, 0.0, 1, 10m });
+
+        var input = new ReportAggregateInput
+        {
+            ReportName = "rptInvoice",
+            RecordSource = "qryInvoice",
+            FooterAggregates = ImmutableArray.Create(
+                ReportFooterControl("txtTax",
+                    "=IIf([TaxStatusID]=1,[taxrate]*Sum((1-[Discount])*[Quantity]*[UnitPrice]),0)")),
+        };
+
+        var result = ReportAggregateComputer.Compute(
+            input, ObjectNameResolved("qryInvoice"), table, Version);
+
+        Assert.Empty(result.DisplayTotals);
+        var skipped = Assert.Single(result.Skipped);
+        Assert.Equal("DisplayTotalUnsupportedFunction", skipped.Kind);
+    }
+
+    [Fact]
+    public void Compute_NonAggregateFooterControls_RoutedToSkipped()
+    {
+        var table = BuildTable(
+            new[] { ("ShippingFee", typeof(decimal)) }, new object?[] { 9m });
+
+        var input = new ReportAggregateInput
+        {
+            ReportName = "rptInvoice",
+            RecordSource = "qryInvoice",
+            FooterAggregates = ImmutableArray.Create(
+                ReportFooterControl("txtShipping", "=[ShippingFee]"),
+                ReportFooterControl("txtTotal", "=[txtSubTotal]+[txtTax]+[txtShipping]")),
+        };
+
+        var result = ReportAggregateComputer.Compute(
+            input, ObjectNameResolved("qryInvoice"), table, Version);
+
+        Assert.Empty(result.DisplayTotals);
+        Assert.Equal(2, result.Skipped.Count);
+        Assert.All(result.Skipped, s => Assert.Equal("DisplayTotalNonAggregate", s.Kind));
+    }
+
+    [Fact]
+    public void Compute_NoFooterAggregates_EmitsEmptyDisplayTotals()
+    {
+        // srptClientBudgets / srptClientCurrentNeeds have no =-bound footer
+        // controls at all: no display totals, nothing skipped on their behalf.
+        var table = BuildTable(
+            new[] { ("Amount", typeof(decimal)) }, new object?[] { 5m });
+
+        var input = new ReportAggregateInput
+        {
+            ReportName = "srptClientBudgets",
+            RecordSource = "qryBudgets",
+        };
+
+        var result = ReportAggregateComputer.Compute(
+            input, ObjectNameResolved("qryBudgets"), table, Version);
+
+        Assert.Empty(result.DisplayTotals);
+        Assert.Empty(result.Skipped);
+    }
+
+    [Fact]
+    public void Compute_DisplayTotals_AreSorted_RowAndInputOrderInvariant()
+    {
+        var table = BuildTable(
+            new[] { ("A", typeof(int)), ("B", typeof(int)) },
+            new object?[] { 1, 10 }, new object?[] { 2, 20 });
+
+        FooterAggregateControl ctlA = ReportFooterControl("zSumA", "=Sum([A])");
+        FooterAggregateControl ctlB = ReportFooterControl("aSumB", "=Sum([B])");
+
+        var forward = ReportAggregateComputer.Compute(
+            new ReportAggregateInput
+            {
+                ReportName = "r",
+                RecordSource = "t",
+                FooterAggregates = ImmutableArray.Create(ctlA, ctlB),
+            },
+            ObjectNameResolved("t"), table, Version);
+
+        var reversed = ReportAggregateComputer.Compute(
+            new ReportAggregateInput
+            {
+                ReportName = "r",
+                RecordSource = "t",
+                FooterAggregates = ImmutableArray.Create(ctlB, ctlA),
+            },
+            ObjectNameResolved("t"), table, Version);
+
+        // Sorted by (Section, Control) ordinal — "aSumB" precedes "zSumA"
+        // regardless of input order.
+        Assert.Equal(
+            new[] { "aSumB", "zSumA" },
+            forward.DisplayTotals.Select(d => d.Control));
+        Assert.Equal(
+            forward.DisplayTotals.Select(d => (d.Control, d.ComputedValue)),
+            reversed.DisplayTotals.Select(d => (d.Control, d.ComputedValue)));
+    }
 }

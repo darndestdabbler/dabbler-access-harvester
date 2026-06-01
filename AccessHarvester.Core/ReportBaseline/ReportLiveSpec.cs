@@ -35,4 +35,15 @@ public sealed record ReportLiveSpec
     /// </summary>
     public IReadOnlyList<ReportGroupLevelKey> GroupLevels { get; init; }
         = ImmutableArray<ReportGroupLevelKey>.Empty;
+
+    /// <summary>
+    /// Footer-section text boxes whose <c>ControlSource</c> is an Access
+    /// expression (begins with <c>=</c>), captured for the report footer and
+    /// group footers (page footers are excluded). The aggregate computer
+    /// decides which are derivable display totals and which are recorded in
+    /// <see cref="ReportAggregates.Skipped"/>. Empty when the report has no
+    /// expression-bound footer controls.
+    /// </summary>
+    public IReadOnlyList<FooterAggregateControl> FooterAggregates { get; init; }
+        = ImmutableArray<FooterAggregateControl>.Empty;
 }

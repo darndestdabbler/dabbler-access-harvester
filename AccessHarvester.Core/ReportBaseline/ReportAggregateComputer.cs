@@ -14,10 +14,15 @@ namespace AccessHarvester.Core.ReportBaseline;
 /// testable on hand-built fixture tables.
 ///
 /// <para>
-/// The aggregator implements the resolved S1 contract: <em>query-result
-/// aggregates</em>. It does not evaluate Access expression syntax
-/// (<c>=Sum(...)</c>, <c>=IIf(...)</c>, etc.); group levels whose key is
-/// an expression are surfaced as a Skipped item rather than computed.
+/// The aggregator computes <em>query-result aggregates</em> (GrandTotals,
+/// GroupLevels) over the result set, and additionally evaluates the supported
+/// closed set of report-footer display-total expressions
+/// (<c>=Sum(&lt;arith&gt;)</c>, via <see cref="SumAggregateEvaluator"/>) into
+/// <see cref="ReportAggregates.DisplayTotals"/>. Group-level keys that are
+/// Access expressions, and footer controls outside the supported closed set
+/// (group footers, RunningSum, unsupported functions such as <c>IIf</c>,
+/// control references, unresolved/non-numeric columns), are surfaced as
+/// Skipped items rather than computed.
 /// </para>
 /// </summary>
 public static class ReportAggregateComputer
@@ -25,7 +30,12 @@ public static class ReportAggregateComputer
     /// <summary>
     /// The contract literal stamped into
     /// <see cref="ReportAggregateProvenance.AggregateContract"/>. Bump
-    /// (mint a new value) only when the aggregate semantics change.
+    /// (mint a new value) only when the result-set aggregate semantics change.
+    /// The value stays <c>RecordSourceResultSet</c> across the addition of
+    /// footer-expression display totals: GrandTotals / GroupLevels are still
+    /// computed exactly as before, and <see cref="ReportAggregates.DisplayTotals"/>
+    /// is an additive field whose presence is described by
+    /// <see cref="ContractNote"/>.
     /// </summary>
     public const string ContractLiteral = "RecordSourceResultSet";
 
@@ -35,9 +45,13 @@ public static class ReportAggregateComputer
     /// the downstream AI consumer that reads the document.
     /// </summary>
     public const string ContractNote =
-        "Aggregates reflect the report's RecordSource query result set " +
-        "(executed via ACE OLE DB), not the rendered report's footer-control " +
-        "expressions. Parity comparisons must compare like-for-like.";
+        "Aggregates (GrandTotals, GroupLevels) reflect the report's RecordSource " +
+        "query result set (executed via ACE OLE DB), not the rendered report's " +
+        "footer-control expressions. DisplayTotals separately captures the " +
+        "supported report-footer aggregate expressions (Sum over numeric " +
+        "result-set columns) — the number a human reads in the footer — " +
+        "evaluated over that same result set; un-derivable footer controls are " +
+        "recorded in Skipped. Parity comparisons must compare like-for-like.";
 
     /// <summary>
     /// Compute aggregates for the given <paramref name="input"/> against
@@ -96,6 +110,8 @@ public static class ReportAggregateComputer
             groupAggregates.Add(BuildGroupLevel(level, resultSet, numericColumns, skipped));
         }
 
+        var displayTotals = ComputeDisplayTotals(input.FooterAggregates, resultSet, skipped);
+
         return new ReportAggregates
         {
             ReportName = input.ReportName,
@@ -106,6 +122,7 @@ public static class ReportAggregateComputer
             NumericColumns = numericColumns,
             GrandTotals = grandTotals,
             GroupLevels = groupAggregates.ToImmutable(),
+            DisplayTotals = displayTotals,
             Skipped = skipped
                 .OrderBy(s => s.Kind, StringComparer.Ordinal)
                 .ThenBy(s => s.Detail, StringComparer.Ordinal)
@@ -119,6 +136,82 @@ public static class ReportAggregateComputer
                     kvp => kvp.Key, kvp => kvp.Value, StringComparer.Ordinal),
             },
         };
+    }
+
+    /// <summary>
+    /// Classify each captured footer aggregate control into a derivable
+    /// <see cref="DisplayTotal"/> or a <see cref="SkippedItem"/>. A control is
+    /// derivable only when it lives in the report footer, has RunningSum off,
+    /// and its expression is a supported <c>Sum</c> aggregate over numeric
+    /// result-set columns (see <see cref="SumAggregateEvaluator"/>). Group
+    /// footers and RunningSum totals are routed to Skipped before the
+    /// expression is even parsed, because their displayed value is not a pure
+    /// function of the flat result set.
+    /// </summary>
+    private static IReadOnlyList<DisplayTotal> ComputeDisplayTotals(
+        IReadOnlyList<FooterAggregateControl> footerAggregates,
+        DataTable resultSet,
+        ImmutableArray<SkippedItem>.Builder skipped)
+    {
+        if (footerAggregates is null || footerAggregates.Count == 0)
+            return ImmutableArray<DisplayTotal>.Empty;
+
+        var displayTotals = ImmutableArray.CreateBuilder<DisplayTotal>();
+        foreach (var control in footerAggregates)
+        {
+            if (control.RunningSum)
+            {
+                skipped.Add(new SkippedItem
+                {
+                    Kind = "DisplayTotalRunningSum",
+                    Detail = $"Footer control '{control.ControlName}' ({control.Section}) has " +
+                             $"RunningSum on; a running-sum total is a report-runtime " +
+                             "accumulation, not a pure function of the result set.",
+                });
+                continue;
+            }
+
+            if (!control.IsReportFooter)
+            {
+                skipped.Add(new SkippedItem
+                {
+                    Kind = "DisplayTotalGroupFooter",
+                    Detail = $"Footer control '{control.ControlName}' ({control.Section}) is a " +
+                             "group-footer aggregate, evaluated per group at report runtime; " +
+                             "the DisplayTotal contract emits whole-result-set report-footer " +
+                             "aggregates only. Per-group numeric subtotals are available under " +
+                             "GroupLevels.",
+                });
+                continue;
+            }
+
+            var outcome = SumAggregateEvaluator.Evaluate(control.Expression, resultSet);
+            switch (outcome)
+            {
+                case SumAggregateComputed computed:
+                    displayTotals.Add(new DisplayTotal
+                    {
+                        Control = control.ControlName,
+                        Section = control.Section,
+                        Expression = control.Expression,
+                        ComputedValue = computed.Value,
+                    });
+                    break;
+                case SumAggregateUnsupported unsupported:
+                    skipped.Add(new SkippedItem
+                    {
+                        Kind = unsupported.Kind,
+                        Detail = $"Footer control '{control.ControlName}' ({control.Section}): " +
+                                 unsupported.Detail,
+                    });
+                    break;
+            }
+        }
+
+        return displayTotals
+            .OrderBy(d => d.Section, StringComparer.Ordinal)
+            .ThenBy(d => d.Control, StringComparer.Ordinal)
+            .ToImmutableArray();
     }
 
     private static ReportGroupLevelAggregate BuildGroupLevel(

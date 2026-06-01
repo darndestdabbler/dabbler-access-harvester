@@ -205,6 +205,7 @@ public sealed class ReportBaselineRunner
                 RecordSource = spec.RecordSource!,
                 SavedQuerySql = spec.SavedQuerySql,
                 GroupLevels = spec.GroupLevels,
+                FooterAggregates = spec.FooterAggregates,
                 ParametersUsed = nameKeyed,
             };
 

@@ -59,12 +59,34 @@ public sealed record ReportAggregates
     public required IReadOnlyList<ReportGroupLevelAggregate> GroupLevels { get; init; }
 
     /// <summary>
-    /// Items the aggregator could not compute. Possible <c>Kind</c> values:
-    /// <c>GroupLevelExpression</c> (Access <c>=...</c> expressions),
-    /// <c>GroupLevelMissingColumn</c> (the named GroupOn column is absent
-    /// from the executed result set), and <c>NumericOverflow</c> (a
-    /// numeric-column sum could not fit in <see cref="decimal"/>). Empty
-    /// when nothing was skipped.
+    /// Displayed totals derived from report-footer aggregate expressions —
+    /// the number a human reads in the report footer (e.g. an invoice
+    /// subtotal a footer text box computes as
+    /// <c>=Sum((1-[Discount])*[Quantity]*[UnitPrice])</c>), evaluated over the
+    /// same RecordSource result set the aggregates above are computed from.
+    /// Only report-footer <c>Sum</c> aggregates over numeric result-set
+    /// columns are captured here; every other footer control (group-footer
+    /// aggregates, unsupported functions, control references, RunningSum
+    /// totals, unresolved columns) is recorded in <see cref="Skipped"/> with a
+    /// grounded reason. Ordered by (Section, Control) ordinal so the
+    /// serialized JSON is byte-stable. Empty when the report has no derivable
+    /// footer display total.
+    /// </summary>
+    public required IReadOnlyList<DisplayTotal> DisplayTotals { get; init; }
+
+    /// <summary>
+    /// Items the aggregator could not compute. Group-level / numeric-column
+    /// <c>Kind</c> values: <c>GroupLevelExpression</c> (Access <c>=...</c>
+    /// expressions), <c>GroupLevelMissingColumn</c> (the named GroupOn column
+    /// is absent from the executed result set), <c>NumericOverflow</c> (a
+    /// numeric-column sum could not fit in <see cref="decimal"/>).
+    /// Footer-display-total <c>Kind</c> values (all prefixed
+    /// <c>DisplayTotal</c>): <c>DisplayTotalGroupFooter</c> (a group-footer
+    /// aggregate, evaluated per group at runtime), <c>DisplayTotalRunningSum</c>
+    /// (RunningSum is on), <c>DisplayTotalUnsupportedFunction</c>,
+    /// <c>DisplayTotalNonAggregate</c>, <c>DisplayTotalParseError</c>,
+    /// <c>DisplayTotalUnresolvedColumn</c>, <c>DisplayTotalNonNumericColumn</c>,
+    /// <c>DisplayTotalNumericOverflow</c>. Empty when nothing was skipped.
     /// </summary>
     public required IReadOnlyList<SkippedItem> Skipped { get; init; }
 
@@ -142,6 +164,32 @@ public sealed record GroupBucket
 }
 
 /// <summary>
+/// A report-footer display total derived from a footer aggregate expression
+/// evaluated over the RecordSource result set — the number a human reads in
+/// the report footer.
+/// </summary>
+public sealed record DisplayTotal
+{
+    /// <summary>The footer control's name as Access stores it.</summary>
+    public required string Control { get; init; }
+
+    /// <summary>The owning section label (always <c>ReportFooter</c> for a
+    /// captured display total; group footers are routed to Skipped).</summary>
+    public required string Section { get; init; }
+
+    /// <summary>The raw footer <c>ControlSource</c> expression, including the
+    /// leading <c>=</c> (e.g. <c>=Sum((1-[Discount])*[Quantity]*[UnitPrice])</c>).</summary>
+    public required string Expression { get; init; }
+
+    /// <summary>
+    /// The aggregate value computed over the result set. Non-null for every
+    /// captured display total; the field is nullable only to mirror the
+    /// null-on-uncomputable convention used elsewhere in this document.
+    /// </summary>
+    public required decimal? ComputedValue { get; init; }
+}
+
+/// <summary>
 /// One thing the aggregator chose not to compute, with enough detail for a
 /// downstream consumer to decide whether to escalate it (e.g. wire a future
 /// session set to add expression evaluation).
@@ -173,9 +221,13 @@ public sealed record ReportAggregateProvenance
     public required string HarvesterVersion { get; init; }
 
     /// <summary>
-    /// The aggregate contract this document conforms to. The S1 value is
-    /// always <c>RecordSourceResultSet</c>; if a future session adds
-    /// footer-expression evaluation it will mint a new value.
+    /// The aggregate contract this document conforms to:
+    /// <c>RecordSourceResultSet</c>. The value is stable across the addition
+    /// of footer-expression display totals
+    /// (<c>harvester-report-displayed-total-parity</c>) — the result-set
+    /// GrandTotals / GroupLevels semantics it names are unchanged, and the
+    /// additive <see cref="ReportAggregates.DisplayTotals"/> field is
+    /// described by <see cref="ReportAggregateProvenance.ContractNote"/>.
     /// </summary>
     public required string AggregateContract { get; init; }
 

@@ -1,0 +1,23 @@
+[
+  {
+    "severity": "Major",
+    "status": "fixed",
+    "location": "AccessHarvester.Core/ReportBaseline/SumAggregateEvaluator.cs",
+    "summary": "Malformed/oversized numeric literal could throw FormatException/OverflowException out of Evaluate.",
+    "fix": "ParseFactor now uses decimal.TryParse and throws ParseException (\u2192 DisplayTotalParseError) on failure; added '=Sum(.)' and oversized-literal tests."
+  },
+  {
+    "severity": "Major",
+    "status": "fixed",
+    "location": "AccessHarvester.Core/Com/AccessReportSpecReader.cs",
+    "summary": "Broad catch swallowed Controls-enumeration failures, allowing silent omission of derivable totals.",
+    "fix": "Removed the broad catch; a Controls-enumeration failure now propagates so ReadSpec fails and the report is recorded Failed (surfaced), not silently empty. Per-property TryRead* stay soft."
+  },
+  {
+    "severity": "Minor",
+    "status": "fixed",
+    "location": "tests/AccessHarvester.Tests/ReportBaseline",
+    "summary": "No coverage for malformed-numeric path or COM section classification.",
+    "fix": "Added malformed-literal cases and extracted the pure ReportFooterSection classifier with hermetic ReportFooterSectionTests (footer vs page-footer vs group-footer, label mapping)."
+  }
+]

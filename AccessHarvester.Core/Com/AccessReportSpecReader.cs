@@ -31,6 +31,10 @@ public sealed class AccessReportSpecReader : IReportSource
     private const int AcHidden = 1;
     private const int AcSaveNo = 2;
 
+    // AcControlType: a bound/unbound text box (the only control type carrying
+    // both ControlSource and RunningSum).
+    private const int AcTextBox = 109;
+
     private readonly AccessComSession _session;
 
     public AccessReportSpecReader(AccessComSession session)
@@ -121,6 +125,7 @@ public sealed class AccessReportSpecReader : IReportSource
                 RecordSource = string.IsNullOrEmpty(recordSource) ? null : recordSource,
                 SavedQuerySql = string.IsNullOrEmpty(savedQuerySql) ? null : savedQuerySql,
                 GroupLevels = groupLevels.ToImmutable(),
+                FooterAggregates = ReadFooterAggregates(report),
             };
         }
         finally
@@ -133,6 +138,82 @@ public sealed class AccessReportSpecReader : IReportSource
             }
             ReleaseRcw(report);
         }
+    }
+
+    /// <summary>
+    /// Enumerate the report's controls (the report is already open in hidden
+    /// Design view) and capture every footer-section text box whose
+    /// <c>ControlSource</c> is an Access expression (begins with <c>=</c>).
+    /// Report footer and group footers are captured; page footers are not
+    /// (their controls are page furniture, not display totals). The
+    /// classification of which captured controls are derivable display totals
+    /// happens downstream in <see cref="ReportAggregateComputer"/>; the reader
+    /// only mechanically lifts the candidates. The returned list is sorted by
+    /// (Section, ControlName) ordinal so the capture is deterministic across
+    /// runs regardless of the COM collection's enumeration order.
+    ///
+    /// <para>
+    /// A failure to enumerate <c>Controls</c> is deliberately <em>not</em>
+    /// swallowed: it propagates so <see cref="ReadSpec"/> fails and the
+    /// runner records the report as <c>Failed</c> rather than silently
+    /// emitting an empty footer set — a derivable display total must never
+    /// disappear from both <see cref="ReportAggregates.DisplayTotals"/> and
+    /// <see cref="ReportAggregates.Skipped"/> with no surfaced reason. The
+    /// per-property <c>TryRead*</c> helpers stay soft: a control whose
+    /// individual properties cannot be read is, by definition, not a usable
+    /// footer-aggregate candidate.
+    /// </para>
+    /// </summary>
+    private static IReadOnlyList<FooterAggregateControl> ReadFooterAggregates(dynamic report)
+    {
+        var captured = new List<FooterAggregateControl>();
+        dynamic? controls = null;
+        try
+        {
+            controls = report.Controls;
+            foreach (dynamic control in controls)
+            {
+                try
+                {
+                    int? controlType = TryReadInt(() => (int)control.ControlType);
+                    if (controlType != AcTextBox) continue;
+
+                    int? section = TryReadInt(() => (int)control.Section);
+                    if (section is null || !ReportFooterSection.IsFooterSection(section.Value)) continue;
+
+                    string? controlSource = TryReadString(() => (string?)control.ControlSource);
+                    if (string.IsNullOrEmpty(controlSource) || !controlSource.TrimStart().StartsWith('='))
+                        continue;
+
+                    string? name = TryReadString(() => (string?)control.Name);
+                    int runningSum = TryReadInt(() => (int)control.RunningSum) ?? 0;
+
+                    captured.Add(new FooterAggregateControl
+                    {
+                        ControlName = name ?? string.Empty,
+                        Section = ReportFooterSection.Label(section.Value),
+                        IsReportFooter = ReportFooterSection.IsReportFooter(section.Value),
+                        Expression = controlSource,
+                        RunningSum = runningSum != 0,
+                    });
+                }
+                finally
+                {
+                    ReleaseRcw(control);
+                }
+            }
+        }
+        finally
+        {
+            ReleaseRcw(controls);
+        }
+
+        captured.Sort(static (a, b) =>
+        {
+            int bySection = string.CompareOrdinal(a.Section, b.Section);
+            return bySection != 0 ? bySection : string.CompareOrdinal(a.ControlName, b.ControlName);
+        });
+        return captured.ToImmutableArray();
     }
 
     private static string? TryReadString(Func<string?> read)

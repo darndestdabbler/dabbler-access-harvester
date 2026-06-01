@@ -40,6 +40,13 @@ public class ReportAggregatesWriterTests
                     .Add("Total", 100m),
             }),
         }),
+        DisplayTotals = ImmutableArray.Create(new DisplayTotal
+        {
+            Control = "txtSubTotal",
+            Section = "ReportFooter",
+            Expression = "=Sum((1-[Discount])*[Quantity]*[UnitPrice])",
+            ComputedValue = 142.50m,
+        }),
         Skipped = ImmutableArray<SkippedItem>.Empty,
         Provenance = new ReportAggregateProvenance
         {
@@ -67,6 +74,13 @@ public class ReportAggregatesWriterTests
         var grand = root.GetProperty("GrandTotals");
         Assert.Equal(28m, grand.GetProperty("OrderID").GetDecimal());
         Assert.Equal(142.50m, grand.GetProperty("Total").GetDecimal());
+
+        var displayTotals = root.GetProperty("DisplayTotals");
+        Assert.Equal(1, displayTotals.GetArrayLength());
+        var dt = displayTotals[0];
+        Assert.Equal("txtSubTotal", dt.GetProperty("Control").GetString());
+        Assert.Equal("ReportFooter", dt.GetProperty("Section").GetString());
+        Assert.Equal(142.50m, dt.GetProperty("ComputedValue").GetDecimal());
 
         var prov = root.GetProperty("Provenance");
         Assert.Equal(ReportAggregateComputer.ContractLiteral,
@@ -102,6 +116,7 @@ public class ReportAggregatesWriterTests
                 ImmutableSortedDictionary<string, decimal?>.Empty.WithComparers(StringComparer.Ordinal),
                 (acc, c) => acc.Add(c.col, c.val)),
             GroupLevels = ImmutableArray<ReportGroupLevelAggregate>.Empty,
+            DisplayTotals = ImmutableArray<DisplayTotal>.Empty,
             Skipped = ImmutableArray<SkippedItem>.Empty,
             Provenance = new ReportAggregateProvenance
             {

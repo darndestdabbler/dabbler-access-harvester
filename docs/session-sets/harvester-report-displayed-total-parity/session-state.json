@@ -1,17 +1,33 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-report-displayed-total-parity",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
       "title": "Footer-Expression Display Totals (Core + capture proof)",
-      "status": "not-started"
+      "status": "in-progress",
+      "startedAt": "2026-06-01T11:40:45.451924-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "high",
+        "chatSessionId": null,
+        "checkedOutAt": "2026-06-01T11:40:45.451924-04:00",
+        "lastActivityAt": "2026-06-01T11:40:45.451924-04:00"
+      },
+      "verificationVerdict": null
     },
     {
       "number": 2,
       "title": "Corpus Regen + Regression + Optional PDF Spot-Check + Closeout",
-      "status": "not-started"
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     }
   ]
 }

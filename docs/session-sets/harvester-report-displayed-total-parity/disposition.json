@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "sessionSetName": "harvester-report-displayed-total-parity",
+  "status": "completed",
+  "summary": "Session 1 of 2 added the DisplayTotals capture to the report-baseline pipeline. A survey of all 5 canonical reports fixed the closed footer-aggregate set to exactly `Sum`; the spec premise of reusing an existing Access-expression parser was corrected (none exists) and a cross-provider routed analysis chose Option A: a focused, dependency-free recursive-descent SumAggregateEvaluator (tokenizer + parser + decimal evaluator) scoped to `=Sum(<arith>)` over numeric result-set columns. ReportAggregateComputer now emits a DisplayTotals collection for derivable report-footer aggregates and routes everything else (group footers, RunningSum, unsupported functions like IIf, control references, unresolved/non-numeric columns, parse errors, overflow) to Skipped with grounded reasons. AccessReportSpecReader captures footer-section text boxes via COM (report footer + group footers, excluding page footers), delegating the pure section classification to a new hermetically-tested ReportFooterSection helper. AggregateContract stays 'RecordSourceResultSet' (DisplayTotals is additive; ContractNote updated). Validation: full-solution build (0 errors), 119 hermetic ReportBaseline tests + 684 Pipeline.Tests green, and a live COM capture against rptInvoice computing txtSubTotal=Sum((1-[Discount])*[Quantity]*[UnitPrice])=50313.622 over 130 rows with the 3 un-derivable footer controls correctly Skipped. Cross-provider verification (gpt-5-4) returned ISSUES_FOUND R1 (two Major: a numeric-literal exception path and a silent COM-enumeration swallow; one Minor: test coverage); all three were fixed and R2 returned VERIFIED. The committed reports-baseline corpus regen, byte-diff regression confirmation, optional PDF spot-check, and READ-ME-FIRST/interpretation docs are Session 2 scope, so the existing committed aggregates.json intentionally lack DisplayTotals until then.",
+  "files_changed": [
+    "AccessHarvester.Core/ReportBaseline/SumAggregateEvaluator.cs",
+    "AccessHarvester.Core/ReportBaseline/FooterAggregateControl.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportFooterSection.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportAggregateComputer.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportAggregates.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportLiveSpec.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportAggregateInput.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs",
+    "AccessHarvester.Core/Com/AccessReportSpecReader.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/SumAggregateEvaluatorTests.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/ReportFooterSectionTests.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/ReportAggregateComputerTests.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/ReportAggregatesWriterTests.cs",
+    "docs/session-sets/harvester-report-displayed-total-parity/ai-assignment.md",
+    "docs/session-sets/harvester-report-displayed-total-parity/activity-log.json",
+    "docs/session-sets/harvester-report-displayed-total-parity/disposition.json",
+    "docs/session-sets/harvester-report-displayed-total-parity/session-state.json",
+    "docs/session-sets/harvester-report-displayed-total-parity/session-events.jsonl",
+    "docs/session-sets/harvester-report-displayed-total-parity/session-reviews/session-001.md",
+    "docs/session-sets/harvester-report-displayed-total-parity/issue-logs/session-001.json"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "effort": "low",
+    "reason": {
+      "code": "switch-due-to-cost",
+      "specifics": "Session 2 is COM corpus regeneration plus narrative docs (two READ-ME-FIRST files and the interpretation guide) plus one small opt-in PDF-spot-check CLI flag and a byte-diff regression confirmation — mechanical and prose work that Sonnet at low effort handles cost-effectively; no frontier coder is needed now that Session 1 shipped the evaluator. Mandatory cross-provider session-verification stays on gpt-5-4."
+    }
+  },
+  "blockers": []
+}

@@ -44,6 +44,17 @@ public sealed record ReportAggregateInput
     /// </summary>
     public IReadOnlyDictionary<string, object?> ParametersUsed { get; init; }
         = ImmutableDictionary<string, object?>.Empty;
+
+    /// <summary>
+    /// Footer aggregate controls projected from
+    /// <see cref="ReportLiveSpec.FooterAggregates"/>. Each derivable
+    /// report-footer <c>Sum</c> over numeric result-set columns becomes a
+    /// <see cref="ReportAggregates.DisplayTotals"/> entry; everything else is
+    /// routed to <see cref="ReportAggregates.Skipped"/>. Empty when the report
+    /// has no expression-bound footer controls.
+    /// </summary>
+    public IReadOnlyList<FooterAggregateControl> FooterAggregates { get; init; }
+        = ImmutableArray<FooterAggregateControl>.Empty;
 }
 
 /// <summary>
