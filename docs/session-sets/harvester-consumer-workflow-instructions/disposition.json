@@ -1,19 +1,25 @@
 {
   "status": "completed",
-  "summary": "Session 1 of 2 made the harvester output self-instructing for AI consumers. Finalized the previously-DRAFT spec (maintainer decisions: totalSessions=2 confirmed, editor-hosting open decision deferred to Session 2, NO new manifest schema field). Added section 3 'Workflow for AI consumers' to docs/harvester/interpretation-guide.md by expanding the former section 3 'Reading order' into 3.2 and inserting 3.1 'The canonical consumer workflow: run -> feedback tools -> developer review' (keeping every existing section-2-6 cross-reference valid). 3.1 documents the canonical sequence (run -> read manifest.json with Summary/FileMap + verify counts -> identify-usage -> read object-use.json, do NOT re-derive the inventory by hand -> identify-cleanup -> read object-cleanup.json -> present *-checklist.json to the developer as authoritative intent), with exact commands/flags verified against the C# source and a prominent callout for the correct --in target (the per-database base dir .../AccessMetaData/<dbName>/ that contains ir/, not the --out root that yields 0 objects). Mirrored a concise 'AI consumers: read the workflow first' pointer into the auto-emitted READ-ME-FIRST.md template (Pipeline.cs ReadMeFirstContent) and into both committed golden-corpus READ-ME-FIRST.md copies. Cross-provider verified VERIFIED on round 2 (gpt-5-4, OpenAI) after fixing a Minor self-contradiction and a Major premature-claim finding from round 1.",
+  "summary": "Session 2 of 2 (final) made the harvester's human-review step self-instructing and one-click. Authored docs/harvester/reviewing-the-feedback-artifacts.md (plain-language per-artifact developer guide: what each *-checklist.json / classification.json is, what the developer does, which zero-install editor opens it), added interpretation-guide §3.3 (mandatory AI-agent rule: explain each artifact + link the editor + copy-paste script, never hand over raw JSON), removed the stale 'forthcoming guide' promise from §3.1, and wired the editor URLs into the emitted READ-ME-FIRST.md template + both golden copies + docs index. Resolved the spec's editor-hosting open decision by cross-provider consensus (gpt-5-4 + gemini-pro, journaled in ai_router/consensus-decisions.jsonl): defer classification-editor GitHub Pages hosting (document local-open); confirm uat-checklist-editor for both checklists. Investigating open-decision (b) surfaced and fixed a real one-click-blocking bug: UsageChecklistWriter serialized object-use-checklist.json in camelCase, so it loaded as an EMPTY checklist in the PascalCase-only uat-checklist-editor; fixed the writer (split _camelOpts/_pascalOpts mirroring CleanupChecklistWriter), updated the unit test that had encoded the bug, and regenerated the two committed golden object-use-checklist.json samples via the hermetic identify-usage path (casing-only change, verified). Validated incrementally per a new lessons-learned tactic: solution build 0 errors; AccessHarvester.Pipeline.Tests (excl. COM probe) 684 passed/0 failed; the fragile Access-COM/PDF tier was intentionally not run since all changes are hermetic. Cross-provider verification (gpt-5-4) VERIFIED on round 1.",
   "files_changed": [
-    "docs/harvester/interpretation-guide.md",
+    "AccessHarvester.Pipeline/UsageIdentification/UsageChecklistWriter.cs",
+    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/UsageChecklistWriterTests.cs",
     "AccessHarvester.Core/Pipeline.cs",
+    "docs/harvester/reviewing-the-feedback-artifacts.md",
+    "docs/harvester/interpretation-guide.md",
+    "docs/README.md",
     "samples/GoldenOutput/HomeHealthCare/READ-ME-FIRST.md",
+    "samples/GoldenOutput/HomeHealthCare/usage/object-use-checklist.json",
     "samples/GoldenOutput/NorthwindDevEdition/READ-ME-FIRST.md",
+    "samples/GoldenOutput/NorthwindDevEdition/usage/object-use-checklist.json",
+    "docs/planning/lessons-learned.md",
+    "ai_router/consensus-decisions.jsonl",
     "docs/session-sets/harvester-consumer-workflow-instructions/spec.md",
-    "docs/session-sets/ROADMAP.md",
     "docs/session-sets/harvester-consumer-workflow-instructions/ai-assignment.md",
-    "docs/session-sets/harvester-consumer-workflow-instructions/session-state.json",
-    "docs/session-sets/harvester-consumer-workflow-instructions/activity-log.json",
-    "docs/session-sets/harvester-consumer-workflow-instructions/session-events.jsonl",
-    "docs/session-sets/harvester-consumer-workflow-instructions/session-reviews/session-001.md",
-    "docs/session-sets/harvester-consumer-workflow-instructions/disposition.json"
+    "docs/session-sets/harvester-consumer-workflow-instructions/change-log.md",
+    "docs/session-sets/harvester-consumer-workflow-instructions/session-reviews/session-002.md",
+    "docs/session-sets/harvester-consumer-workflow-instructions/disposition.json",
+    "docs/session-sets/harvester-consumer-workflow-instructions/session-state.json"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
@@ -21,10 +27,10 @@
     "engine": "claude-code",
     "provider": "anthropic",
     "model": "claude-opus-4-8",
-    "effort": "medium",
+    "effort": "low",
     "reason": {
       "code": "continue-current-trajectory",
-      "specifics": "Session 2 is a documentation-authoring session (developer-facing feedback-artifact guide + an explicit AI-agent 'always explain + link the editor' instruction + wiring editor URLs into the output) plus the one reasoned editor-hosting decision Session 1 deferred (publish classification-editor to GitHub Pages; confirm uat-checklist-editor opens both checklists). The same orchestrator that finalized the spec and authored 3.1 carries that context; routed sub-tasks pick cheaper balanced-writer models per ai-assignment.md. Resolve the editor decision via cross-provider consensus before any AskUserQuestion."
+      "specifics": "Routed recommendation (gemini-pro, do-not-self-opine): start the sanitize-against-HomeHealthCare timeout investigative spike next — reliability before features, the ordering this arc just validated. Re-measure FIRST: the just-closed harvester-access-com-graceful-shutdown set hardened AccessComSession and may have resolved the timeout as a side effect, in which case the spike closes with a documentation note and no code work. No spec required (goal already documented in lessons-learned.md). harvester-sql-migration-generator is the capstone after, needs its own spec, and a belongs-here-vs-future-migration-repo check. The routed call suggested an ultra-cheap diagnostic model on pure cost grounds, but a sanitize/OLE-DB/COM diagnostic that must comprehend this repo's extraction code needs a capable model on a Windows+Access host; start at effort=low (cheap re-measure) and escalate only if the timeout reproduces."
     }
   },
   "blockers": []

@@ -47,7 +47,8 @@
 |---|---|---|
 | `[x]` | [`harvester-report-baseline-capture`](harvester-report-baseline-capture/change-log.md) | Closed 2026-05-31. Recovered Session 3 honestly after a bad prior closeout attempt: `report-baseline` now stays aggregates-first, optional PDF render runs only after aggregate success, and the shipped docs/help text match the runtime contract. The committed golden corpus + regression gate + `READ-ME-FIRST` propagation remain explicitly deferred to the named follow-up stub [`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/spec.md). |
 | `[x]` | [`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/change-log.md) | Closed 2026-06-01. Committed the canonical `reports-baseline/` corpus for HomeHealthCare and Northwind, wired those artifacts into the canonical regression gate, repaired the report-baseline CLI teardown path in `CliInvoker`, and updated both fixture guides so downstream agents can discover the new artifact tier. |
-| `[x]` | [`harvester-access-com-graceful-shutdown`](harvester-access-com-graceful-shutdown/change-log.md) | Closed 2026-06-01 (maintainer: claude-code). Root-cause fix for the on-deck `harvester-parallel-com-test-cleanup` candidate: hardened the single COM chokepoint `AccessComSession` to capture its Access PID up front (via `hWndAccessApp` -> `GetWindowThreadProcessId`) and force-kill only that exact PID if a graceful `Quit()` leaves a zombie `msaccess.exe`. Session 1 added the `IProcessController` seam + exact-PID reaper under 9 hermetic unit tests; Session 2 verified on a real Windows+Access host that the full COM/PDF integration tier (56/56) leaves **zero orphaned `msaccess.exe`/`testhost`** (process census 0/0), simplified the blunt `CliInvoker` `taskkill` teardown, fixed a pre-existing parallel-COM file-lock race (added three Pipeline classes to the serializing collection), and wired `docs/access-com-zombie-cleanup.md` into `project-guidance.md` + the three agent files. **Absorbs** the on-deck `harvester-parallel-com-test-cleanup` candidate. Next set (routed): [`harvester-sql-migration-generator`](harvester-access-com-graceful-shutdown/next-session-set-recommendation.md) — its "until CI is reliable" deferral is now satisfied. |
+| `[x]` | [`harvester-access-com-graceful-shutdown`](harvester-access-com-graceful-shutdown/change-log.md) | Closed 2026-06-01 (maintainer: claude-code). Root-cause fix for the on-deck `harvester-parallel-com-test-cleanup` candidate: hardened the single COM chokepoint `AccessComSession` to capture its Access PID up front (via `hWndAccessApp` -> `GetWindowThreadProcessId`) and force-kill only that exact PID if a graceful `Quit()` leaves a zombie `msaccess.exe`. Session 1 added the `IProcessController` seam + exact-PID reaper under 9 hermetic unit tests; Session 2 verified on a real Windows+Access host that the full COM/PDF integration tier (56/56) leaves **zero orphaned `msaccess.exe`/`testhost`** (process census 0/0), simplified the blunt `CliInvoker` `taskkill` teardown, fixed a pre-existing parallel-COM file-lock race (added three Pipeline classes to the serializing collection), and wired `docs/access-com-zombie-cleanup.md` into `project-guidance.md` + the three agent files. **Absorbs** the on-deck `harvester-parallel-com-test-cleanup` candidate. |
+| `[x]` | [`harvester-consumer-workflow-instructions`](harvester-consumer-workflow-instructions/change-log.md) | Closed 2026-06-01 (maintainer: claude-code). Made the harvester output self-instructing for AI consumers: interpretation-guide §3.1 canonical workflow + §3.3 mandatory "explain the artifacts + link the editor, never hand over raw JSON" rule, a plain-language developer guide [`reviewing-the-feedback-artifacts.md`](../harvester/reviewing-the-feedback-artifacts.md), and editor URLs wired into `READ-ME-FIRST.md`. Resolved the editor-hosting open decision by cross-provider consensus (defer classification-editor hosting; document local-open). Fixed a real one-click-blocking bug: `object-use-checklist.json` was emitted camelCase and loaded empty in the PascalCase-only uat-checklist-editor — fixed `UsageChecklistWriter` + test + regenerated golden samples. Both sessions VERIFIED first round. |
 
 Phase 4 closed [2026-05-29](harvester-cli-distribution/change-log.md); the
 most recent maintenance set
@@ -61,22 +62,27 @@ shipped `report-baseline` contract. The follow-up set
 closed 2026-06-01, landing the deferred golden corpus, regression gate,
 fixture-guide propagation, and Windows-specific regression-harness cleanup
 for the CLI-backed validation path. The sibling
-[`harvester-consumer-workflow-instructions`](harvester-consumer-workflow-instructions/spec.md)
-was finalized 2026-06-01 (maintainer: claude-code) and is in progress —
-making the harvester output self-instructing so a consuming AI agent
-discovers the `identify-usage` / `identify-cleanup` feedback workflow, and
-giving developers a plain-language guide to the feedback artifacts.
+[`harvester-consumer-workflow-instructions`](harvester-consumer-workflow-instructions/change-log.md)
+closed 2026-06-01 (maintainer: claude-code) — making the harvester output
+self-instructing so a consuming AI agent discovers the `identify-usage` /
+`identify-cleanup` feedback workflow, giving developers a plain-language guide
+to the feedback artifacts, and fixing a checklist-casing bug that made the
+usage checklist load empty in the editor. The COM/zombie fragility it surfaced
+mid-session was fixed by the now-closed
+[`harvester-access-com-graceful-shutdown`](harvester-access-com-graceful-shutdown/change-log.md).
 
-
-The on-deck `harvester-parallel-com-test-cleanup` candidate
-([recommendation](harvester-manifest-index-and-batch-readiness/next-session-set-recommendation.md))
-is now **absorbed** by the in-progress
-[`harvester-access-com-graceful-shutdown`](harvester-access-com-graceful-shutdown/spec.md),
-which fixes the same parallel-COM zombie flake at the root cause (the
-`AccessComSession` COM-lifecycle chokepoint) rather than papering over it
-with a blunt teardown. `harvester-sql-migration-generator`
+The on-deck `harvester-parallel-com-test-cleanup` candidate is **absorbed** by
+the closed `harvester-access-com-graceful-shutdown` (root-cause fix at the
+`AccessComSession` chokepoint). **Next up (routed recommendation, 2026-06-01):**
+the **`sanitize`-against-HomeHealthCare timeout investigative spike** documented
+in [`lessons-learned.md`](../planning/lessons-learned.md) — reliability before
+features, the ordering this arc just validated. *Re-measure first:* the COM
+graceful-shutdown hardening may have resolved the timeout as a side effect, in
+which case the spike closes with a documentation note; no spec required. The
+feature capstone `harvester-sql-migration-generator`
 ([`harvester-cli-distribution`'s recommendation](harvester-cli-distribution/next-session-set-recommendation.md))
-is feature work, not maintenance — defer until the CI is reliable.
+follows the spike — its "until CI is reliable" deferral is now satisfied; it
+needs its own spec plus a belongs-here-vs-future-migration-repo check.
 
 ---
 
