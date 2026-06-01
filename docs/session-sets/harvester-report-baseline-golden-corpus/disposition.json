@@ -1,0 +1,35 @@
+{
+  "status": "in-progress",
+  "summary": "Session 1 of 2 complete. The report-baseline path now preloads saved-query SQL, threads it through the runner/service input, deterministically substitutes the documented Northwind reportParameterStartDate()/reportParameterEndDate() defaults, and records the derived dates in aggregates provenance. Focused report-baseline unit tests passed (26/26), the live Northwind unattended probe now captures rptInvoice + rptSalesByEmployee + rptSalesByProduct with ExitCode=0, and cross-provider verification on gemini-pro returned VERIFIED with no issues.",
+  "files_changed": [
+    "AccessHarvester.Core/Com/AccessReportSpecReader.cs",
+    "AccessHarvester.Core/ReportBaseline/RecordSourceResolver.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportAggregateInput.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportBaselineService.cs",
+    "AccessHarvester.Core/ReportBaseline/ReportLiveSpec.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/RecordSourceResolverTests.cs",
+    "tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineServiceTests.cs",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/spec.md",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/session-state.json",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/session-events.jsonl",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/activity-log.json",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/ai-assignment.md",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/next-orchestrator-recommendation-session-2.md",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/session-reviews/session-001.md",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/disposition.json"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "effort": "medium",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 is mostly mechanical corpus commits, regression-harness wiring, and fixture-doc updates after the core SQL rewrite risk was retired in Session 1."
+    }
+  },
+  "blockers": []
+}
