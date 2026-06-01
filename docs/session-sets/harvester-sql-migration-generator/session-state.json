@@ -6,9 +6,9 @@
     {
       "number": 1,
       "title": "Input contract + Access->SQL Server DDL generation",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-01T15:59:28.897926-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-01T16:40:07.974956-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
