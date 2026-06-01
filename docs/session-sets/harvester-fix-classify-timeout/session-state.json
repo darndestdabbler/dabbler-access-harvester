@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "harvester-fix-classify-timeout",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Reproduce, Instrument, Root-Cause",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Remediate + Verify + Closeout",
+      "status": "not-started"
+    }
+  ]
+}
