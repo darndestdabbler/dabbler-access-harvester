@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-consumer-workflow-instructions",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -23,9 +23,9 @@
     {
       "number": 2,
       "title": "Session 2",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-01T07:58:59.484627-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-01T10:31:47.754823-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
