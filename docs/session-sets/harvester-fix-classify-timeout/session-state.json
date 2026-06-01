@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-fix-classify-timeout",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -23,9 +23,9 @@
     {
       "number": 2,
       "title": "Remediate + Verify + Closeout",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-01T15:31:58.397838-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-01T15:52:46.774327-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
