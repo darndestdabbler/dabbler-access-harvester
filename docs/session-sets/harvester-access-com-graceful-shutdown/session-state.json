@@ -6,9 +6,9 @@
     {
       "number": 1,
       "title": "Harden AccessComSession with PID capture + force-kill failsafe (hermetic)",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-01T08:57:36.821936-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-01T09:21:39.859034-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
