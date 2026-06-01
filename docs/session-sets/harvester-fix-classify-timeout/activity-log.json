@@ -1,0 +1,25 @@
+{
+  "sessionSetName": "harvester-fix-classify-timeout",
+  "createdDate": "2026-06-01T14:21:02.621632-04:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/reproduce-timeout",
+      "dateTime": "2026-06-01T14:21:02.623924-04:00",
+      "description": "Reproduced: the classify-against-HomeHealthCare COM test timed out at 240s in both the batch run and a targeted retry during the prior set's re-measurement (2026-06-01); persistent and deterministic.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/instrument-classify-path",
+      "dateTime": "2026-06-01T14:21:02.623924-04:00",
+      "description": "Static analysis of OleDbValueSampler + IR-based query-volume bound. Findings: (1) the OLE DB connection is opened ONCE and reused for the whole scan -- connection-per-call hypothesis RULED OUT. (2) Per non-key data column the sampler runs 3 queries: null-count, cardinality via COUNT(*) over a SELECT DISTINCT subquery (no index help on Jet/ACE -- prime suspect), and a TOP-200 value sample; plus 1 COUNT(*) per table. (3) Harvested HomeHealthCare IR has only 13 tables / 93 columns (~292 queries) -- the spec's 'hundreds of tables' claim is UNVERIFIED/likely wrong, so the cost is per-query (the DISTINCT cardinality on larger tables), not raw query volume. Remaining: a per-phase timed run to attribute wall-clock and quantify magnitude before fix-vs-quarantine is chosen.",
+      "status": "in-progress",
+      "routedApiCalls": []
+    }
+  ]
+}

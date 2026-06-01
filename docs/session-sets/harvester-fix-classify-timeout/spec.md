@@ -52,16 +52,24 @@ COM-tier run ambiguous (`was it my change, or the usual timeout?`) and
 risks numbing the orchestrator to a real regression (per
 `lessons-learned.md` → "SanitizeCommandTests.HomeHealthCare Timeout…").
 
-**Likely root-cause area (to confirm in Session 1, not assert):** `classify`
-samples up to `ScanConfig.ValueSampleSize = 200` values per **non-key data
-column across every table** via `AccessHarvester.Core.Com.OleDbValueSampler`
-(behind `IValueSampler.Sample`). On `HomeHealthCare.accdb` (hundreds of
-tables) that is a very large number of per-column samples; if each sample
-opens its own OLE DB connection / round-trip, the connection-per-call
-overhead alone could dominate. Other candidates: OLE DB connection-pool
-exhaustion, or COM/session teardown cost. Per the repo convention "Do Not
-Present An Inferred Root Cause As Fact Without Verifying It", Session 1
-must attribute the wall-clock with evidence before any fix is chosen.
+**Likely root-cause area (Session-1 interim finding — magnitude still to be
+measured):** `classify` runs, per **non-key data column**, three OLE DB
+queries via `AccessHarvester.Core.Com.OleDbValueSampler`: a null-count, a
+**cardinality count over a `SELECT DISTINCT` subquery**, and a `TOP 200`
+value sample (`ScanConfig.ValueSampleSize = 200`); plus one `COUNT(*)` per
+table. Two hypotheses are already **ruled out / corrected** by reading the
+code and the harvested schema: (a) the OLE DB connection is opened **once and
+reused** for the whole scan, so it is *not* connection-per-call; (b) the
+harvested HomeHealthCare schema is **13 tables / 93 columns** (~292 queries),
+**not** "hundreds of tables" — so raw query *volume* is not the driver. The
+prime remaining suspect is the **per-query cost of the DISTINCT-subquery
+cardinality count**, which Jet/ACE evaluates with no index (full O(rows)
+distinct materialization per column) and which is pathological on any table
+with substantial row counts. Per the repo convention "Do Not Present An
+Inferred Root Cause As Fact Without Verifying It", Session 1 still owes a
+**per-phase timed run** attributing the 240 s across the four query kinds
+before a fix is chosen (and a check of how many tables the *schema reader*
+actually enumerates vs. the 13 in the harvested IR).
 
 ## Scope
 
