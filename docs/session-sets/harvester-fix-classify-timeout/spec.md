@@ -52,24 +52,27 @@ COM-tier run ambiguous (`was it my change, or the usual timeout?`) and
 risks numbing the orchestrator to a real regression (per
 `lessons-learned.md` → "SanitizeCommandTests.HomeHealthCare Timeout…").
 
-**Likely root-cause area (Session-1 interim finding — magnitude still to be
-measured):** `classify` runs, per **non-key data column**, three OLE DB
-queries via `AccessHarvester.Core.Com.OleDbValueSampler`: a null-count, a
-**cardinality count over a `SELECT DISTINCT` subquery**, and a `TOP 200`
-value sample (`ScanConfig.ValueSampleSize = 200`); plus one `COUNT(*)` per
-table. Two hypotheses are already **ruled out / corrected** by reading the
-code and the harvested schema: (a) the OLE DB connection is opened **once and
-reused** for the whole scan, so it is *not* connection-per-call; (b) the
-harvested HomeHealthCare schema is **13 tables / 93 columns** (~292 queries),
-**not** "hundreds of tables" — so raw query *volume* is not the driver. The
-prime remaining suspect is the **per-query cost of the DISTINCT-subquery
-cardinality count**, which Jet/ACE evaluates with no index (full O(rows)
-distinct materialization per column) and which is pathological on any table
-with substantial row counts. Per the repo convention "Do Not Present An
-Inferred Root Cause As Fact Without Verifying It", Session 1 still owes a
-**per-phase timed run** attributing the 240 s across the four query kinds
-before a fix is chosen (and a check of how many tables the *schema reader*
-actually enumerates vs. the 13 in the harvested IR).
+**ROOT CAUSE — established by evidence in Session 1 (2026-06-01); this
+section's earlier value-sampling hypothesis is OVERTURNED.** See
+[`root-cause-findings.md`](root-cause-findings.md) for the full evidence.
+Summary: the `classify` work completes in **~6.9 s** (schema read 6.4 s, of
+which the DAO/Access-COM augmentation is 6.35 s; value sampling **0.16 s**).
+The 240 s timeout is **not** product compute latency and **not** the
+`SELECT DISTINCT` cardinality count (all 93 cardinality queries = 0.06 s,
+max 2 ms; the fixture is 13 tables / 93 columns, largest table 62 rows).
+The real failure: the **`classify` CLI *process* never terminates** — after
+writing its output files it **wedges in native/runtime process shutdown**
+(consistent with COM un-initialization following the Access COM interop; the
+exact native frame was not captured), with **no surviving `msaccess.exe`**
+(the graceful-shutdown hardening reaps the Access child mid-work; this is a
+separate, CLI-process-level wedge). The test fails because
+`CliInvoker.RunWithTimeout` blocks on `proc.WaitForExit(240000)`. Probes
+confirmed `Environment.Exit` still wedges (it runs the same managed→native
+finalizer / COM-un-init shutdown path) while a hard `TerminateProcess` after
+flushing output exits cleanly in 7 s with the correct exit code and no
+zombie — consistent with COM un-initialization, though the exact native frame
+was not captured. So the remediation target is
+**CLI process teardown**, not `OleDbValueSampler` / `ValueSampleSize`.
 
 ## Scope
 
@@ -148,20 +151,40 @@ confirm the path before Session 2 implements it.
 
 ### Session 2 of 2: Remediate + Verify + Closeout
 
+**Path chosen by the human at Session-1 close (2026-06-01):** Option 2,
+*scoped* — a flush-then-`TerminateProcess(exitCode)` shutdown guard scoped to
+the COM-using command path(s), NOT unconditional at `Main` for every
+subcommand (narrows the cross-subcommand blast radius gpt-5-4 flagged).
+**Fallback:** Option 3 (`Skip.If` quarantine + issue link) if verification
+surfaces a blast-radius / buffered-sink problem with the scoped exit. The
+**E5 DAO `Property not found` regression is folded in** (see below).
+
 **Steps:**
-1. Implement the Session-1-chosen remediation: either the focused
-   performance fix (bringing the test green within budget) or the
-   `Skip.If` quarantine with a specific reason + issue link.
-2. Verify the `AccessHarvester.Integration` COM tier is green-or-skip
+1. Implement the scoped CLI-process-teardown fix so `classify` (and the other
+   COM-using subcommands sharing the path) flush stdout/stderr and hard-exit
+   with the correct exit code instead of wedging in COM un-init. Confirm the
+   process exits in ~7 s with the right exit code and leaves no orphaned
+   `AccessHarvester.exe`. Must not change `classify`'s output contract,
+   `classification-schema.json`, or the sampled-statistics semantics.
+2. **Fold-in (E5):** add the "Property not found" HRESULT to
+   `OleDbDaoSchemaReader.DaoPropertyAbsentHResults` so the absent-property
+   case is caught at the inner `catch … when` and no longer recorded as 93
+   `SchemaReadError` degradations (which currently force exit code 3 on the
+   rebuilt HomeHealthCare fixture). Add/adjust a hermetic test for the
+   absent-property HRESULT mapping.
+3. Verify the `AccessHarvester.Integration` COM tier is green-or-skip
    (run it incrementally per the Testing Conventions; read the TRX for
-   truth; reap any wedged `testhost` via WMI).
-3. Update `lessons-learned.md` (the sanitize/classify-timeout entry) and
+   truth; reap any wedged `testhost` / `AccessHarvester.exe` via WMI
+   `Win32_Process.Terminate`).
+4. Update `lessons-learned.md` (the sanitize/classify-timeout entry) and
    the ROADMAP with the outcome; run focused validation, closeout, and the
    Step 9 reorganization review.
 
-**Touches (depends on the chosen path):**
-`AccessHarvester.Core/Com/OleDbValueSampler.cs` (fix path) **or**
-`tests/AccessHarvester.Integration/Cli/ClassifyCommandTests.cs` (quarantine)
+**Touches (per the chosen path):**
+`AccessHarvester.Cli/Program.cs` (scoped flush-then-terminate shutdown guard)
+`AccessHarvester.Core/Com/OleDbDaoSchemaReader.cs` (E5 HRESULT fold-in)
+`tests/AccessHarvester.Integration/Cli/ClassifyCommandTests.cs` (only if the
+quarantine fallback is taken)
 `docs/planning/lessons-learned.md`
 `docs/session-sets/ROADMAP.md`
 

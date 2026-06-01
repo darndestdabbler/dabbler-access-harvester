@@ -17,9 +17,22 @@
       "stepNumber": 2,
       "stepKey": "session-1/instrument-classify-path",
       "dateTime": "2026-06-01T14:21:02.623924-04:00",
-      "description": "Static analysis of OleDbValueSampler + IR-based query-volume bound. Findings: (1) the OLE DB connection is opened ONCE and reused for the whole scan -- connection-per-call hypothesis RULED OUT. (2) Per non-key data column the sampler runs 3 queries: null-count, cardinality via COUNT(*) over a SELECT DISTINCT subquery (no index help on Jet/ACE -- prime suspect), and a TOP-200 value sample; plus 1 COUNT(*) per table. (3) Harvested HomeHealthCare IR has only 13 tables / 93 columns (~292 queries) -- the spec's 'hundreds of tables' claim is UNVERIFIED/likely wrong, so the cost is per-query (the DISTINCT cardinality on larger tables), not raw query volume. Remaining: a per-phase timed run to attribute wall-clock and quantify magnitude before fix-vs-quarantine is chosen.",
-      "status": "in-progress",
+      "description": "Per-phase timed instrumentation completed (session-1-timing-evidence.md). Reproduced the classify path in-process: Phase A schema read 6.42s (of which DAO/Access-COM augmentation 6.35s), Phase B value sampling 0.16s, overall 6.87s. The spec's prime suspect (DISTINCT-subquery cardinality) is DISPROVEN: all 93 cardinality queries total 0.06s (max 2ms); fixture is 13 tables/93 cols, largest 62 rows. Then reproduced the REAL failure: the classify CLI *process* never exits (242s WaitForExit timeout) -- it wedges in native COM un-init at managed shutdown AFTER writing correct output, with no surviving msaccess.exe (accumulated 4 live AccessHarvester.exe zombies, reaped only by WMI Win32_Process.Terminate). dotnet-stack could not attach (native wedge). Fix-direction probes: Environment.Exit does NOT help; hard TerminateProcess after flush exits cleanly in 7s with correct exit code and no zombie.",
+      "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/root-cause-and-recommendation",
+      "dateTime": "2026-06-01T19:30:00.000000-04:00",
+      "description": "Authored root-cause-findings.md (evidence-anchored, spec premise overturned) and ai-assignment.md (routed analysis). Root cause: classify CLI process wedges in native COM un-initialization at managed shutdown after completing all work (~7s). Routed a cross-provider consensus on fix-vs-quarantine: gpt-5-4 -> Option 3 (quarantine for the bounded spike, blast-radius concern), gemini-pro -> Option 2 (hard-terminate, fixes test+consumer). Both confirmed the root cause sound. Split escalated to the human, who chose Option 2 SCOPED (flush-then-TerminateProcess on the COM command path, quarantine fallback) and folded in the E5 'Property not found' DAO HRESULT fix. Spec Session 2 + likely-root-cause-area corrected to match the evidence.",
+      "status": "complete",
+      "routedApiCalls": [
+        {"model": "gpt-5-4", "taskType": "analysis", "purpose": "fix-vs-quarantine consensus #1", "costUsd": 0.0519},
+        {"model": "gemini-pro", "taskType": "analysis", "purpose": "fix-vs-quarantine consensus #2", "costUsd": 0.0092},
+        {"model": "gemini-pro", "taskType": "analysis", "purpose": "ai-assignment.md authoring", "costUsd": 0.0077}
+      ]
     }
   ]
 }

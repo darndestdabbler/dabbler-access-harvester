@@ -1,0 +1,31 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 2 (diagnosis) root-caused the classify-against-HomeHealthCare 240s test timeout with evidence and OVERTURNED the spec's premise. A faithful in-process timing harness (since deleted) showed the classify work completes in ~6.9s (schema read 6.42s, of which DAO/Access-COM augmentation 6.35s; value sampling 0.16s) -- the spec's prime suspect, the SELECT DISTINCT cardinality, totals 0.06s across all 93 columns (the fixture is 13 tables/93 cols, largest 62 rows), so it is disproven. Running the real failing test in true isolation reproduced the 240s timeout as `CLI process did not exit within 240000ms`: the classify CLI process completes all work and writes its output, then wedges in native/runtime process shutdown (consistent with COM un-initialization after the Access COM interop; exact native frame not captured) with NO surviving msaccess.exe -- runs accumulated 4 simultaneous live AccessHarvester.exe zombies, reapable only by WMI Win32_Process.Terminate; dotnet-stack could not attach (native wedge). Two fix-direction probes (reverted): Environment.Exit still wedges (runs the same shutdown path) while a hard TerminateProcess after flushing output exits cleanly in 7s with the correct exit code and no zombie. Routed a cross-provider consensus on fix-vs-quarantine (gpt-5-4 -> quarantine; gemini-pro -> hard-terminate; both confirmed the root cause sound); the split was escalated to the human, who chose Option 2 SCOPED (flush-then-TerminateProcess on the COM command path, quarantine fallback) and folded in the E5 'Property not found' DAO HRESULT regression. Cross-provider session verification ran 3 rounds (gpt-5-4); substance VERIFIED throughout (root cause sound, spec corrections accurate); the only residual was wording, fixed by separating proven facts from the COM-uninit inference -- the final round's prescribed wording was accepted and applied verbatim after the 2-retry budget was exhausted. No production code changed this session; deliverables are diagnostic docs plus spec corrections. Orchestrated by Claude Code (Opus 4.8).",
+  "files_changed": [
+    "docs/session-sets/harvester-fix-classify-timeout/root-cause-findings.md",
+    "docs/session-sets/harvester-fix-classify-timeout/session-1-timing-evidence.md",
+    "docs/session-sets/harvester-fix-classify-timeout/ai-assignment.md",
+    "docs/session-sets/harvester-fix-classify-timeout/decision-consensus-gpt-5-4.md",
+    "docs/session-sets/harvester-fix-classify-timeout/decision-consensus-gemini-pro.md",
+    "docs/session-sets/harvester-fix-classify-timeout/spec.md",
+    "docs/session-sets/harvester-fix-classify-timeout/activity-log.json",
+    "docs/session-sets/harvester-fix-classify-timeout/session-events.jsonl",
+    "docs/session-sets/harvester-fix-classify-timeout/issue-logs/session-001.json",
+    "docs/session-sets/harvester-fix-classify-timeout/session-reviews/session-001.md",
+    "docs/session-sets/harvester-fix-classify-timeout/disposition.json",
+    "docs/session-sets/harvester-fix-classify-timeout/session-state.json"
+  ],
+  "verification_method": "api",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 implements the human-chosen Option-2-scoped CLI shutdown guard (flush-then-TerminateProcess on the COM command path in AccessHarvester.Cli/Program.cs) plus the folded-in E5 DAO HRESULT fix in OleDbDaoSchemaReader, then verifies the AccessHarvester.Integration COM tier green-or-skip. This is non-trivial COM/process-lifecycle code touching the fragile COM tier; the routed ai-assignment analysis recommends staying on Opus-class, and the gpt-5-4 verification override stays cross-provider for a Claude orchestrator. Precondition: a Windows host with Microsoft Access installed; reap any wedged AccessHarvester.exe/testhost via WMI Win32_Process.Terminate."
+    }
+  },
+  "blockers": []
+}

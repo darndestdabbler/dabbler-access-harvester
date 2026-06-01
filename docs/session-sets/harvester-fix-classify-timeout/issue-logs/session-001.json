@@ -1,0 +1,23 @@
+[
+  {
+    "severity": "Major",
+    "location": "root-cause-findings.md (mechanism)",
+    "summary": "Stated 'native COM un-initialization' as proven when evidence proves a native shutdown wedge consistent with COM teardown.",
+    "status": "fixed",
+    "resolution": "Reworded; added a 'proven vs inferred' Confidence section separating facts (E1-E4) from the COM-uninit inference."
+  },
+  {
+    "severity": "Minor",
+    "location": "root-cause-findings.md E3/E5",
+    "summary": "'known signature' / 'correct output' stronger than evidence.",
+    "status": "fixed",
+    "resolution": "Softened to 'matching the documented signature' and 'output files fully written (schema not re-asserted)'."
+  },
+  {
+    "severity": "Major",
+    "location": "spec corrections (deliverable 4)",
+    "summary": "Spec diff not shown to verifier, so the spec-corrections deliverable could not be verified.",
+    "status": "fixed",
+    "resolution": "Context gap, not a defect: the spec WAS corrected. Re-verifying round 2 with the corrected spec excerpt included."
+  }
+]
