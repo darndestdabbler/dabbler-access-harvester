@@ -1,0 +1,20 @@
+<Project>
+
+  <!--
+    Solution-wide product version. The harvester is shipped from the CLI
+    version output (DatabaseManifest.ResolveHarvesterVersion reads
+    AssemblyInformationalVersionAttribute, stripping the SourceLink +sha
+    suffix), and tools/publish/publish.ps1 reads that same version string
+    to name the release bundle. So this single value is the source of
+    truth for both the runtime version output and the GitHub Release
+    artifact name; bump it here when cutting a release tag.
+
+    History: v1.0.0 shipped while no Version property was set, relying on
+    the .NET SDK default of 1.0.0. v1.1.0 (report-baseline) is the first
+    release where the version is set explicitly.
+  -->
+  <PropertyGroup>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+
+</Project>
