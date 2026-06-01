@@ -77,10 +77,43 @@ identity-column handling.
 | 6. Code review | `handle-in-conversation` (per rule) | `sonnet` |
 | 7. Session verification | `route(task_type="session-verification")` | `gpt-5-4` (per rule) |
 
-*   **Actuals (filled after session)**: TBD
+*   **Actuals (Session 2)**:
+    *   **Orchestrator**: Claude Opus 4.8 (`claude-opus-4-8`), effort high.
+    *   **Routed cost**: ~$0.285 total — `session-verification` (gpt-5-4) R1 $0.224
+        + R2 $0.059; next-orchestrator `analysis` (gemini-pro) $0.002. Code review
+        handled in-conversation per the same-provider rule.
+    *   **Deviation from recommendation**: hermetic tests were authored
+        **in-conversation** rather than via routed `test-generation` — the surface
+        is brand-new and intricate (Tarjan SCC cycle detection, RFC 4180
+        NULL-vs-empty, typed INSERT literals) where a routed model that cannot see
+        the just-written code produces brittle/truncated tests; this is the
+        precedented "author in-conversation and disclose" path, disclosed in the
+        verification prompt. The R1 verifier judged the tests on merit and found
+        them strong (it flagged two missing regressions, both added).
+    *   **Verification verdict**: VERIFIED (gpt-5-4 Round 2). Round 1 returned
+        ISSUES_FOUND with 2 Major findings — (a) the cycle fallback conflated
+        cycle members with their downstream descendants and could misorder them;
+        (b) the NULL-vs-empty-string contract was unproven against the real
+        producer. Both fixed in-session: (a) replaced with Tarjan SCC +
+        condensation ordering (descendants of a cycle now load after it; only true
+        SCCs flagged) + a cycle-plus-downstream regression test; (b) documented the
+        real `"" -> NULL` collapse and pinned it with a real-`CsvWriter` round-trip
+        test (the producer change is out-of-scope sanitize-tier follow-up, which
+        the verifier explicitly agreed was not mandatory here). R2 VERIFIED, no
+        regressions. Final: 93 Migration tests, 777 hermetic Pipeline.Tests green.
+    *   **Note (refactor)**: Session 1's `SqlServerDdlGenerator` was refactored into
+        a shared `MigrationSchemaResolver` (single "what-survived" authority) +
+        `SqlServerDdlEmitter` (pure text), with `GenerateDdl` delegating; DDL output
+        is byte-identical (all 52 Session-1 DDL tests stayed green) so DDL/order/data
+        never drift.
 
-*   **Next-session recommendation**: Proceed to Session 3 — CLI wiring, end-to-end
-    emit, docs, and closeout.
+*   **Next-session recommendation (Session 3)**: Claude **Sonnet** (`claude-sonnet-4-6`),
+    effort medium — routed `analysis` (gemini-pro) confirms the Session-1 plan: the
+    work (CLI wiring, golden-script test, docs, closeout synthesis) is mechanical
+    integration where Opus would be overkill; change-log prose routes to
+    `summarization` (max_tier=1) regardless. Session 3 consumes
+    `SqlServerMigrationGenerator.Generate(inputs, openTableCsv)` and emits the
+    manifest from its merged degradation list.
 
 ## Session 3 of 3: CLI subcommand + end-to-end emit + docs + closeout
 

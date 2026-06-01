@@ -46,6 +46,29 @@ public enum MigrationDegradationKind
     /// was itself degraded out of its table).
     /// </summary>
     ForeignKeyDropped,
+
+    /// <summary>
+    /// A set of tables that form a foreign-key reference cycle, so no strict
+    /// parent-before-child load order exists. The tables are still emitted (in a
+    /// deterministic order) and flagged so a reviewer can defer/disable the
+    /// offending constraints during load.
+    /// </summary>
+    ForeignKeyCycle,
+
+    /// <summary>
+    /// A migrated table whose sanitized CSV data file is absent, so no data-load
+    /// (<c>INSERT</c>) statements could be emitted for it. The <c>CREATE TABLE</c>
+    /// still stands; only its rows are missing.
+    /// </summary>
+    MissingDataFile,
+
+    /// <summary>
+    /// A surviving schema column that is not loaded from the sanitized CSV — either
+    /// the CSV has no column for it, or its data (e.g. binary/OLE) cannot round-trip
+    /// through the text CSV. The column stays in the schema; it is simply omitted
+    /// from the generated <c>INSERT</c> column list.
+    /// </summary>
+    DataColumnOmitted,
 }
 
 /// <summary>

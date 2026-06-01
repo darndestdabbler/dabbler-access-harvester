@@ -23,10 +23,18 @@
     {
       "number": 2,
       "title": "Data-load + identity + FK-safe ordering",
-      "status": "not-started",
-      "startedAt": null,
+      "status": "in-progress",
+      "startedAt": "2026-06-01T18:23:33.042886-04:00",
       "completedAt": null,
-      "orchestrator": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "high",
+        "chatSessionId": null,
+        "checkedOutAt": "2026-06-01T18:23:33.042886-04:00",
+        "lastActivityAt": "2026-06-01T18:23:33.042886-04:00"
+      },
       "verificationVerdict": null
     },
     {

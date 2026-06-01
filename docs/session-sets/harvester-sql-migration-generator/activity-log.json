@@ -1,7 +1,7 @@
 {
   "sessionSetName": "harvester-sql-migration-generator",
   "createdDate": "2026-06-01T16:06:22.549926-04:00",
-  "totalSessions": 0,
+  "totalSessions": 3,
   "entries": [
     {
       "sessionNumber": 1,
@@ -70,6 +70,103 @@
           "costUsd": 0.12364750000000001
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/schema-resolver",
+      "dateTime": "2026-06-01T18:50:40.398865-04:00",
+      "description": "Extracted MigrationSchemaResolver + SqlServerDdlEmitter as the single resolved-schema authority; SqlServerDdlGenerator.GenerateDdl now delegates (DDL output byte-identical; 52 Session-1 DDL tests green).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/fk-safe-ordering",
+      "dateTime": "2026-06-01T18:50:40.399865-04:00",
+      "description": "Implemented TableDependencyOrderer: deterministic Kahn topological sort (parents before children), multi-FK dedupe, self-reference ignored, cycle detection that still emits every table with a ForeignKeyCycle degradation.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/data-load",
+      "dateTime": "2026-06-01T18:50:40.400866-04:00",
+      "description": "Implemented CsvTableReader (RFC4180, unquoted-empty=NULL vs quoted-empty=''), SqlValueFormatter (typed INSERT literals), and SqlServerDataLoadGenerator (INSERTs from sanitized CSV honoring surviving columns; binary/OLE + missing-data flagged as DataColumnOmitted/MissingDataFile).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/identity-insert",
+      "dateTime": "2026-06-01T18:50:40.400866-04:00",
+      "description": "SET IDENTITY_INSERT ON/OFF framing emitted when the identity column is loaded from the CSV (explicit IDs, preserved or remapped upstream by sanitize per plan 5).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/combinator",
+      "dateTime": "2026-06-01T18:50:40.401864-04:00",
+      "description": "Added SqlServerMigrationGenerator combinator: DDL + FK-safe order + data-load from one resolved schema; merged + byte-stable degradation list.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/tests",
+      "dateTime": "2026-06-01T18:50:40.401864-04:00",
+      "description": "Authored 39 hermetic tests (orderer/cycle, CSV reader, value formatter, data-load identity/typing/escaping/degradations, end-to-end combinator). Build+test green: 91 Migration tests, 775 hermetic Pipeline.Tests total.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verification-r1",
+      "dateTime": "2026-06-01T18:55:04.409701-04:00",
+      "description": "Cross-provider session-verification round 1 via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 16588,
+          "outputTokens": 12179,
+          "costUsd": 0.224155
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verification-r2",
+      "dateTime": "2026-06-01T19:00:35.401028-04:00",
+      "description": "Cross-provider session-verification round 2 via gpt-5-4 after fixing 2 Major R1 findings.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6436,
+          "outputTokens": 2888,
+          "costUsd": 0.05941
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/closeout",
+      "dateTime": "2026-06-01T19:03:38.050959-04:00",
+      "description": "R2 VERIFIED. Reverted spurious samples/HomeHealthCare.accdb timestamp diff; removed TestResults. Authored disposition.json + ai-assignment.md Session 2 actuals + Session 3 (Sonnet) routed recommendation. Committing and pushing the work.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
