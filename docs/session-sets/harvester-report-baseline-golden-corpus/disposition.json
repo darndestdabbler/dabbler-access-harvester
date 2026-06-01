@@ -1,35 +1,24 @@
 {
-  "status": "in-progress",
-  "summary": "Session 1 of 2 complete. The report-baseline path now preloads saved-query SQL, threads it through the runner/service input, deterministically substitutes the documented Northwind reportParameterStartDate()/reportParameterEndDate() defaults, and records the derived dates in aggregates provenance. Focused report-baseline unit tests passed (26/26), the live Northwind unattended probe now captures rptInvoice + rptSalesByEmployee + rptSalesByProduct with ExitCode=0, and cross-provider verification on gemini-pro returned VERIFIED with no issues.",
+  "status": "completed",
+  "summary": "Session set harvester-report-baseline-golden-corpus completed all 2 sessions. Session 1 established deterministic Northwind date-helper support and live capture proof for the canonical unattended report subset. Session 2 committed the HomeHealthCare and Northwind `reports-baseline/` golden corpus, wired those artifacts into `CanonicalGoldenRegressionTests`, restored the report-baseline manifest placeholder contract, updated both fixture `READ-ME-FIRST.md` guides, and repaired `CliInvoker` so the report-baseline regression path no longer blocks on natural process exit or lingering child-process trees during local validation. Final validation used workspace-local TRX runs for both canonical fixtures; `HomeHealthCare_ReproducesGoldenOutput` and `NorthwindDevEdition_ReproducesGoldenOutput` both passed.",
   "files_changed": [
-    "AccessHarvester.Core/Com/AccessReportSpecReader.cs",
-    "AccessHarvester.Core/ReportBaseline/RecordSourceResolver.cs",
-    "AccessHarvester.Core/ReportBaseline/ReportAggregateInput.cs",
-    "AccessHarvester.Core/ReportBaseline/ReportBaselineRunner.cs",
-    "AccessHarvester.Core/ReportBaseline/ReportBaselineService.cs",
-    "AccessHarvester.Core/ReportBaseline/ReportLiveSpec.cs",
-    "tests/AccessHarvester.Tests/ReportBaseline/RecordSourceResolverTests.cs",
-    "tests/AccessHarvester.Tests/ReportBaseline/ReportBaselineServiceTests.cs",
-    "docs/session-sets/harvester-report-baseline-golden-corpus/spec.md",
+    "samples/GoldenOutput/HomeHealthCare/READ-ME-FIRST.md",
+    "samples/GoldenOutput/HomeHealthCare/reports-baseline/",
+    "samples/GoldenOutput/NorthwindDevEdition/READ-ME-FIRST.md",
+    "samples/GoldenOutput/NorthwindDevEdition/reports-baseline/",
+    "tests/AccessHarvester.Integration/Pipeline/CanonicalGoldenRegressionTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/GoldenNormalizer.cs",
+    "tests/AccessHarvester.Integration/TestSupport/CliInvoker.cs",
+    "docs/session-sets/ROADMAP.md",
+    "docs/session-sets/harvester-report-baseline-golden-corpus/change-log.md",
     "docs/session-sets/harvester-report-baseline-golden-corpus/session-state.json",
     "docs/session-sets/harvester-report-baseline-golden-corpus/session-events.jsonl",
     "docs/session-sets/harvester-report-baseline-golden-corpus/activity-log.json",
     "docs/session-sets/harvester-report-baseline-golden-corpus/ai-assignment.md",
-    "docs/session-sets/harvester-report-baseline-golden-corpus/next-orchestrator-recommendation-session-2.md",
-    "docs/session-sets/harvester-report-baseline-golden-corpus/session-reviews/session-001.md",
     "docs/session-sets/harvester-report-baseline-golden-corpus/disposition.json"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 2 is mostly mechanical corpus commits, regression-harness wiring, and fixture-doc updates after the core SQL rewrite risk was retired in Session 1."
-    }
-  },
+  "next_orchestrator": null,
   "blockers": []
 }

@@ -1,0 +1,27 @@
+{
+  "ReportName": "srptClientBudgets",
+  "RecordSource": "tblClientBudgets",
+  "RecordSourceKind": "TableOrQueryName",
+  "ResolvedSql": "SELECT * FROM [tblClientBudgets]",
+  "RowCount": 21,
+  "NumericColumns": [
+    "ClientBudgetID",
+    "ClientID",
+    "FiscalYear",
+    "AnnualBudget"
+  ],
+  "GrandTotals": {
+    "AnnualBudget": 637500,
+    "ClientBudgetID": 231,
+    "ClientID": 131,
+    "FiscalYear": 42514
+  },
+  "GroupLevels": [],
+  "Skipped": [],
+  "Provenance": {
+    "HarvesterVersion": "\u003CNORMALIZED:HarvesterVersion\u003E",
+    "AggregateContract": "RecordSourceResultSet",
+    "ContractNote": "Aggregates reflect the report\u0027s RecordSource query result set (executed via ACE OLE DB), not the rendered report\u0027s footer-control expressions. Parity comparisons must compare like-for-like.",
+    "ParametersUsed": {}
+  }
+}

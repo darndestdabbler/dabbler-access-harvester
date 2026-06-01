@@ -45,7 +45,7 @@ public sealed class AccessComSession : IDisposable
             Application?.Quit(2); // acQuitSaveNone
             if (Application is not null)
             {
-                Marshal.ReleaseComObject(Application);
+                Marshal.FinalReleaseComObject(Application);
             }
         }
         catch

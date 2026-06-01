@@ -80,6 +80,51 @@
           "costUsd": 0.0173
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/commit-report-baseline-goldens",
+      "dateTime": "2026-06-01T07:11:55.0638137-04:00",
+      "description": "Committed the normalized `reports-baseline/` golden corpus for the canonical HomeHealthCare and Northwind report subsets, including `baseline-manifest.json` plus per-report `aggregates.json` files.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/wire-regression-gate",
+      "dateTime": "2026-06-01T07:11:55.0638137-04:00",
+      "description": "Extended the canonical regression harness for report-baseline artifacts and repaired `CliInvoker` so the report-baseline CLI path no longer blocks on natural process exit, stream drain, or lingering child-process trees during validation.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/update-read-me-first",
+      "dateTime": "2026-06-01T07:11:55.0638137-04:00",
+      "description": "Updated both fixture `READ-ME-FIRST.md` guides so downstream agents know where the committed report baselines live and which canonical reports the golden corpus covers.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/closeout",
+      "dateTime": "2026-06-01T07:11:55.0638137-04:00",
+      "description": "Validated `CanonicalGoldenRegressionTests` via workspace-local TRX artifacts (`HomeHealthCare_ReproducesGoldenOutput` passed, `NorthwindDevEdition_ReproducesGoldenOutput` passed), then updated ROADMAP, disposition, and closeout metadata for Session 2.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/step-9-reorganization-review",
+      "dateTime": "2026-06-01T07:11:55.0638137-04:00",
+      "description": "Step 9 reorganization review complete. Scanned `docs/planning/project-guidance.md` and `docs/planning/lessons-learned.md`; no promotions, demotions, or relocations qualified. Existing guidance already covers the repeated COM/Access integration-test contention patterns, while the fresh `BaseOutputPath` plus TRX-authoritative wrapper workaround is still a single-context calibration note.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }

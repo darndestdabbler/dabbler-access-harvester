@@ -1,0 +1,31 @@
+{
+  "ReportName": "srptClientCurrentNeeds",
+  "RecordSource": "SELECT n.*, s.ServiceName FROM tblClientServiceNeeds AS n LEFT JOIN tblServices AS s ON n.ServiceID = s.ServiceID; ",
+  "RecordSourceKind": "InlineSql",
+  "ResolvedSql": "SELECT n.*, s.ServiceName FROM tblClientServiceNeeds AS n LEFT JOIN tblServices AS s ON n.ServiceID = s.ServiceID; ",
+  "RowCount": 62,
+  "NumericColumns": [
+    "ClientServiceNeedID",
+    "ClientID",
+    "ServiceID",
+    "FiscalYear",
+    "Priority",
+    "HoursPerWeek"
+  ],
+  "GrandTotals": {
+    "ClientID": 380,
+    "ClientServiceNeedID": 1953,
+    "FiscalYear": 125520,
+    "HoursPerWeek": 158,
+    "Priority": 151,
+    "ServiceID": 240
+  },
+  "GroupLevels": [],
+  "Skipped": [],
+  "Provenance": {
+    "HarvesterVersion": "\u003CNORMALIZED:HarvesterVersion\u003E",
+    "AggregateContract": "RecordSourceResultSet",
+    "ContractNote": "Aggregates reflect the report\u0027s RecordSource query result set (executed via ACE OLE DB), not the rendered report\u0027s footer-control expressions. Parity comparisons must compare like-for-like.",
+    "ParametersUsed": {}
+  }
+}

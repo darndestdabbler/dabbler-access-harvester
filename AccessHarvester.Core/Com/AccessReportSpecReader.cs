@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using AccessHarvester.Core.ReportBaseline;
 
@@ -40,10 +41,28 @@ public sealed class AccessReportSpecReader : IReportSource
     public IReadOnlyList<string> EnumerateAll()
     {
         var names = new List<string>();
-        dynamic allReports = _session.Application.CurrentProject.AllReports;
-        foreach (dynamic report in allReports)
+        dynamic? currentProject = null;
+        dynamic? allReports = null;
+        try
         {
-            names.Add((string)report.Name);
+            currentProject = _session.Application.CurrentProject;
+            allReports = currentProject.AllReports;
+            foreach (dynamic report in allReports)
+            {
+                try
+                {
+                    names.Add((string)report.Name);
+                }
+                finally
+                {
+                    ReleaseRcw(report);
+                }
+            }
+        }
+        finally
+        {
+            ReleaseRcw(allReports);
+            ReleaseRcw(currentProject);
         }
         names.Sort(StringComparer.Ordinal);
         return names;
@@ -61,9 +80,10 @@ public sealed class AccessReportSpecReader : IReportSource
             Type.Missing,
             AcHidden);
 
+        dynamic? report = null;
         try
         {
-            dynamic report = _session.Application.Reports[reportName];
+            report = _session.Application.Reports[reportName];
 
             string? recordSource = TryReadString(() => (string?)report.RecordSource);
             string? savedQuerySql = TryReadSavedQuerySql(recordSource);
@@ -75,7 +95,18 @@ public sealed class AccessReportSpecReader : IReportSource
             int count = TryReadInt(() => (int)report.GroupLevel.Count) ?? 0;
             for (int i = 0; i < count; i++)
             {
-                string? controlSource = TryReadString(() => (string?)report.GroupLevel(i).ControlSource);
+                dynamic? groupLevel = null;
+                string? controlSource;
+                try
+                {
+                    groupLevel = report.GroupLevel(i);
+                    controlSource = TryReadString(() => (string?)groupLevel.ControlSource);
+                }
+                finally
+                {
+                    ReleaseRcw(groupLevel);
+                }
+
                 if (string.IsNullOrEmpty(controlSource)) continue;
                 groupLevels.Add(new ReportGroupLevelKey
                 {
@@ -100,6 +131,7 @@ public sealed class AccessReportSpecReader : IReportSource
                 // Best-effort close; the caller's Application.Quit will
                 // discard any lingering state on session dispose.
             }
+            ReleaseRcw(report);
         }
     }
 
@@ -120,15 +152,31 @@ public sealed class AccessReportSpecReader : IReportSource
         if (string.IsNullOrWhiteSpace(recordSource))
             return null;
 
+        dynamic? currentDb = null;
+        dynamic? queryDefs = null;
+        dynamic? queryDef = null;
         try
         {
-            dynamic currentDb = _session.Application.CurrentDb();
-            dynamic queryDef = currentDb.QueryDefs[recordSource];
+            currentDb = _session.Application.CurrentDb();
+            queryDefs = currentDb.QueryDefs;
+            queryDef = queryDefs[recordSource];
             return TryReadString(() => (string?)queryDef.SQL);
         }
         catch
         {
             return null;
         }
+        finally
+        {
+            ReleaseRcw(queryDef);
+            ReleaseRcw(queryDefs);
+            ReleaseRcw(currentDb);
+        }
+    }
+
+    private static void ReleaseRcw(object? rcw)
+    {
+        if (rcw is null) return;
+        try { Marshal.FinalReleaseComObject(rcw); } catch { /* RCW already released */ }
     }
 }

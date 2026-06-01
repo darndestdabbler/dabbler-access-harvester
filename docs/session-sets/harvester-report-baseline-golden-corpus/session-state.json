@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-report-baseline-golden-corpus",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -23,10 +23,18 @@
     {
       "number": 2,
       "title": "Commit Corpus + Regression Gate + READ-ME-FIRST + Closeout",
-      "status": "not-started",
-      "startedAt": null,
-      "completedAt": null,
-      "orchestrator": null,
+      "status": "complete",
+      "startedAt": "2026-06-01T05:45:21.051657-04:00",
+      "completedAt": "2026-06-01T07:11:55.0638137-04:00",
+      "orchestrator": {
+        "engine": "github-copilot",
+        "provider": "openai",
+        "model": "gpt-5.4",
+        "effort": "medium",
+        "chatSessionId": null,
+        "checkedOutAt": "2026-06-01T03:36:53.138849-04:00",
+        "lastActivityAt": "2026-06-01T07:11:55.0638137-04:00"
+      },
       "verificationVerdict": null
     }
   ]

@@ -1,0 +1,22 @@
+{
+  "Database": "\u003CNORMALIZED:ReportBaseline.Database\u003E",
+  "HarvesterVersion": "\u003CNORMALIZED:HarvesterVersion\u003E",
+  "Reports": [
+    {
+      "Name": "srptClientBudgets",
+      "Status": "Captured",
+      "Paths": {
+        "aggregates": "srptClientBudgets/aggregates.json"
+      },
+      "Reason": null
+    },
+    {
+      "Name": "srptClientCurrentNeeds",
+      "Status": "Captured",
+      "Paths": {
+        "aggregates": "srptClientCurrentNeeds/aggregates.json"
+      },
+      "Reason": null
+    }
+  ]
+}

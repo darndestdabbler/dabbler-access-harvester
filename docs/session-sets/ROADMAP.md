@@ -46,6 +46,7 @@
 | Status | Slug | Why now |
 |---|---|---|
 | `[x]` | [`harvester-report-baseline-capture`](harvester-report-baseline-capture/change-log.md) | Closed 2026-05-31. Recovered Session 3 honestly after a bad prior closeout attempt: `report-baseline` now stays aggregates-first, optional PDF render runs only after aggregate success, and the shipped docs/help text match the runtime contract. The committed golden corpus + regression gate + `READ-ME-FIRST` propagation remain explicitly deferred to the named follow-up stub [`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/spec.md). |
+| `[x]` | [`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/change-log.md) | Closed 2026-06-01. Committed the canonical `reports-baseline/` corpus for HomeHealthCare and Northwind, wired those artifacts into the canonical regression gate, repaired the report-baseline CLI teardown path in `CliInvoker`, and updated both fixture guides so downstream agents can discover the new artifact tier. |
 
 Phase 4 closed [2026-05-29](harvester-cli-distribution/change-log.md); the
 most recent maintenance set
@@ -54,12 +55,14 @@ closed 2026-05-29 after answering the first real downstream consumer's six
 findings, and surfaced two consumption-triggered follow-ons. The first,
 [`harvester-report-baseline-capture`](harvester-report-baseline-capture/change-log.md),
 closed 2026-05-31 after repairing the Session 3 closeout and locking the
-shipped `report-baseline` contract. The follow-up stub
-[`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/spec.md)
-is on deck for the deferred lock-free aggregate capture + golden corpus /
-regression-gate work. The sibling
+shipped `report-baseline` contract. The follow-up set
+[`harvester-report-baseline-golden-corpus`](harvester-report-baseline-golden-corpus/change-log.md)
+closed 2026-06-01, landing the deferred golden corpus, regression gate,
+fixture-guide propagation, and Windows-specific regression-harness cleanup
+for the CLI-backed validation path. The sibling
 [`harvester-consumer-workflow-instructions`](harvester-consumer-workflow-instructions/spec.md)
 remains DRAFT, awaiting maintainer finalization.
+
 
 Other candidates remain on deck but are not active:
 [`harvester-parallel-com-test-cleanup`](harvester-manifest-index-and-batch-readiness/next-session-set-recommendation.md)
