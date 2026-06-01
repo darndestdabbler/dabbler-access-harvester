@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "harvester-report-displayed-total-parity",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Footer-Expression Display Totals (Core + capture proof)",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Corpus Regen + Regression + Optional PDF Spot-Check + Closeout",
+      "status": "not-started"
+    }
+  ]
+}
