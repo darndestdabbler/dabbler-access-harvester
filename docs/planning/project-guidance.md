@@ -123,6 +123,35 @@ applications:
   business already curates) when the consumer is downstream tooling
   that can ask for the curated answer directly.
 
+### Evidence Over Inference In Root-Cause Work
+
+A reasoned inference from source, config, or symptom is **not evidence**.
+For every factual claim a root-cause theory (or a fix that depends on a
+specific value) rests on, there is a command or check that proves or
+disproves it — run that check before writing the claim as fact, and mark
+anything you could not directly confirm as "inferred / not verified."
+
+This is non-trivial guidance for LLM orchestrators, which tend to narrate
+a plausible mechanism as established truth. Specific applications:
+
+- Capture concrete values empirically rather than asserting them. (This
+  set's E5 fix added the DAO HRESULT `0x800A0CC6` only after a probe
+  showed all 93 degradations actually carried it — not because 3270 was
+  the "obvious" code for "Property not found.")
+- Separate *proven* from *inferred* in findings docs and session reviews.
+  (Session 1's root-cause doc localized the wedge to native shutdown by
+  evidence but kept "COM apartment un-initialization" explicitly in the
+  inferred bucket because no native stack was captured.)
+- When the proof would be expensive and would not change the chosen
+  action, say so and proceed on the strong inference — but still label it.
+
+Promoted from `lessons-learned.md` → "Do Not Present An Inferred Root
+Cause As Fact Without Verifying It" on 2026-06-01 (after
+`harvester-fix-classify-timeout`, where the discipline overturned the
+spec's own premise and drove an empirically-captured fix). The
+lessons-learned entry is retained as the action-detail reference (the
+list-every-claim-and-name-its-check procedure).
+
 ### Testing Hierarchy
 
 Testing follows this order of preference:

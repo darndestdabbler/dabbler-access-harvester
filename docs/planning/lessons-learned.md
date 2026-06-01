@@ -169,6 +169,15 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Do Not Present An Inferred Root Cause As Fact Without Verifying It
 
+> **Promoted to `project-guidance.md` → Principles → "Evidence Over
+> Inference In Root-Cause Work"** on 2026-06-01 (after
+> `harvester-fix-classify-timeout`: Session 1 separated proven-vs-inferred
+> facts in `root-cause-findings.md` across 3 verifier rounds and overturned
+> the spec's own premise; Session 2 added the DAO HRESULT `0x800A0CC6` only
+> after a probe confirmed all 93 degradations carried it). Retained here as
+> the action-detail reference (the list-every-claim-and-name-its-check
+> procedure); the rule itself is now a Principle.
+
 - **Context:** Any user-reported symptom whose explanation depends
   on an assumed environmental, operational, or version condition.
 - **Failure or friction:** A plausible-sounding root cause was
@@ -1802,6 +1811,42 @@ reference; if it proves out twice in *this* repo, propose promotion to
   `AccessHarvester.Integration` will reliably fail one test against
   HomeHealthCare; do not let that mask a real regression by getting
   numb to the red.
+
+## A COM-Tier Test "Timeout" Is Not Automatically Slow Product Compute — Confirm The Process Actually Exits
+
+- **Context:** Any COM/CLI integration test that drives a child process
+  and asserts via a `proc.WaitForExit(budget)` wrapper (e.g.
+  `CliInvoker.RunWithTimeout`). First decisively hit in
+  `harvester-fix-classify-timeout` (2026-06-01).
+- **Failure or friction:** The spec (and three prior sets' notes)
+  assumed the 240s `classify`-against-HomeHealthCare timeout was slow
+  product compute — value sampling / `SELECT DISTINCT` cardinality — and
+  named `OleDbValueSampler` / `ValueSampleSize` as the remediation
+  target. Session 1's per-phase timing proved the actual work completes
+  in ~7s (sampling 0.16s; the suspected DISTINCT 0.06s total). The 240s
+  was the **CLI process never terminating**: it wrote all output, then
+  wedged in native process shutdown (consistent with COM apartment
+  un-init) — and a never-exiting process is **indistinguishable from a
+  slow one** through `WaitForExit`, which simply blocks until the budget
+  elapses either way.
+- **Lesson:** A `WaitForExit` timeout reports "the process had not exited
+  by T" — NOT "the work took longer than T." Before attributing a COM-tier
+  timeout to slow compute, confirm two separate things: (1) how long the
+  *work* takes (instrument the phases, or watch for the output/completion
+  artifacts), and (2) whether the *process* actually exits after the work.
+  When the work finishes fast but the process lingers, the fix is in
+  teardown/shutdown, not in the algorithm. A cheap tell: run the CLI
+  directly and watch for a completion log line + output files appearing
+  while the process stays alive (and check for accumulating zombie PIDs).
+- **Action for future sessions:** For any "X is slow / times out" COM-tier
+  report, first split wall-clock into work-time vs. exit-time before
+  picking a remediation target. If exit-time is the cost, look at the
+  process-shutdown path (finalizers / COM un-init); `Environment.Exit`
+  runs that same path and will not help, whereas a scoped flush-then-hard-
+  exit (see `AccessHarvester.Cli`'s `FinalizeExit`, gated on
+  `AccessComSession.ActivatedInThisProcess`) does. If a second COM-tier
+  set hits the same work-fast/exit-slow split, propose promoting this to a
+  Convention in `project-guidance.md`.
 
 ## Run Tests Incrementally By Project; Isolate The Access-COM / PDF Integration Tests
 
