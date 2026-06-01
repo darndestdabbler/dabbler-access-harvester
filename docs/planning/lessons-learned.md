@@ -1824,3 +1824,37 @@ reference; if it proves out twice in *this* repo, propose promotion to
      `project-guidance.md` and consider encoding the project split as
      named test "lanes" (a hermetic lane vs. a COM/PDF lane) the
      CLAUDE.md "Building & Testing" section points at directly.
+
+## Verify Docs Against The Tool's Actual Input Contract Before Pointing A Consumer At It
+
+- **Context:** Authoring consumer/output documentation that directs a developer
+  or AI agent to open an artifact (artifact X) in a specific tool (tool Y). First
+  hit in `harvester-consumer-workflow-instructions` Session 2 (2026-06-01), wiring
+  the `*-checklist.json` files to the uat-checklist-editor.
+- **Failure or friction:** The spec asserted, as a premise, that "the consumer's
+  run produced the `{projectName, review[…]}` shape the editor expects." That was
+  **backwards**: the uat-checklist-editor's committed `checklist-schema.json` and
+  its `index.html` parser both require **PascalCase** `{ "ProjectName", "Review" }`
+  and silently reset `Review` to `[]` when the key is absent. `object-use-checklist.json`
+  was being emitted camelCase, so it would have loaded as an **empty** checklist —
+  meaning documentation that said "open it in the editor" would have shipped a
+  one-click experience that silently does nothing. The mismatch was invisible from
+  the harvester side; it only surfaced by reading the *editor's* actual schema and
+  parser code.
+- **Lesson:** When docs or emitted output direct a consumer to open artifact X in
+  tool Y, do not assume the formats match — verify X against Y's real input
+  contract (its schema file, and if available the parser code), including casing,
+  required keys, and shape. A spec's stated premise about an external tool's format
+  is a hypothesis, not evidence (cf. "Do Not Present An Inferred Root Cause As Fact
+  Without Verifying It"). The cost of reading the other tool's schema is minutes;
+  the cost of shipping docs that point at a file the tool can't load is a broken
+  feature that looks finished.
+- **Action for future sessions:** Before writing "open <artifact> in <editor/tool>"
+  in any guide or emitted `READ-ME-FIRST` / output, open the tool's schema (and
+  parser if it is in-repo or a sibling repo) and confirm the harvester actually
+  produces that exact shape — field casing included. If they diverge, fixing the
+  producer is in scope even on a "documentation" session: the documentation is only
+  true if the artifact loads. Prefer a hermetic test that asserts the produced
+  artifact matches the consuming tool's required keys (as Session 2 did:
+  `object-use-checklist.json` must have PascalCase `ProjectName`/`Review`, not
+  camelCase `review`).
