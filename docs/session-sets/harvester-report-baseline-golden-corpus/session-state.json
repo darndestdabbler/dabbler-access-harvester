@@ -6,9 +6,9 @@
     {
       "number": 1,
       "title": "Deterministic Northwind Date-Helper Support + Capture Proof",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-05-31T18:13:09.057091-04:00",
-      "completedAt": null,
+      "completedAt": "2026-05-31T20:27:23.331521-04:00",
       "orchestrator": {
         "engine": "github-copilot",
         "provider": "openai",
@@ -18,7 +18,7 @@
         "checkedOutAt": "2026-05-31T18:13:09.057091-04:00",
         "lastActivityAt": "2026-05-31T18:13:09.057091-04:00"
       },
-      "verificationVerdict": null
+      "verificationVerdict": "VERIFIED"
     },
     {
       "number": 2,
