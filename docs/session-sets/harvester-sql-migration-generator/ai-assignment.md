@@ -140,8 +140,36 @@ performs project closeout.
 | 6. Code review | `handle-in-conversation` (per rule) | `sonnet` |
 | 7. Session verification | `route(task_type="session-verification")` | `gpt-5-4` (per rule) |
 
-*   **Actuals (filled after session)**: TBD
+*   **Actuals (Session 3)**:
+    *   **Orchestrator**: Claude Opus 4.8 (`claude-opus-4-8`), effort medium.
+        The routed Session-2 recommendation was Sonnet/medium; the human started
+        the session under the Opus-default orchestrator. The work was mechanical
+        integration + docs as predicted, so per the "when the orchestrator's model
+        matches the routing target, handle in-conversation" convention the CLI
+        wiring, golden test, and doc edits were authored in-conversation regardless
+        of tier; only verification (mandatory cross-provider) routed.
+    *   **Routed cost**: ~$0.29 total — all `session-verification` (gpt-5-4):
+        R1 $0.190 + R2 $0.070 + R3 $0.032. No other routed calls: the CLI subcommand,
+        golden test, and docs are mechanical integration the orchestrator handled
+        directly; change-log prose routed to `summarization` (max_tier=1, negligible).
+        Code review handled in-conversation per the same-provider rule.
+    *   **Deviation from recommendation**: orchestrator was Opus, not the recommended
+        Sonnet — a human-side engine choice, not a routing error. Net effect on cost
+        is nil: the substantive reasoning (verification) is cross-provider regardless
+        of orchestrator tier, and the in-conversation work would have been the same
+        on either tier.
+    *   **Verification verdict**: VERIFIED (gpt-5-4 Round 3). R1 ISSUES_FOUND with
+        2 findings (Major: `ParseOptions` silently accepted unknown `--options`, so a
+        `--data` typo degraded the migration instead of erroring; Minor: broad
+        `InvalidDataException` catch misattributed IR/CSV failures to the
+        classification). Both fixed; R2 ISSUES_FOUND with 1 Minor regression (the
+        scoped catch moved the classification read outside the command-level
+        try/catch, leaving non-parse read failures uncaught) — fixed by moving the
+        read back inside the main try with a tight nested catch. R3 VERIFIED, no
+        regressions. Final: AccessHarvester.Pipeline.Tests 787 hermetic green
+        (incl. 5 new `MigrationGoldenScriptTests`); `GenerateMigrationCommandTests`
+        4 green (COM-free `[Fact]`s).
 
 *   **Next-session recommendation**: The harvester development arc is complete.
     The repository becomes consumer-driven-only — new sets only on a concrete
-    downstream-consumer request.
+    downstream-consumer request. See `next-session-set-recommendation.md`.

@@ -1,42 +1,36 @@
 {
-  "status": "completed",
-  "summary": "Session 2 of 3 complete. Delivered the data-load half of generate-migration on the shared resolved-schema model. Refactored Session 1's SqlServerDdlGenerator into MigrationSchemaResolver (single authority on surviving columns/types/identity/PK + real enforced-FK edges + all degradations) and SqlServerDdlEmitter (pure text); GenerateDdl now delegates and the DDL output is byte-identical (all 52 Session-1 DDL tests + fixture stop-rule tests stayed green). New: TableDependencyOrderer (FK-safe load order via Tarjan SCC + deterministic Kahn over the condensation; only true multi-table SCCs flagged ForeignKeyCycle, descendants of a cycle still load after it; self-loops ignored); CsvTableReader (RFC 4180; unquoted-empty=NULL vs quoted-empty=''; documents + pins the real CsvWriter ''->NULL collapse); SqlValueFormatter (typed INSERT literals by DAO type with '-escaping, bit/date/guid quoting, binary flagged not-loadable); SqlServerDataLoadGenerator (INSERTs from the sanitized CSV in FK-safe order, SET IDENTITY_INSERT ON/OFF when the identity column is loaded, binary/OLE + missing-file + missing-column flagged DataColumnOmitted/MissingDataFile, never fabricated); SqlServerMigrationGenerator combinator (DDL + order + data + merged byte-stable degradations). IDENTITY framing keys off the identity column actually being present in the INSERT set (preserve-vs-remap was decided upstream by sanitize and is already baked into the CSV per plan section 5). Build green; AccessHarvester.Pipeline.Tests = 777 hermetic tests (0 failed, 0 skipped), incl. 93 Migration cases. Cross-provider verification: gpt-5-4 R1 ISSUES_FOUND (2 Major: cycle fallback misordered non-cycle descendants; NULL-vs-empty contract unproven against the real producer) -> both fixed in-session (Tarjan SCC + condensation ordering with a cycle-plus-downstream regression test; documented + pinned the real ''->NULL collapse via a real-CsvWriter round-trip test) -> R2 VERIFIED, no regressions.",
+  "status": "complete",
+  "summary": "Session 3 of 3 (final) ships the generate-migration CLI subcommand — the runnable product of the classify -> sanitize -> migrate pipeline and Phase 4 of the data-classification plan. GenerateMigrationCommand (COM-free; reads ir/ + reviewed classification.json + sanitize CSVs, never opens the .accdb) is wired into Program.cs dispatch (+ bare-file exclusion + usage/exit-code docs) with options --in/--out/--classification/--data/--json-status, emitting schema.sql (CREATE TABLE + PK + FK) + data.sql (FK-safe INSERT data-load with SET IDENTITY_INSERT framing) + migration-manifest.json (emitted files + table load order + every honestly-flagged degradation) under <out>/<database-slug>/. Exit codes: 0 clean / 1 usage / 2 unexpected / 3 completed-with-degradations. End-to-end emit against the committed HomeHealthCare golden IR plus a small committed sanitize CSV slice (tlkpStates non-identity FK-parent, tlkpPlanStatuses identity) produced committed golden schema.sql + data.sql + sample-data + READ-ME under samples/GoldenOutput/HomeHealthCare/migration/. New tests: MigrationGoldenScriptTests (Pipeline.Tests, hermetic + cross-platform: byte-golden schema/data with LF-normalization, dialect well-formedness, determinism, missing-data-not-dropped) and GenerateMigrationCommandTests (Integration, COM-free [Fact] black-box: files+manifest+--json-status envelope, usage errors, unknown-option rejection). Docs updated: interpretation-guide.md (new 5.5 generate-migration subsection + output-map note), install.md (COM-free list + subcommand list + exit codes + dedicated section), ROADMAP.md + data-classification-plan.md (Phase 4 shipped / arc complete / consumer-driven-only). Build 0 errors; AccessHarvester.Pipeline.Tests 787 hermetic green (incl. 5 new golden tests); GenerateMigrationCommandTests 4 green. Cross-provider verification gpt-5-4: R1 ISSUES_FOUND (Major: ParseOptions silently accepted unknown --options so a --data typo degraded silently; Minor: broad InvalidDataException catch misattributed IR/CSV failures) -> fixed (reject unknown switches; scope the classification catch) -> R2 ISSUES_FOUND (Minor: scoped read moved outside the command try, leaving non-parse read failures uncaught) -> fixed (read back inside main try with a tight nested catch) -> R3 VERIFIED, no regressions. This is the second and last remaining harvester set; the development arc is complete and the repo is now consumer-driven-only.",
   "files_changed": [
-    "AccessHarvester.Pipeline/Migration/MigrationDegradation.cs",
-    "AccessHarvester.Pipeline/Migration/MigrationSchema.cs",
-    "AccessHarvester.Pipeline/Migration/MigrationSchemaResolver.cs",
-    "AccessHarvester.Pipeline/Migration/SqlServerDdlEmitter.cs",
-    "AccessHarvester.Pipeline/Migration/SqlServerDdlGenerator.cs",
-    "AccessHarvester.Pipeline/Migration/TableDependencyOrderer.cs",
-    "AccessHarvester.Pipeline/Migration/CsvTableReader.cs",
-    "AccessHarvester.Pipeline/Migration/SqlValueFormatter.cs",
-    "AccessHarvester.Pipeline/Migration/SqlServerDataLoadGenerator.cs",
-    "AccessHarvester.Pipeline/Migration/SqlServerMigrationGenerator.cs",
-    "tests/AccessHarvester.Pipeline.Tests/Migration/TableDependencyOrdererTests.cs",
-    "tests/AccessHarvester.Pipeline.Tests/Migration/CsvTableReaderAndValueTests.cs",
-    "tests/AccessHarvester.Pipeline.Tests/Migration/SqlServerDataLoadGeneratorTests.cs",
-    "tests/AccessHarvester.Pipeline.Tests/Migration/SqlServerMigrationGeneratorTests.cs",
+    "AccessHarvester.Cli/Commands/GenerateMigrationCommand.cs",
+    "AccessHarvester.Cli/Program.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Migration/MigrationGoldenScriptTests.cs",
+    "tests/AccessHarvester.Integration/Cli/GenerateMigrationCommandTests.cs",
+    "samples/GoldenOutput/HomeHealthCare/migration/schema.sql",
+    "samples/GoldenOutput/HomeHealthCare/migration/data.sql",
+    "samples/GoldenOutput/HomeHealthCare/migration/READ-ME-FIRST.md",
+    "samples/GoldenOutput/HomeHealthCare/migration/sample-data/tlkpStates.csv",
+    "samples/GoldenOutput/HomeHealthCare/migration/sample-data/tlkpPlanStatuses.csv",
+    "docs/harvester/interpretation-guide.md",
+    "docs/harvester/install.md",
+    "docs/session-sets/ROADMAP.md",
+    "docs/planning/data-classification-plan.md",
     "docs/session-sets/harvester-sql-migration-generator/ai-assignment.md",
+    "docs/session-sets/harvester-sql-migration-generator/change-log.md",
+    "docs/session-sets/harvester-sql-migration-generator/next-session-set-recommendation.md",
+    "docs/session-sets/harvester-sql-migration-generator/disposition.json",
     "docs/session-sets/harvester-sql-migration-generator/activity-log.json",
-    "docs/session-sets/harvester-sql-migration-generator/session-state.json",
     "docs/session-sets/harvester-sql-migration-generator/session-events.jsonl",
-    "docs/session-sets/harvester-sql-migration-generator/session-reviews/session-002.md",
-    "docs/session-sets/harvester-sql-migration-generator/disposition.json"
+    "docs/session-sets/harvester-sql-migration-generator/session-state.json",
+    "docs/session-sets/harvester-sql-migration-generator/session-reviews/session-003.md",
+    "docs/session-sets/harvester-sql-migration-generator/issue-logs/session-003.json"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 3 (generate-migration CLI subcommand + manifest, end-to-end emit against a committed fixture with a hermetic golden-script test, interpretation/install guide updates, ROADMAP/change-log, closeout + Step 9 reorg) is mechanical integration + docs + closeout synthesis. A routed analysis (gemini-pro) recommends Sonnet at medium effort: Opus would be overkill, change-log prose routes to summarization (max_tier=1) regardless. Session 3 consumes SqlServerMigrationGenerator.Generate(inputs, openTableCsv) and emits the manifest from its merged degradation list."
-    }
+  "next_session_set": {
+    "slug": null,
+    "summary": "None — the harvester development arc is complete. The repository is consumer-driven-only: new sets only on a concrete downstream-consumer request. See next-session-set-recommendation.md for the known, non-blocking, consumer-gated follow-ups (genuine-empty-string preservation, live SQL Server execution validation, custom identity seed/calculated columns/collation)."
   },
   "blockers": [],
-  "post_close_resolutions": [
-    "Known limitation (out of Session-2 scope, verifier-agreed not mandatory): the sanitize CsvWriter emits both SQL NULL and a genuine empty string as an unquoted empty field, so the migration data-load loads an empty field as NULL (the '' -> NULL collapse is documented in CsvTableReader and pinned by a real-writer round-trip test). If preserving genuine empty strings end-to-end becomes a product requirement, change the producer (quote empty strings or use a NULL sentinel) as separate sanitize-tier follow-up work."
-  ]
+  "post_close_resolutions": []
 }

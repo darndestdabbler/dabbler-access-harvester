@@ -90,10 +90,18 @@ in [`lessons-learned.md`](../planning/lessons-learned.md) — reliability before
 features, the ordering this arc just validated. *Re-measure first:* the COM
 graceful-shutdown hardening may have resolved the timeout as a side effect, in
 which case the spike closes with a documentation note; no spec required. The
-feature capstone `harvester-sql-migration-generator`
-([`harvester-cli-distribution`'s recommendation](harvester-cli-distribution/next-session-set-recommendation.md))
-follows the spike — its "until CI is reliable" deferral is now satisfied; it
-needs its own spec plus a belongs-here-vs-future-migration-repo check.
+feature capstone
+[`harvester-sql-migration-generator`](harvester-sql-migration-generator/change-log.md)
+**closed 2026-06-01** (maintainer: claude-code) — adding the
+`generate-migration` subcommand that emits a deterministic SQL Server
+migration (schema `CREATE TABLE` + PK/FK, FK-safe `INSERT` data-load with
+`IDENTITY_INSERT` framing, honest degradation manifest) from the harvested
+`ir/` + reviewed `classification.json` + `sanitize` CSV output, validated
+hermetically by a committed golden-script gate. This was **Phase 4 of the
+data-classification plan** and the long-deferred feature capstone (its
+"until CI is reliable" deferral satisfied). **With it, the harvester
+development arc is complete: the repo is now consumer-driven-only — new
+sets only on a concrete downstream-consumer request.**
 
 ---
 

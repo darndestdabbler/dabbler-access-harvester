@@ -85,6 +85,12 @@ output directory:
   `<output-dir>/manifest.json` and `<output-dir>/unresolved-items.json`
   as the canonical entry points without scanning the directory.
 
+Downstream subcommands write **outside** this `run` output map. The
+feedback chain (`classify` / `sanitize`) writes `classification.json`
+and CSV-per-table data; `generate-migration` consumes those plus `ir/`
+to write a SQL Server migration (`schema.sql`, `data.sql`,
+`migration-manifest.json`) under its own `--out` — see §5.5.
+
 The **canonical golden corpus** at
 [`samples/GoldenOutput/<fixture>/`](../../samples/GoldenOutput/)
 shows what a complete run looks like for the two fixtures the
@@ -999,6 +1005,55 @@ expanded. A migration consumer is expected to plan a per-row
 attachment-extraction pass against the live `.accdb` if the
 attachments need to be moved, not to look in the harvester's `ir/`
 for them.
+
+#### `generate-migration` — the SQL Server migration product
+
+`generate-migration` is the final, runnable product of the classify →
+sanitize → **migrate** chain. It is **not** part of `run`: it is a
+separate, COM-free subcommand that reads already-harvested artefacts
+(`ir/Tables` + `ir/Relationships` for schema, the reviewed
+`classification.json` for multi-value / preserve decisions, and the
+`sanitize` CSV-per-table output for data) and emits a deterministic
+SQL Server migration under `<out>/<database-slug>/`:
+
+- **`schema.sql`** — `CREATE TABLE` (Access→SQL Server type map,
+  nullability, defaults, primary keys) followed by `ALTER TABLE … ADD
+  CONSTRAINT … FOREIGN KEY`. Identifiers are bracket-quoted; each batch
+  ends with `GO`. Autonumber columns become `IDENTITY(1,1)`.
+- **`data.sql`** — the data-load, emitted in **FK-safe order** (parents
+  before children; a topological sort over the FK graph). A table whose
+  identity column is being loaded from the sanitized CSV is wrapped in
+  `SET IDENTITY_INSERT [T] ON … OFF` so the preserved keys land verbatim.
+  **Run `schema.sql` first, then `data.sql`.**
+- **`migration-manifest.json`** — `{ SchemaType: "MigrationManifest",
+  Database, GeneratedFiles, TableLoadOrder, DegradationCount,
+  Degradations[] }`. This is the honest record of what could **not**
+  migrate cleanly.
+
+**Degradation semantics (read the manifest, not just the SQL).** The
+generator never silently drops or fabricates. Each `Degradations[]`
+entry carries `{ Kind, Table, Column, Reason }`; the kinds a consumer
+will see are: `UnmappableColumnType` / `MultiValueColumn` (Attachment /
+multi-value columns — omitted from `CREATE TABLE`, recovered per the
+Attachments note above), `LinkedTableSkipped` (a linked/attached table
+excluded), `UntranslatedDefault` (column kept, its Access default
+dropped), `AssumedTypePrecision` (a length/precision the IR did not
+carry — tighten before production), `ForeignKeyDropped` (an FK to a
+table/column that did not survive), `ForeignKeyCycle` (a set of tables
+forming an FK reference cycle — emitted in a deterministic order and
+flagged so a reviewer can defer the offending constraints during load),
+`MissingDataFile` (no sanitized CSV for a migrated table — `CREATE
+TABLE` stands, no rows), and `DataColumnOmitted` (a surviving column not
+loaded — binary/OLE that cannot round-trip through text CSV, or a column
+the CSV had no data for; SQL Server supplies its default/NULL).
+
+A clean run exits `0`; any flagged degradation exits `3` (review the
+manifest). The migration validates **hermetically** — there is no SQL
+Server in the harvester's test environment, so correctness is pinned by
+a golden-script comparison and dialect well-formedness checks, plus an
+optional, non-gated manual run against a real SQL Server. The committed
+golden lives at
+[`samples/GoldenOutput/HomeHealthCare/migration/`](../../samples/GoldenOutput/HomeHealthCare/migration/).
 
 ### 5.6 Macros — standalone and embedded
 

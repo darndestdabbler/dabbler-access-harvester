@@ -116,7 +116,7 @@ public static class Program
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
             && !IsVersionFlag(args[0])
-            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage" or "identify-cleanup" or "classify" or "sanitize" or "report-baseline"))
+            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage" or "identify-cleanup" or "classify" or "sanitize" or "report-baseline" or "generate-migration"))
         {
             return RunParse(args);
         }
@@ -135,6 +135,7 @@ public static class Program
             "classify"        => ClassifyCommand.Run(rest),
             "sanitize"        => SanitizeCommand.Run(rest),
             "report-baseline" => ReportBaselineCommand.Run(rest),
+            "generate-migration" => GenerateMigrationCommand.Run(rest),
             _                 => UnknownCommand(args[0]),
         };
     }
@@ -692,6 +693,7 @@ public static class Program
               AccessHarvester classify        --in <file.accdb> --out <output-dir> [--exclude-cleanup <path>] [--json-status]
               AccessHarvester sanitize        --classification <classification.json> --in <file.accdb> --out <output-dir> [--json-status]
               AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir> [--reports <name,name>] [--params <params.json>] [--include-pdf] [--no-clean] [--json-status]
+              AccessHarvester generate-migration --in <harvested-output-root> --out <output-dir> [--classification <classification.json>] [--data <sanitized-csv-dir>] [--json-status]
               AccessHarvester parse           <source-file>
               AccessHarvester parse           --in <source-file>
               AccessHarvester                 <source-file>       (bare-file mode; equivalent to 'parse')
@@ -730,6 +732,17 @@ public static class Program
             `validate` checks a DatabaseManifest JSON against the embedded harvester-schema.v1.1.json.
               --in locates manifest.json recursively under <output-root-dir> (the --out root from `run`).
               --manifest validates a single specified manifest file directly.
+            `generate-migration` emits a deterministic SQL Server migration (the classify -> sanitize ->
+              migrate pipeline's final product) from already-harvested artifacts — no Microsoft Access
+              required. Reads ir/Tables + ir/Relationships (schema) under --in, the optional reviewed
+              --classification (multi-value / preserve decisions), and the optional --data CSV-per-table
+              directory (the `sanitize` output). Writes schema.sql (CREATE TABLE + PK + FK), data.sql
+              (FK-safe INSERT data-load, parents before children, with SET IDENTITY_INSERT framing), and
+              migration-manifest.json (emitted files + table load order + every honestly flagged
+              degradation: OLE / multi-value / linked-table / missing-data / FK-cycle) to
+              <output-dir>/<database-slug>/. Run schema.sql first, then data.sql. When --data is omitted,
+              schema.sql still emits and every table is flagged as missing data. Nothing is silently
+              dropped or fabricated.
 
             Layout under <output-root-dir>: AccessMetaData/<dbName>/{raw,kb,ir}/<Category>/...
 
@@ -791,6 +804,12 @@ public static class Program
               1  usage error (bad args, file/dir not found, manifest not valid JSON)
               2  unexpected error (I/O or embedded schema failure)
               3  schema-validation errors found (details on stderr)
+
+            Exit codes for generate-migration:
+              0  clean migration (no degradations flagged)
+              1  usage error (bad args, input dir / classification / data dir not found, invalid classification)
+              2  unexpected error
+              3  completed with flagged degradations (review migration-manifest.json)
             """);
     }
 

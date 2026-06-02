@@ -167,6 +167,78 @@
       "description": "R2 VERIFIED. Reverted spurious samples/HomeHealthCare.accdb timestamp diff; removed TestResults. Authored disposition.json + ai-assignment.md Session 2 actuals + Session 3 (Sonnet) routed recommendation. Committing and pushing the work.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 0,
+      "stepKey": "setup",
+      "dateTime": "2026-06-01T19:56:58.946267-04:00",
+      "description": "Session 3 start: read spec/guidance/prior reviews, registered start, inventoried generate-migration integration surface (MigrationInputs, SqlServerMigrationGenerator.Generate, CLI command pattern).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "step-1-cli-subcommand",
+      "dateTime": "2026-06-01T19:56:58.947490-04:00",
+      "description": "Wired generate-migration CLI subcommand: GenerateMigrationCommand.cs (COM-free; --in/--out/--classification/--data/--json-status; emits schema.sql + data.sql + migration-manifest.json; exit 0 clean / 1 usage / 2 error / 3 degradations). Registered in Program.cs dispatch + bare-file exclusion + usage/exit-code docs.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "step-2-e2e-golden",
+      "dateTime": "2026-06-01T20:01:54.016308-04:00",
+      "description": "End-to-end emit against committed HomeHealthCare golden IR + a committed sanitize CSV slice (tlkpStates non-identity, tlkpPlanStatuses identity). Committed golden schema.sql + data.sql + sample-data + READ-ME under samples/GoldenOutput/HomeHealthCare/migration/. Added MigrationGoldenScriptTests (Pipeline.Tests, hermetic: byte-golden schema/data, dialect well-formedness, determinism, missing-data-not-dropped) and GenerateMigrationCommandTests (Integration, COM-free [Fact] black-box: files+manifest+json-status envelope, usage errors). Pipeline.Tests 787 green; 3 CLI tests green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "step-3-docs",
+      "dateTime": "2026-06-01T20:04:59.957345-04:00",
+      "description": "Updated docs: interpretation-guide.md (new generate-migration subsection in 5.5 + output-map note in 2), install.md (COM-free list + subcommand list + exit codes + a focused generate-migration section), ROADMAP.md (capstone closed, arc complete / consumer-driven-only), data-classification-plan.md (Phase 4 shipped annotation). change-log.md deferred to close_session at Step 8.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "step-6-verify-r1",
+      "dateTime": "2026-06-01T20:10:23.718625-04:00",
+      "description": "Cross-provider session-verification R1 (gpt-5-4, $0.190): ISSUES_FOUND \u2014 (Major) ParseOptions silently accepted unknown --options so a --data typo degraded silently; (Minor) broad InvalidDataException catch misattributed IR/CSV failures to classification.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "step-7-fixes",
+      "dateTime": "2026-06-01T20:10:23.719868-04:00",
+      "description": "Fixed both R1 findings: ParseOptions now rejects unknown switches with ArgumentException (exit 1) via an allowed value/flag set; classification read moved to its own try/catch so InvalidDataException is scoped to ClassificationReader (truthful diagnostic), removed the broad outer catch. Added GenerateMigration_with_unknown_option_reports_usage_error regression test. Build 0 errors; 4 CLI + 5 golden tests green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "step-6-verify-r2-r3",
+      "dateTime": "2026-06-01T20:13:33.260639-04:00",
+      "description": "R2 (gpt-5-4, $0.070) ISSUES_FOUND 1 Minor (scoped catch moved read outside command-level try) -> fixed (read back inside main try, tight nested catch). R3 (gpt-5-4, $0.032) VERIFIED, no regressions. Saved 3 raw review rounds + issue log.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "step-8-closeout",
+      "dateTime": "2026-06-01T20:16:32.197698-04:00",
+      "description": "Closeout artifacts authored: ai-assignment Session 3 actuals, change-log.md (routed summarization gemini-flash $0.003), next-session-set-recommendation.md (consumer-driven-only), disposition.json. Swept spurious samples/HomeHealthCare.accdb diff; removed temp verifier/changelog scripts. Ready to commit + push + close_session.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }

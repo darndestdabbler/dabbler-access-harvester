@@ -1,0 +1,26 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "AccessHarvester.Cli/Commands/GenerateMigrationCommand.cs",
+    "summary": "ParseOptions silently accepted unknown --options; a --data typo could degrade the migration silently instead of a usage error.",
+    "resolution": "Fixed: ParseOptions rejects unknown switches (ArgumentException -> exit 1) via an allowed value/flag set; added regression test.",
+    "status": "resolved"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "AccessHarvester.Cli/Commands/GenerateMigrationCommand.cs",
+    "summary": "Broad InvalidDataException catch always reported classification invalid, misattributing IR/CSV failures.",
+    "resolution": "Fixed: InvalidDataException scoped to ClassificationReader.ReadFile.",
+    "status": "resolved"
+  },
+  {
+    "round": 2,
+    "severity": "Minor",
+    "location": "AccessHarvester.Cli/Commands/GenerateMigrationCommand.cs",
+    "summary": "Scoped classification read was moved outside the command-level try/catch, leaving non-InvalidData read failures uncaught.",
+    "resolution": "Fixed: classification read moved back inside the main try with a tight nested InvalidDataException catch; other failures flow to the command-level handlers. R3 VERIFIED.",
+    "status": "resolved"
+  }
+]

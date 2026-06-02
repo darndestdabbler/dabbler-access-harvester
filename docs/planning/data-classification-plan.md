@@ -247,4 +247,8 @@ Modeled on the existing JSON-driven UAT Checklist Editor:
    preserve-autonumber flag.
 4. **Phase 3 — Test-data generator.** Consume reviewed JSON; mask/preserve per category and ID rules.
 5. **Phase 4 — Migration generator.** Emit SQL Server schema + data-load scripts honoring
-   preserve/remap and `IDENTITY_INSERT` handling.
+   preserve/remap and `IDENTITY_INSERT` handling. **Shipped 2026-06-01** as the
+   `generate-migration` subcommand via
+   [`harvester-sql-migration-generator`](../session-sets/harvester-sql-migration-generator/change-log.md)
+   (schema `CREATE TABLE` + PK/FK, FK-safe data-load, honest degradation manifest;
+   hermetic golden-script validation).

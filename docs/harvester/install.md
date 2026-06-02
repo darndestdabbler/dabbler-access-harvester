@@ -27,8 +27,8 @@ The exe contains everything except Microsoft Access itself. `extract`
 and `run` subcommands talk to Access via COM and therefore require
 Windows + an installed Microsoft Access (per the `AccessHarvester.Core`
 `[SupportedOSPlatform("windows")]` gating). The `parse`, `translate`,
-`generate-docs`, and `validate` subcommands are pure file-to-file and
-run anywhere Windows can launch the binary.
+`generate-docs`, `validate`, and `generate-migration` subcommands are
+pure file-to-file and run anywhere Windows can launch the binary.
 
 ---
 
@@ -131,6 +131,7 @@ AccessHarvester report-baseline --db <file.accdb> --out <output-root-dir> [--rep
 AccessHarvester generate-docs --in <manifest.json> --out <output-dir>
 AccessHarvester validate      --in <output-root-dir> [--json-status]
 AccessHarvester validate      --manifest <manifest.json> [--json-status]
+AccessHarvester generate-migration --in <harvested-output-root> --out <output-dir> [--classification <classification.json>] [--data <sanitized-csv-dir>] [--json-status]
 AccessHarvester parse         <source-file>
 AccessHarvester parse         --in <source-file>
 AccessHarvester               <source-file>              # bare-file mode; equivalent to 'parse'
@@ -162,6 +163,10 @@ Exit codes per subcommand group:
 - `validate`: `0` (manifest conforms to schema v1.0), `1` (usage error /
   file not found / not valid JSON), `2` (unexpected error),
   `3` (schema-validation errors found).
+- `generate-migration`: `0` (clean migration, no degradations), `1` (usage
+  error / input not found / invalid classification), `2` (unexpected
+  error), `3` (completed with flagged degradations — review
+  `migration-manifest.json`). File-to-file, no Access required.
 - `--version` / `--help`: `0` (printed).
 
 For the per-subcommand option list, JSON-status envelope shapes, and
@@ -240,6 +245,49 @@ text commands); the values used are recorded verbatim in
 > `harvester-report-baseline-golden-corpus` — capturing it currently
 > trips an Access design-view / ACE-OLEDB exclusive-lock contention, and
 > the follow-up will make aggregate capture lock-free.
+
+## `generate-migration` — SQL Server migration
+
+`generate-migration` is the final product of the classify → sanitize →
+**migrate** chain: a deterministic SQL Server migration emitted from
+already-harvested artefacts. It is **file-to-file (no Access required)** —
+it reads the harvested `ir/`, the reviewed `classification.json`, and the
+`sanitize` CSV output; it never opens the `.accdb`.
+
+```
+AccessHarvester generate-migration --in <harvested-output-root> --out <output-dir>
+    [--classification <classification.json>] [--data <sanitized-csv-dir>] [--json-status]
+```
+
+| Option | Required | Meaning |
+|---|---|---|
+| `--in` | yes | Harvested output root (the directory containing `ir/`, or `ir/` itself). `ir/Tables` + `ir/Relationships` are the schema source |
+| `--out` | yes | Output dir; `schema.sql`, `data.sql`, and `migration-manifest.json` land under `<out>/<database-slug>/` |
+| `--classification` | no | Reviewed `classification.json` (multi-value / preserve decisions). Recommended |
+| `--data` | no | The `sanitize` CSV-per-table directory (`<sanitize-out>/<database-slug>/`). When omitted, `schema.sql` still emits and every table is flagged missing data |
+| `--json-status` | no | Emit a machine-readable JSON status summary to stdout |
+
+**What it writes**, under `<out>/<database-slug>/`:
+
+- `schema.sql` — `CREATE TABLE` (type map, nullability, defaults, PK)
+  + `ALTER TABLE … ADD … FOREIGN KEY`. Autonumber → `IDENTITY(1,1)`;
+  identifiers bracket-quoted; each batch ends with `GO`.
+- `data.sql` — the data-load, in **FK-safe order** (parents before
+  children), with `SET IDENTITY_INSERT [T] ON … OFF` where an identity
+  column's preserved keys are loaded. **Run `schema.sql` first, then
+  `data.sql`.**
+- `migration-manifest.json` — `{ SchemaType, Database, GeneratedFiles,
+  TableLoadOrder, DegradationCount, Degradations[] }`. Every column or
+  table that could not migrate cleanly (OLE / multi-value / linked-table
+  / untranslated-default / assumed-precision / dropped-FK / FK-cycle /
+  missing-data / omitted-column) is flagged here — **never silently
+  dropped or fabricated**.
+
+Because there is no SQL Server in the harvester's test environment, the
+emitted SQL is validated **hermetically** (golden-script comparison +
+dialect well-formedness checks); an actual run against a live SQL Server
+is an optional, non-gated spot-check. See the interpretation guide §5.5
+for the degradation semantics a downstream consumer should read.
 
 ## Versioning convention
 
