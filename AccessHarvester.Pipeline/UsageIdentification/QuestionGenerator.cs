@@ -23,16 +23,29 @@ public static class QuestionGenerator
     {
         var questions = new List<ClarifyingQuestion>();
 
-        // NoNavigationEntry — form not present as navigation target and not a nav shell
-        if (objectType == "Form"
-            && !isNavigationTarget
+        // OutOfBandEntryPossible — no harvested opener was found, but the object may
+        // still be reached via application startup, direct object-pane navigation,
+        // the ribbon, or VBA in another object. This replaces the older
+        // NoNavigationEntry frame, which read like a staleness hint. Lack of an
+        // opener is an uncertainty to explain, not a cleanup signal (strategy §5a).
+        //
+        // Scope keeps the checklist focused: reports/queries get it whenever they
+        // have no harvested opener (they had no equivalent question before); forms
+        // get it only when bound to a RecordSource (an unbound form's uncertainty is
+        // already carried by the NoRecordSource question below, so we do not pile on).
+        bool eligibleForOutOfBand =
+            objectType is "Report" or "Query"
+            || (objectType == "Form" && !string.IsNullOrWhiteSpace(recordSource));
+        if (eligibleForOutOfBand
+            && confidence < 0.8
             && category != UsageCategory.NavigationShell
-            && category != UsageCategory.PossiblyUnused)
+            && category != UsageCategory.PossiblyUnused
+            && !HasHarvestedOpener(objectName, isNavigationTarget, index))
         {
             questions.Add(new ClarifyingQuestion
             {
-                QuestionText    = $"No navigation entry found for Form '{objectName}' — is it launched from VBA code, another form, or an external application?",
-                UncertaintySignal = UncertaintySignal.NoNavigationEntry,
+                QuestionText    = $"No harvested opener was found for {objectType} '{objectName}'. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+                UncertaintySignal = UncertaintySignal.OutOfBandEntryPossible,
             });
         }
 
@@ -73,12 +86,15 @@ public static class QuestionGenerator
             });
         }
 
-        // UnreferencedObject — object is completely absent from all signals
+        // UnreferencedObject — object is absent from all harvested signals. Reframed
+        // (set 001 Session 1) so missing references read as out-of-band uncertainty
+        // rather than a deletion hint: in Access an object can stay live via startup,
+        // direct navigation, or the ribbon even with no inbound harvested reference.
         if (category == UsageCategory.PossiblyUnused)
         {
             questions.Add(new ClarifyingQuestion
             {
-                QuestionText    = $"{objectType} '{objectName}' is not referenced by any form, report, query, VBA, or macro — is it still in use or can it be excluded from analysis?",
+                QuestionText    = $"No harvested reference was found for {objectType} '{objectName}'. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph — a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
                 UncertaintySignal = UncertaintySignal.UnreferencedObject,
             });
         }
@@ -116,6 +132,21 @@ public static class QuestionGenerator
 
         return questions;
     }
+
+    // True when the harvested graph contains any opener/reference that would reach
+    // this object: it is a navigation target, referenced from VBA, used as a
+    // RecordSource, used as a RowSource, or consumed by another query's SQL
+    // (FROM/JOIN). When none hold, the object's entry path is out-of-band
+    // (startup/direct/ribbon) and the OutOfBandEntryPossible question explains that
+    // rather than implying the object is stale. The query-SQL arm matters because an
+    // intermediate query referenced only by another query is an in-graph dependency
+    // the harvester already knows about — not an out-of-band entry.
+    private static bool HasHarvestedOpener(string name, bool isNavigationTarget, SignalIndex index)
+        => isNavigationTarget
+        || index.VbaReferencedObjects.Contains(name)
+        || index.UsedAsRecordSource.Contains(name)
+        || index.UsedAsRowSource.Contains(name)
+        || index.UsedInQuerySql.Contains(name);
 
     private static bool IsCrypticName(string name)
         => name.Length < 5 && !name.Contains('_') && !char.IsUpper(name.Length > 1 ? name[1] : '\0');

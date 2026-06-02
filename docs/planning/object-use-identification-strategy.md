@@ -42,6 +42,45 @@ Seven mutually exclusive categories assigned to each object:
 - 0.2–0.5 = Low
 - < 0.2 = Unknown (category becomes `Unknown` regardless of signals)
 
+### 2a. Launcher / Navigation-Shell Recognition (set 001 Session 1)
+
+Classic Access launcher surfaces — switchboards, menu forms, startup
+forms — are entry points, not stale objects. The base `F5`/`R2` rules
+only recognized a navigation shell when the object **emitted** harvested
+navigation edges. That misses the common pattern where a switchboard
+form delegates its opens to a **separate** macro (e.g.,
+`frmSwitchboard` → `mcrSwitchboardActions`), so the form emits no edges
+of its own and previously fell through to `Unknown`/`PossiblyUnused`.
+
+A form is recognized as a `NavigationShell` launcher even with no
+RecordSource and no navigation edges of its own when **either**:
+
+- **Launcher name pattern** — the name matches a switchboard/menu/startup
+  convention (`*Switchboard*`, `*Menu*`, or a core of `Main`, `Startup`,
+  `Home`, `MainMenu*`, `Startup*` after stripping a `frm` prefix); **or**
+- **Startup linkage** — the form is opened by an `AutoExec` startup macro
+  (`StartupEntry`).
+
+**Launcher chrome** — no RecordSource, with record selectors and
+navigation buttons turned off — *corroborates* a name/startup signal
+(raising confidence to 0.80) but never classifies a form on its own.
+Chrome alone is deliberately insufficient: stripped-chrome parameter
+dialogs share the same traits, and promoting parameter-collection forms
+to a first-class signal is **set 001 Session 2's** scope, not this one.
+
+Helper artifacts are tied to the launcher rather than read as generic
+unexplained objects:
+
+- A **switchboard/menu macro** (name match or emitted nav edges) is a
+  `NavigationShell`.
+- A **switchboard navigation-data table** (`*Switchboard*`,
+  `*MenuItems*`) is `StandaloneUtility` with a `LauncherSurface` signal
+  and a launcher-aware summary — never `PossiblyUnused` solely for
+  lacking inbound references.
+
+**Core principle:** the absence of a harvested opener is an *uncertainty
+to explain*, not a cleanup hint. See §5a.
+
 ---
 
 ## 3. Signal Families
@@ -113,6 +152,28 @@ Six signal collectors feed the classifier. All read from `ir/` files.
   transactional); LookupReference (table has FK parents only, or is
   parent-only with small column count).
 
+### 3.7 LauncherSurface (set 001 Session 1)
+
+- **Source:** object name + form `Properties` (chrome) + navigation
+  edges + startup linkage.
+- **Extraction:** launcher name patterns (§2a), launcher chrome
+  (RecordSelectors / NavigationButtons off on an unbound form),
+  switchboard navigation-data table names, and switchboard/menu macro
+  names or emitted edges.
+- **Produces:** a per-object boolean with evidence strings
+  (`launcher-name-pattern`, `launcher-chrome`, `opened-by-startup-macro`,
+  `switchboard-navigation-data`, `emits-navigation-edges`).
+- **Supports classifying:** `NavigationShell` for launcher forms/macros;
+  the launcher-aware `StandaloneUtility` summary for switchboard tables.
+
+### 3.8 StartupEntry (set 001 Session 1)
+
+- **Source:** navigation edges whose **source** is an `AutoExec`
+  (case-insensitive) startup macro.
+- **Produces:** the set of objects opened on database open.
+- **Supports classifying:** launcher recognition (§2a) and a first-class
+  positive entry signal so a startup surface is never read as stale.
+
 ---
 
 ## 4. Classification Rules
@@ -129,6 +190,7 @@ and applies these rules in order. The first matching rule wins.
 | F3 | Has RecordSource → lookup table (table name matches `tlkp` or `_Lookup` pattern, or table has ≤ 3 columns with no FK children) | LookupReference | 0.75 |
 | F4 | Has RecordSource → query | Reporting or MainDataEntry | 0.55 (sub-classify by query type) |
 | F5 | No RecordSource AND has navigation edges (opens other forms/reports) | NavigationShell | 0.80 |
+| F5b | No RecordSource AND no edges of its own BUT launcher name pattern OR opened by AutoExec startup (§2a) | NavigationShell | 0.70–0.80 (0.80 with launcher chrome; 0.75 startup) |
 | F6 | No RecordSource AND no navigation edges AND has VBA code | Unknown | 0.30 |
 | F7 | No RecordSource AND no navigation edges AND no VBA | PossiblyUnused | 0.70 |
 | F8 | Named `*Param*`, `*Filter*`, `*Criteria*`, `*Dialog*` | (unknown intent, mark question) | — |
@@ -182,6 +244,7 @@ Access `QueryTypeCode` values: 0 = Select, 1 = Crosstab, 2 = Delete,
 | T3 | Is FK parent only (child of other tables) AND ≤ 4 columns | LookupReference | 0.80 |
 | T4 | Name matches `tlkp*`, `lkp*`, `*_Lookup*`, `*_Codes*`, `*_Types*` | LookupReference | 0.75 |
 | T5 | No FK relationships AND referenced in VBA domain functions | StandaloneUtility | 0.65 |
+| T5b | Switchboard/menu navigation-data table name (§2a) | StandaloneUtility (launcher-tied, `LauncherSurface` signal) | 0.65 |
 | T6 | No FK relationships AND no RecordSource references AND no query references | PossiblyUnused | 0.70 |
 | T7 | System tables (`MSys*`, `USys*`) | — (excluded from output) | — |
 
@@ -215,7 +278,7 @@ These signals trigger the generation of clarifying questions:
 
 | Signal | Trigger |
 |---|---|
-| `NoNavigationEntry` | Form not present as target of any macro or VBA navigation edge |
+| `OutOfBandEntryPossible` | No harvested opener for a Report/Query (any), or a bound Form, at confidence < 0.8 and not PossiblyUnused/NavigationShell (set 001 Session 1) |
 | `NoRecordSource` | Form has no `RecordSource` property |
 | `QueryReferencesNoTables` | Query SQL references only other queries in FROM clause |
 | `UnreferencedObject` | Object fired no signals at all (PossiblyUnused) |
@@ -223,6 +286,25 @@ These signals trigger the generation of clarifying questions:
 | `CrosstabQuery` | Query is Crosstab type |
 | `UnrecognizedVbaPattern` | Form/module has VBA but no parseable DoCmd/DFunction calls |
 | `CrypticObjectName` | Object name has no conventional prefix and < 5 chars |
+| `NoNavigationEntry` | **Retired (set 001 Session 1).** No longer emitted; the missing-opener case is now framed by `OutOfBandEntryPossible`. Kept in the schema enum for backward compatibility with historical outputs. |
+
+### 5a. Out-Of-Band Entry Uncertainty (set 001 Session 1)
+
+In Access an object can be reached without any harvested macro/VBA
+opener: from application **startup**, by **direct navigation** in the
+object pane, via the **ribbon**, or through other access outside the
+harvested graph. A missing inbound reference is therefore an
+**uncertainty to explain, not a staleness signal**.
+
+- `OutOfBandEntryPossible` reframes a missing opener for forms (bound),
+  reports, and queries, enumerating the out-of-band lanes and asking the
+  reviewer to confirm the entry path rather than implying the object is
+  unused.
+- `UnreferencedObject` (PossiblyUnused) is reworded to the same effect —
+  it no longer asks whether the object "can be excluded from analysis."
+- This layer never asserts staleness; positive stale-like evidence is
+  the cleanup pipeline's concern (`object-cleanup.json`), which is itself
+  positive-signal-only.
 
 ---
 
@@ -233,10 +315,10 @@ and type as context.
 
 | Signal | Question template |
 |---|---|
-| `NoNavigationEntry` | "No navigation entry found for {objectType} '{name}' — is it launched from VBA code, another form, or an external application?" |
+| `OutOfBandEntryPossible` | "No harvested opener was found for {objectType} '{name}'. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?" |
 | `NoRecordSource` | "Form '{name}' has no record source — is it a navigation panel, a parameter/filter dialog, or a utility form?" |
 | `QueryReferencesNoTables` | "Query '{name}' references only other queries — is it an intermediate computation step, a parameter source, or can it be merged into its callers?" |
-| `UnreferencedObject` | "{objectType} '{name}' is not referenced by any form, report, query, VBA, or macro — is it still in use or can it be excluded from analysis?" |
+| `UnreferencedObject` | "No harvested reference was found for {objectType} '{name}'. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph — a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?" |
 | `LookupTablePattern` | "Table '{name}' appears to hold reference/lookup values — should it migrate as static reference data, or be replaced with application constants?" |
 | `CrosstabQuery` | "Query '{name}' is a crosstab query — is it used for reporting, for driving a form or chart control, or for data exports?" |
 | `UnrecognizedVbaPattern` | "{objectType} '{name}' contains VBA that couldn't be auto-classified — can you describe its primary function?" |

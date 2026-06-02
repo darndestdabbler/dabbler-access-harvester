@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "001-harvester-upstream-feedback-followups",
+  "status": "in-progress",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Session 1",
+      "status": "in-progress",
+      "startedAt": "2026-06-02T15:18:03.111188-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "medium",
+        "chatSessionId": null,
+        "checkedOutAt": "2026-06-02T15:18:03.111188-04:00",
+        "lastActivityAt": "2026-06-02T15:18:03.111188-04:00"
+      },
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Session 2",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    },
+    {
+      "number": 3,
+      "title": "Session 3",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    }
+  ]
+}

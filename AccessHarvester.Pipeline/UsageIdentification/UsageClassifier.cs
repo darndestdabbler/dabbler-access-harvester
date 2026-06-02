@@ -81,6 +81,14 @@ public static class UsageClassifier
         bool hasNavEdgesOut  = index.NavigationSources.Contains(form.Name);
         bool hasVbaCode      = !string.IsNullOrWhiteSpace(form.VbaCode);
 
+        // Launcher-surface evidence (set 001 Session 1): a switchboard/menu/startup
+        // form is a navigation shell even when it has no RecordSource and delegates
+        // its opens to a separate macro (so it emits no navigation edges of its own).
+        bool launcherName   = SignalIndex.IsLauncherFormName(form.Name);
+        bool startupOpened  = index.IsStartupOpened(form.Name);
+        bool launcherChrome = HasLauncherChrome(form);
+        bool isLauncher     = launcherName || startupOpened;
+
         string category;
         double confidence;
         var evidence = new List<string>();
@@ -139,6 +147,19 @@ public static class UsageClassifier
             confidence = 0.80;
             evidence.Add("has-navigation-edges-out");
         }
+        else if (isLauncher)
+        {
+            // F5b — launcher/menu shell recognized by name or startup linkage even
+            // though it emits no navigation edges itself (opens are delegated to a
+            // switchboard macro, or it is the database's startup surface).
+            category   = UsageCategory.NavigationShell;
+            confidence = (launcherName && launcherChrome) ? 0.80
+                       : startupOpened                    ? 0.75
+                       :                                     0.70;
+            if (launcherName)   evidence.Add("launcher-name-pattern");
+            if (launcherChrome) evidence.Add("launcher-chrome");
+            if (startupOpened)  evidence.Add("opened-by-startup-macro");
+        }
         else if (hasVbaCode)
         {
             // F6
@@ -167,7 +188,7 @@ public static class UsageClassifier
         return BuildFinding("Form", form.Name, category, confidence, evidence,
                             "Form", form.RecordSource, hasRecordSource,
                             hasNavEdgesOut, index.NavigationTargets.Contains(form.Name),
-                            hasVbaCode, hasCrudHandlers, null, index);
+                            hasVbaCode, hasCrudHandlers, null, index, launcherChrome);
     }
 
     // ── Reports ──────────────────────────────────────────────────────────────────
@@ -336,6 +357,10 @@ public static class UsageClassifier
         bool vbaReferenced  = index.VbaReferencedObjects.Contains(table.Name);
         bool isLookupNamed  = index.IsLookupTable(table.Name);
         bool unreferenced   = index.IsCompletelyUnreferenced(table.Name);
+        // True only when the launcher-data rule (T5b) actually decides the category,
+        // so the launcher summary/signal never fire for a launcher-named table that
+        // an earlier rule already explained (e.g., a used 'tblMenuItems' data table).
+        bool launcherDataTable = false;
 
         if (hasFkChildren && usedAsRS)
         {
@@ -382,6 +407,16 @@ public static class UsageClassifier
             confidence = 0.65;
             evidence.Add("VBA-referenced");
         }
+        else if (SignalIndex.IsLauncherDataTableName(table.Name))
+        {
+            // T5b — switchboard/menu navigation-data table backing a launcher
+            // surface. Tie it to launcher behavior rather than letting the lack of
+            // FK/inbound references read as a generic unexplained/unused object.
+            category   = UsageCategory.StandaloneUtility;
+            confidence = 0.65;
+            evidence.Add("switchboard-navigation-data");
+            launcherDataTable = true;
+        }
         else if (unreferenced)
         {
             // T6
@@ -401,7 +436,8 @@ public static class UsageClassifier
         return BuildFinding("Table", table.Name, category, confidence, evidence,
                             "Table", null, usedAsRS,
                             false, false,
-                            vbaReferenced, false, null, index);
+                            vbaReferenced, false, null, index,
+                            launcherDataTable: launcherDataTable);
     }
 
     // ── Modules ───────────────────────────────────────────────────────────────────
@@ -432,11 +468,24 @@ public static class UsageClassifier
         bool hasNavEdges = index.NavigationSources.Contains(macro.Name);
         bool isNavTarget = index.NavigationTargets.Contains(macro.Name);
         bool unreferenced = index.IsCompletelyUnreferenced(macro.Name);
-        string category = hasNavEdges ? UsageCategory.NavigationShell : UsageCategory.StandaloneUtility;
-        double confidence = hasNavEdges ? 0.75 : unreferenced ? 0.60 : 0.55;
-        string summary = hasNavEdges
-            ? $"Macro '{macro.Name}' containing navigation actions that open forms or reports"
-            : $"Macro '{macro.Name}' providing automated actions";
+        // A switchboard/menu-named macro is a launcher helper even if its actions did
+        // not parse into navigation edges (set 001 Session 1).
+        bool launcherNamed = SignalIndex.IsLauncherFormName(macro.Name);
+        bool isLauncherMacro = hasNavEdges || launcherNamed;
+        string category = isLauncherMacro ? UsageCategory.NavigationShell : UsageCategory.StandaloneUtility;
+        double confidence = hasNavEdges ? 0.75 : launcherNamed ? 0.65 : unreferenced ? 0.60 : 0.55;
+        // Word the summary by evidence source so it never overstates harvested
+        // evidence: only claim "contains navigation actions" when edges were parsed,
+        // and only tie it to "a launcher surface" when the macro is launcher-named.
+        // A generic edge-backed macro keeps neutral navigation wording.
+        string summary =
+            (hasNavEdges && launcherNamed)
+                ? $"Macro '{macro.Name}' containing navigation actions that open forms or reports for a launcher surface"
+            : hasNavEdges
+                ? $"Macro '{macro.Name}' containing navigation actions that open forms or reports"
+            : launcherNamed
+                ? $"Macro '{macro.Name}' named like a switchboard/menu launcher helper (no navigation actions parsed)"
+                : $"Macro '{macro.Name}' providing automated actions";
         return new UsageFinding
         {
             ObjectType     = "Macro",
@@ -482,12 +531,15 @@ public static class UsageClassifier
         bool usedAsRecordSource, bool isNavSource, bool isNavTarget,
         bool hasVbaCode, bool hasCrudHandlers,
         int? queryTypeCode,
-        SignalIndex index)
+        SignalIndex index,
+        bool launcherChrome = false,
+        bool launcherDataTable = false)
     {
         string summary = BuildSummary(objectType, objectName, category, recordSource,
-                                      queryTypeCode, index);
+                                      queryTypeCode, index, launcherDataTable);
         var signals = BuildSignals(objectName, objectType, recordSource, usedAsRecordSource,
-                                   isNavSource, isNavTarget, hasVbaCode, queryTypeCode, index);
+                                   isNavSource, isNavTarget, hasVbaCode, queryTypeCode, index,
+                                   launcherChrome, launcherDataTable);
         var questions = QuestionGenerator.Generate(objectType, objectName, category, confidence,
                                                    signals, recordSource, hasVbaCode, isNavTarget,
                                                    queryTypeCode, index);
@@ -504,8 +556,16 @@ public static class UsageClassifier
     }
 
     private static string BuildSummary(string objectType, string name, string category,
-                                        string? recordSource, int? queryTypeCode, SignalIndex index)
+                                        string? recordSource, int? queryTypeCode, SignalIndex index,
+                                        bool launcherDataTable = false)
     {
+        // Launcher-data tables get a launcher-aware summary instead of the generic
+        // "not referenced by any form or report" StandaloneUtility wording — but only
+        // when the launcher-data rule (T5b) actually decided the category, never from
+        // the name alone.
+        if (objectType == "Table" && launcherDataTable)
+            return $"Navigation/switchboard configuration table '{name}' backing the application's launcher menu";
+
         return category switch
         {
             UsageCategory.MainDataEntry   => recordSource != null
@@ -517,7 +577,14 @@ public static class UsageClassifier
                 : recordSource != null
                     ? $"Report backed by {recordSource}"
                     : $"Reporting {objectType.ToLowerInvariant()} '{name}'",
-            UsageCategory.NavigationShell => $"Navigation/shell form '{name}' that opens other forms or reports",
+            // Launcher wording only when launcher evidence is actually present
+            // (F5b: launcher name or startup linkage). A generic form classified
+            // NavigationShell purely from its own navigation edges (F5) keeps the
+            // neutral wording so the summary does not overstate switchboard/menu traits.
+            UsageCategory.NavigationShell =>
+                (SignalIndex.IsLauncherFormName(name) || index.IsStartupOpened(name))
+                    ? $"Navigation/launcher form '{name}' — a switchboard/menu shell that routes to other forms or reports (directly or via a navigation macro)"
+                    : $"Navigation/shell form '{name}' that opens other forms or reports",
             UsageCategory.StandaloneUtility => $"Standalone utility {objectType.ToLowerInvariant()} '{name}' not referenced by any form or report",
             UsageCategory.PossiblyUnused  => $"{objectType} '{name}' is not referenced by any form, report, query, VBA, or macro",
             _                             => $"{objectType} '{name}' — insufficient signals to determine usage",
@@ -528,7 +595,8 @@ public static class UsageClassifier
         string objectName, string objectType,
         string? recordSource, bool usedAsRecordSource,
         bool isNavSource, bool isNavTarget,
-        bool hasVbaCode, int? queryTypeCode, SignalIndex index)
+        bool hasVbaCode, int? queryTypeCode, SignalIndex index,
+        bool launcherChrome = false, bool launcherDataTable = false)
     {
         var signals = new List<SignalEntry>();
 
@@ -632,8 +700,70 @@ public static class UsageClassifier
             Evidence = cryptic ? ["cryptic-name"] : lookupNamed ? ["lookup-name-pattern"] : [],
         });
 
+        // Launcher surface — switchboard/menu/startup traits. Mirrors the
+        // classifier's launcher predicates so the signal agrees with the category.
+        var launcherEvidence = new List<string>();
+        if (objectType == "Form")
+        {
+            // Mirror F5b exactly: a form is a launcher surface only when it is
+            // unbound. A bound startup-opened / launcher-named form classifies from
+            // its RecordSource branch, so it must NOT report LauncherSurface (its
+            // StartupEntry signal below still fires — that is honest). Chrome is
+            // recorded only as a corroborator of a primary name/startup signal.
+            bool unbound = string.IsNullOrWhiteSpace(recordSource);
+            if (unbound && SignalIndex.IsLauncherFormName(objectName)) launcherEvidence.Add("launcher-name-pattern");
+            if (unbound && index.IsStartupOpened(objectName))          launcherEvidence.Add("opened-by-startup-macro");
+            if (unbound && launcherChrome && launcherEvidence.Count > 0) launcherEvidence.Add("launcher-chrome");
+        }
+        else if (objectType == "Table")
+        {
+            // Gated on the T5b decision (not the name) so a launcher-named table that
+            // an earlier rule explained does not emit a launcher signal.
+            if (launcherDataTable) launcherEvidence.Add("switchboard-navigation-data");
+        }
+        else if (objectType == "Macro")
+        {
+            if (isNavSource)                                launcherEvidence.Add("emits-navigation-edges");
+            if (SignalIndex.IsLauncherFormName(objectName)) launcherEvidence.Add("launcher-name-pattern");
+        }
+        signals.Add(new SignalEntry
+        {
+            SignalType = UsageSignalType.LauncherSurface,
+            Fired = launcherEvidence.Count > 0,
+            Evidence = launcherEvidence,
+        });
+
+        // Startup entry — opened by an AutoExec/startup macro.
+        bool startupEntry = index.IsStartupOpened(objectName);
+        signals.Add(new SignalEntry
+        {
+            SignalType = UsageSignalType.StartupEntry,
+            Fired = startupEntry,
+            Evidence = startupEntry ? ["opened-by-startup-macro"] : [],
+        });
+
         return signals;
     }
+
+    // ── Launcher chrome ───────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// True when an unbound form carries classic launcher chrome: no RecordSource,
+    /// record selectors off, and navigation buttons off. Used only to corroborate a
+    /// name/startup launcher signal (it does not, on its own, classify a form as a
+    /// launcher — that would risk catching stripped-chrome parameter dialogs).
+    /// </summary>
+    private static bool HasLauncherChrome(IrFormOrReport form)
+    {
+        if (!string.IsNullOrWhiteSpace(form.RecordSource)) return false;
+        return PropIsFalse(form, "RecordSelectors") && PropIsFalse(form, "NavigationButtons");
+    }
+
+    private static bool PropIsFalse(IrFormOrReport form, string key)
+        => form.Properties.TryGetValue(key, out var v)
+        && (v.Equals("False", StringComparison.OrdinalIgnoreCase)
+            || v.Equals("No", StringComparison.OrdinalIgnoreCase)
+            || v == "0");
 
     // ── Helpers ───────────────────────────────────────────────────────────────────
 

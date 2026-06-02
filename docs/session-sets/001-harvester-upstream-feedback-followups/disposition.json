@@ -1,0 +1,38 @@
+{
+  "status": "complete",
+  "summary": "Session 1 of 3 tightens the usage-side explanation layer for launcher surfaces and out-of-band entry. Launcher/menu shells are now recognized even when they have no RecordSource and delegate their opens to a separate macro: a new F5b rule classifies a form as NavigationShell when its name matches a switchboard/menu/startup pattern or it is opened by an AutoExec startup macro (launcher chrome — record selectors/nav buttons off — only corroborates, so stripped-chrome parameter dialogs stay Unknown for Session 2). Helper artifacts are tied to the launcher: switchboard/menu macros are NavigationShell (T-side T5b gives switchboard navigation-data tables a launcher-aware StandaloneUtility summary instead of PossiblyUnused). Missing harvested openers are reframed as out-of-band uncertainty: a new OutOfBandEntryPossible question (and a reworded UnreferencedObject) explain startup/direct-object-pane/ribbon access rather than implying staleness; NoNavigationEntry is retired from emission but kept in the schema enum for backward compatibility (mirrors the CrossReferenceAbsence cleanup precedent). New signal types LauncherSurface and StartupEntry are added to the schema and emitted by the classifier, gated to agree with the category decision across forms, macros, and tables. The launcher/out-of-band contract is documented in docs/planning/object-use-identification-strategy.md (new §2a, §3.7/3.8, F5b/T5b, §5a). Pilot of identify-usage against the committed HomeHealthCare golden IR (temp dir; the committed golden is intentionally NOT regenerated — that is Session 3): frmSwitchboard/frmReportMenu Unknown 0.35 -> NavigationShell 0.85 (no nagging questions); tblSwitchboardItems no longer reads as unused; frmReportParam_* correctly left Unknown for Session 2; a parameterized query now carries the out-of-band reframing; checklist casing remains canonical PascalCase. Hermetic AccessHarvester.Pipeline.Tests 808 passed, 0 failed (790 baseline + 18 net new); full-solution dotnet build 0 errors. Scope discipline held: no parameter-dialog/parameterized-query promotion (Session 2), no cleanup-semantics changes, no golden regeneration. Cross-provider verification gpt-5-4: R1 ISSUES_FOUND (2 Major: query-SQL inbound not counted as a harvested opener; form LauncherSurface signal disagreed with category for bound forms + no chrome evidence; 1 Minor: missing boundary tests) -> fixed -> R2 ISSUES_FOUND (1 Minor: name-only launcher-macro summary overstated evidence) -> fixed -> R3 ISSUES_FOUND (1 Minor: launcher summaries overstated traits for generic nav forms/macros; no positive Query out-of-band test) -> fixed -> R4 ISSUES_FOUND (1 Minor: table launcher summary/signal re-derived from name alone). All 6 findings across the 4 rounds are resolved; the R4 trivial table-name minor was fixed post-hoc under explicit human authorization to close without an R5 chase (the fix completes signal/summary-vs-category consistency across all object types). Verdict recorded honestly as ISSUES_FOUND (no clean VERIFIED round was obtained) with every finding resolved.",
+  "files_changed": [
+    "AccessHarvester.Pipeline/UsageIdentification/UsageClassifier.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/QuestionGenerator.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/SignalIndex.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/UsageFinding.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/object-use-schema.json",
+    "docs/planning/object-use-identification-strategy.md",
+    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/LauncherSurfaceTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/QuestionGeneratorTests.cs",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/ai-assignment.md",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/disposition.json",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-1-verify.py",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-1-next-rec.py",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-1-closeout.py",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/activity-log.json",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-events.jsonl",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-state.json",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-reviews/session-001.md",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/issue-logs/session-001.json"
+  ],
+  "verification_method": "api",
+  "verification_verdict": "ISSUES_FOUND",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Routed recommendation (gemini-pro, analysis, do-not-self-opine): Session 2 (Parameterized Queries + Parameter-Dialog Flows) is synthesis-dominant. Although it includes mechanical plumbing (carrying saved-query PARAMETERS metadata into IrQuery/IrLoader so it survives load), the higher-order work is novel heuristics — recognizing likely parameter-collection forms (e.g. frmReportParam_*, which Session 1 deliberately left Unknown), report-open parameter flows, and distinct parameter-uncertainty question wording. Per project-guidance.md, novel-heuristic/architecture work earns Opus; an Opus orchestrator handles that synthesis in-conversation, routing only session-verification. Start at effort=high. Session 2's IR-loader seam (QueryMetadata PARAMETERS) and the question generator are the primary touch points; keep the parameterized-query work distinct from the launcher/out-of-band layer this session shipped."
+    }
+  },
+  "blockers": []
+}

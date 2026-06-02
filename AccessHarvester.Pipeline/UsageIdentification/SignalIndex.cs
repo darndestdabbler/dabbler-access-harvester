@@ -31,6 +31,9 @@ public sealed class SignalIndex
     // Forms/objects that emit navigation edges (open other objects)
     public IReadOnlySet<string> NavigationSources { get; }
 
+    // Objects opened by an AutoExec/startup macro — first-class entry surfaces
+    public IReadOnlySet<string> StartupOpenedObjects { get; }
+
     // Tables/queries referenced in VBA domain functions or OpenRecordset
     public IReadOnlySet<string> VbaReferencedObjects { get; }
 
@@ -60,6 +63,7 @@ public sealed class SignalIndex
         IReadOnlySet<string> usedAsRowSource,
         IReadOnlySet<string> navigationTargets,
         IReadOnlySet<string> navigationSources,
+        IReadOnlySet<string> startupOpenedObjects,
         IReadOnlySet<string> vbaReferencedObjects,
         IReadOnlyDictionary<string, IReadOnlySet<string>> querySqlTargetsByQuery,
         IReadOnlySet<string> usedInQuerySql,
@@ -75,6 +79,7 @@ public sealed class SignalIndex
         UsedAsRowSource         = usedAsRowSource;
         NavigationTargets       = navigationTargets;
         NavigationSources       = navigationSources;
+        StartupOpenedObjects    = startupOpenedObjects;
         VbaReferencedObjects    = vbaReferencedObjects;
         QuerySqlTargetsByQuery  = querySqlTargetsByQuery;
         UsedInQuerySql          = usedInQuerySql;
@@ -132,6 +137,13 @@ public sealed class SignalIndex
         var navigationSources = new HashSet<string>(
             navEdges.Select(e => e.Source), StringComparer.OrdinalIgnoreCase);
 
+        // Startup entry: objects opened by an AutoExec/startup macro. AutoExec is
+        // the canonical Access macro that runs on database open; anything it opens
+        // is a first-class application entry surface, not a stale/unreferenced object.
+        var startupOpenedObjects = new HashSet<string>(
+            navEdges.Where(e => IsStartupMacroName(e.Source)).Select(e => e.Target),
+            StringComparer.OrdinalIgnoreCase);
+
         // VBA references
         var vbaRefs = VbaReferenceCollector.Collect(db);
         var vbaReferencedObjects = new HashSet<string>(
@@ -181,6 +193,7 @@ public sealed class SignalIndex
             usedAsRowSource,
             navigationTargets,
             navigationSources,
+            startupOpenedObjects,
             vbaReferencedObjects,
             querySqlTargetsByQuery,
             usedInQuerySql,
@@ -223,6 +236,53 @@ public sealed class SignalIndex
         || name.Contains("_Lookup", StringComparison.OrdinalIgnoreCase)
         || name.Contains("_Codes",  StringComparison.OrdinalIgnoreCase)
         || name.Contains("_Types",  StringComparison.OrdinalIgnoreCase);
+
+    // True when the source object is an AutoExec/startup macro (runs on db open).
+    private static bool IsStartupMacroName(string name)
+        => name.Equals("AutoExec", StringComparison.OrdinalIgnoreCase)
+        || name.Equals("Autoexec", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// True when a form name matches a conventional switchboard/menu/launcher
+    /// naming pattern (e.g., frmSwitchboard, frmMainMenu, frmReportMenu,
+    /// frmStartup, frmHome). Used to recognize launcher shells even when the
+    /// form delegates its opens to a separate macro and so emits no navigation
+    /// edges of its own. See strategy doc §2a.
+    /// </summary>
+    public static bool IsLauncherFormName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        // Strip a leading object-type prefix ("frm") so "frmMain" -> "Main".
+        string core = name.StartsWith("frm", StringComparison.OrdinalIgnoreCase)
+            ? name.Substring(3)
+            : name;
+        return name.Contains("Switchboard", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Menu",        StringComparison.OrdinalIgnoreCase)
+            || core.Equals("Main",     StringComparison.OrdinalIgnoreCase)
+            || core.Equals("Startup",  StringComparison.OrdinalIgnoreCase)
+            || core.Equals("Home",     StringComparison.OrdinalIgnoreCase)
+            || core.StartsWith("MainMenu", StringComparison.OrdinalIgnoreCase)
+            || core.StartsWith("Startup",  StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// True when a table name looks like switchboard/menu navigation-configuration
+    /// data (e.g., tblSwitchboardItems, tblMenuItems). Such helper tables back a
+    /// launcher surface and should be explained as launcher infrastructure rather
+    /// than read as generic unexplained objects. See strategy doc §2a.
+    /// </summary>
+    public static bool IsLauncherDataTableName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        return name.Contains("Switchboard", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("MenuItems",   StringComparison.OrdinalIgnoreCase)
+            || (name.Contains("Menu", StringComparison.OrdinalIgnoreCase)
+                && name.Contains("Item", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>True when the object is opened by an AutoExec/startup macro.</summary>
+    public bool IsStartupOpened(string objectName)
+        => StartupOpenedObjects.Contains(objectName);
 
     /// <summary>Returns true when the table has FK children in the index.</summary>
     public bool HasFkChildren(string tableName)

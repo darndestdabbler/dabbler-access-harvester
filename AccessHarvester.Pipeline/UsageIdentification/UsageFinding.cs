@@ -69,6 +69,9 @@ public static class UsageSignalType
     public const string FkRelationship       = "FkRelationship";
     public const string QueryType            = "QueryType";
     public const string ObjectNameConvention = "ObjectNameConvention";
+    // Launcher/navigation-surface signals (set 001 Session 1).
+    public const string LauncherSurface      = "LauncherSurface";
+    public const string StartupEntry         = "StartupEntry";
 }
 
 /// <summary>
@@ -76,6 +79,10 @@ public static class UsageSignalType
 /// </summary>
 public static class UncertaintySignal
 {
+    // NoNavigationEntry is retained for backward compatibility with historical
+    // outputs but is no longer emitted: the missing-opener case is now framed by
+    // OutOfBandEntryPossible, which explains startup/direct/ribbon access paths
+    // instead of implying the object is unreachable. See set 001 Session 1.
     public const string NoNavigationEntry      = "NoNavigationEntry";
     public const string NoRecordSource         = "NoRecordSource";
     public const string QueryReferencesNoTables = "QueryReferencesNoTables";
@@ -84,4 +91,8 @@ public static class UncertaintySignal
     public const string CrosstabQuery          = "CrosstabQuery";
     public const string UnrecognizedVbaPattern = "UnrecognizedVbaPattern";
     public const string CrypticObjectName      = "CrypticObjectName";
+    // Out-of-band entry uncertainty (set 001 Session 1): no harvested opener was
+    // found, but the object may still be reached via startup, direct object-pane
+    // navigation, the ribbon, or other access outside the harvested graph.
+    public const string OutOfBandEntryPossible = "OutOfBandEntryPossible";
 }

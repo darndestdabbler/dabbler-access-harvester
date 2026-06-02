@@ -97,9 +97,11 @@
             "QueryTableReference",
             "FkRelationship",
             "QueryType",
-            "ObjectNameConvention"
+            "ObjectNameConvention",
+            "LauncherSurface",
+            "StartupEntry"
           ],
-          "description": "Which signal family produced this entry. See strategy doc §3."
+          "description": "Which signal family produced this entry. See strategy doc §3. LauncherSurface fires when the object exhibits switchboard/menu/launcher traits (name pattern, navigation chrome, or switchboard-data naming) even without harvested navigation edges; StartupEntry fires when the object is opened by an AutoExec/startup macro."
         },
         "fired": {
           "type": "boolean",
@@ -131,9 +133,10 @@
             "LookupTablePattern",
             "CrosstabQuery",
             "UnrecognizedVbaPattern",
-            "CrypticObjectName"
+            "CrypticObjectName",
+            "OutOfBandEntryPossible"
           ],
-          "description": "Which uncertainty signal triggered this question. See strategy doc §5-6."
+          "description": "Which uncertainty signal triggered this question. See strategy doc §5-6. OutOfBandEntryPossible reframes a missing harvested opener as out-of-band entry uncertainty (startup, direct object-pane navigation, ribbon, or other access outside the harvested graph) rather than implying staleness. NoNavigationEntry is retained for backward compatibility with historical outputs and is no longer emitted by the current writer."
         }
       }
     }

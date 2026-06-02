@@ -32,26 +32,58 @@ public class QuestionGeneratorTests
     }
 
     [Fact]
-    public void Generate_NoNavigationEntry_When_Form_Not_Nav_Target_And_Not_NavShell()
+    public void Generate_OutOfBandEntry_When_Bound_Form_Has_No_Harvested_Opener()
     {
+        // A bound (RecordSource) form not reachable through any harvested opener now
+        // gets the out-of-band reframing instead of the old NoNavigationEntry hint.
         var index = EmptyIndex();
         var questions = QuestionGenerator.Generate(
             "Form", "frmHidden", UsageCategory.MainDataEntry, 0.7,
             NoSignals(), "tblData", hasVbaCode: false,
             isNavigationTarget: false, queryTypeCode: null, index);
-        Assert.Contains(questions, q => q.UncertaintySignal == UncertaintySignal.NoNavigationEntry);
+        Assert.Contains(questions, q => q.UncertaintySignal == UncertaintySignal.OutOfBandEntryPossible);
+        // The retired signal is no longer emitted.
+        Assert.DoesNotContain(questions, q => q.UncertaintySignal == UncertaintySignal.NoNavigationEntry);
         Assert.Contains("frmHidden", questions[0].QuestionText);
     }
 
     [Fact]
-    public void Generate_NoNavigationEntry_Not_Raised_For_NavigationShell()
+    public void Generate_OutOfBandEntry_For_Report_With_No_Opener()
     {
+        var index = EmptyIndex();
+        var questions = QuestionGenerator.Generate(
+            "Report", "rptAdHoc", UsageCategory.Reporting, 0.6,
+            NoSignals(), null, hasVbaCode: false,
+            isNavigationTarget: false, queryTypeCode: null, index);
+        Assert.Contains(questions, q => q.UncertaintySignal == UncertaintySignal.OutOfBandEntryPossible);
+    }
+
+    [Fact]
+    public void Generate_OutOfBandEntry_Not_Raised_For_NavigationShell()
+    {
+        // A launcher surface is itself the entry point — no out-of-band question, and
+        // the retired NoNavigationEntry signal stays absent.
         var index = EmptyIndex();
         var questions = QuestionGenerator.Generate(
             "Form", "frmSwitchboard", UsageCategory.NavigationShell, 0.8,
             NoSignals(), null, hasVbaCode: true,
             isNavigationTarget: false, queryTypeCode: null, index);
+        Assert.DoesNotContain(questions, q => q.UncertaintySignal == UncertaintySignal.OutOfBandEntryPossible);
         Assert.DoesNotContain(questions, q => q.UncertaintySignal == UncertaintySignal.NoNavigationEntry);
+    }
+
+    [Fact]
+    public void Generate_OutOfBandEntry_Not_Raised_For_PossiblyUnused()
+    {
+        // PossiblyUnused objects carry the (reframed) UnreferencedObject question; the
+        // out-of-band question must not also fire so the checklist stays focused.
+        var index = EmptyIndex();
+        var questions = QuestionGenerator.Generate(
+            "Query", "qryOrphan", UsageCategory.PossiblyUnused, 0.65,
+            NoSignals(), null, hasVbaCode: false,
+            isNavigationTarget: false, queryTypeCode: null, index);
+        Assert.DoesNotContain(questions, q => q.UncertaintySignal == UncertaintySignal.OutOfBandEntryPossible);
+        Assert.Contains(questions, q => q.UncertaintySignal == UncertaintySignal.UnreferencedObject);
     }
 
     [Fact]
