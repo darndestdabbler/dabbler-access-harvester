@@ -4,6 +4,14 @@
 > **Authority:** This document is the design specification for the
 > `AccessHarvester identify-cleanup` subcommand. Session 2 implements it
 > exactly as described here; divergences require human approval.
+>
+> **2026-06-02 correction:** The current implementation now treats
+> `object-cleanup.json` as a positive-signal stale-object list only.
+> Cross-reference absence by itself no longer produces a cleanup finding,
+> because missing inbound references are too ambiguous in Access to imply
+> that an object is obsolete. Historical references below to Low /
+> `CrossReferenceAbsence` findings should be read in that light until this
+> strategy doc is fully revised.
 
 ---
 

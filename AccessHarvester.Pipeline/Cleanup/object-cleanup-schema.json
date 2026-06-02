@@ -65,7 +65,7 @@
         "confidenceTier": {
           "type": "string",
           "enum": ["High", "Medium", "Low"],
-          "description": "Categorical confidence. High = NamePattern AND DateSignal both fired. Medium = exactly one of NamePattern or DateSignal fired. Low = only CrossReferenceAbsence fired."
+          "description": "Categorical confidence. Current analyzer output is High = NamePattern AND DateSignal both fired, Medium = exactly one of NamePattern or DateSignal fired. Low is retained for backward compatibility with historical outputs and is not emitted by the current analyzer."
         },
         "explanation": {
           "type": "string",
@@ -152,7 +152,7 @@
       "properties": {
         "signalType": {
           "const": "CrossReferenceAbsence",
-          "description": "Discriminator for tagged-union Signal."
+          "description": "Discriminator for tagged-union Signal. Retained for backward compatibility with historical outputs; the current cleanup analyzer does not emit this signal."
         },
         "summary": {
           "type": "string",

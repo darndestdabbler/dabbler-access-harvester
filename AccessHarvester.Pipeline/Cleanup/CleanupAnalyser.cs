@@ -6,7 +6,7 @@ using AccessHarvester.Pipeline.UsageIdentification;
 
 namespace AccessHarvester.Pipeline.Cleanup;
 
-/// <summary>Coordinates the three cleanup detectors and assigns confidence tiers per §4.</summary>
+/// <summary>Coordinates the cleanup detectors and assigns confidence tiers per §4.</summary>
 public static class CleanupAnalyser
 {
     /// <summary>Runs all detectors and returns the combined findings list.</summary>
@@ -31,8 +31,6 @@ public static class CleanupAnalyser
         // 1. Collect signals per object.
         var nameSignalsByKey = new Dictionary<(string Type, string Name), List<NamePatternSignal>>();
         var dateSignalsByKey = new Dictionary<(string Type, string Name), DateSignal>();
-        var crossSignalsByKey = new Dictionary<(string Type, string Name), CrossReferenceAbsenceSignal>();
-
         var allObjects = EnumerateAllObjects(db).ToList();
         var peers = allObjects.Select(o => (o.Name, o.Type)).ToArray();
 
@@ -98,33 +96,27 @@ public static class CleanupAnalyser
             };
         }
 
-        // Cross-reference absence
-        foreach (var (objType, objName, signal) in CrossReferenceDetector.Detect(db))
-            crossSignalsByKey[(objType, objName)] = signal;
-
-        // 2. Build per-object findings with tier assignment.
+        // 2. Build per-object findings with tier assignment. Cleanup findings are
+        // positive stale-like signals only; lack of inbound references is too
+        // ambiguous in Access to stand on its own as cleanup evidence.
         var findings = new List<CleanupFinding>();
         var keys = new HashSet<(string Type, string Name)>();
         foreach (var k in nameSignalsByKey.Keys) keys.Add(k);
         foreach (var k in dateSignalsByKey.Keys) keys.Add(k);
-        foreach (var k in crossSignalsByKey.Keys) keys.Add(k);
 
         foreach (var key in keys)
         {
             bool hasName = nameSignalsByKey.TryGetValue(key, out var nameSigs);
             bool hasDate = dateSignalsByKey.TryGetValue(key, out var dateSig);
-            bool hasCross = crossSignalsByKey.TryGetValue(key, out var crossSig);
 
             string tier;
             if (hasName && hasDate) tier = ConfidenceTiers.High;
             else if (hasName || hasDate) tier = ConfidenceTiers.Medium;
-            else if (hasCross) tier = ConfidenceTiers.Low;
             else continue;
 
             var fired = new List<CleanupSignal>();
             if (hasName) fired.AddRange(nameSigs!);
             if (hasDate) fired.Add(dateSig!);
-            if (tier == ConfidenceTiers.Low && hasCross) fired.Add(crossSig!);
 
             string explanation = BuildExplanation(key.Type, key.Name, tier, nameSigs, dateSig, thresholdDays);
 
@@ -150,14 +142,9 @@ public static class CleanupAnalyser
 
         // 5. Degradation notes.
         var notes = new List<string>();
-        bool queriesHaveSql = db.Queries.Any(q => !string.IsNullOrWhiteSpace(q.Sql));
-        if (db.Queries.Count > 0 && !queriesHaveSql)
-        {
-            notes.Add("Cross-reference QueryTableReference detection unavailable: ir/Queries/*.ir.json Sql fields are absent (soft prereq harvester-body-and-query-sql not satisfied). Low-confidence findings for both queries (cannot prove they reference other tables) AND tables (cannot prove they are referenced by other queries) may have higher false-positive rate.");
-        }
         if (dateSignalSource == "unavailable")
         {
-            notes.Add("Date sampling unavailable: COM declined AND no IR LastUpdated values present. Date-signal path produced no findings; only NamePattern and CrossReferenceAbsence applied.");
+            notes.Add("Date sampling unavailable: COM declined AND no IR LastUpdated values present. Date-signal path produced no findings; only NamePattern applied.");
         }
 
         return new CleanupFindings
@@ -195,7 +182,9 @@ public static class CleanupAnalyser
             return $"{objectType} '{name}' name matches staleness pattern '{nameSigs[0].MatchedSubstring}' — likely archived/superseded.";
         if (tier == ConfidenceTiers.Medium && dateSig is not null)
             return $"Table '{name}' has had no data updated in {dateSig.DaysSinceMax} days (threshold: {thresholdDays}) — possibly stale.";
-        return $"{objectType} '{name}' is not referenced anywhere in the harvested database — possibly unused.";
+
+        throw new InvalidOperationException(
+            $"Unexpected cleanup tier '{tier}' for {objectType} '{name}'.");
     }
 
     private static string ResolveDateSignalSource(IReadOnlyList<SampledDateMaximum> samples, bool comAvailable)
