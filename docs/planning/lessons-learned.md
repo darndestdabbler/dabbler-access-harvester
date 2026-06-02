@@ -612,6 +612,41 @@ reference; if it proves out twice in *this* repo, propose promotion to
     promoting the dynamic-budget heuristic to a Convention in
     `project-guidance.md`.
 
+### New CLI Subcommands Should Reject Unknown Switches, Not Silently Ignore Them
+
+- **Context:** Adding a new CLI subcommand by mirroring the repo's
+  established `ParseOptions` pattern (the copies in `Program.cs`,
+  `SanitizeCommand`, etc.). First hit in
+  `harvester-sql-migration-generator` Session 3 (2026-06-01) on the new
+  `generate-migration` command.
+- **Failure or friction:** The repo's `ParseOptions` family accepts **any**
+  token beginning with `--`: only the declared flags are special-cased, and
+  every other `--key value` pair is stored but then never read. A typo like
+  `--datta` for `--data` is therefore not a usage error — the command
+  proceeds with the mistyped option silently dropped. For
+  `generate-migration` the worst case is acute: a mistyped `--data` makes
+  the run flag every table `MissingDataFile` and still "succeed" with
+  exit 3, so the operator gets a degraded migration that looks like a
+  legitimate no-data run. The closeout cross-provider verifier (gpt-5-4)
+  flagged this as a Major finding on Round 1.
+- **Lesson:** Silent acceptance of unknown switches is a real footgun for
+  any command whose options materially change the output, and a
+  closeout-grade verifier will catch it. The cost of an allowed-keys check
+  is a few lines; the cost of a silently-degraded artifact is a wrong
+  migration the consumer may not notice. The existing commands predate this
+  and still silently ignore unknown options — this lesson does **not** call
+  for retrofitting them wholesale, but every **new** subcommand should
+  validate option names up front.
+- **Action for future sessions:** When authoring a new CLI subcommand's
+  `ParseOptions`, validate each parsed `--key` against the command's known
+  value-option and flag-option sets and throw `ArgumentException` (→ the
+  command's exit-1 usage path) for anything unknown — as
+  `GenerateMigrationCommand.ParseOptions` now does. If a second new command
+  independently applies this check (or a consumer reports a silent-typo
+  degradation against one of the older commands), propose promoting it to a
+  Convention in `project-guidance.md` → Conventions → Code Style, and
+  consider retrofitting the shared pattern at that point.
+
 ---
 
 ## Cost Guard On Verification: Skip When Verifier Cost Greatly Exceeds Generator
