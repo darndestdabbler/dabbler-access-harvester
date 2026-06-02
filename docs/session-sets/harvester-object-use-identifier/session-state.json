@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "harvester-object-use-identifier",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -45,6 +45,5 @@
       },
       "verificationVerdict": "VERIFIED"
     }
-  ],
-  "status": "complete"
+  ]
 }
