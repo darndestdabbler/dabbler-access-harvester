@@ -647,6 +647,46 @@ reference; if it proves out twice in *this* repo, propose promotion to
   Convention in `project-guidance.md` → Conventions → Code Style, and
   consider retrofitting the shared pattern at that point.
 
+### Thread Analyzer Decisions Into Emission As Explicit Flags — Never Re-Derive Signal/Summary/Label Text From The Object Name At Output Time
+
+- **Context:** Adding new classification signals, summaries, or questions to
+  the usage-identification layer (`UsageClassifier` → `BuildSignals` /
+  `BuildSummary` / `QuestionGenerator`). First hit in
+  `001-harvester-upstream-feedback-followups` Session 1 (2026-06-02) on the
+  launcher / out-of-band work; reconfirmed proactively in Session 2 on the
+  parameter / parameter-dialog work.
+- **Failure or friction:** When the classifier decided a rule fired (e.g. F5b
+  launcher, T5b launcher-table, F8 parameter-dialog) but the *emission* code
+  (`BuildSignals` / `BuildSummary`) re-inspected the object **name** to decide
+  whether to emit the launcher/parameter signal or the launcher/parameter
+  summary, the emitted signal/summary could disagree with the category the
+  classifier actually chose. A table positively classified by some other rule
+  could still emit `LauncherSurface=true` and a launcher-specific summary
+  purely because its name matched `IsLauncherDataTableName`; a bound
+  startup-opened form could emit `LauncherSurface` while classifying as data
+  entry. Session 1's cross-provider verifier surfaced exactly this class of
+  defect on **four consecutive rounds** — form signals (R2), form/macro
+  summaries (R3), then the table summary/signal (R4) — each a fresh instance of
+  the same root cause re-appearing in the next un-threaded emission site.
+- **Lesson:** The classifier decision is the single source of truth. Once a
+  rule fires, thread its outcome forward as an **explicit flag or evidence
+  list** (Session 2's `paramEvidence` / `parameterDialogForm` are the worked
+  example) and have `BuildSignals` / `BuildSummary` / the question generator key
+  off that threaded state — never re-run the name heuristic at emission time. A
+  name match is an *input* to the decision, not something to re-evaluate after
+  the decision is made; re-deriving it lets the signal, the summary, and the
+  category drift apart object-by-object.
+- **Action for future sessions:** When you add a signal/summary/question whose
+  firing is decided by a classifier rule, audit every emission site for a
+  second, independent name check against the same heuristic. If one exists,
+  replace it with the threaded flag/evidence the rule already produced. Session
+  2 applied this up front (threaded flags, no name recompute in emission) and
+  closed clean. Because this has now recurred across two contexts inside one set
+  and the same code area, it is recorded here as a lesson; propose promoting it
+  to a Convention in `project-guidance.md` → Conventions → Code Style the next
+  time a **different** session set or analyzer surface independently hits the
+  same emission-vs-decision drift.
+
 ---
 
 ## Cost Guard On Verification: Skip When Verifier Cost Greatly Exceeds Generator

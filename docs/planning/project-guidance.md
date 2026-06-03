@@ -558,16 +558,20 @@ experiments only.
   Both the analysis and the JSON block are required." If Round 1
   returns only the JSON block despite the JSON-block instruction
   alone, retry once with the "show your reasoning before the JSON"
-  reminder. Confirmed in three contexts: `harvester-finish-cli-e2e-test-audit`
+  reminder. Confirmed in four contexts: `harvester-finish-cli-e2e-test-audit`
   Session 2 (2026-05-18 — original failure; Round 1 returned a bare
   verdict, Round 2 with the reminder produced a substantive 5-point
   analysis), `harvester-finish-cli-packaging` Session 2 (2026-05-18 —
   proactive application; the lead was baked into the very first
   prompt and Round 1 returned a substantive 7-point analysis with
-  empty issues on the first try, no Round 2 needed), and
+  empty issues on the first try, no Round 2 needed),
   `harvester-object-cleanup-identifier` Session 3 (2026-05-28 — third
   proactive application; closeout-grade R1 returned a substantive
-  7-point analysis with empty issues, no R2 needed). The
+  7-point analysis with empty issues, no R2 needed), and
+  `001-harvester-upstream-feedback-followups` Session 3 (2026-06-02 —
+  fourth proactive application; the final-session closeout-grade prompt
+  carried the prose-first lead and Round 1 returned a substantive
+  5-concern analysis with empty issues, no R2 needed). The
   proactive-application reading mirrors the precedent set by the
   "Write `disposition.json` Before The Final Session's Closeout
   Commit" promotion. The action-detail reference is preserved in
