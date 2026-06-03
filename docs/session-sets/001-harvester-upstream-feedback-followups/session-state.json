@@ -23,9 +23,9 @@
     {
       "number": 2,
       "title": "Session 2",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-02T20:04:47.947459-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-02T20:50:07.050334-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
