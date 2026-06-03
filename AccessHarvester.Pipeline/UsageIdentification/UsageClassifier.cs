@@ -88,10 +88,19 @@ public static class UsageClassifier
         bool startupOpened  = index.IsStartupOpened(form.Name);
         bool launcherChrome = HasLauncherChrome(form);
         bool isLauncher     = launcherName || startupOpened;
+        // Parameter/filter/criteria dialog by name (set 001 Session 2, rule F8).
+        // The unbound + not-launcher gating is structural via branch order below,
+        // so the name match only takes effect in the no-RecordSource, non-launcher
+        // path; it never overrides a bound or launcher form.
+        bool paramDialogName = SignalIndex.IsParameterDialogName(form.Name);
 
         string category;
         double confidence;
         var evidence = new List<string>();
+        // Non-null only when rule F8 fires; carries the ParameterizedInput signal
+        // evidence so the signal is gated on the F8 decision, not recomputed from
+        // the name at emission time (set 001 Session 1 discipline).
+        List<string>? paramEvidence = null;
 
         if (hasRecordSource && rs != null)
         {
@@ -160,6 +169,22 @@ public static class UsageClassifier
             if (launcherChrome) evidence.Add("launcher-chrome");
             if (startupOpened)  evidence.Add("opened-by-startup-macro");
         }
+        else if (paramDialogName)
+        {
+            // F8 — unbound parameter/filter/criteria dialog (set 001 Session 2,
+            // §2b). Keeps the Unknown category (the ParameterDialogFlow question,
+            // not a positive category, is the F8 deliverable per the strategy
+            // contract) but is positively recognized: it fires ParameterizedInput
+            // and a parameter-dialog summary/question, so it no longer reads as a
+            // generic VBA-only Unknown form. Sits ahead of F6 so a frmReportParam_*
+            // dialog is recognized rather than lumped with unclassified VBA forms.
+            category   = UsageCategory.Unknown;
+            confidence = 0.40;
+            paramEvidence = ["param-dialog-name-pattern"];
+            if (launcherChrome) paramEvidence.Add("dialog-chrome");
+            if (index.NavigationTargets.Contains(form.Name)) paramEvidence.Add("opened-as-dialog");
+            evidence.AddRange(paramEvidence);
+        }
         else if (hasVbaCode)
         {
             // F6
@@ -188,7 +213,9 @@ public static class UsageClassifier
         return BuildFinding("Form", form.Name, category, confidence, evidence,
                             "Form", form.RecordSource, hasRecordSource,
                             hasNavEdgesOut, index.NavigationTargets.Contains(form.Name),
-                            hasVbaCode, hasCrudHandlers, null, index, launcherChrome);
+                            hasVbaCode, hasCrudHandlers, null, index, launcherChrome,
+                            parameterDialogForm: paramEvidence != null,
+                            parameterEvidence: paramEvidence);
     }
 
     // ── Reports ──────────────────────────────────────────────────────────────────
@@ -336,11 +363,69 @@ public static class UsageClassifier
                                       false, false, false, tc);
         if (confidence < 0.2) category = UsageCategory.Unknown;
 
+        // Parameter expectation is a first-class signal, computed independently of
+        // the Q-rule category above so a parameterized query that classifies via
+        // Q2/Q3 (used as a form/report RecordSource) still surfaces it (set 001
+        // Session 2, §3.9). The Q5 category path above is unchanged.
+        var parameterEvidence = BuildQueryParameterEvidence(query);
+
         return BuildFinding("Query", query.Name, category, confidence, evidence,
                             "Query", null, false,
                             index.NavigationSources.Contains(query.Name),
                             openedByNav,
-                            false, false, query.QueryTypeCode, index);
+                            false, false, query.QueryTypeCode, index,
+                            parameterEvidence: parameterEvidence);
+    }
+
+    /// <summary>
+    /// Builds the ParameterizedInput evidence for a query: the declared / form- /
+    /// report-reference parameters carried on <see cref="IrQuery.Parameters"/>
+    /// (parsed at load by <see cref="IrLoader.ExtractQueryParameters"/>), plus two
+    /// SQL-text signals computed here — an inline bracketed prompt when no declared
+    /// parameter already covers it, and an ODBC <c>?</c> marker. Returns null when
+    /// no parameter evidence is present.
+    /// </summary>
+    private static IReadOnlyList<string>? BuildQueryParameterEvidence(IrQuery query)
+    {
+        var evidence = new List<string>();
+
+        bool declaredOrRef = false;
+        if (query.Parameters != null)
+        {
+            foreach (var p in query.Parameters)
+            {
+                switch (p.Source)
+                {
+                    case "declared":
+                        evidence.Add($"declared-parameter:{p.Name}");
+                        declaredOrRef = true;
+                        break;
+                    case "form-reference":
+                        evidence.Add($"form-control-reference:{p.Path ?? p.Name}");
+                        declaredOrRef = true;
+                        break;
+                    case "report-reference":
+                        evidence.Add($"report-control-reference:{p.Path ?? p.Name}");
+                        declaredOrRef = true;
+                        break;
+                }
+            }
+        }
+
+        string? sql = query.Sql;
+        if (sql != null)
+        {
+            // An inline bracketed prompt (e.g. WHERE FY = [Enter Fiscal Year]) only
+            // when no declared/reference parameter already covers it — avoids
+            // re-listing the declared prompt names.
+            if (!declaredOrRef && ContainsParamBracket(sql))
+                evidence.Add("bracketed-prompt");
+
+            if (sql.Contains('?'))
+                evidence.Add("odbc-parameter-marker");
+        }
+
+        return evidence.Count > 0 ? evidence : null;
     }
 
     // ── Tables ────────────────────────────────────────────────────────────────────
@@ -533,13 +618,15 @@ public static class UsageClassifier
         int? queryTypeCode,
         SignalIndex index,
         bool launcherChrome = false,
-        bool launcherDataTable = false)
+        bool launcherDataTable = false,
+        bool parameterDialogForm = false,
+        IReadOnlyList<string>? parameterEvidence = null)
     {
         string summary = BuildSummary(objectType, objectName, category, recordSource,
-                                      queryTypeCode, index, launcherDataTable);
+                                      queryTypeCode, index, launcherDataTable, parameterDialogForm);
         var signals = BuildSignals(objectName, objectType, recordSource, usedAsRecordSource,
                                    isNavSource, isNavTarget, hasVbaCode, queryTypeCode, index,
-                                   launcherChrome, launcherDataTable);
+                                   launcherChrome, launcherDataTable, parameterEvidence);
         var questions = QuestionGenerator.Generate(objectType, objectName, category, confidence,
                                                    signals, recordSource, hasVbaCode, isNavTarget,
                                                    queryTypeCode, index);
@@ -557,7 +644,7 @@ public static class UsageClassifier
 
     private static string BuildSummary(string objectType, string name, string category,
                                         string? recordSource, int? queryTypeCode, SignalIndex index,
-                                        bool launcherDataTable = false)
+                                        bool launcherDataTable = false, bool parameterDialogForm = false)
     {
         // Launcher-data tables get a launcher-aware summary instead of the generic
         // "not referenced by any form or report" StandaloneUtility wording — but only
@@ -565,6 +652,14 @@ public static class UsageClassifier
         // the name alone.
         if (objectType == "Table" && launcherDataTable)
             return $"Navigation/switchboard configuration table '{name}' backing the application's launcher menu";
+
+        // Parameter-dialog forms (rule F8) get a parameter-aware summary instead of
+        // the generic "insufficient signals" Unknown wording — but only when F8
+        // actually fired (threaded flag), never recomputed from the name here. This
+        // is what makes a recognized parameter dialog read distinctly from a generic
+        // unknown form (set 001 Session 2, §2b).
+        if (objectType == "Form" && parameterDialogForm)
+            return $"Likely parameter/filter dialog form '{name}' — an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)";
 
         return category switch
         {
@@ -596,7 +691,8 @@ public static class UsageClassifier
         string? recordSource, bool usedAsRecordSource,
         bool isNavSource, bool isNavTarget,
         bool hasVbaCode, int? queryTypeCode, SignalIndex index,
-        bool launcherChrome = false, bool launcherDataTable = false)
+        bool launcherChrome = false, bool launcherDataTable = false,
+        IReadOnlyList<string>? parameterEvidence = null)
     {
         var signals = new List<SignalEntry>();
 
@@ -740,6 +836,19 @@ public static class UsageClassifier
             SignalType = UsageSignalType.StartupEntry,
             Fired = startupEntry,
             Evidence = startupEntry ? ["opened-by-startup-macro"] : [],
+        });
+
+        // Parameterized input — declared/bracketed/control-reference/ODBC
+        // parameter evidence for queries, or parameter-dialog recognition for
+        // forms (rule F8). Gated on the classifier's threaded evidence list so it
+        // agrees with the decision that fired and is never recomputed from the
+        // object name here (set 001 Session 2, §3.9; mirrors the launcher flag
+        // discipline from Session 1).
+        signals.Add(new SignalEntry
+        {
+            SignalType = UsageSignalType.ParameterizedInput,
+            Fired = parameterEvidence is { Count: > 0 },
+            Evidence = parameterEvidence ?? [],
         });
 
         return signals;

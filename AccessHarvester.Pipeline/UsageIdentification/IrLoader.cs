@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using AccessHarvester.Access;
 
 namespace AccessHarvester.Pipeline.UsageIdentification;
 
@@ -244,12 +245,37 @@ public static class IrLoader
                 int typeCode = 0;
                 if (root.TryGetProperty("QueryTypeCode", out var tc) && tc.ValueKind == JsonValueKind.Number)
                     typeCode = tc.GetInt32();
-                string? sql = GetString(root, "Sql");
-                results.Add(new IrQuery { Name = name, QueryTypeCode = typeCode, Sql = NullIfEmpty(sql) });
+                string? sql = NullIfEmpty(GetString(root, "Sql"));
+                results.Add(new IrQuery
+                {
+                    Name = name,
+                    QueryTypeCode = typeCode,
+                    Sql = sql,
+                    Parameters = ExtractQueryParameters(sql),
+                });
             }
             catch { }
         }
         return results;
+    }
+
+    /// <summary>
+    /// Extracts saved-query parameters (declared <c>PARAMETERS</c> entries and
+    /// implicit <c>[Forms]!</c>/<c>[Reports]!</c> control references) from a query's
+    /// SQL, reusing the shared <see cref="QueryMetadataExtractor.ParseParameters"/>
+    /// scan rather than re-implementing it. Returns null when none are present.
+    /// Public so in-memory tests can populate <see cref="IrQuery.Parameters"/> the
+    /// same way the loader does. See set 001 Session 2, strategy §3.9.
+    /// </summary>
+    public static IReadOnlyList<IrQueryParameter>? ExtractQueryParameters(string? sql)
+    {
+        if (string.IsNullOrEmpty(sql)) return null;
+        var parsed = QueryMetadataExtractor.ParseParameters(sql);
+        if (parsed is null || parsed.Count == 0) return null;
+        var list = new List<IrQueryParameter>(parsed.Count);
+        foreach (var p in parsed)
+            list.Add(new IrQueryParameter { Name = p.Name, Source = p.Source, Path = p.Path });
+        return list;
     }
 
     // ── Tables ───────────────────────────────────────────────────────────────────

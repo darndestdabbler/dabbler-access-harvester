@@ -72,6 +72,10 @@ public static class UsageSignalType
     // Launcher/navigation-surface signals (set 001 Session 1).
     public const string LauncherSurface      = "LauncherSurface";
     public const string StartupEntry         = "StartupEntry";
+    // Parameter-input signal (set 001 Session 2): fires when a query carries
+    // declared/bracketed/control-reference/ODBC parameter evidence, or when a
+    // form is recognized as a parameter/filter/criteria dialog (rule F8).
+    public const string ParameterizedInput   = "ParameterizedInput";
 }
 
 /// <summary>
@@ -95,4 +99,10 @@ public static class UncertaintySignal
     // found, but the object may still be reached via startup, direct object-pane
     // navigation, the ribbon, or other access outside the harvested graph.
     public const string OutOfBandEntryPossible = "OutOfBandEntryPossible";
+    // Parameter uncertainty (set 001 Session 2). ParameterizedQuery: a query (or
+    // report) expects run-time input — confirm where the values come from.
+    // ParameterDialogFlow: an unbound form recognized as a parameter/filter/
+    // criteria dialog (rule F8) — confirm which report/query it drives.
+    public const string ParameterizedQuery    = "ParameterizedQuery";
+    public const string ParameterDialogFlow   = "ParameterDialogFlow";
 }

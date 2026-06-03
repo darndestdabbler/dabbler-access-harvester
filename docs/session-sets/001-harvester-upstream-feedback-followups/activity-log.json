@@ -1,7 +1,7 @@
 {
   "sessionSetName": "001-harvester-upstream-feedback-followups",
   "createdDate": "2026-06-02T15:46:05.999079-04:00",
-  "totalSessions": 0,
+  "totalSessions": 3,
   "entries": [
     {
       "sessionNumber": 1,
@@ -68,6 +68,75 @@
           "inputTokens": 15418,
           "outputTokens": 10645,
           "costUsd": 0.19822
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/inventory-and-design",
+      "dateTime": "2026-06-02T20:17:38.104136-04:00",
+      "description": "Inventoried usage-side seams (IrQuery/IrLoader/UsageClassifier/QuestionGenerator/SignalIndex/schema) + Access QueryMetadataExtractor; grounded design in HHC fixture (2 declared-PARAMETERS queries, 5 frmReportParam_* dialog forms opened by reports via OnOpen macros, no [Forms]! refs). Design: additive ParameterizedInput signal + ParameterizedQuery/ParameterDialogFlow questions; F8 fleshed out per strategy contract (keep Unknown, mark question); reuse QueryMetadataExtractor.ParseParameters; thread flags not name-recompute.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/build-test-pilot",
+      "dateTime": "2026-06-02T20:36:52.616738-04:00",
+      "description": "Implemented: IrQuery.Parameters carried through IrLoader (reusing QueryMetadataExtractor.ParseParameters); ParameterizedInput signal; F8 param-dialog form rule; ParameterizedQuery/ParameterDialogFlow questions with generic-question suppression; schema + strategy-doc contract; ParameterDialogTests (12). UsageIdentification tests 118/118; full hermetic Pipeline.Tests 814/814; full-solution build 0 errors. Pilot vs committed HHC IR (temp dir, no golden overwrite): 5 frmReportParam_* forms now Unknown 0.45 + ParameterizedInput + ParameterDialogFlow (was F6 generic Unknown); 2 declared-PARAMETERS queries now surface ParameterizedInput + ParameterizedQuery; frmReportMenu launcher intact. Swept spurious .accdb diff.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify-round-1",
+      "dateTime": "2026-06-02T20:40:15.701040-04:00",
+      "description": "Cross-provider session verification round 1 (parameterized queries + parameter-dialog flows)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 13903,
+          "outputTokens": 7157,
+          "costUsd": 0.1421125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verify-round-2",
+      "dateTime": "2026-06-02T20:44:08.876821-04:00",
+      "description": "Cross-provider session verification round 2 (after R1 test-coverage fixes: report-ref + ODBC marker tests)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14513,
+          "outputTokens": 6394,
+          "costUsd": 0.13219250000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/next-session-recommendation",
+      "dateTime": "2026-06-02T20:46:41.113335-04:00",
+      "description": "Routed Session 3 orchestrator recommendation (analysis)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 617,
+          "outputTokens": 152,
+          "costUsd": 0.00229125
         }
       ]
     }

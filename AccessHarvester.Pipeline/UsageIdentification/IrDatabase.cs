@@ -52,6 +52,30 @@ public sealed record IrQuery
     public required string Name { get; init; }
     public required int QueryTypeCode { get; init; }
     public string? Sql { get; init; }
+
+    /// <summary>
+    /// Saved-query parameters carried through from the query SQL at load time
+    /// (set 001 Session 2): declared <c>PARAMETERS</c>-clause entries and implicit
+    /// <c>[Forms]!</c>/<c>[Reports]!</c> control references. Null when none were
+    /// detected. Populated by <see cref="IrLoader"/> via the shared
+    /// <c>AccessHarvester.Access</c> parameter scan so this metadata survives load
+    /// into the classifier instead of being dropped — the usage classifier reads
+    /// it rather than re-implementing parameter parsing.
+    /// </summary>
+    public IReadOnlyList<IrQueryParameter>? Parameters { get; init; }
+}
+
+/// <summary>
+/// One saved-query parameter (set 001 Session 2). Mirrors the declared /
+/// form-reference / report-reference provenance of the Access-layer
+/// <c>QueryParameter</c>, kept as a usage-side type so the IR model does not
+/// leak the extractor type.
+/// </summary>
+public sealed record IrQueryParameter
+{
+    public required string Name { get; init; }
+    public required string Source { get; init; }   // "declared" | "form-reference" | "report-reference"
+    public string? Path { get; init; }
 }
 
 /// <summary>Minimal parsed representation of a table IR file.</summary>

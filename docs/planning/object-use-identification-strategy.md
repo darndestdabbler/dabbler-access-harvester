@@ -81,6 +81,59 @@ unexplained objects:
 **Core principle:** the absence of a harvested opener is an *uncertainty
 to explain*, not a cleanup hint. See §5a.
 
+### 2b. Parameterized Queries And Parameter-Dialog Flows (set 001 Session 2)
+
+Access applications routinely collect run-time criteria before showing a
+report or running a query. Two harvested shapes matter, and both were
+previously lost in generic categories:
+
+- **Parameterized queries** — a saved query that declares a leading
+  `PARAMETERS <name> <type>, … ;` clause, references a bracketed prompt
+  (`[Enter Client ID]`) Access resolves at run time, references a control
+  on an open form (`[Forms]![frmX]![ctl]`) or report
+  (`[Reports]![rptX]![ctl]`), or carries an ODBC `?` marker. Such a query
+  *expects run-time input* — a first-class usage fact, not a reason to
+  read it as generic reporting.
+- **Parameter-collection (filter/criteria) dialog forms** (rule F8) — an
+  unbound form whose name matches `*Param*`, `*Filter*`, `*Criteria*`, or
+  `*Dialog*`. The classic shape (HomeHealthCare's `frmReportParam_*`) is a
+  stripped-chrome dialog with a selector control plus OK/Cancel, opened
+  with `acDialog` from a report's `OnOpen` and closed on its `OnClose`.
+  Before this set such a form fell to F6 `Unknown` ("has VBA, no record
+  source") and read as a *generic unknown form*.
+
+Recognition is **evidence-gated, never name-recomputed at emission time**
+(set 001 Session 1's discipline): the classifier decides once, threads an
+explicit flag, and the signal/summary/question read that flag rather than
+re-deriving from the object name.
+
+- A parameterized query fires the `ParameterizedInput` signal (§3.9) with
+  evidence naming the parameter source (declared parameter, bracketed
+  prompt, form/report control reference, ODBC marker). The signal is
+  computed independently of the Q2–Q7 category branch, so a parameterized
+  query that is *also* a report's RecordSource (Q3) still surfaces it.
+- A parameter-dialog form (F8) fires `ParameterizedInput` with evidence
+  `param-dialog-name-pattern` (plus `dialog-chrome` when record selectors
+  and navigation buttons are off, and `opened-as-dialog` when the form is
+  a harvested navigation target). Its summary is parameter-dialog-aware
+  and it is asked the `ParameterDialogFlow` question instead of the
+  generic `NoRecordSource` / `UnrecognizedVbaPattern` ones.
+
+**Category treatment.** Per the F8 contract (the rule marks a question; it
+does not assign a positive category), a recognized parameter-dialog form
+keeps the `Unknown` category its signal rules produced — its precise
+role/target is genuinely uncertain, which is exactly what the
+`ParameterDialogFlow` question asks. "Distinguishable from a generic
+unknown form" is achieved by the fired `ParameterizedInput` signal, the
+parameter-dialog summary, and the specific question — not by a new
+taxonomy category. Parameterized *queries* keep their existing Q-rule
+category (usually `Reporting`); the parameter fact is additive.
+
+**Scope guard.** A *bound* form is data entry, never a parameter dialog,
+even if its name matches the F8 pattern — the RecordSource branches win
+first (mirrors the Session 1 bound-launcher guard). A launcher/menu form
+(§2a) also wins over F8.
+
 ---
 
 ## 3. Signal Families
@@ -174,6 +227,28 @@ Six signal collectors feed the classifier. All read from `ir/` files.
 - **Supports classifying:** launcher recognition (§2a) and a first-class
   positive entry signal so a startup surface is never read as stale.
 
+### 3.9 ParameterizedInput (set 001 Session 2)
+
+- **Source:** query `Sql` (declared `PARAMETERS` clause, bracketed
+  prompts, `[Forms]!`/`[Reports]!` control references, ODBC `?`) and, for
+  forms, the F8 name pattern + dialog chrome + navigation-target state.
+- **Extraction:** declared-parameter / bracketed-prompt / form-control- /
+  report-control-reference / ODBC-marker evidence for queries;
+  `param-dialog-name-pattern` / `dialog-chrome` / `opened-as-dialog` for
+  forms. Query parameter parsing reuses the shared `AccessHarvester.Access`
+  `QueryMetadataExtractor.ParseParameters` scan rather than
+  re-implementing it.
+- **Produces:** a per-object boolean with evidence strings.
+- **Supports classifying:** surfaces parameter expectation on queries
+  (independently of the Q-rule category) and recognizes
+  parameter-collection dialog forms (F8) so they no longer read as a
+  generic `Unknown`.
+
+The same shallow-scan limitation the Access extractor documents applies:
+a bracketed field name containing a space (e.g. `[Order Date]`) can read
+as a bracketed prompt. That only ever raises a clarifying question; it
+never changes a category.
+
 ---
 
 ## 4. Classification Rules
@@ -191,9 +266,18 @@ and applies these rules in order. The first matching rule wins.
 | F4 | Has RecordSource → query | Reporting or MainDataEntry | 0.55 (sub-classify by query type) |
 | F5 | No RecordSource AND has navigation edges (opens other forms/reports) | NavigationShell | 0.80 |
 | F5b | No RecordSource AND no edges of its own BUT launcher name pattern OR opened by AutoExec startup (§2a) | NavigationShell | 0.70–0.80 (0.80 with launcher chrome; 0.75 startup) |
+| F8 | No RecordSource AND not a launcher (F5/F5b) AND name matches `*Param*`/`*Filter*`/`*Criteria*`/`*Dialog*` (set 001 Session 2, §2b) | Unknown — parameter-dialog **recognized**: `ParameterizedInput` signal + `ParameterDialogFlow` question + dialog summary | 0.40 |
 | F6 | No RecordSource AND no navigation edges AND has VBA code | Unknown | 0.30 |
 | F7 | No RecordSource AND no navigation edges AND no VBA | PossiblyUnused | 0.70 |
-| F8 | Named `*Param*`, `*Filter*`, `*Criteria*`, `*Dialog*` | (unknown intent, mark question) | — |
+
+> **Form rule order:** F1–F4 (RecordSource) → F5 (own edges) → F5b
+> (launcher name/startup, §2a) → **F8 (parameter dialog, §2b)** → F6 (VBA,
+> no record source) → F7b (navigation target, no other signal) → F7 (no
+> signal). F8 sits ahead of F6 so a `frmReportParam_*` dialog is
+> recognized as a parameter collector rather than read as a generic
+> VBA-only `Unknown`. It keeps the `Unknown` category (the question, not a
+> positive category, is the F8 deliverable) but is no longer
+> indistinguishable from a generic unknown form.
 
 ### Reports
 
@@ -234,6 +318,14 @@ Access `QueryTypeCode` values: 0 = Select, 1 = Crosstab, 2 = Delete,
 >   `QueryTypeCode ∈ {0, 64}` (Select and Union).
 > - DDL and Pass-through (Q11) are infrastructure queries; StandaloneUtility
 >   is the appropriate fallback regardless of reference signals.
+> - **Parameter expectation is a signal, not a category (set 001 Session
+>   2, §2b/§3.9).** The `ParameterizedInput` signal and its
+>   `ParameterizedQuery` question are emitted whenever a query carries
+>   declared/bracketed/control-reference/ODBC parameter evidence,
+>   *regardless of which Q-rule set its category*. The legacy Q5
+>   parameter-marker category path is unchanged; the signal adds the
+>   missing visibility for parameterized queries that classify via Q2/Q3
+>   (used as a form/report RecordSource) and so never reached Q5.
 
 ### Tables
 
@@ -279,13 +371,15 @@ These signals trigger the generation of clarifying questions:
 | Signal | Trigger |
 |---|---|
 | `OutOfBandEntryPossible` | No harvested opener for a Report/Query (any), or a bound Form, at confidence < 0.8 and not PossiblyUnused/NavigationShell (set 001 Session 1) |
-| `NoRecordSource` | Form has no `RecordSource` property |
+| `NoRecordSource` | Form has no `RecordSource` property (suppressed when the form is a recognized parameter dialog — F8/§5b emits `ParameterDialogFlow` instead) |
 | `QueryReferencesNoTables` | Query SQL references only other queries in FROM clause |
 | `UnreferencedObject` | Object fired no signals at all (PossiblyUnused) |
 | `LookupTablePattern` | Table classified as LookupReference |
 | `CrosstabQuery` | Query is Crosstab type |
-| `UnrecognizedVbaPattern` | Form/module has VBA but no parseable DoCmd/DFunction calls |
+| `UnrecognizedVbaPattern` | Form/module has VBA but no parseable DoCmd/DFunction calls (suppressed for a recognized parameter dialog — its VBA *is* recognized, F8/§5b) |
 | `CrypticObjectName` | Object name has no conventional prefix and < 5 chars |
+| `ParameterizedQuery` | Query carries declared/bracketed/control-reference/ODBC parameter evidence — expects run-time input (set 001 Session 2, §5b) |
+| `ParameterDialogFlow` | Unbound form recognized as a parameter/filter/criteria dialog (rule F8, set 001 Session 2, §5b) |
 | `NoNavigationEntry` | **Retired (set 001 Session 1).** No longer emitted; the missing-opener case is now framed by `OutOfBandEntryPossible`. Kept in the schema enum for backward compatibility with historical outputs. |
 
 ### 5a. Out-Of-Band Entry Uncertainty (set 001 Session 1)
@@ -306,6 +400,27 @@ harvested graph. A missing inbound reference is therefore an
   the cleanup pipeline's concern (`object-cleanup.json`), which is itself
   positive-signal-only.
 
+### 5b. Parameter Uncertainty (set 001 Session 2)
+
+Parameter expectation is a distinct uncertainty from "is this reachable"
+(§5a) and from "is this generic unknown VBA":
+
+- `ParameterizedQuery` — a query (or report) carries parameter evidence
+  (§3.9). The question asks where the run-time values come from: an
+  automatic Access prompt, a parameter/filter form, or a calling
+  procedure. It is additive — a parameterized query that also has no
+  harvested opener still gets the §5a `OutOfBandEntryPossible` question;
+  the two probe different things (parameter source vs. entry path) and are
+  deliberately not merged.
+- `ParameterDialogFlow` — an unbound form recognized by rule F8 as a
+  parameter/filter/criteria dialog. The question asks which report or
+  query it drives and how its collected values are applied. Because the
+  form is now positively recognized, its generic `NoRecordSource` and
+  `UnrecognizedVbaPattern` questions are **suppressed** — they would be
+  redundant noise next to the specific parameter-dialog question. This
+  suppression is what makes a parameter dialog *distinguishable from a
+  generic unknown form* in the output.
+
 ---
 
 ## 6. Clarifying Question Templates
@@ -323,6 +438,8 @@ and type as context.
 | `CrosstabQuery` | "Query '{name}' is a crosstab query — is it used for reporting, for driving a form or chart control, or for data exports?" |
 | `UnrecognizedVbaPattern` | "{objectType} '{name}' contains VBA that couldn't be auto-classified — can you describe its primary function?" |
 | `CrypticObjectName` | "{objectType} '{name}' has a name that doesn't clearly indicate its purpose — can you describe what it is used for?" |
+| `ParameterizedQuery` | "{objectType} '{name}' expects run-time parameter input (a declared PARAMETERS clause, a bracketed prompt, a form/report control reference, or an ODBC marker). Where do the values come from at run time — an automatic Access prompt, a parameter/filter form, or a calling procedure?" |
+| `ParameterDialogFlow` | "Form '{name}' has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report's Open event)?" |
 
 ---
 

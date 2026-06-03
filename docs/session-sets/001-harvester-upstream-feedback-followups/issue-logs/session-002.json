@@ -1,0 +1,18 @@
+[
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/ParameterDialogTests.cs",
+    "summary": "No regression covered the [Reports]![...] report-control-reference query-parameter path, though BuildQueryParameterEvidence supports report-reference evidence.",
+    "resolution": "Fixed (test-only): added Report_Control_Reference_Query_Fires_ParameterizedInput asserting ParameterizedInput fires with report-control-reference evidence + the ParameterizedQuery question.",
+    "status": "resolved"
+  },
+  {
+    "round": 1,
+    "severity": "Minor",
+    "location": "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/ParameterDialogTests.cs",
+    "summary": "No regression covered the ODBC '?' marker parameter-evidence path.",
+    "resolution": "Fixed (test-only): added Odbc_Marker_Query_Fires_ParameterizedInput asserting ParameterizedInput fires with odbc-parameter-marker evidence + the ParameterizedQuery question (Q5 category behavior unchanged).",
+    "status": "resolved"
+  }
+]

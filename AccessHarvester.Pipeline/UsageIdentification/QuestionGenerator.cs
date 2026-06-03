@@ -49,8 +49,40 @@ public static class QuestionGenerator
             });
         }
 
-        // NoRecordSource — form has no record source and is not NavigationShell or PossiblyUnused
+        // ParameterizedInput-driven questions (set 001 Session 2). The signal is
+        // set by the classifier — queries: SQL parameter evidence (declared
+        // PARAMETERS, bracketed prompt, form/report control reference, ODBC marker);
+        // forms: rule F8 parameter-dialog recognition. For a form it is a recognized
+        // parameter/filter dialog; for a query/report it expects run-time input.
+        bool parameterizedInput = signals
+            .Any(s => s.SignalType == UsageSignalType.ParameterizedInput && s.Fired);
+        bool isParamDialog = parameterizedInput && objectType == "Form";
+
+        if (isParamDialog)
+        {
+            // Specific recognition replaces the generic NoRecordSource /
+            // UnrecognizedVbaPattern questions (suppressed below) — this is what
+            // makes a parameter dialog distinguishable from a generic unknown form.
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"Form '{objectName}' has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report's Open event)?",
+                UncertaintySignal = UncertaintySignal.ParameterDialogFlow,
+            });
+        }
+        else if (parameterizedInput && objectType is "Query" or "Report")
+        {
+            questions.Add(new ClarifyingQuestion
+            {
+                QuestionText    = $"{objectType} '{objectName}' expects run-time parameter input (a declared PARAMETERS clause, a bracketed prompt, a form/report control reference, or an ODBC marker). Where do the values come from at run time — an automatic Access prompt, a parameter/filter form, or a calling procedure?",
+                UncertaintySignal = UncertaintySignal.ParameterizedQuery,
+            });
+        }
+
+        // NoRecordSource — form has no record source and is not NavigationShell or
+        // PossiblyUnused (and not a recognized parameter dialog — that gets the
+        // specific ParameterDialogFlow question above instead).
         if (objectType == "Form" && string.IsNullOrWhiteSpace(recordSource)
+            && !isParamDialog
             && category is not (UsageCategory.NavigationShell or UsageCategory.PossiblyUnused))
         {
             questions.Add(new ClarifyingQuestion
@@ -109,8 +141,11 @@ public static class QuestionGenerator
             });
         }
 
-        // UnrecognizedVbaPattern — form/module has VBA but no parseable DoCmd/DFunction calls
+        // UnrecognizedVbaPattern — form/module has VBA but no parseable DoCmd/DFunction calls.
+        // Suppressed for a recognized parameter dialog: its VBA (the OK/Cancel dialog
+        // logic) is explained by the ParameterDialogFlow recognition above.
         if (hasVbaCode && category == UsageCategory.Unknown
+            && !isParamDialog
             && objectType is "Form" or "Module")
         {
             questions.Add(new ClarifyingQuestion

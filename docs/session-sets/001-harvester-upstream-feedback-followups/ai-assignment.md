@@ -76,3 +76,85 @@ for expressing parameter uncertainty distinctly. Per project-guidance.md,
 novel-heuristic/architecture work earns Opus, handled in-conversation by an Opus
 orchestrator (only session-verification routed). Estimated routed cost: Low
 ($0.05–$0.20, verification only).
+
+---
+
+## Session 2 of 3: Parameterized Queries + Parameter-Dialog Flows
+
+**Recommended orchestrator:** `claude-opus-4-8` (claude-code) @ effort=high
+**Rationale:** Synthesis-dominant — the mechanical plumbing (carrying saved-query
+`PARAMETERS` metadata through `IrQuery`/`IrLoader`) is outweighed by the novel
+heuristics for recognizing likely parameter-collection forms and report-open
+parameter flows and for expressing parameter uncertainty distinctly. Opus is the
+routing target for `architecture`; per project-guidance.md, an Opus orchestrator
+handles the synthesis in-conversation, routing only `session-verification`.
+**Estimated routed cost:** Low ($0.05–$0.20) — verification only.
+
+| Step | Action | Routing Decision |
+|---|---|---|
+| 1 | Inventory the usage-side seams (`IrQuery`/`IrLoader`/`UsageClassifier`/`QuestionGenerator`/`SignalIndex`/schema) + the Access `QueryMetadataExtractor` parameter model; ground the design in the HHC fixture. | `In-conversation` |
+| 2 | Author the parameterized-query + parameter-dialog contract in the strategy doc (§2b/§3.9/F8/§5b/§6). | `In-conversation` (task type `architecture`, matches orchestrator) |
+| 3 | Widen `IrQuery` with `Parameters`, populated at load by `IrLoader` (reusing `QueryMetadataExtractor.ParseParameters`). | `tool-use` |
+| 4 | Add the `ParameterizedInput` signal + F8 parameter-dialog form rule (gated flags, not name-recompute); add `ParameterizedQuery`/`ParameterDialogFlow` questions with generic-question suppression. | `In-conversation` + `tool-use` |
+| 5 | Regression tests (`ParameterDialogTests`). | `tool-use` |
+| 6 | Pilot `identify-usage` against committed HHC golden IR (temp dir, no golden overwrite); `dotnet build` + `dotnet test` sequentially. | `tool-use` |
+| 7 | Cross-provider session verification. | `route(session-verification)` (cross-provider, MUST route) |
+| 8 | Closeout: issue log, ai-assignment actuals, disposition.json, `close_session`. | `tool-use` |
+
+### Actuals (filled after the session)
+
+- **Orchestrator used:** claude-code / claude-opus-4-8 @ effort=high.
+- **Total routed cost:** ~$0.277 USD — two gpt-5-4 session-verification rounds
+  (R1 $0.1421, R2 $0.1322) plus one gemini-pro `analysis` route for the Session 3
+  recommendation ($0.0023). Design and implementation were handled in-conversation
+  (Opus orchestrator matches the `architecture` routing target), so no synthesis
+  routes were spent. (Set cumulative through Session 2: ~$1.25.)
+- **Verdict:** VERIFIED (Round 2). Clean — unlike Session 1's ISSUES_FOUND close.
+  Round 1 returned ISSUES_FOUND with two Minor findings, both test-coverage-only
+  (no behavioral defects — the verifier confirmed concerns 1–5 correct): the
+  `[Reports]!` control-reference path and the ODBC `?` marker path were implemented
+  but unpinned. Fixed test-only (two added regressions); Round 2 returned a clean
+  VERIFIED on the first re-try, well inside the Step 7 2-retry cap.
+- **Deviations from recommendation:**
+  - One mid-session design reconciliation: parameter parsing was first done
+    on-demand in the classifier, then refactored to carry parsed parameters on
+    `IrQuery.Parameters` (populated at load by `IrLoader.ExtractQueryParameters`) to
+    honor spec Step 2's "widen the usage-side IR … through `IrQuery`/`IrLoader`"
+    wording. Behavior-preserving — the pilot evidence was byte-identical before and
+    after the refactor — and verifier-confirmed as the right placement.
+  - Cost landed just above the Low estimate's high end ($0.277 vs $0.20) because two
+    verification rounds were needed; both were warranted and R2 was clean.
+- **Notes for Session 3 calibration:**
+  - The committed HHC usage golden under `samples/GoldenOutput/HomeHealthCare/usage/`
+    is now stale relative to BOTH the Session 1 launcher work and the Session 2
+    parameter work, and is intentionally NOT regenerated until Session 3. Session 3's
+    golden regen will bake in the cumulative launcher + parameter changes.
+  - Both the Session 1 and Session 2 pilots showed checklist top-level keys remain
+    canonical PascalCase. The spec's "verify casing, only patch if a fresh run
+    drifts" task is likely a verification-only confirmation — honor the stop rule
+    (do not touch casing code unless a current run actually drifts).
+  - Parameter recognition surfaced cleanly on the 5 `frmReportParam_*` forms
+    (Unknown 0.45 + `ParameterizedInput` + `ParameterDialogFlow`) and the 2
+    declared-`PARAMETERS` queries (`ParameterizedInput` + `ParameterizedQuery`). If
+    the Session 3 pilot review finds the `ParameterDialogFlow` / `ParameterizedQuery`
+    question wording unclear, that is the place to calibrate it (in-scope wording
+    only — not new heuristics).
+  - The `QuestionGenerator` has a dormant `ParameterizedInput` → Report branch
+    (reports do not fire the signal this session — scoped out deliberately). The
+    verifier flagged it as future-facing, not a defect; it is ready if a later set
+    adds report-side parameter flows.
+
+---
+
+**Next-session orchestrator recommendation (Session 3, final):** claude-code /
+claude-opus-4-8 @ effort=high. Rationale (routed via `gemini-pro` analysis,
+do-not-self-opine; the routed reply named a stale Opus model id, normalized here to
+the current `claude-opus-4-8`): although the Session 3 body is predominantly
+mechanical verification + committed-golden regeneration + checklist-casing
+verification (which the conventions would route to Sonnet), Session 3 is the FINAL
+session and its primary deliverables are the synthesis closeout artifacts —
+`change-log.md`, `next-session-set-recommendation.md`, and the Step 9 reorganization
+review (promoting lessons to conventions/principles). Per project-guidance.md, that
+high-level synthesis earns Opus, handled in-conversation, with only the
+cross-provider `session-verification` routed. Estimated routed cost: Low
+($0.05–$0.20, verification only).

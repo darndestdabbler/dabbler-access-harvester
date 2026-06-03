@@ -280,6 +280,24 @@ public sealed class SignalIndex
                 && name.Contains("Item", StringComparison.OrdinalIgnoreCase));
     }
 
+    /// <summary>
+    /// True when a form name matches a conventional parameter/filter/criteria
+    /// dialog naming pattern (e.g., frmReportParam_Client, frmServiceFilter,
+    /// frmSearchCriteria, frmExportDialog). Used by rule F8 to recognize an
+    /// unbound parameter-collection dialog so it is no longer read as a generic
+    /// VBA-only Unknown form. See strategy doc §2b. The caller gates this on the
+    /// form being unbound and not a launcher; the name match alone never
+    /// classifies (set 001 Session 1 discipline).
+    /// </summary>
+    public static bool IsParameterDialogName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return false;
+        return name.Contains("Param",    StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Filter",   StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Criteria", StringComparison.OrdinalIgnoreCase)
+            || name.Contains("Dialog",   StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>True when the object is opened by an AutoExec/startup macro.</summary>
     public bool IsStartupOpened(string objectName)
         => StartupOpenedObjects.Contains(objectName);
