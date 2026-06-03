@@ -139,6 +139,103 @@
           "costUsd": 0.00229125
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/setup-inventory",
+      "dateTime": "2026-06-02T21:03:06.124035-04:00",
+      "description": "Bootstrapped: verified keys/venv, clean tree (S2 committed), built solution (0 errors), located committed HHC+Northwind golden IR + usage goldens; identify-usage runs hermetically on committed IR.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/pilot-run",
+      "dateTime": "2026-06-02T21:03:06.401309-04:00",
+      "description": "Ran identify-usage fresh against committed HHC IR (74 objects) and Northwind IR (167 objects) into temp dirs; exit 0 both. New S1/S2 signals fire: HHC LauncherSurface=5/ParameterizedInput=7, Northwind LauncherSurface=2/StartupEntry=1/ParameterizedInput=4.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/review-and-casing",
+      "dateTime": "2026-06-02T21:03:06.656526-04:00",
+      "description": "Reviewed launcher/param objects: summaries+questions read clearly (launcher NavigationShell, param-dialog Unknown+ParameterDialogFlow, param-query OutOfBand+ParameterizedQuery additive). Verified object-use-checklist.json casing canonical PascalCase on fresh run for BOTH fixtures (Review/Subarea/ItemLabel/Steps, no camelCase) -> stop rule honored, no casing code change.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/no-calibration-no-docchange",
+      "dateTime": "2026-06-02T21:03:07.020146-04:00",
+      "description": "Pilot exposed no local wording/threshold defects -> no calibration. Consumer doc reviewing-the-feedback-artifacts.md is intentionally high-level/vocabulary-agnostic and questions are self-describing; per Lean principle no consumer-doc change warranted. Concept vocabulary already documented in object-use-identification-strategy.md (S1/S2).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/golden-regen",
+      "dateTime": "2026-06-02T21:03:07.285415-04:00",
+      "description": "Regenerated committed usage goldens for HHC + Northwind (LF-normalized per .gitattributes). Diff = 3 new fired:false signal rows (LauncherSurface/StartupEntry/ParameterizedInput) on every object + real changes on 12 HHC / 6 Northwind objects; no objects added/removed. Reverted spurious samples/HomeHealthCare.accdb timestamp churn.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-06-02T21:03:07.646524-04:00",
+      "description": "dotnet build AccessHarvester.sln: 0 errors (pre-existing CA1416 warnings only). dotnet test Pipeline.Tests hermetic (excl ComDateMaximaProbe COM tier): 816 passed / 0 failed / 0 skipped, incl all S1 LauncherSurfaceTests + S2 ParameterDialogTests.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/verify-round-1",
+      "dateTime": "2026-06-02T21:05:52.150752-04:00",
+      "description": "Cross-provider session verification round 1 (final session: golden regen + casing stop-rule + pilot judgment)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4099,
+          "outputTokens": 2915,
+          "costUsd": 0.0539725
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/next-set-recommendation",
+      "dateTime": "2026-06-02T21:08:31.034676-04:00",
+      "description": "Routed next-session-set recommendation (analysis, do-not-self-opine)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 595,
+          "outputTokens": 280,
+          "costUsd": 0.0035437499999999996
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-3/closeout-author",
+      "dateTime": "2026-06-02T21:10:46.235620-04:00",
+      "description": "Authored disposition.json (completed/api/VERIFIED), change-log.md (all 3 sessions), ai-assignment.md Session 3 actuals; next-session-set-recommendation.md routed (consumer-driven-only, no next set).",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }

@@ -1,7 +1,7 @@
 ﻿{
   "version": "1.0",
   "database": "HomeHealthCare",
-  "generatedAt": "2026-05-28T14:54:27.1563102Z",
+  "generatedAt": "2026-06-03T00:58:28.6797955Z",
   "excludedObjects": [],
   "objects": [
     {
@@ -50,6 +50,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -109,12 +124,27 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "No navigation entry found for Form \u0027frmBudgetServicePlan\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
-          "uncertaintySignal": "NoNavigationEntry"
+          "questionText": "No harvested opener was found for Form \u0027frmBudgetServicePlan\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "uncertaintySignal": "OutOfBandEntryPossible"
         }
       ]
     },
@@ -169,6 +199,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -220,6 +265,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -276,14 +336,24 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
-      "questions": [
-        {
-          "questionText": "No navigation entry found for Form \u0027frmClientServiceNeedDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
-          "uncertaintySignal": "NoNavigationEntry"
-        }
-      ]
+      "questions": []
     },
     {
       "objectType": "Form",
@@ -333,12 +403,27 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "No navigation entry found for Form \u0027frmClientServicePlanDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
-          "uncertaintySignal": "NoNavigationEntry"
+          "questionText": "No harvested opener was found for Form \u0027frmClientServicePlanDetail\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "uncertaintySignal": "OutOfBandEntryPossible"
         }
       ]
     },
@@ -390,6 +475,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -445,6 +545,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -497,21 +612,31 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
-      "questions": [
-        {
-          "questionText": "No navigation entry found for Form \u0027frmProviderServiceCatalogDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
-          "uncertaintySignal": "NoNavigationEntry"
-        }
-      ]
+      "questions": []
     },
     {
       "objectType": "Form",
       "objectName": "frmReportMenu",
-      "classification": "Unknown",
-      "confidence": 0.35,
-      "usageSummary": "Form \u0027frmReportMenu\u0027 \u2014 insufficient signals to determine usage",
+      "classification": "NavigationShell",
+      "confidence": 0.85,
+      "usageSummary": "Navigation/launcher form \u0027frmReportMenu\u0027 \u2014 a switchboard/menu shell that routes to other forms or reports (directly or via a navigation macro)",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -554,25 +679,34 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
-        }
-      ],
-      "questions": [
-        {
-          "questionText": "Form \u0027frmReportMenu\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "uncertaintySignal": "NoRecordSource"
         },
         {
-          "questionText": "Form \u0027frmReportMenu\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "uncertaintySignal": "UnrecognizedVbaPattern"
+          "signalType": "LauncherSurface",
+          "fired": true,
+          "evidence": [
+            "launcher-name-pattern",
+            "launcher-chrome"
+          ]
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
-      ]
+      ],
+      "questions": []
     },
     {
       "objectType": "Form",
       "objectName": "frmReportParam_Client",
       "classification": "Unknown",
-      "confidence": 0.35,
-      "usageSummary": "Form \u0027frmReportParam_Client\u0027 \u2014 insufficient signals to determine usage",
+      "confidence": 0.45,
+      "usageSummary": "Likely parameter/filter dialog form \u0027frmReportParam_Client\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -615,16 +749,31 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": true,
+          "evidence": [
+            "param-dialog-name-pattern",
+            "dialog-chrome",
+            "opened-as-dialog"
+          ]
         }
       ],
       "questions": [
         {
-          "questionText": "Form \u0027frmReportParam_Client\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "uncertaintySignal": "NoRecordSource"
-        },
-        {
-          "questionText": "Form \u0027frmReportParam_Client\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "uncertaintySignal": "UnrecognizedVbaPattern"
+          "questionText": "Form \u0027frmReportParam_Client\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
+          "uncertaintySignal": "ParameterDialogFlow"
         }
       ]
     },
@@ -632,8 +781,8 @@
       "objectType": "Form",
       "objectName": "frmReportParam_ClientFY",
       "classification": "Unknown",
-      "confidence": 0.35,
-      "usageSummary": "Form \u0027frmReportParam_ClientFY\u0027 \u2014 insufficient signals to determine usage",
+      "confidence": 0.45,
+      "usageSummary": "Likely parameter/filter dialog form \u0027frmReportParam_ClientFY\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -676,16 +825,31 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": true,
+          "evidence": [
+            "param-dialog-name-pattern",
+            "dialog-chrome",
+            "opened-as-dialog"
+          ]
         }
       ],
       "questions": [
         {
-          "questionText": "Form \u0027frmReportParam_ClientFY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "uncertaintySignal": "NoRecordSource"
-        },
-        {
-          "questionText": "Form \u0027frmReportParam_ClientFY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "uncertaintySignal": "UnrecognizedVbaPattern"
+          "questionText": "Form \u0027frmReportParam_ClientFY\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
+          "uncertaintySignal": "ParameterDialogFlow"
         }
       ]
     },
@@ -693,8 +857,8 @@
       "objectType": "Form",
       "objectName": "frmReportParam_FY",
       "classification": "Unknown",
-      "confidence": 0.35,
-      "usageSummary": "Form \u0027frmReportParam_FY\u0027 \u2014 insufficient signals to determine usage",
+      "confidence": 0.45,
+      "usageSummary": "Likely parameter/filter dialog form \u0027frmReportParam_FY\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -737,16 +901,31 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": true,
+          "evidence": [
+            "param-dialog-name-pattern",
+            "dialog-chrome",
+            "opened-as-dialog"
+          ]
         }
       ],
       "questions": [
         {
-          "questionText": "Form \u0027frmReportParam_FY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "uncertaintySignal": "NoRecordSource"
-        },
-        {
-          "questionText": "Form \u0027frmReportParam_FY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "uncertaintySignal": "UnrecognizedVbaPattern"
+          "questionText": "Form \u0027frmReportParam_FY\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
+          "uncertaintySignal": "ParameterDialogFlow"
         }
       ]
     },
@@ -754,8 +933,8 @@
       "objectType": "Form",
       "objectName": "frmReportParam_Provider",
       "classification": "Unknown",
-      "confidence": 0.35,
-      "usageSummary": "Form \u0027frmReportParam_Provider\u0027 \u2014 insufficient signals to determine usage",
+      "confidence": 0.45,
+      "usageSummary": "Likely parameter/filter dialog form \u0027frmReportParam_Provider\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -798,16 +977,31 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": true,
+          "evidence": [
+            "param-dialog-name-pattern",
+            "dialog-chrome",
+            "opened-as-dialog"
+          ]
         }
       ],
       "questions": [
         {
-          "questionText": "Form \u0027frmReportParam_Provider\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "uncertaintySignal": "NoRecordSource"
-        },
-        {
-          "questionText": "Form \u0027frmReportParam_Provider\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "uncertaintySignal": "UnrecognizedVbaPattern"
+          "questionText": "Form \u0027frmReportParam_Provider\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
+          "uncertaintySignal": "ParameterDialogFlow"
         }
       ]
     },
@@ -815,8 +1009,8 @@
       "objectType": "Form",
       "objectName": "frmReportParam_ProviderFY",
       "classification": "Unknown",
-      "confidence": 0.35,
-      "usageSummary": "Form \u0027frmReportParam_ProviderFY\u0027 \u2014 insufficient signals to determine usage",
+      "confidence": 0.45,
+      "usageSummary": "Likely parameter/filter dialog form \u0027frmReportParam_ProviderFY\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -859,16 +1053,31 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": true,
+          "evidence": [
+            "param-dialog-name-pattern",
+            "dialog-chrome",
+            "opened-as-dialog"
+          ]
         }
       ],
       "questions": [
         {
-          "questionText": "Form \u0027frmReportParam_ProviderFY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "uncertaintySignal": "NoRecordSource"
-        },
-        {
-          "questionText": "Form \u0027frmReportParam_ProviderFY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "uncertaintySignal": "UnrecognizedVbaPattern"
+          "questionText": "Form \u0027frmReportParam_ProviderFY\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
+          "uncertaintySignal": "ParameterDialogFlow"
         }
       ]
     },
@@ -920,6 +1129,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -977,6 +1201,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -1031,6 +1270,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -1038,9 +1292,9 @@
     {
       "objectType": "Form",
       "objectName": "frmSwitchboard",
-      "classification": "Unknown",
-      "confidence": 0.35,
-      "usageSummary": "Form \u0027frmSwitchboard\u0027 \u2014 insufficient signals to determine usage",
+      "classification": "NavigationShell",
+      "confidence": 0.85,
+      "usageSummary": "Navigation/launcher form \u0027frmSwitchboard\u0027 \u2014 a switchboard/menu shell that routes to other forms or reports (directly or via a navigation macro)",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -1081,22 +1335,27 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": true,
+          "evidence": [
+            "launcher-name-pattern",
+            "launcher-chrome"
+          ]
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
-      "questions": [
-        {
-          "questionText": "No navigation entry found for Form \u0027frmSwitchboard\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
-          "uncertaintySignal": "NoNavigationEntry"
-        },
-        {
-          "questionText": "Form \u0027frmSwitchboard\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "uncertaintySignal": "NoRecordSource"
-        },
-        {
-          "questionText": "Form \u0027frmSwitchboard\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "uncertaintySignal": "UnrecognizedVbaPattern"
-        }
-      ]
+      "questions": []
     },
     {
       "objectType": "Report",
@@ -1146,6 +1405,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -1200,6 +1474,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -1250,6 +1539,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -1304,6 +1608,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -1354,6 +1673,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -1408,6 +1742,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -1458,6 +1807,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -1512,6 +1876,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -1562,6 +1941,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -1616,6 +2010,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -1666,6 +2075,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -1720,6 +2144,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -1772,11 +2211,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qryApprovedPlansByClient\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qryApprovedPlansByClient\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -1829,11 +2283,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qryBudgetUtilization\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qryBudgetUtilization\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -1886,11 +2355,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qryClientAge\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qryClientAge\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -1943,11 +2427,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qryClientBudgetSummary\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qryClientBudgetSummary\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -2000,11 +2499,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qryClientList\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qryClientList\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -2055,6 +2569,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -2109,6 +2638,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -2161,9 +2705,35 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": true,
+          "evidence": [
+            "declared-parameter:Enter Client ID:"
+          ]
         }
       ],
-      "questions": []
+      "questions": [
+        {
+          "questionText": "No harvested opener was found for Query \u0027qryClientServicePlan_ByClient\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "uncertaintySignal": "OutOfBandEntryPossible"
+        },
+        {
+          "questionText": "Query \u0027qryClientServicePlan_ByClient\u0027 expects run-time parameter input (a declared PARAMETERS clause, a bracketed prompt, a form/report control reference, or an ODBC marker). Where do the values come from at run time \u2014 an automatic Access prompt, a parameter/filter form, or a calling procedure?",
+          "uncertaintySignal": "ParameterizedQuery"
+        }
+      ]
     },
     {
       "objectType": "Query",
@@ -2213,6 +2783,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -2267,11 +2852,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qryProviderList\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qryProviderList\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -2324,9 +2924,36 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": true,
+          "evidence": [
+            "declared-parameter:Enter Provider ID:",
+            "declared-parameter:Enter Fiscal Year:"
+          ]
         }
       ],
-      "questions": []
+      "questions": [
+        {
+          "questionText": "No harvested opener was found for Query \u0027qryProviderPlansByClient_Param\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "uncertaintySignal": "OutOfBandEntryPossible"
+        },
+        {
+          "questionText": "Query \u0027qryProviderPlansByClient_Param\u0027 expects run-time parameter input (a declared PARAMETERS clause, a bracketed prompt, a form/report control reference, or an ODBC marker). Where do the values come from at run time \u2014 an automatic Access prompt, a parameter/filter form, or a calling procedure?",
+          "uncertaintySignal": "ParameterizedQuery"
+        }
+      ]
     },
     {
       "objectType": "Query",
@@ -2374,6 +3001,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -2426,6 +3068,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -2482,6 +3139,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -2534,6 +3206,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -2584,6 +3271,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -2640,6 +3342,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -2690,6 +3407,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -2744,11 +3476,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qxtClientServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qxtClientServiceCosts\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -2801,11 +3548,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qxtClientServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qxtClientServiceHours\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -2858,11 +3620,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qxtProviderServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qxtProviderServiceCosts\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -2915,11 +3692,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
         {
-          "questionText": "Query \u0027qxtProviderServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "questionText": "No harvested reference was found for Query \u0027qxtProviderServiceHours\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "uncertaintySignal": "UnreferencedObject"
         }
       ]
@@ -2976,6 +3768,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -3037,6 +3844,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3093,6 +3915,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -3154,6 +3991,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3211,6 +4063,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -3274,6 +4141,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3328,6 +4210,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -3390,6 +4287,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3397,9 +4309,9 @@
     {
       "objectType": "Table",
       "objectName": "tblSwitchboardItems",
-      "classification": "PossiblyUnused",
-      "confidence": 0.7,
-      "usageSummary": "Table \u0027tblSwitchboardItems\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "classification": "StandaloneUtility",
+      "confidence": 0.65,
+      "usageSummary": "Navigation/switchboard configuration table \u0027tblSwitchboardItems\u0027 backing the application\u0027s launcher menu",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -3440,14 +4352,26 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": true,
+          "evidence": [
+            "switchboard-navigation-data"
+          ]
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
-      "questions": [
-        {
-          "questionText": "Table \u0027tblSwitchboardItems\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
-          "uncertaintySignal": "UnreferencedObject"
-        }
-      ]
+      "questions": []
     },
     {
       "objectType": "Table",
@@ -3499,6 +4423,21 @@
           "evidence": [
             "lookup-name-pattern"
           ]
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
@@ -3556,6 +4495,21 @@
           "evidence": [
             "lookup-name-pattern"
           ]
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
@@ -3613,6 +4567,21 @@
           "evidence": [
             "lookup-name-pattern"
           ]
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": [
@@ -3672,6 +4641,21 @@
           "evidence": [
             "lookup-name-pattern"
           ]
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3720,6 +4704,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -3772,6 +4771,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3822,6 +4836,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3870,6 +4899,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -3924,6 +4968,23 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges"
+          ]
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3974,6 +5035,21 @@
           "signalType": "ObjectNameConvention",
           "fired": false,
           "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
+          "fired": false,
+          "evidence": []
         }
       ],
       "questions": []
@@ -3983,7 +5059,7 @@
       "objectName": "mcrSwitchboardActions",
       "classification": "NavigationShell",
       "confidence": 0.75,
-      "usageSummary": "Macro \u0027mcrSwitchboardActions\u0027 containing navigation actions that open forms or reports",
+      "usageSummary": "Macro \u0027mcrSwitchboardActions\u0027 containing navigation actions that open forms or reports for a launcher surface",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -4024,6 +5100,24 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": true,
+          "evidence": [
+            "emits-navigation-edges",
+            "launcher-name-pattern"
+          ]
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }
@@ -4074,6 +5168,21 @@
         },
         {
           "signalType": "ObjectNameConvention",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "LauncherSurface",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "StartupEntry",
+          "fired": false,
+          "evidence": []
+        },
+        {
+          "signalType": "ParameterizedInput",
           "fired": false,
           "evidence": []
         }

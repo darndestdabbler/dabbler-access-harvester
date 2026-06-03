@@ -1,40 +1,26 @@
 {
-  "status": "complete",
-  "summary": "Session 2 of 3 adds parameterized-query and parameter-dialog recognition to the usage-identification layer. Saved-query parameter metadata now survives load: IrQuery carries a new Parameters list populated by IrLoader.ExtractQueryParameters, which reuses the Access-layer QueryMetadataExtractor.ParseParameters scan (declared PARAMETERS entries + [Forms]!/[Reports]! control references) rather than re-implementing parsing. A new ParameterizedInput signal is emitted independently of the Q2-Q7 category branch, so a parameterized query used as a report RecordSource (Q3) now surfaces its parameter expectation instead of being lumped into generic reporting; its evidence covers declared parameters, form/report control references, inline bracketed prompts, and ODBC '?' markers. Rule F8 is fleshed out: an unbound form whose name matches *Param*/*Filter*/*Criteria*/*Dialog* is recognized as a likely parameter-collection dialog (e.g. frmReportParam_*, which Session 1 deliberately left Unknown). Per the strategy-doc F8 contract the form keeps the Unknown category (the question, not a positive category, is the deliverable) but is made distinguishable from a generic unknown form via the fired ParameterizedInput signal (evidence param-dialog-name-pattern + dialog-chrome + opened-as-dialog), a parameter-dialog summary, and a specific ParameterDialogFlow question that suppresses the now-redundant NoRecordSource/UnrecognizedVbaPattern questions. Queries get an additive ParameterizedQuery question that deliberately does not suppress the Session 1 OutOfBandEntryPossible question (the two probe different things). All new signal/summary state is threaded via explicit flags from the classifier decision (paramEvidence / parameterDialogForm), never recomputed from the object name in BuildSignals/BuildSummary, per the Session 1 calibration discipline. The contract is documented in docs/planning/object-use-identification-strategy.md (new §2b, §3.9, fleshed-out F8, §5b, §6 templates) and the schema enums (ParameterizedInput; ParameterizedQuery; ParameterDialogFlow). Pilot of identify-usage against the committed HomeHealthCare golden IR (temp dir; golden intentionally NOT regenerated — Session 3): the 5 frmReportParam_* forms go from F6 generic Unknown 0.30 to Unknown 0.45 with ParameterizedInput + ParameterDialogFlow (generic questions suppressed); the 2 declared-PARAMETERS queries (qryProviderPlansByClient_Param, qryClientServicePlan_ByClient) now surface ParameterizedInput + ParameterizedQuery; frmReportMenu stays a NavigationShell launcher (F8 correctly yields to the launcher rules). Hermetic AccessHarvester.Pipeline.Tests 814 passed, 0 failed, 0 skipped (incl. 13 new ParameterDialogTests; all Session 1 LauncherSurfaceTests unchanged and green); full-solution dotnet build 0 errors. Scope discipline held: no cleanup-pipeline changes, no COM changes, no golden regeneration, no duplicate-table/obsolete-module heuristics. Cross-provider verification gpt-5-4: R1 ISSUES_FOUND (2 Minor, test-coverage only — concerns 1-5 confirmed correct: missing regressions for the [Reports]! control-reference path and the ODBC '?' marker path) -> fixed test-only -> R2 VERIFIED (empty issues). Both findings resolved; verdict recorded as VERIFIED.",
+  "status": "completed",
+  "summary": "Session 3 of 3 (FINAL): pilot + fresh-output verification + closeout for the harvester upstream-feedback-followups set. No production code changed this session; the classifier/question-generator/signal/schema implementation was already cross-provider verified in Sessions 1 and 2. (1) Pilot: ran identify-usage fresh against the committed HomeHealthCare IR (74 objects) and NorthwindDevEdition IR (167 objects), exit 0 both, hermetic on committed IR (no Access COM). The cumulative Session 1 + Session 2 signals fire as designed — HHC LauncherSurface x5 / ParameterizedInput x7; Northwind LauncherSurface x2 / StartupEntry x1 / ParameterizedInput x4. (2) Output review: launcher shells read clearly as NavigationShell launchers (0.8-0.85); tblSwitchboardItems reads as a switchboard config table (StandaloneUtility), no longer deletion-scented; parameter-dialog forms stay hedged Unknown @ 0.45 with a single ParameterDialogFlow question; parameterized queries keep both OutOfBandEntryPossible and ParameterizedQuery (additive). No local wording/threshold defect was exposed, so no calibration was made (Step 4 is conditional). (3) Checklist casing: a fresh run emits canonical PascalCase for BOTH fixtures (top-level Review; PascalCase item keys; no camelCase) — per the spec stop rule the verification is recorded and the writer left UNCHANGED (no casing code change). (4) Golden regeneration: regenerated the committed usage goldens for both fixtures to bake in the cumulative S1+S2 changes; the diff is the 3 new fired:false signal-type rows on every object plus the real changes on 12 HHC / 6 Northwind objects, with no objects added or removed; files LF-normalized per .gitattributes; the spurious samples/HomeHealthCare.accdb test-build timestamp churn was reverted and excluded. (5) Docs: no consumer-doc change warranted — reviewing-the-feedback-artifacts.md is intentionally high-level/vocabulary-agnostic and the new questions are self-describing; the concept vocabulary already lives in object-use-identification-strategy.md (S1/S2). Per the Lean-by-default principle no edit was made. (6) Build/test: dotnet build 0 errors (pre-existing CA1416/NU1903 warnings only); dotnet test AccessHarvester.Pipeline.Tests hermetic (excl. the Access-COM ComDateMaximaProbe tier) 816 passed / 0 failed / 0 skipped, including all S1 LauncherSurfaceTests and S2 ParameterDialogTests unchanged and green. Scope discipline held: no cleanup-pipeline changes, no COM changes, no duplicate-table-shape / obsolete-module-header heuristics, missing inbound references not treated as deletability. Cross-provider verification (gpt-5-4): R1 VERIFIED (empty issues) — a clean first-round close on the regeneration + casing stop-rule + pilot judgment. This is the final session; the set's top-level status flips to complete. The harvester arc is complete and the repo is in a consumer-driven-only posture (see next-session-set-recommendation.md): no self-initiated next set.",
   "files_changed": [
-    "AccessHarvester.Pipeline/UsageIdentification/IrDatabase.cs",
-    "AccessHarvester.Pipeline/UsageIdentification/IrLoader.cs",
-    "AccessHarvester.Pipeline/UsageIdentification/UsageClassifier.cs",
-    "AccessHarvester.Pipeline/UsageIdentification/QuestionGenerator.cs",
-    "AccessHarvester.Pipeline/UsageIdentification/SignalIndex.cs",
-    "AccessHarvester.Pipeline/UsageIdentification/UsageFinding.cs",
-    "AccessHarvester.Pipeline/UsageIdentification/object-use-schema.json",
-    "docs/planning/object-use-identification-strategy.md",
-    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/ParameterDialogTests.cs",
-    "docs/session-sets/001-harvester-upstream-feedback-followups/ai-assignment.md",
+    "samples/GoldenOutput/HomeHealthCare/usage/object-use.json",
+    "samples/GoldenOutput/HomeHealthCare/usage/object-use-checklist.json",
+    "samples/GoldenOutput/NorthwindDevEdition/usage/object-use.json",
+    "samples/GoldenOutput/NorthwindDevEdition/usage/object-use-checklist.json",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/change-log.md",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/next-session-set-recommendation.md",
     "docs/session-sets/001-harvester-upstream-feedback-followups/disposition.json",
-    "docs/session-sets/001-harvester-upstream-feedback-followups/session-2-log.py",
-    "docs/session-sets/001-harvester-upstream-feedback-followups/session-2-verify.py",
-    "docs/session-sets/001-harvester-upstream-feedback-followups/session-2-next-rec.py",
-    "docs/session-sets/001-harvester-upstream-feedback-followups/session-2-closeout.py",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/ai-assignment.md",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-3-log.py",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-3-verify.py",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-3-next-rec.py",
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-reviews/session-003.md",
     "docs/session-sets/001-harvester-upstream-feedback-followups/activity-log.json",
     "docs/session-sets/001-harvester-upstream-feedback-followups/session-events.jsonl",
-    "docs/session-sets/001-harvester-upstream-feedback-followups/session-state.json",
-    "docs/session-sets/001-harvester-upstream-feedback-followups/session-reviews/session-002.md",
-    "docs/session-sets/001-harvester-upstream-feedback-followups/issue-logs/session-002.json"
+    "docs/session-sets/001-harvester-upstream-feedback-followups/session-state.json"
   ],
   "verification_method": "api",
   "verification_verdict": "VERIFIED",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-8",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Routed recommendation (gemini-pro, analysis, do-not-self-opine; the reply named a stale Opus model id, normalized to the current claude-opus-4-8): Session 3 is the FINAL session. Although its body is predominantly mechanical verification + committed-golden regeneration + checklist-casing verification (which the conventions would route to Sonnet), its primary deliverables are the synthesis closeout artifacts — change-log.md, next-session-set-recommendation.md, and the Step 9 reorganization review (promoting lessons to conventions/principles). Per project-guidance.md that high-level synthesis earns Opus, handled in-conversation, with only the cross-provider session-verification routed. Start at effort=high. Honor the spec stop rule: do not change object-use-checklist.json casing code unless a fresh run actually drifts (the Session 1 and Session 2 pilots both showed canonical PascalCase). Regenerate the committed HHC usage golden (deferred from Sessions 1-2) so it reflects the cumulative launcher + parameter changes."
-    }
-  },
+  "next_orchestrator": null,
   "blockers": []
 }

@@ -158,3 +158,43 @@ review (promoting lessons to conventions/principles). Per project-guidance.md, t
 high-level synthesis earns Opus, handled in-conversation, with only the
 cross-provider `session-verification` routed. Estimated routed cost: Low
 ($0.05–$0.20, verification only).
+
+| Step | Action | Routing Decision |
+|---|---|---|
+| 1 | Pilot: run `identify-usage` fresh against committed HHC IR (74 obj) + Northwind IR (167 obj); confirm the cumulative S1+S2 signals fire. | `tool-use` |
+| 2 | Review regenerated `object-use.json` / `object-use-checklist.json` for launcher + parameter clarity. | `In-conversation` |
+| 3 | Verify `object-use-checklist.json` casing vs the fresh run (stop rule: patch only on drift). | `tool-use` |
+| 4 | Calibrate wording/thresholds only if the pilot exposes a defect. | `In-conversation` (skipped — no defect) |
+| 5 | Update consumer/planning docs only if new operator-facing concepts. | `In-conversation` (skipped — lean) |
+| 6 | Regenerate committed usage goldens (HHC + Northwind); `dotnet build` + `dotnet test` sequentially. | `tool-use` |
+| 7 | Cross-provider session verification. | `route(session-verification)` (cross-provider, MUST route) |
+| 8 | Closeout: `disposition.json`, `change-log.md`, routed `next-session-set-recommendation.md`, `close_session`, notify; Step 9 reorg review. | `tool-use` + `route(analysis)` for the next-set rec |
+
+### Actuals (filled after the session)
+
+- **Orchestrator used:** claude-code / claude-opus-4-8 @ effort=high.
+- **Total routed cost:** ~$0.057 USD — one gpt-5-4 `session-verification` round
+  (R1 clean VERIFIED, $0.0540) plus one gemini-pro `analysis` route for the
+  next-session-set recommendation ($0.0035). Pilot review, golden regeneration,
+  change-log, and disposition were handled in-conversation (Opus orchestrator matches
+  the synthesis routing target; only verification and the do-not-self-opine next-set
+  recommendation were routed). (Set cumulative across all 3 sessions: ~$1.31.)
+- **Verdict:** VERIFIED (Round 1). The cleanest close of the three sessions — the
+  prose-before-JSON closeout lead produced a substantive 5-concern analysis and an
+  empty-issues verdict on the first try (no retries), well inside the Step 7 cap.
+- **Deviations from recommendation:** none material. As planned, no production code
+  changed — Session 3 is pilot + regeneration + verification judgment. Two judgments
+  honored stop rules / the Lean principle and were verifier-confirmed: (a) checklist
+  casing is canonical PascalCase on a fresh run for both fixtures, so the casing writer
+  was left unchanged (spec stop rule); (b) no consumer-doc edit was made because the
+  consumer guide is intentionally vocabulary-agnostic and the new questions are
+  self-describing.
+- **Notes / outcome:**
+  - The committed usage goldens (HHC 74, Northwind 167) were regenerated to bake in the
+    cumulative S1 launcher + S2 parameter changes (deferred from S1/S2). The diff is the
+    3 new `fired:false` signal-type rows on every object plus the real changes on 12 HHC
+    / 6 Northwind objects; no objects added or removed; LF-normalized; spurious `.accdb`
+    timestamp churn excluded.
+  - Final session: the set's top-level `status` flips to `complete` on `close_session`.
+    The harvester arc is complete; per the routed `next-session-set-recommendation.md`
+    the repo stays in a consumer-driven-only posture with no self-initiated next set.

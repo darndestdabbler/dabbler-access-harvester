@@ -23,7 +23,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "No navigation entry found for Form \u0027frmBudgetServicePlan\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "Action": "No harvested opener was found for Form \u0027frmBudgetServicePlan\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
           "Verifications": []
         }
       ],
@@ -53,13 +53,7 @@
       "FunctionalArea": "Form",
       "Subarea": "frmClientServiceNeedDetail",
       "ItemLabel": "Main data entry form backed by tblClientServiceNeeds",
-      "Steps": [
-        {
-          "StepNumber": 1,
-          "Action": "No navigation entry found for Form \u0027frmClientServiceNeedDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
-          "Verifications": []
-        }
-      ],
+      "Steps": [],
       "IsJudgmentItem": true,
       "Passes": false,
       "Feedback": ""
@@ -71,7 +65,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "No navigation entry found for Form \u0027frmClientServicePlanDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
+          "Action": "No harvested opener was found for Form \u0027frmClientServicePlanDetail\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
           "Verifications": []
         }
       ],
@@ -101,13 +95,7 @@
       "FunctionalArea": "Form",
       "Subarea": "frmProviderServiceCatalogDetail",
       "ItemLabel": "Main data entry form backed by tblProviderServiceCatalog",
-      "Steps": [
-        {
-          "StepNumber": 1,
-          "Action": "No navigation entry found for Form \u0027frmProviderServiceCatalogDetail\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
-          "Verifications": []
-        }
-      ],
+      "Steps": [],
       "IsJudgmentItem": true,
       "Passes": false,
       "Feedback": ""
@@ -115,19 +103,8 @@
     {
       "FunctionalArea": "Form",
       "Subarea": "frmReportMenu",
-      "ItemLabel": "Form \u0027frmReportMenu\u0027 \u2014 insufficient signals to determine usage",
-      "Steps": [
-        {
-          "StepNumber": 1,
-          "Action": "Form \u0027frmReportMenu\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "Verifications": []
-        },
-        {
-          "StepNumber": 2,
-          "Action": "Form \u0027frmReportMenu\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "Verifications": []
-        }
-      ],
+      "ItemLabel": "Navigation/launcher form \u0027frmReportMenu\u0027 \u2014 a switchboard/menu shell that routes to other forms or reports (directly or via a navigation macro)",
+      "Steps": [],
       "IsJudgmentItem": true,
       "Passes": false,
       "Feedback": ""
@@ -135,16 +112,11 @@
     {
       "FunctionalArea": "Form",
       "Subarea": "frmReportParam_Client",
-      "ItemLabel": "Form \u0027frmReportParam_Client\u0027 \u2014 insufficient signals to determine usage",
+      "ItemLabel": "Likely parameter/filter dialog form \u0027frmReportParam_Client\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Form \u0027frmReportParam_Client\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "Verifications": []
-        },
-        {
-          "StepNumber": 2,
-          "Action": "Form \u0027frmReportParam_Client\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "Action": "Form \u0027frmReportParam_Client\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
           "Verifications": []
         }
       ],
@@ -155,16 +127,11 @@
     {
       "FunctionalArea": "Form",
       "Subarea": "frmReportParam_ClientFY",
-      "ItemLabel": "Form \u0027frmReportParam_ClientFY\u0027 \u2014 insufficient signals to determine usage",
+      "ItemLabel": "Likely parameter/filter dialog form \u0027frmReportParam_ClientFY\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Form \u0027frmReportParam_ClientFY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "Verifications": []
-        },
-        {
-          "StepNumber": 2,
-          "Action": "Form \u0027frmReportParam_ClientFY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "Action": "Form \u0027frmReportParam_ClientFY\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
           "Verifications": []
         }
       ],
@@ -175,16 +142,11 @@
     {
       "FunctionalArea": "Form",
       "Subarea": "frmReportParam_FY",
-      "ItemLabel": "Form \u0027frmReportParam_FY\u0027 \u2014 insufficient signals to determine usage",
+      "ItemLabel": "Likely parameter/filter dialog form \u0027frmReportParam_FY\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Form \u0027frmReportParam_FY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "Verifications": []
-        },
-        {
-          "StepNumber": 2,
-          "Action": "Form \u0027frmReportParam_FY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "Action": "Form \u0027frmReportParam_FY\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
           "Verifications": []
         }
       ],
@@ -195,16 +157,11 @@
     {
       "FunctionalArea": "Form",
       "Subarea": "frmReportParam_Provider",
-      "ItemLabel": "Form \u0027frmReportParam_Provider\u0027 \u2014 insufficient signals to determine usage",
+      "ItemLabel": "Likely parameter/filter dialog form \u0027frmReportParam_Provider\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Form \u0027frmReportParam_Provider\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "Verifications": []
-        },
-        {
-          "StepNumber": 2,
-          "Action": "Form \u0027frmReportParam_Provider\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "Action": "Form \u0027frmReportParam_Provider\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
           "Verifications": []
         }
       ],
@@ -215,16 +172,11 @@
     {
       "FunctionalArea": "Form",
       "Subarea": "frmReportParam_ProviderFY",
-      "ItemLabel": "Form \u0027frmReportParam_ProviderFY\u0027 \u2014 insufficient signals to determine usage",
+      "ItemLabel": "Likely parameter/filter dialog form \u0027frmReportParam_ProviderFY\u0027 \u2014 an unbound form that appears to collect run-time criteria for a report or query (no record source of its own)",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Form \u0027frmReportParam_ProviderFY\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "Verifications": []
-        },
-        {
-          "StepNumber": 2,
-          "Action": "Form \u0027frmReportParam_ProviderFY\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
+          "Action": "Form \u0027frmReportParam_ProviderFY\u0027 has no record source and matches a parameter/filter/criteria dialog naming pattern. Which report or query does it collect input for, and how are the entered values applied at run time (for example, opened with acDialog and read by a report\u0027s Open event)?",
           "Verifications": []
         }
       ],
@@ -262,24 +214,8 @@
     {
       "FunctionalArea": "Form",
       "Subarea": "frmSwitchboard",
-      "ItemLabel": "Form \u0027frmSwitchboard\u0027 \u2014 insufficient signals to determine usage",
-      "Steps": [
-        {
-          "StepNumber": 1,
-          "Action": "No navigation entry found for Form \u0027frmSwitchboard\u0027 \u2014 is it launched from VBA code, another form, or an external application?",
-          "Verifications": []
-        },
-        {
-          "StepNumber": 2,
-          "Action": "Form \u0027frmSwitchboard\u0027 has no record source \u2014 is it a navigation panel, a parameter/filter dialog, or a utility form?",
-          "Verifications": []
-        },
-        {
-          "StepNumber": 3,
-          "Action": "Form \u0027frmSwitchboard\u0027 contains VBA that couldn\u0027t be auto-classified \u2014 can you describe its primary function?",
-          "Verifications": []
-        }
-      ],
+      "ItemLabel": "Navigation/launcher form \u0027frmSwitchboard\u0027 \u2014 a switchboard/menu shell that routes to other forms or reports (directly or via a navigation macro)",
+      "Steps": [],
       "IsJudgmentItem": true,
       "Passes": false,
       "Feedback": ""
@@ -399,7 +335,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qryApprovedPlansByClient\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qryApprovedPlansByClient\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -414,7 +350,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qryBudgetUtilization\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qryBudgetUtilization\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -429,7 +365,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qryClientAge\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qryClientAge\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -444,7 +380,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qryClientBudgetSummary\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qryClientBudgetSummary\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -459,7 +395,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qryClientList\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qryClientList\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -489,7 +425,18 @@
       "FunctionalArea": "Query",
       "Subarea": "qryClientServicePlan_ByClient",
       "ItemLabel": "Reporting query \u0027qryClientServicePlan_ByClient\u0027",
-      "Steps": [],
+      "Steps": [
+        {
+          "StepNumber": 1,
+          "Action": "No harvested opener was found for Query \u0027qryClientServicePlan_ByClient\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "Verifications": []
+        },
+        {
+          "StepNumber": 2,
+          "Action": "Query \u0027qryClientServicePlan_ByClient\u0027 expects run-time parameter input (a declared PARAMETERS clause, a bracketed prompt, a form/report control reference, or an ODBC marker). Where do the values come from at run time \u2014 an automatic Access prompt, a parameter/filter form, or a calling procedure?",
+          "Verifications": []
+        }
+      ],
       "IsJudgmentItem": true,
       "Passes": false,
       "Feedback": ""
@@ -510,7 +457,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qryProviderList\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qryProviderList\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -522,7 +469,18 @@
       "FunctionalArea": "Query",
       "Subarea": "qryProviderPlansByClient_Param",
       "ItemLabel": "Reporting query \u0027qryProviderPlansByClient_Param\u0027",
-      "Steps": [],
+      "Steps": [
+        {
+          "StepNumber": 1,
+          "Action": "No harvested opener was found for Query \u0027qryProviderPlansByClient_Param\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "Verifications": []
+        },
+        {
+          "StepNumber": 2,
+          "Action": "Query \u0027qryProviderPlansByClient_Param\u0027 expects run-time parameter input (a declared PARAMETERS clause, a bracketed prompt, a form/report control reference, or an ODBC marker). Where do the values come from at run time \u2014 an automatic Access prompt, a parameter/filter form, or a calling procedure?",
+          "Verifications": []
+        }
+      ],
       "IsJudgmentItem": true,
       "Passes": false,
       "Feedback": ""
@@ -597,7 +555,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qxtClientServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qxtClientServiceCosts\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -612,7 +570,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qxtClientServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qxtClientServiceHours\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -627,7 +585,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qxtProviderServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qxtProviderServiceCosts\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -642,7 +600,7 @@
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "Query \u0027qxtProviderServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
+          "Action": "No harvested reference was found for Query \u0027qxtProviderServiceHours\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
           "Verifications": []
         }
       ],
@@ -725,14 +683,8 @@
     {
       "FunctionalArea": "Table",
       "Subarea": "tblSwitchboardItems",
-      "ItemLabel": "Table \u0027tblSwitchboardItems\u0027 is not referenced by any form, report, query, VBA, or macro",
-      "Steps": [
-        {
-          "StepNumber": 1,
-          "Action": "Table \u0027tblSwitchboardItems\u0027 is not referenced by any form, report, query, VBA, or macro \u2014 is it still in use or can it be excluded from analysis?",
-          "Verifications": []
-        }
-      ],
+      "ItemLabel": "Navigation/switchboard configuration table \u0027tblSwitchboardItems\u0027 backing the application\u0027s launcher menu",
+      "Steps": [],
       "IsJudgmentItem": true,
       "Passes": false,
       "Feedback": ""
@@ -848,7 +800,7 @@
     {
       "FunctionalArea": "Macro",
       "Subarea": "mcrSwitchboardActions",
-      "ItemLabel": "Macro \u0027mcrSwitchboardActions\u0027 containing navigation actions that open forms or reports",
+      "ItemLabel": "Macro \u0027mcrSwitchboardActions\u0027 containing navigation actions that open forms or reports for a launcher surface",
       "Steps": [],
       "IsJudgmentItem": true,
       "Passes": false,
