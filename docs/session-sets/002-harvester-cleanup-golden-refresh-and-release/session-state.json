@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "002-harvester-cleanup-golden-refresh-and-release",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Stale-Artifact Refresh (Cleanup Goldens + Dead Code + Feedback Doc)",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Release v1.2.0",
+      "status": "not-started"
+    }
+  ]
+}
