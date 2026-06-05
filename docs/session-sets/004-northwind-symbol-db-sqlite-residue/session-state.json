@@ -23,9 +23,9 @@
     {
       "number": 2,
       "title": "Curate Scrub Allowlist + Backup + Dry-Run",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-05T11:16:42.987877-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-05T11:40:41.048210-04:00",
       "orchestrator": {
         "engine": "github-copilot",
         "provider": "openai",
