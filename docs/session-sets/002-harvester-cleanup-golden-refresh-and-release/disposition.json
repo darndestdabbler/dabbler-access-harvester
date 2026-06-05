@@ -1,33 +1,32 @@
 {
   "status": "completed",
-  "summary": "Session 1 of 2 — Stale-Artifact Refresh. NO classifier/usage logic changed (that shipped in set 001). (1) Confirmed fresh cleanup behavior: identify-cleanup --no-com => 0 findings for both HomeHealthCare and NorthwindDevEdition (matches the spec premise). A COM-backed run was also exercised (spec's stated preference): NorthwindDevEdition 0; HomeHealthCare 3 DateSignal findings — tblClientServicePlan (288d) and tblClients (293d) are legitimate stale-vs-fresh, but tblClientServiceNeeds reports MAX DateTime 1899-12-30 (the Access/OLE zero-date = a time-only DateTime column with no date part) as ~46176 days stale, which looks wrong (a heuristic misfire), not merely stale. Two cross-provider consensus rounds (gpt-5-4 + gemini-pro) were unanimous, the maintainer was consulted (HomeHealthCare is synthetic so its dates are fabricated; NorthwindDevEdition is proprietary with a gitignored .accdb so a COM golden can't be reproduced from a clone), and the deliberate decision was to commit the deterministic --no-com goldens and surface the 1899-12-30 misfire to the maintainer per the spec stop rule rather than fix it here. (2) Regenerated object-cleanup.json + object-cleanup-checklist.json for both fixtures via --no-com (harvest-date 2026-06-05), LF-normalized with the BOM preserved; both now carry findings: [] (no CrossReferenceAbsence, no launcher/parameter false positives); confirmed via grep. (3) Removed the dead CrossReferenceDetector.cs + CrossReferenceDetectorTests.cs (zero production callers; CleanupAnalyser uses only NamePatternDetector + DateSignal). Retained the CrossReferenceAbsenceSignal type, its CleanupChecklistWriter switch arm, and the object-cleanup-schema enum per the spec's conservative guard (still cross-referenced; removing the schema enum is a consumer-contract change out of scope). The negative-assertion pin CleanupAnalyserTests.Run_Does_Not_Emit_CrossReferenceOnly_Findings is retained. (4) Refreshed docs/planning/harvester-upstream-feedback.md with a dated Resolution Status (2026-06-05) table marking all 5 items addressed with shipping set + grounded evidence pointers (all cited signal identifiers verified present in code), plus a deferred-observation note for the 1899-12-30 zero-date misfire; original feedback content retained verbatim. (5) Build/test sequential: dotnet build AccessHarvester.sln => 0 errors; Pipeline.Tests Cleanup slice 48/48; full Pipeline.Tests (excl. COM probe) 789/789. Swept spurious samples/*.accdb timestamp churn before staging. Cross-provider verification (gpt-5-4) R1 VERIFIED, empty issues. Separately surfaced to the maintainer (out of scope for this set): ~406 NorthwindDevEdition derived-metadata files are committed to GitHub despite the proprietary policy.",
+  "summary": "Session 2 of 2 — Release v1.2.0 (FINAL; set complete). NO product/classifier logic changed — only the version string and docs. (1) Bumped Directory.Build.props <Version> 1.1.0 -> 1.2.0 (single source of truth read by publish.ps1 and the CLI). Rebuilt + confirmed the binary reports `AccessHarvester 1.2.0 (schema v1.1)`; schema literal unchanged at v1.1. Verified the only version-asserting test (CliBootstrapTests) asserts just the substring 'schema v1.1' (still true), so the bump is test-neutral. (2) Confirmed main clean + green: dotnet build -c Release => 0 errors (1143 pre-existing CA1416 warnings); 2234 hermetic tests pass across 9 projects (Sql.Grammar 85, SymbolDb 70, Vba.Grammar 294, Vba.Parser 69, Vba.Resolver 400, TranslationProbe 9, Characterization 131, Pipeline.Tests 794, AccessHarvester.Tests 382 with the 6 COM-spawning classes filtered). The COM integration tier (AccessHarvester.Integration + the HomeHealthCareCom-collection classes) was EXCLUDED because a testhost wedged in post-COM native shutdown (known environmental flake; reaped via WMI Win32_Process.Terminate) — acceptable for this version+docs-only session per cross-provider verdict. (3) Release notes authored via route(documentation, gemini-pro) covering ALL consumer-visible changes since the v1.1.0 tag (not just sets 001/002), because v1.1.0 was an unpublished CI draft and the intervening sets all targeted v1.2.0: generate-migration capstone, report-baseline DisplayTotals, classify shutdown-hang fix, set-001 usage signals, set-001/002 narrowed cleanup. (4) Refreshed docs/harvester/install.md: version examples -> 1.2.0/schema-v1.1, both --version example outputs corrected, and the stale validate 'schema v1.0' refs fixed (binary embeds both v1.0 and v1.1 and validates against the manifest's declared schemaVersion). (5) Packaged via tools/publish/publish.ps1 (local smoke build; its SHA differed from CI's, confirming cross-machine non-determinism and that the CI artifact must be authoritative). (6) Cut the release via the established CI path: explicit maintainer go-ahead obtained BEFORE the tag push (spec stop rule + verifier issue #2); pushed tag v1.2.0; GitHub Actions (release.yml) built the deterministic win-x64 bundle and created the draft. Downloaded + checksum-verified the CI artifact (SHA-256 3820e6000fca44320fb4180d26137ad1f6dba213c4050f5b8daf993d4ee27b53), extracted + smoke-checked the released exe (--version => 1.2.0), set the release body to the authored notes with the real SHA, and PUBLISHED v1.2.0 as Latest (zip + .sha256). Cross-provider verification (gpt-5-4): R1 ISSUES_FOUND (3: stale install.md validate schema refs [fixed]; publish-discipline / approval-before-tag-push [honored]; ambiguous 'schema unchanged' wording [fixed]) -> R2 VERIFIED. Router note surfaced to maintainer: task_type='summarization' currently 400s against gemini-2.5-pro (config bug; documentation/analysis paths work) — routed change-log via documentation as a workaround.",
   "files_changed": [
-    "samples/GoldenOutput/HomeHealthCare/cleanup/object-cleanup.json",
-    "samples/GoldenOutput/HomeHealthCare/cleanup/object-cleanup-checklist.json",
-    "samples/GoldenOutput/NorthwindDevEdition/cleanup/object-cleanup.json",
-    "samples/GoldenOutput/NorthwindDevEdition/cleanup/object-cleanup-checklist.json",
-    "AccessHarvester.Pipeline/Cleanup/CrossReferenceDetector.cs",
-    "tests/AccessHarvester.Pipeline.Tests/Cleanup/CrossReferenceDetectorTests.cs",
-    "docs/planning/harvester-upstream-feedback.md",
-    "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/ai-assignment.md",
+    "Directory.Build.props",
+    "docs/harvester/install.md",
+    "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/change-log.md",
+    "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/next-session-set-recommendation.md",
     "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/disposition.json",
-    "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/s1-verification.md",
+    "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/s2-verification.md",
+    "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/s2-verification-round-2.md",
+    "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/s2-issues.json",
+    "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/ai-assignment.md",
     "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/activity-log.json",
     "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/session-events.jsonl",
     "docs/session-sets/002-harvester-cleanup-golden-refresh-and-release/session-state.json"
   ],
+  "release": {
+    "tag": "v1.2.0",
+    "url": "https://github.com/darndestdabbler/dabbler-access-harvester/releases/tag/v1.2.0",
+    "bundle": "AccessHarvester-1.2.0-schema-v1.1-win-x64.zip",
+    "sha256": "3820e6000fca44320fb4180d26137ad1f6dba213c4050f5b8daf993d4ee27b53",
+    "schemaVersion": "1.1",
+    "channel": "Latest",
+    "builtBy": "github-actions release.yml (deterministic win-x64 publish)"
+  },
   "verification_method": "api",
   "verification_verdict": "VERIFIED",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 2 is mechanical release work (build/package the v1.2.0 zip + .sha256, tag, publish the GitHub release, bump install.md). A mid-tier Sonnet orchestrator suffices per the Step 3.5 routed analysis; release-notes/change-log prose routes as task_type=summarization with max_tier=1, and session-verification stays cross-provider (gpt-5-4)."
-    }
-  },
+  "next_orchestrator": null,
   "blockers": []
 }

@@ -182,6 +182,42 @@
           "cost_usd": 0.0374525
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/closeout",
+      "dateTime": "2026-06-05T06:47:55.084589-04:00",
+      "description": "Author change-log.md (routed documentation; summarization task_type is currently 400-broken against gemini-2.5-pro)",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "model_id": "gemini-2.5-pro",
+          "task_type": "documentation",
+          "input_tokens": 1186,
+          "output_tokens": 966,
+          "cost_usd": 0.0266765
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/closeout",
+      "dateTime": "2026-06-05T06:48:05.367780-04:00",
+      "description": "Author next-session-set-recommendation.md (routed analysis)",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "model_id": "gemini-2.5-pro",
+          "task_type": "analysis",
+          "input_tokens": 569,
+          "output_tokens": 262,
+          "cost_usd": 0.0033312500000000004
+        }
+      ]
     }
   ]
 }
