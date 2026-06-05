@@ -6,9 +6,9 @@
     {
       "number": 1,
       "title": "Refresh Inventory + Disposition Manifest + Bulk-Delete Spent Artifacts",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-05T12:50:06.069450-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-05T13:19:10.242709-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
