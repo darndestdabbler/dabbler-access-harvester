@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "005-northwind-embedded-residue-remediation",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Refresh Inventory + Disposition Manifest + Bulk-Delete Spent Artifacts",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Test Triage — Re-base or Delete the Corpus-Pinned Tests",
+      "status": "not-started"
+    },
+    {
+      "number": 3,
+      "title": "Genericize C# Source + Redact Docs + Final Residue Scan + Closeout",
+      "status": "not-started"
+    }
+  ]
+}
