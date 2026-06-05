@@ -34,6 +34,34 @@ Out of scope here:
 5. Verify `object-use-checklist.json` casing against current upstream output
   before scheduling work, because this may already be fixed upstream.
 
+## Resolution Status (2026-06-05)
+
+All five feedback items are **addressed upstream**. The usage-side fixes shipped in
+set `001-harvester-upstream-feedback-followups` (cross-provider VERIFIED 2026-06-02);
+the cleanup-side narrowing shipped as set `001`'s baseline commit `6da3b29`; and the
+stale consumer-facing cleanup goldens were regenerated against the narrowed classifier
+(plus removal of the dead `CrossReferenceDetector`) in set
+`002-harvester-cleanup-golden-refresh-and-release` (this set). The original feedback
+text below is retained verbatim for provenance — it is annotated, not superseded.
+
+| # | Feedback item | Status | Shipping set | Evidence pointer |
+|---|---|---|---|---|
+| 1 | Cleanup positive-signal only (stop `CrossReferenceAbsence`-only findings) | Addressed | `001` baseline `6da3b29`; goldens refreshed + dead detector removed in `002` | `CleanupAnalyser` emits only `NamePattern` + `DateSignal`; pinned by `CleanupAnalyserTests.Run_Does_Not_Emit_CrossReferenceOnly_Findings`; regenerated `object-cleanup.json` goldens now carry `findings: []` (no `CrossReferenceAbsence`) |
+| 2 | Switchboard / launcher detection too weak | Addressed | `001` S1 | `frmSwitchboard` → `NavigationShell` / `LauncherSurface` / `StartupEntry` usage signals |
+| 3 | Parameterized query / parameter-dialog handling | Addressed | `001` S2 | `ParameterizedInput`, `ParameterDialogFlow`, `ParameterizedQuery` signals |
+| 4 | Out-of-band / direct-navigation entry uncertainty | Addressed | `001` S1 | `OutOfBandEntryPossible` signal models missing-opener uncertainty as first-class |
+| 5 | `object-use-checklist.json` canonical PascalCase casing | Addressed | `001` S3 | Canonical PascalCase checklist; casing pinned by `UsageChecklistWriterTests` |
+
+> **Observed in `002`, deliberately not actioned (deferred to a separately-scoped
+> classifier set per `002`'s stop rule):** running `identify-cleanup` with COM date
+> sampling against the **synthetic** HomeHealthCare fixture surfaces a `DateSignal` on
+> `tblClientServiceNeeds` whose `MaxValue` is the Access/OLE zero-date `1899-12-30` (a
+> time-only `DateTime` column with no date component), reported as "~46176 days stale".
+> That is a date-interpretation edge case (a time-only column should not read as ~126
+> years stale), not a stale-vs-fresh signal. The committed goldens were therefore
+> regenerated with the deterministic `--no-com` path (which reads only the committed IR
+> and yields zero findings for both fixtures); `002` made no classifier-logic change.
+
 ## Current Direction After 2026-06-02 Clarification
 
 The current intended cleanup semantics are stricter than the original feedback

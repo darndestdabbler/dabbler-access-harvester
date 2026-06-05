@@ -1,0 +1,133 @@
+{
+  "sessionSetName": "002-harvester-cleanup-golden-refresh-and-release",
+  "createdDate": "2026-06-05T04:39:00.446624-04:00",
+  "totalSessions": 2,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 0,
+      "stepKey": "setup/bootstrap",
+      "dateTime": "2026-06-05T04:39:00.447149-04:00",
+      "description": "Verified API keys via venv interpreter; registered session start (Full tier); read project-guidance, lessons-learned, spec; verified prerequisites (001 complete).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-06-05T04:39:00.448212-04:00",
+      "description": "Authored ai-assignment.md via routed analysis (no self-opine on cost).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 3977,
+          "outputTokens": 902,
+          "costUsd": 0.01399125
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/confirm-fresh-behavior",
+      "dateTime": "2026-06-05T04:39:00.448212-04:00",
+      "description": "Built solution; ran identify-cleanup on HHC + Northwind IR. --no-com => 0/0 findings (matches spec premise). COM => HHC 3 DateSignal findings (incl. tblClientServiceNeeds @ 1899-12-30 OLE zero-date / time-only column, ~46176d 'stale'), Northwind 0. Cross-provider consensus (gpt-5-4 + gemini-pro, two rounds) unanimous: commit --no-com (deterministic, reproducible; Northwind .accdb gitignored; HHC dates synthetic), surface the zero-date misfire to maintainer (stop-rule). Maintainer confirmed via AskUserQuestion.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0037
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0144
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0039
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0236
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/regen-goldens",
+      "dateTime": "2026-06-05T04:39:00.449297-04:00",
+      "description": "Regenerated object-cleanup.json + object-cleanup-checklist.json for both fixtures via --no-com (harvest-date 2026-06-05). LF-normalized (BOM preserved per existing golden). Both now carry findings: [] (no CrossReferenceAbsence, no launcher/parameter objects). No samples/*.accdb timestamp churn (COM probes used copies).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/prune-dead-code",
+      "dateTime": "2026-06-05T04:39:00.449297-04:00",
+      "description": "Confirmed CrossReferenceDetector has zero production callers (CleanupAnalyser uses only NamePatternDetector + DateSignal). Removed CrossReferenceDetector.cs and CrossReferenceDetectorTests.cs. Retained CrossReferenceAbsenceSignal type, CleanupChecklistWriter switch arm, and object-cleanup-schema enum per spec's conservative guard (still cross-referenced; removing schema enum is a consumer-contract change out of scope).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/refresh-feedback-doc",
+      "dateTime": "2026-06-05T04:39:00.450333-04:00",
+      "description": "Added dated Resolution Status (2026-06-05) table to harvester-upstream-feedback.md marking all 5 items addressed with shipping set + grounded evidence pointers (signal identifiers verified present in code). Original feedback retained verbatim. Added zero-date observation note for a future scoped set.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-06-05T04:39:00.450866-04:00",
+      "description": "dotnet build AccessHarvester.sln: 0 errors. dotnet test Pipeline.Tests Cleanup slice: 48/48 passed. Full Pipeline.Tests (excl. COM probe): 789/789 passed. Sequential, no parallel dotnet.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/verify",
+      "dateTime": "2026-06-05T04:41:10.248935-04:00",
+      "description": "Cross-provider session-verification via gpt-5-4.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2472,
+          "outputTokens": 2520,
+          "costUsd": 0.04398
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/closeout",
+      "dateTime": "2026-06-05T04:42:49.569696-04:00",
+      "description": "Authored + validated disposition.json (VERIFIED, next_orchestrator=Sonnet for S2). Staging closeout commit; close_session + notify to follow.",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}
