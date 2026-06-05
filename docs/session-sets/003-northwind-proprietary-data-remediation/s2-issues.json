@@ -1,0 +1,26 @@
+[
+  {
+    "severity": "Major",
+    "location": "scrub-allowlist-rationale.md; Evidence/Path universe accounting",
+    "summary": "The scrub-path counts are internally inconsistent: the bucket math yields 415 scrubbed paths, but the docs claim 421.",
+    "fix": "Recompute and correct the scrub total everywhere, or if 421 is intentional identify the six additional paths explicitly, then re-run any count-based verification statements against the corrected total.",
+    "resolution": "fixed",
+    "resolution_note": "Arithmetic error confirmed: 406+4+1+2+2 = 415. Corrected the single '421' occurrence in scrub-allowlist-rationale.md to 415 and added the explicit (406+4+1+2+2) breakdown. Added a path-counting-method note explaining the name-only (444/415) vs object-universe (2770/312) views count different things and both agree zero proprietary scrub-target survives."
+  },
+  {
+    "severity": "Major",
+    "location": "Dry-run evidence / concern 4",
+    "summary": "The dry-run shows the allowlisted paths are removed, but it does not exhaustively prove that no non-allowlisted path was lost or altered.",
+    "fix": "Add a before/after diff of the complete non-allowlisted path universe on the throwaway clone, so the exact claim 'only the intended paths changed' is proven rather than inferred from sentinel checks.",
+    "resolution": "fixed",
+    "resolution_note": "Ran the exhaustive set-equality proof on a fresh throwaway mirror: BEFORE 2770 unique tree-paths, AFTER 2458, removed 312, all 312 matched by an allowlist entry; expected_after (BEFORE minus allowlisted) == AFTER exactly (True), with 0 keep paths lost and 0 allowlisted survivors. Recorded as 'Dry-run exhaustiveness proof' in scrub-allowlist-rationale.md."
+  },
+  {
+    "severity": "Minor",
+    "location": "embedded-residue-findings.md vs scrub-allowlist-rationale.md",
+    "summary": "The residue inventory includes docs/session-sets/generalization-validation-on-non-northwind/inventory.md, which conflicts with the rationale's statement that that keep subtree contains no proprietary-derived metadata.",
+    "fix": "Review that file, determine whether the scan result is a false positive or real residue, and update the keep-list wording or the findings so the documentation is internally consistent.",
+    "resolution": "fixed",
+    "resolution_note": "Inspected inventory.md: it names two Northwind forms (frmCompanyList, frmCompanyDetail) as comparison analogues for the HHC fixture — a real (incidental) reference, not a false positive. Softened the keep-list wording in scrub-allowlist-rationale.md to add this caveat and cross-reference the residue finding, and listed inventory.md explicitly in the findings LOW bucket. Keep decision for the subtree is unchanged."
+  }
+]

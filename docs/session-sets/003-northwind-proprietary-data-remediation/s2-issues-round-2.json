@@ -1,0 +1,10 @@
+[
+  {
+    "severity": "Major",
+    "location": "scrub-allowlist-rationale.md / path-counting note + Dry-run exhaustiveness proof; scrub-allowlist.txt header exactness claim",
+    "summary": "The 415 arithmetic fix is correct, but the round-2 dry-run exactness proof was anchored on `git rev-list --all --objects`, which enumerates objects (one pathname per blob) and collapses content-identical files at different paths — so it under-reported 444->346 / 415->312 and was not a path-complete pathname universe; the 'removes exactly the intended paths and nothing else' claim was therefore not yet proven.",
+    "fix": "Redo the before/after comparison using a genuinely path-complete enumeration of all historical tree paths (enumerate every reachable commit's tree entries), then compare BEFORE minus allowlisted to AFTER and re-state the proof against that complete pathname universe.",
+    "resolution": "fixed",
+    "resolution_note": "Re-ran the proof using the path-complete enumeration: union of `git ls-tree -r --name-only <commit>` over all reachable commits, sort -u, on an unmodified mirror vs a filter-repo-rewritten sibling mirror. Result: BEFORE 2626 unique paths (444 northwind), AFTER 2211 (29 northwind), removed = 415 = exactly the allowlist-matched set; expected_after == AFTER exactly (True); 0 keep lost, 0 allowlisted survived; the 29 northwind survivors are exactly the kept folders/files. This reconciles the object-universe surrogate's 312/346 under-count and matches the 415/29 bucket math. Updated the path-counting note and the 'Dry-run exhaustiveness proof' section in scrub-allowlist-rationale.md accordingly. Verifier's diagnosis (blob-dedup in rev-list --objects) was correct."
+  }
+]

@@ -88,6 +88,85 @@
           "costUsd": 0.0191
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/install-tooling",
+      "dateTime": "2026-06-05T07:38:51.860863-04:00",
+      "description": "Installed git-filter-repo 2.47.0 into workspace .venv via pip; invocable as the `git filter-repo` subcommand when .venv/Scripts is on PATH (internal version a40bce548d2c). For Session 3, prefix the rewrite command with PATH=$PWD/.venv/Scripts:$PATH.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/curate-allowlist",
+      "dateTime": "2026-06-05T07:48:36.026499-04:00",
+      "description": "Inventoried full git history for northwind paths: 444 unique, fully bucketed (zero catch-all). Scrub set = 421 paths (406 golden + 4 samples binaries/mirrors + 5 judgment-call paths in 9 dir/file lines). Inspected all 5 judgment-call file contents; classified all SCRUB (examples/northwind-output.json = degenerate manifest of proprietary DB; tools/symbol-db 2x .md + comprehension 2x = structural disclosure). Independent cross-provider reasoning pass (gemini-pro, analysis) agreed on all 5 with no uncertainty. Keep list = 29 incidental name-matches (non-northwind set, 003 set, comparison doc, test .cs). Verified dir-prefix boundaries: comprehension/NorthwindDevEdition/ exclusive; examples/ + tools/symbol-db/ need exact paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/write-manifest",
+      "dateTime": "2026-06-05T07:48:36.028504-04:00",
+      "description": "Wrote scrub-allowlist.txt (9 lines, exact filter-repo input, paths only) + scrub-allowlist-rationale.md (per-path rationale, keep list, boundary checks). Sanitized the rationale doc to describe proprietary identifiers BY CATEGORY only (it is a keep-file that survives the rewrite; reproducing object names/formulas verbatim would partially defeat the remediation).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/embedded-residue-scan",
+      "dateTime": "2026-06-05T07:48:36.028504-04:00",
+      "description": "MAJOR FINDING: scanned all HEAD keep-files (excluding scrub targets) for distinctive proprietary Northwind identifiers -> 123 keep-files disclose proprietary structure, far exceeding the spec premise. Includes 2 binary SQLite DBs (symbol-db.sqlite 1.2MB + grades.sqlite 672KB) embedding full source/interpretations (CRITICAL), full proprietary procedure descriptions/translations/workflow packages (HIGH), characterization tests (MEDIUM), and name-only refs (LOW). Recorded in embedded-residue-findings.md with full 123-path inventory, severity buckets, and 3 maintainer options. NOT scrubbed (spec Out-of-Scope + Stop Rule). Requires maintainer scope decision before/at Session 3 go-ahead.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/backup",
+      "dateTime": "2026-06-05T07:49:25.122880-04:00",
+      "description": "Created full backup bundle C:/temp/dabbler-access-harvester-backups/dabbler-access-harvester-pre003.bundle (--all, 16,566,494 bytes, sha256 6dd3d9bc...4a04ad recorded alongside). git bundle verify = complete history OK. Restorability proven by throwaway clone: HEAD 44122f7, 2114 files, golden tree present in cloned history. Refs captured: refs/heads/main=44122f7, origin/main=44122f7, tags v1.0.0=81fb14a, v1.1.0=0ccdd72, v1.2.0=e8ec779.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/dry-run",
+      "dateTime": "2026-06-05T07:51:15.632102-04:00",
+      "description": "Dry-ran git filter-repo --invert-paths --paths-from-file scrub-allowlist.txt on a throwaway --mirror clone (C:/temp/nw-dryrun-mirror.git, since removed). BEFORE: 412 allowlisted objects in rev-list. AFTER: 0 allowlisted objects; git log --all empty for all 9 allowlist entries. KEEP paths all intact (HomeHealthCare golden, comprehension/scenarios.md + HHC, examples non-NW siblings, comparison doc, non-northwind set, NorthwindFixtureSmokeTests.cs). Deferred residue symbol-db.sqlite correctly STILL present (not on allowlist). Tags v1.0.0/v1.1.0/v1.2.0 resolve post-rewrite; main commit count 423 preserved; size-pack 8.83->8.24 MiB. Required env override GIT_CONFIG_*=safe.bareRepository=all because the host git sets safe.bareRepository=explicit; recorded for Session 3.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/dry-run-exhaustive",
+      "dateTime": "2026-06-05T08:06:29.541013-04:00",
+      "description": "Strengthened the dry-run proof after R2 verifier caught that git rev-list --all --objects collapses content-identical blobs to one pathname (under-counted 444->346, 415->312). Redid with path-complete enumeration: union of git ls-tree -r --name-only over all reachable commits, BEFORE mirror vs filter-repo-rewritten sibling mirror. BEFORE 2626 unique paths (444 northwind), AFTER 2211 (29 northwind), removed=415=exactly allowlist-matched; expected_after==AFTER True; 0 keep lost, 0 scrub survived. Reconciles to the 415/29 bucket math.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verify",
+      "dateTime": "2026-06-05T08:20:35.590729-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4) across 3 rounds. R1 ISSUES_FOUND (2 Major: 421-vs-415 count error, dry-run not exhaustive; 1 Minor: inventory.md keep-rationale contradiction). R2 ISSUES_FOUND (1 Major: dry-run proof anchored on rev-list --objects which blob-dedups pathnames). R3 VERIFIED, empty issues. Fixes: corrected 415 count + path-counting note; redid exhaustiveness proof path-complete via ls-tree (415 removed==matched, expected_after==AFTER); softened inventory.md keep wording + listed it LOW-bucket. Total verification cost ~$0.375 (R1 0.142 + R2 0.158 + R3 0.075).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "verdict": "VERIFIED",
+          "costUsd": 0.0752225
+        }
+      ]
     }
   ]
 }
