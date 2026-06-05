@@ -142,6 +142,94 @@
           "costUsd": 0.06375
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/preflight-gate",
+      "dateTime": "2026-06-05T12:17:04.761643-04:00",
+      "description": "Pre-flight gate all satisfied: explicit maintainer go-ahead at the moment of the rewrite; fresh restore-tested backup bundle at live HEAD 9bba62f (sha256 d5b4b800...ba20818) + the S2 bundle; v1.2.0 published (800fe15, local==remote); tree clean and in sync; 003 fully complete (its rewrite already ran) so 004 runs a sequential second rewrite per the Stop Rule; no other set in flight. Confirmed plain single-worktree checkout (doc-drift) and safe.bareRepository=explicit (needs GIT_CONFIG override).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/filter-repo",
+      "dateTime": "2026-06-05T12:17:04.762636-04:00",
+      "description": "Cloned a throwaway --mirror of the live repo and ran git filter-repo 2.47.0 --invert-paths --paths-from-file scrub-allowlist.txt --force (safe.bareRepository=all override, venv on PATH). 434 commits reprocessed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/verify-local",
+      "dateTime": "2026-06-05T12:17:04.763783-04:00",
+      "description": "Exactness proof over the path-complete ls-tree pathname universe: BEFORE 2238 unique paths -> AFTER 2231; removed == exactly the 7 allowlist paths; 0 keep lost; 0 allowlist survivors; 0 added; expected_after==after; commit count preserved 434->434; git log --all -- <path> empty for all 7; keep-paths intact at HEAD; v1.2.0 resolves to a712e87 (matches S2 dry-run hash).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/force-push",
+      "dateTime": "2026-06-05T12:17:04.763783-04:00",
+      "description": "Force-pushed rewritten main + 3 tags to private origin via gh as the sole credential helper (headless GCM-hang mitigation): main 9bba62f->1ee4102; v1.0.0 842ff1b->3fe60bd; v1.1.0 991260f->2b0c717; v1.2.0 800fe15->a712e87. Post-push ls-remote confirms new hashes.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/reestablish-layout",
+      "dateTime": "2026-06-05T12:17:04.765321-04:00",
+      "description": "Re-established the live single-worktree checkout: fetch --force --tags --prune; reset --hard origin/main; reflog expire --expire=now --all; gc --prune=now. Local universe now 2231 paths, all 7 allowlist paths purged locally, keep-paths intact, developer local untracked symbol-db copies preserved. Per the 003 lesson, reset --hard reverted the tracked session-state files, so register_session_start was re-run after the reset.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/github-caveat",
+      "dateTime": "2026-06-05T12:17:04.766743-04:00",
+      "description": "Recorded the GitHub server-side unreachable-object caveat in rewrite-record.md: force-push leaves old objects unreachable but not immediately gc'd; private single-maintainer repo with no forks/PRs -> minimal residual risk; Support request is the only hard server-side expungement path; backup bundles retained out-of-repo.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/verify",
+      "dateTime": "2026-06-05T12:17:04.766743-04:00",
+      "description": "Cross-provider session-verification routed to gpt-5-4 (OpenAI) against the rewrite description-of-work (rewrite-record + allowlist + exactness proof + force-push log). Verdict VERIFIED, 0 issues; cost ~$0.185. Raw output saved to s3-verification.md (never edited).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.185237
+        }
+      ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/closeout",
+      "dateTime": "2026-06-05T12:17:04.767768-04:00",
+      "description": "Authored rewrite-record.md, change-log.md, routed next-session-set-recommendation.md (005-embedded-residue-redaction, via route(analysis)=gemini-pro) + next-set-analysis-raw.md, and the final disposition.json (status complete, verdict VERIFIED). Committed + pushed closeout artifacts before mark_session_complete.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0
+        }
+      ]
     }
   ]
 }
