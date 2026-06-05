@@ -128,7 +128,32 @@ moderate
 | 8 | Session closeout and reporting | task_type=prose_gen, max_tier=hermetic |
 
 ### Actuals (filled after the session)
-- Orchestrator used: (TBD)
-- Total routed cost: (TBD)
-- Deviations from recommendation: (TBD)
-- Notes for next-session calibration: (TBD)
+- Orchestrator used: claude-code (Claude Opus 4.8 @ effort=high) — NOT the
+  recommended openai gpt-4o@max. The routed Session-3 recommendation (gemini-pro,
+  do-not-self-opine) had called for claude-code@high for continuity (this
+  orchestrator authored + dry-ran the VERIFIED allowlist and found the
+  safe.bareRepository quirk); the human ran the session with this orchestrator
+  accordingly. The destructive command sequence is mechanical, but the judgment
+  load (gate adjudication, the bare-vs-plain layout reconciliation, the
+  credential-helper failure recovery, evidence-typo fix) justified the tier.
+- Total routed cost: ~$0.36 — next-set analysis (gemini-pro, do-not-self-opine,
+  ~$0.01) + session-verification gpt-5-4 across 2 rounds (R1 ISSUES_FOUND $0.120 +
+  R2 VERIFIED $0.124 = $0.244). All work steps (filter-repo, force-push, verify,
+  re-establishment) handled directly per Delegation Discipline — they are
+  mechanical command execution, not routable reasoning.
+- Deviations from recommendation: (a) Orchestrator was claude-code, not gpt-4o
+  (per the routed continuity rec, see above). (b) LAYOUT: spec Steps 2/5 assume
+  the bare-repo+flat-worktree layout; the repo is a PLAIN single-worktree checkout,
+  so the rewrite ran on a throwaway --mirror clone and re-establishment was
+  reset+gc of the one checkout (disclosed in the verification prompt; verifier
+  agreed it is a disclosed deviation, not a defect). (c) AUTH: the fresh --mirror
+  clone's inherited GCM credential helper hung under the non-interactive shell;
+  the reliable push used gh as the SOLE credential helper
+  (`-c credential.helper= -c credential.helper='!gh auth git-credential'`).
+- Notes for next-session calibration: Two reusable operational facts for the
+  follow-up set 004's destructive session — (1) push from a fresh clone via
+  `gh auth git-credential` with the helper list reset, do NOT rely on the
+  inherited GCM helper (it pops a GUI dialog that hangs headless); (2) prove
+  rewrite exactness over the path-complete `ls-tree`-union universe, never the
+  `rev-list --objects` surrogate. R1's only finding was a transcription typo in
+  the evidence table (caught by gpt-5-4), not a substantive rewrite error.

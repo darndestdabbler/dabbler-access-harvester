@@ -1,33 +1,28 @@
 {
-  "status": "completed",
-  "summary": "Session 2 of 3 — Curate Scrub Allowlist + Tooling + Backup (NON-DESTRUCTIVE; no real history rewritten, no keep-file rewritten, no classifier/extractor change). (1) Installed git-filter-repo 2.47.0 into the workspace .venv (invocable as `git filter-repo` with .venv/Scripts on PATH). (2) Inventoried the FULL git history for northwind paths via path-complete ls-tree enumeration: 444 unique paths, fully bucketed with an empty catch-all. Scrub set = 415 paths (406 golden tree + 4 samples binaries/mirrors + 5 judgment-call paths) collapsed to a 9-line allowlist; keep set = 29 incidental name-matches. (3) Inspected the contents of all 5 judgment-call paths and classified every one SCRUB (examples/northwind-output.json = degenerate manifest naming the proprietary DB; tools/symbol-db/{interpretation-summary,measurement}-northwind.md = structural disclosure; docs/test-cases/comprehension/NorthwindDevEdition/ = fullest structural disclosure). An independent cross-provider reasoning pass (gemini-pro) agreed on all 5. (4) Wrote scrub-allowlist.txt (exact filter-repo input, paths only) + scrub-allowlist-rationale.md (per-path rationale, keep list, boundary checks, path-complete dry-run proof) — the rationale describes proprietary identifiers BY CATEGORY only since it is a keep-file. (5) Took a verified+restorable full backup bundle (--all, 16.5MB, sha256 recorded, throwaway-clone restore confirmed). (6) Dry-ran the rewrite on throwaway --mirror clones and proved exactness over the path-complete historical pathname universe (ls-tree over all reachable commits): BEFORE 2626 paths -> AFTER 2211, removed = 415 = exactly the allowlist-matched set, expected_after == AFTER (0 keep lost, 0 scrub survived), tags resolve, commit count preserved. Cross-provider verification (gpt-5-4): R1 ISSUES_FOUND (count error + non-exhaustive proof + a keep-rationale contradiction) -> R2 ISSUES_FOUND (proof was anchored on rev-list --objects which blob-dedups pathnames) -> all fixed (redid proof path-complete via ls-tree) -> R3 VERIFIED.",
+  "status": "complete",
+  "summary": "Session 3 of 3 (FINAL) - Execute History Rewrite + Force-Push (DESTRUCTIVE, irreversible, outward-facing; run under explicit maintainer go-ahead at the moment of the rewrite). Pre-flight gate satisfied: explicit go-ahead; verified restorable backup (Session-2 bundle at 44122f7 + a FRESH bundle at HEAD 897d851, both sha256-recorded and bundle-verify clean); v1.2.0 published to remote + GitHub Release live; working tree clean and in sync; set 004 not-started. Layout reconciliation: the spec assumed bare-repo+flat-worktree but the repo is a PLAIN single-worktree checkout - so the rewrite ran on a throwaway --mirror clone and re-establishment = reset+gc of the one checkout. Ran git filter-repo 2.47.0 --invert-paths --paths-from-file scrub-allowlist.txt (safe.bareRepository=all override) in the mirror; 426 commits reprocessed. Verified exactness over the path-complete ls-tree pathname universe: BEFORE 2636 unique paths -> AFTER 2221, removed=415 with all 415 allowlist-matched, expected_after==after (0 keep lost, 0 scrub survived), per-path git log --all + rev-list --objects = 0 for every allowlist entry, tags resolve, commit count preserved (426), keep-set intact. Force-pushed rewritten main+tags to private origin (main 897d851->87844e3; v1.0.0 81fb14a->842ff1b; v1.1.0 0ccdd72->991260f; v1.2.0 e8ec779->800fe15); fresh-clone GCM helper hung under non-interactive shell so pushed via gh as the sole credential helper. Re-established the live checkout (fetch --force --tags --prune; reset --hard origin/main; reflog expire --all; gc --prune=now): old commit 897d851 pruned, 0 proprietary objects in local all-history, developer local untracked copies preserved (406 golden files + 12.2MB .accdb). Recorded the GitHub server-side unreachable-object caveat in rewrite-record.md. Cross-provider verification (gpt-5-4): R1 ISSUES_FOUND (one Major - a transcription typo in the evidence table, AFTER total written 2211 instead of measured 2221; underlying rewrite correct) -> corrected + embedded verbatim measured results -> R2 VERIFIED. Embedded-residue footprint (~123 keep-files incl. 2 binary SQLite DBs) remains out of scope and is deferred to follow-up set 004.",
   "files_changed": [
-    "docs/session-sets/003-northwind-proprietary-data-remediation/scrub-allowlist.txt (new)",
-    "docs/session-sets/003-northwind-proprietary-data-remediation/scrub-allowlist-rationale.md (new)",
-    "docs/session-sets/003-northwind-proprietary-data-remediation/embedded-residue-findings.md (new)",
-    "docs/session-sets/003-northwind-proprietary-data-remediation/s2-verification.md (new)",
-    "docs/session-sets/003-northwind-proprietary-data-remediation/s2-verification-round-2.md (new)",
-    "docs/session-sets/003-northwind-proprietary-data-remediation/s2-verification-round-3.md (new)",
-    "docs/session-sets/003-northwind-proprietary-data-remediation/s2-issues.json (new)",
-    "docs/session-sets/003-northwind-proprietary-data-remediation/s2-issues-round-2.json (new)",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/rewrite-record.md (new)",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/change-log.md (new)",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/next-session-set-recommendation.md (new)",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/next-set-analysis-raw.md (new)",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/s3-verification.md (new)",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/s3-verification-round-2.md (new)",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/s3-issues.json (new)",
     "docs/session-sets/003-northwind-proprietary-data-remediation/disposition.json",
     "docs/session-sets/003-northwind-proprietary-data-remediation/session-state.json",
     "docs/session-sets/003-northwind-proprietary-data-remediation/session-events.jsonl",
     "docs/session-sets/003-northwind-proprietary-data-remediation/activity-log.json",
-    "C:/temp/dabbler-access-harvester-backups/dabbler-access-harvester-pre003.bundle (+ .sha256) — OUTSIDE the repo, not committed"
+    "docs/session-sets/003-northwind-proprietary-data-remediation/ai-assignment.md",
+    "ENTIRE GIT HISTORY (all commit hashes rewritten; main 897d851->87844e3; tags re-pointed) - force-pushed to private origin",
+    "C:/temp/dabbler-access-harvester-backups/dabbler-access-harvester-pre003-rewrite.bundle (+ .sha256) - OUTSIDE the repo, not committed"
   ],
   "verification_method": "api",
   "verification_verdict": "VERIFIED",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-8",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Routed recommendation (gemini-pro, do-not-self-opine) calls for claude-code @ effort=high for the destructive Session 3, reason capability-match. Continuity is the driver: this orchestrator authored and dry-ran the cross-provider-VERIFIED allowlist and discovered the host's safe.bareRepository=explicit quirk that filter-repo needs a GIT_CONFIG_* override for. Session 3 is mechanical command execution (filter-repo --invert-paths + force-push + worktree re-establishment) but irreversible and outward-facing, so it must run only on explicit maintainer go-ahead with the verified backup bundle in hand."
-    }
+  "next_session_set": {
+    "slug": "004-northwind-symbol-db-sqlite-residue",
+    "summary": "Triage the deferred ~123-file embedded-residue footprint (incl. the two binary SQLite DBs tools/symbol-db/symbol-db.sqlite and tools/symbol-db/consistency/grades.sqlite) with per-file keep/delete/redact decisions and test-impact analysis (re-base characterization/translation tests onto HomeHealthCare), then a gated history rewrite + force-push. Recommended Session-1 orchestrator: Codex (GPT-5.x) or claude-code (Opus 4.8) @ medium. Caveats: block new releases until 004 completes; re-base tests onto HHC before its destructive session; freeze main and avoid parallel sets during execution; take a fresh backup at the moment of the rewrite. See next-session-set-recommendation.md."
   },
   "blockers": []
 }

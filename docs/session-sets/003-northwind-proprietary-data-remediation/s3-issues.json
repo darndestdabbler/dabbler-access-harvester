@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Major",
+      "location": "rewrite-record.md - Before/after evidence table",
+      "summary": "AFTER total transcribed as 2,211 (Session-2 dry-run number) instead of measured 2,221; 2636-2211=425 not 415, so the table did not arithmetically prove exactly-415-removed.",
+      "fix": "Correct AFTER total to 2,221 and embed verbatim measured set-equality results. (Underlying rewrite was correct; transcription typo only.)"
+    }
+  ]
+}

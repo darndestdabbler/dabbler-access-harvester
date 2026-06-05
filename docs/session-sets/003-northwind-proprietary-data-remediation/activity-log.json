@@ -167,6 +167,69 @@
           "costUsd": 0.0752225
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/filter-repo",
+      "dateTime": "2026-06-05T09:05:35.907310-04:00",
+      "description": "Took fresh pre-rewrite backup bundle at HEAD 897d851 (sha256 recorded, verified). Mirror-cloned the live repo to a throwaway bare clone and ran git filter-repo 2.47.0 --invert-paths --paths-from-file scrub-allowlist.txt --force (safe.bareRepository=all env override). 426 commits reprocessed.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/verify-local",
+      "dateTime": "2026-06-05T09:05:35.908306-04:00",
+      "description": "Verified in mirror over the path-complete historical pathname universe: BEFORE 2636 unique paths (454 northwind) -> AFTER 2221 (39 northwind); removed=415, all 415 matched by the 9-line allowlist; expected_after==after (0 keep lost, 0 scrub survived). Per-path git log --all and rev-list --objects = 0 for all 9 allowlist entries. Keep-set intact (003/004 sets, non-northwind set, comparison doc, smoke test, HHC golden, symbol-db.sqlite). Tags resolve to rewritten SHAs; main commit count preserved (426); size-pack 8.83->8.25 MiB.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/force-push",
+      "dateTime": "2026-06-05T09:05:35.909305-04:00",
+      "description": "Force-pushed rewritten history to private origin. main 897d851->87844e3; v1.0.0 81fb14a->842ff1b; v1.1.0 0ccdd72->991260f; v1.2.0 e8ec779->800fe15. Auth note: fresh-clone GCM helper hung (GUI dialog under non-interactive shell); pushed via -c credential.helper= (reset list) -c credential.helper=!gh auth git-credential. Independent ls-remote confirms all rewritten SHAs live on origin.",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/reestablish-worktrees",
+      "dateTime": "2026-06-05T09:05:35.909305-04:00",
+      "description": "Repo is a PLAIN single-worktree checkout (not the bare+flat-worktree layout the spec assumed), so re-establishment = fetch --force --tags --prune + reset --hard origin/main + reflog expire --all + gc --prune=now in the one checkout. HEAD now 87844e3; old commit 897d851 gc-pruned and gone; 0 proprietary objects in local all-history rev-list; working tree clean; developer local untracked copies preserved (406 golden files + 12.2MB .accdb). Throwaway mirror + scratch path-lists deleted (held proprietary path names).",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/github-caveat",
+      "dateTime": "2026-06-05T09:16:10.192416-04:00",
+      "description": "Wrote rewrite-record.md: allowlist used, path-complete before/after evidence, force-push old->new SHAs, plain-checkout re-establishment, retained backups, and the GitHub server-side unreachable-object caveat (private repo, no forks, Release survives tag re-point, Support can expedite GC).",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/verify",
+      "dateTime": "2026-06-05T09:16:10.193410-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4, closeout-grade prose-first + trailing JSON block). R1 ISSUES_FOUND: one Major - evidence-table AFTER total transcribed 2211 instead of measured 2221 (2636-2211=425!=415); underlying rewrite correct. Fixed (AFTER=2221, embedded verbatim measured set-equality results). R2 VERIFIED, issues=[].",
+      "status": "completed",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/closeout",
+      "dateTime": "2026-06-05T09:16:10.194411-04:00",
+      "description": "Closeout artifacts: rewrite-record.md, change-log.md, next-session-set-recommendation.md (routed gemini-pro, do-not-self-opine -> set 004), next-set-analysis-raw.md, disposition.json (status complete, next_session_set=004), ai-assignment.md actuals, s3 verification/issue files. About to mark_session_complete (set flips to complete) + commit/push + notify + Step 9 reorg review.",
+      "status": "completed",
+      "routedApiCalls": []
     }
   ]
 }
