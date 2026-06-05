@@ -40,14 +40,14 @@ Releases page for the `dabbler-access-harvester` repository:
 - **<https://github.com/darndestdabbler/dabbler-access-harvester/releases>**
 
 Each release is created by a CI workflow on a tag push (`v<semver>`,
-e.g., `v1.0.0`) on `main`. The workflow runs the deterministic publish
+e.g., `v1.2.0`) on `main`. The workflow runs the deterministic publish
 script and creates the release as a draft; the maintainer reviews and
 publishes. Consumers only see published releases.
 
 Each published release ships two assets:
 
 1. The bundle: `AccessHarvester-<semver>-schema-v<schema>-win-x64.zip`
-   (e.g., `AccessHarvester-1.0.0-schema-v1.0-win-x64.zip`), containing
+   (e.g., `AccessHarvester-1.2.0-schema-v1.1-win-x64.zip`), containing
    `AccessHarvester.exe`, `RELEASE-NOTES.md`, and `LICENSE.txt` at the
    archive root.
 2. A `.sha256` sidecar (`<bundle-filename>.zip.sha256`) for integrity
@@ -62,11 +62,11 @@ Each published release ships two assets:
    sidecar into the same directory.
 
 2. Verify the integrity of the bundle against the sidecar. Substitute
-   the version you downloaded for `1.0.0` / `v1.0` below.
+   the version you downloaded for `1.2.0` / `v1.1` below.
 
    **PowerShell (native Windows):**
    ```powershell
-   $zip = "AccessHarvester-1.0.0-schema-v1.0-win-x64.zip"
+   $zip = "AccessHarvester-1.2.0-schema-v1.1-win-x64.zip"
    $expected = ((Get-Content "$zip.sha256" -Raw) -split '\s+')[0].ToLower()
    $actual   = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
    if ($actual -ne $expected) { throw "Checksum mismatch: $actual != $expected" }
@@ -75,8 +75,8 @@ Each published release ships two assets:
 
    **Git Bash / WSL:**
    ```bash
-   sha256sum -c AccessHarvester-1.0.0-schema-v1.0-win-x64.zip.sha256
-   # AccessHarvester-1.0.0-schema-v1.0-win-x64.zip: OK
+   sha256sum -c AccessHarvester-1.2.0-schema-v1.1-win-x64.zip.sha256
+   # AccessHarvester-1.2.0-schema-v1.1-win-x64.zip: OK
    ```
 
 3. Extract the `.zip`. The exe is at the archive root alongside
@@ -141,7 +141,8 @@ AccessHarvester               <source-file>              # bare-file mode; equiv
 `generate-docs` reads a `DatabaseManifest` JSON and writes a markdown
 schema summary to `<output-dir>/<database-slug>/schema-summary.md`.
 `validate` checks a `DatabaseManifest` JSON against the harvester-schema
-v1.0 that is embedded in the binary. `--in` locates `manifest.json`
+(v1.0 or v1.1) embedded in the binary, matching the manifest's declared
+`schemaVersion`. `--in` locates `manifest.json`
 recursively under the output root produced by `run`; `--manifest`
 validates a single specified file directly.
 
@@ -160,7 +161,8 @@ Exit codes per subcommand group:
   error).
 - `generate-docs`: `0` (summary written), `1` (usage error),
   `2` (unexpected error).
-- `validate`: `0` (manifest conforms to schema v1.0), `1` (usage error /
+- `validate`: `0` (manifest conforms to its declared schema version — v1.0
+  or v1.1), `1` (usage error /
   file not found / not valid JSON), `2` (unexpected error),
   `3` (schema-validation errors found).
 - `generate-migration`: `0` (clean migration, no degradations), `1` (usage
@@ -296,7 +298,7 @@ manifests it produces:
 
 ```
 > AccessHarvester --version
-AccessHarvester 1.0.0 (schema v1.0)
+AccessHarvester 1.2.0 (schema v1.1)
 ```
 
 - **`AccessHarvester <semver>`** — the harvester tool's own version.
@@ -311,7 +313,7 @@ AccessHarvester 1.0.0 (schema v1.0)
 
 A release artifact filename should encode both the harvester semver and
 the schema version it produces, e.g.,
-`AccessHarvester-1.0.0-schema-v1.0-win-x64.zip` (the published release
+`AccessHarvester-1.2.0-schema-v1.1-win-x64.zip` (the published release
 bundle; the extracted executable inside is simply `AccessHarvester.exe`).
 The CLI's `--version`
 output is the runtime authority — if the filename and the runtime
@@ -325,7 +327,7 @@ Smoke-check the installed binary with four zero-cost invocations:
 
 ```bash
 AccessHarvester --version
-# AccessHarvester 1.0.0 (schema v1.0)
+# AccessHarvester 1.2.0 (schema v1.1)
 
 AccessHarvester --help
 # (full usage text on stderr; exit 0)
@@ -334,7 +336,7 @@ AccessHarvester parse path\to\a\sample.bas
 # {"status":"parsed", "errors":[], "tree_stats": {...}}  on stdout
 
 AccessHarvester validate --manifest path\to\a\manifest.json
-# Validation passed (1 manifest(s) checked against schema v1.0).  on stderr; exit 0
+# Validation passed (1 manifest(s) checked against schema v1.1).  on stderr; exit 0
 ```
 
 These four calls exercise the dispatcher, the help text, the parse
@@ -344,9 +346,11 @@ do not proceed to `extract` or `run`.
 
 For the `validate` smoke check, pass any `manifest.json` produced by a
 prior `run` invocation, or use the `examples/northwind-output.json` file
-from the repository. The embedded schema is the same as
-`docs/test-cases/harvester-schema.v1.0.json` at build time — no schema
-file on disk is required at runtime.
+from the repository (it declares `schemaVersion` `1.1`). The embedded
+schemas (v1.0 and v1.1) are the same as the
+`docs/test-cases/harvester-schema.v1.0.json` /
+`harvester-schema.v1.1.json` files at build time — no schema file on
+disk is required at runtime.
 
 The repository's `tests/AccessHarvester.Integration/Cli/PackagedBinarySmokeTests.cs`
 runs the same checks plus a `generate-docs` round-trip against the

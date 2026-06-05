@@ -1,0 +1,32 @@
+{
+  "session": 2,
+  "verifier": "gpt-5-4",
+  "round": 1,
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": 1,
+      "severity": "medium",
+      "category": "completeness",
+      "summary": "docs/harvester/install.md left stale 'schema v1.0' references in the validate-command section (lines ~144, 163, 337, 348), reading as current output and making the doc internally inconsistent.",
+      "status": "fixed",
+      "resolution": "Updated all four: validate now described as checking against the embedded harvester-schema (v1.0 or v1.1) matching the manifest's declared schemaVersion; exit-0 text says 'its declared schema version — v1.0 or v1.1'; smoke-check example output bumped to 'schema v1.1' (examples/northwind-output.json declares schemaVersion 1.1); embedded-schema note now lists both v1.0 and v1.1 schema files. Also bumped the tag-format example on line 43 to v1.2.0 for consistency."
+    },
+    {
+      "id": 2,
+      "severity": "medium",
+      "category": "correctness",
+      "summary": "Session is release-prep only; the authoritative CI-built artifact, final SHA-256, tag push, and published release are pending. Maintainer approval must precede the TAG PUSH (not just the Publish click), because tag push creates the outward-facing draft + public tag.",
+      "status": "accepted",
+      "resolution": "Process commitment honored: explicit maintainer go-ahead will be obtained BEFORE pushing the v1.2.0 tag, and again is implicit for the publish. The real bundle SHA-256 from the CI-built (authoritative) artifact replaces the <FILLED_AT_PUBLISH> placeholder before publishing. Not a code/doc defect."
+    },
+    {
+      "id": 3,
+      "severity": "low",
+      "category": "correctness",
+      "summary": "Release-notes phrase 'The harvester schema is unchanged' is ambiguous for users upgrading from the last published release v1.0.0, for whom the published schema advances v1.0 -> v1.1.",
+      "status": "fixed",
+      "resolution": "Reworded: schema is 'unchanged from the unpublished v1.1.0 draft'; for v1.0.0 upgraders the manifest schema advances v1.0 -> v1.1 (additive, backward-compatible; validate accepts both)."
+    }
+  ]
+}

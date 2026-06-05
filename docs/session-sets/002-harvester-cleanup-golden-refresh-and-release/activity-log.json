@@ -128,6 +128,60 @@
       "description": "Authored + validated disposition.json (VERIFIED, next_orchestrator=Sonnet for S2). Staging closeout commit; close_session + notify to follow.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/release-notes",
+      "dateTime": "2026-06-05T05:33:06.725042-04:00",
+      "description": "Author v1.2.0 release notes (changes since v1.1.0) via routed documentation task",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "model_id": "gemini-2.5-pro",
+          "task_type": "documentation",
+          "input_tokens": 1386,
+          "output_tokens": 734,
+          "cost_usd": 0.02304275
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify",
+      "dateTime": "2026-06-05T05:59:19.507964-04:00",
+      "description": "Cross-provider session verification of v1.2.0 release prep (notes accuracy, semver, install-doc, scope, test-exclusion)",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "model_id": "gpt-5.4",
+          "task_type": "session-verification",
+          "input_tokens": 3838,
+          "output_tokens": 8708,
+          "cost_usd": 0.140215
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verify",
+      "dateTime": "2026-06-05T06:02:40.299082-04:00",
+      "description": "Round-2 cross-provider verification: confirm fixes for the 3 round-1 findings",
+      "status": "completed",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "model_id": "gpt-5.4",
+          "task_type": "session-verification",
+          "input_tokens": 3179,
+          "output_tokens": 1967,
+          "cost_usd": 0.0374525
+        }
+      ]
     }
   ]
 }
