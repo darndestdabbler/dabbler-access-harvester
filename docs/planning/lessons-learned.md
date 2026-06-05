@@ -687,6 +687,95 @@ reference; if it proves out twice in *this* repo, propose promotion to
   time a **different** session set or analyzer surface independently hits the
   same emission-vs-decision drift.
 
+### `git reset --hard` During History-Rewrite Re-establishment Reverts The Tracked Session-State Files — Re-register After The Reset
+
+- **Context:** A destructive history-rewrite session (`git filter-repo` +
+  force-push) whose re-establishment step resets the live checkout onto the
+  rewritten remote. First hit in `003-northwind-proprietary-data-remediation`
+  Session 3 (2026-06-05).
+- **Failure or friction:** `register_session_start()` was correctly called at
+  Step 0 (flipping `session-state.json` → session 3 `in-progress` and appending
+  the `work_started` event). But the Step-5 re-establishment ran
+  `git reset --hard origin/main`, and `session-state.json`,
+  `session-events.jsonl`, and `activity-log.json` are **tracked files** — so the
+  reset reverted all three to their pre-rewrite committed content, silently
+  undoing the Step-0 flip. `mark_session_complete()` then failed the
+  `next_orchestrator_present` gate because the reverted state showed session 3 as
+  `not-started`, making the closeout look like a *non-final* session (so the gate
+  demanded a `next_orchestrator` block the final-session disposition correctly
+  omits). Recovery: re-run `register_session_start()`, then commit + push the
+  re-synced state files **before** calling `mark_session_complete()` (the gate
+  checks `pushed_to_remote`).
+- **Lesson:** In any session whose own steps `git reset --hard` (or otherwise
+  rewrite) the working tree, the session-set state files are collateral. The
+  in-progress registration must be (re-)established **after** the last tree-reset,
+  not before, and the closeout commit/push must precede the gate flip.
+- **Action for future sessions:** For destructive-rewrite sessions (e.g. the
+  imminent `004-northwind-symbol-db-sqlite-residue`), call
+  `register_session_start()` (or re-call it) **after** the checkout
+  re-establishment. Then: stage+commit+push the closeout artifacts (state files
+  showing `in-progress`) → `mark_session_complete()` (gate passes: tree clean +
+  pushed + final-session) → commit+push the state flip. If a second
+  destructive-rewrite set hits this, promote to a Convention.
+
+### Force-Push From A Fresh Clone Via gh As The Sole Credential Helper — The Inherited GCM Helper Hangs Headless
+
+- **Context:** Pushing a rewritten history from a throwaway `git clone --mirror`
+  (or any fresh clone) to the private GitHub remote in a non-interactive shell.
+  First hit in `003-northwind-proprietary-data-remediation` Session 3 (2026-06-05).
+- **Failure or friction:** A fresh clone inherits the global
+  `credential.helper = …git-credential-manager.exe` (GCM). On `git push` under
+  the agent's non-interactive shell, GCM tried to pop a GUI auth dialog and
+  **hung indefinitely** (no output, remote ref unchanged). `GIT_TERMINAL_PROMPT=0`
+  did not help — it suppresses only git's built-in terminal prompt, not GCM's
+  window; with it set, the push failed fast with "could not read Username". Read
+  ops (`git ls-remote`) worked because their credential was already cached, but
+  the push path still invoked the GUI helper.
+- **Lesson:** Don't rely on the inherited GCM helper for pushes in headless
+  sessions. The gh CLI (authenticated with a `repo`-scoped token) is a reliable
+  credential helper, but it must be the **sole** helper — appending it leaves
+  GCM first in the list. Reset the list, then add gh:
+  `git -c credential.helper= -c credential.helper='!gh auth git-credential' push …`.
+- **Action for future sessions:** Use that exact incantation for force-pushes
+  from fresh clones (and for fetch/reset auth in the re-establishment step). Note
+  the harness may auto-background a `git push`; if it hangs with no output and the
+  remote ref is unchanged after ~20s, it is the GCM-GUI hang — stop the task and
+  retry with the helper-reset form. If a second destructive-rewrite set confirms
+  this, promote to a Convention.
+
+### Repo-Layout Doc Drift: Docs Claim Bare-Repo + Flat-Worktree, Actual Is A Plain Single-Worktree Checkout — Reconcile Before The Next Destructive-Rewrite Set
+
+- **Context:** `003-northwind-proprietary-data-remediation` Session 3 (2026-06-05)
+  preflight. The spec's Steps 2 & 5 ("operate on the container's `.bare/`",
+  "remove and recreate each worktree") were written against the layout
+  `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` (the "bare-repo + flat-worktree layout
+  — working tree at `<container>/main/`" paragraph) and `project-guidance.md`
+  describe.
+- **Failure or friction:** The actual repo is a **plain single-worktree
+  checkout** — `git rev-parse --is-bare-repository` → `false`, `--git-dir` →
+  `.git`, `git worktree list` → one entry at the container root. There is no
+  `.bare/` and no `main/` subdirectory. The orchestrator had to reconcile Steps
+  2/5 at runtime (rewrite on a throwaway `--mirror` clone; re-establishment =
+  `reset --hard` + `gc` of the one checkout). This was already flagged in this
+  set's Session-2 actuals; it cost preflight analysis time and made the spec's
+  worktree-teardown step inapplicable. A memory note records prior *intent* to
+  migrate to the bare+worktree layout, so the drift may be an incomplete
+  migration rather than a doc error.
+- **Lesson:** The durable layout guidance and the on-disk reality disagree. This
+  is a maintainer infra decision — either (a) migrate this checkout to the
+  documented bare-repo + flat-worktree layout, or (b) correct the layout
+  paragraphs in `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` (kept in sync) and
+  `project-guidance.md` to describe the plain single-worktree checkout, retaining
+  the worktree recipe as the procedure for *parallel* sets only. Recorded as a
+  lesson rather than unilaterally rewritten because the migrate-vs-re-doc choice
+  depends on whether parallel session sets are still expected.
+- **Action for future sessions:** **Before authoring/executing the next
+  destructive-rewrite set (`004-northwind-symbol-db-sqlite-residue`), resolve
+  this** so its spec's Step 2/5 match reality. Until then, assume the plain
+  single-worktree checkout: rewrite on a throwaway `--mirror` clone, re-establish
+  via `fetch --force --tags --prune` + `reset --hard origin/main` +
+  `reflog expire --all` + `gc --prune=now`.
+
 ---
 
 ## Cost Guard On Verification: Skip When Verifier Cost Greatly Exceeds Generator
