@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "003-northwind-proprietary-data-remediation",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Forward Removal + Test Skip-Hardening",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Curate Scrub Allowlist + Tooling + Backup",
+      "status": "not-started"
+    },
+    {
+      "number": 3,
+      "title": "Execute History Rewrite + Force-Push (destructive)",
+      "status": "not-started"
+    }
+  ]
+}
