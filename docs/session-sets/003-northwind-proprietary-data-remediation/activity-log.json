@@ -1,0 +1,93 @@
+{
+  "sessionSetName": "003-northwind-proprietary-data-remediation",
+  "createdDate": "2026-06-05T07:28:11.617551-04:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/inventory-tracked",
+      "dateTime": "2026-06-05T07:28:11.617551-04:00",
+      "description": "Inventoried the tracked-at-HEAD Northwind footprint: 406 files under samples/GoldenOutput/NorthwindDevEdition/. Found two mirror files still TRACKED at HEAD (FormsAndReportsYaml YAML + parse-success-report JSON) contradicting the spec's 'already gitignored' premise; maintainer approved including them. .accdb/.laccdb confirmed untracked.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/skip-harden-tests",
+      "dateTime": "2026-06-05T07:28:11.617551-04:00",
+      "description": "Converted the two hermetic golden consumers (ManifestCompletenessTests x2 theories, MigrationFixtureCoverageTests x2 theories) from [Theory] to [SkippableTheory] with Skip.IfNot(Directory.Exists(...)). Confirmed CanonicalGoldenRegressionTests (already .accdb-gated), MigrationGoldenScriptTests (HHC-only), ParseSuccessReportTests (already mirror-gated) need no change.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/untrack-and-gitignore",
+      "dateTime": "2026-06-05T07:28:11.617551-04:00",
+      "description": "git rm --cached the golden tree (406) + 2 mirror files (408 total deletions), local copies preserved. Added .gitignore entries for the golden tree + parse-report mirror (YAML entry already present); expanded the comment to point at set 003.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/docs",
+      "dateTime": "2026-06-05T07:28:11.617551-04:00",
+      "description": "Updated project-guidance.md Canonical Test Fixtures table (Northwind proprietary/local-only) and samples/README.md (new proprietary local-only section; corrected HomeHealthCare Primary label).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-06-05T07:28:11.617551-04:00",
+      "description": "dotnet build AccessHarvester.sln => 0 errors. AccessHarvester.Pipeline.Tests: golden present => 794 passed/0 skipped; golden moved aside => 790 passed/4 skipped/0 failed (exactly the 4 Northwind cases). Restored golden (406 files); swept HomeHealthCare.accdb byte-drift via git restore.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/verify",
+      "dateTime": "2026-06-05T07:28:11.617551-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4): R1 ISSUES_FOUND (1 Minor doc-consistency: stale HomeHealthCare 'Secondary' label) -> fixed -> R2 VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 8743,
+          "outputTokens": 6169,
+          "costUsd": 0.114393
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.025385
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/closeout",
+      "dateTime": "2026-06-05T07:28:11.617551-04:00",
+      "description": "Authored disposition.json (VERIFIED, next_orchestrator for Session 2), filled ai-assignment.md Session 1 actuals, persisted s1-issues.json + verification reviews, committed + pushed.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 5397,
+          "outputTokens": 1236,
+          "costUsd": 0.0191
+        }
+      ]
+    }
+  ]
+}
