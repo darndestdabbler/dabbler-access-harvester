@@ -70,14 +70,38 @@ moderate
 | 8 | Session closeout | task_type=prose_gen, max_tier=hermetic |
 
 ### Actuals (filled after the session)
-- Orchestrator used: (TBD)
-- Total routed cost: (TBD)
-- Deviations from recommendation: (TBD)
-- Notes for next-session calibration: (TBD)
+- Orchestrator used: claude-code (Claude Opus 4.8 @ effort=high) — matched the
+  recommended top-tier orchestrator; the allowlist curation was genuine judgment
+  (5 judgment-call paths inspected + classified) and the embedded-residue finding
+  required scope discipline, both warranting the tier.
+- Total routed cost: ~$0.385 — judgment-call classification (gemini-pro analysis
+  $0.005) + Session-3 orchestrator rec (gemini-pro $0.002) + session-verification
+  3 rounds (gpt-5-4: R1 $0.142 + R2 $0.158 + R3 $0.075 = $0.375). All work steps
+  (file inspection, allowlist authoring, backup, dry-run) handled directly per
+  Delegation Discipline (mechanical/single-file).
+- Deviations from recommendation: (a) The recommended Session-2 model literal was
+  "claude-3-opus" (a stale router emission); mapped to the current top tier
+  claude-opus-4-8. (b) MAJOR unplanned finding: the embedded-residue scan surfaced
+  123 keep-files (incl. 2 binary SQLite DBs with full proprietary source) that the
+  narrow allowlist will NOT remove — recorded per spec stop-rules, deferred to a
+  follow-up set by maintainer decision. (c) Verification took 3 rounds (not the
+  hoped-for 1) — the gpt-5-4 verifier caught a real count error and, valuably, that
+  the first exhaustiveness proof was built on `git rev-list --objects` (which
+  blob-dedups pathnames); the proof was redone path-complete via `ls-tree`.
+- Notes for next-session calibration: Session 3 is destructive (filter-repo rewrite
+  + force-push). Two hard operational facts discovered this session that S3 must
+  carry: the host git sets `safe.bareRepository=explicit`, so filter-repo needs a
+  `GIT_CONFIG_COUNT=1 / GIT_CONFIG_KEY_0=safe.bareRepository / GIT_CONFIG_VALUE_0=all`
+  env override; and filter-repo is invoked via `.venv/Scripts` on PATH. This clone
+  is a plain (non-bare) single-worktree checkout — reconcile the spec's bare-repo
+  worktree-re-establishment step against actual layout at S3 preflight. Backup
+  bundle is at C:/temp/dabbler-access-harvester-backups/ (sha256 recorded).
 
 **Next-session orchestrator recommendation (Session 3):**
-openai gpt-4o @ effort=max
-Rationale: Session 3 is a destructive, high-stakes procedure requiring maximum precision and reliability for execution of irreversible commands.
+claude-code (anthropic) claude-opus-4-8 @ effort=high
+Rationale (routed, gemini-pro, capability-match): continuity with the orchestrator
+that authored + dry-ran the VERIFIED allowlist and found the safe.bareRepository
+quirk minimizes execution risk on the irreversible rewrite/force-push.
 
 ---
 
