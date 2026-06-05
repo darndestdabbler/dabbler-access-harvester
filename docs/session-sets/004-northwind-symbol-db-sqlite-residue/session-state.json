@@ -6,9 +6,9 @@
     {
       "number": 1,
       "title": "Forward Removal + Test/Tooling Skip-Hardening",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-05T10:37:50.984467-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-05T11:00:37.786732-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
