@@ -2030,3 +2030,35 @@ reference; if it proves out twice in *this* repo, propose promotion to
   artifact matches the consuming tool's required keys (as Session 2 did:
   `object-use-checklist.json` must have PascalCase `ProjectName`/`Review`, not
   camelCase `review`).
+
+## Release-Artifact Determinism Is Per-Toolchain — Take The Published SHA-256 From The CI-Built Artifact, Never A Local Build
+
+- **Context:** Cutting the `v1.2.0` GitHub release in
+  `002-harvester-cleanup-golden-refresh-and-release` Session 2 (2026-06-05).
+  `tools/publish/publish.ps1` and `docs/harvester/install.md` both state that
+  "two publishes of the same source produce a byte-identical exe," and the zip
+  bundler pins entry timestamps + alphabetical order specifically for
+  reproducibility.
+- **Failure or friction:** A **local** `publish.ps1` build (this dev machine's
+  .NET 10 SDK) and the **CI** `release.yml` build (GitHub `windows-latest`) of the
+  **same commit** (`c2aa82a`) produced **different** bundle SHA-256s — local
+  `e6dc9689f508ef9fc4938b5f50f6cf8774c3ab520abed355e7277f06c5c1109f` vs CI
+  `3820e6000fca44320fb4180d26137ad1f6dba213c4050f5b8daf993d4ee27b53`. The
+  "byte-identical" guarantee holds **within one toolchain**, not across a local
+  SDK patch level and the CI runner's. Had the local SHA been pasted into the
+  release notes, consumers verifying the CI-published zip would have hit a
+  checksum mismatch on a perfectly good artifact.
+- **Lesson:** Release-artifact determinism is per-toolchain. The authoritative
+  artifact (and its SHA-256) is the one the CI tag-push workflow builds, because
+  that is what gets attached to the release and downloaded by consumers. Run a
+  local `publish.ps1` only as a packaging **smoke test** (does it build, is the
+  bundle named `AccessHarvester-<semver>-schema-v<schema>-win-x64.zip`); never
+  publish a locally-computed checksum.
+- **Action for future sessions:** Cut releases via the established path — bump
+  `Directory.Build.props`, push `main`, push the `v<semver>` tag, let
+  `release.yml` build the deterministic bundle and create the draft (as v1.0.0
+  and v1.1.0 were). Then `gh release download` the CI artifact + its `.sha256`,
+  verify the checksum locally, smoke-check the extracted exe's `--version`, and
+  only then set the release body's `SHA-256:` line from **that** sidecar before
+  publishing. Get maintainer go-ahead before the tag push (the tag and the draft
+  are outward-facing), not merely before the Publish click.
