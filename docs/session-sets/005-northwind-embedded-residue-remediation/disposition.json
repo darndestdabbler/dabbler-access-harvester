@@ -1,0 +1,28 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 3 - Refresh Inventory + Disposition Manifest + Bulk-Delete Spent Artifacts (non-destructive, HEAD-only, no history rewrite). Refreshed the 003 reviewed 123-path inventory against HEAD (117 still tracked; 6 purged by 004) + a fresh git grep over distinctive Northwind STRUCTURAL identifiers (brand word 'Northwind' deliberately excluded as non-structural). MATERIAL FINDING: the fresh scan surfaced a coupled order-entry PILOT ARC absent from both the 003 inventory and the 005 spec - 4 workflow-package-pilot packages (spec named 3), the full CharacterizationTests tree (33 files), the blazor-add-an-order + blazor-update-workflows session-sets, and output-tests/blazor-add-an-order (a buildable MudBlazor project in AccessHarvester.sln). All leaf projects (no harvester-core dependents) encoding full Northwind business logic (denser than structural names => spec Stop Rule). Surfaced to maintainer, who AUTHORIZED deleting the whole arc. Authored disposition-manifest.md + .csv (255 inventory paths classified: delete=198, edit=1 (.sln), re-base=26 (S2), genericize=7 (S3), redact=20 (S3), keep-accepted=3) + 25 generic-example keep-accepted records (e.g. textbook [Order Details].[Quantity] in JetSql.g4). Executed Session-1 deletes: dotnet sln remove the 2 arc projects, git rm 199 paths (spent experimental arcs vba-symbol-db/path-b-probe/symbol-resolution/dabbler-platform-discovery + workflow-package-pilot + the pilot arc + 7 spent driver/probe scripts + 1 orphan __init__.py). Tests deferred to S2; C#/doc redaction to S3. Build: dotnet build AccessHarvester.sln -> 0 errors (1143 pre-existing CA1416 warnings). Hermetic tests green: Vba.Parser 69 + Vba.Grammar 294 + Sql.Grammar 85 + Vba.Resolver 400 = 848 passed/0 failed/0 skipped. Access-COM/PDF tier deliberately not run (deletion-only change, no COM surface touched). Cross-provider verification (gpt-5-4, OpenAI): R1 VERIFIED, 0 issues, with substantive per-concern prose analysis.",
+  "files_changed": [
+    "docs/session-sets/005-northwind-embedded-residue-remediation/disposition-manifest.md (new)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/disposition-manifest.csv (new)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/ai-assignment.md (new)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/s1-verification.md (new)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/disposition.json (new)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/{session-state.json,session-events.jsonl,activity-log.json}",
+    "AccessHarvester.sln (modified - removed AccessHarvester.CharacterizationTests + BlazorAddAnOrder project entries)",
+    "199 paths git-rm'd at HEAD (spent experimental/process arcs + workflow-package-pilot + order-entry pilot arc + spent driver/probe scripts) - see disposition-manifest.csv DELETE rows"
+  ],
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "effort": "high",
+    "reason": {
+      "code": "switch-due-to-cost",
+      "specifics": "Session 2 is mechanical per-file test re-basing of ~26 corpus-pinned tests onto the HomeHealthCare fixture (re-base or delete, never weaken assertions); Sonnet handles the code comprehension at lower cost than Opus, with mandatory cross-provider verification retained."
+    }
+  },
+  "blockers": []
+}

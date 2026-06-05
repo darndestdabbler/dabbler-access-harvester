@@ -1,4 +1,0 @@
-ENGINE: claude-code
-MODEL: claude-sonnet-4-6
-EFFORT: low
-RATIONALE: This session's tasks are validation and cleanup, not novel synthesis, making a cost-effective model the appropriate choice per the spec's original guidance.

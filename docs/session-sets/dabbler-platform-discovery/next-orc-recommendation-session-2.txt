@@ -1,4 +1,0 @@
-ENGINE: claude-code
-MODEL: claude-opus-4-7
-EFFORT: high
-RATIONALE: Given Session 1 required a high-effort Opus run and multiple verification rounds to satisfy the spec, using the same orchestrator for Session 2's complex analysis task minimizes the risk of similar churn and rework.

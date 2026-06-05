@@ -1,9 +1,0 @@
-### Recommendation
-
-*   **Engine:** `claude-code`
-*   **Provider model:** Anthropic Opus 4.7 (or latest equivalent)
-*   **Effort:** `max`
-
-### Rationale
-
-Session 5 is the capstone, where the primary tasks are not code generation but high-judgment synthesis, adjudication, and authoring the final verdict. The orchestrator must draft a ground-truth reference, synthesize outputs from three different providers, and write a go/no-go recommendation based on that complex analysis. Using the top-performing model (`Opus`) at maximum effort ensures the highest possible quality for this critical reasoning and authoring workload, prioritizing a definitive and well-supported conclusion over minimal cost savings in this final session.

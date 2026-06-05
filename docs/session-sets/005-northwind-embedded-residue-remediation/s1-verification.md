@@ -1,0 +1,50 @@
+1. INVENTORY COMPLETENESS & METHODOLOGY
+
+The refreshed-inventory method is sound. Using the reviewed `003` appendix as the authoritative floor, then re-running a fresh `HEAD` scan over a curated set of distinctive Northwind structural identifiers, is the right way to do a non-destructive `HEAD` cleanup. It gives continuity with the already-reviewed inventory while still protecting against drift since `003` and `004`. The fact that this process surfaced a material fresh-only category—the order-entry pilot arc that had been missed by both the earlier inventory and the `005` spec—is strong evidence that the refresh was real rather than a rote replay.
+
+Excluding the bare brand word `Northwind` is also correct for this set's stated goal. The target is not “remove every textual mention of Northwind”; it is “make the tracked working tree free of NorthwindDevEdition structural disclosure.” A bare brand-token scan would swamp the process with false positives in remediation docs, planning records, and historical references that merely name the fixture. Structural identifiers—prefixed Access object names, module/class names, workflow names, and similarly distinctive tokens—are the right signal because they correlate to actual embedded structure or denser business logic. The maintainers also compensated for the narrower scan by manually triaging fresh-only hits, which is the correct safety valve.
+
+The main theoretical blind spots are the usual ones: binary/non-text artifacts and semantically dense residue that no longer contains any of the chosen identifiers. But those are not obvious active misses in the supplied record. `003` already covered prior known residue, the refresh explicitly accounted for previously purged paths, and the fresh scan was broad enough to catch an entire missed subsystem. So on the evidence given, I do not see an obvious residue category likely missed by the Session 1 inventory method.
+
+2. DISPOSITION CORRECTNESS
+
+The disposition buckets are appropriate and they match the session split well. “Delete now” is correctly used for spent process artifacts, workflow packages, one-shot drivers/probes, and the maintainer-authorized pilot arc. Those are either pure process residue or leaf experimental artifacts whose value does not justify retaining proprietary structure or business logic at `HEAD`. “Re-base” for the 26 corpus-pinned tests is also correct: those are live tests, so they should not be deleted reflexively, but they also should not remain pinned to Northwind. Deferring them to Session 2 preserves the rule that assertions must be re-based rather than weakened.
+
+“Genericize” for the 7 C# source files is the right choice where the problem is incidental naming or comments/strings in otherwise live generic code. Likewise, “redact” for reference docs, live tooling, parser test pairs, and legitimate development records is correct where the artifact still has ongoing value but contains fixture-specific names that should be removed or swapped to generic/HHC references. The two keep buckets are also coherent: immutable verifier outputs are reasonably accepted residue because the workflow forbids editing them, and the 25 generic-example hits are explicitly documented as evaluated false positives rather than silently ignored.
+
+This is also consistent with the spec’s sequencing. Session 1 removes spent material and lands the manifest; Session 2 handles test re-basing; Session 3 handles source/doc redaction and genericization. That is a disciplined split. The only bookkeeping nuance is that the staged deletions include an extra `tools/symbol-db/probe/__init__.py` not listed in the residue delete bucket; that reads as collateral cleanup of a dead probe package, not as a disposition error.
+
+3. DELETE-vs-KEEP BOUNDARY DISCIPLINE
+
+(a) Deleting the spent-experimental session-set folders wholesale, including `session-state.json` and `session-events.jsonl`, is the right boundary. Those files are not neutral metadata; in this workflow they are part of the spent process record and often preserve prompts, state, issue details, and other residue-rich context. If the folder is classified as a spent process artifact, deleting the whole tracked package is cleaner and safer than trying to preserve state/event files piecemeal.
+
+(b) The pilot-arc whole-delete is also justified. The supplied rationale is specific: four workflow packages, a 33-file characterization test tree, two session-sets, and a buildable Blazor app formed one coupled leaf subsystem encoding full order/product/employee business logic. Once that finding was surfaced, the maintainer explicitly authorized deleting the whole arc. Given that these projects had no harvester-core dependents, whole-arc deletion is more disciplined than trying to partially redact or surgically salvage files from a tightly coupled experimental chain. That approach minimizes risk of leaving behind denser-than-structural residue. The presence of `AddAClient/*` under the deleted characterization project is the only place where a reader might ask for extra explanation, but at the project level the deletion still looks disciplined because the entire characterization project was treated as spent experimental leaf work, not as live shared test infrastructure.
+
+(c) Keeping the legitimate harvester-dev session records for Session 3 redaction, rather than deleting them, is the right call. Those files are not just spent proprietary workflow packages; they are part of real project history around continuing harvester work. If their problem is incidental naming of proprietary fixtures, redact/genericize is the correct remedy. Deleting them would be more destructive than necessary and would erase useful development context.
+
+(d) The 25 generic-example keep-accepted calls are reasonable. In contexts like grammar examples, parser tests, Access object-model examples, and tooling readmes, names such as `frmStartup`, `rptInvoice`, or textbook fragments like `[Order Details].[Quantity]` can be generic examples rather than NorthwindDevEdition disclosure. Some of these are naturally borderline, so it is important that they were not silently dismissed—they were explicitly recorded as accepted generic matches. That is the correct control: allowlist them transparently so the final residue accounting can distinguish “known benign example” from “missed disclosure.” Based on the filenames and stated rationale, I do not see a clear case where one of those 25 must instead be treated as genuine proprietary residue.
+
+Overall, I do not see evidence of either over-delete or under-delete. The boundary between “spent and removable,” “live but redacted later,” and “generic example, accepted” is well maintained.
+
+4. NO LIVE-CODE DELETION
+
+On the supplied path list, nothing deleted appears to be harvester-core production code. The deleted code-bearing paths fall into three categories: a leaf test project (`tests/AccessHarvester.CharacterizationTests/**`), a leaf output/test application (`output-tests/blazor-add-an-order/**`), and clearly session- or probe-specific scripts under `tools/**`. The only edit to core project structure is `AccessHarvester.sln`, and that edit is limited to removing entries for the deleted leaf projects.
+
+There are no deletions under the main production source trees such as `AccessHarvester.Access/`, `AccessHarvester.Pipeline/`, `AccessHarvester.SymbolDb/`, `AccessHarvester.Vba.Resolver/`, etc. Those appear only in the deferred Session 3 genericize list, not in Session 1 deletions. That is exactly what “no live-code deletion” should look like in this session.
+
+The tool deletions are also acceptable. Although `tools/symbol-db/probe/build_packet.py` and `run_probe.py` could sound generic in isolation, the session classifies them as one-shot probe/PoC scripts with no live caller, and the deletion of the companion `__init__.py` reinforces that this was retirement of a dead probe package rather than accidental removal of reusable tooling. Combined with the stated fact that the characterization tests and Blazor app had no harvester-core dependents, I see no evidence that Session 1 deleted live generic tooling or production code.
+
+5. SOLUTION/BUILD INTEGRITY
+
+For a deletion-only session of this shape, `dotnet build AccessHarvester.sln` plus a successful hermetic test run is sufficient validation. The critical risks here are: broken project graph after removing solution entries, lingering references from remaining projects to deleted leaf projects, and accidental fallout in the core engine. A clean solution build addresses the first two, and the reported 848 passing hermetic tests across parser/grammar/resolver projects provide good coverage that the remaining codebase still behaves normally.
+
+Deferring the Access-COM/PDF integration tier is defensible here. The session did not modify surviving production source; it removed docs, spent scripts, and two leaf projects with no core dependents. The COM/PDF tier is explicitly non-hermetic and environment-sensitive. In that context, skipping it for Session 1 is a reasonable risk-based decision, especially since the deletion target was outside the remaining production/test graph. If the repository’s normal CI policy eventually wants that tier exercised, that is fine, but it is not necessary to establish that this Session 1 deletion set preserved solution integrity.
+
+There is one narrative wrinkle: the summary line says tests were “deferred to Session 2,” but the record also reports a meaningful hermetic test run in Session 1. I read that as “full residue-bearing test remediation is deferred to Session 2,” not “no validation occurred.” On the actual evidence reported—solution build green and hermetic tests green—the Session 1 validation burden is adequately met.
+
+```json
+{
+  "verdict": "VERIFIED",
+  "issues": []
+}
+```
