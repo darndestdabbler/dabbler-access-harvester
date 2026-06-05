@@ -43,7 +43,7 @@
       "stepNumber": 4,
       "stepKey": "session-1/validation",
       "dateTime": "2026-05-31T20:19:40.570727-04:00",
-      "description": "Focused report-baseline unit tests passed (26 tests), and the live Northwind report-baseline probe captured rptInvoice, rptSalesByEmployee, and rptSalesByProduct with ExitCode=0.",
+      "description": "Focused report-baseline unit tests passed (26 tests), and the live Northwind report-baseline probe captured rptInvoice, rptTotalsByOwner, and rptTotalsByCategory with ExitCode=0.",
       "status": "complete",
       "routedApiCalls": []
     },

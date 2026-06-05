@@ -281,13 +281,13 @@ Children:
 
 ### Small Report with One Group Level
 
-**Input IR JSON (`ir/Reports/rptByRegion.ir.json` — simplified):**
+**Input IR JSON (`ir/Reports/rptSummaryByRegion.ir.json` — simplified):**
 
 ```json
 {
   "Type": "Report",
   "Properties": {
-    "RecordSource": "qrySalesByRegion",
+    "RecordSource": "qrySummaryByRegion",
     "DefaultView": "1"
   },
   "Children": [
@@ -313,9 +313,9 @@ Children:
 **Resulting `ReportMetadata` (typed record):**
 
 ```
-Name:          "rptByRegion"
-ModuleName:    null   ← (no VbaCode in this example; would be "Report_rptByRegion" otherwise)
-RecordSource:  "qrySalesByRegion"   ← exact-value lift
+Name:          "rptSummaryByRegion"
+ModuleName:    null   ← (no VbaCode in this example; would be "Report_rptSummaryByRegion" otherwise)
+RecordSource:  "qrySummaryByRegion"   ← exact-value lift
 Filter:        null
 OrderBy:       null
 DefaultView:   "Print Preview"       ← report-specific code 1

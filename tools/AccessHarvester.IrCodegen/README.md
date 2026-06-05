@@ -44,7 +44,7 @@ to prevent the stray-output footgun from re-committing.
 ### Default namespace
 
 If the namespace argument is omitted, the generator emits
-`BlazorAddAnOrder.Ui.Pages.Generated` (matches the pilot at
+`GeneratedApp.Ui.Pages.Generated` (matches the pilot at
 [`output-tests/blazor-add-an-order/`](../../output-tests/blazor-add-an-order/)).
 Override for any other target project.
 

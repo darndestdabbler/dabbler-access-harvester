@@ -314,10 +314,10 @@ public sealed class ReferenceResolver
             // project; this step closes the gap surfaced by the
             // vba-symbol-db Session 7 comprehension probe (e.g.,
             // `GetString` and `StringFormat` calls in a Form module
-            // referencing modStrings.GetString / modStrings.StringFormat).
+            // referencing modUtil.GetString / modUtil.StringFormat).
             // Public-enum members spill into their owning module's Public
             // namespace under VBA's enum visibility rule, so a bare use
-            // of an enum value (e.g., `sCompanyDelete_CompanyTypeChange`)
+            // of an enum value (e.g., `eRecordAction_TypeChange`)
             // also binds here when the enum is Public in a sibling module.
             //
             // Restricted to Standard modules: Form/Report/Class modules

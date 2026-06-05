@@ -117,7 +117,7 @@ in `aggregates.json` provenance.
   parameters are chosen and how unresolved parameter decisions route through the
   feedback-question mechanism.
 - Capture goldens for the two canonical fixtures (`NorthwindDevEdition` —
-  `rptInvoice`, `rptSalesByEmployee`, `rptSalesByProduct`; `HomeHealthCare` —
+  `rptInvoice`, `rptTotalsByOwner`, `rptTotalsByCategory`; `HomeHealthCare` —
   its in-scope reports). Closeout + ROADMAP/state + Step 9.
 
 ---

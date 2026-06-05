@@ -140,7 +140,7 @@ already open, and (b) evaluate those expressions over the same result set.
 
 **Steps:**
 1. Survey the canonical report subset
-   (`rptInvoice`, `rptSalesByEmployee`, `rptSalesByProduct`,
+   (`rptInvoice`, `rptTotalsByOwner`, `rptTotalsByCategory`,
    `srptClientBudgets`, `srptClientCurrentNeeds`) and record, per report,
    each footer/group-footer aggregate control, its expression, its
    `RunningSum` state, and whether the value is derivable from the

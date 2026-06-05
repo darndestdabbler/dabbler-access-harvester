@@ -25,13 +25,13 @@ HHC is roughly half the size by every count except macros, which is intentional.
 
 ## Search/select patterns
 
-Northwind's list views are **bound split forms**. `frmCompanyList` has `RecordSource: qryCompanyList`, `DefaultView: 5` (Split Form), `SplitFormSize: 1290`, `NavigationButtons: True` — the user scrolls Access's built-in record navigator to pick a row, and the matching `frmCompanyDetail` is bound to `qryCompanies` and embeds four subforms (`sfrmCompanyDetail_CustomerOrders`, `sfrmCompanyDetail_VendorPurchaseOrders`, `sfrmCompanyDetail_ShipperOrders`, `sfrmCompanyDetail_Contacts`). Northwind has **17 `sfrm`-prefixed subforms** in total.
+Northwind's list views are **bound split forms**. `frmRecordList` has `RecordSource: qryRecordList`, `DefaultView: 5` (Split Form), `SplitFormSize: 1290`, `NavigationButtons: True` — the user scrolls Access's built-in record navigator to pick a row, and the matching `frmRecordDetail` is bound to `qryRecords` and embeds four subforms (`sfrmRecordDetail_Children`, `sfrmRecordDetail_RelatedA`, `sfrmRecordDetail_RelatedB`, `sfrmRecordDetail_Notes`). Northwind has **17 `sfrm`-prefixed subforms** in total.
 
 HHC's list views are **unbound listbox-cascade forms**. `frmClientSearch` has `RecordSource: ""`, `NavigationButtons: False`, and an `OnLoad` embedded macro that sets a status filter and focuses a name-filter textbox. The form is a host for filter controls plus a listbox; selecting a row opens `frmClientDetail` as a popup via `DoCmd.OpenForm ... acDialog`. The detail form is bound to `tblClients` and has `NavigationButtons: False` with a caption set dynamically per record (`"Margaret Sullivan — Client Detail"`). HHC has **0 `sfrm`-prefixed subforms**.
 
 | Aspect                  | HomeHealthCare                          | Northwind                                  |
 |-------------------------|-----------------------------------------|--------------------------------------------|
-| List-form `RecordSource`| unbound (`""`)                          | bound (`qryCompanyList`)                   |
+| List-form `RecordSource`| unbound (`""`)                          | bound (`qryRecordList`)                   |
 | List-form `DefaultView` | 0 (Single Form)                         | 5 (Split Form)                             |
 | List-form navigation    | filter textbox + listbox → `OpenForm`   | Access nav buttons on split form           |
 | Detail-form navigation  | `NavigationButtons: False`, popup       | `NavigationButtons: True`, bound nav       |
@@ -58,20 +58,20 @@ Both databases use BeforeChange data macros heavily, but for opposite reasons. N
 |-------------------|------------------------------------------------------|---------------------------------------------|
 | `DAO.*`           | 37 occurrences across 6 files                        | 24 occurrences across 10 files              |
 | `ADODB.*`         | 15 occurrences across 3 files (`basDataOperations`, `basUtilities`, `basListHelpers`) | 0 |
-| Error-handling style | `mcrErrorHandler` — macro object                  | `clsErrorHandler` — VBA class module        |
-| Dedicated DAO helper module | none — DAO usage is co-located with feature code | `modDAO`                          |
+| Error-handling style | `mcrErrorHandler` — macro object                  | `clsErrorManager` — VBA class module        |
+| Dedicated DAO helper module | none — DAO usage is co-located with feature code | `modDataAccess`                          |
 
-HHC is unusual in being a single Access database that uses **both DAO and ADODB**. The ADODB block lives in `basDataOperations` and powers a transactional copy of `tblProviderServiceCatalog` rows from one fiscal year to the next (open `ADODB.Connection` against `CurrentProject.Connection`, begin transaction, copy fields, commit or roll back). A migration tool that only handles DAO will silently drop the transactional semantics of that operation; one that only handles ADODB will trip over Northwind's `DAO.Recordset` patterns and `modDAO` helpers.
+HHC is unusual in being a single Access database that uses **both DAO and ADODB**. The ADODB block lives in `basDataOperations` and powers a transactional copy of `tblProviderServiceCatalog` rows from one fiscal year to the next (open `ADODB.Connection` against `CurrentProject.Connection`, begin transaction, copy fields, commit or roll back). A migration tool that only handles DAO will silently drop the transactional semantics of that operation; one that only handles ADODB will trip over Northwind's `DAO.Recordset` patterns and `modDataAccess` helpers.
 
-The error-handling divergence is a smaller but real source of friction: lifting Northwind's `clsErrorHandler` to another platform is a class-translation problem; lifting HHC's `mcrErrorHandler` is a macro-object problem. They share no machinery.
+The error-handling divergence is a smaller but real source of friction: lifting Northwind's `clsErrorManager` to another platform is a class-translation problem; lifting HHC's `mcrErrorHandler` is a macro-object problem. They share no machinery.
 
 ## Notable differences (at a glance)
 
-- **Startup:** HHC opens directly to `frmSwitchboard`; Northwind runs `AutoExec` → `Startup()` (or `frmStartup` on untrusted DBs) → optional `frmLogin` against `frmCredentials`.
-- **Security:** Northwind ships a user/role model (`Employees`, `EmployeePrivileges`, `Privileges`, `frmLogin`); HHC has none — it's single-user by design.
-- **Lookup tables:** HHC names them with a `tlkp` prefix (`tlkpFiscalYears`, `tlkpPlanStatuses`, `tlkpServiceCategories`, `tlkpStates`); Northwind uses plain names (`CompanyTypes`, `OrderStatus`, `TaxStatus`, `Titles`, `States`).
-- **Reports:** Both use main-report + subreport composition. HHC's `rptClientProfile` embeds `srptClientCurrentNeeds`/`srptClientBudgets`/`srptServicePlanEntries`/`srptServiceShortfall`; Northwind's `rptInvoice` embeds `srptOrderForm` etc.
+- **Startup:** HHC opens directly to `frmSwitchboard`; Northwind runs `AutoExec` → `Startup()` (or `frmStartup` on untrusted DBs) → optional `frmLogin` against an accounts table.
+- **Security:** Northwind ships a user/role model (`Users`, `UserPrivileges`, `Privileges`, `frmLogin`); HHC has none — it's single-user by design.
+- **Lookup tables:** HHC names them with a `tlkp` prefix (`tlkpFiscalYears`, `tlkpPlanStatuses`, `tlkpServiceCategories`, `tlkpStates`); Northwind uses plain names (`RecordTypes`, `StatusCodes`, `TaxStatus`, `Titles`, `States`).
+- **Reports:** Both use main-report + subreport composition. HHC's `rptClientProfile` embeds `srptClientCurrentNeeds`/`srptClientBudgets`/`srptServicePlanEntries`/`srptServiceShortfall`; Northwind's `rptInvoice` embeds `srptChildBand` etc.
 - **Domain:** HHC = home-healthcare agency (clients, providers, services, fiscal-year budgets, service plans, rate limits). Northwind = order entry (customers, employees, products, orders, purchase orders, inventory). The schemas exercise different join shapes — HHC has a four-way `Client × Service × Provider × FiscalYear` plan/budget relationship that has no direct Northwind analogue.
-- **Object naming:** HHC uses Hungarian-ish prefixes throughout (`tbl`, `tlkp`, `qry`, `qxt` for crosstab, `frm`, `rpt`, `srpt`, `bas`, `mcr`). Northwind mixes prefixed and unprefixed names freely (`Companies` vs `qryCompanies`, `frmCompanyDetail` vs `Catalog_TableOfContents`).
+- **Object naming:** HHC uses Hungarian-ish prefixes throughout (`tbl`, `tlkp`, `qry`, `qxt` for crosstab, `frm`, `rpt`, `srpt`, `bas`, `mcr`). Northwind mixes prefixed and unprefixed names freely (`Records` vs `qryRecords`, `frmRecordDetail` vs `TableOfContents`).
 
 The throughline: HHC is built around a single coherent set of conventions (listbox + popup, `OpenArgs` contract, prefixed names, validation data macros, mixed DAO/ADODB) maintained consistently across all forms. Northwind covers a wider surface (split forms, subforms, security, ribbons, startup chain, audit macros) at the cost of a less uniform internal style. For migration tooling, both are useful; for testing migration tooling, having both is better than having either alone.

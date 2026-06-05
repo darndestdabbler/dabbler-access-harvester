@@ -5,10 +5,10 @@ Usage::
     python -m tools.symbol_db.interpret \
         --db tools/symbol-db/symbol-db.sqlite \
         --config tools/symbol-db/interpretation-config.json \
-        --module modStrings
+        --module modUtil
 
 If no ``--module`` is given, the runner walks every non-deferred
-module in the database (modStrings first per the spec).
+module in the database (modUtil first per the spec).
 
 The runner imports ``ai_router`` from the repo's ``ai-router/``
 directory; the import dance is unchanged from the rest of the repo.
@@ -96,7 +96,7 @@ def main(argv: list[str] | None = None) -> int:
         if deferred_count:
             print(f"emitted {deferred_count} skipped-deferred history rows")
 
-        # 2. Modules in spec order: modStrings (and other Modules) first,
+        # 2. Modules in spec order: modUtil (and other Modules) first,
         #    then Forms / Reports / ClassModules. The
         #    `Modules.kind == 'Module'` rows pre-sort so callees land first.
         modules = db.list_modules(con)

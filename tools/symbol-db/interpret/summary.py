@@ -1,4 +1,4 @@
-"""Generate ``interpretation-summary-northwind.md`` from the symbol DB.
+"""Generate ``interpretation-summary.md`` from the symbol DB.
 
 The report is the Step 10 deliverable for vba-symbol-db Session 4. It
 quantifies how the leaves-first + dedup + dead-code + skip-deferred
@@ -29,12 +29,12 @@ def build_report(con: sqlite3.Connection) -> str:
     lines: list[str] = []
     lines.append("# vba-symbol-db Session 4 — Interpretation Summary")
     lines.append("")
-    lines.append("Fixture: `samples/NorthwindDevEdition.accdb`  ")
-    lines.append("Modules: `Form_frmCompanyDetail` and `modStrings`.  ")
+    lines.append("Fixture: the local-only Access fixture  ")
+    lines.append("Modules: `Form_frmRecordDetail` and `modUtil`.  ")
     lines.append("")
     lines.append("This report is generated from the symbol DB after the AI")
     lines.append("interpretation pass. It is the bookend to Session 1's")
-    lines.append("`measurement-northwind.md` — Session 1 measured the")
+    lines.append("`measurement-report.md` — Session 1 measured the")
     lines.append("dedup/dead/deferred savings on paper; this report measures")
     lines.append("what the leaves-first interpretation actually cost in")
     lines.append("dollars and routed calls.")
@@ -139,14 +139,14 @@ def build_report(con: sqlite3.Connection) -> str:
 
     lines.append("## Notes for Session 5")
     lines.append("")
-    lines.append("- The probe target `Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate`")
+    lines.append("- The probe target `Form_frmRecordDetail.cboRecordType_BeforeUpdate`")
     lines.append("  has its full direct-callee interpretation set populated:")
     lines.append("  the procedure itself (to be blanked at packet build time),")
     lines.append("  the seven `m_lng*` / `m_str*` module-level vars, the two")
     lines.append("  local `Dim` strings (skipped as proc-local — Session 5's")
     lines.append("  packet builder should reconstruct them inline from")
-    lines.append("  `source_body`), `CompanyIsActive`, `GetString`, and")
-    lines.append("  `sCompanyDelete_CompanyTypeChange`.")
+    lines.append("  `source_body`), `RecordIsActive`, `GetString`, and")
+    lines.append("  `eRecordAction_TypeChange`.")
     lines.append("- `DLookup`, `DCount`, `Nz`, `MsgBox`, `DoCmd.OpenForm`, etc.")
     lines.append("  resolve to built-ins or the Access object model and stay")
     lines.append("  outside the symbol-table interpretation set.")

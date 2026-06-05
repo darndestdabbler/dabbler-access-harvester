@@ -130,7 +130,7 @@
       "stepNumber": 2,
       "stepKey": "session-3/schema-docs-update",
       "dateTime": "2026-05-15T04:03:17.871470-04:00",
-      "description": "Updated docs/ir-schema-forms-reports.md: removed deferred-decoding notices for GroupingMode/SortOrder/KeepTogether/GroupInterval; updated ModuleName notes on FormMetadata and ReportMetadata; rewrote GroupLevel section with IR JSON source block, property-name quirk note, decoded-field mappings; updated worked examples (frmPatients gets ModuleName populated; rptByRegion uses GroupLevel <N> child node shape with decoded fields).",
+      "description": "Updated docs/ir-schema-forms-reports.md: removed deferred-decoding notices for GroupingMode/SortOrder/KeepTogether/GroupInterval; updated ModuleName notes on FormMetadata and ReportMetadata; rewrote GroupLevel section with IR JSON source block, property-name quirk note, decoded-field mappings; updated worked examples (frmPatients gets ModuleName populated; rptSummaryByRegion uses GroupLevel <N> child node shape with decoded fields).",
       "status": "complete",
       "routedApiCalls": []
     },

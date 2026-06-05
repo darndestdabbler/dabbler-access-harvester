@@ -231,7 +231,7 @@ parameter:
 ```json
 {
   "rptInvoice":       { "OrderID": 10250 },
-  "rptSalesByPeriod": { "StartDate": "2026-01-01", "EndDate": "2026-03-31" }
+  "rptTotalsByPeriod": { "StartDate": "2026-01-01", "EndDate": "2026-03-31" }
 }
 ```
 
@@ -345,8 +345,7 @@ touching Microsoft Access. If any of them fail, the install is broken;
 do not proceed to `extract` or `run`.
 
 For the `validate` smoke check, pass any `manifest.json` produced by a
-prior `run` invocation, or use the `examples/northwind-output.json` file
-from the repository (it declares `schemaVersion` `1.1`). The embedded
+prior `run` invocation (it declares its `schemaVersion`). The embedded
 schemas (v1.0 and v1.1) are the same as the
 `docs/test-cases/harvester-schema.v1.0.json` /
 `harvester-schema.v1.1.json` files at build time — no schema file on

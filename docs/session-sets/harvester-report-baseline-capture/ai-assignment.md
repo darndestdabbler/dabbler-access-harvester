@@ -97,7 +97,7 @@ moderate
 
 | Step | Action | Routing Decision |
 |------|--------|------------------|
-| 3.1  | Run the new `report-baseline` subcommand to capture golden artifacts for `NorthwindDevEdition` (rptInvoice, rptSalesByEmployee, rptSalesByProduct) and all in-scope reports for `HomeHealthCare`. | `orchestrator` |
+| 3.1  | Run the new `report-baseline` subcommand to capture golden artifacts for `NorthwindDevEdition` (rptInvoice, rptTotalsByOwner, rptTotalsByCategory) and all in-scope reports for `HomeHealthCare`. | `orchestrator` |
 | 3.2  | Draft documentation for the new subcommand in `docs/harvester/install.md` (CLI reference) and `docs/harvester/interpretation-guide.md`. | `gemini-pro` |
 | 3.3  | Ensure the documentation explicitly covers the parameter selection strategy (unfiltered default, `identify-usage` for required params) and the `--params` JSON file shape. | `gemini-pro` |
 | 3.4  | Update the `READ-ME-FIRST.md` template to include the new `reports-baseline` artifact, ensuring downstream agents can discover it. | `orchestrator` |

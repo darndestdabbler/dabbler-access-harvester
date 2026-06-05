@@ -19,7 +19,7 @@ namespace AccessHarvester.Pipeline.Manifest;
 public sealed record DatabaseInfo
 {
     /// <summary>
-    /// Database file name without path, e.g. <c>NorthwindDevEdition.accdb</c>.
+    /// Database file name without path, e.g. <c>MyDatabase.accdb</c>.
     /// </summary>
     public required string Name { get; init; }
 

@@ -1,4 +1,0 @@
-model=gemini-pro
-input_tokens=24150
-output_tokens=2261
-cost_usd=0.0528

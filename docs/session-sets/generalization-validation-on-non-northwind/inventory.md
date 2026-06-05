@@ -26,7 +26,7 @@
   - `lstClientList_DblClick` routes through `basListHelpers.OpenDetailFromList Me.lstClientList, "frmClientDetail"`.
   - `btnAddNew_Click` is a second add entry point and opens `frmClientDetail` with `acFormAdd`, not through the shared helper.
 - Northwind analogue:
-  - Closest analogue is `frmCompanyList` plus `qryCompanyList`, but the shape is materially different.
+  - Closest analogue is `frmRecordList` plus `qryRecordList`, but the shape is materially different.
   - Northwind uses a bound split form and built-in record navigation.
   - HHC uses an unbound listbox-cascade search form with explicit filter widgets and launch handlers.
 
@@ -47,7 +47,7 @@
   - Field-level handlers normalize names and validate email, date-of-birth, SSN, and state/city interactions.
   - `OnClose` embedded macro requeries `frmClientSearch` if it is open.
 - Northwind analogue:
-  - Closest analogue is `frmCompanyDetail`, but HHC does not use subforms.
+  - Closest analogue is `frmRecordDetail`, but HHC does not use subforms.
   - HHC uses child listboxes (`lstClientServiceNeeds`, `lstClientBudgets`) plus popup detail forms rather than always-visible bound subforms.
 
 ### `basListHelpers`
@@ -101,7 +101,7 @@
   - `frmClientSearch` does not bind directly to `qryClientList`; it builds its own SQL over `tblClients`.
   - The query is still useful as a structural cross-check because it exposes the intended list columns and ordering.
 - Northwind analogue:
-  - `qryCompanyList`, with the same caveat that Northwind actually binds the query into a split-form UI while HHC composes the list dynamically.
+  - `qryRecordList`, with the same caveat that Northwind actually binds the query into a split-form UI while HHC composes the list dynamically.
 
 ## Behavior-Bearing Procedures
 

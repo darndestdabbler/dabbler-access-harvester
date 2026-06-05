@@ -93,14 +93,11 @@ to write a SQL Server migration (`schema.sql`, `data.sql`,
 
 The **canonical golden corpus** at
 [`samples/GoldenOutput/<fixture>/`](../../samples/GoldenOutput/)
-shows what a complete run looks like for the two fixtures the
-harvester tests against:
-[`HomeHealthCare`](../../samples/GoldenOutput/HomeHealthCare/) (the
-primary fixture; unbound forms, ADODB, validation-only data macros,
-Hungarian naming) and
-[`NorthwindDevEdition`](../../samples/GoldenOutput/NorthwindDevEdition/)
-(secondary; bound split forms, subforms, audit data macros, AutoExec
-startup). `raw/` is deliberately excluded from the golden corpus per
+shows what a complete run looks like for the committed golden fixture
+the harvester tests against:
+[`HomeHealthCare`](../../samples/GoldenOutput/HomeHealthCare/) (unbound
+forms, ADODB, validation-only data macros, Hungarian naming). `raw/`
+is deliberately excluded from the golden corpus per
 the decisions in
 [`harvester-finish-canonical-golden-output`](../session-sets/harvester-finish-canonical-golden-output/change-log.md);
 the golden corpus carries `kb/`, `ir/`, `manifest.json`, and
@@ -172,9 +169,9 @@ is the plain-language developer guide you direct them to.
 # The per-database base dir produced by `run` is the dir that CONTAINS
 # ir/ — NOT the --out root, and NOT the AccessMetaData/ parent. See the
 # trap below.
-DB=out/AccessMetaData/Northwind
+DB=out/AccessMetaData/HomeHealthCare
 
-AccessHarvester run --db Northwind.accdb --out out          # harvest -> DB/{manifest.json,ir/,kb/,raw/}
+AccessHarvester run --db HomeHealthCare.accdb --out out     # harvest -> DB/{manifest.json,ir/,kb/,raw/}
 AccessHarvester identify-usage   --in "$DB"                 # -> DB/object-use.json + object-use-checklist.json
 AccessHarvester identify-cleanup --in "$DB"                 # -> DB/object-cleanup.json + object-cleanup-checklist.json
 ```
@@ -968,10 +965,8 @@ not the harvester's job. Empty strings (`""`) mean "Access stored
 an empty entry" — a meaningful Access-level signal distinct from
 `null` (the harvester read no value at all).
 
-**Worked example — `Employees.Attachments` (Northwind).** The
-column lands in
-[`ir/Tables/Employees.ir.json`](../../samples/GoldenOutput/NorthwindDevEdition/ir/Tables/Employees.ir.json)
-as:
+**Worked example — an `Attachment` column.** Such a column lands in
+its table's `ir/Tables/<Table>.ir.json` as:
 
 ```json
 {
@@ -1229,9 +1224,9 @@ Unless Reauthorized (2026-05-17)*:
   frozen at its current revision pending the migration-repo work.
 - **No CRUD scaffolder expansion.** The scaffolder probe under
   `tools/` is frozen at its current scope.
-- **No additional Northwind workflows.** The four existing pilot
-  packages cover the in-scope workflows; further additions are
-  deferred.
+- **No workflow-package authoring.** The order-entry pilot packages
+  have been removed from this repo; further package work is deferred
+  to the migration repo.
 - **No symbolic execution of dynamic SQL.** Concatenated-SQL build
   sites surface as `UnresolvedItems[Source=DynamicSqlSite]` entries
   rather than getting resolved.
@@ -1270,18 +1265,13 @@ shape is whatever the harvester actually writes today:
   `Procedures` and `NonDefaultProperties` enricher additions. Exhibits
   the structural conventions §5.1 documents on a single self-contained
   record.
-- [`examples/northwind-output.json`](../../examples/northwind-output.json) —
-  the `manifest.json` envelope from the NorthwindDevEdition canonical
-  corpus. Shows every top-level key §4 documents (envelope
-  identification, `Database`, `Summary`, the per-category stub arrays,
-  and the cross-cutting enrichment arrays) in the order the writer
-  emits them. The arrays are empty in this snapshot because the
-  committed Northwind golden corpus normalises per-record content out
-  of the manifest for diff-cleanliness — the per-record detail lives
-  in `samples/GoldenOutput/NorthwindDevEdition/ir/<Category>/` (see
-  below). The file is small by design; a consumer looking for a
-  populated envelope should read a populated `manifest.json` from a
-  live harvester run.
+A populated `manifest.json` envelope shows every top-level key §4
+documents (envelope identification, `Database`, `Summary`, the
+per-category stub arrays, and the cross-cutting enrichment arrays) in
+the order the writer emits them. Any live harvester run produces one;
+read a `manifest.json` from a run's output root for the full envelope
+shape, and the committed golden corpus (below) for the populated
+per-record `ir/<Category>/` detail.
 
 The example files are deliberately single-record (or single-envelope)
 slices. They are not a substitute for the full canonical corpus —
@@ -1294,11 +1284,8 @@ harvester actually writes, including populated `ir/Forms/`,
 the canonical corpora:
 
 - [`samples/GoldenOutput/HomeHealthCare/`](../../samples/GoldenOutput/HomeHealthCare/) —
-  primary fixture: unbound forms, ADODB, validation-only data macros,
-  Hungarian naming.
-- [`samples/GoldenOutput/NorthwindDevEdition/`](../../samples/GoldenOutput/NorthwindDevEdition/) —
-  secondary: bound split forms, subforms, audit data macros, AutoExec
-  startup.
+  the committed canonical fixture: unbound forms, ADODB, validation-only
+  data macros, Hungarian naming.
 
 The structural comparison at
 [`docs/homehealthcare-northwind-comparison.md`](../homehealthcare-northwind-comparison.md)

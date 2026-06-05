@@ -6,8 +6,8 @@ namespace AccessHarvester.Access;
 /// <summary>
 /// Hand-curated registry of common DAO, ADO, Office, and Access object-model
 /// type-member surfaces. The seed targets the members the VBA resolver will
-/// most often encounter in test fixtures <c>01</c>-<c>12</c> plus the
-/// <c>NorthwindDevEdition.accdb</c> sample. Adding a new type or new
+/// most often encounter in test fixtures <c>01</c>-<c>12</c> plus a
+/// sample Access database. Adding a new type or new
 /// members on an existing type is a single-file edit — append a
 /// <c>Build*()</c> entry and register it in the constructor.
 /// </summary>

@@ -57,8 +57,8 @@ remaining problem:
   capture through `OleDbReportQueryExecutor`.
 - A live Northwind probe against the intended canonical set no longer
   hangs. `rptInvoice` captures cleanly.
-- The two remaining target reports (`rptSalesByEmployee`,
-  `rptSalesByProduct`) fail because their `RecordSource` SQL calls
+- The two remaining target reports (`rptTotalsByOwner`,
+  `rptTotalsByCategory`) fail because their `RecordSource` SQL calls
   `reportParameterStartDate()` / `reportParameterEndDate()`, which ACE
   OLE DB cannot evaluate directly.
 - The helper module's *form-closed* branch is deterministic and already
@@ -81,8 +81,8 @@ canonical unattended report set captures cleanly, then commit the
    generic VBA-function executor.
 2. **Capture the committed report-baseline corpus** for the unattended
    canonical set:
-   - `NorthwindDevEdition`: `rptInvoice`, `rptSalesByEmployee`,
-     `rptSalesByProduct`
+   - `NorthwindDevEdition`: `rptInvoice`, `rptTotalsByOwner`,
+     `rptTotalsByCategory`
    - `HomeHealthCare`: the clean aggregates-only subset already proven in
      the shipped integration slice (`srptClientBudgets`,
      `srptClientCurrentNeeds`, plus any additional report proven cleanly

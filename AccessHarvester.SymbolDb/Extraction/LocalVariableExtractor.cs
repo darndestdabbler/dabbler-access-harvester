@@ -8,8 +8,8 @@ namespace AccessHarvester.SymbolDb.Extraction;
 // Walks a procedure body (and recursively into its nested control-flow
 // blocks) collecting Dim / Static / Const declarations. Each becomes a
 // kind='module_var' (or 'module_const') Symbols row with declared_in_fqn
-// set to the enclosing procedure's FQN, per the spec's expected layout for
-// `cboCompanyTypeID_BeforeUpdate`'s `strDlgMsg` and `strOpenArgs`.
+// set to the enclosing procedure's FQN — e.g. a control event handler such
+// as `cboCategory_BeforeUpdate` and its procedure-local `strMsg` / `strArgs`.
 public static class LocalVariableExtractor
 {
     public static void ExtractInto(

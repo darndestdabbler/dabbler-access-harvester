@@ -104,7 +104,7 @@ def build_sample_objects() -> str:
     picks = {
         "HomeHealthCare": ["frmSwitchboard", "tblSwitchboardItems",
                            "frmReportParam_Client", "qryProviderPlansByClient_Param"],
-        "NorthwindDevEdition": ["frmStartup", "frmGenericDialog", "qryProductList_Export"],
+        "NorthwindDevEdition": ["frmStartup", "frmGenericDialog", "qryItemList_Export"],
     }
     out = []
     for db, names in picks.items():
@@ -150,7 +150,7 @@ PILOT_JUDGMENT = """Pilot review judgment (orchestrator):
   PossiblyUnused, so no deletion-scented UnreferencedObject question). Helper macro
   mcrSwitchboardActions -> NavigationShell (edge-backed, accurate "containing
   navigation actions" wording).
-- Parameter-dialog forms (frmReportParam_*, frmGenericDialog, frmSelectVendorDialog)
+- Parameter-dialog forms (frmReportParam_*, frmGenericDialog, frmSelectItemDialog)
   stay Unknown @ 0.45 with a hedged "Likely parameter/filter dialog ... appears to
   collect run-time criteria" summary + a single ParameterDialogFlow question
   (generic NoRecordSource/UnrecognizedVbaPattern suppressed).

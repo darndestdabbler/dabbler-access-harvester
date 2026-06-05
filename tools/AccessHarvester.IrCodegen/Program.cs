@@ -17,7 +17,7 @@ internal static class Program
 
         var inputPath = args[0];
         var outputDir = args[1];
-        var ns = args.Length >= 3 ? args[2] : "BlazorAddAnOrder.Ui.Pages.Generated";
+        var ns = args.Length >= 3 ? args[2] : "GeneratedApp.Ui.Pages.Generated";
 
         var ir = LoadIr(inputPath);
 

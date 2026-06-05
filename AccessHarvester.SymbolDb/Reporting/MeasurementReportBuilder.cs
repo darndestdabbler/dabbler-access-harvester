@@ -8,7 +8,7 @@ using AccessHarvester.SymbolDb.Persistence;
 namespace AccessHarvester.SymbolDb.Reporting;
 
 // Renders the Session 1 measurement deliverable
-// (tools/symbol-db/measurement-northwind.md). Captures totals, per-module
+// (tools/symbol-db/measurement-report.md). Captures totals, per-module
 // breakdown, and the AI-call savings estimate the spec requires:
 //
 //   * naive baseline = one interpretation per non-deferred symbol
@@ -146,7 +146,7 @@ public sealed class MeasurementReportBuilder
         sb.AppendLine();
         if (deferred.Count == 0)
         {
-            sb.AppendLine("None — `NorthwindDevEdition.accdb` has no `Old`-companion modules in the");
+            sb.AppendLine("None — the fixture has no `Old`-companion modules in the");
             sb.AppendLine("Session 1 input set. The deferral filter is exercised by the unit tests");
             sb.AppendLine("regardless; this is the documented zero-case baseline.");
             return;

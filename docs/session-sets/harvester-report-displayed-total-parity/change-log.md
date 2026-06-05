@@ -48,7 +48,7 @@ contaminate the determinism gate.
   `txtSubTotal=Sum((1-[Discount])*[Quantity]*[UnitPrice])=50313.622` with
   `txtShipping`/`txtTotal` (DisplayTotalNonAggregate) and `txtTax`
   (DisplayTotalUnsupportedFunction, `IIf`) recorded in `Skipped`;
-  `rptSalesByEmployee`/`rptSalesByProduct` compute `GrandTotalSum=Sum([OrderTotal])`
+  `rptTotalsByOwner`/`rptTotalsByCategory` compute `GrandTotalSum=Sum([OrderTotal])`
   with their group-footer controls Skipped; the two HHC sub-reports get empty
   `DisplayTotals`. `CanonicalGoldenRegressionTests` passes 2/2 byte-for-byte.
 - Moved the opt-in `--include-pdf` visual spot-check into a SEPARATE, non-gated

@@ -16,7 +16,7 @@ filesystem:
 | Path | What it is |
 |---|---|
 | `symbol-db.sqlite` | The symbol database — modules, symbols, references, interpretations |
-| `measurement-northwind.md` | Build measurement report emitted alongside the DB |
+| `measurement-report.md` | Build measurement report emitted alongside the DB |
 | `consistency/grades.sqlite` | Cross-provider consistency-grading rows |
 | `consistency/sample.json` | Stratified sample manifest |
 | `consistency/sample-report.md` | Sample report |
@@ -43,11 +43,13 @@ tests in `tests/AccessHarvester.SymbolDb.Tests/`.
 The data is reproducible from the local `NorthwindDevEdition` KB fixture
 (`tmp/comprehension-ir/AccessMetaData/NorthwindDevEdition/kb/`, itself local-only):
 
-- **`symbol-db.sqlite` (structural rows) + `measurement-northwind.md`** —
-  `AccessHarvester.SymbolDb.Cli.BuildArtifacts.RunForNorthwind(...)`; the
-  `GenerateArtifacts` test regenerates it when the DB is absent and the fixture
-  is present (it skips when the fixture is absent and no-ops once AI
-  interpretation columns are populated, to avoid wiping them).
+- **`symbol-db.sqlite` (structural rows) + `measurement-report.md`** —
+  `AccessHarvester.SymbolDb.Cli.BuildArtifacts.RunForFixture(repoRoot, fixture, ...)`,
+  where `fixture` (a `FixtureObjectSet`) names the local kb-tier directory and the
+  form/module to ingest. The `probe-builder/` utility drives it from the command
+  line (`--fixture <name> --form-json … --form-module … --module-json … --module-name …`),
+  so no fixture-specific identifiers live in source — point it at whatever local
+  Access fixture you are measuring.
 - **AI interpretation columns** — `python -m interpret --db symbol-db.sqlite ...`.
 - **Consistency outputs** (`grades.sqlite`, `sample*.json/.md`, `correlation-*`) —
   the `consistency/` runners (sampler → grader → correlation → report).

@@ -161,7 +161,7 @@ have surfaced.
   against.
 - `docs/session-sets/workflow-package-pilot/_template.md` — the
   copyable template (same seven-section structure).
-- `tests/AccessHarvester.CharacterizationTests/AddAnOrder/` — the
+- `tests/AccessHarvester.CharacterizationTests/CreateRecord/` — the
   baseline characterization-test set the HHC tests are compared
   against (for shape, not content).
 - The harvester pipeline. If Access COM is available, the

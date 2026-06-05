@@ -250,8 +250,8 @@ substantive findings.
   + 5 across the four packages).
 - **107 characterization tests** in
   `tests/AccessHarvester.CharacterizationTests/`, organized into
-  per-workflow folders (AddAnOrder ~890 LOC; UpdateAnOrder ~705 LOC;
-  UpdateAProduct ~1119 LOC; UpdateAnEmployee ~480 LOC). All pass.
+  per-workflow folders (CreateRecord ~890 LOC; UpdateRecord ~705 LOC;
+  UpdateItem ~1119 LOC; UpdateUser ~480 LOC). All pass.
 - **Cross-workflow audit** confirming the four packages form an
   internally coherent dataset; no UI-coupled tests; no systematic
   invented rationale; consistent confidence-tag calibration.
@@ -334,14 +334,14 @@ $0.20-$0.40 estimate.
 **Success criterion: PROVEN, with one explicit nuance.**
 
 The pilot's success criterion was that the
-`tests/AccessHarvester.CharacterizationTests/AddAnOrder/` tests
-(and their UpdateAnOrder/UpdateAProduct/UpdateAnEmployee siblings)
+`tests/AccessHarvester.CharacterizationTests/CreateRecord/` tests
+(and their UpdateRecord/UpdateItem/UpdateUser siblings)
 pass without modification against the Blazor app's wiring. **All
 111 characterization tests pass unmodified.**
 
 The nuance: **Stop Rule #1 fired in Session 2.** The
-characterization-test workflow classes (`OrderCreationWorkflow`,
-`OrderLineItemWorkflow`, `InventoryAllocator`) are `private sealed`
+characterization-test workflow classes (`RecordCreationWorkflow`,
+`RecordLineWorkflow`, `AllocationService`) are `private sealed`
 inside their respective test files and could not be shared with
 the Blazor project as written. The orchestrator surfaced four
 resolution options to the human; the human chose **Option D**:
@@ -370,8 +370,8 @@ it. This nuance is documented in the pilot's change log.
 
 - **Single ASP.NET Core 10.0 host** at
   `output-tests/blazor-add-an-order/` with three namespaces
-  (`BlazorAddAnOrder.Ui`, `BlazorAddAnOrder.Services`,
-  `BlazorAddAnOrder.Contracts`).
+  (`BlazorCreateRecord.Ui`, `BlazorCreateRecord.Services`,
+  `BlazorCreateRecord.Contracts`).
 - **Add-an-Order vertical slice** reachable at `/orders/new` —
   master-detail entry form, customer/product lookup, line items
   with inventory allocation, save with validation, persistence to
@@ -379,8 +379,8 @@ it. This nuance is documented in the pilot's change log.
 - **All 111 characterization tests pass unmodified** (count grew
   from 107 in Phase 1 to 111 across the suite, reflecting test
   refactoring during Phase 2).
-- **Layer-separation discipline holds** — `BlazorAddAnOrder.Ui`
-  does not directly reference `BlazorAddAnOrder.Services` types;
+- **Layer-separation discipline holds** — `BlazorCreateRecord.Ui`
+  does not directly reference `BlazorCreateRecord.Services` types;
   all cross-layer communication goes through the named
   `HttpClient` and the shared `Contracts` DTOs.
 
@@ -413,7 +413,7 @@ templates are correctly scoped to single-entity admin slices and
 *not* a fit for workflow-driven update flows; further hand-
 authored Blazor work in this repo would dilute the harvester's
 scope. The partial Session 1 work (persistence extensions,
-`ShipperEntity`, `IShipperCatalog`) was dropped from the stash
+`LookupEntity`, `ILookupCatalog`) was dropped from the stash
 on 2026-05-17. The spec at `docs/session-sets/blazor-update-
 workflows/spec.md` is preserved as input the future migration
 repo can adapt; this repo will not execute the set.
@@ -922,7 +922,7 @@ candidates by default. This revision lands that reset.
   work in this repo to the future migration repo.
 - The partial Session 1 work (persistence extensions for
   Invoice/Shipping/Payment fields on the Order entity, a new
-  `ShipperEntity`, an `IShipperCatalog` interface) was dropped
+  `LookupEntity`, an `ILookupCatalog` interface) was dropped
   from the stash on 2026-05-17. The spec at
   `docs/session-sets/blazor-update-workflows/spec.md` is
   preserved as input the future migration repo can adapt.

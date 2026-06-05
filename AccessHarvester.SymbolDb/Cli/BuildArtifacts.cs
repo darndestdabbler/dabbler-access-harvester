@@ -10,23 +10,36 @@ using AccessHarvester.SymbolDb.SourceLoading;
 
 namespace AccessHarvester.SymbolDb.Cli;
 
+// Describes which local Access fixture (by its kb-tier directory name) and
+// which VBA form/module the symbol-db build should ingest. The caller supplies
+// this so the build helper carries no fixture-specific identifiers — the dev /
+// probe tooling passes the object set for whatever Access fixture is being
+// measured locally.
+public sealed record FixtureObjectSet(
+    string FixtureName,
+    string FormKbJsonFile,
+    string FormModuleFqn,
+    string ModuleKbJsonFile,
+    string ModuleFqn);
+
 // Static entry-point that drives the full symbol-db build pipeline through
-// Session 3 (FormControls, EventBindings, Macros, Queries, Tables) against
-// the canonical NorthwindDevEdition fixture and writes:
-//   * tools/symbol-db/symbol-db.sqlite       — checked-in build artifact
-//   * tools/symbol-db/measurement-northwind.md — measurement report
+// Session 3 (FormControls, EventBindings, Macros, Queries, Tables) against a
+// caller-supplied Access fixture and writes:
+//   * <dbPath>                — the symbol database (build artifact)
+//   * <reportPath> (optional) — the measurement report
 public static class BuildArtifacts
 {
-    public static int RunForNorthwind(string repoRoot)
+    public static int RunForFixture(string repoRoot, FixtureObjectSet fixture)
     {
-        return RunForNorthwind(repoRoot,
+        return RunForFixture(repoRoot, fixture,
             Path.Combine(repoRoot, "tools", "symbol-db", "symbol-db.sqlite"),
             writeMeasurementReport: true,
-            reportPath: Path.Combine(repoRoot, "tools", "symbol-db", "measurement-northwind.md"));
+            reportPath: Path.Combine(repoRoot, "tools", "symbol-db", "measurement-report.md"));
     }
 
-    public static int RunForNorthwind(
+    public static int RunForFixture(
         string repoRoot,
+        FixtureObjectSet fixture,
         string dbPath,
         bool writeMeasurementReport,
         string? reportPath = null)
@@ -35,28 +48,28 @@ public static class BuildArtifacts
             throw new DirectoryNotFoundException(repoRoot);
 
         string kbRoot = Path.Combine(repoRoot,
-            "tmp", "comprehension-ir", "AccessMetaData", "NorthwindDevEdition", "kb");
+            "tmp", "comprehension-ir", "AccessMetaData", fixture.FixtureName, "kb");
 
         // --- VBA symbols (Sessions 1 + 2) ---
         var rawModules = new[]
         {
             KbVbaSourceLoader.FromKbJson(
-                Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json"),
-                "Form_frmCompanyDetail",
+                Path.Combine(kbRoot, "Forms", fixture.FormKbJsonFile),
+                fixture.FormModuleFqn,
                 "Form")
-                ?? throw new InvalidOperationException("frmCompanyDetail.json has no VbaCode."),
+                ?? throw new InvalidOperationException($"{fixture.FormKbJsonFile} has no VbaCode."),
             KbVbaSourceLoader.FromKbJson(
-                Path.Combine(kbRoot, "ModulesAndClasses", "modStrings.json"),
-                "modStrings",
+                Path.Combine(kbRoot, "ModulesAndClasses", fixture.ModuleKbJsonFile),
+                fixture.ModuleFqn,
                 "Module")
-                ?? throw new InvalidOperationException("modStrings.json has no VbaCode."),
+                ?? throw new InvalidOperationException($"{fixture.ModuleKbJsonFile} has no VbaCode."),
         };
         var vbaResult = new SymbolDbBuilder().Build(rawModules);
 
         // --- Session 3: FormControls + EventBindings ---
         var formResult = FormControlsExtractor.Extract(
-            Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json"),
-            "Form_frmCompanyDetail");
+            Path.Combine(kbRoot, "Forms", fixture.FormKbJsonFile),
+            fixture.FormModuleFqn);
 
         // Count, per table or query name, how many form controls reference it
         // as a row source or bound table. The TableSchemaExtractor uses this
@@ -118,13 +131,13 @@ public static class BuildArtifacts
         if (writeMeasurementReport)
         {
             string effectiveReportPath = reportPath
-                ?? Path.Combine(repoRoot, "tools", "symbol-db", "measurement-northwind.md");
+                ?? Path.Combine(repoRoot, "tools", "symbol-db", "measurement-report.md");
             Directory.CreateDirectory(Path.GetDirectoryName(effectiveReportPath)
                 ?? throw new InvalidOperationException(
                     $"Cannot determine directory for {effectiveReportPath}."));
             var report = new MeasurementReportBuilder().Build(
                 vbaResult, dedupReport,
-                "NorthwindDevEdition.accdb (Session 3 fixture: Form_frmCompanyDetail + modStrings + all macros/queries/tables)");
+                $"{fixture.FixtureName}.accdb (Session 3 fixture: {fixture.FormModuleFqn} + {fixture.ModuleFqn} + all macros/queries/tables)");
             File.WriteAllText(effectiveReportPath, report);
             Console.WriteLine($"Wrote {effectiveReportPath}");
         }

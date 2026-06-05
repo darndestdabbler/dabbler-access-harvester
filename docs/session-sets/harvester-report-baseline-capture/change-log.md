@@ -475,8 +475,8 @@ a distinct failure).
   through aggregates + PDF render + manifest. S3 work is mostly
   documentation (CLI reference in `install.md`, interpretation
   guide, parameter selection strategy), golden capture for
-  `NorthwindDevEdition` (rptInvoice, rptSalesByEmployee,
-  rptSalesByProduct) and HomeHealthCare's in-scope reports
+  `NorthwindDevEdition` (rptInvoice, rptTotalsByOwner,
+  rptTotalsByCategory) and HomeHealthCare's in-scope reports
   (`srpt*` for the modal-free subset; `rpt*` requires the
   parameter elicitation work below), plus the closeout pieces.
 - **Parameter elicitation design (S3 prerequisite for `rpt*`

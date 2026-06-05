@@ -213,6 +213,23 @@ in `tests/AccessHarvester.SymbolDb.Tests/` are `[SkippableFact]`/`[SkippableTheo
 gated on `FixtureLoader.RequireNorthwindFixture()`, so they skip cleanly when the
 fixture is absent. See `tools/symbol-db/README.md`.
 
+**The tracked tree is NorthwindDevEdition-free at `HEAD` (set `005`).** Sets `003`
+and `004` removed the proprietary binaries, data, and symbol-DB artifacts; set
+`005-northwind-embedded-residue-remediation` finished the job by deleting the
+spent order-entry pilot arc, re-basing/deleting the corpus-pinned tests onto the
+HomeHealthCare fixture, genericizing the one fixture-bound CLI helper
+(`BuildArtifacts.RunForFixture`, formerly `RunForNorthwind`), and redacting the
+incidental structural identifiers that remained in source comments and reference
+docs. No tracked file carries a NorthwindDevEdition **structural identifier**
+(form / report / query / table / module / control / procedure name) except the
+`003`/`004`/`005` process records that must describe what was removed and a small
+set of recorded generic-example names. The fixture's **name** still appears where
+it documents the local-only fixture policy (this section, `.gitignore`, the
+symbol-db README); that is the fixture identity, not structural disclosure. This
+set performed **no git-history rewrite** — old structural names remain reachable
+in pre-rewrite history by accepted maintainer decision (structural names are
+materially lower-sensitivity than the VBA source bodies `003`/`004` purged).
+
 **Excluded fixtures:** `samples/MiniComplex.accdb` and
 `samples/ProjectBoard.accdb` are excluded from automated test coverage
 pending an error-audit pass. They may be used in narrow, explicitly-scoped

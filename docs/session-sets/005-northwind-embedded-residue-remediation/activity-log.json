@@ -153,6 +153,86 @@
       "description": "Authored disposition.json (verdict VERIFIED, next_orchestrator Sonnet@medium for S3). Committed + pushed to main (5775ac2).",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/genericize-source",
+      "dateTime": "2026-06-05T16:21:53.462482-04:00",
+      "description": "Genericized AccessHarvester.SymbolDb/Cli/BuildArtifacts.cs: RunForNorthwind -> RunForFixture parameterized over a new FixtureObjectSet record (fixture dir + form/module identifiers); sole caller probe-builder/Program.cs supplies the object set via required CLI args (no Northwind defaults in tracked source). Identical behavior given identical inputs; probe-builder builds clean.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/stop-rule-finding",
+      "dateTime": "2026-06-05T16:21:53.462482-04:00",
+      "description": "STOP-RULE: docs/lowdefy-evaluation/prompt-for-codex.md embedded the full deleted add-an-order workflow package verbatim (business logic denser than structural names). Surfaced to maintainer (s3-stop-rule-finding.md); maintainer chose Option A -> deleted the whole 5-file lowdefy-evaluation arc.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/redact-source",
+      "dateTime": "2026-06-05T16:21:53.462482-04:00",
+      "description": "Redacted incidental NorthwindDevEdition identifiers in 5 C# source files (comments/doc-strings/one report-prose string; no behavior change): TypeLibraryRegistry, NamePatternDetector, DatabaseInfo, LocalVariableExtractor, MeasurementReportBuilder, ReferenceResolver.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/redact-docs",
+      "dateTime": "2026-06-05T16:21:53.462482-04:00",
+      "description": "Redacted distinctive NW structural identifiers across reference/planning docs + live tooling: comparison doc, install, interpretation-guide (repointed golden links to committed HHC corpus; fixed dead examples/northwind-output.json refs), migration-map, strategy, generalization inventory, the 8 harvester-report-baseline/parity process records, interpret/*.py, and 3 inventory-gap files the S1 manifest missed (ir-schema-forms-reports.md, IrCodegen, form-report-code-and-grouping records). Test-case pair kept as generic-accepted (rptInvoice; coupled to a live fixture-conformance test).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/gitignore-policy",
+      "dateTime": "2026-06-05T16:21:53.462482-04:00",
+      "description": "Confirmed local-only NW fixture trees stay gitignored (git ls-files: none tracked); added measurement-report.md to .gitignore; added a 'NorthwindDevEdition-free at HEAD (set 005)' policy note to project-guidance.md Canonical Test Fixtures.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-3/final-scan",
+      "dateTime": "2026-06-05T16:21:53.462482-04:00",
+      "description": "Final HEAD residue scan (final-residue-scan.md): PASS - zero distinctive NW structural identifiers outside accepted paths (003/004/005 process records + 2 immutable verifier outputs). Brand token Northwind/NorthwindDevEdition kept as fixture identity where the local-only policy is documented.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-3/build-test",
+      "dateTime": "2026-06-05T16:21:53.462482-04:00",
+      "description": "dotnet build 0 errors; out-of-sln probe-builder 0 errors. Hermetic suite GREEN: Parser69 Grammar294 Sql85 Resolver400 SymbolDb69 Pipeline794 + AccessHarvester.Tests 590/0 (clean re-run; 1 transient ACE-OLEDB lock cascade from a wedged msaccess reaped via WMI Terminate). 8 AccessHarvester.Integration failures proven PRE-EXISTING (depend on never-committed examples/northwind-output.json + 1 COM timeout); none touch this session's files. s3-build-test.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-3/verify",
+      "dateTime": "2026-06-05T16:21:53.462482-04:00",
+      "description": "Cross-provider session verification (route session-verification -> gpt-5-4, different provider). VERIFIED, 0 issues across all 5 concerns (genericization faithfulness/no engine change, cosmetic redactions, stop-rule escalation+whole-arc delete correct, scan methodology sound, pre-existing Integration-failure attribution rigorous). s3-verification.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 8647,
+          "outputTokens": 7218,
+          "costUsd": 0.1298875
+        }
+      ]
     }
   ]
 }

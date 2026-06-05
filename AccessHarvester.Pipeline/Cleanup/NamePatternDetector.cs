@@ -13,7 +13,7 @@ public static class NamePatternDetector
     // case-fold the [a-z] / [A-Z] character classes in the boundary lookarounds, which
     // collapses the CamelCase transition check into a generic letter-letter check and
     // produces false positives like "tEmp" matching inside "Employee". Calibrated in
-    // Session 3 against NorthwindDevEdition; see object-cleanup-strategy.md §3.1.1.
+    // Session 3 against a sample Access database; see object-cleanup-strategy.md §3.1.1.
     private static readonly Regex VocabularyPattern =
         new(@"(?:^|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))(?i:Old|Copy|Bak|Archive|Tmp|Temp|Hold|Save|Backup|Snapshot)(?:$|[^A-Za-z]|(?<=[a-z])(?=[A-Z]))",
             RegexOptions.Compiled);
