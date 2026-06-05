@@ -16,7 +16,7 @@ namespace AccessHarvester.SymbolDb.Tests;
 // is "if there are clusters, the canonical points are correct."
 public sealed class PersistenceAndDedupTests
 {
-    [Fact]
+    [SkippableFact]
     public void Build_Persist_AndDedup_RoundTrip_PopulatesCanonicalsOnTwins()
     {
         var rawModules = new[]
@@ -77,7 +77,7 @@ public sealed class PersistenceAndDedupTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void Build_Persist_RoundTrip_RowCountsMatchInMemory()
     {
         var rawModules = new[]
@@ -265,7 +265,7 @@ public sealed class PersistenceAndDedupTests
             s.Kind == "module_var" && s.DeclaredInFqn == "modX.Foo"));
     }
 
-    [Fact]
+    [SkippableFact]
     public void SignatureFormatter_GetString_ProducesExpectedSignatureText()
     {
         // The spec's probe target enumerates GetString's parameters as

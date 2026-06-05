@@ -201,6 +201,18 @@ fixture-selection rationale and structural comparison. NorthwindDevEdition is
 proprietary: a fresh clone has only the HomeHealthCare golden, and the
 Northwind-dependent hermetic tests skip cleanly when the local golden is absent.
 
+The same local-only rule extends to **Northwind-derived symbol-DB data**: the
+SQLite symbol database (`tools/symbol-db/symbol-db.sqlite`) and its derived
+consistency-grading outputs (`tools/symbol-db/consistency/grades.sqlite`,
+`sample*.json`/`.md`, `correlation-*`) serialize proprietary NorthwindDevEdition
+VBA source and AI interpretations, so they are gitignored and regenerated locally
+by the generic `tools/symbol-db/` tooling (which is kept and committed). They were
+untracked from `HEAD` in session set `004-northwind-symbol-db-sqlite-residue`
+(history scrub in its Sessions 2–3). The symbol-DB-data-dependent hermetic tests
+in `tests/AccessHarvester.SymbolDb.Tests/` are `[SkippableFact]`/`[SkippableTheory]`
+gated on `FixtureLoader.RequireNorthwindFixture()`, so they skip cleanly when the
+fixture is absent. See `tools/symbol-db/README.md`.
+
 **Excluded fixtures:** `samples/MiniComplex.accdb` and
 `samples/ProjectBoard.accdb` are excluded from automated test coverage
 pending an error-audit pass. They may be used in narrow, explicitly-scoped

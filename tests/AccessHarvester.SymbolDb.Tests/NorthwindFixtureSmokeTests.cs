@@ -19,7 +19,7 @@ public sealed class NorthwindFixtureSmokeTests
         _output = output;
     }
 
-    [Fact]
+    [SkippableFact]
     public void Build_FormFrmCompanyDetail_AndModStrings_ProducesExpectedShape()
     {
         var rawModules = new[]

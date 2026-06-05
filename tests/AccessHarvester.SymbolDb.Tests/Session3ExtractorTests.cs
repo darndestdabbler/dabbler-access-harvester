@@ -9,12 +9,16 @@ namespace AccessHarvester.SymbolDb.Tests;
 
 // Hermetic tests for Session 3 extractors:
 //   FormControlsExtractor, MacroExtractor, QuerySchemaExtractor, TableSchemaExtractor.
-// All tests read from the committed NorthwindDevEdition KB fixture under tmp/.
+// Most tests read from the proprietary, local-only NorthwindDevEdition KB fixture
+// under the gitignored tmp/ tree (absent on a fresh clone) and are therefore
+// [SkippableFact] — they skip when the fixture is absent (set 004). The two
+// synthetic tests (inline SQL / inline temp JSON) carry no fixture dependency and
+// stay [Fact].
 public sealed class Session3ExtractorTests
 {
     // ── FormControlsExtractor ────────────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void FormControls_CboCompanyTypeID_IsExtracted()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -38,7 +42,7 @@ public sealed class Session3ExtractorTests
         Assert.Equal("CompanyTypeID", cbo.BoundColumn);
     }
 
-    [Fact]
+    [SkippableFact]
     public void FormControls_AllNamedControls_AreExtracted()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -59,7 +63,7 @@ public sealed class Session3ExtractorTests
         Assert.Equal(names.Distinct().Count(), names.Count);
     }
 
-    [Fact]
+    [SkippableFact]
     public void EventBindings_CboCompanyTypeID_BeforeUpdate_IsVbaBinding()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -76,7 +80,7 @@ public sealed class Session3ExtractorTests
         Assert.Null(binding.HandlerExpression);
     }
 
-    [Fact]
+    [SkippableFact]
     public void EventBindings_FormLevelEvents_AreExtracted()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -98,7 +102,7 @@ public sealed class Session3ExtractorTests
 
     // ── MacroExtractor ───────────────────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void MacroExtractor_AutoExec_IsExtracted()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -125,7 +129,7 @@ public sealed class Session3ExtractorTests
         for (int i = 0; i < positions.Count; i++) Assert.Equal(i, positions[i]);
     }
 
-    [Fact]
+    [SkippableFact]
     public void MacroExtractor_AllMacroFiles_AreExtracted()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -144,7 +148,7 @@ public sealed class Session3ExtractorTests
 
     // ── QuerySchemaExtractor ─────────────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void QuerySchemaExtractor_AllQueryFiles_AreExtracted()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -164,6 +168,7 @@ public sealed class Session3ExtractorTests
         }
     }
 
+    // Synthetic (inline SQL) — no NorthwindDevEdition fixture dependency; never skips.
     [Fact]
     public void QuerySchemaExtractor_NormalizedSql_IsUppercaseNoParameters()
     {
@@ -179,7 +184,7 @@ public sealed class Session3ExtractorTests
         Assert.DoesNotContain("  ", normalized);
     }
 
-    [Fact]
+    [SkippableFact]
     public void QuerySchemaExtractor_IdenticalQueries_ShareCanonicalFqn()
     {
         // Build two synthetic query file-equivalent rows by examining the real
@@ -218,7 +223,7 @@ public sealed class Session3ExtractorTests
 
     // ── TableSchemaExtractor ─────────────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void TableSchemaExtractor_CompanyTypes_IsLookupTable()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -240,7 +245,7 @@ public sealed class Session3ExtractorTests
             $"CompanyTypes score {ct.IsLookupTableScore} should be ≥70 for a bona-fide lookup table.");
     }
 
-    [Fact]
+    [SkippableFact]
     public void TableSchemaExtractor_AllTableFiles_AreExtracted()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -257,6 +262,7 @@ public sealed class Session3ExtractorTests
 
     // ── Round-1 verification fixes ───────────────────────────────────────────
 
+    // Synthetic (inline temp JSON) — no NorthwindDevEdition fixture dependency; never skips.
     [Fact]
     public void EventBindings_OnPush_MapsToClickHandler()
     {
@@ -295,7 +301,7 @@ public sealed class Session3ExtractorTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void MacroExtractor_PositionsAreDenseAndContiguous()
     {
         // Run against the AutoExec macro and assert (macro_fqn, position) is
@@ -315,7 +321,7 @@ public sealed class Session3ExtractorTests
         }
     }
 
-    [Fact]
+    [SkippableFact]
     public void QuerySchemaExtractor_DeadQuery_IsFlagged()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -335,7 +341,7 @@ public sealed class Session3ExtractorTests
             q => Assert.False(q.IsDead, $"Query '{q.Fqn}' should not be is_dead."));
     }
 
-    [Fact]
+    [SkippableFact]
     public void TableSchemaExtractor_RowSourceCount_TiersTheScore()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();
@@ -361,7 +367,7 @@ public sealed class Session3ExtractorTests
 
     // ── End-to-end persistence smoke ─────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void Session3_FullPipeline_WritesExpectedTableCounts()
     {
         string kbRoot = FixtureLoader.NorthwindKbRoot();

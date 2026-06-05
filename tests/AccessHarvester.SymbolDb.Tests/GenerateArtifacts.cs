@@ -18,9 +18,15 @@ namespace AccessHarvester.SymbolDb.Tests;
 // when the upstream C# pipeline shape changes.
 public sealed class GenerateArtifacts
 {
-    [Fact]
+    [SkippableFact]
     public void Regenerate_NorthwindFixture_ArtifactsLandUnderToolsSymbolDb()
     {
+        // Set 004: the proprietary NorthwindDevEdition KB fixture (and the
+        // regenerated tools/symbol-db/symbol-db.sqlite) are local-only and
+        // absent on a fresh clone. Without the fixture there is nothing to
+        // regenerate from, so skip rather than fail.
+        FixtureLoader.RequireNorthwindFixture();
+
         string repoRoot = FixtureLoader.LocateRepoRoot();
         string dbPath = Path.Combine(repoRoot, "tools", "symbol-db", "symbol-db.sqlite");
 

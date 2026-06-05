@@ -12,6 +12,9 @@
     <PackageReference Include="xunit" Version="2.8.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <!-- Set 004: skip-when-absent guards for the proprietary, local-only
+         NorthwindDevEdition symbol-db fixture (mirrors the Integration project). -->
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
   </ItemGroup>
 
   <ItemGroup>

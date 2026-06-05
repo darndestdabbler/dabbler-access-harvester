@@ -28,14 +28,14 @@ public sealed class ReferencesExtractorTests
 
     // ── References populated ──────────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void Build_ProducesReferenceRows()
     {
         var result = BuildNorthwind();
         Assert.NotEmpty(result.References);
     }
 
-    [Fact]
+    [SkippableFact]
     public void Build_ProducesMemberAccessRows()
     {
         var result = BuildNorthwind();
@@ -50,14 +50,14 @@ public sealed class ReferencesExtractorTests
     private static IReadOnlyList<ReferenceRow> ProbeTargetRefs(BuildResult result) =>
         result.References.Where(r => r.FromFqn == ProbeTargetFqn).ToList();
 
-    [Fact]
+    [SkippableFact]
     public void ProbeTarget_HasReferenceRows()
     {
         var refs = ProbeTargetRefs(BuildNorthwind());
         Assert.NotEmpty(refs);
     }
 
-    [Theory]
+    [SkippableTheory]
     [InlineData("CompanyIsActive")]
     [InlineData("GetString")]
     [InlineData("Me")]
@@ -71,7 +71,7 @@ public sealed class ReferencesExtractorTests
 
     // ── Caller-kind annotation ────────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void ProbeTarget_AllRefRows_HaveCallerKind_UiEventHandler()
     {
         // cboCompanyTypeID_BeforeUpdate is in a Form module and its name contains '_'.
@@ -80,7 +80,7 @@ public sealed class ReferencesExtractorTests
         Assert.All(refs, r => Assert.Equal("ui-event-handler", r.CallerKind));
     }
 
-    [Fact]
+    [SkippableFact]
     public void ModStrings_ProcRefs_HaveCallerKind_NonUi()
     {
         var result = BuildNorthwind();
@@ -95,7 +95,7 @@ public sealed class ReferencesExtractorTests
 
     // ── Reverse-lookup: CompanyIsActive has a caller ───────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void CompanyIsActive_HasAtLeastOneCaller()
     {
         var result = BuildNorthwind();
@@ -108,14 +108,14 @@ public sealed class ReferencesExtractorTests
 
     // ── Resolution status variety ─────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void References_ContainAtLeastOneResolvedRow()
     {
         var result = BuildNorthwind();
         Assert.Contains(result.References, r => r.ResolutionStatus == "resolved");
     }
 
-    [Fact]
+    [SkippableFact]
     public void References_ContainMeIdentifierRows()
     {
         // Me references may be resolved-to-me or unresolved (me-in-standard-module
@@ -127,7 +127,7 @@ public sealed class ReferencesExtractorTests
 
     // ── MemberAccesses: Me.X or Me!X rows present ─────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void MemberAccesses_ContainMeReceiverRow()
     {
         var result = BuildNorthwind();
@@ -136,7 +136,7 @@ public sealed class ReferencesExtractorTests
 
     // ── Persistence round-trip ────────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void Persist_ReferencesAndMemberAccesses_RoundTrip()
     {
         var result = BuildNorthwind();
@@ -161,7 +161,7 @@ public sealed class ReferencesExtractorTests
         Assert.Equal((long)result.MemberAccesses.Count, maCount);
     }
 
-    [Fact]
+    [SkippableFact]
     public void Persist_ProbeTargetCallerKind_IsUiEventHandlerInDb()
     {
         var result = BuildNorthwind();
@@ -192,14 +192,14 @@ public sealed class ReferencesExtractorTests
 
     // ── Kind classification ───────────────────────────────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void References_ContainCallKindRows()
     {
         var result = BuildNorthwind();
         Assert.Contains(result.References, r => r.Kind == "call");
     }
 
-    [Fact]
+    [SkippableFact]
     public void References_ContainVariableReadKindRows()
     {
         var result = BuildNorthwind();
@@ -208,7 +208,7 @@ public sealed class ReferencesExtractorTests
 
     // ── MemberAccesses: this fixture has no bang-access rows ──────────────
 
-    [Fact]
+    [SkippableFact]
     public void MemberAccesses_NoBangAccessRows_InNorthwindFixture()
     {
         // Form_frmCompanyDetail + modStrings use dot notation (Me.Foo) exclusively;
@@ -220,7 +220,7 @@ public sealed class ReferencesExtractorTests
 
     // ── Local variable to_fqn includes procedure segment ─────────────────
 
-    [Fact]
+    [SkippableFact]
     public void LocalVariable_ToFqn_IncludesProcedureSegment()
     {
         // strDlgMsg is a local Dim in cboCompanyTypeID_BeforeUpdate.
@@ -241,7 +241,7 @@ public sealed class ReferencesExtractorTests
 
     // ── control_access / enum_value_use: shape guards ─────────────────────
 
-    [Fact]
+    [SkippableFact]
     public void References_ControlAccessRows_HaveNonEmptyIdentifier()
     {
         // The NorthwindDevEdition fixture uses dot notation (Me.Foo) rather than bang
@@ -252,7 +252,7 @@ public sealed class ReferencesExtractorTests
             r => Assert.False(string.IsNullOrEmpty(r.Identifier)));
     }
 
-    [Fact]
+    [SkippableFact]
     public void References_EnumValueUseRows_HaveNonEmptyIdentifier()
     {
         // Cross-module enum members are unresolved in this fixture (the resolver does

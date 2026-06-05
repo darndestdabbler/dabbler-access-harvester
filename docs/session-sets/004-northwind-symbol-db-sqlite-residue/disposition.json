@@ -1,0 +1,44 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 3 (non-destructive) - Forward Removal + Test/Tooling Skip-Hardening. Inventoried the tracked-at-HEAD symbol-DB data footprint and classified scrub-vs-keep: 7 proprietary NorthwindDevEdition-derived DATA artifacts untracked via `git rm --cached` (local copies preserved on disk) and gitignored - tools/symbol-db/symbol-db.sqlite (1.2MB), tools/symbol-db/consistency/grades.sqlite (672KB), and the 5 derived consistency artifacts (correlation-summary.json, sample.json, sample-report.md, correlation-report.md, correlation-scatter.png), each provably NW-derived (embed/reference proprietary FQNs like Form_frmCompanyDetail/modStrings/qrycbo*). Generic tooling KEPT untouched: all tools/symbol-db/**/*.py, interpretation-config.json (inspected: generic thresholds/policy), probe-builder/*, and the C# source/tests. The BuildNorthwind() module-source fixture (tmp/comprehension-ir/AccessMetaData/NorthwindDevEdition/kb/) was already untracked+gitignored (whole tmp/ tree), so needed no HEAD removal. Converted the symbol-DB-data-dependent hermetic tests to skip-when-absent by centralizing the guard in FixtureLoader (NorthwindFixtureAvailable + RequireNorthwindFixture -> Skip.IfNot, funneled through NorthwindKbRoot()/Load*), adding Xunit.SkippableFact 1.4.13 to the test csproj, and flipping fixture-dependent [Fact]/[Theory] to [SkippableFact]/[SkippableTheory] (CrossModuleResolutionTests, ReferencesExtractorTests, NorthwindFixtureSmokeTests fully; Session3ExtractorTests 13/15; PersistenceAndDedupTests 3/8; GenerateArtifacts with an explicit guard). NO live assertion weakened - assertion bodies unchanged; synthetic/inline-data tests left as [Fact]. Python consistency/interpret tests untouched (they use :memory:/temp DBs). Docs: new tools/symbol-db/README.md + a Canonical Test Fixtures note in project-guidance.md. Validation: `dotnet build` 0 errors; `dotnet test AccessHarvester.SymbolDb.Tests` with fixture PRESENT = 70 passed/0 skipped/0 failed (all live assertions ran), with fixture MOVED ASIDE = 24 passed/46 skipped/0 failed, build+tests green both ways; fixture + local data restored/preserved. Cross-provider verification (gpt-5-4, R1): VERIFIED, issues []. The git-HISTORY scrub + force-push of these paths is DEFERRED to this set's Sessions 2-3 (gated, destructive); note 003's history rewrite already ran, so the Stop-Rule coordination resolves to a sequential second rewrite in Session 3.",
+  "files_changed": [
+    ".gitignore (modified - added Northwind symbol-DB data block, 8 paths, set-004 comment)",
+    "tests/AccessHarvester.SymbolDb.Tests/AccessHarvester.SymbolDb.Tests.csproj (modified - +Xunit.SkippableFact 1.4.13)",
+    "tests/AccessHarvester.SymbolDb.Tests/FixtureLoader.cs (modified - skip chokepoint)",
+    "tests/AccessHarvester.SymbolDb.Tests/CrossModuleResolutionTests.cs (modified - [SkippableFact])",
+    "tests/AccessHarvester.SymbolDb.Tests/ReferencesExtractorTests.cs (modified - [SkippableFact]/[SkippableTheory])",
+    "tests/AccessHarvester.SymbolDb.Tests/NorthwindFixtureSmokeTests.cs (modified - [SkippableFact])",
+    "tests/AccessHarvester.SymbolDb.Tests/Session3ExtractorTests.cs (modified - 13 [SkippableFact]; 2 synthetic kept [Fact])",
+    "tests/AccessHarvester.SymbolDb.Tests/PersistenceAndDedupTests.cs (modified - 3 [SkippableFact]; 5 synthetic kept [Fact])",
+    "tests/AccessHarvester.SymbolDb.Tests/GenerateArtifacts.cs (modified - [SkippableFact] + RequireNorthwindFixture guard)",
+    "tools/symbol-db/README.md (new)",
+    "docs/planning/project-guidance.md (modified - Canonical Test Fixtures note)",
+    "tools/symbol-db/symbol-db.sqlite (UNTRACKED via git rm --cached; local copy preserved)",
+    "tools/symbol-db/consistency/grades.sqlite (UNTRACKED; local copy preserved)",
+    "tools/symbol-db/consistency/correlation-summary.json (UNTRACKED; local copy preserved)",
+    "tools/symbol-db/consistency/sample.json (UNTRACKED; local copy preserved)",
+    "tools/symbol-db/consistency/sample-report.md (UNTRACKED; local copy preserved)",
+    "tools/symbol-db/consistency/correlation-report.md (UNTRACKED; local copy preserved)",
+    "tools/symbol-db/consistency/correlation-scatter.png (UNTRACKED; local copy preserved)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/ai-assignment.md (new)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/s1-verification.md (new - raw verifier output)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/disposition.json (new)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/session-state.json (modified)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/session-events.jsonl (new)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/activity-log.json (new)"
+  ],
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "codex",
+    "provider": "openai",
+    "model": "gpt-5.4",
+    "effort": "medium",
+    "reason": {
+      "code": "other",
+      "specifics": "Routed ai-assignment analysis recommends a cross-provider orchestrator (Codex/GPT-5.4 @ moderate) for Session 2's allowlist curation + path-complete dry-run, where independent rigor on the destructive-prep allowlist pays off before Session 3. IMPORTANT: if Session 2 runs on Codex (OpenAI), swap the router-config session-verification override from gpt-5-4 to opus so verification stays cross-provider (per lessons-learned). claude-code (Opus 4.8) @ high is an acceptable alternative; per Rule 7 the human controls the choice. Session 2 is non-destructive prep (curate scrub-allowlist + rationale, full backup bundle, path-complete dry-run on throwaway --mirror clones) - no real history rewrite."
+    }
+  },
+  "blockers": []
+}

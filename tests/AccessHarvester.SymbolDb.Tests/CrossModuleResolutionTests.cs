@@ -41,7 +41,7 @@ public sealed class CrossModuleResolutionTests
         return matches[0];
     }
 
-    [Fact]
+    [SkippableFact]
     public void GetString_BindsToModStringsGetString()
     {
         var refs = ProbeTargetRefs(BuildNorthwind());
@@ -50,7 +50,7 @@ public sealed class CrossModuleResolutionTests
         Assert.Equal("modStrings.GetString", row.ToFqn);
     }
 
-    [Fact]
+    [SkippableFact]
     public void StringFormat_BindsToModStringsStringFormat()
     {
         var refs = ProbeTargetRefs(BuildNorthwind());
@@ -59,7 +59,7 @@ public sealed class CrossModuleResolutionTests
         Assert.Equal("modStrings.StringFormat", row.ToFqn);
     }
 
-    [Fact]
+    [SkippableFact]
     public void EnumMember_sCompanyDelete_BindsAcrossModules()
     {
         // Bare reference to a Public-enum member declared in modStrings.
@@ -73,7 +73,7 @@ public sealed class CrossModuleResolutionTests
             row.ToFqn);
     }
 
-    [Fact]
+    [SkippableFact]
     public void WithinModule_CompanyIsActive_StillBinds()
     {
         // Same-module reference must continue to bind after the cross-module
@@ -84,7 +84,7 @@ public sealed class CrossModuleResolutionTests
         Assert.Equal("Form_frmCompanyDetail.CompanyIsActive", row.ToFqn);
     }
 
-    [Fact]
+    [SkippableFact]
     public void RebuiltSymbolDb_PersistsResolvedCrossModuleReferences()
     {
         // End-to-end persistence check that mirrors the spec's Step 5
@@ -169,7 +169,7 @@ public sealed class CrossModuleResolutionTests
         return result;
     }
 
-    [Fact]
+    [SkippableFact]
     public void OutOfFixtureScope_IsFormOpen_RemainsUnresolved()
     {
         // IsFormOpen lives in a module not part of this two-module fixture.
