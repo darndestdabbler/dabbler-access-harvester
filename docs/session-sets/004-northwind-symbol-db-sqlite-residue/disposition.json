@@ -1,32 +1,26 @@
 {
-  "status": "completed",
-  "summary": "Session 2 of 3 (analysis/prep, no rewrite) completed the destructive-prep package for the symbol-db residue scrub. It authored the exact 7-path history allowlist, wrote a rationale doc with explicit keep/scrub boundaries and proved exclusions for the local-only `measurement-northwind.md` and `tmp/comprehension-ir/...` fixture sources, created and restore-tested an out-of-repo backup bundle at HEAD `9d07baa4b3cf` (SHA-256 `D115416560351AF229E40F3CF9283CBEE794566739E5E3A0A2A7467D27FA8EA2`), and dry-ran `git filter-repo` on throwaway mirrors with a full-history exactness proof showing only the 7 allowlisted paths would be removed (`2235 -> 2228` unique paths; keep lost `0`; allowlist survived `0`; commit count preserved `432 -> 432`; `v1.2.0` still resolves). Validation also included `dotnet build AccessHarvester.sln` (1143 pre-existing warnings, 0 errors), a focused symbol-db Northwind fixture test slice (29 passed, 0 failed, 0 skipped), and first-round cross-provider verification via `opus`, which returned `VERIFIED` with no issues. Session 3 is fully prepared but remains gated on explicit maintainer go-ahead before any destructive rewrite or force-push.",
+  "status": "complete",
+  "summary": "Session 3 of 3 (FINAL) - Execute History Rewrite + Force-Push (DESTRUCTIVE, irreversible, outward-facing; run under explicit maintainer go-ahead at the moment of the rewrite). Pre-flight gate satisfied: explicit go-ahead ('authorized to go ahead with the rewrite and force-push'); verified restorable backup (Session-2 bundle at 9d07baa + a FRESH bundle at live HEAD 9bba62f, sha256 d5b4b800...ba20818, bundle-verify clean and restore-tested); v1.2.0 published on remote (800fe15, local==remote); working tree clean and in sync; 003 complete and no other set in flight. 003 coordination: 003's history rewrite had already run earlier 2026-06-05, so the combined-single-pass option was gone and 004 ran a sequential second rewrite, which the Stop Rule permits. Layout reconciliation: the spec assumed bare-repo+flat-worktree but the repo is a PLAIN single-worktree checkout - so the rewrite ran on a throwaway --mirror clone and re-establishment = fetch --force + reset --hard + reflog expire + gc --prune=now on the one checkout. Ran git filter-repo 2.47.0 --invert-paths --paths-from-file scrub-allowlist.txt (safe.bareRepository=all override) in the mirror; 434 commits reprocessed. Verified exactness over the path-complete ls-tree pathname universe: BEFORE 2238 unique paths -> AFTER 2231, removed=7 (exactly the allowlist), 0 keep lost, 0 scrub survived, 0 added, expected_after==after, commit count preserved 434->434, per-path git log --all = 0 for every allowlist entry, keep-paths intact, v1.2.0 resolves (a712e87, matches S2 dry-run hash). Force-pushed rewritten main+tags to private origin (main 9bba62f->1ee4102; v1.0.0 842ff1b->3fe60bd; v1.1.0 991260f->2b0c717; v1.2.0 800fe15->a712e87) via gh as the sole credential helper (headless GCM-hang mitigation from 003). Re-established the live checkout; per the 003 lesson, reset --hard reverted the tracked session-state files so register_session_start was re-run after the reset; developer's local untracked symbol-db copies preserved on disk. Recorded the GitHub server-side unreachable-object caveat in rewrite-record.md. Cross-provider verification (gpt-5-4, OpenAI): R1 VERIFIED, 0 issues. Remaining HIGH/MEDIUM/LOW embedded-residue (prose/test/name-only) + the C# residue question stay out of scope and are deferred to the routed 005-embedded-residue-redaction recommendation.",
   "files_changed": [
-    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/scrub-allowlist.txt (new)",
-    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/scrub-allowlist-rationale.md (new)",
-    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/s2-verification.md (new - raw verifier output)",
-    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/ai-assignment.md (modified)",
-    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/activity-log.json (modified)",
-    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/disposition.json (modified)",
-    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/session-state.json (modified by start_session)",
-    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/session-events.jsonl (modified by start_session)",
-    "C:/Users/denmi/source/repos/dabbler-access-harvester-backups/pre004-session2-9d07baa4b3cf.bundle (new, outside repo)"
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/rewrite-record.md (new)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/change-log.md (new)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/next-session-set-recommendation.md (new)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/next-set-analysis-raw.md (new)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/s3-verification.md (new)",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/disposition.json",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/session-state.json",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/session-events.jsonl",
+    "docs/session-sets/004-northwind-symbol-db-sqlite-residue/activity-log.json",
+    "ENTIRE GIT HISTORY (all commit hashes rewritten; main 9bba62f->1ee4102; tags re-pointed) - force-pushed to private origin",
+    "C:/Users/denmi/source/repos/dabbler-access-harvester-backups/pre004-session3-9bba62fc5e4d.bundle (+ .sha256) - OUTSIDE the repo, not committed"
   ],
   "verification_method": "api",
   "verification_verdict": "VERIFIED",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-8",
-    "effort": "low",
-    "reason": {
-      "code": "switch-due-to-blocker",
-      "specifics": "Session 2 ran on an OpenAI orchestrator. Switching Session 3 to Anthropic preserves a clean OpenAI cross-provider verifier for the destructive rewrite session while keeping the explicit maintainer go-ahead gate as the hard blocker before any rewrite or force-push."
-    }
+  "next_session_set": {
+    "slug": "005-embedded-residue-redaction",
+    "summary": "Triage + remediate the remaining HIGH/MEDIUM/LOW embedded-residue buckets (probe/translation/workflow docs, characterization tests, name-only references disclosing proprietary NorthwindDevEdition structure in KEEP-files) + the deferred C# symbol-DB source/test residue question, via another gated history rewrite. Routed analysis (gemini-pro) frames this as compliance, not feature work, so the consumer-driven-only posture does not gate it. Approach (redact-in-place vs delete vs per-bucket split) is a 005-spec design decision, not settled here. Maintainer-gated; not auto-started. Block new releases until complete. See next-session-set-recommendation.md.",
+    "not_auto_started": true
   },
-  "blockers": [
-    "Session 3 cannot execute the destructive rewrite or force-push until the maintainer gives explicit go-ahead at the moment of execution.",
-    "Keeping OpenAI as the Session 3 orchestrator would require another temporary router-config override to preserve true cross-provider verification for the destructive closeout."
-  ]
+  "blockers": []
 }
