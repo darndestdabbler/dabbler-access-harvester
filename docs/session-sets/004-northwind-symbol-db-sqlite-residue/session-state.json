@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "004-northwind-symbol-db-sqlite-residue",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Forward Removal + Test/Tooling Skip-Hardening",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Curate Scrub Allowlist + Backup + Dry-Run",
+      "status": "not-started"
+    },
+    {
+      "number": 3,
+      "title": "Execute History Rewrite + Force-Push (destructive)",
+      "status": "not-started"
+    }
+  ]
+}
