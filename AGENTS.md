@@ -178,13 +178,19 @@ The intended layout (filled in by Session Set #1):
 Code style conventions (namespaces, casing, nullable, `Async` suffix)
 live in `docs/planning/project-guidance.md` → Conventions → Code Style.
 
-This repo uses the bare-repo + flat-worktree layout — the working tree
-is at `<container>/main/` and parallel session-set worktrees live at
-`<container>/<slug>/`. Run all build, test, and Python commands from
-inside `main/` (or the session-set worktree), never from the container
-root. See
+This repo is a plain single-worktree checkout — an ordinary git working
+tree at the repo root (`git rev-parse --is-bare-repository` → `false`,
+`git worktree list` shows one entry; there is no `.bare/` or `main/`
+subdirectory). Run all build, test, and Python commands from the repo
+root; the `.venv/` lives there too. The bare-repo + flat-worktree layout
+the docs once described was planned but never adopted (reconciled
+2026-06-05 after the drift cost preflight time in sets `003` and `004`).
+The per-set worktree recipe (`git worktree add`) applies only when
+running **parallel** session sets; see
 `../../dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`
-for the layout, recipe, and gotchas.
+for that recipe and gotchas. A destructive history rewrite operates on a
+throwaway `--mirror` clone and re-establishes this checkout via
+`fetch --force` + `reset --hard origin/main` + `gc --prune=now`.
 
 If a file-system operation (typically `mv` or `git worktree remove`)
 fails with a Windows file-lock error, run `python -m ai_router.utils

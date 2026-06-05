@@ -633,9 +633,10 @@ experiments only.
 - **Run each parallel session set in its own per-set git worktree.**
   When multiple session sets run in parallel, create a
   `session-set/<slug>` branch off main and a worktree for each set
-  inside this container — `dabbler-access-harvester/<slug>/` under the
-  bare-repo + flat-worktree layout (the standard going forward, see
+  inside this container — `dabbler-access-harvester/<slug>/` via
+  `git worktree add` from the plain single-worktree checkout (see
   `dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`).
+  This is a parallel-sets-only procedure, not the day-to-day layout.
   All sessions of that set work inside the worktree; the last session
   merges `origin/main` into the session-set branch (resolving
   conflicts), merges the session-set branch into main, pushes, then
@@ -650,16 +651,25 @@ experiments only.
   `lessons-learned.md` → "Run Parallel Session Sets In Per-Set Git
   Worktrees".
 
-- **This repo uses the bare-repo + flat-worktree layout.** The
-  container at `~/source/repos/dabbler-access-harvester/` holds
-  `.bare/` (the real git data), a `.git` pointer file, `main/` (the
-  main worktree), and one directory per active session-set worktree.
-  The container has no source files at its top level — `dotnet
-  build`, `python -m pytest`, etc. all run from inside `main/` (or
-  `<slug>/`). The Python venv (`.venv/`) lives in `main/`, not at the
-  container root. The full layout description, fresh-repo setup
-  recipe, migration recipe, and gotchas live at
-  `dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`.
+- **This repo is a plain single-worktree checkout (not bare+worktree).**
+  `~/source/repos/dabbler-access-harvester/` is an ordinary git working
+  tree: `git rev-parse --is-bare-repository` → `false`, `--git-dir` →
+  `.git`, and `git worktree list` shows one entry at the repo root.
+  There is no `.bare/` and no `main/` subdirectory; `dotnet build`,
+  `python -m pytest`, and the `.venv/` all live at the repo root. An
+  earlier plan to migrate to the bare-repo + flat-worktree layout was
+  recorded as intent but never carried out; the docs were reconciled to
+  reality on 2026-06-05 after the drift cost preflight time in two
+  destructive-rewrite sets (`003`, `004`). The per-set worktree recipe
+  (previous bullet) is the procedure for **parallel** session sets only
+  — running `git worktree add` from this single checkout — and is not
+  the day-to-day layout. The recipe, fresh-repo setup, and gotchas live
+  at `dabbler-ai-orchestration/docs/planning/repo-worktree-layout.md`.
+  **Destructive history-rewrite sessions therefore operate on a
+  throwaway `--mirror` clone and re-establish this one checkout via
+  `fetch --force --tags --prune` → `reset --hard origin/main` →
+  `reflog expire --all` → `gc --prune=now`**, rather than tearing down
+  and recreating worktrees.
 
 - **Probe substrate value early.** When a project arc is "build
   substrate for an AI-driven downstream task," insert probe
@@ -761,6 +771,45 @@ experiments only.
   exception. Confirmed in `harvester-cli-validate-subcommand` Session 1
   (2026-05-28): verifier flagged the OrdinalIgnoreCase `$id` cache key
   as a correctness risk; the two-level cache redesign resolved it.
+
+- **In any session that `git reset --hard`s its own working tree,
+  re-register session start AFTER the last reset and commit/push the
+  closeout artifacts BEFORE `mark_session_complete()`.** The tracked
+  `session-state.json` / `session-events.jsonl` / `activity-log.json`
+  files live under `docs/session-sets/<slug>/`, so a `reset --hard`
+  (e.g. the re-establishment step of a history-rewrite session) silently
+  reverts them to their committed content, undoing the Step-0
+  `register_session_start`. `mark_session_complete()` then fails the
+  `next_orchestrator_present` / state gates because the reverted state
+  shows the session as `not-started`. Recovery and correct ordering:
+  re-run `register_session_start` after the final tree-reset, then
+  stage+commit+push the closeout artifacts, then `mark_session_complete`,
+  then commit+push the state flip. Confirmed in two contexts:
+  `003-northwind-proprietary-data-remediation` Session 3 (2026-06-05,
+  original failure — the reset undid the Step-0 flip and the gate
+  demanded a `next_orchestrator` block) and
+  `004-northwind-symbol-db-sqlite-residue` Session 3 (2026-06-05,
+  proactive application — re-registered after reset, gate passed clean).
+  Action-detail reference is preserved in `lessons-learned.md` →
+  "`git reset --hard` During History-Rewrite Re-establishment Reverts
+  The Tracked Session-State Files".
+
+- **Force-push a rewritten history from a fresh/mirror clone using `gh`
+  as the SOLE credential helper.** A fresh clone inherits the global
+  `credential.helper = …git-credential-manager.exe` (GCM), which tries
+  to pop a GUI auth dialog on `git push` under a non-interactive shell
+  and hangs indefinitely (`GIT_TERMINAL_PROMPT=0` does not help — it
+  suppresses git's own prompt, not GCM's window). Reset the helper list
+  and add gh: `git -c credential.helper= -c credential.helper='!gh auth
+  git-credential' push --force …` (gh must be authenticated with a
+  `repo`-scoped token). Confirmed in two contexts:
+  `003-northwind-proprietary-data-remediation` Session 3 (2026-06-05,
+  original failure — the inherited GCM helper hung headless) and
+  `004-northwind-symbol-db-sqlite-residue` Session 3 (2026-06-05,
+  proactive application — pushed via the gh-sole-helper incantation,
+  no hang). Action-detail reference is preserved in `lessons-learned.md`
+  → "Force-Push From A Fresh Clone Via gh As The Sole Credential
+  Helper".
 
 ### Token-Window Budget Overrides
 

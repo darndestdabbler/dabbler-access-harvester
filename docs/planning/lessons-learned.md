@@ -689,6 +689,12 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### `git reset --hard` During History-Rewrite Re-establishment Reverts The Tracked Session-State Files — Re-register After The Reset
 
+> **Promoted to `project-guidance.md` → Conventions → Workflow
+> Expectations** on 2026-06-05 (after `004-northwind-symbol-db-sqlite-residue`
+> Session 3, second-context confirmation — re-registered after the reset and
+> the closeout gate passed clean). Retained here as the action-detail
+> reference; the rule itself is now a Convention.
+
 - **Context:** A destructive history-rewrite session (`git filter-repo` +
   force-push) whose re-establishment step resets the live checkout onto the
   rewritten remote. First hit in `003-northwind-proprietary-data-remediation`
@@ -720,6 +726,12 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Force-Push From A Fresh Clone Via gh As The Sole Credential Helper — The Inherited GCM Helper Hangs Headless
 
+> **Promoted to `project-guidance.md` → Conventions → Workflow
+> Expectations** on 2026-06-05 (after `004-northwind-symbol-db-sqlite-residue`
+> Session 3, second-context confirmation — force-pushed via the gh-sole-helper
+> incantation with no GCM hang). Retained here as the action-detail reference;
+> the rule itself is now a Convention.
+
 - **Context:** Pushing a rewritten history from a throwaway `git clone --mirror`
   (or any fresh clone) to the private GitHub remote in a non-interactive shell.
   First hit in `003-northwind-proprietary-data-remediation` Session 3 (2026-06-05).
@@ -744,6 +756,15 @@ reference; if it proves out twice in *this* repo, propose promotion to
   this, promote to a Convention.
 
 ### Repo-Layout Doc Drift: Docs Claim Bare-Repo + Flat-Worktree, Actual Is A Plain Single-Worktree Checkout — Reconcile Before The Next Destructive-Rewrite Set
+
+> **RESOLVED 2026-06-05** at `004-northwind-symbol-db-sqlite-residue` Session 3
+> Step 9: the maintainer chose option (b) — **correct the docs to reality**. The
+> layout paragraphs in `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` and the
+> `project-guidance.md` Conventions bullet now describe the plain single-worktree
+> checkout, retaining the `git worktree add` recipe as a parallel-sets-only
+> procedure. The on-disk checkout was NOT migrated to bare+worktree (no current
+> parallel-set need; migration would add risk for no benefit). Kept here as the
+> incident record; the drift no longer exists.
 
 - **Context:** `003-northwind-proprietary-data-remediation` Session 3 (2026-06-05)
   preflight. The spec's Steps 2 & 5 ("operate on the container's `.bare/`",
