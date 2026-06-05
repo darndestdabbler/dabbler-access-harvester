@@ -56,14 +56,29 @@
 | 6    | Closeout: review the plan, confirm readiness for the destructive rewrite.                                    | local/no-route      |
 
 ### Actuals (filled after the session)
-*   **Actual orchestrator:**
-*   **Actual cost:**
-*   **Notes:**
+*   **Actual orchestrator:** github-copilot (OpenAI GPT-5.4) @ medium
+*   **Actual routed cost:** ~$0.0774 total: gemini-pro allowlist classification
+    ($0.0064) + opus session-verification ($0.06375) + gemini-pro closeout /
+    next-orchestrator follow-ups ($0.00724).
+*   **Deviations from recommendation:** The original step-level plan expected an
+    Opus-class pass for the initial allowlist curation. In practice the candidate
+    set was already narrowed to a verified 47-path historical universe, so a
+    gemini-pro classification pass was sufficient and the remaining curation /
+    dry-run proof work stayed mechanical-local. Because this session ran on an
+    OpenAI orchestrator, verification used a temporary local router-config copy
+    that swapped `session-verification` from `gpt-5-4` to `opus` so the review
+    stayed cross-provider. One extra gemini-pro follow-up was needed because the
+    first Session-3 recommendation came back as a non-schema-compatible human
+    stop-gate rather than a concrete next-orchestrator block.
+*   **Notes for next-session calibration:** Session 2 verified `VERIFIED` on
+    round 1. Session 3 should switch to `claude-code` / Anthropic so OpenAI can
+    remain the closeout verifier for the destructive rewrite session; the
+    maintainer go-ahead gate remains mandatory before any rewrite or force-push.
 
 ## Session 3: DESTRUCTIVE History Rewrite Execution
 
-**Recommended orchestrator:** gemini-pro @ low
-**Rationale:** This session executes a pre-vetted, destructive command sequence where procedural precision is paramount. A cost-effective, mid-tier model is sufficient for orchestrating the exact, pre-planned steps without needing novel reasoning.
+**Recommended orchestrator:** claude-code (Claude Opus 4.8) @ low
+**Rationale:** Session 2 already completed the reasoning-heavy part: the allowlist, backup path, dry-run proof, and exact command sequence are all pinned. Session 3 is mostly mechanical execution plus a hard human go-ahead gate. Switching away from the Session-2 OpenAI orchestrator preserves a clean OpenAI cross-provider verifier for the destructive closeout without reopening the plan.
 **Estimated routed cost:** low
 
 | Step | Action                                                                                                             | Routing Decision |
@@ -82,4 +97,4 @@
 *   **Notes:**
 
 ---
-**Next-session orchestrator recommendation:** gemini-pro
+**Next-session orchestrator recommendation:** claude-code (Claude Opus 4.8) @ low

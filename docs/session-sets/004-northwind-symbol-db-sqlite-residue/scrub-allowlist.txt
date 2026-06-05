@@ -1,0 +1,20 @@
+# Scrub allowlist for 004-northwind-symbol-db-sqlite-residue Session 3.
+#
+# This file is the EXACT input consumed by Session 3's history rewrite:
+#   git filter-repo --invert-paths --paths-from-file scrub-allowlist.txt
+#
+# Every non-comment line is a proprietary NorthwindDevEdition-derived path to
+# PURGE FROM ALL GIT HISTORY. Blank lines and lines starting with "#" are
+# ignored by git filter-repo.
+#
+# Paths only, no proprietary content. See scrub-allowlist-rationale.md for the
+# keep/scrub rationale, explicit non-history exclusions, and the dry-run proof
+# that these remove exactly the intended paths and nothing else.
+
+tools/symbol-db/symbol-db.sqlite
+tools/symbol-db/consistency/grades.sqlite
+tools/symbol-db/consistency/correlation-summary.json
+tools/symbol-db/consistency/sample.json
+tools/symbol-db/consistency/sample-report.md
+tools/symbol-db/consistency/correlation-report.md
+tools/symbol-db/consistency/correlation-scatter.png

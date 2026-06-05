@@ -72,6 +72,76 @@
           "costUsd": 0.0922775
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/verify-tooling",
+      "dateTime": "2026-06-05T11:36:44.3142504-04:00",
+      "description": "Verified Session 2 prerequisites/artifacts exist (`spec.md`, `activity-log.json`, `ai-assignment.md`, `tools/symbol-db/README.md`) and confirmed rewrite tooling. `git filter-repo --version` resolved from the workspace `.venv`, and `.venv/Scripts/python.exe -m pip show git-filter-repo` reported version 2.47.0. Current `git config --get safe.bareRepository` in this worktree returned empty, so the Session 3 `GIT_CONFIG_*` override is recorded as a conservative compatibility shim carried forward from set 003, not as a freshly reproduced host requirement.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/curate-allowlist",
+      "dateTime": "2026-06-05T11:36:44.3142504-04:00",
+      "description": "Enumerated the exact reachable-history pathname universe under `tools/symbol-db/` via path-complete `git ls-tree -r --name-only` over all commits: 47 unique paths total. Routed one gemini-pro analysis pass across the 9 non-code candidates. Final classification: SCRUB = 7 exact file paths (`symbol-db.sqlite`, `grades.sqlite`, `correlation-summary.json`, `sample.json`, `sample-report.md`, `correlation-report.md`, `correlation-scatter.png`); KEEP = `interpretation-config.json` and `README.md`; EXCLUDE-FROM-ALLOWLIST-BECAUSE-NOT-IN-HISTORY = `measurement-northwind.md` plus the `tmp/comprehension-ir/AccessMetaData/NorthwindDevEdition/kb/` fixture sources. Negative checks confirmed those excluded paths are absent from reachable history.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1594,
+          "outputTokens": 462,
+          "costUsd": 0.00640375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/write-manifest",
+      "dateTime": "2026-06-05T11:36:44.3142504-04:00",
+      "description": "Authored `scrub-allowlist.txt` (7 exact filter-repo input paths, no directory prefixes) and `scrub-allowlist-rationale.md` (47-path method, 7/40 scrub-vs-keep split, explicit non-history exclusions, measured dry-run proof, and verified Session 3 command sequence). Local validation of the authored allowlist passed: 7 non-comment lines, every line present in reachable history, and no local-only exclusions (`measurement-northwind.md`, `tmp/comprehension-ir/...`) accidentally included.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/backup",
+      "dateTime": "2026-06-05T11:36:44.3142504-04:00",
+      "description": "Created an out-of-repo pre-rewrite bundle at `C:/Users/denmi/source/repos/dabbler-access-harvester-backups/pre004-session2-9d07baa4b3cf.bundle` from HEAD `9d07baa4b3cf`. `git bundle verify` reported the bundle as complete (main, origin/main, origin/HEAD, and tags `v1.0.0`, `v1.1.0`, `v1.2.0` present). Restore-test clone resolved to the same HEAD (`RESTORE_HEAD=9d07baa4b3cf`). Recorded SHA-256 `D115416560351AF229E40F3CF9283CBEE794566739E5E3A0A2A7467D27FA8EA2`.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/dry-run",
+      "dateTime": "2026-06-05T11:36:44.3142504-04:00",
+      "description": "Dry-ran `git filter-repo 2.47.0 --invert-paths --paths-from-file scrub-allowlist.txt --force` on throwaway `--mirror` clones using the `safe.bareRepository=all` env override. Full-history exactness proof over the union of `git ls-tree -r --name-only <commit>` across all reachable commits: BEFORE 2235 unique paths, AFTER 2228, removed 7 = allowlist count, keep lost 0, allowlist survived 0, `expected_after == after` True. Reachable commit count preserved 432 -> 432; `v1.2.0` still resolved post-rewrite rehearsal. Standard workflow validation also ran here: `dotnet build AccessHarvester.sln` succeeded with 1143 pre-existing warnings and 0 errors; focused symbol-db Northwind fixture slice (`CrossModuleResolutionTests|ReferencesExtractorTests|NorthwindFixtureSmokeTests|GenerateArtifacts`) passed 29/29. Removed the throwaway dry-run mirrors after capturing the proof.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/verify",
+      "dateTime": "2026-06-05T11:36:44.3142504-04:00",
+      "description": "Cross-provider `session-verification` routed to `opus` (Anthropic) because this GitHub Copilot/OpenAI session used a temporary local router-config copy that swapped `session-verification` from `gpt-5-4` to `opus`, matching the repo comment for Codex/OpenAI sessions. Verification prompt covered allowlist correctness, rationale keep/scrub boundaries, the explicit non-history exclusions, backup integrity, dry-run proof quality, and scope discipline. Verdict: VERIFIED, issues: []. Raw output saved to `s2-verification.md` (never edited).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.06375
+        }
+      ]
     }
   ]
 }
