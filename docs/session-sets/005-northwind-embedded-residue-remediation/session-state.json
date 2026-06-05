@@ -23,9 +23,9 @@
     {
       "number": 2,
       "title": "Test Triage \u2014 Re-base or Delete the Corpus-Pinned Tests",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-05T13:39:22.846694-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-05T14:53:02.647911-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
