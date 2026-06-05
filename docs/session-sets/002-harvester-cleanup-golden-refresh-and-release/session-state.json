@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "002-harvester-cleanup-golden-refresh-and-release",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -23,9 +23,9 @@
     {
       "number": 2,
       "title": "Release v1.2.0",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-05T05:19:15.695334-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-05T06:50:11.889476-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
@@ -35,7 +35,7 @@
         "checkedOutAt": "2026-06-05T05:19:15.695334-04:00",
         "lastActivityAt": "2026-06-05T05:19:15.695334-04:00"
       },
-      "verificationVerdict": null
+      "verificationVerdict": "VERIFIED"
     }
   ]
 }
