@@ -1,0 +1,36 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 3 — Forward Removal + Test Skip-Hardening (NON-DESTRUCTIVE; no history rewrite, no classifier/extractor change). (1) Inventoried the tracked-at-HEAD Northwind footprint: 406 files under samples/GoldenOutput/NorthwindDevEdition/. DISCOVERY — the spec's Step-1 premise was wrong: two mirror files it assumed were 'already gitignored (history-only)' were in fact STILL TRACKED at HEAD — samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml (it was in .gitignore but committed before that rule, so it stayed tracked) and samples/parse-success-reports/NorthwindDevEdition.accdb.parse-success-report.json. The maintainer was surfaced this and EXPLICITLY APPROVED folding both into this session's forward removal (Done-Looks-Like #1 requires no Northwind artifact tracked at HEAD). The docs/test-cases/comprehension/NorthwindDevEdition/ files (also tracked) are Session-2 judgment-call paths and were intentionally LEFT for Session 2. (2) Untracked all three targets via `git rm --cached` (406 + 2 = 408 staged deletions) keeping local copies on disk. (3) Skip-hardened the two hermetic golden consumers: ManifestCompletenessTests (2 theories) and MigrationFixtureCoverageTests (2 theories) — [Theory] -> [SkippableTheory] + Skip.IfNot(Directory.Exists(...)) per the existing CanonicalGoldenRegressionTests pattern; HomeHealthCare always runs, NorthwindDevEdition skips when its local golden is absent. Verified NO assertion was weakened. Confirmed three other consumers needed no change and disclosed why to the verifier: CanonicalGoldenRegressionTests (already .accdb Skip.IfNot-gated, fires first on a fresh clone), MigrationGoldenScriptTests (HomeHealthCare-only), ParseSuccessReportTests (already SkippableFact-gated on the local DatabaseYaml mirror; local parse-report copy persists). (4) Added .gitignore entries for the golden tree + parse-report mirror (the .yaml entry already existed) with a comment pointing at set 003. (5) Updated docs: project-guidance.md Canonical Test Fixtures table + samples/README.md (new proprietary-local-only section). (6) Build: dotnet build AccessHarvester.sln => 0 errors. Tested AccessHarvester.Pipeline.Tests TWICE: with the local golden present => 794 passed / 0 skipped (Northwind assertions run); with the golden moved aside (fresh-clone simulation) => 790 passed / 4 skipped / 0 failed (exactly the 4 Northwind theory cases). Restored the local golden (406 files) and swept spurious samples/HomeHealthCare.accdb byte-drift via git restore. Cross-provider verification (gpt-5-4): R1 ISSUES_FOUND — one Minor doc-consistency finding (samples/README.md still labeled HomeHealthCare 'Secondary', conflicting with project-guidance.md 'Primary' and the new local-only note) [fixed] -> R2 VERIFIED.",
+  "files_changed": [
+    ".gitignore",
+    "docs/planning/project-guidance.md",
+    "samples/README.md",
+    "tests/AccessHarvester.Pipeline.Tests/Manifest/ManifestCompletenessTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Migration/MigrationFixtureCoverageTests.cs",
+    "samples/GoldenOutput/NorthwindDevEdition/ (406 files untracked via git rm --cached; local copies preserved)",
+    "samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml (untracked; local copy preserved)",
+    "samples/parse-success-reports/NorthwindDevEdition.accdb.parse-success-report.json (untracked; local copy preserved)",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/ai-assignment.md",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/s1-verification.md",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/s1-verification-round-2.md",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/s1-issues.json",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/disposition.json",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/session-state.json",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/session-events.jsonl",
+    "docs/session-sets/003-northwind-proprietary-data-remediation/activity-log.json"
+  ],
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Routed ai-assignment.md recommendation (gemini-pro, do-not-self-opine) calls for a top-tier orchestrator at effort=high for Session 2: its core task is CURATING the history-scrub allowlist by inspecting the contents of judgment-call paths (examples/northwind-output.json, tools/symbol-db/*-northwind.md, docs/test-cases/comprehension/NorthwindDevEdition/) to classify scrub-vs-keep — a misclassification feeds the destructive Session 3, so this is high-stakes judgment, not mechanical work. The router emitted a stale model literal (claude-3-opus); mapped to the current top tier that = claude-opus-4-8. Session 2 is still non-destructive (allowlist + tooling install + backup bundle + throwaway-mirror dry-run only)."
+    }
+  },
+  "blockers": []
+}

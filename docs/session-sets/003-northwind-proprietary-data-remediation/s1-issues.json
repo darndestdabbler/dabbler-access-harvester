@@ -1,0 +1,16 @@
+{
+  "session": 1,
+  "verifier": "gpt-5-4",
+  "round": 1,
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": 1,
+      "severity": "low",
+      "category": "consistency",
+      "summary": "samples/README.md's HomeHealthCare.accdb row still described it as a 'Secondary real-world-shaped fixture', conflicting with the updated project-guidance.md fixtures table (which calls HomeHealthCare 'Primary') and with this session's new README note that a fresh clone builds and tests against HomeHealthCare as the committed baseline. Pre-existing label, made glaring by the Northwind local-only note.",
+      "status": "fixed",
+      "resolution": "Updated the HomeHealthCare.accdb row to describe it as the Primary committed (synthetic) baseline fixture a fresh clone builds and tests against, driving the committed golden under samples/GoldenOutput/HomeHealthCare/. Now consistent with docs/planning/project-guidance.md and the README's own local-only note. Doc-only change; no code/test impact."
+    }
+  ]
+}

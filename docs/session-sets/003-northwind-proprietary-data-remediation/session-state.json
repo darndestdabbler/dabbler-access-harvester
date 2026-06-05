@@ -1,22 +1,42 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "003-northwind-proprietary-data-remediation",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
       "title": "Forward Removal + Test Skip-Hardening",
-      "status": "not-started"
+      "status": "in-progress",
+      "startedAt": "2026-06-05T07:10:15.293727-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "medium",
+        "chatSessionId": null,
+        "checkedOutAt": "2026-06-05T07:10:15.293727-04:00",
+        "lastActivityAt": "2026-06-05T07:10:15.293727-04:00"
+      },
+      "verificationVerdict": null
     },
     {
       "number": 2,
       "title": "Curate Scrub Allowlist + Tooling + Backup",
-      "status": "not-started"
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     },
     {
       "number": 3,
       "title": "Execute History Rewrite + Force-Push (destructive)",
-      "status": "not-started"
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     }
   ]
 }

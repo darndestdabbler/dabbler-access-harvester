@@ -193,11 +193,13 @@ the human before proceeding.
 
 | Fixture | Role | Committed? |
 |---|---|---|
-| `samples/HomeHealthCare.accdb` | **Primary** — unbound forms, ADODB, validation-only data macros, Hungarian naming | Yes (YAML mirror in `samples/DatabaseYaml/HomeHealthCare.accdb/`) |
-| `samples/NorthwindDevEdition.accdb` | **Secondary/reference** — bound split forms, subforms, audit data macros, AutoExec startup | Binary gitignored; YAML regenerated locally |
+| `samples/HomeHealthCare.accdb` | **Primary** — unbound forms, ADODB, validation-only data macros, Hungarian naming | Yes (YAML mirror in `samples/DatabaseYaml/HomeHealthCare.accdb/`), plus its full golden output under `samples/GoldenOutput/HomeHealthCare/` |
+| `samples/NorthwindDevEdition.accdb` | **Secondary/reference** — bound split forms, subforms, audit data macros, AutoExec startup | **Proprietary — local-only.** The binary, its YAML/parse-report mirrors, and its entire golden output (`samples/GoldenOutput/NorthwindDevEdition/`) are gitignored and regenerated locally; none is committed. Untracked in session set `003-northwind-proprietary-data-remediation`. |
 
 See `docs/homehealthcare-northwind-comparison.md` for the authoritative
-fixture-selection rationale and structural comparison.
+fixture-selection rationale and structural comparison. NorthwindDevEdition is
+proprietary: a fresh clone has only the HomeHealthCare golden, and the
+Northwind-dependent hermetic tests skip cleanly when the local golden is absent.
 
 **Excluded fixtures:** `samples/MiniComplex.accdb` and
 `samples/ProjectBoard.accdb` are excluded from automated test coverage

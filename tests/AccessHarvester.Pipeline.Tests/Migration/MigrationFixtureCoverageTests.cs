@@ -23,7 +23,11 @@ public class MigrationFixtureCoverageTests
         new object[] { "NorthwindDevEdition" },
     };
 
-    private static string LocateGoldenFixture(string fixture)
+    // Returns the golden fixture dir, or null if it is not present on disk.
+    // The NorthwindDevEdition golden tree is local-only per session set 003
+    // (proprietary): a fresh clone has only HomeHealthCare, so the Northwind
+    // theory case skips when its tree is absent.
+    private static string? TryLocateGoldenFixture(string fixture)
     {
         string dir = AppContext.BaseDirectory;
         for (int i = 0; i < 12; i++)
@@ -34,14 +38,23 @@ public class MigrationFixtureCoverageTests
             if (parent is null || parent == dir) break;
             dir = parent;
         }
-        throw new DirectoryNotFoundException(
-            $"Could not locate samples/GoldenOutput/{fixture} walking up from '{AppContext.BaseDirectory}'.");
+        return null;
     }
 
-    [Theory]
+    private static string LocateGoldenFixture(string fixture) =>
+        TryLocateGoldenFixture(fixture)
+        ?? throw new DirectoryNotFoundException(
+            $"Could not locate samples/GoldenOutput/{fixture} walking up from '{AppContext.BaseDirectory}'.");
+
+    [SkippableTheory]
     [MemberData(nameof(Fixtures))]
     public void Every_fixture_column_maps_cleanly_or_is_an_honest_degradation(string fixture)
     {
+        Skip.IfNot(TryLocateGoldenFixture(fixture) is not null,
+            $"Golden fixture '{fixture}' not present. The NorthwindDevEdition golden " +
+            "tree is local-only per session set 003 (proprietary): drop a local copy " +
+            "under samples/GoldenOutput/ to exercise this gate. HomeHealthCare " +
+            "(synthetic) remains committed and always runs.");
         var tables = MigrationIrReader.ReadTables(Path.Combine(LocateGoldenFixture(fixture), "ir", "Tables"));
         Assert.NotEmpty(tables);
 
@@ -68,10 +81,15 @@ public class MigrationFixtureCoverageTests
             + string.Join("\n  ", unmappable));
     }
 
-    [Theory]
+    [SkippableTheory]
     [MemberData(nameof(Fixtures))]
     public void GenerateDdl_over_the_full_fixture_produces_create_tables(string fixture)
     {
+        Skip.IfNot(TryLocateGoldenFixture(fixture) is not null,
+            $"Golden fixture '{fixture}' not present. The NorthwindDevEdition golden " +
+            "tree is local-only per session set 003 (proprietary): drop a local copy " +
+            "under samples/GoldenOutput/ to exercise this gate. HomeHealthCare " +
+            "(synthetic) remains committed and always runs.");
         var inputs = MigrationIrReader.Read(LocateGoldenFixture(fixture));
         var result = SqlServerDdlGenerator.GenerateDdl(inputs);
 

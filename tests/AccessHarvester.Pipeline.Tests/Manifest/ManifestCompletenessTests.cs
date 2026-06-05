@@ -23,13 +23,18 @@ namespace AccessHarvester.Pipeline.Tests.Manifest;
 // future regression of the same shape fails here.
 public sealed class ManifestCompletenessTests
 {
-    [Theory]
+    [SkippableTheory]
     [InlineData("HomeHealthCare")]
     [InlineData("NorthwindDevEdition")]
     public void Manifest_per_category_counts_match_summary_and_ir_files(string fixture)
     {
         string repoRoot = FindRepoRoot();
         string fixtureRoot = Path.Combine(repoRoot, "samples", "GoldenOutput", fixture);
+        Skip.IfNot(Directory.Exists(fixtureRoot),
+            $"Golden fixture '{fixture}' not present at {fixtureRoot}. " +
+            "The NorthwindDevEdition golden tree is local-only per session set 003 " +
+            "(proprietary): drop a local copy under samples/GoldenOutput/ to exercise " +
+            "this gate. HomeHealthCare (synthetic) remains committed and always runs.");
         string manifestPath = Path.Combine(fixtureRoot, "manifest.json");
         string irRoot = Path.Combine(fixtureRoot, "ir");
 
@@ -73,13 +78,18 @@ public sealed class ManifestCompletenessTests
     // different shape than what is actually on disk. This test pins
     // the invariant for every category surfaced in FileMap on the
     // committed goldens.
-    [Theory]
+    [SkippableTheory]
     [InlineData("HomeHealthCare")]
     [InlineData("NorthwindDevEdition")]
     public void Manifest_FileMap_counts_and_globs_match_arrays_and_on_disk(string fixture)
     {
         string repoRoot = FindRepoRoot();
         string fixtureRoot = Path.Combine(repoRoot, "samples", "GoldenOutput", fixture);
+        Skip.IfNot(Directory.Exists(fixtureRoot),
+            $"Golden fixture '{fixture}' not present at {fixtureRoot}. " +
+            "The NorthwindDevEdition golden tree is local-only per session set 003 " +
+            "(proprietary): drop a local copy under samples/GoldenOutput/ to exercise " +
+            "this gate. HomeHealthCare (synthetic) remains committed and always runs.");
         string manifestPath = Path.Combine(fixtureRoot, "manifest.json");
 
         Assert.True(File.Exists(manifestPath),

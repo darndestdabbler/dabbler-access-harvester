@@ -24,9 +24,16 @@ samples/NorthwindDevEdition.accdb
 # Access lock files (created when Access opens a .accdb; never committed).
 *.laccdb
 
-# Northwind-derived YAML extracts — regenerated locally; not committed
+# Northwind-derived harvester artifacts — NorthwindDevEdition is proprietary,
+# so neither its .accdb nor any derived metadata belongs in the repo. These are
+# regenerated locally and kept on the developer's filesystem only. Untracked in
+# session set 003-northwind-proprietary-data-remediation (forward removal); the
+# full history scrub is handled in that set's Sessions 2-3. HomeHealthCare (the
+# synthetic primary fixture) is unaffected and remains fully committed.
 samples/DatabaseYaml/NorthwindDevEdition.accdb/
 samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml
+samples/GoldenOutput/NorthwindDevEdition/
+samples/parse-success-reports/NorthwindDevEdition.accdb.parse-success-report.json
 
 # .NET build artifacts (will appear in later sessions)
 **/bin/

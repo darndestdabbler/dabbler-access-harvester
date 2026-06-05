@@ -8,14 +8,33 @@ harvester's integration tests, the symbol-DB pipeline (see
 
 | File | Purpose | Status |
 |---|---|---|
-| `NorthwindDevEdition.accdb` | The canonical large-fixture corpus. The reference DB the resolver / classifier / enrichment / symbol-DB pipelines target. **Gitignored** (see `.gitignore`); not present on a fresh clone. Maintain a working copy locally. The decision to gitignore was made on 2026-04-27 because Access mutates internal timestamps on every open and the noise was constant; subsequent practice has been to manage that drift via `tools/refresh-sample-timestamps.py` for *tracked* fixtures, but Northwind remains gitignored for legacy reasons (revisit if a clean clone needs the fixture). | Local-only; gitignored. |
-| `HomeHealthCare.accdb` | Secondary real-world-shaped fixture for cross-checking pipeline output against a non-Northwind app. | Stable. |
+| `NorthwindDevEdition.accdb` | The reference large-fixture corpus the resolver / classifier / enrichment / symbol-DB pipelines target. **Proprietary — gitignored and local-only** (see `.gitignore`); not present on a fresh clone. Maintain a working copy locally. The binary was first gitignored on 2026-04-27 (Access mutates internal timestamps on every open); session set `003-northwind-proprietary-data-remediation` then established that **all** Northwind-derived metadata is proprietary and local-only — see the note below. | Local-only; gitignored. |
+| `HomeHealthCare.accdb` | **Primary committed fixture** — the synthetic, real-world-shaped baseline a fresh clone builds and tests against (Northwind is local-only). Drives the committed golden under `samples/GoldenOutput/HomeHealthCare/`. | Stable; committed. |
 | `MiniComplex.accdb` | Smaller fixture covering complex-but-narrow constructs (`With` blocks, nested subforms, etc.) used for fast iteration loops. | Stable. |
 | `MasterDbPropertyExtractor.accdb` | Fixture for the property-extractor tooling under `tools/`. | Stable. |
 | `FormAndReportDefaults.accdb` | Captures the default property values Access applies to forms / reports / controls; used by the property-defaults extractor. | Stable. |
 | `ProjectBoard.accdb` | Mid-sized real-world-shaped fixture. | Stable. |
 | `VbaParserTestCoverage.accdb` | **Initial work-in-progress.** A 3-form synthetic DB built to materialize targeted test cases for the VBA parser. May be expanded into a full synthetic-coverage corpus later, or abandoned if the existing committed `.accdb` fixtures prove sufficient. **Do not write tests that depend on this file without confirming with the human first** — its contents may change or it may be removed. | WIP / experimental. |
-| `FormsAndReportsYaml/` | YAML extractions used by parts of the pipeline. | Stable. |
+| `FormsAndReportsYaml/` | YAML extractions used by parts of the pipeline. The `HomeHealthCare` extract is committed; the `NorthwindDevEdition.accdb.yaml` mirror is gitignored and local-only (proprietary). | Stable. |
+
+## NorthwindDevEdition is proprietary — local-only
+
+`NorthwindDevEdition` is a proprietary database. Neither its `.accdb` nor any
+harvester-derived metadata belongs in the repo, so all of the following are
+gitignored and kept on the developer's filesystem only (regenerate locally):
+
+- `samples/NorthwindDevEdition.accdb` (and its `.laccdb` lock file)
+- `samples/DatabaseYaml/NorthwindDevEdition.accdb/`
+- `samples/FormsAndReportsYaml/NorthwindDevEdition.accdb.yaml`
+- `samples/parse-success-reports/NorthwindDevEdition.accdb.parse-success-report.json`
+- `samples/GoldenOutput/NorthwindDevEdition/` (full structural + enriched golden tree)
+
+These were untracked from `HEAD` in session set
+`003-northwind-proprietary-data-remediation` (forward removal); that set's later
+sessions scrub them from git history. The Northwind-dependent hermetic tests
+(`ManifestCompletenessTests`, `MigrationFixtureCoverageTests`) skip cleanly when
+the local golden is absent, so a fresh clone builds and tests green on the
+**HomeHealthCare** golden alone. HomeHealthCare is synthetic and fully committed.
 
 ## Lock files (`.laccdb` / `.ldb`)
 
