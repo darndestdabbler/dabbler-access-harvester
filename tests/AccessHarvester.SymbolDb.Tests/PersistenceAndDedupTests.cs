@@ -8,12 +8,16 @@ using Xunit;
 
 namespace AccessHarvester.SymbolDb.Tests;
 
-// Persistence smoke + MD5 dedup hermetic tests. Spins the builder against
-// the canonical fixture, writes the rows to a transient SQLite db, and
-// checks that the dedup pass populates equivalence_canonical_fqn for every
-// hash-equivalent cluster. No external assertions on cluster membership
-// (the fixture's twin set may evolve as Access edits ripple); the contract
-// is "if there are clusters, the canonical points are correct."
+// Persistence smoke + MD5 dedup tests. Spins the builder against the committed
+// synthetic HomeHealthCare kb fixture, writes the rows to a transient SQLite db,
+// and checks that the dedup pass populates equivalence_canonical_fqn for every
+// hash-equivalent cluster. No external assertions on cluster membership (the
+// fixture's twin set may evolve); the contract is "if there are clusters, the
+// canonical points are correct."
+//
+// Set 005: the fixture-coupled tests were re-based off the proprietary
+// NorthwindDevEdition fixture onto the committed HHC kb. The hermetic [Fact]
+// tests below already use inline synthetic VBA and are unchanged.
 public sealed class PersistenceAndDedupTests
 {
     [SkippableFact]
@@ -21,8 +25,8 @@ public sealed class PersistenceAndDedupTests
     {
         var rawModules = new[]
         {
-            FixtureLoader.LoadFormFrmCompanyDetail(),
-            FixtureLoader.LoadModStrings(),
+            FixtureLoader.LoadFormFrmProviderSearch(),
+            FixtureLoader.LoadBasListHelpers(),
         };
         var result = new SymbolDbBuilder().Build(rawModules);
 
@@ -82,8 +86,8 @@ public sealed class PersistenceAndDedupTests
     {
         var rawModules = new[]
         {
-            FixtureLoader.LoadFormFrmCompanyDetail(),
-            FixtureLoader.LoadModStrings(),
+            FixtureLoader.LoadFormFrmProviderSearch(),
+            FixtureLoader.LoadBasListHelpers(),
         };
         var result = new SymbolDbBuilder().Build(rawModules);
 
@@ -266,19 +270,18 @@ public sealed class PersistenceAndDedupTests
     }
 
     [SkippableFact]
-    public void SignatureFormatter_GetString_ProducesExpectedSignatureText()
+    public void SignatureFormatter_BuildContextArgs_ProducesExpectedSignatureText()
     {
-        // The spec's probe target enumerates GetString's parameters as
-        // 'ID:enumStrings:ByVal' and 'params:Variant():ByRef:ParamArray'.
-        // Pin the exact signature_string the formatter produces so future
-        // refactors cannot silently shift its shape.
-        var rawModules = new[] { FixtureLoader.LoadModStrings() };
+        // basListHelpers.BuildContextArgs(ParamArray pairs() As Variant) As String
+        // is the ParamArray probe: pin the exact signature_string the formatter
+        // produces so future refactors cannot silently shift its shape.
+        var rawModules = new[] { FixtureLoader.LoadBasListHelpers() };
         var result = new SymbolDbBuilder().Build(rawModules);
 
-        var getString = Assert.Single(result.Symbols.Where(s => s.Fqn == "modStrings.GetString"));
+        var fn = Assert.Single(result.Symbols.Where(s => s.Fqn == "basListHelpers.BuildContextArgs"));
         Assert.Equal(
-            "Function(ID:enumStrings:ByVal,params:Variant:ByRef:ParamArray:Array):String",
-            getString.SignatureString);
+            "Function(pairs:Variant:ByRef:ParamArray:Array):String",
+            fn.SignatureString);
     }
 
     [Fact]

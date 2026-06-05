@@ -1,0 +1,35 @@
+{
+  "session": 2,
+  "round": 1,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": "s2-r1-1",
+      "severity": "Major",
+      "location": "tests/AccessHarvester.SymbolDb.Tests/Session3ExtractorTests.cs",
+      "summary": "Re-base dropped live extractor-level coverage that macro files produce MacroActions rows (HHC committed macros yield zero actions, so the remaining macro-action assertions passed vacuously).",
+      "fix": "Add a synthetic action-bearing macro fixture (inline temp JSON with an _AXL: chunk) and assert MacroActions.Count and exact action/position/argument expectations.",
+      "status": "fixed",
+      "resolution": "Added MacroExtractor_ActionBearingMacro_EmitsActionsWithDensePositions: an inline _AXL macro JSON yields 2 actions (Beep, OpenForm w/ FormName arg) with dense positions 0..1. SymbolDb.Tests now 69 passed / 0 skipped."
+    },
+    {
+      "id": "s2-r1-2",
+      "severity": "Major",
+      "location": "docs/session-sets/005-northwind-embedded-residue-remediation/test-triage.md",
+      "summary": "The decision record still named proprietary structural identifiers (frmCompanyDetail, modStrings, rptInvoice, qryInvoice, etc.) despite its 'no proprietary content' note, leaving tracked-tree residue at HEAD.",
+      "fix": "Rewrite to neutral placeholders / category-level descriptions, avoiding the original frm/rpt/qry/mod identifiers.",
+      "status": "fixed",
+      "resolution": "Genericized all proprietary structural identifiers in test-triage.md to object-kind-category descriptions (rpt*/qry*/frm*/mod*); kept the brand token and synthetic HHC names. A grep for the distinctive identifier set now returns no matches."
+    },
+    {
+      "id": "s2-r1-3",
+      "severity": "Minor",
+      "location": "tests/AccessHarvester.SymbolDb.Tests/CrossModuleResolutionTests.cs",
+      "summary": "The helper named Single only checked Count>0 and returned the first row, so its name overstated a uniqueness guarantee it did not enforce.",
+      "fix": "Rename to reflect first-match semantics, or use Assert.Single.",
+      "status": "fixed",
+      "resolution": "Renamed the helper Single -> FirstRef (5 call sites updated) with a comment clarifying it returns the first match; the per-identifier resolution claim is what each test asserts."
+    }
+  ]
+}

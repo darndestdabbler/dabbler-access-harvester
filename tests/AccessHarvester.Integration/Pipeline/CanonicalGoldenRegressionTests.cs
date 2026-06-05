@@ -20,9 +20,9 @@ namespace AccessHarvester.Integration.Pipeline;
 // first differing file with the surrounding lines so the root cause is
 // obvious without manually diffing multi-MB JSON.
 //
-// SkippableFact-gated for hosts without Microsoft Access. Northwind is
-// gitignored per the spec: its test additionally skips when the local
-// .accdb is absent so a fresh clone runs the HomeHealthCare gate alone.
+// SkippableFact-gated for hosts without Microsoft Access, and additionally
+// skips when the canonical fixture .accdb is absent so a fresh clone runs
+// the gate only where the fixture is available.
 //
 // Closes Phase 4 Criteria #3 ("golden output committed for each
 // canonical fixture; CI/test suite verifies the harvester reproduces
@@ -44,24 +44,12 @@ public sealed class CanonicalGoldenRegressionTests
             "srptClientBudgets",
             "srptClientCurrentNeeds",
         },
-        ["NorthwindDevEdition.accdb"] = new[]
-        {
-            "rptInvoice",
-            "rptSalesByEmployee",
-            "rptSalesByProduct",
-        },
     };
 
     [SkippableFact]
     public void HomeHealthCare_ReproducesGoldenOutput()
     {
         AssertGoldenCorpusReproduced("HomeHealthCare.accdb");
-    }
-
-    [SkippableFact]
-    public void NorthwindDevEdition_ReproducesGoldenOutput()
-    {
-        AssertGoldenCorpusReproduced("NorthwindDevEdition.accdb");
     }
 
     private static void AssertGoldenCorpusReproduced(string fixtureFileName)
@@ -72,8 +60,7 @@ public sealed class CanonicalGoldenRegressionTests
         Skip.IfNot(
             File.Exists(fixturePath),
             $"Canonical fixture not present at {fixturePath}. " +
-            $"NorthwindDevEdition.accdb is gitignored per spec: drop a local copy " +
-            $"into samples/ to exercise this gate.");
+            $"Drop a local copy into samples/ to exercise this gate.");
 
         string fixtureStem = Path.GetFileNameWithoutExtension(fixtureFileName);
         string goldenDir = Path.Combine(RepoPaths.Samples(), "GoldenOutput", fixtureStem);

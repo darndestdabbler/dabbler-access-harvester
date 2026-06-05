@@ -6,26 +6,29 @@ using Xunit.Abstractions;
 
 namespace AccessHarvester.SymbolDb.Tests;
 
-// Tier-1 smoke test: runs the builder against the canonical NorthwindDevEdition
-// Form_frmCompanyDetail + modStrings input and asserts on counts and known
-// probe-target shapes. Output is also dumped via ITestOutputHelper so the
+// Tier-1 smoke test: runs the builder against the committed synthetic
+// HomeHealthCare Form_frmProviderSearch + basListHelpers input and asserts on
+// counts and known shapes. Output is also dumped via ITestOutputHelper so the
 // numbers are visible in dotnet test logs without rerunning the extractor.
-public sealed class NorthwindFixtureSmokeTests
+//
+// Set 005: re-based off the proprietary NorthwindDevEdition fixture onto the
+// committed HHC kb so the test runs live on every clone.
+public sealed class HhcFixtureSmokeTests
 {
     private readonly ITestOutputHelper _output;
 
-    public NorthwindFixtureSmokeTests(ITestOutputHelper output)
+    public HhcFixtureSmokeTests(ITestOutputHelper output)
     {
         _output = output;
     }
 
     [SkippableFact]
-    public void Build_FormFrmCompanyDetail_AndModStrings_ProducesExpectedShape()
+    public void Build_FormFrmProviderSearch_AndBasListHelpers_ProducesExpectedShape()
     {
         var rawModules = new[]
         {
-            FixtureLoader.LoadFormFrmCompanyDetail(),
-            FixtureLoader.LoadModStrings(),
+            FixtureLoader.LoadFormFrmProviderSearch(),
+            FixtureLoader.LoadBasListHelpers(),
         };
 
         var builder = new SymbolDbBuilder();
@@ -34,74 +37,58 @@ public sealed class NorthwindFixtureSmokeTests
         // --- Always-true sanity ---
         Assert.Equal(2, result.Modules.Count);
         Assert.False(result.Modules.Any(m => m.IsDeferred),
-            "NorthwindDevEdition has no Old-companion modules in this two-module fixture set.");
+            "This two-module fixture set has no Old-companion deferred modules.");
 
-        var formModule = Assert.Single(result.Modules.Where(m => m.Fqn == "Form_frmCompanyDetail"));
+        var formModule = Assert.Single(result.Modules.Where(m => m.Fqn == "Form_frmProviderSearch"));
         Assert.Equal("Form", formModule.Kind);
         Assert.Equal("utf-16-le", formModule.Encoding);
 
-        var modStringsModule = Assert.Single(result.Modules.Where(m => m.Fqn == "modStrings"));
-        Assert.Equal("Module", modStringsModule.Kind);
-        Assert.Equal("ascii", modStringsModule.Encoding);
+        var listHelpersModule = Assert.Single(result.Modules.Where(m => m.Fqn == "basListHelpers"));
+        Assert.Equal("Module", listHelpersModule.Kind);
+        Assert.Equal("ascii", listHelpersModule.Encoding);
 
-        // --- Probe target: cboCompanyTypeID_BeforeUpdate parameters ---
+        // --- Probe target: lstProviderList_DblClick(Cancel As Integer) ---
         AssertProcedureSignature(result.Symbols, result.Parameters,
-            "Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate",
+            "Form_frmProviderSearch.lstProviderList_DblClick",
             expectedKind: "sub",
             expectedParameters: new[]
             {
                 ("Cancel", "Integer", "ByRef", false, false, false),
             });
 
-        // --- modStrings.GetString ---
+        // --- basListHelpers.BuildContextArgs(ParamArray pairs() As Variant) ---
+        // The ParamArray probe: a function whose sole parameter is a
+        // ByRef ParamArray array of Variant.
         AssertProcedureSignature(result.Symbols, result.Parameters,
-            "modStrings.GetString",
+            "basListHelpers.BuildContextArgs",
             expectedKind: "function",
             expectedParameters: new[]
             {
-                ("ID",     "enumStrings", "ByVal", false, false, false),
-                ("params", "Variant",     "ByRef", false, true,  true),
+                ("pairs", "Variant", "ByRef", false, true, true),
             });
 
-        // --- The exact seven m_lng* / m_str* module variables in frmCompanyDetail ---
-        var moduleVars = result.Symbols
-            .Where(s => s.ModuleFqn == "Form_frmCompanyDetail" && s.Kind == "module_var" && s.DeclaredInFqn is null)
-            .Select(s => s.Name).OrderBy(n => n, System.StringComparer.Ordinal).ToList();
-        Assert.Equal(
-            new[]
-            {
-                "m_lngCalledFromID",
-                "m_lngCompanyContactCount",
-                "m_lngCustomerOrderCount",
-                "m_lngShipperOrderCount",
-                "m_lngVendorProductCount",
-                "m_lngVendorPurchaseOrderCount",
-                "m_strMsgCaption",
-            },
-            moduleVars);
-
-        // --- The exact two local Dims inside cboCompanyTypeID_BeforeUpdate ---
-        var locals = result.Symbols
-            .Where(s => s.DeclaredInFqn == "Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate")
-            .Select(s => s.Name).OrderBy(n => n, System.StringComparer.Ordinal).ToList();
-        Assert.Equal(new[] { "strDlgMsg", "strOpenArgs" }, locals);
-
-        // --- modStrings.enumStrings has many values, including the named ones ---
+        // --- The form's StatusEnum has exactly its three named values ---
         var enumValues = result.Symbols
-            .Where(s => s.Kind == "enum_value" && s.DeclaredInFqn == "modStrings.enumStrings")
-            .Select(s => s.Name).ToList();
-        Assert.Contains("sCompanyDelete_CompanyTypeChange", enumValues);
-        Assert.True(enumValues.Count >= 30,
-            $"expected enumStrings to carry at least 30 values; got {enumValues.Count}");
-
-        // --- modStrings has the 4 public functions ---
-        var modStringsFunctions = result.Symbols
-            .Where(s => s.ModuleFqn == "modStrings" && s.Kind == "function")
-            .Select(s => s.Name).ToList();
-        modStringsFunctions.Sort();
+            .Where(s => s.Kind == "enum_value" && s.DeclaredInFqn == "Form_frmProviderSearch.StatusEnum")
+            .Select(s => s.Name).OrderBy(n => n, System.StringComparer.Ordinal).ToList();
         Assert.Equal(
-            new[] { "GetString", "StringFormat", "StringFormatSQL", "StringToDictionary" },
-            modStringsFunctions);
+            new[] { "STATUS_ACTIVE", "STATUS_ALL", "STATUS_INACTIVE" },
+            enumValues);
+
+        // --- The exact two local Dims inside btnSearch_Click ---
+        var locals = result.Symbols
+            .Where(s => s.DeclaredInFqn == "Form_frmProviderSearch.btnSearch_Click")
+            .Select(s => s.Name).OrderBy(n => n, System.StringComparer.Ordinal).ToList();
+        Assert.Equal(new[] { "i", "where" }, locals);
+
+        // --- basListHelpers exposes its public helper functions ---
+        var listHelperFunctions = result.Symbols
+            .Where(s => s.ModuleFqn == "basListHelpers" && s.Kind == "function")
+            .Select(s => s.Name).ToList();
+        Assert.Contains("BuildAddableRowSource", listHelperFunctions);
+        Assert.Contains("BuildContextArgs", listHelperFunctions);
+        Assert.Contains("GetContextString", listHelperFunctions);
+        Assert.Contains("IsAddMode", listHelperFunctions);
 
         // --- Dump full counts so any future change to the fixture surfaces ---
         var stats = result.Statistics;

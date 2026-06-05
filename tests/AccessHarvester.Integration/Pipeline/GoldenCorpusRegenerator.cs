@@ -46,12 +46,6 @@ public sealed class GoldenCorpusRegenerator
                 "srptClientBudgets",
                 "srptClientCurrentNeeds",
             },
-            ["NorthwindDevEdition.accdb"] = new[]
-            {
-                "rptInvoice",
-                "rptSalesByEmployee",
-                "rptSalesByProduct",
-            },
         };
 
     [SkippableFact]
@@ -68,8 +62,8 @@ public sealed class GoldenCorpusRegenerator
             string fixturePath = Path.Combine(RepoPaths.Samples(), fixtureFileName);
             if (!File.Exists(fixturePath))
             {
-                // NorthwindDevEdition.accdb is gitignored; skip it on hosts
-                // without a local copy rather than fail the regen.
+                // Skip a fixture whose local .accdb is absent rather than
+                // fail the regen on hosts without a local copy.
                 continue;
             }
 

@@ -53,12 +53,12 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptInvoice",
-            RecordSource = "qryInvoice",
+            ReportName = "rptSummary",
+            RecordSource = "qrySummary",
         };
 
         var result = ReportAggregateComputer.Compute(
-            input, ObjectNameResolved("qryInvoice"), table, Version);
+            input, ObjectNameResolved("qrySummary"), table, Version);
 
         Assert.Equal(0, result.RowCount);
         Assert.Equal(new[] { "OrderID", "Total" }, result.NumericColumns);
@@ -78,7 +78,7 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptCustomers",
+            ReportName = "rptRoster",
             RecordSource = "Customers",
         };
 
@@ -103,7 +103,7 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptOrders",
+            ReportName = "rptLedger",
             RecordSource = "Orders",
         };
 
@@ -152,7 +152,7 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptSalesByCountry",
+            ReportName = "rptTotalsByRegion",
             RecordSource = "Sales",
             GroupLevels = ImmutableArray.Create(new ReportGroupLevelKey
             {
@@ -422,7 +422,7 @@ public class ReportAggregateComputerTests
 
         ReportAggregateInput Input() => new()
         {
-            ReportName = "rptOrders",
+            ReportName = "rptLedger",
             RecordSource = "Orders",
             GroupLevels = ImmutableArray.Create(new ReportGroupLevelKey
             {
@@ -518,7 +518,7 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptOrders",
+            ReportName = "rptLedger",
             RecordSource = "Orders",
             GroupLevels = ImmutableArray.Create(new ReportGroupLevelKey
             {
@@ -615,7 +615,7 @@ public class ReportAggregateComputerTests
     [Fact]
     public void Compute_ReportFooterSumExpression_EmitsDisplayTotal()
     {
-        // The rptInvoice footer subtotal: =Sum((1-[Discount])*[Quantity]*[UnitPrice]).
+        // The rptSummary footer subtotal: =Sum((1-[Discount])*[Quantity]*[UnitPrice]).
         // Row1: (1-0.1)*2*100 = 180 ; Row2: (1-0)*3*10 = 30 → 210.
         var table = BuildTable(
             new[]
@@ -629,14 +629,14 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptInvoice",
-            RecordSource = "qryInvoice",
+            ReportName = "rptSummary",
+            RecordSource = "qrySummary",
             FooterAggregates = ImmutableArray.Create(
                 ReportFooterControl("txtSubTotal", "=Sum((1-[Discount])*[Quantity]*[UnitPrice])")),
         };
 
         var result = ReportAggregateComputer.Compute(
-            input, ObjectNameResolved("qryInvoice"), table, Version);
+            input, ObjectNameResolved("qrySummary"), table, Version);
 
         var displayTotal = Assert.Single(result.DisplayTotals);
         Assert.Equal("txtSubTotal", displayTotal.Control);
@@ -649,7 +649,7 @@ public class ReportAggregateComputerTests
     [Fact]
     public void Compute_ReportFooterSumOfColumn_MatchesGrandTotalOfThatColumn()
     {
-        // rptSalesByEmployee / rptSalesByProduct footer: =Sum([OrderTotal]).
+        // rptTotalsByStaff / rptTotalsByItem footer: =Sum([OrderTotal]).
         // The derived display total must equal the result-set grand total of
         // the same column — the like-for-like cross-check.
         var table = BuildTable(
@@ -658,14 +658,14 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptSalesByEmployee",
-            RecordSource = "qrySales",
+            ReportName = "rptTotalsByStaff",
+            RecordSource = "qryTotals",
             FooterAggregates = ImmutableArray.Create(
                 ReportFooterControl("GrandTotalSum", "=Sum([OrderTotal])")),
         };
 
         var result = ReportAggregateComputer.Compute(
-            input, ObjectNameResolved("qrySales"), table, Version);
+            input, ObjectNameResolved("qryTotals"), table, Version);
 
         var displayTotal = Assert.Single(result.DisplayTotals);
         Assert.Equal(result.GrandTotals["OrderTotal"], displayTotal.ComputedValue);
@@ -680,8 +680,8 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptSalesByProduct",
-            RecordSource = "qrySales",
+            ReportName = "rptTotalsByItem",
+            RecordSource = "qryTotals",
             FooterAggregates = ImmutableArray.Create(new FooterAggregateControl
             {
                 ControlName = "SumOfOrderTotal",
@@ -692,7 +692,7 @@ public class ReportAggregateComputerTests
         };
 
         var result = ReportAggregateComputer.Compute(
-            input, ObjectNameResolved("qrySales"), table, Version);
+            input, ObjectNameResolved("qryTotals"), table, Version);
 
         Assert.Empty(result.DisplayTotals);
         var skipped = Assert.Single(result.Skipped);
@@ -709,13 +709,13 @@ public class ReportAggregateComputerTests
         var input = new ReportAggregateInput
         {
             ReportName = "rptRunning",
-            RecordSource = "qrySales",
+            RecordSource = "qryTotals",
             FooterAggregates = ImmutableArray.Create(
                 ReportFooterControl("txtRunning", "=Sum([OrderTotal])", runningSum: true)),
         };
 
         var result = ReportAggregateComputer.Compute(
-            input, ObjectNameResolved("qrySales"), table, Version);
+            input, ObjectNameResolved("qryTotals"), table, Version);
 
         Assert.Empty(result.DisplayTotals);
         var skipped = Assert.Single(result.Skipped);
@@ -732,15 +732,15 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptInvoice",
-            RecordSource = "qryInvoice",
+            ReportName = "rptSummary",
+            RecordSource = "qrySummary",
             FooterAggregates = ImmutableArray.Create(
                 ReportFooterControl("txtTax",
                     "=IIf([TaxStatusID]=1,[taxrate]*Sum((1-[Discount])*[Quantity]*[UnitPrice]),0)")),
         };
 
         var result = ReportAggregateComputer.Compute(
-            input, ObjectNameResolved("qryInvoice"), table, Version);
+            input, ObjectNameResolved("qrySummary"), table, Version);
 
         Assert.Empty(result.DisplayTotals);
         var skipped = Assert.Single(result.Skipped);
@@ -755,15 +755,15 @@ public class ReportAggregateComputerTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptInvoice",
-            RecordSource = "qryInvoice",
+            ReportName = "rptSummary",
+            RecordSource = "qrySummary",
             FooterAggregates = ImmutableArray.Create(
                 ReportFooterControl("txtShipping", "=[ShippingFee]"),
                 ReportFooterControl("txtTotal", "=[txtSubTotal]+[txtTax]+[txtShipping]")),
         };
 
         var result = ReportAggregateComputer.Compute(
-            input, ObjectNameResolved("qryInvoice"), table, Version);
+            input, ObjectNameResolved("qrySummary"), table, Version);
 
         Assert.Empty(result.DisplayTotals);
         Assert.Equal(2, result.Skipped.Count);

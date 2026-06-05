@@ -6,26 +6,29 @@ using Xunit;
 
 namespace AccessHarvester.SymbolDb.Tests;
 
-// Locates the canonical fixture root (tmp/comprehension-ir/AccessMetaData/
-// NorthwindDevEdition/) by walking up from the test assembly. The path is
-// the same one the existing pipeline tests use; centralising the lookup
-// keeps each test class small.
+// Locates the committed synthetic HomeHealthCare kb fixture root
+// (samples/GoldenOutput/HomeHealthCare/kb/) by walking up from the test
+// assembly. Centralising the lookup keeps each test class small.
 //
-// Set 004 (northwind-symbol-db-sqlite-residue): the NorthwindDevEdition KB
-// fixture is proprietary and local-only — it lives under the gitignored tmp/
-// tree and is never committed, so it is ABSENT on a fresh clone. This loader
-// is the single chokepoint that decides fixture availability: NorthwindKbRoot()
-// and the Load* helpers all funnel through RequireNorthwindFixture(), which
-// raises a SkippableFact skip (rather than a hard failure) when the fixture is
-// missing. Every symbol-db-data-dependent test is a [SkippableFact]/[SkippableTheory]
-// so it skips cleanly when absent and runs every live assertion when present.
+// Set 005 (northwind-embedded-residue-remediation): these tests were
+// re-based off the proprietary, local-only NorthwindDevEdition kb fixture
+// onto the synthetic HomeHealthCare kb, which IS committed to the repo
+// (samples/GoldenOutput/HomeHealthCare/kb/...). So the symbol-db tests now
+// run LIVE on every clone rather than skipping. The skip guard is retained
+// as a belt-and-suspenders fallback: if the committed fixture is ever moved
+// or a partial checkout omits it, the data-dependent tests skip cleanly
+// (mirroring the 004 pattern) instead of hard-failing.
 internal static class FixtureLoader
 {
     private const string FixtureSkipReason =
-        "NorthwindDevEdition symbol-db fixture " +
-        "(tmp/comprehension-ir/AccessMetaData/NorthwindDevEdition/kb) is proprietary " +
-        "and local-only; absent on a fresh clone. See " +
-        "docs/session-sets/004-northwind-symbol-db-sqlite-residue/.";
+        "HomeHealthCare symbol-db kb fixture " +
+        "(samples/GoldenOutput/HomeHealthCare/kb) is committed and should be " +
+        "present; absent only on a partial checkout.";
+
+    // The form module re-base target: a synthetic provider-search form with
+    // a private Enum, several event handlers, same-module and cross-module
+    // calls, and control access via dot notation.
+    public const string FormFqn = "Form_frmProviderSearch";
 
     public static string LocateRepoRoot()
     {
@@ -43,55 +46,69 @@ internal static class FixtureLoader
     }
 
     // Path-only computation — never raises a skip, so the availability probe
-    // below can use it without recursing through RequireNorthwindFixture().
+    // below can use it without recursing through RequireFixture().
     private static string KbRootPath()
     {
         return Path.Combine(LocateRepoRoot(),
-            "tmp", "comprehension-ir", "AccessMetaData", "NorthwindDevEdition", "kb");
+            "samples", "GoldenOutput", "HomeHealthCare", "kb");
     }
 
-    // True when the proprietary, local-only NorthwindDevEdition KB fixture is
-    // present on disk. The two module-source files behind BuildNorthwind() are
-    // the canonical presence signal for the whole kb tree.
-    public static bool NorthwindFixtureAvailable
+    // True when the committed synthetic HomeHealthCare kb fixture is present.
+    // The form + standard-module files behind the loaders below are the
+    // canonical presence signal for the whole kb tree.
+    public static bool FixtureAvailable
     {
         get
         {
             string kb = KbRootPath();
-            return File.Exists(Path.Combine(kb, "Forms", "frmCompanyDetail.json"))
-                && File.Exists(Path.Combine(kb, "ModulesAndClasses", "modStrings.json"));
+            return File.Exists(Path.Combine(kb, "Forms", "frmProviderSearch.json"))
+                && File.Exists(Path.Combine(kb, "ModulesAndClasses", "basListHelpers.json"));
         }
     }
 
     // Skip-when-absent guard. Tests funnel through this (directly, or via
-    // NorthwindKbRoot()/Load*) so a missing proprietary fixture skips the test
-    // instead of failing it. Mirrors the 003 CanonicalGoldenRegressionTests pattern.
-    public static void RequireNorthwindFixture()
+    // KbRoot()/Load*) so a missing fixture skips the test instead of failing.
+    public static void RequireFixture()
     {
-        Skip.IfNot(NorthwindFixtureAvailable, FixtureSkipReason);
+        Skip.IfNot(FixtureAvailable, FixtureSkipReason);
     }
 
-    public static string NorthwindKbRoot()
+    public static string KbRoot()
     {
-        RequireNorthwindFixture();
+        RequireFixture();
         return KbRootPath();
     }
 
-    public static RawModule LoadFormFrmCompanyDetail()
+    // Standard-module loader: kb/ModulesAndClasses/<name>.json, module FQN == name.
+    public static RawModule LoadStandardModule(string name)
     {
-        RequireNorthwindFixture();
-        string path = Path.Combine(KbRootPath(), "Forms", "frmCompanyDetail.json");
-        return KbVbaSourceLoader.FromKbJson(path, "Form_frmCompanyDetail", "Form")
+        RequireFixture();
+        string path = Path.Combine(KbRootPath(), "ModulesAndClasses", name + ".json");
+        return KbVbaSourceLoader.FromKbJson(path, name, "Module")
             ?? throw new InvalidOperationException(
-                $"VbaCode missing from {path}; cannot run Session 1 fixture tests without it.");
+                $"VbaCode missing from {path}; cannot run symbol-db fixture tests without it.");
     }
 
-    public static RawModule LoadModStrings()
+    // Form loader: kb/Forms/<name>.json, module FQN == "Form_<name>".
+    public static RawModule LoadForm(string name)
     {
-        RequireNorthwindFixture();
-        string path = Path.Combine(KbRootPath(), "ModulesAndClasses", "modStrings.json");
-        return KbVbaSourceLoader.FromKbJson(path, "modStrings", "Module")
+        RequireFixture();
+        string path = Path.Combine(KbRootPath(), "Forms", name + ".json");
+        return KbVbaSourceLoader.FromKbJson(path, "Form_" + name, "Form")
             ?? throw new InvalidOperationException(
-                $"VbaCode missing from {path}; cannot run Session 1 fixture tests without it.");
+                $"VbaCode missing from {path}; cannot run symbol-db fixture tests without it.");
     }
+
+    // The canonical re-base form: frmProviderSearch (has event handlers,
+    // same-module calls, qualified cross-module calls, a private Enum, and
+    // dot-notation control access).
+    public static RawModule LoadFormFrmProviderSearch() => LoadForm("frmProviderSearch");
+
+    // basListHelpers: a standard module of reusable list-box helpers; its
+    // BuildContextArgs(ParamArray pairs() As Variant) is the ParamArray probe.
+    public static RawModule LoadBasListHelpers() => LoadStandardModule("basListHelpers");
+
+    // basUtilities: a standard module the search form calls into (qualified
+    // cross-module references resolve to its public functions).
+    public static RawModule LoadBasUtilities() => LoadStandardModule("basUtilities");
 }

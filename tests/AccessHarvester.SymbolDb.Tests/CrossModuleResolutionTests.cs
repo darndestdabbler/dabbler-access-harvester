@@ -10,29 +10,65 @@ using Xunit;
 
 namespace AccessHarvester.SymbolDb.Tests;
 
-// Regression tests for the cross-module reference-resolution gap surfaced
-// by the vba-symbol-db Session 7 comprehension probe and addressed by
-// Session 1 of vba-symbol-db-path-b-probe. Bare-name uses in
-// Form_frmCompanyDetail of Public symbols declared in modStrings
-// (procedures and Public-enum members) must bind across modules.
+// Regression tests for cross-module reference resolution: bare-name uses in a
+// Form module of Public symbols declared in a standard module (procedures and
+// Public-enum members) must bind across modules, while same-module references
+// keep binding and out-of-scope identifiers stay unresolved.
+//
+// Set 005: re-based off the proprietary NorthwindDevEdition fixture. HHC's
+// committed forms qualify their cross-module calls (basModule.Member), which the
+// resolver treats as member access on an unresolved module name — so they do not
+// exercise the *bare-name* cross-module binding this regression guards. The
+// bare-name semantic is reproduced here with a hermetic two-module synthetic
+// fixture (a committed, in-source fixture per the re-base guidance), preserving
+// the exact resolution claims the NorthwindDevEdition probe asserted.
 public sealed class CrossModuleResolutionTests
 {
-    private const string ProbeTargetFqn = "Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate";
+    private const string ProbeTargetFqn = "Form_frmConsumer.btnGo_BeforeUpdate";
 
-    private static BuildResult BuildNorthwind()
-    {
-        var rawModules = new[]
-        {
-            FixtureLoader.LoadFormFrmCompanyDetail(),
-            FixtureLoader.LoadModStrings(),
-        };
-        return new SymbolDbBuilder().Build(rawModules);
-    }
+    private static readonly RawModule StandardModule = new(
+        "modHelpers", "Module", "/synthetic/modHelpers.bas", "ascii",
+        """
+        Option Compare Database
+        Public Enum ColorEnum
+            clrRed = 1
+            clrGreen = 2
+        End Enum
+        Public Function Greet(ByVal personName As String) As String
+            Greet = "Hi " & personName
+        End Function
+        Public Function Farewell() As String
+            Farewell = "Bye"
+        End Function
+        """);
+
+    private static readonly RawModule FormModule = new(
+        "Form_frmConsumer", "Form", "/synthetic/frmConsumer.cls", "utf-16-le",
+        """
+        Option Compare Database
+        Private Sub btnGo_BeforeUpdate(Cancel As Integer)
+            Dim msg As String
+            msg = Greet("x")
+            msg = Farewell()
+            If clrRed = 1 Then
+                LocalHelper
+            End If
+            UnknownThing
+        End Sub
+        Private Function LocalHelper() As Boolean
+            LocalHelper = True
+        End Function
+        """);
+
+    private static BuildResult Build() =>
+        new SymbolDbBuilder().Build(new[] { FormModule, StandardModule });
 
     private static IReadOnlyList<ReferenceRow> ProbeTargetRefs(BuildResult result) =>
         result.References.Where(r => r.FromFqn == ProbeTargetFqn).ToList();
 
-    private static ReferenceRow Single(IReadOnlyList<ReferenceRow> refs, string identifier)
+    // Returns the first reference row for an identifier (existence + first match);
+    // the per-identifier resolution claim is what each test asserts, not row uniqueness.
+    private static ReferenceRow FirstRef(IReadOnlyList<ReferenceRow> refs, string identifier)
     {
         var matches = refs.Where(r => string.Equals(r.Identifier, identifier,
             StringComparison.OrdinalIgnoreCase)).ToList();
@@ -41,60 +77,49 @@ public sealed class CrossModuleResolutionTests
         return matches[0];
     }
 
-    [SkippableFact]
-    public void GetString_BindsToModStringsGetString()
+    [Fact]
+    public void Greet_BindsToModHelpersGreet()
     {
-        var refs = ProbeTargetRefs(BuildNorthwind());
-        var row = Single(refs, "GetString");
+        var row = FirstRef(ProbeTargetRefs(Build()), "Greet");
         Assert.Equal("resolved", row.ResolutionStatus);
-        Assert.Equal("modStrings.GetString", row.ToFqn);
+        Assert.Equal("modHelpers.Greet", row.ToFqn);
     }
 
-    [SkippableFact]
-    public void StringFormat_BindsToModStringsStringFormat()
+    [Fact]
+    public void Farewell_BindsToModHelpersFarewell()
     {
-        var refs = ProbeTargetRefs(BuildNorthwind());
-        var row = Single(refs, "StringFormat");
+        var row = FirstRef(ProbeTargetRefs(Build()), "Farewell");
         Assert.Equal("resolved", row.ResolutionStatus);
-        Assert.Equal("modStrings.StringFormat", row.ToFqn);
+        Assert.Equal("modHelpers.Farewell", row.ToFqn);
     }
 
-    [SkippableFact]
-    public void EnumMember_sCompanyDelete_BindsAcrossModules()
+    [Fact]
+    public void EnumMember_clrRed_BindsAcrossModules()
     {
-        // Bare reference to a Public-enum member declared in modStrings.
+        // Bare reference to a Public-enum member declared in modHelpers.
         // VBA spills Public enum members into the module's Public namespace,
         // so use sites can name them without enum qualification.
-        var refs = ProbeTargetRefs(BuildNorthwind());
-        var row = Single(refs, "sCompanyDelete_CompanyTypeChange");
+        var row = FirstRef(ProbeTargetRefs(Build()), "clrRed");
         Assert.Equal("resolved", row.ResolutionStatus);
-        Assert.Equal(
-            "modStrings.enumStrings.sCompanyDelete_CompanyTypeChange",
-            row.ToFqn);
+        Assert.Equal("modHelpers.ColorEnum.clrRed", row.ToFqn);
     }
 
-    [SkippableFact]
-    public void WithinModule_CompanyIsActive_StillBinds()
+    [Fact]
+    public void WithinModule_LocalHelper_StillBinds()
     {
         // Same-module reference must continue to bind after the cross-module
         // fix; this is the "no regression on the in-scope path" check.
-        var refs = ProbeTargetRefs(BuildNorthwind());
-        var row = Single(refs, "CompanyIsActive");
+        var row = FirstRef(ProbeTargetRefs(Build()), "LocalHelper");
         Assert.Equal("resolved", row.ResolutionStatus);
-        Assert.Equal("Form_frmCompanyDetail.CompanyIsActive", row.ToFqn);
+        Assert.Equal("Form_frmConsumer.LocalHelper", row.ToFqn);
     }
 
-    [SkippableFact]
+    [Fact]
     public void RebuiltSymbolDb_PersistsResolvedCrossModuleReferences()
     {
-        // End-to-end persistence check that mirrors the spec's Step 5
-        // ("Re-run the symbol DB build [...] confirm with a one-symbol
-        // query that GetString-call sites now bind"), but writes to a
-        // temp DB so the committed tools/symbol-db/symbol-db.sqlite —
-        // which carries vba-symbol-db Sessions 4-7 interpretation
-        // columns — is not overwritten. The committed DB's structural
-        // rows can be regenerated explicitly when the human is ready.
-        var result = BuildNorthwind();
+        // End-to-end persistence check: write to a temp DB and confirm the
+        // resolved cross-module / enum-member references survive the round-trip.
+        var result = Build();
         string tempPath = Path.Combine(Path.GetTempPath(),
             $"symbol-db-cross-module-{Guid.NewGuid():N}.sqlite");
         try
@@ -109,19 +134,16 @@ public sealed class CrossModuleResolutionTests
                     result.MemberAccesses);
             }
 
-            var rows = QueryProbeTargetReferences(tempPath, "GetString",
-                "StringFormat", "sCompanyDelete_CompanyTypeChange");
+            var rows = QueryProbeTargetReferences(tempPath, "Greet", "Farewell", "clrRed");
 
-            Assert.Equal("resolved", rows["GetString"].Status);
-            Assert.Equal("modStrings.GetString", rows["GetString"].ToFqn);
+            Assert.Equal("resolved", rows["Greet"].Status);
+            Assert.Equal("modHelpers.Greet", rows["Greet"].ToFqn);
 
-            Assert.Equal("resolved", rows["StringFormat"].Status);
-            Assert.Equal("modStrings.StringFormat", rows["StringFormat"].ToFqn);
+            Assert.Equal("resolved", rows["Farewell"].Status);
+            Assert.Equal("modHelpers.Farewell", rows["Farewell"].ToFqn);
 
-            Assert.Equal("resolved", rows["sCompanyDelete_CompanyTypeChange"].Status);
-            Assert.Equal(
-                "modStrings.enumStrings.sCompanyDelete_CompanyTypeChange",
-                rows["sCompanyDelete_CompanyTypeChange"].ToFqn);
+            Assert.Equal("resolved", rows["clrRed"].Status);
+            Assert.Equal("modHelpers.ColorEnum.clrRed", rows["clrRed"].ToFqn);
         }
         finally
         {
@@ -169,15 +191,13 @@ public sealed class CrossModuleResolutionTests
         return result;
     }
 
-    [SkippableFact]
-    public void OutOfFixtureScope_IsFormOpen_RemainsUnresolved()
+    [Fact]
+    public void OutOfScope_UnknownThing_RemainsUnresolved()
     {
-        // IsFormOpen lives in a module not part of this two-module fixture.
-        // It must continue to resolve as 'unresolved' with reason
-        // 'not-in-scope' — the fix must not leak out-of-scope identifiers
-        // into spurious bindings.
-        var refs = ProbeTargetRefs(BuildNorthwind());
-        var row = Single(refs, "IsFormOpen");
+        // UnknownThing is declared in no module in this fixture. It must
+        // resolve as 'unresolved' with reason 'not-in-scope' — the cross-module
+        // fix must not leak out-of-scope identifiers into spurious bindings.
+        var row = FirstRef(ProbeTargetRefs(Build()), "UnknownThing");
         Assert.Equal("unresolved", row.ResolutionStatus);
         Assert.Equal("not-in-scope", row.ResolutionReason);
         Assert.Null(row.ToFqn);

@@ -57,14 +57,14 @@ public class ReportBaselineServiceTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptInvoice",
-            RecordSource = "qryInvoiceDetails",
+            ReportName = "rptSummary",
+            RecordSource = "qrySummaryDetails",
         };
 
         var aggregates = svc.Capture(input);
 
         var call = Assert.Single(fake.Calls);
-        Assert.Equal("SELECT * FROM [qryInvoiceDetails]", call.Sql);
+        Assert.Equal("SELECT * FROM [qrySummaryDetails]", call.Sql);
         Assert.Null(call.PositionalParameters);
         Assert.Equal(1, aggregates.RowCount);
         Assert.Equal(25m, aggregates.GrandTotals["Total"]);
@@ -107,8 +107,8 @@ public class ReportBaselineServiceTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptOrders",
-            RecordSource = "qryOrders",
+            ReportName = "rptLedger",
+            RecordSource = "qryLedger",
             SavedQuerySql = savedQuerySql,
         };
 
@@ -121,7 +121,7 @@ public class ReportBaselineServiceTests
     }
 
     [Fact]
-    public void Capture_InlinesSupportedNorthwindDateHelperFunctions_AndRecordsDerivedDefaults()
+    public void Capture_InlinesSupportedDateHelperFunctions_AndRecordsDerivedDefaults()
     {
         const string savedQuerySql =
             "SELECT * FROM Orders WHERE OrderDate Between reportParameterStartDate() And reportParameterEndDate()";
@@ -140,8 +140,8 @@ public class ReportBaselineServiceTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptSalesByEmployee",
-            RecordSource = "qryrptSalesByEmployee",
+            ReportName = "rptTotalsByStaff",
+            RecordSource = "qryrptTotalsByStaff",
             SavedQuerySql = savedQuerySql,
         };
 
@@ -165,13 +165,13 @@ public class ReportBaselineServiceTests
 
         var input = new ReportAggregateInput
         {
-            ReportName = "rptInvoice",
-            RecordSource = "qryInvoice",
+            ReportName = "rptSummary",
+            RecordSource = "qrySummary",
         };
 
         string root = Path.Combine(Path.GetTempPath(), $"baseline-{Guid.NewGuid():N}");
-        string outDir = Path.Combine(root, "AccessMetaData", "NorthwindDev",
-            "reports-baseline", "rptInvoice");
+        string outDir = Path.Combine(root, "AccessMetaData", "SampleDb",
+            "reports-baseline", "rptSummary");
         try
         {
             string written = svc.CaptureAndWrite(input, outDir);
@@ -179,7 +179,7 @@ public class ReportBaselineServiceTests
             Assert.True(File.Exists(written));
 
             using var doc = JsonDocument.Parse(File.ReadAllText(written));
-            Assert.Equal("rptInvoice", doc.RootElement.GetProperty("ReportName").GetString());
+            Assert.Equal("rptSummary", doc.RootElement.GetProperty("ReportName").GetString());
             Assert.Equal("v-test",
                 doc.RootElement.GetProperty("Provenance").GetProperty("HarvesterVersion").GetString());
             Assert.Equal(ReportAggregateComputer.ContractLiteral,

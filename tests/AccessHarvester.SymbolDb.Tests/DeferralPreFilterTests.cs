@@ -4,10 +4,9 @@ using Xunit;
 
 namespace AccessHarvester.SymbolDb.Tests;
 
-// Hermetic unit tests for the Old-companion deferral filter. Northwind has
-// no Old-companions in the Session 1 input set, but the filter must still
-// be exercised so a future fixture (HomeHealthCare in a follow-up scaling
-// set) gets correct behaviour without a separate test pass.
+// Hermetic unit tests for the Old-companion deferral filter. The filter is
+// exercised with synthetic module names so any fixture (whether or not it
+// contains Old-companions) gets correct behaviour without a separate test pass.
 public sealed class DeferralPreFilterTests
 {
     private static readonly DeferralPreFilter Filter = new();
@@ -54,9 +53,9 @@ public sealed class DeferralPreFilterTests
     {
         var modules = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase)
         {
-            "frmCompanyDetail", "modStrings"
+            "frmSample", "modSample"
         };
-        var outcome = Filter.Classify("frmCompanyDetail", modules);
+        var outcome = Filter.Classify("frmSample", modules);
         Assert.False(outcome.IsDeferred);
     }
 }

@@ -1,15 +1,23 @@
 {
   "status": "completed",
-  "summary": "Session 1 of 3 - Refresh Inventory + Disposition Manifest + Bulk-Delete Spent Artifacts (non-destructive, HEAD-only, no history rewrite). Refreshed the 003 reviewed 123-path inventory against HEAD (117 still tracked; 6 purged by 004) + a fresh git grep over distinctive Northwind STRUCTURAL identifiers (brand word 'Northwind' deliberately excluded as non-structural). MATERIAL FINDING: the fresh scan surfaced a coupled order-entry PILOT ARC absent from both the 003 inventory and the 005 spec - 4 workflow-package-pilot packages (spec named 3), the full CharacterizationTests tree (33 files), the blazor-add-an-order + blazor-update-workflows session-sets, and output-tests/blazor-add-an-order (a buildable MudBlazor project in AccessHarvester.sln). All leaf projects (no harvester-core dependents) encoding full Northwind business logic (denser than structural names => spec Stop Rule). Surfaced to maintainer, who AUTHORIZED deleting the whole arc. Authored disposition-manifest.md + .csv (255 inventory paths classified: delete=198, edit=1 (.sln), re-base=26 (S2), genericize=7 (S3), redact=20 (S3), keep-accepted=3) + 25 generic-example keep-accepted records (e.g. textbook [Order Details].[Quantity] in JetSql.g4). Executed Session-1 deletes: dotnet sln remove the 2 arc projects, git rm 199 paths (spent experimental arcs vba-symbol-db/path-b-probe/symbol-resolution/dabbler-platform-discovery + workflow-package-pilot + the pilot arc + 7 spent driver/probe scripts + 1 orphan __init__.py). Tests deferred to S2; C#/doc redaction to S3. Build: dotnet build AccessHarvester.sln -> 0 errors (1143 pre-existing CA1416 warnings). Hermetic tests green: Vba.Parser 69 + Vba.Grammar 294 + Sql.Grammar 85 + Vba.Resolver 400 = 848 passed/0 failed/0 skipped. Access-COM/PDF tier deliberately not run (deletion-only change, no COM surface touched). Cross-provider verification (gpt-5-4, OpenAI): R1 VERIFIED, 0 issues, with substantive per-concern prose analysis.",
+  "summary": "Session 2 of 3 - Test Triage (re-base or delete the corpus-pinned tests; HEAD-only, non-destructive). Refined Session 1's blanket 're-base' classification of the 26 corpus-pinned test paths into a reviewed per-file disposition (test-triage.md): 6 keep-clean (manifest over-included - BodyHasher, IntraProcedureDeadCodeDetector, and the 4 Vba.Resolver fixture tests, all verified zero NorthwindDevEdition tokens); 5 redact-literals (DeferralPreFilter + 4 ReportBaseline tests - distinctive rpt*/qry*/frm*/mod* identifiers renamed to neutral, generic SQL vectors kept, every assertion preserved; also genericized one incidental ref in the S1 keep-accepted SumAggregateEvaluatorTests); 6 re-base (FixtureLoader re-pointed from the proprietary local-only NorthwindDevEdition kb to the COMMITTED HHC kb samples/GoldenOutput/HomeHealthCare/kb, + 5 SymbolDb engine test files re-derived onto HHC content - these were [SkippableFact] that SKIPPED on a fresh clone and now run LIVE); 3 edit-trim-arm (SyntheticDbIntegrationTests dropped its 2 NorthwindDevEdition COM methods + ResolveSampleDb helper keeping synthetic geometry/label tests; CanonicalGoldenRegressionTests + GoldenCorpusRegenerator dropped the NorthwindDevEdition arm keeping the HHC arm); 1 file delete (GenerateArtifacts - weak dev regenerator coupled to RunForNorthwind, maintainer-confirmed); 1 project delete (the entire AccessHarvester.TranslationProbe.Tests - a spent C# reimplementation of a proprietary form's business logic, leaf project, removed from .sln, maintainer-confirmed). CrossModuleResolutionTests was re-based onto an inline synthetic 2-module fixture (not HHC) because HHC forms qualify cross-module calls and cannot exercise bare-name cross-module binding; the inline fixture reproduces that exact semantic hermetically. Strategy got cross-provider consensus (route(analysis)->gemini-pro APPROVE; query->gpt-5-4 APPROVE-WITH-CHANGES, all 3 constraints adopted). Build: dotnet build AccessHarvester.sln -> 0 errors. Hermetic tests green: SymbolDb.Tests 69 passed/0 skipped (re-base made them live; +1 new action-bearing macro test), AccessHarvester.Tests 585 passed/0 failed/2 COM-skip (incl. the redacted ReportBaseline tests), Vba.Resolver.Tests 400 passed. COM tier not run under the agent shell (one wedged testhost reaped via WMI Terminate); the Northwind-arm-trim edits to the Integration/golden + SyntheticDb COM tests were confirmed to compile via the full-solution build, HHC arms unchanged. Cross-provider verification (gpt-5-4): R1 ISSUES_FOUND (3: macro-action coverage drop, test-triage.md residue, misleading Single helper name) -> all fixed; R2 confirmed 2 resolved + 1 doc residual -> fixed; R3 VERIFIED.",
   "files_changed": [
-    "docs/session-sets/005-northwind-embedded-residue-remediation/disposition-manifest.md (new)",
-    "docs/session-sets/005-northwind-embedded-residue-remediation/disposition-manifest.csv (new)",
-    "docs/session-sets/005-northwind-embedded-residue-remediation/ai-assignment.md (new)",
-    "docs/session-sets/005-northwind-embedded-residue-remediation/s1-verification.md (new)",
-    "docs/session-sets/005-northwind-embedded-residue-remediation/disposition.json (new)",
-    "docs/session-sets/005-northwind-embedded-residue-remediation/{session-state.json,session-events.jsonl,activity-log.json}",
-    "AccessHarvester.sln (modified - removed AccessHarvester.CharacterizationTests + BlazorAddAnOrder project entries)",
-    "199 paths git-rm'd at HEAD (spent experimental/process arcs + workflow-package-pilot + order-entry pilot arc + spent driver/probe scripts) - see disposition-manifest.csv DELETE rows"
+    "docs/session-sets/005-northwind-embedded-residue-remediation/test-triage.md (new)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/s2-verification.md + s2-verification-round-2.md + s2-verification-round-3.md (new, raw verifier output)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/s2-issues.json + s2-issues-round-2.json (new)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/ai-assignment.md (S1+S2 actuals + S3 recommendation)",
+    "docs/session-sets/005-northwind-embedded-residue-remediation/{disposition.json,session-state.json,session-events.jsonl,activity-log.json}",
+    "tests/AccessHarvester.SymbolDb.Tests/FixtureLoader.cs (re-pointed to committed HHC kb)",
+    "tests/AccessHarvester.SymbolDb.Tests/HhcFixtureSmokeTests.cs (new; replaces NorthwindFixtureSmokeTests.cs)",
+    "tests/AccessHarvester.SymbolDb.Tests/NorthwindFixtureSmokeTests.cs (deleted)",
+    "tests/AccessHarvester.SymbolDb.Tests/{CrossModuleResolutionTests,ReferencesExtractorTests,PersistenceAndDedupTests,Session3ExtractorTests}.cs (re-based onto HHC / inline synthetic)",
+    "tests/AccessHarvester.SymbolDb.Tests/DeferralPreFilterTests.cs (redacted literals)",
+    "tests/AccessHarvester.SymbolDb.Tests/GenerateArtifacts.cs (deleted)",
+    "tests/AccessHarvester.Tests/ReportBaseline/{RecordSourceResolver,ReportAggregateComputer,ReportAggregatesWriter,ReportBaselineService,SumAggregateEvaluator}Tests.cs (redacted literals)",
+    "tests/AccessHarvester.Tests/SyntheticDbIntegrationTests.cs (removed NorthwindDevEdition COM methods + helper)",
+    "tests/AccessHarvester.Integration/Pipeline/{CanonicalGoldenRegressionTests,GoldenCorpusRegenerator}.cs (dropped NorthwindDevEdition arm)",
+    "AccessHarvester.sln (removed AccessHarvester.TranslationProbe.Tests project)",
+    "tests/AccessHarvester.TranslationProbe.Tests/* (entire project deleted: csproj + 3 .cs)"
   ],
   "verification_method": "api",
   "verification_verdict": "VERIFIED",
@@ -18,10 +26,10 @@
     "engine": "claude-code",
     "provider": "anthropic",
     "model": "claude-sonnet-4-6",
-    "effort": "high",
+    "effort": "medium",
     "reason": {
       "code": "switch-due-to-cost",
-      "specifics": "Session 2 is mechanical per-file test re-basing of ~26 corpus-pinned tests onto the HomeHealthCare fixture (re-base or delete, never weaken assertions); Sonnet handles the code comprehension at lower cost than Opus, with mandatory cross-provider verification retained."
+      "specifics": "Session 3 is mechanical-to-moderate redaction of source comments/strings + reference docs, one small CLI-helper genericization (RunForNorthwind), a final HEAD residue scan, and closeout; Sonnet handles this at much lower cost than Opus (routed recommendation via gemini-pro), with cross-provider verification retained."
     }
   },
   "blockers": []

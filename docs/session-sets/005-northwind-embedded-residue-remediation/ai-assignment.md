@@ -19,7 +19,10 @@
 
 **Actuals (Session 1):**
 
-*Placeholder for actual orchestrator used, time, cost, and deviations.*
+- Orchestrator used: claude-code / Claude Opus 4.8 @ effort=high (not the routed GPT-4o recommendation; human ran Claude).
+- Verification: gpt-5-4 (OpenAI), Round 1 VERIFIED, 0 issues.
+- Deviations: material scope expansion — the fresh `HEAD` scan surfaced an order-entry PILOT ARC (packages + 33 characterization tests + a buildable MudBlazor project) not in the `003` inventory or the `005` spec; maintainer authorized deleting the whole arc. 198 deletes landed.
+- Notes: the disposition manifest is the authoritative input to Session 2/3.
 
 ---
 
@@ -63,4 +66,14 @@
 
 ---
 
-**Next-Session Orchestrator Recommendation (for Session 2):** Claude 3.5 Sonnet
+**Actuals (Session 2):**
+
+- Orchestrator used: claude-code / Claude Opus 4.8 @ effort=high (not the routed Sonnet recommendation; human ran Claude).
+- Triage refined the manifest's blanket "re-base" into per-file decisions: 6 keep-clean (manifest over-included), 5 redact-literals, 6 re-base (5 SymbolDb tests + FixtureLoader), 3 edit-trim-arm, 1 file delete (GenerateArtifacts), 1 project delete (TranslationProbe.Tests).
+- Cross-provider consensus on the triage strategy: route(analysis)→gemini-pro APPROVE; query→gpt-5-4 APPROVE-WITH-CHANGES (all 3 execution constraints adopted). Two manifest-deviating deletes maintainer-confirmed.
+- The SymbolDb tests were re-based onto the committed HHC kb fixture and now run **live** (68/68 pass, 0 skipped) instead of skipping on the absent proprietary fixture — a coverage gain.
+- Deviation from triage doc: CrossModuleResolutionTests re-based onto an inline synthetic 2-module fixture (not HHC) because HHC's forms qualify cross-module calls and so cannot exercise *bare-name* cross-module binding; inline synthetic preserves that exact semantic hermetically.
+- Total routed cost: see `ai_router/router-metrics.jsonl` (triage consensus + recommendations; ~$0.08).
+
+**Next-Session Orchestrator Recommendation (for Session 3):** Claude Sonnet 4.6 @ effort=medium.
+Rationale (routed via gemini-pro): Session 3 is mechanical-to-moderate redaction of source comments + reference docs plus one small CLI-helper genericization and a final residue scan; Sonnet provides sufficient code/text intelligence at much lower cost than Opus, with cross-provider verification retained.

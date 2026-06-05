@@ -13,7 +13,7 @@ public class RecordSourceResolverTests
 {
     [Theory]
     [InlineData("Orders")]
-    [InlineData("qryInvoiceDetails")]
+    [InlineData("qrySummaryDetails")]
     [InlineData("Order Details")]
     public void Resolve_TreatsObjectName_AsTableOrQuery_AndWrapsInSelectStar(string name)
     {
@@ -29,10 +29,10 @@ public class RecordSourceResolverTests
     {
         const string savedQuerySql = "SELECT OrderID, CustomerID FROM Orders";
 
-        var resolved = RecordSourceResolver.Resolve("qryOrders", savedQuerySql);
+        var resolved = RecordSourceResolver.Resolve("qryLedger", savedQuerySql);
 
         Assert.Equal(RecordSourceKind.TableOrQueryName, resolved.Kind);
-        Assert.Equal("qryOrders", resolved.Original);
+        Assert.Equal("qryLedger", resolved.Original);
         Assert.Equal(savedQuerySql, resolved.SqlToExecute);
     }
 

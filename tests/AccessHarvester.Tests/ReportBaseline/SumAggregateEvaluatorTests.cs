@@ -45,9 +45,9 @@ public class SumAggregateEvaluatorTests
     }
 
     [Fact]
-    public void Evaluate_RptInvoiceSubtotalExpression_ComputesExtendedPriceSum()
+    public void Evaluate_RptSummarySubtotalExpression_ComputesExtendedPriceSum()
     {
-        // The actual rptInvoice footer display total:
+        // A representative report footer display total:
         //   =Sum((1-[Discount])*[Quantity]*[UnitPrice])
         // Row 1: (1-0.1)*2*100 = 180 ; Row 2: (1-0)*3*10 = 30 → 210.
         var table = BuildTable(

@@ -1,0 +1,18 @@
+{
+  "session": 2,
+  "round": 2,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "note": "Round-1 issues s2-r1-1 (macro coverage) and s2-r1-3 (helper rename) confirmed RESOLVED. One residual from the s2-r1-2 doc sanitization remained.",
+  "issues": [
+    {
+      "id": "s2-r2-1",
+      "severity": "Major",
+      "location": "docs/session-sets/005-northwind-embedded-residue-remediation/test-triage.md",
+      "summary": "The delete-project section still listed two deleted file PATHS containing a frm*-derived proprietary name (FrmCompanyDetailTranslationProbe.cs and its tests).",
+      "fix": "Genericize those filenames to object-kind/category placeholders.",
+      "status": "fixed",
+      "resolution": "Replaced the two filenames with '<frm*>TranslationProbe.cs' / '<frm*>TranslationProbeTests.cs' category placeholders and added a note that the exact paths remain on the S1 disposition-manifest + git history per the spec's accepted-process-record carve-out. A grep for the distinctive identifier set (incl. FrmCompanyDetail) over test-triage.md now returns no matches."
+    }
+  ]
+}

@@ -16,10 +16,10 @@ public class ReportAggregatesWriterTests
 {
     private static ReportAggregates Sample() => new()
     {
-        ReportName = "rptInvoice",
-        RecordSource = "qryInvoice",
+        ReportName = "rptSummary",
+        RecordSource = "qrySummary",
         RecordSourceKind = "TableOrQueryName",
-        ResolvedSql = "SELECT * FROM [qryInvoice]",
+        ResolvedSql = "SELECT * FROM [qrySummary]",
         RowCount = 7,
         NumericColumns = ImmutableArray.Create("OrderID", "Total"),
         GrandTotals = ImmutableSortedDictionary<string, decimal?>.Empty
@@ -66,8 +66,8 @@ public class ReportAggregatesWriterTests
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
 
-        Assert.Equal("rptInvoice", root.GetProperty("ReportName").GetString());
-        Assert.Equal("qryInvoice", root.GetProperty("RecordSource").GetString());
+        Assert.Equal("rptSummary", root.GetProperty("ReportName").GetString());
+        Assert.Equal("qrySummary", root.GetProperty("RecordSource").GetString());
         Assert.Equal("TableOrQueryName", root.GetProperty("RecordSourceKind").GetString());
         Assert.Equal(7, root.GetProperty("RowCount").GetInt64());
 

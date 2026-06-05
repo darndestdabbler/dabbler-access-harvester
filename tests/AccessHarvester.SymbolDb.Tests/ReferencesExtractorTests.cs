@@ -10,18 +10,21 @@ using Xunit;
 
 namespace AccessHarvester.SymbolDb.Tests;
 
-// Session 2 hermetic tests: References + MemberAccesses extraction and
-// persistence against the canonical NorthwindDevEdition fixture.
+// References + MemberAccesses extraction and persistence against the committed
+// synthetic HomeHealthCare kb fixture (frmProviderSearch + basListHelpers +
+// basUtilities). Set 005: re-based off the proprietary NorthwindDevEdition
+// fixture; runs live on every clone.
 public sealed class ReferencesExtractorTests
 {
     // ── Fixture helpers ───────────────────────────────────────────────────
 
-    private static BuildResult BuildNorthwind()
+    private static BuildResult BuildHhc()
     {
         var rawModules = new[]
         {
-            FixtureLoader.LoadFormFrmCompanyDetail(),
-            FixtureLoader.LoadModStrings(),
+            FixtureLoader.LoadFormFrmProviderSearch(),
+            FixtureLoader.LoadBasListHelpers(),
+            FixtureLoader.LoadBasUtilities(),
         };
         return new SymbolDbBuilder().Build(rawModules);
     }
@@ -31,21 +34,21 @@ public sealed class ReferencesExtractorTests
     [SkippableFact]
     public void Build_ProducesReferenceRows()
     {
-        var result = BuildNorthwind();
+        var result = BuildHhc();
         Assert.NotEmpty(result.References);
     }
 
     [SkippableFact]
     public void Build_ProducesMemberAccessRows()
     {
-        var result = BuildNorthwind();
+        var result = BuildHhc();
         Assert.NotEmpty(result.MemberAccesses);
     }
 
     // ── Probe target reference set ────────────────────────────────────────
 
-    // The spec's probe-target procedure and the identifiers it directly uses.
-    private const string ProbeTargetFqn = "Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate";
+    // A rich form event handler and the identifiers it directly uses.
+    private const string ProbeTargetFqn = "Form_frmProviderSearch.btnSearch_Click";
 
     private static IReadOnlyList<ReferenceRow> ProbeTargetRefs(BuildResult result) =>
         result.References.Where(r => r.FromFqn == ProbeTargetFqn).ToList();
@@ -53,18 +56,18 @@ public sealed class ReferencesExtractorTests
     [SkippableFact]
     public void ProbeTarget_HasReferenceRows()
     {
-        var refs = ProbeTargetRefs(BuildNorthwind());
+        var refs = ProbeTargetRefs(BuildHhc());
         Assert.NotEmpty(refs);
     }
 
     [SkippableTheory]
-    [InlineData("CompanyIsActive")]
-    [InlineData("GetString")]
-    [InlineData("Me")]
-    [InlineData("strDlgMsg")]
+    [InlineData("PopulateProviderList")]
+    [InlineData("StatusEnum")]
+    [InlineData("i")]
+    [InlineData("where")]
     public void ProbeTarget_ContainsExpectedIdentifiers(string identifier)
     {
-        var refs = ProbeTargetRefs(BuildNorthwind());
+        var refs = ProbeTargetRefs(BuildHhc());
         Assert.Contains(refs, r => string.Equals(r.Identifier, identifier,
             StringComparison.OrdinalIgnoreCase));
     }
@@ -74,36 +77,35 @@ public sealed class ReferencesExtractorTests
     [SkippableFact]
     public void ProbeTarget_AllRefRows_HaveCallerKind_UiEventHandler()
     {
-        // cboCompanyTypeID_BeforeUpdate is in a Form module and its name contains '_'.
-        var refs = ProbeTargetRefs(BuildNorthwind());
+        // btnSearch_Click is in a Form module and its name contains '_'.
+        var refs = ProbeTargetRefs(BuildHhc());
         Assert.NotEmpty(refs);
         Assert.All(refs, r => Assert.Equal("ui-event-handler", r.CallerKind));
     }
 
     [SkippableFact]
-    public void ModStrings_ProcRefs_HaveCallerKind_NonUi()
+    public void StandardModule_ProcRefs_HaveCallerKind_NonUi()
     {
-        var result = BuildNorthwind();
-        // GetString is a Public Function in a Standard module.
+        var result = BuildHhc();
+        // Functions in the standard modules are non-ui callers.
         var refs = result.References
-            .Where(r => r.FromFqn.StartsWith("modStrings.", StringComparison.OrdinalIgnoreCase))
+            .Where(r => r.FromFqn.StartsWith("basListHelpers.", StringComparison.OrdinalIgnoreCase)
+                     || r.FromFqn.StartsWith("basUtilities.", StringComparison.OrdinalIgnoreCase))
             .ToList();
-        // Not all refs may come from procedures — skip if the module has no refs.
-        if (refs.Count == 0) return;
+        Assert.NotEmpty(refs);
         Assert.All(refs, r => Assert.Equal("non-ui", r.CallerKind));
     }
 
-    // ── Reverse-lookup: CompanyIsActive has a caller ───────────────────────
+    // ── Reverse-lookup: PopulateProviderList has a caller ──────────────────
 
     [SkippableFact]
-    public void CompanyIsActive_HasAtLeastOneCaller()
+    public void PopulateProviderList_HasAtLeastOneCaller()
     {
-        var result = BuildNorthwind();
-        // Some reference's to_fqn must resolve to CompanyIsActive's FQN.
+        var result = BuildHhc();
         bool hasCaller = result.References.Any(r =>
             r.ToFqn is not null &&
-            r.ToFqn.EndsWith(".CompanyIsActive", StringComparison.OrdinalIgnoreCase));
-        Assert.True(hasCaller, "Expected at least one reference to CompanyIsActive.");
+            r.ToFqn.EndsWith(".PopulateProviderList", StringComparison.OrdinalIgnoreCase));
+        Assert.True(hasCaller, "Expected at least one reference to PopulateProviderList.");
     }
 
     // ── Resolution status variety ─────────────────────────────────────────
@@ -111,26 +113,26 @@ public sealed class ReferencesExtractorTests
     [SkippableFact]
     public void References_ContainAtLeastOneResolvedRow()
     {
-        var result = BuildNorthwind();
+        var result = BuildHhc();
         Assert.Contains(result.References, r => r.ResolutionStatus == "resolved");
     }
 
     [SkippableFact]
     public void References_ContainMeIdentifierRows()
     {
-        // Me references may be resolved-to-me or unresolved (me-in-standard-module
-        // when the form's class context is not wired in the resolver). Either way
-        // the identifier must appear in the references list.
-        var result = BuildNorthwind();
+        // Me references are unresolved (me-in-standard-module when the form's
+        // class context is not wired in the resolver). Either way the identifier
+        // must appear in the references list.
+        var result = BuildHhc();
         Assert.Contains(result.References, r => r.Identifier == "Me");
     }
 
-    // ── MemberAccesses: Me.X or Me!X rows present ─────────────────────────
+    // ── MemberAccesses: Me.X rows present ─────────────────────────────────
 
     [SkippableFact]
     public void MemberAccesses_ContainMeReceiverRow()
     {
-        var result = BuildNorthwind();
+        var result = BuildHhc();
         Assert.Contains(result.MemberAccesses, ma => ma.Receiver == "Me");
     }
 
@@ -139,55 +141,66 @@ public sealed class ReferencesExtractorTests
     [SkippableFact]
     public void Persist_ReferencesAndMemberAccesses_RoundTrip()
     {
-        var result = BuildNorthwind();
-        // Temp file intentionally not deleted — SQLite on Windows holds file locks
-        // briefly after Dispose; deleting in the test causes intermittent failures.
-        // The OS cleans up TEMP on reboot. (Same pattern as PersistenceAndDedupTests.)
+        var result = BuildHhc();
         string tempPath = Path.Combine(Path.GetTempPath(),
             $"symbol-db-refs-test-{Guid.NewGuid():N}.sqlite");
+        try
+        {
+            using var writer = new SymbolDbWriter(tempPath);
+            writer.Write(result.Modules, result.Symbols, result.Parameters,
+                result.References, result.MemberAccesses);
 
-        using var writer = new SymbolDbWriter(tempPath);
-        writer.Write(result.Modules, result.Symbols, result.Parameters,
-            result.References, result.MemberAccesses);
+            using var cmd = writer.Connection.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM [References];";
+            long refCount = (long)cmd.ExecuteScalar()!;
+            Assert.Equal((long)result.References.Count, refCount);
 
-        using var cmd = writer.Connection.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM [References];";
-        long refCount = (long)cmd.ExecuteScalar()!;
-        Assert.Equal((long)result.References.Count, refCount);
-
-        using var cmd2 = writer.Connection.CreateCommand();
-        cmd2.CommandText = "SELECT COUNT(*) FROM MemberAccesses;";
-        long maCount = (long)cmd2.ExecuteScalar()!;
-        Assert.Equal((long)result.MemberAccesses.Count, maCount);
+            using var cmd2 = writer.Connection.CreateCommand();
+            cmd2.CommandText = "SELECT COUNT(*) FROM MemberAccesses;";
+            long maCount = (long)cmd2.ExecuteScalar()!;
+            Assert.Equal((long)result.MemberAccesses.Count, maCount);
+        }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            if (File.Exists(tempPath)) File.Delete(tempPath);
+        }
     }
 
     [SkippableFact]
     public void Persist_ProbeTargetCallerKind_IsUiEventHandlerInDb()
     {
-        var result = BuildNorthwind();
+        var result = BuildHhc();
         string tempPath = Path.Combine(Path.GetTempPath(),
             $"symbol-db-refs-test-{Guid.NewGuid():N}.sqlite");
+        try
+        {
+            using var writer = new SymbolDbWriter(tempPath);
+            writer.Write(result.Modules, result.Symbols, result.Parameters,
+                result.References, result.MemberAccesses);
 
-        using var writer = new SymbolDbWriter(tempPath);
-        writer.Write(result.Modules, result.Symbols, result.Parameters,
-            result.References, result.MemberAccesses);
+            using var cmd = writer.Connection.CreateCommand();
+            cmd.CommandText = $"""
+                SELECT COUNT(*) FROM [References]
+                WHERE from_fqn = '{ProbeTargetFqn}'
+                  AND caller_kind != 'ui-event-handler';
+                """;
+            long nonUiCount = (long)cmd.ExecuteScalar()!;
+            Assert.Equal(0L, nonUiCount);
 
-        using var cmd = writer.Connection.CreateCommand();
-        cmd.CommandText = $"""
-            SELECT COUNT(*) FROM [References]
-            WHERE from_fqn = '{ProbeTargetFqn}'
-              AND caller_kind != 'ui-event-handler';
-            """;
-        long nonUiCount = (long)cmd.ExecuteScalar()!;
-        Assert.Equal(0L, nonUiCount);
-
-        using var cmd2 = writer.Connection.CreateCommand();
-        cmd2.CommandText = $"""
-            SELECT COUNT(*) FROM [References]
-            WHERE from_fqn = '{ProbeTargetFqn}';
-            """;
-        long totalCount = (long)cmd2.ExecuteScalar()!;
-        Assert.True(totalCount > 0, "Expected at least one reference row for the probe target.");
+            using var cmd2 = writer.Connection.CreateCommand();
+            cmd2.CommandText = $"""
+                SELECT COUNT(*) FROM [References]
+                WHERE from_fqn = '{ProbeTargetFqn}';
+                """;
+            long totalCount = (long)cmd2.ExecuteScalar()!;
+            Assert.True(totalCount > 0, "Expected at least one reference row for the probe target.");
+        }
+        finally
+        {
+            SqliteConnection.ClearAllPools();
+            if (File.Exists(tempPath)) File.Delete(tempPath);
+        }
     }
 
     // ── Kind classification ───────────────────────────────────────────────
@@ -195,27 +208,27 @@ public sealed class ReferencesExtractorTests
     [SkippableFact]
     public void References_ContainCallKindRows()
     {
-        var result = BuildNorthwind();
+        var result = BuildHhc();
         Assert.Contains(result.References, r => r.Kind == "call");
     }
 
     [SkippableFact]
     public void References_ContainVariableReadKindRows()
     {
-        var result = BuildNorthwind();
+        var result = BuildHhc();
         Assert.Contains(result.References, r => r.Kind == "variable_read");
     }
 
-    // ── MemberAccesses: this fixture has no bang-access rows ──────────────
+    // ── MemberAccesses shape invariant ────────────────────────────────────
 
     [SkippableFact]
-    public void MemberAccesses_NoBangAccessRows_InNorthwindFixture()
+    public void MemberAccesses_AllHaveNonEmptyReceiver()
     {
-        // Form_frmCompanyDetail + modStrings use dot notation (Me.Foo) exclusively;
-        // no bang-access (Me!Foo / Forms!X) expressions appear. Assert the known
-        // fixture count so the test is fixture-assertive rather than a vacuous guard.
-        var result = BuildNorthwind();
-        Assert.DoesNotContain(result.MemberAccesses, ma => ma.Path.StartsWith("!"));
+        // The form uses dot-notation control access (Me.txtFilterName etc.);
+        // every member-access row must carry a non-empty receiver.
+        var result = BuildHhc();
+        Assert.NotEmpty(result.MemberAccesses);
+        Assert.All(result.MemberAccesses, ma => Assert.False(string.IsNullOrEmpty(ma.Receiver)));
     }
 
     // ── Local variable to_fqn includes procedure segment ─────────────────
@@ -223,43 +236,45 @@ public sealed class ReferencesExtractorTests
     [SkippableFact]
     public void LocalVariable_ToFqn_IncludesProcedureSegment()
     {
-        // strDlgMsg is a local Dim in cboCompanyTypeID_BeforeUpdate.
-        // Its to_fqn must be Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate.strDlgMsg,
-        // not Form_frmCompanyDetail.strDlgMsg (which would confuse it with a module var).
-        // This fixture resolves strDlgMsg — the assertion is not guarded.
-        var result = BuildNorthwind();
-        var strDlgMsgRef = result.References.First(r =>
+        // 'where' is a local Dim in btnSearch_Click. Its to_fqn must be
+        // Form_frmProviderSearch.btnSearch_Click.where, not
+        // Form_frmProviderSearch.where (which would confuse it with a module var).
+        var result = BuildHhc();
+        var localRef = result.References.First(r =>
             r.FromFqn == ProbeTargetFqn &&
-            string.Equals(r.Identifier, "strDlgMsg", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(r.Identifier, "where", StringComparison.OrdinalIgnoreCase) &&
             r.ToFqn is not null);
 
-        Assert.Contains(".cboCompanyTypeID_BeforeUpdate.", strDlgMsgRef.ToFqn,
+        Assert.Contains(".btnSearch_Click.", localRef.ToFqn!,
             StringComparison.OrdinalIgnoreCase);
-        Assert.StartsWith("Form_frmCompanyDetail.", strDlgMsgRef.ToFqn,
+        Assert.StartsWith("Form_frmProviderSearch.", localRef.ToFqn!,
             StringComparison.OrdinalIgnoreCase);
     }
 
-    // ── control_access / enum_value_use: shape guards ─────────────────────
+    // ── control_access / enum_value_use: present and well-formed ──────────
 
     [SkippableFact]
-    public void References_ControlAccessRows_HaveNonEmptyIdentifier()
+    public void References_ControlAccessRows_ArePresent_AndHaveNonEmptyIdentifier()
     {
-        // The NorthwindDevEdition fixture uses dot notation (Me.Foo) rather than bang
-        // (Me!Foo) in the two probe modules, so control_access count is 0 here.
-        // This test validates the shape invariant for any rows that do appear.
-        var result = BuildNorthwind();
-        Assert.All(result.References.Where(r => r.Kind == "control_access"),
-            r => Assert.False(string.IsNullOrEmpty(r.Identifier)));
+        // The form's dot-notation control references (Me.txtFilterName etc.)
+        // produce control_access reference rows.
+        var result = BuildHhc();
+        var controlAccess = result.References.Where(r => r.Kind == "control_access").ToList();
+        Assert.NotEmpty(controlAccess);
+        Assert.All(controlAccess, r => Assert.False(string.IsNullOrEmpty(r.Identifier)));
     }
 
     [SkippableFact]
-    public void References_EnumValueUseRows_HaveNonEmptyIdentifier()
+    public void References_EnumValueUseRows_ArePresent_AndResolveToTheEnum()
     {
-        // Cross-module enum members are unresolved in this fixture (the resolver does
-        // not yet do cross-module lookup). enum_value_use count is 0 here. The test
-        // validates the shape invariant for any rows that do appear.
-        var result = BuildNorthwind();
-        Assert.All(result.References.Where(r => r.Kind == "enum_value_use"),
-            r => Assert.False(string.IsNullOrEmpty(r.Identifier)));
+        // StatusEnum.* uses in the form produce enum_value_use reference rows
+        // that resolve to the form's StatusEnum declaration.
+        var result = BuildHhc();
+        var enumUses = result.References.Where(r => r.Kind == "enum_value_use").ToList();
+        Assert.NotEmpty(enumUses);
+        Assert.All(enumUses, r => Assert.False(string.IsNullOrEmpty(r.Identifier)));
+        Assert.Contains(enumUses, r =>
+            r.ResolutionStatus == "resolved" &&
+            r.ToFqn == "Form_frmProviderSearch.StatusEnum");
     }
 }

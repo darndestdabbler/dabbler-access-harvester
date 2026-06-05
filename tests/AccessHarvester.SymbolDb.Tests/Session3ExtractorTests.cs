@@ -7,56 +7,65 @@ using Xunit;
 
 namespace AccessHarvester.SymbolDb.Tests;
 
-// Hermetic tests for Session 3 extractors:
+// Tests for Session 3 extractors:
 //   FormControlsExtractor, MacroExtractor, QuerySchemaExtractor, TableSchemaExtractor.
-// Most tests read from the proprietary, local-only NorthwindDevEdition KB fixture
-// under the gitignored tmp/ tree (absent on a fresh clone) and are therefore
-// [SkippableFact] — they skip when the fixture is absent (set 004). The two
-// synthetic tests (inline SQL / inline temp JSON) carry no fixture dependency and
-// stay [Fact].
+// Set 005: re-based off the proprietary, local-only NorthwindDevEdition KB fixture
+// onto the committed synthetic HomeHealthCare kb (samples/GoldenOutput/HomeHealthCare/kb),
+// so they run live on every clone. Two synthetic tests (inline SQL / inline temp
+// JSON) carry no fixture dependency and stay [Fact].
+//
+// Note: the committed HHC kb macros store their structure as a parsed Children tree
+// rather than the raw `_AXL:` chunks the COM extractor emits, so MacroExtractor
+// parses them into zero MacroActions. The action-parsing path itself is covered
+// hermetically by AccessHarvester.Tests/MacroXmlParserTests; here the macro tests
+// assert the file-level extraction contract (one row per file, FQNs, SourceXml,
+// dense action positions) that is the MacroExtractor's unique responsibility.
 public sealed class Session3ExtractorTests
 {
+    // Control-rich form: a combo bound to a query + lookup table.
+    private const string ControlFormName = "frmClientServiceNeedDetail";
+    private const string ControlFormFqn = "Form_frmClientServiceNeedDetail";
+
     // ── FormControlsExtractor ────────────────────────────────────────────────
 
     [SkippableFact]
-    public void FormControls_CboCompanyTypeID_IsExtracted()
+    public void FormControls_CboServiceID_IsExtracted()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
-        string formPath = Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json");
+        string kbRoot = FixtureLoader.KbRoot();
+        string formPath = Path.Combine(kbRoot, "Forms", ControlFormName + ".json");
 
-        var result = FormControlsExtractor.Extract(formPath, "Form_frmCompanyDetail");
+        var result = FormControlsExtractor.Extract(formPath, ControlFormFqn);
 
         // The combo box must be present.
-        var cbo = Assert.Single(result.Controls, c => c.ControlName == "cboCompanyTypeID");
-        Assert.Equal("Form_frmCompanyDetail", cbo.FormFqn);
+        var cbo = Assert.Single(result.Controls, c => c.ControlName == "cboServiceID");
+        Assert.Equal(ControlFormFqn, cbo.FormFqn);
         Assert.Equal("ComboBox", cbo.ControlType);
 
-        // ControlSource is CompanyTypeID (the form's record-source column this control writes to).
-        Assert.Equal("CompanyTypeID", cbo.ControlSource);
+        // ControlSource is the record-source column this control writes to.
+        Assert.Equal("ServiceID", cbo.ControlSource);
 
         // RowSource is the combo's list-population query.
-        Assert.Equal("qrycboCompanyType", cbo.RowSource);
+        Assert.Equal("qryServiceList", cbo.RowSource);
 
-        // BaseInfo decoding: bound_table_or_query = CompanyTypes, bound_column = CompanyTypeID.
-        Assert.Equal("CompanyTypes", cbo.BoundTableOrQuery);
-        Assert.Equal("CompanyTypeID", cbo.BoundColumn);
+        // BaseInfo decoding: bound_table_or_query = tblServices, bound_column = ServiceID.
+        Assert.Equal("tblServices", cbo.BoundTableOrQuery);
+        Assert.Equal("ServiceID", cbo.BoundColumn);
     }
 
     [SkippableFact]
     public void FormControls_AllNamedControls_AreExtracted()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
-        string formPath = Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json");
+        string kbRoot = FixtureLoader.KbRoot();
+        string formPath = Path.Combine(kbRoot, "Forms", ControlFormName + ".json");
 
-        var result = FormControlsExtractor.Extract(formPath, "Form_frmCompanyDetail");
+        var result = FormControlsExtractor.Extract(formPath, ControlFormFqn);
 
-        // The form has several named controls (TextBoxes, ComboBoxes, CommandButtons, Subforms, etc.)
-        // At minimum we expect more than 10 named controls in frmCompanyDetail.
+        // The form has many named controls (TextBoxes, ComboBoxes, CommandButtons, etc.).
         Assert.True(result.Controls.Count > 10,
             $"Expected >10 named controls, found {result.Controls.Count}.");
 
         // Every control must belong to the form.
-        Assert.All(result.Controls, c => Assert.Equal("Form_frmCompanyDetail", c.FormFqn));
+        Assert.All(result.Controls, c => Assert.Equal(ControlFormFqn, c.FormFqn));
 
         // No duplicate control names within the same form.
         var names = result.Controls.Select(c => c.ControlName).ToList();
@@ -64,32 +73,30 @@ public sealed class Session3ExtractorTests
     }
 
     [SkippableFact]
-    public void EventBindings_CboCompanyTypeID_BeforeUpdate_IsVbaBinding()
+    public void EventBindings_BtnSave_Click_IsVbaBinding()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
-        string formPath = Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json");
+        string kbRoot = FixtureLoader.KbRoot();
+        string formPath = Path.Combine(kbRoot, "Forms", ControlFormName + ".json");
 
-        var result = FormControlsExtractor.Extract(formPath, "Form_frmCompanyDetail");
+        var result = FormControlsExtractor.Extract(formPath, ControlFormFqn);
 
-        // The spec probe target: cboCompanyTypeID.BeforeUpdate → vba handler.
         var binding = Assert.Single(result.Bindings,
-            b => b.ControlName == "cboCompanyTypeID" && b.EventName == "BeforeUpdate");
+            b => b.ControlName == "btnSave" && b.EventName == "Click");
 
         Assert.Equal("vba", binding.HandlerKind);
-        Assert.Equal("Form_frmCompanyDetail.cboCompanyTypeID_BeforeUpdate", binding.HandlerFqn);
+        Assert.Equal(ControlFormFqn + ".btnSave_Click", binding.HandlerFqn);
         Assert.Null(binding.HandlerExpression);
     }
 
     [SkippableFact]
     public void EventBindings_FormLevelEvents_AreExtracted()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
-        string formPath = Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json");
+        string kbRoot = FixtureLoader.KbRoot();
+        string formPath = Path.Combine(kbRoot, "Forms", ControlFormName + ".json");
 
-        var result = FormControlsExtractor.Extract(formPath, "Form_frmCompanyDetail");
+        var result = FormControlsExtractor.Extract(formPath, ControlFormFqn);
 
-        // The form JSON has AfterInsert, BeforeDelConfirm, AfterDelConfirm, OnOpen, OnLoad
-        // as [Event Procedure] bindings at the form level (control_name = null).
+        // Form-level [Event Procedure] bindings have control_name = null.
         var formLevelBindings = result.Bindings.Where(b => b.ControlName is null).ToList();
         Assert.True(formLevelBindings.Count > 0, "Expected at least one form-level event binding.");
 
@@ -97,42 +104,15 @@ public sealed class Session3ExtractorTests
         Assert.Contains(formLevelBindings, b =>
             b.EventName == "Open" &&
             b.HandlerKind == "vba" &&
-            b.HandlerFqn == "Form_frmCompanyDetail.Form_Open");
+            b.HandlerFqn == ControlFormFqn + ".Form_Open");
     }
 
     // ── MacroExtractor ───────────────────────────────────────────────────────
 
     [SkippableFact]
-    public void MacroExtractor_AutoExec_IsExtracted()
-    {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
-        string autoExecPath = Path.Combine(kbRoot, "Macros", "AutoExec.json");
-
-        var result = MacroExtractor.Extract([autoExecPath]);
-
-        // Exactly one macro row for AutoExec.
-        var macro = Assert.Single(result.Macros);
-        Assert.Equal("AutoExec", macro.Fqn);
-        Assert.False(macro.IsDead);
-        Assert.False(string.IsNullOrEmpty(macro.SourceXml),
-            "AutoExec has _AXL: chunks and should have non-empty SourceXml.");
-
-        // AutoExec has at least one action.
-        Assert.True(result.MacroActions.Count > 0,
-            $"Expected >0 MacroActions for AutoExec, found {result.MacroActions.Count}.");
-
-        // All actions reference the same macro FQN.
-        Assert.All(result.MacroActions, a => Assert.Equal("AutoExec", a.MacroFqn));
-
-        // Positions are sequential from 0.
-        var positions = result.MacroActions.Select(a => a.Position).OrderBy(p => p).ToList();
-        for (int i = 0; i < positions.Count; i++) Assert.Equal(i, positions[i]);
-    }
-
-    [SkippableFact]
     public void MacroExtractor_AllMacroFiles_AreExtracted()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        string kbRoot = FixtureLoader.KbRoot();
         string macroDir = Path.Combine(kbRoot, "Macros");
         var paths = Directory.GetFiles(macroDir, "*.json");
 
@@ -141,9 +121,65 @@ public sealed class Session3ExtractorTests
         // One MacroRow per file.
         Assert.Equal(paths.Length, result.Macros.Count);
 
-        // No duplicate FQNs.
+        // No duplicate FQNs, and each macro yields some SourceXml.
         var fqns = result.Macros.Select(m => m.Fqn).ToList();
         Assert.Equal(fqns.Distinct().Count(), fqns.Count);
+        Assert.All(result.Macros, m => Assert.False(string.IsNullOrEmpty(m.SourceXml),
+            $"Macro '{m.Fqn}' should have non-empty SourceXml."));
+    }
+
+    // Synthetic (inline temp JSON) — no fixture dependency; never skips.
+    // The committed HHC kb macros store a parsed Children tree rather than the
+    // raw `_AXL:` chunks the COM extractor emits, so they yield zero MacroActions.
+    // This action-bearing synthetic fixture preserves MacroExtractor's
+    // extractor-level "macro file -> action rows" integration coverage
+    // (distinct from the parser-only MacroXmlParserTests).
+    [Fact]
+    public void MacroExtractor_ActionBearingMacro_EmitsActionsWithDensePositions()
+    {
+        string tempPath = Path.Combine(Path.GetTempPath(),
+            $"mcrSynthetic_{System.Guid.NewGuid():N}.json");
+        // One Begin child whose Properties.Comment carries an _AXL: chunk with two
+        // top-level Actions (single-quoted XML attributes avoid SaveAsText quote escaping).
+        File.WriteAllText(tempPath, """
+            {
+              "Type": "DocumentRoot",
+              "Properties": {},
+              "Children": [
+                {
+                  "Type": "Begin",
+                  "Properties": {
+                    "Comment": "_AXL:<UserInterfaceMacro><Statements><Action Name='Beep' /><Action Name='OpenForm'><Argument Name='FormName'>frmHome</Argument></Action></Statements></UserInterfaceMacro>"
+                  },
+                  "Children": []
+                }
+              ]
+            }
+            """);
+        try
+        {
+            var result = MacroExtractor.Extract(new[] { tempPath });
+
+            var macro = Assert.Single(result.Macros);
+            Assert.False(string.IsNullOrEmpty(macro.SourceXml));
+
+            // The action extractor must emit one row per top-level action.
+            Assert.Equal(2, result.MacroActions.Count);
+
+            // All actions reference this macro; positions are dense from 0.
+            Assert.All(result.MacroActions, a => Assert.Equal(macro.Fqn, a.MacroFqn));
+            var positions = result.MacroActions.Select(a => a.Position).OrderBy(p => p).ToList();
+            Assert.Equal(new[] { 0, 1 }, positions);
+
+            // The two named actions are present in document order, with arguments.
+            Assert.Equal("Beep", result.MacroActions[0].ActionName);
+            Assert.Equal("OpenForm", result.MacroActions[1].ActionName);
+            Assert.Contains("frmHome", result.MacroActions[1].ArgumentsJson);
+        }
+        finally
+        {
+            if (File.Exists(tempPath)) File.Delete(tempPath);
+        }
     }
 
     // ── QuerySchemaExtractor ─────────────────────────────────────────────────
@@ -151,7 +187,7 @@ public sealed class Session3ExtractorTests
     [SkippableFact]
     public void QuerySchemaExtractor_AllQueryFiles_AreExtracted()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        string kbRoot = FixtureLoader.KbRoot();
         var paths = Directory.GetFiles(Path.Combine(kbRoot, "Queries"), "*.json");
 
         var queries = QuerySchemaExtractor.Extract(paths);
@@ -168,7 +204,7 @@ public sealed class Session3ExtractorTests
         }
     }
 
-    // Synthetic (inline SQL) — no NorthwindDevEdition fixture dependency; never skips.
+    // Synthetic (inline SQL) — no fixture dependency; never skips.
     [Fact]
     public void QuerySchemaExtractor_NormalizedSql_IsUppercaseNoParameters()
     {
@@ -187,13 +223,12 @@ public sealed class Session3ExtractorTests
     [SkippableFact]
     public void QuerySchemaExtractor_IdenticalQueries_ShareCanonicalFqn()
     {
-        // Build two synthetic query file-equivalent rows by examining the real
-        // NorthwindDevEdition fixture for any duplicates by text hash.
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        // Examine the real fixture for any text-hash duplicates and assert the
+        // dedup contract for whichever groups exist.
+        string kbRoot = FixtureLoader.KbRoot();
         var paths = Directory.GetFiles(Path.Combine(kbRoot, "Queries"), "*.json");
         var queries = QuerySchemaExtractor.Extract(paths);
 
-        // Group by text hash to find any duplicates.
         var groups = queries
             .Where(q => q.SqlTextHash is not null)
             .GroupBy(q => q.SqlTextHash!)
@@ -203,8 +238,7 @@ public sealed class Session3ExtractorTests
         if (groups.Count == 0)
         {
             // No duplicates in this fixture — document and pass.
-            // The test fulfils the spec requirement: "if zero, document."
-            Assert.True(true, "No duplicate query text hashes in NorthwindDevEdition fixture.");
+            Assert.True(true, "No duplicate query text hashes in the HomeHealthCare fixture.");
             return;
         }
 
@@ -223,32 +257,32 @@ public sealed class Session3ExtractorTests
 
     // ── TableSchemaExtractor ─────────────────────────────────────────────────
 
+    private const string LookupTableName = "tlkpServiceCategories";
+
     [SkippableFact]
-    public void TableSchemaExtractor_CompanyTypes_IsLookupTable()
+    public void TableSchemaExtractor_LookupTable_IsScoredAsLookup()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        string kbRoot = FixtureLoader.KbRoot();
         var paths = Directory.GetFiles(Path.Combine(kbRoot, "Tables"), "*.json");
 
-        // Provide CompanyTypes as a row-source table (it is used by cboCompanyTypeID).
-        var rowSourceNames = new HashSet<string>(["CompanyTypes"], System.StringComparer.OrdinalIgnoreCase);
+        // Provide the lookup table as a row-source table (a combo populates from it).
+        var rowSourceNames = new HashSet<string>([LookupTableName], System.StringComparer.OrdinalIgnoreCase);
         var tables = TableSchemaExtractor.Extract(paths, rowSourceNames);
 
-        var ct = Assert.Single(tables, t => t.Fqn == "CompanyTypes");
+        var lookup = Assert.Single(tables, t => t.Fqn == LookupTableName);
 
-        Assert.Equal("CompanyTypeID", ct.PrimaryKeyColumn);
+        Assert.Equal("CategoryID", lookup.PrimaryKeyColumn);
 
-        // Score: PK(+20) + RecordCount≤200(+30) + is-row-source(+30) = at least 80.
-        // The CompanyType column name does not contain any label-hint word
-        // (value/text/label/caption/name/description), so the +20 label-col bonus
-        // is not expected — the score reflects the other three contributors.
-        Assert.True(ct.IsLookupTableScore >= 70,
-            $"CompanyTypes score {ct.IsLookupTableScore} should be ≥70 for a bona-fide lookup table.");
+        // Score: PK(+20) + RecordCount<=200(+30) + is-row-source(+30) => >=70 for a
+        // bona-fide lookup table (a label-hint column name may add a further bonus).
+        Assert.True(lookup.IsLookupTableScore >= 70,
+            $"{LookupTableName} score {lookup.IsLookupTableScore} should be >=70 for a bona-fide lookup table.");
     }
 
     [SkippableFact]
     public void TableSchemaExtractor_AllTableFiles_AreExtracted()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        string kbRoot = FixtureLoader.KbRoot();
         var paths = Directory.GetFiles(Path.Combine(kbRoot, "Tables"), "*.json");
 
         var tables = TableSchemaExtractor.Extract(paths);
@@ -262,7 +296,7 @@ public sealed class Session3ExtractorTests
 
     // ── Round-1 verification fixes ───────────────────────────────────────────
 
-    // Synthetic (inline temp JSON) — no NorthwindDevEdition fixture dependency; never skips.
+    // Synthetic (inline temp JSON) — no fixture dependency; never skips.
     [Fact]
     public void EventBindings_OnPush_MapsToClickHandler()
     {
@@ -304,14 +338,12 @@ public sealed class Session3ExtractorTests
     [SkippableFact]
     public void MacroExtractor_PositionsAreDenseAndContiguous()
     {
-        // Run against the AutoExec macro and assert (macro_fqn, position) is
-        // dense from 0..N-1 — no gaps even if the parser yields non-object
-        // elements that the extractor skips.
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        // Each macro's MacroActions positions must be dense from 0..N-1 — no gaps,
+        // even if the parser yields non-object elements that the extractor skips.
+        string kbRoot = FixtureLoader.KbRoot();
         var paths = Directory.GetFiles(Path.Combine(kbRoot, "Macros"), "*.json");
         var result = MacroExtractor.Extract(paths);
 
-        // Group by macro_fqn; each group's positions must be 0..count-1.
         var byMacro = result.MacroActions.GroupBy(a => a.MacroFqn);
         foreach (var g in byMacro)
         {
@@ -324,7 +356,7 @@ public sealed class Session3ExtractorTests
     [SkippableFact]
     public void QuerySchemaExtractor_DeadQuery_IsFlagged()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        string kbRoot = FixtureLoader.KbRoot();
         var paths = Directory.GetFiles(Path.Combine(kbRoot, "Queries"), "*.json");
 
         // Caller set contains every query name except one — that one becomes is_dead.
@@ -344,21 +376,21 @@ public sealed class Session3ExtractorTests
     [SkippableFact]
     public void TableSchemaExtractor_RowSourceCount_TiersTheScore()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        string kbRoot = FixtureLoader.KbRoot();
         var paths = Directory.GetFiles(Path.Combine(kbRoot, "Tables"), "*.json");
 
-        // CompanyTypes: simulate 3 controls referencing it (≥3 → +30).
+        // Simulate 3 controls referencing the lookup table (>=3 → +30).
         var counts = new Dictionary<string, int>(System.StringComparer.OrdinalIgnoreCase)
         {
-            ["CompanyTypes"] = 3,
+            [LookupTableName] = 3,
         };
         var heavy = TableSchemaExtractor.Extract(paths, counts);
-        var ctHeavy = Assert.Single(heavy, t => t.Fqn == "CompanyTypes");
+        var ctHeavy = Assert.Single(heavy, t => t.Fqn == LookupTableName);
 
-        // Now simulate exactly 1 control (1 ≤ uses < 3 → +20).
-        counts["CompanyTypes"] = 1;
+        // Now simulate exactly 1 control (1 <= uses < 3 → +20).
+        counts[LookupTableName] = 1;
         var light = TableSchemaExtractor.Extract(paths, counts);
-        var ctLight = Assert.Single(light, t => t.Fqn == "CompanyTypes");
+        var ctLight = Assert.Single(light, t => t.Fqn == LookupTableName);
 
         Assert.True(ctHeavy.IsLookupTableScore > ctLight.IsLookupTableScore,
             $"Heavier row-source usage ({ctHeavy.IsLookupTableScore}) should outscore light ({ctLight.IsLookupTableScore}).");
@@ -370,11 +402,11 @@ public sealed class Session3ExtractorTests
     [SkippableFact]
     public void Session3_FullPipeline_WritesExpectedTableCounts()
     {
-        string kbRoot = FixtureLoader.NorthwindKbRoot();
+        string kbRoot = FixtureLoader.KbRoot();
 
         var formResult = FormControlsExtractor.Extract(
-            Path.Combine(kbRoot, "Forms", "frmCompanyDetail.json"),
-            "Form_frmCompanyDetail");
+            Path.Combine(kbRoot, "Forms", ControlFormName + ".json"),
+            ControlFormFqn);
 
         var rowSourceNames = new HashSet<string>(
             formResult.Controls
@@ -389,11 +421,13 @@ public sealed class Session3ExtractorTests
         var tables = TableSchemaExtractor.Extract(
             Directory.GetFiles(Path.Combine(kbRoot, "Tables"), "*.json"), rowSourceNames);
 
-        // Write everything to an in-memory SQLite database.
+        // Build the VBA module set from the SAME form whose controls we
+        // extracted, so the FormControls' form_fqn has a matching Modules row
+        // (the FormControls -> Modules foreign key).
         var rawModules = new[]
         {
-            FixtureLoader.LoadFormFrmCompanyDetail(),
-            FixtureLoader.LoadModStrings(),
+            FixtureLoader.LoadForm(ControlFormName),
+            FixtureLoader.LoadBasListHelpers(),
         };
         var vbaResult = new AccessHarvester.SymbolDb.Extraction.SymbolDbBuilder().Build(rawModules);
 
@@ -416,7 +450,6 @@ public sealed class Session3ExtractorTests
             queries: queries,
             tables: tables);
 
-        // Verify row counts via SQL.
         int CountTable(string tableName)
         {
             using var cmd = conn.CreateCommand();
@@ -427,7 +460,9 @@ public sealed class Session3ExtractorTests
         Assert.True(CountTable("FormControls") > 0, "FormControls should have rows.");
         Assert.True(CountTable("EventBindings") > 0, "EventBindings should have rows.");
         Assert.True(CountTable("Macros") > 0, "Macros should have rows.");
-        Assert.True(CountTable("MacroActions") > 0, "MacroActions should have rows.");
+        // Note: the committed HHC macros carry no _AXL action chunks, so
+        // MacroActions is legitimately empty here (the action parser is covered
+        // by MacroXmlParserTests). We assert the FK integrity below regardless.
         Assert.True(CountTable("Queries") > 0, "Queries should have rows.");
         Assert.True(CountTable("Tables") > 0, "Tables should have rows.");
 
