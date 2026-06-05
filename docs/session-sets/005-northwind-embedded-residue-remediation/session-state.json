@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "005-northwind-embedded-residue-remediation",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -40,9 +40,9 @@
     {
       "number": 3,
       "title": "Genericize C# Source + Redact Docs + Final Residue Scan + Closeout",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-05T15:13:14.364952-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-05T16:25:04.823688-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
