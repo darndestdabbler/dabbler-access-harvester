@@ -797,6 +797,39 @@ reference; if it proves out twice in *this* repo, propose promotion to
   via `fetch --force --tags --prune` + `reset --hard origin/main` +
   `reflog expire --all` + `gc --prune=now`.
 
+### A Reviewed Disposition/Inventory Manifest Is A Floor, Not A Ceiling — Run The Final Residue Scan Against The Whole Tracked Tree
+
+- **Context:** Residue/compliance-remediation sets that author a reviewed per-file
+  disposition manifest in an early session and execute it across later sessions.
+  First hit in `005-northwind-embedded-residue-remediation` Session 3 (2026-06-05).
+- **Failure or friction:** The Session-1 manifest was authored from the `003`
+  inventory plus a fresh scan, yet the Session-3 **final scan over the entire
+  tracked tree** still surfaced files the manifest had never classified:
+  `docs/lowdefy-evaluation/` (5 files — and `prompt-for-codex.md` embedded a
+  **verbatim copy of the separately-deleted `add-an-order` business-logic
+  package**, denser than structural names → a Stop-Rule trigger),
+  `docs/ir-schema-forms-reports.md`, `tools/AccessHarvester.IrCodegen/`
+  (Program.cs + README), the generalization spec, and the
+  `form-report-code-and-grouping` process records. Several files the manifest *did*
+  list as `keep-accepted-generic` actually carried distinctive identifiers. A scan
+  scoped to manifest paths would have shipped all of these as residue.
+- **Lesson:** The reviewed manifest is the *plan*, not the *proof*. The
+  authoritative completeness gate is a fresh scan over the **whole tracked tree**
+  (`git grep` excluding only the explicitly-accepted process-record dirs + immutable
+  verifier outputs), not a re-walk of manifest rows. Treat any hit the manifest did
+  not anticipate as an inventory gap to fix, and any file carrying content **denser
+  than structural names** (verbatim business logic, source bodies) as a Stop-Rule
+  finding to **surface to the maintainer**, not to silently name-redact. This is the
+  same "verify against fresh reality, not the planning artifact" discipline as the
+  Evidence-Over-Inference principle, applied to residue inventory.
+- **Action for future sessions:** In the closeout session of any residue set, run
+  the final scan against the full tree before declaring done; reconcile every hit
+  against the accepted-paths list explicitly (as `final-residue-scan.md` does); and
+  re-examine manifest `keep-accepted` classifications against the actual file
+  contents rather than trusting the label. If a second residue set hits the same
+  manifest-under-coverage pattern, promote this to a Convention in
+  `project-guidance.md`.
+
 ---
 
 ## Cost Guard On Verification: Skip When Verifier Cost Greatly Exceeds Generator
