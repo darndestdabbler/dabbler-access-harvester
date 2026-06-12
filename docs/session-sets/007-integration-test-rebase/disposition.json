@@ -1,37 +1,29 @@
 {
   "status": "completed",
-  "summary": "Session 1: re-based all 8 northwind-output.json-dependent Integration tests onto the new committed HomeHealthCare-derived fixture examples/homehealthcare-output.json (SchemaVersion 1.1, deliberately v1.0-shaped, golden-literal field values); zero northwind-output references remain under tests/; filtered hermetic run green 23/23 per TRX; VERIFIED on round 2 after fixing the R1 HarvesterVersion-provenance Major and a stale-rationale Minor.",
+  "summary": "Session 2 (final): full Integration suite validated on the Access host - post-quarantine TRX total=60 executed=58 passed=58 failed=0 (2 non-executed: by-design corpus-regenerator skip + the quarantined sanitize test). The sanitize timeout was dispositioned with evidence that overturned the spec's intermittent-contention premise: persistent under a dotnet-test testhost parent (batch + targeted both fail at the 120s budget), healthy outside it (direct probes 0.54-0.55s exit 0, incl. an exact CliInvoker ProcessStartInfo replication; no msaccess.exe involved). Quarantined via [SkippableFact(Skip=...)] with evidence record s2-flake-disposition.md per the spec's persistent branch; a scoped sanitize-testhost-wedge investigation set is proposed (low urgency). Set 008-manifest-vba-ingestion-and-parser-hardening authored (spec + v4 not-started stub) from 006 P1a / F-3-1,2,3,6,9,10 with hard constraints carried verbatim. VERIFIED on round 2 after fixing the R1 Minor (final-tree full-suite TRX evidence).",
   "verification_method": "api",
   "verification_verdict": "VERIFIED",
   "files_changed": [
-    "examples/homehealthcare-output.json",
-    "examples/README.md",
-    "tests/AccessHarvester.Integration/Cli/CliValidateTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliGenerateDocsTests.cs",
-    "tests/AccessHarvester.Integration/Cli/CliDeterminismTests.cs",
-    "tests/AccessHarvester.Integration/Cli/PackagedBinarySmokeTests.cs",
-    "tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs",
-    "docs/session-sets/007-integration-test-rebase/s1-inventory.md",
+    "tests/AccessHarvester.Integration/Cli/SanitizeCommandTests.cs",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/spec.md",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/session-state.json",
+    "docs/session-sets/007-integration-test-rebase/s2-flake-disposition.md",
+    "docs/session-sets/007-integration-test-rebase/s2-verification.md",
+    "docs/session-sets/007-integration-test-rebase/s2-verification-round-2.md",
+    "docs/session-sets/007-integration-test-rebase/s2-issues.json",
+    "docs/session-sets/007-integration-test-rebase/s2-close-reason.md",
     "docs/session-sets/007-integration-test-rebase/ai-assignment.md",
-    "docs/session-sets/007-integration-test-rebase/s1-verification.md",
-    "docs/session-sets/007-integration-test-rebase/s1-verification-round-2.md",
-    "docs/session-sets/007-integration-test-rebase/s1-issues.json",
-    "docs/session-sets/007-integration-test-rebase/s1-close-reason.md",
+    "docs/session-sets/007-integration-test-rebase/change-log.md",
+    "docs/session-sets/007-integration-test-rebase/next-session-set-recommendation.md",
     "docs/session-sets/007-integration-test-rebase/disposition.json",
     "docs/session-sets/007-integration-test-rebase/session-state.json",
     "docs/session-sets/007-integration-test-rebase/session-events.jsonl",
     "docs/session-sets/007-integration-test-rebase/activity-log.json"
   ],
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "gemini-code-assist",
-    "provider": "google",
-    "model": "gemini-pro",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Routed ai-assignment.md analysis recommends Gemini Code Assist gemini-pro @ effort=high for Session 2: the session is dominated by authoring the long-form 008 spec (strong prose/synthesis fit) plus TRX flake analysis. Human retains orchestrator choice; if a Google orchestrator runs Session 2, the session-verification override (gpt-5-4) remains cross-provider."
-    }
+  "next_session_set": {
+    "slug": "008-manifest-vba-ingestion-and-parser-hardening",
+    "summary": "P1a of the 006 review, authored this session and ready to trigger (prerequisite 007 now complete): kb-tier VBA ingestion for the manifest's form/report ParserOutput (F-3-1 Critical), grammar/AstBuilder hardening + corpus pins (F-3-2/F-3-3/F-3-10), diagnostics surfacing + conformance-contract decision (F-3-6/F-3-9). Routed analysis recommends Claude Code (claude-opus-4-7) for its Session 1; P1b output-encoding-correctness is independent and can run in parallel."
   },
   "blockers": []
 }

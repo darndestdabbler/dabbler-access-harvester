@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "sessionNumber": 2,
+  "verificationRound": 1,
+  "verificationVerdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "description": "The final quarantined tree is not demonstrated by a full post-quarantine AccessHarvester.Integration TRX; the green final state is inferred from a pre-quarantine full run plus a post-quarantine class-only run.",
+      "location": "007 Session 2 closeout evidence / tests/AccessHarvester.Integration/TestResults",
+      "severity": "Minor",
+      "resolution_status": "fixed",
+      "resolution_notes": "Full AccessHarvester.Integration suite re-run on the final quarantined tree (sequential, foreground, TRX s2-full-integration-post-quarantine.trx): total=60 executed=58 passed=58 failed=0; the 2 non-executed are the by-design GoldenCorpusRegenerator skip and the quarantined sanitize test. Counters appended to s2-flake-disposition.md and cited in the closeout artifacts. Ride-along: the em-dash in the quarantine comment (flagged in R1 prose as possible mojibake) replaced with a plain hyphen to remove the encoding ambiguity.",
+      "resolved_in_round": 2
+    }
+  ]
+}

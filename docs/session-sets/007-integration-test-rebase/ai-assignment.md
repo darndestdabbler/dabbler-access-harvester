@@ -25,10 +25,10 @@ moderate
 | 7    | Finalize artifacts (`disposition.json`), commit, push, notify. | Direct |
 
 ### Actuals (filled after the session)
-- Orchestrator used: `<engine + model + effort>`
-- Total routed cost: $X.XX
-- Deviations from recommendation: `<any>`
-- Notes for next-session calibration: `<any>`
+- Orchestrator used: Claude Code claude-fable-5 @ effort=medium
+- Total routed cost: $0.26 (analysis $0.01 gemini-pro; session-verification 2 rounds $0.25 gpt-5-4)
+- Deviations from recommendation: steps 2-3 (inventory, fixture strategy) were handled in-conversation rather than routed to Opus — the orchestrator's model is the same provider at a higher tier, per the "orchestrator matches the routing target → handle in-conversation" convention. Step 1 doc synthesis was likewise in-conversation (the analysis route covered ai-assignment authoring only).
+- Notes for next-session calibration: Round 1 verification found 1 Major (fixture HarvesterVersion provenance) + 1 Minor; both fixed in-session, Round 2 VERIFIED — the two-round pattern is the dominant cost; budget for it.
 
 **Next-session orchestrator recommendation (Session 2):**
 Gemini Code Assist gemini-pro @ effort=high
@@ -57,7 +57,7 @@ high
 | 6    | Finalize artifacts, including `next-session-set-recommendation.md` (routed analysis). **Constraint:** Carry forward the never-regenerate-northwind rule into the next set's spec. Commit, push, notify. | Route (sonnet) for analysis; Direct for mechanics. |
 
 ### Actuals (filled after the session)
-- Orchestrator used: `<engine + model + effort>`
-- Total routed cost: $X.XX
-- Deviations from recommendation: `<any>`
-- Notes for next-session calibration: `<any>`
+- Orchestrator used: Claude Code claude-fable-5 @ effort=medium
+- Total routed cost: $0.21 (session-verification 2 rounds $0.20 gpt-5-4; analysis $0.007 gemini-pro; summarization $0.003 gemini-flash)
+- Deviations from recommendation: (1) the human's trigger chose Claude Code over the recommended Gemini Code Assist; (2) step 4 (008 spec authoring) was handled in-conversation rather than routed to Opus, per the "orchestrator matches the routing target → handle in-conversation" and synthesis-document conventions — disclosed in the verification prompt and assessed clean by the verifier (R1 prose, concern 4/D1); (3) step 2's routed TRX analysis was unnecessary — the flake characterization was driven by direct probes, mechanical evidence the orchestrator gathered itself.
+- Notes for next-session calibration: the spec's "intermittent flake" premise was overturned by evidence (persistent under a testhost parent); future flake-disposition steps should budget for 2–3 bounded probes rather than a single targeted re-run. R1's only finding was an evidence-completeness gap (final-tree full-suite TRX), not a substance issue — cite the final-state TRX proactively in closeout-grade prompts.

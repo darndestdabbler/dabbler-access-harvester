@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "008-manifest-vba-ingestion-and-parser-hardening",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Kb-Tier VBA Ingestion And Golden Regeneration",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Grammar And AstBuilder Hardening, Corpus Pins",
+      "status": "not-started"
+    },
+    {
+      "number": 3,
+      "title": "Diagnostics Surfacing And Conformance-Contract Decision",
+      "status": "not-started"
+    }
+  ]
+}

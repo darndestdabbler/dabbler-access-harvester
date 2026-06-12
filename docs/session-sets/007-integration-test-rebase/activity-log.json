@@ -1,7 +1,7 @@
 {
   "sessionSetName": "007-integration-test-rebase",
   "createdDate": "2026-06-12T16:03:15.882677-04:00",
-  "totalSessions": 0,
+  "totalSessions": 2,
   "entries": [
     {
       "sessionNumber": 1,
@@ -98,6 +98,100 @@
       "description": "Session 1 verification complete: VERIFIED on round 2 (gpt-5-4). Closeout artifacts authored (disposition.json before commit, s1-close-reason.md, s1-issues.json).",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 0,
+      "stepKey": "session-2/setup",
+      "dateTime": "2026-06-12T16:26:46.389938-04:00",
+      "description": "Session 2 start registered (start_session CLI); preflight: prior session commit/push verified, API keys OK, spec + guidance + lessons + workflow doc read.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/com-tier-validation",
+      "dateTime": "2026-06-12T16:38:46.981489-04:00",
+      "description": "Full Integration suite run sequential/foreground on Access host; TRX s2-full-integration.trx counters total=60 executed=59 passed=58 failed=1; sole failure = predicted sanitize timeout; all 8 re-based tests green; no wrapper hang, no orphaned processes.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/flake-disposition",
+      "dateTime": "2026-06-12T16:38:46.981489-04:00",
+      "description": "Sanitize flake characterized within time-box: reproducible 120s timeout under testhost parent (batch + targeted TRX), passes 0.54-0.55s exit 0 via direct spawn incl. exact CliInvoker ProcessStartInfo replication; classify ACE run passes under same harness. Spec premise (intermittent contention) overturned -> persistent-under-testhost. Disposition: quarantine via SkippableFact(Skip=...) + evidence record s2-flake-disposition.md; post-quarantine class run 2 passed/1 skipped/0 failed (s2-sanitize-quarantined.trx). Scoped investigation set proposed in closeout.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/next-set-authored",
+      "dateTime": "2026-06-12T16:43:59.659583-04:00",
+      "description": "Set 008-manifest-vba-ingestion-and-parser-hardening authored: spec.md (3 sessions: kb-tier VBA ingestion+golden regen; grammar/AstBuilder hardening+corpus pins; diagnostics surfacing+F-3-9 decision) from 006 P1a + F-3-1/2/3/6/9/10 recommendation blocks, hard constraints carried verbatim; v4 not-started state stub (omit-null). Authored in-conversation per the synthesis-document convention (orchestrator is the Anthropic top-tier model; route(architecture)->Opus is same-provider and times out at this prompt size) -- deviation from ai-assignment Route(opus) disclosed for verification.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/verification-r1",
+      "dateTime": "2026-06-12T16:51:59.664879-04:00",
+      "description": "Closeout-grade cross-provider verification R1 (gpt-5-4): ISSUES_FOUND, 1 Minor (final quarantined tree not demonstrated by full-suite TRX). Raw output s2-verification.md; structured s2-issues.json.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 15238,
+          "outputTokens": 9192,
+          "costUsd": 0.175975
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/verification-r2",
+      "dateTime": "2026-06-12T16:51:59.664879-04:00",
+      "description": "R1 Minor fixed: full Integration re-run on final quarantined tree, TRX s2-full-integration-post-quarantine.trx total=60 executed=58 passed=58 failed=0; em-dash->hyphen in quarantine comment; .accdb re-swept. R2 (gpt-5-4): VERIFIED, empty issues. Raw output s2-verification-round-2.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 2900,
+          "outputTokens": 1256,
+          "costUsd": 0.02609
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/closeout",
+      "dateTime": "2026-06-12T16:55:07.083701-04:00",
+      "description": "Closeout artifacts authored: disposition.json (final-session shape, verification_verdict VERIFIED, next_session_set=008), s2-close-reason.md, change-log.md (routed summarization gemini-flash $0.003), next-session-set-recommendation.md (routed analysis gemini-pro $0.007, hard constraints verbatim), ai-assignment.md actuals for both sessions. Committing, pushing, close_session, notify.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.007465
+        },
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0033787
+        }
+      ]
     }
   ]
 }
