@@ -5,14 +5,15 @@ using System.Linq;
 using System.Runtime.Versioning;
 using AccessHarvester.Integration.TestSupport;
 using Xunit;
+using CorePipeline = AccessHarvester.Core.Pipeline;
 
 namespace AccessHarvester.Integration.Pipeline;
 
-// Mechanical regenerator for the committed reports-baseline golden corpus
-// (samples/GoldenOutput/<fixture>/reports-baseline/). This is a DEV TOOL, not
+// Mechanical regenerator for the committed golden corpus
+// (samples/GoldenOutput/<fixture>/). This is a DEV TOOL, not
 // an assertion test: it is hard-guarded behind the AH_REGEN_GOLDEN env var and
 // Skip.IfNot, so a normal `dotnet test` run never touches the repo. Run it only
-// when an intentional, reviewed change to the report-baseline output shape
+// when an intentional, reviewed change to the output shape
 // lands (e.g. the DisplayTotals field + updated ContractNote added by the
 // harvester-report-displayed-total-parity session set) and the committed corpus
 // needs to be refreshed.
@@ -47,6 +48,91 @@ public sealed class GoldenCorpusRegenerator
                 "srptClientCurrentNeeds",
             },
         };
+
+    // Regenerates the pipeline slice of the committed golden corpus —
+    // manifest.json, unresolved-items.json, READ-ME-FIRST.md, and the
+    // kb/ + ir/ trees — through the exact capture + normalization
+    // CanonicalGoldenRegressionTests applies (Pipeline.Run →
+    // GoldenNormalizer), so a regen followed by the gate is guaranteed
+    // consistent. HomeHealthCare only: the NorthwindDevEdition golden
+    // tree is proprietary and local-only (session set 003) and must
+    // never be regenerated into the repo. The cleanup/, migration/,
+    // usage/, and reports-baseline/ slices belong to their own
+    // subcommands (reports-baseline has its own regenerator below).
+    //
+    // Usage (PowerShell, from the repo root, Windows + Access required):
+    //   $env:AH_REGEN_GOLDEN = "1"
+    //   dotnet test tests/AccessHarvester.Integration `
+    //     --filter "FullyQualifiedName~RegenerateCommittedPipelineCorpus"
+    //   Remove-Item Env:\AH_REGEN_GOLDEN
+    [SkippableFact]
+    public void RegenerateCommittedPipelineCorpus()
+    {
+        Skip.IfNot(
+            string.Equals(Environment.GetEnvironmentVariable("AH_REGEN_GOLDEN"), "1", StringComparison.Ordinal),
+            "Golden-corpus regeneration is a guarded dev tool. Set AH_REGEN_GOLDEN=1 to run it.");
+        AccessAvailability.SkipIfNoAccess();
+
+        string fixturePath = Path.Combine(RepoPaths.Samples(), "HomeHealthCare.accdb");
+        Skip.IfNot(
+            File.Exists(fixturePath),
+            $"Canonical fixture not present at {fixturePath}.");
+
+        string goldenDir = Path.Combine(RepoPaths.Samples(), "GoldenOutput", "HomeHealthCare");
+        string stagingRoot = Path.Combine(
+            Path.GetTempPath(), $"ah-golden-regen-pipeline-{Guid.NewGuid():N}");
+        try
+        {
+            var runResult = CorePipeline.Default().Run(fixturePath, stagingRoot);
+
+            File.WriteAllText(
+                Path.Combine(goldenDir, "manifest.json"),
+                GoldenNormalizer.NormalizeManifest(
+                    File.ReadAllText(Path.Combine(runResult.BaseDir, "manifest.json"))));
+            File.WriteAllText(
+                Path.Combine(goldenDir, "unresolved-items.json"),
+                GoldenNormalizer.NormalizeUnresolvedItems(
+                    File.ReadAllText(Path.Combine(runResult.BaseDir, "unresolved-items.json"))));
+            // READ-ME-FIRST.md is intentionally NOT copied: the golden
+            // corpus carries a curated version (corpus-specific entry
+            // points, AI-consumer workflow pointer) that diverges from
+            // the generic pipeline-emitted file, and the regression gate
+            // does not compare it.
+
+            CopyTree(runResult.KbDir, Path.Combine(goldenDir, "kb"), normalize: null);
+            CopyTree(runResult.IrDir, Path.Combine(goldenDir, "ir"),
+                normalize: GoldenNormalizer.NormalizePerObjectIr);
+        }
+        finally
+        {
+            if (Directory.Exists(stagingRoot))
+                Directory.Delete(stagingRoot, recursive: true);
+        }
+    }
+
+    // Rewrites a golden subtree from a freshly captured staging tree.
+    // The golden subtree is cleared first so an object removed from the
+    // fixture cannot leave an orphan behind.
+    private static void CopyTree(string sourceRoot, string goldenRoot, Func<string, string>? normalize)
+    {
+        if (!Directory.Exists(sourceRoot))
+            throw new DirectoryNotFoundException($"Captured tree missing: {sourceRoot}.");
+
+        if (Directory.Exists(goldenRoot))
+            Directory.Delete(goldenRoot, recursive: true);
+        Directory.CreateDirectory(goldenRoot);
+
+        foreach (var sourcePath in Directory.EnumerateFiles(sourceRoot, "*", SearchOption.AllDirectories))
+        {
+            string rel = Path.GetRelativePath(sourceRoot, sourcePath);
+            string goldenPath = Path.Combine(goldenRoot, rel);
+            Directory.CreateDirectory(Path.GetDirectoryName(goldenPath)!);
+            if (normalize is null)
+                File.Copy(sourcePath, goldenPath, overwrite: true);
+            else
+                File.WriteAllText(goldenPath, normalize(File.ReadAllText(sourcePath)));
+        }
+    }
 
     [SkippableFact]
     public void RegenerateCommittedReportBaselineCorpus()

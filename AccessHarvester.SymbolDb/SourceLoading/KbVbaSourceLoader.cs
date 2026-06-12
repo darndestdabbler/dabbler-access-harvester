@@ -1,9 +1,8 @@
 using System;
 using System.IO;
-using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using AccessHarvester.SymbolDb.Extraction;
+using AccessHarvester.Vba.Parser;
 
 namespace AccessHarvester.SymbolDb.SourceLoading;
 
@@ -55,47 +54,9 @@ public static class KbVbaSourceLoader
             Source: source);
     }
 
-    // The VBE-format module header lines (`VERSION x.y CLASS`, `BEGIN`,
-    // `END`, `Attribute VB_*`, and the leading `CodeBehindForm` / `Class`
-    // marker the harvester emits) are not accepted by the standalone VBA
-    // parser. They sit before any executable code, so we drop every line
-    // up to the first one that looks like real source — `Option ...`, an
-    // access modifier (`Public`/`Private`/`Friend`), `Sub`/`Function`/
-    // `Property`/`Enum`/`Type`/`Declare`/`Const`/`Dim`/`Implements`/
-    // `Event`, or a comment.
+    // The VBE-header strip lives in the parser project
+    // (VbeHeaderStripper) so the Core manifest pipeline can share it;
+    // this wrapper keeps the loader's historical entry point.
     private static string StripVbeHeader(string source)
-    {
-        if (string.IsNullOrEmpty(source)) return source;
-        var normalised = source.Replace("\r\n", "\n").Split('\n');
-        int dropUntil = -1;
-        for (int i = 0; i < normalised.Length; i++)
-        {
-            string line = normalised[i].TrimStart();
-            if (IsHeaderLine(line))
-            {
-                dropUntil = i;
-                continue;
-            }
-            break;
-        }
-        if (dropUntil < 0) return source;
-
-        var sb = new StringBuilder();
-        for (int i = dropUntil + 1; i < normalised.Length; i++)
-        {
-            sb.Append(normalised[i]);
-            if (i + 1 < normalised.Length) sb.Append('\n');
-        }
-        return sb.ToString();
-    }
-
-    private static readonly Regex HeaderPatterns = new(
-        @"^(VERSION\s|BEGIN\b|END\b|MultiUse\b|Attribute\s+VB_|CodeBehindForm\b|Class\b|Object\s*=)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    private static bool IsHeaderLine(string trimmedLine)
-    {
-        if (trimmedLine.Length == 0) return true;             // blank lines before the header end
-        return HeaderPatterns.IsMatch(trimmedLine);
-    }
+        => VbeHeaderStripper.Strip(source);
 }

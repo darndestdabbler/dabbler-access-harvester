@@ -1,0 +1,34 @@
+{
+  "status": "completed",
+  "summary": "Session 1: F-3-1 (Critical) fixed - EmitManifestArtifacts sources form/report VBA from the kb tier's VbaCode (shared VbeHeaderStripper extracted from the SymbolDb ingestion path; KbVbaSourceLoader delegates) instead of whole-file parsing the raw SaveAsText dump, and the parse result's diagnostics are no longer discarded (degraded parse -> VBA_PARSE_DEGRADED; signal is Diagnostics.Count>0 || Lossy because the parse pipeline defaults to Recovering). Golden manifest regenerated via the new guarded RegenerateCommittedPipelineCorpus dev tool: forms with >=1 parsed item 0/19 -> 17/19, reports 0/12 -> 9/12, 140 EventHandler items, Me. x665; new real catch rptClientProfile VBA_PARSE_DEGRADED (previously silent); kb/ and ir/ byte-identical. Expected Unresolved wall (2222 vs 2131 resolved) present and disclosed per spec - F-3-4 wiring stays out of scope. 4 hermetic pins added (staged kb/ir tree, no COM). Integration TRX total=61 executed=58 passed=58 failed=0 (007 baseline held; sanitize quarantine intact). VERIFIED on round 1.",
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "files_changed": [
+    "AccessHarvester.Vba.Parser/VbeHeaderStripper.cs",
+    "AccessHarvester.SymbolDb/SourceLoading/KbVbaSourceLoader.cs",
+    "AccessHarvester.Core/Pipeline.cs",
+    "tests/AccessHarvester.Tests/ManifestVbaIngestionTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/GoldenCorpusRegenerator.cs",
+    ".gitignore",
+    "samples/GoldenOutput/HomeHealthCare/manifest.json",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/ai-assignment.md",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/s1-verification.md",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/s1-close-reason.md",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/disposition.json",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/session-state.json",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/session-events.jsonl",
+    "docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/activity-log.json"
+  ],
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "codex",
+    "provider": "openai",
+    "model": "gpt-5-5",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Routed ai-assignment.md analysis recommends codex gpt-5-5 @ effort=high for Session 2: intricate multi-file parser work (ANTLR Vba.g4 grammar edits, AstBuilder hardening, corpus pins). Human retains orchestrator choice; if an OpenAI orchestrator runs Session 2, swap the session-verification override away from gpt-5-4 (use opus or gemini-pro) so verification stays cross-provider, per lessons-learned."
+    }
+  },
+  "blockers": []
+}

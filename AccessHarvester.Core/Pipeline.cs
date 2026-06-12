@@ -19,6 +19,7 @@ using VbaReferenceResolver = AccessHarvester.Vba.Resolver.References.ReferenceRe
 using AccessHarvester.Vba.Resolver.Scopes;
 using ManifestModuleKind = AccessHarvester.Pipeline.Manifest.ModuleKind;
 using ResolverModuleKind = AccessHarvester.Vba.Resolver.Scopes.ModuleKind;
+using VbaParseMode = AccessHarvester.Vba.Parser.ParseMode;
 
 namespace AccessHarvester.Core;
 
@@ -225,7 +226,7 @@ public sealed class Pipeline
         string irDir = IrDir(outputRoot, dbName);
         var enrich = Enrich(translate.KbDir, irDir, clean);
 
-        EmitManifestArtifacts(extract.BaseDir, databasePath, extract.RawDir, enrich.IrDir);
+        EmitManifestArtifacts(extract.BaseDir, databasePath, extract.RawDir, translate.KbDir, enrich.IrDir);
         EmitRootIndex(outputRoot);
 
         return new RunResult(
@@ -238,16 +239,26 @@ public sealed class Pipeline
     // into a DatabaseManifest alongside any form/report specs already
     // built by the ir/ enrichment pass.
     //
-    // Module discovery reads *.txt files from raw/Modules/, raw/Forms/,
-    // and raw/Reports/ (SaveAsText output). Form/report specs are loaded
-    // from ir/Forms/*.ir.json and ir/Reports/*.ir.json via
+    // Module discovery reads *.txt files from raw/ModulesAndClasses/
+    // (SaveAsText output) and form/report VBA from the kb tier's
+    // VbaCode field (kb/Forms/*.json, kb/Reports/*.json) — a raw
+    // form/report .txt is layout DSL with the VBA after a
+    // `CodeBehindForm` marker, which the whole-file parse cannot see
+    // (006 review F-3-1). Form/report specs are loaded from
+    // ir/Forms/*.ir.json and ir/Reports/*.ir.json via
     // FormMetadataExtractor + FormComponentSpecBuilder.
     //
     // Files that fail to parse are logged as HarvesterDiagnostics and
     // skipped rather than aborting the emission — one broken module
     // should not prevent the rest of the manifest from being written.
-    private static void EmitManifestArtifacts(
-        string baseDir, string databasePath, string rawDir, string irDir)
+    // Parses that succeed in a degraded mode (recovery used, or parse
+    // diagnostics present) are visible as VBA_PARSE_DEGRADED
+    // diagnostics rather than silently shipping a reduced ParserOutput.
+    // (Internal, not private, so the hermetic ingestion-path tests can
+    // drive manifest emission against a staged raw/kb/ir tree — the
+    // method is pure file IO; no Access COM.)
+    internal static void EmitManifestArtifacts(
+        string baseDir, string databasePath, string rawDir, string kbDir, string irDir)
     {
         var database = new DatabaseInfo
         {
@@ -278,10 +289,18 @@ public sealed class Pipeline
             new List<(string Name, ManifestModuleKind Kind)>();
         foreach (var category in new[] { "ModulesAndClasses", "Forms", "Reports" })
         {
-            var categoryDir = Path.Combine(rawDir, category);
+            // Forms and Reports source their VBA from the kb tier's
+            // VbaCode field (everything from the SaveAsText
+            // `CodeBehindForm` marker onward, captured by
+            // AccessTextParser). Feeding the raw .txt whole-file fed
+            // layout DSL to the VBA parser and produced zero items for
+            // every form/report, silently (006 review F-3-1).
+            bool fromKb = category != "ModulesAndClasses";
+            var categoryDir = Path.Combine(fromKb ? kbDir : rawDir, category);
             if (!Directory.Exists(categoryDir)) continue;
 
-            foreach (var file in Directory.GetFiles(categoryDir, "*.txt").OrderBy(f => f, StringComparer.Ordinal))
+            var searchPattern = fromKb ? "*.json" : "*.txt";
+            foreach (var file in Directory.GetFiles(categoryDir, searchPattern).OrderBy(f => f, StringComparer.Ordinal))
             {
                 var name = Path.GetFileNameWithoutExtension(file);
                 // Kind detection is lifted out of the parse try-block so a
@@ -291,20 +310,56 @@ public sealed class Pipeline
                 // true elsewhere) — the worst case is one stub with the
                 // standalone-vs-class flag wrong, which is materially
                 // better than dropping the module from the manifest.
-                bool isClassModule = category != "ModulesAndClasses";
+                bool isClassModule = fromKb;
                 try
                 {
-                    var text = File.ReadAllText(file, Encoding.GetEncoding(1252));
+                    string text;
+                    if (fromKb)
+                    {
+                        // A form/report without code-behind has no VbaCode
+                        // key in its kb JSON (SaveAsText emitted no
+                        // CodeBehindForm section) — nothing to parse, and
+                        // its export's ParserOutput stays absent per
+                        // omission semantics.
+                        var vbaCode = ReadKbVbaCode(file);
+                        if (vbaCode is null) continue;
+                        // The kb VbaCode starts with the `CodeBehindForm`
+                        // marker + `Attribute VB_*` lines, which the
+                        // canonical-header recognition in
+                        // VbaModuleBodyLoader does not strip.
+                        text = VbeHeaderStripper.Strip(vbaCode);
+                    }
+                    else
+                    {
+                        text = File.ReadAllText(file, Encoding.GetEncoding(1252));
 
-                    // Within ModulesAndClasses, class modules carry the
-                    // "VERSION 1.0 CLASS" SaveAsText header; standalone
-                    // modules do not. Forms / Reports are always class
-                    // modules.
-                    isClassModule = category != "ModulesAndClasses"
-                        || text.Contains("VERSION 1.0 CLASS\r\n", StringComparison.Ordinal)
-                        || text.Contains("VERSION 1.0 CLASS\n", StringComparison.Ordinal);
+                        // Within ModulesAndClasses, class modules carry the
+                        // "VERSION 1.0 CLASS" SaveAsText header; standalone
+                        // modules do not. Forms / Reports are always class
+                        // modules.
+                        isClassModule =
+                            text.Contains("VERSION 1.0 CLASS\r\n", StringComparison.Ordinal)
+                            || text.Contains("VERSION 1.0 CLASS\n", StringComparison.Ordinal);
+                    }
 
-                    var (ast, _) = VbaModuleBodyLoader.LoadAndParse(text);
+                    var (ast, parseResult) = VbaModuleBodyLoader.LoadAndParse(text);
+                    // ModeUsed reports which parse *strategy* ran — the
+                    // pipeline default is Recovering even for a clean
+                    // parse — so the degraded signal is the presence of
+                    // parse diagnostics (or the lossy fallback), not a
+                    // non-Strict mode.
+                    if (parseResult.Diagnostics.Count > 0
+                        || parseResult.ModeUsed == VbaParseMode.Lossy)
+                    {
+                        diagnostics.Add(new HarvesterDiagnostic
+                        {
+                            Severity = HarvesterDiagnosticSeverity.Warning,
+                            Message = $"VBA parse degraded for '{name}': "
+                                + $"mode={parseResult.ModeUsed}, "
+                                + $"diagnostics={parseResult.Diagnostics.Count}",
+                            Code = "VBA_PARSE_DEGRADED",
+                        });
+                    }
 
                     var manifestKind = isClassModule
                         ? ManifestModuleKind.ClassModule
@@ -460,6 +515,19 @@ public sealed class Pipeline
         File.WriteAllText(
             Path.Combine(baseDir, "READ-ME-FIRST.md"),
             ReadMeFirstContent);
+    }
+
+    // Reads the top-level VbaCode string out of a kb-tier form/report
+    // JSON file. Returns null when the object has no code-behind — the
+    // translator only writes VbaCode when SaveAsText emitted a
+    // CodeBehindForm section.
+    private static string? ReadKbVbaCode(string kbJsonPath)
+    {
+        using var doc = JsonDocument.Parse(File.ReadAllText(kbJsonPath, Encoding.UTF8));
+        return doc.RootElement.TryGetProperty("VbaCode", out var vbaCode)
+            && vbaCode.ValueKind == JsonValueKind.String
+                ? vbaCode.GetString()
+                : null;
     }
 
     // Cross-DB roll-up index emitted at the AccessMetaData/ root after

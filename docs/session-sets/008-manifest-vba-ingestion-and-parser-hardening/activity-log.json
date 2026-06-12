@@ -1,0 +1,86 @@
+{
+  "sessionSetName": "008-manifest-vba-ingestion-and-parser-hardening",
+  "createdDate": "2026-06-12T17:04:41.965987-04:00",
+  "totalSessions": 3,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/step-0-1-setup",
+      "dateTime": "2026-06-12T17:04:41.968583-04:00",
+      "description": "Step 0-1 preflight: required reading (project-guidance, lessons-learned, workflow doc, spec), API keys OK, prior set 007 verified committed+pushed and complete (prereq met), register_session_start done (claude-code/anthropic/claude-fable-5 @ high). Added **/TestResults/ to .gitignore (transient TRX output was untracked noise).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/step-3.5-ai-assignment",
+      "dateTime": "2026-06-12T17:05:09.914167-04:00",
+      "description": "Authored ai-assignment.md via routed analysis (all 3 sessions; hard constraints carried verbatim in prompt).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 6146,
+          "outputTokens": 1479,
+          "costUsd": 0.0224725
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/step-4.2-reground-f31",
+      "dateTime": "2026-06-12T17:11:38.369830-04:00",
+      "description": "Re-grounded F-3-1 against current tree. All 006 anchors hold: whole-file feed of raw/Forms|Reports/*.txt at Pipeline.cs:307 via VbaModuleBodyLoader.LoadAndParse with diagnostics discarded (var (ast, _)); per-file catch only emits VBA_PARSE_FAILURE on throw. kb form/report JSON carries top-level VbaCode starting with CodeBehindForm + Attribute VB_* lines (AccessTextParser captures from marker onward); forms without code-behind omit VbaCode. VbaModuleBodyLoader CanonicalHeader regex cannot strip a CodeBehindForm-led header; KbVbaSourceLoader.StripVbeHeader (line-based) is the working reference. kbDir is in scope at the single EmitManifestArtifacts call site (Run). Core reaches Vba.Parser transitively via AccessHarvester.Pipeline; SymbolDb references Vba.Parser directly -> shared stripper extracted into Vba.Parser reachable by both. Core grants InternalsVisibleTo(AccessHarvester.Tests) -> hermetic manifest-path pin feasible (EmitManifestArtifacts is pure file IO; PipelineCleanTests harness pattern). Schema HarvesterDiagnostic.Code is free string -> new VBA_PARSE_DEGRADED code is additive-conformant. ParseResult exposes Diagnostics + ModeUsed for degraded detection.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/step-4.3-4.4-ingestion-fix-and-pins",
+      "dateTime": "2026-06-12T17:20:41.357842-04:00",
+      "description": "Implemented F-3-1 fix: extracted line-based VBE header strip into AccessHarvester.Vba.Parser/VbeHeaderStripper.cs (KbVbaSourceLoader now delegates); EmitManifestArtifacts (now internal, +kbDir param) sources Forms/Reports VBA from kb-tier VbaCode via VbeHeaderStripper + LoadAndParse, retains ParseResult and emits VBA_PARSE_DEGRADED diagnostics (signal = Diagnostics.Count>0 or Lossy; ModeUsed alone is strategy, not health - clean-parse pin caught the noise predicate). Forms without VbaCode omit ParserOutput (schema: optional). 4 hermetic pins in ManifestVbaIngestionTests (staged kb/ir temp tree): form items, report items, degraded-not-silent, no-code omission. Reaped wedged sanitize-probe AccessHarvester.exe PID 65056 (WMI Terminate, standing auth) that held Integration bin DLL locks from 007. Hermetic validation: Vba.Parser.Tests 69/69, SymbolDb.Tests 69/69, Pipeline.Tests(!ComDateMaxima) 789/789, AccessHarvester.Tests hermetic subset 463/463.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/step-6a-com-tier-golden-regen",
+      "dateTime": "2026-06-12T17:27:01.199771-04:00",
+      "description": "COM tier (deliberate, foreground, TRX-as-truth): added guarded RegenerateCommittedPipelineCorpus to GoldenCorpusRegenerator (Pipeline.Run -> GoldenNormalizer, HHC only; READ-ME-FIRST.md NOT copied - golden copy is curated; initial copy mistake caught+reverted). Regenerated golden: manifest.json only delta (kb/ + ir/ byte-identical -> change isolated to manifest emission). F-3-1 outcome on golden: Forms 17/19 with >=1 parsed item (was 0/19), Reports 9/12 (was 0/12), 140 EventHandler items, Me. x665; Diagnostics now 2: pre-existing basResetFixture VBA_PARSE_FAILURE (F-3-2, Session 2 scope) + NEW real catch rptClientProfile VBA_PARSE_DEGRADED (Recovering, 3 diagnostics - previously silent). Expected Unresolved wall present and disclosed: ResolutionStatus Unresolved=2222 vs Resolved=2131 (F-3-4 wiring deliberately out of scope, P3). Full Integration suite: TRX Counters total=61 executed=58 passed=58 failed=0 (matches 007 baseline; sanitize quarantine intact). Spurious samples/HomeHealthCare.accdb COM-touch diff swept via git checkout before staging.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/step-6-cross-provider-verification",
+      "dateTime": "2026-06-12T17:30:22.652474-04:00",
+      "description": "Routed session-verification R1 (diff + probes + TRX evidence + scope disclosures).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 8852,
+          "outputTokens": 5152,
+          "costUsd": 0.09941
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/step-8-closeout",
+      "dateTime": "2026-06-12T17:32:30.449151-04:00",
+      "description": "Closeout: verification VERIFIED R1 (gpt-5-4, 6-point analysis, no issues). Authored disposition.json (next_orchestrator: codex gpt-5-5 @ high per routed ai-assignment), s1-close-reason.md, ai-assignment.md Session 1 actuals (routed total ~USD 0.12). Commit + push + close_session + notify follow.",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}
