@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "007-integration-test-rebase",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Inventory, Fixture Strategy, And Hermetic Re-Base",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "COM-Tier Validation, Flake Disposition, And Next-Set Authoring",
+      "status": "not-started"
+    }
+  ]
+}
