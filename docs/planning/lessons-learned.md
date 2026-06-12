@@ -2205,3 +2205,65 @@ reference; if it proves out twice in *this* repo, propose promotion to
   only then set the release body's `SHA-256:` line from **that** sidecar before
   publishing. Get maintainer go-ahead before the tag push (the tag and the draft
   are outward-facing), not merely before the Publish click.
+
+## Constraint-Bearing Facts Must Travel IN The Routed Prompt — Routed Calls Cannot See Repo Stop Rules
+
+- **Context:** `006-solution-review-and-upstream-feedback-discovery` Session 4
+  (2026-06-12), authoring `next-session-set-recommendation.md` via
+  `route(task_type="analysis")` per the never-self-opine convention.
+- **Failure or friction:** The first routed call returned a recommendation whose
+  scope bullets instructed **regenerating `examples/northwind-output.json`** —
+  the exact action the repo's hardest stop rule forbids (regeneration
+  reintroduces the proprietary NorthwindDevEdition residue that set `005`
+  removed). The routed model was not being careless: the routing context
+  described the red integration suite but omitted the prohibition, and a
+  model that can only see the prompt filled the gap with the *obvious-looking*
+  fix. The orchestrator caught it on read-back and re-routed with the
+  constraints stated inline; the rewrite complied (and even surfaced the
+  constraint as an explicit scope bullet).
+- **Lesson:** A routed model has no access to CLAUDE.md, `project-guidance.md`,
+  stop rules, or memory — only the prompt. Any routed call whose output will be
+  committed as guidance for a future orchestrator (next-set recommendations,
+  change logs, plan documents) must carry the relevant hard constraints
+  *verbatim in the prompt*, or the output can encode a forbidden action with
+  full confidence. The risk scales with how "natural" the forbidden action
+  looks from outside the repo.
+- **Action for future sessions:** Before routing any recommendation/synthesis
+  call, ask "which stop rules or standing decisions could this output
+  plausibly contradict?" and paste those rules into the prompt under an
+  explicit `HARD CONSTRAINTS` heading. Always read the routed output back
+  against the repo's stop rules before committing it — routed text is input,
+  not finished product. (First hit: the never-regenerate-northwind rule;
+  other likely candidates here are the read-only-on-shipping-code rule for
+  discovery sets and the COM-runs-isolation conventions.)
+
+## Pre-Verification Sweep: Diff Every Quantified Claim Against The Embedded Evidence Before Routing
+
+- **Context:** All four sessions of `006-solution-review-and-upstream-feedback-discovery`
+  (2026-06-12) — cross-provider verification of findings/synthesis documents
+  whose prompts embedded probe console output for observability.
+- **Failure or friction:** Every round-1 verdict in the set was ISSUES_FOUND on
+  evidence-observability grounds (S1: four issues; S2: one; S3: three; S4:
+  two), and none was a substantive error in the work. Session 4's two were the
+  purest form: the claims ("8 of 12 reports", the TempVars writer/reader
+  linkage, "no row content anywhere in the output tree") had all been **proven
+  by probes during the session** — but the proving console output was not
+  embedded in the verification prompt, so the verifier correctly flagged them
+  as unsupported-as-presented. Each round-1 miss cost a fix-and-re-verify
+  cycle (~$0.10–0.25 and minutes of wall clock).
+- **Lesson:** The verifier can only audit what the prompt shows. A claim proven
+  in-session but not evidenced in-prompt is, from the verifier's seat,
+  indistinguishable from an invented one — and flagging it is the verifier
+  doing its job. The recurring round-1 tax in this set was not sloppy claims;
+  it was a missing mechanical step between "the doc is done" and "route the
+  verification": checking that the prompt's evidence covers the doc's claims.
+- **Action for future sessions:** Before routing a `session-verification` call
+  on an evidence-bearing document, do a mechanical sweep: extract every
+  quantified or exhaustive claim in the deliverable (counts, "all/none/only/
+  every", file totals, escalation conditions), and for each one confirm the
+  embedded evidence section actually shows the probe output that proves it.
+  Anything proven-but-not-shown: re-run the probe and paste the output in
+  verbatim; anything not provable: relabel `inferred — not verified` before
+  the verifier says it for you. This composes with the existing "Send Related
+  Files To The Cross-Provider Verifier Or Disclaim What Is Out Of Scope"
+  lesson — that one covers files, this one covers probe evidence for claims.

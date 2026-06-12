@@ -14,4 +14,13 @@
 # resolved version (this repo had 0.1.1) writes the legacy v2 schema, which
 # the Session Set Explorer flags as "needs migration". 0.10.0 is the latest
 # published release at time of writing.
-dabbler-ai-router>=0.10.0
+#
+# Floor raised to >=0.15.0 (2026-06-12, set 006 Step 9): close_session's
+# per-session verificationVerdict persistence (canonical Set 054 S2,
+# resolve_close_verdict reading disposition.json's verification_verdict)
+# first ships in 0.15.0. Under 0.10.0 every closed session records
+# verificationVerdict: null even when the disposition carries VERIFIED —
+# observed across all four sessions of set 006. Verdicts for sets closed
+# under 0.10.0 live only in each session's disposition.json/sN-verification*.md;
+# the nulls in those sets' session-state.json are historical, not data loss.
+dabbler-ai-router>=0.15.0
