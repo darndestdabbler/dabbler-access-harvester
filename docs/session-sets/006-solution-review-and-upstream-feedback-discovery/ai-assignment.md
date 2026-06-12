@@ -82,3 +82,32 @@ than via routed analysis.
 claude-code claude-fable-5 @ effort=high
 Rationale: maintainer-assigned for all four sessions; recorded here per
 the spec's deviation note rather than via routed analysis.
+
+### Session 3 (2026-06-12)
+
+- **Orchestrator used:** Claude Code / Claude Fable 5 (`claude-fable-5`) @ effort=high
+- **Total routed cost:** $0.30 (session-verification x2: gpt-5-4 round 1
+  $0.28 ISSUES_FOUND (3 Minor) -> fixes -> round 2 $0.02 VERIFIED)
+- **Deviations from recommendation:** none — review authored
+  in-conversation per the spec's human-directed deviation; router used
+  only for mandatory cross-provider verification.
+- **Notes for next-session calibration:** The Status-label discipline
+  carried from Session 2 held (no label issues), but R1 still found three
+  evidence-discipline Minors: a blast-radius sub-claim worded stronger
+  than its source-read evidence, an uncited convention premise, and a
+  worked example that didn't match its own cited regex. Session 4 should
+  (a) cite the convention doc verbatim whenever a finding's impact rests
+  on an output convention, and (b) sanity-check every worked example
+  against the exact cited mechanism before authoring. Embedding ephemeral-
+  probe console output verbatim in the verification prompt again kept R1
+  focused on the doc rather than on observability. Session 4 is closeout-
+  grade: use the prose-first lead BEFORE the file listings plus the JSON
+  block, per convention.
+
+**Next-session orchestrator recommendation (Session 4):**
+claude-code claude-fable-5 @ effort=high
+Rationale: maintainer-assigned for all four sessions; recorded here per
+the spec's deviation note rather than via routed analysis. Session 4 is
+the only COM-touching session (fresh HomeHealthCare run) — run it on the
+Access-equipped host, deliberately and sequentially, with the
+spurious-`.accdb`-diff sweep before staging.

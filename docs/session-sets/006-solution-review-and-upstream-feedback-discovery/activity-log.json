@@ -141,6 +141,75 @@
           "costUsd": 0.0332775
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 0,
+      "stepKey": "session-3/initial-setup",
+      "dateTime": "2026-06-12T14:12:14.237948-04:00",
+      "description": "Session 3 start registered (claude-fable-5 @ high); API keys verified; prior-session commit verified clean; spec + guidance + lessons read.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-3/step-1-required-reading",
+      "dateTime": "2026-06-12T14:13:53.398328-04:00",
+      "description": "Read VBA-Parser-Migration-Harvester-Plan.md (full), docs/test-cases/README.md, parser-strategy principles (project-guidance.md), s1/s2 findings carry-forwards. Noted: schema versions v0/v1.0/v1.1 on disk; README lists 12 cases but 13-preprocessor exists.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-3/step-2-parser-resolver-review",
+      "dateTime": "2026-06-12T14:26:24.523567-04:00",
+      "description": "Vba.Parser + Vba.Resolver line-level review done. Proven via probes: (1) basResetFixture NRE reproduced (AstBuilder.BuildSubProcedure:281 null IDENTIFIER after step-keyword recovery cascade; whole module dropped from manifest); (2) type-suffix declarations (module vars/consts/params) unresolvable (names retain suffix, references strip it; locals stripped correctly); (3) production wiring gaps: per-module ProjectScope in Core Pipeline.cs:320, no AccessObjectModelRegistry/owningClass anywhere in production, DefaultMemberRegistry/TypeInferencePass zero production call sites; (4) golden manifest: 0/19 forms and 0/12 reports have any parsed VBA items; SqlStrings hardcoded empty.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-3/step-3-sql-symboldb-testpins",
+      "dateTime": "2026-06-12T14:34:34.919300-04:00",
+      "description": "Sql.Parser + SymbolDb review and test-pin assessment done. Proven: TRANSFORM parses cleanly (grammar fit as contract-grade type source) but crosstab abstraction discards inner SELECT and Parsed.QueryType re-stamps broken DAO decode; form-DSL probe items=0 silent; ByVal pass-mode lost end-to-end in golden signatures; no behavioral expected.json conformance test exists (schema-shape only); 917 hermetic tests green across 5 projects.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-3/step-4-findings-authored",
+      "dateTime": "2026-06-12T14:45:45.778704-04:00",
+      "description": "s3-review-findings.md authored: 1 Critical (F-3-1 form/report code-behind absent from manifest), 4 Major (F-3-2 NRE on legal VBA, F-3-3 type-suffix de-resolution, F-3-4 resolver capabilities unwired in production, F-3-5 ByVal lost), 4 Minor, 1 Observation; positives + not-reviewed remainder + Session 4 carry-forward threads recorded.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-3/step-5-verification",
+      "dateTime": "2026-06-12T14:45:45.779701-04:00",
+      "description": "Cross-provider verification: R1 gpt-5-4 ISSUES_FOUND (3 Minor findings-doc discipline issues) -> fixes + frame sweep -> R2 gpt-5-4 VERIFIED. Issues persisted to s3-issues.json with resolutions.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model_name": "gpt-5-4",
+          "task_type": "session-verification",
+          "input_tokens": 18405,
+          "output_tokens": 15449,
+          "cost_usd": 0.277747
+        },
+        {
+          "model_name": "gpt-5-4",
+          "task_type": "session-verification",
+          "input_tokens": 2920,
+          "output_tokens": 1151,
+          "cost_usd": 0.024565
+        }
+      ]
     }
   ]
 }

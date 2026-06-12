@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "sessionNumber": 3,
+  "verificationRound": 1,
+  "verificationVerdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "description": "F-3-2: the symbol-db blast-radius sub-claim was slightly overstated as proven — the excerpt shows SymbolDbBuilder.Build does not catch LoadAndParse exceptions, but does not by itself verify tool-level abort behavior beyond that method.",
+      "category": "process",
+      "severity": "Minor",
+      "issueId": "S006-S3-V1-001",
+      "issueType": "evidence-overreach",
+      "verificationMethod": "Compared the finding's Status label and blast-radius wording against the supplied SymbolDbBuilder.Build excerpt.",
+      "resolution_status": "fixed",
+      "resolution_notes": "Split the Status line: NRE + manifest consequence stay proven; the symbol-db blast radius is relabeled partially proven with the untraced outer-harness residual explicitly marked inferred — not verified. Evidence narrowed to 'fails the whole Build call rather than skipping one module' and strengthened one level with the catch-free CLI call site (Cli/BuildArtifacts.cs:67). Problem paragraph reworded to 'fails the symbol-db build pass'.",
+      "resolved_in_round": 2
+    },
+    {
+      "description": "F-3-5: the claim that consumers 'must read every ByVal parameter as ByRef' relied on an omission-semantics contract that was not cited in the finding.",
+      "category": "process",
+      "severity": "Minor",
+      "issueId": "S006-S3-V1-002",
+      "issueType": "missing-citation",
+      "verificationMethod": "Checked the finding's Problem paragraph for a source backing the omission-semantics premise.",
+      "resolution_status": "fixed",
+      "resolution_notes": "Cited the convention verbatim (docs/planning/project-guidance.md -> Conventions -> Output JSON Conventions: omission is read as the Access/language default) plus VBA's ByRef default, and added the weaker fallback claim (consumer cannot distinguish explicit ByVal from omitted) for readers who reject the premise. Title softened to 'under the repo's documented omission convention'.",
+      "resolved_in_round": 2
+    },
+    {
+      "description": "F-3-10: the BodyHasher continuation-line example ('x = 1 + _' / '2') did not actually match the cited strip regex, which requires whitespace after the digits.",
+      "category": "process",
+      "severity": "Minor",
+      "issueId": "S006-S3-V1-003",
+      "issueType": "incorrect-example",
+      "verificationMethod": "Evaluated the cited regex ^\\s*\\d+\\s+ against the example continuation line.",
+      "resolution_status": "fixed",
+      "resolution_notes": "Replaced the example with a continuation line the regex does match ('x = a + _' / '2 + b' — leading '2 ' stripped) and noted explicitly that a digits-only line would not match.",
+      "resolved_in_round": 2
+    }
+  ]
+}

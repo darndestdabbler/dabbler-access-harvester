@@ -40,10 +40,18 @@
     {
       "number": 3,
       "title": "Parser Stack And Symbol DB Review",
-      "status": "not-started",
-      "startedAt": null,
+      "status": "in-progress",
+      "startedAt": "2026-06-12T14:12:04.805275-04:00",
       "completedAt": null,
-      "orchestrator": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-fable-5",
+        "effort": "high",
+        "chatSessionId": null,
+        "checkedOutAt": "2026-06-12T14:12:04.805275-04:00",
+        "lastActivityAt": "2026-06-12T14:12:04.805275-04:00"
+      },
       "verificationVerdict": null
     },
     {
