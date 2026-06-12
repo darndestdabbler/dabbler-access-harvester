@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "007-integration-test-rebase",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -19,16 +19,16 @@
     {
       "number": 2,
       "title": "COM-Tier Validation, Flake Disposition, And Next-Set Authoring",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-12T16:26:22.841132-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-12T16:55:31.901239-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
         "model": "claude-fable-5",
         "effort": "medium"
       },
-      "verificationVerdict": null
+      "verificationVerdict": "VERIFIED"
     }
   ]
 }
