@@ -23,9 +23,9 @@
     {
       "number": 2,
       "title": "Pipeline Review \u2014 Enrichment, Usage, Classification, Migration",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-12T13:37:51.901384-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-12T14:05:32.205657-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
