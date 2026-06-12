@@ -6,9 +6,9 @@
     {
       "number": 1,
       "title": "Extraction Core, COM Session, And CLI Review",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-12T13:12:29.292848-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-12T13:33:54.017777-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
