@@ -18,7 +18,7 @@ public sealed class CliValidateTests
     [Fact]
     public void Validate_Manifest_ValidDocument_ReturnsZero()
     {
-        string manifest = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        string manifest = Path.Combine(RepoPaths.Examples(), "homehealthcare-output.json");
         Assert.True(File.Exists(manifest), $"Fixture missing: {manifest}");
 
         var result = CliInvoker.Run("validate", "--manifest", manifest);
@@ -253,7 +253,7 @@ public sealed class CliValidateTests
     [Fact]
     public void Validate_BothInAndManifest_ReturnsOne_UsageError()
     {
-        string manifest = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        string manifest = Path.Combine(RepoPaths.Examples(), "homehealthcare-output.json");
         var result = CliInvoker.Run("validate", "--in", "somedir", "--manifest", manifest);
 
         Assert.Equal(1, result.ExitCode);
@@ -265,7 +265,7 @@ public sealed class CliValidateTests
     [Fact]
     public void Validate_JsonStatus_ValidDocument_EmitsEnvelopeWithExitZero()
     {
-        string manifest = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        string manifest = Path.Combine(RepoPaths.Examples(), "homehealthcare-output.json");
         Assert.True(File.Exists(manifest), $"Fixture missing: {manifest}");
 
         var result = CliInvoker.Run("validate", "--manifest", manifest, "--json-status");

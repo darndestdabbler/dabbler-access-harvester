@@ -72,7 +72,7 @@ public sealed class PackagedBinarySmokeTests
         string? exe = PublishedArtifact.TryLocate();
         Skip.If(exe is null, "Published artifact absent; run tools/publish/publish.ps1.");
 
-        string manifest = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        string manifest = Path.Combine(RepoPaths.Examples(), "homehealthcare-output.json");
         Assert.True(File.Exists(manifest), $"Example manifest missing: {manifest}");
 
         string outDir = Path.Combine(Path.GetTempPath(), $"ah-pkg-{Guid.NewGuid():N}");
@@ -81,7 +81,7 @@ public sealed class PackagedBinarySmokeTests
             var result = RunPackaged(exe!, "generate-docs", "--in", manifest, "--out", outDir);
             Assert.Equal(0, result.ExitCode);
 
-            string expected = Path.Combine(outDir, "northwinddevedition", "schema-summary.md");
+            string expected = Path.Combine(outDir, "homehealthcare", "schema-summary.md");
             Assert.True(File.Exists(expected),
                 $"Expected schema summary not written. stderr={result.StdErr}");
         }
@@ -98,7 +98,7 @@ public sealed class PackagedBinarySmokeTests
         string? exe = PublishedArtifact.TryLocate();
         Skip.If(exe is null, "Published artifact absent; run tools/publish/publish.ps1.");
 
-        string manifest = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        string manifest = Path.Combine(RepoPaths.Examples(), "homehealthcare-output.json");
         Assert.True(File.Exists(manifest), $"Example manifest missing: {manifest}");
 
         var result = RunPackaged(exe!, "validate", "--manifest", manifest);

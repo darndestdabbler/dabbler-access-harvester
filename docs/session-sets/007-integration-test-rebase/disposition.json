@@ -1,0 +1,37 @@
+{
+  "status": "completed",
+  "summary": "Session 1: re-based all 8 northwind-output.json-dependent Integration tests onto the new committed HomeHealthCare-derived fixture examples/homehealthcare-output.json (SchemaVersion 1.1, deliberately v1.0-shaped, golden-literal field values); zero northwind-output references remain under tests/; filtered hermetic run green 23/23 per TRX; VERIFIED on round 2 after fixing the R1 HarvesterVersion-provenance Major and a stale-rationale Minor.",
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "files_changed": [
+    "examples/homehealthcare-output.json",
+    "examples/README.md",
+    "tests/AccessHarvester.Integration/Cli/CliValidateTests.cs",
+    "tests/AccessHarvester.Integration/Cli/CliGenerateDocsTests.cs",
+    "tests/AccessHarvester.Integration/Cli/CliDeterminismTests.cs",
+    "tests/AccessHarvester.Integration/Cli/PackagedBinarySmokeTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/ManifestSchemaConformanceTests.cs",
+    "docs/session-sets/007-integration-test-rebase/s1-inventory.md",
+    "docs/session-sets/007-integration-test-rebase/ai-assignment.md",
+    "docs/session-sets/007-integration-test-rebase/s1-verification.md",
+    "docs/session-sets/007-integration-test-rebase/s1-verification-round-2.md",
+    "docs/session-sets/007-integration-test-rebase/s1-issues.json",
+    "docs/session-sets/007-integration-test-rebase/s1-close-reason.md",
+    "docs/session-sets/007-integration-test-rebase/disposition.json",
+    "docs/session-sets/007-integration-test-rebase/session-state.json",
+    "docs/session-sets/007-integration-test-rebase/session-events.jsonl",
+    "docs/session-sets/007-integration-test-rebase/activity-log.json"
+  ],
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "gemini-code-assist",
+    "provider": "google",
+    "model": "gemini-pro",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Routed ai-assignment.md analysis recommends Gemini Code Assist gemini-pro @ effort=high for Session 2: the session is dominated by authoring the long-form 008 spec (strong prose/synthesis fit) plus TRX flake analysis. Human retains orchestrator choice; if a Google orchestrator runs Session 2, the session-verification override (gpt-5-4) remains cross-provider."
+    }
+  },
+  "blockers": []
+}

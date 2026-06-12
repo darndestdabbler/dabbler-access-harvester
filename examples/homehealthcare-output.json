@@ -1,0 +1,14 @@
+{
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.1",
+  "HarvesterVersion": "<NORMALIZED:HarvesterVersion>",
+  "Database": {
+    "Name": "HomeHealthCare.accdb"
+  },
+  "Forms": [],
+  "Reports": [],
+  "Queries": [],
+  "Tables": [],
+  "Relationships": [],
+  "Modules": []
+}

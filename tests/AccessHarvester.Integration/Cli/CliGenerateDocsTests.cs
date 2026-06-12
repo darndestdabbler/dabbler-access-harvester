@@ -9,16 +9,18 @@ namespace AccessHarvester.Integration.Cli;
 // the CLI against committed examples/*.json fixtures and asserts that the
 // expected schema-summary.md lands at <out>/<dbSlug>/schema-summary.md.
 //
-// Fixture choice: northwind-output.json is the manifest-shaped example
-// (SchemaType == "DatabaseManifest", Database.Name set). The other
+// Fixture choice: homehealthcare-output.json is the manifest-shaped
+// example (SchemaType == "DatabaseManifest", Database.Name set). The other
 // examples (minimal-form.json, complex-form.json) are per-form IR
 // records, not manifests, so they are not valid inputs to generate-docs.
+// Provenance and refresh rule: examples/README.md (HomeHealthCare-derived,
+// deliberately v1.0-shaped).
 public sealed class CliGenerateDocsTests
 {
     [Fact]
     public void GenerateDocs_AgainstCommittedManifest_WritesSchemaSummary()
     {
-        string manifest = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        string manifest = Path.Combine(RepoPaths.Examples(), "homehealthcare-output.json");
         Assert.True(File.Exists(manifest), $"Example manifest missing: {manifest}");
 
         string outDir = Path.Combine(Path.GetTempPath(), $"ah-int-{Guid.NewGuid():N}");
@@ -28,10 +30,10 @@ public sealed class CliGenerateDocsTests
             Assert.Equal(0, result.ExitCode);
 
             // The CLI derives the slug from the Database.Name property of
-            // the manifest. northwind-output.json sets it to
-            // "NorthwindDevEdition.accdb" -> slug "northwinddevedition"
+            // the manifest. homehealthcare-output.json sets it to
+            // "HomeHealthCare.accdb" -> slug "homehealthcare"
             // (regex strips non-word characters, then ToLowerInvariant).
-            string expected = Path.Combine(outDir, "northwinddevedition", "schema-summary.md");
+            string expected = Path.Combine(outDir, "homehealthcare", "schema-summary.md");
             Assert.True(File.Exists(expected),
                 $"Expected schema summary not written. stderr={result.StdErr}");
 
@@ -39,7 +41,7 @@ public sealed class CliGenerateDocsTests
             // SchemaDocGenerator emits a Database overview, form catalog,
             // and subform-dependency section. Spot-check the heading shape
             // without binding to exact prose.
-            Assert.Contains("NorthwindDevEdition.accdb", md);
+            Assert.Contains("HomeHealthCare.accdb", md);
         }
         finally
         {

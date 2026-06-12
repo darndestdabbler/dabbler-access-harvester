@@ -1,17 +1,29 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "007-integration-test-rebase",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
       "title": "Inventory, Fixture Strategy, And Hermetic Re-Base",
-      "status": "not-started"
+      "status": "in-progress",
+      "startedAt": "2026-06-12T16:01:59.595949-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-fable-5"
+      },
+      "verificationVerdict": null
     },
     {
       "number": 2,
       "title": "COM-Tier Validation, Flake Disposition, And Next-Set Authoring",
-      "status": "not-started"
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     }
   ]
 }

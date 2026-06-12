@@ -143,13 +143,14 @@ public sealed class ManifestSchemaConformanceTests
     // v1.1 (Session 2 backward-compat): a v1.0-shaped document (no
     // Documentation, no FileMap, all per-category arrays empty) must
     // continue to validate against v1.1, modulo the SchemaVersion
-    // const bump. examples/northwind-output.json is the smoke fixture
-    // the CLI's `validate` subcommand exercises; if it stops
-    // validating, the additive-policy guarantee is broken.
+    // const bump. examples/homehealthcare-output.json is the smoke
+    // fixture the CLI's `validate` subcommand exercises (provenance:
+    // examples/README.md); if it stops validating, the additive-policy
+    // guarantee is broken.
     [Fact]
     public void V1_0_Shaped_SmokeFixture_ValidatesAgainstSchema()
     {
-        string fixturePath = Path.Combine(RepoPaths.Examples(), "northwind-output.json");
+        string fixturePath = Path.Combine(RepoPaths.Examples(), "homehealthcare-output.json");
         Assert.True(File.Exists(fixturePath),
             $"Smoke fixture missing: {fixturePath}");
 
@@ -158,7 +159,7 @@ public sealed class ManifestSchemaConformanceTests
 
         Assert.True(
             result.IsValid,
-            "examples/northwind-output.json (v1.0-shape, no Documentation/FileMap) "
+            "examples/homehealthcare-output.json (v1.0-shape, no Documentation/FileMap) "
                 + "must validate against v1.1:\n  - "
                 + string.Join("\n  - ", result.Errors));
     }

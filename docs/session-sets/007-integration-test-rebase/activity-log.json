@@ -1,0 +1,103 @@
+{
+  "sessionSetName": "007-integration-test-rebase",
+  "createdDate": "2026-06-12T16:03:15.882677-04:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/step-3.5-ai-assignment",
+      "dateTime": "2026-06-12T16:03:15.882677-04:00",
+      "description": "Authored ai-assignment.md via routed analysis (Step 3.5)",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 4180,
+          "outputTokens": 932,
+          "costUsd": 0.014544999999999999
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "s1-inventory",
+      "dateTime": "2026-06-12T16:09:12.240614-04:00",
+      "description": "Enumerated the 8 northwind-output-resolving tests across the 5 files; reconciled expected failure count 7 (5 unconditional + 2 publish-gated; usage-error test passes pre-file-access). Probed golden (v1.1-shaped, normalized placeholders) and schemas; decided single committed v1.0-shaped fixture examples/homehealthcare-output.v1_0.json for all 8 tests. Evidence in s1-inventory.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "s1-fixtures-rebased",
+      "dateTime": "2026-06-12T16:13:05.390044-04:00",
+      "description": "Re-based all 8 tests onto examples/homehealthcare-output.json (HHC-derived, SchemaVersion 1.1, deliberately v1.0-shaped; SchemaVersion-const subtlety caught and corrected pre-build). Created examples/README.md provenance note. grep -rn northwind-output tests/ returns nothing.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/step-5-build-test",
+      "dateTime": "2026-06-12T16:14:24.849783-04:00",
+      "description": "dotnet build solution: 0 errors. dotnet test Integration with precise filter (re-based tests + host classes, COM SkippableFacts excluded): TRX counters total=23 executed=23 passed=23 failed=0. All 8 re-based tests pass incl. both PackagedBinary tests against the present publish artifact.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/step-6-verification-r1",
+      "dateTime": "2026-06-12T16:16:23.350165-04:00",
+      "description": "Cross-provider verification round 1: verdict=ISSUES_FOUND, issues=2",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 14651,
+          "outputTokens": 6208,
+          "costUsd": 0.1297475
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/step-6-verification-r2",
+      "dateTime": "2026-06-12T16:19:32.856868-04:00",
+      "description": "Cross-provider verification round 2: verdict=VERIFIED, issues=0",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 15078,
+          "outputTokens": 5234,
+          "costUsd": 0.116205
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/step-7-fixes",
+      "dateTime": "2026-06-12T16:20:47.788360-04:00",
+      "description": "R1 fixes: fixture HarvesterVersion now the golden literal <NORMALIZED:HarvesterVersion> (Major); stale .v1_0 rationale rewritten in s1-inventory.md (Minor); pre-fix-token sweep run; filtered tests re-run 23/23 per TRX (s1-rebase-r2.trx). R2 verdict VERIFIED.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "s1-verified",
+      "dateTime": "2026-06-12T16:20:47.788360-04:00",
+      "description": "Session 1 verification complete: VERIFIED on round 2 (gpt-5-4). Closeout artifacts authored (disposition.json before commit, s1-close-reason.md, s1-issues.json).",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}

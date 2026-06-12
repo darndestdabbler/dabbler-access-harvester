@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "sessionNumber": 1,
+  "verificationRound": 1,
+  "verificationVerdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "description": "The new fixture is not strictly HomeHealthCare-derived only: README states HarvesterVersion \"1.2.0\" was taken from Directory.Build.props instead of from a committed HomeHealthCare artifact, which violates the session's HomeHealthCare-only fixture-source constraint.",
+      "location": "examples/homehealthcare-output.json; examples/README.md",
+      "severity": "Major",
+      "resolution_status": "fixed",
+      "resolution_notes": "Fixture now carries the golden manifest's literal HarvesterVersion value (<NORMALIZED:HarvesterVersion>) - schema-valid free-form string, asserted on by no test; README and s1-inventory.md updated to record the provenance and the R1 correction. Filtered test run re-confirmed 23/23 per TRX.",
+      "resolved_in_round": 2
+    },
+    {
+      "description": "The inventory's rationale still says a '.v1_0' filename suffix makes the backward-compat shape explicit, but the implemented file is actually named 'homehealthcare-output.json'.",
+      "location": "docs/session-sets/007-integration-test-rebase/s1-inventory.md",
+      "severity": "Minor",
+      "resolution_status": "fixed",
+      "resolution_notes": "Stale suffix rationale rewritten to point at examples/README.md + test comments as the shape-explicitness carriers; full pre-fix-token sweep (1.2.0 / v1_0 / Directory.Build.props) run across the narrative artifacts, leaving only the accurate historical record of the corrected draft.",
+      "resolved_in_round": 2
+    }
+  ]
+}
