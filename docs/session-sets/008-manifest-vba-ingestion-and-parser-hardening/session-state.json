@@ -6,16 +6,16 @@
     {
       "number": 1,
       "title": "Kb-Tier VBA Ingestion And Golden Regeneration",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-12T17:03:34.111660-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-12T17:32:50.220962-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
         "model": "claude-fable-5",
         "effort": "high"
       },
-      "verificationVerdict": null
+      "verificationVerdict": "VERIFIED"
     },
     {
       "number": 2,
