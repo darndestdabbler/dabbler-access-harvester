@@ -1,0 +1,28 @@
+{
+  "status": "completed",
+  "summary": "Session 1 of 4 - Extraction Core, COM Session, And CLI review (read-only discovery; no shipping code changed). Authored s1-review-findings.md: 8 findings (2 Major proven: F-1-1 kb/ tier decodes SaveAsText raw text as UTF-8 corrupting non-ASCII to U+FFFD, proven end-to-end with a cp1252 probe through the built CLI; F-1-3 misspelled --types value silently produces an empty harvest with exit 0, proven by CLI probe; plus F-1-2 unsanitized SaveAsTextExporter output path rated Minor with a named Session-4 escalation condition, and 5 further Minors), 8 observations, a positive-confirmations section (AccessComSession line-level read matches its documented two-layer teardown contract; RCW/HRESULT/escaping discipline confirmed), and a stop-rule 'not reviewed' remainder (ReportBaseline subsystem, TypeLibraryRegistry, Com report-path readers, 5 CLI command bodies). Every finding carries an explicit proven/partially-proven/inferred Status label. Solution build green (0 errors). Cross-provider verification (gpt-5-4): round 1 ISSUES_FOUND (4 issues against the findings doc - labelling discipline, F-1-2 severity vs evidence, F-1-8 overstatement, excerpt-packet observability); all 4 fixed in the doc and persisted to s1-issues.json; round 2 VERIFIED with 0 issues.",
+  "files_changed": [
+    "docs/session-sets/006-solution-review-and-upstream-feedback-discovery/s1-review-findings.md (new - session deliverable)",
+    "docs/session-sets/006-solution-review-and-upstream-feedback-discovery/s1-verification.md (new - raw round-1 verifier output)",
+    "docs/session-sets/006-solution-review-and-upstream-feedback-discovery/s1-verification-round-2.md (new - raw round-2 verifier output, VERIFIED)",
+    "docs/session-sets/006-solution-review-and-upstream-feedback-discovery/s1-issues.json (new - structured round-1 findings with resolution annotations)",
+    "docs/session-sets/006-solution-review-and-upstream-feedback-discovery/disposition.json (new)",
+    "docs/session-sets/006-solution-review-and-upstream-feedback-discovery/ai-assignment.md (actuals appended)",
+    "docs/session-sets/006-solution-review-and-upstream-feedback-discovery/session-state.json, session-events.jsonl, activity-log.json (state/ledger updates)",
+    "ai_router/router-metrics.jsonl (verification call telemetry; local-only - gitignored, not part of the commit)"
+  ],
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "verification_message_ids": [],
+  "blockers": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-fable-5",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "The maintainer explicitly assigned Claude Fable 5 as orchestrator for all four sessions of this set (the model's judgment is the set's purpose); Session 2 reviews AccessHarvester.Pipeline and should also pick up the enricher files under Core/Enrichment/ that the spec's Session 2 step list names, plus the O-1-5 date-sampler observations feeding the known zero-date item."
+    }
+  }
+}

@@ -31,3 +31,28 @@ escalation ladder from `project-guidance.md` if the configured verifier fails.
 ## Actuals
 
 *(append per session at closeout)*
+
+### Session 1 (2026-06-12)
+
+- **Orchestrator used:** Claude Code / Claude Fable 5 (`claude-fable-5`) @ effort=high
+- **Total routed cost:** $0.38 (session-verification x2: gpt-5-4 round 1
+  $0.26 ISSUES_FOUND -> fixes -> round 2 $0.12 VERIFIED)
+- **Deviations from recommendation:** none — review authored
+  in-conversation per the spec's human-directed deviation; router used
+  only for mandatory cross-provider verification.
+- **Notes for next-session calibration:** Round-1 verifier issues were
+  all findings-doc discipline (explicit proven/inferred Status labels,
+  severity-vs-evidence on an inferred premise, claim-vs-evidence width,
+  excerpt-packet observability). Session 2 should bake the Status label
+  and evidence-basis preambles into the findings doc from the start, and
+  state in the verification prompt which claims rest on full in-session
+  reads. Also note for Session 2 scope: the geometry/label/property-decode
+  enrichers named in the spec's Session 2 step list physically live under
+  `AccessHarvester.Core/Enrichment/` (not the Pipeline project) — Session 1
+  deliberately left them unreviewed to avoid double coverage.
+
+**Next-session orchestrator recommendation (Session 2):**
+claude-code claude-fable-5 @ effort=high
+Rationale: maintainer-assigned for all four sessions (the model choice is
+the set's purpose); recorded here per the spec's deviation note rather
+than via routed analysis.

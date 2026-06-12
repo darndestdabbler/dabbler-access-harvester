@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 2,
+  "sessionNumber": 1,
+  "verificationRound": 1,
+  "verificationVerdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "description": "The findings do not carry the required explicit proven-vs-inferred label; they only embed ad hoc prose such as 'Proven by probe' or 'inferred'.",
+      "category": "process",
+      "severity": "Minor",
+      "issueId": "S006-S1-V1-001",
+      "issueType": "standards-departure",
+      "verificationMethod": "Compared each finding's record shape against the spec's findings-record shape (Evidence must carry the proving check or the explicit 'inferred — not verified' label).",
+      "resolution_status": "fixed",
+      "resolution_notes": "Added an explicit Status line (proven | partially proven | inferred — not verified) to every finding F-1-1..F-1-8, plus a labelling legend in the summary.",
+      "resolved_in_round": 2
+    },
+    {
+      "description": "F-1-2: the unsanitized output-path defect is real, but the Major path-traversal/outside-root-write impact is not established by the supplied evidence and depends on unverified Access naming-rule assumptions.",
+      "category": "evidence",
+      "severity": "Major",
+      "issueId": "S006-S1-V1-002",
+      "issueType": "standards-departure",
+      "verificationMethod": "Checked the finding's severity rationale against the evidence actually supplied (source divergence proven; naming-rule premise unverified).",
+      "resolution_status": "fixed",
+      "resolution_notes": "Re-rated F-1-2 to Minor with a named escalation condition (Session 4 COM probe of '/' and '\\' legality in object names); Evidence and Problem now separate the proven sanitization gap from the inferred traversal premise. Summary verdict paragraph updated to match.",
+      "resolved_in_round": 2
+    },
+    {
+      "description": "F-1-8: the evidence proves no direct test references to SaveAsTextTranslator, not zero hermetic coverage, so the finding overstates what the probe establishes.",
+      "category": "evidence",
+      "severity": "Minor",
+      "issueId": "S006-S1-V1-003",
+      "issueType": "standards-departure",
+      "verificationMethod": "Compared the finding's claim text against the grep evidence supplied.",
+      "resolution_status": "fixed",
+      "resolution_notes": "Ran the additional check: enumerated all CorePipeline.Default()/.Translate(/.Run( call sites in tests/ and confirmed each lives in the Integration project or an Access-gated [SkippableFact] class (attribute verified at SyntheticDbIntegrationTests.cs:25). Finding retitled and re-evidenced to the now-proven claim 'no hermetic test pins the translator'.",
+      "resolved_in_round": 2
+    },
+    {
+      "description": "Several observation and positive-confirmation entries are presented as checked, but they are not verifiable from the supplied excerpts in this packet.",
+      "category": "evidence",
+      "severity": "Minor",
+      "issueId": "S006-S1-V1-004",
+      "issueType": "missing-context",
+      "verificationMethod": "Attempted to re-derive Observations and Positive confirmations from the excerpts included in the verification packet.",
+      "resolution_status": "fixed",
+      "resolution_notes": "Added explicit evidence-basis preambles to both sections stating they rest on full in-session file reads with file:line pointers as the audit trail, and acknowledging an excerpt-only verifier cannot re-derive all of them.",
+      "resolved_in_round": 2
+    }
+  ]
+}
