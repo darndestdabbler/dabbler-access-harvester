@@ -1952,6 +1952,23 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ## SanitizeCommandTests.HomeHealthCare Timeout Is A Pre-Existing Latent Issue Deserving Its Own Investigation Set
 
+> **Superseded characterization (2026-06-12, `007-integration-test-rebase`
+> Session 2):** the "intermittent contention flake" framing from the
+> 2026-06-01 re-measurement below is overturned. The failure is
+> **deterministic under a `dotnet test` testhost parent** (batch + targeted
+> harness runs both exhaust the 120s budget) and absent outside it — the
+> identical CLI invocation, including an exact `ProcessStartInfo`/cwd
+> replication of the harness spawn, completes in ~0.55s with exit 0, and no
+> `msaccess.exe` is involved (sanitize is pure ACE OLE DB). The 0.5s
+> "targeted retry pass" below almost certainly measured a direct CLI run,
+> not a harness run (timing signature matches exactly; the command line was
+> not recorded — see the "Flake Re-Measurements Must Match The Failing
+> Context" lesson at the end of this file). The test is quarantined via
+> `[SkippableFact(Skip = …)]`; evidence and re-enable condition:
+> [`007-integration-test-rebase/s2-flake-disposition.md`](../session-sets/007-integration-test-rebase/s2-flake-disposition.md).
+> A scoped sanitize-testhost-wedge investigation set is proposed (low
+> urgency — the quarantine blocks nothing).
+
 > **RESOLVED (2026-06-01, `harvester-fix-classify-timeout` Sessions 1–2).**
 > The persistent offender was `classify`, not `sanitize`. Session 1 overturned
 > the value-sampling premise with evidence: the `classify` work completes in
@@ -2267,3 +2284,41 @@ reference; if it proves out twice in *this* repo, propose promotion to
   the verifier says it for you. This composes with the existing "Send Related
   Files To The Cross-Provider Verifier Or Disclaim What Is Out Of Scope"
   lesson — that one covers files, this one covers probe evidence for claims.
+
+## Flake Re-Measurements Must Match The Failing Context, And Must Record The Exact Command Line
+
+- **Context:** `007-integration-test-rebase` Session 2 (2026-06-12),
+  dispositioning the `SanitizeCommandTests.HomeHealthCare_sanitize…` timeout.
+  The 007 spec's premise — "intermittent contention flake" — came from a
+  2026-06-01 re-measurement that reported the test "passed targeted in 0.5 s".
+- **Failure or friction:** The re-measurement did not record its invocation
+  command, and its 0.5 s timing matches a **direct CLI run** (Session 2's
+  direct probes: 0.54–0.55 s), not a `dotnet test` harness run (framework
+  overhead alone is multiple seconds). Session 2's evidence showed the failure
+  is **deterministic under a testhost parent** (batch + targeted harness runs,
+  2/2, both at the full 120 s budget, collection-serialized with nothing else
+  running) and absent outside it. The mismatched measurement context turned a
+  deterministic harness-context failure into an "intermittent flake" in the
+  planning record, which became the spec's premise and pointed the session at
+  the wrong disposition branch (contention mitigations that were already in
+  place and could not have helped).
+- **Lesson:** A passing re-measurement only refutes a failure if it runs in
+  the same context that failed. Parent process (testhost vs. direct), spawn
+  configuration, and working directory are all context dimensions; "the same
+  command" run from a different parent is a different experiment. And a
+  measurement whose exact command line is not recorded cannot be
+  re-interpreted later — Session 2 had to label its reinterpretation of the
+  2026-06-01 result `inferred — not verified` because only the timing
+  signature survived.
+- **Action for future sessions:** When measuring any test flake: (a) before
+  classifying it intermittent-vs-persistent, reproduce in the **same
+  parent-process context** as the original failure (for xUnit tests, that
+  means through `dotnet test`, not by invoking the underlying CLI/code
+  directly); (b) record the **exact command line** of every measurement in
+  the evidence record alongside the result; (c) use spawn-config-replication
+  probes (clone the harness's `ProcessStartInfo` fields and cwd outside the
+  harness — see `007-integration-test-rebase/s2-flake-disposition.md`) to
+  cheaply separate "the code is broken" from "the harness interaction is
+  broken". If a second flake disposition hits a context-mismatched historical
+  measurement, propose promoting this to a Convention in
+  `project-guidance.md` → Testing Conventions.
