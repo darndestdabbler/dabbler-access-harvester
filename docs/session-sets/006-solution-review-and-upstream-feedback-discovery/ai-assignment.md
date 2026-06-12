@@ -111,3 +111,28 @@ the spec's deviation note rather than via routed analysis. Session 4 is
 the only COM-touching session (fresh HomeHealthCare run) — run it on the
 Access-equipped host, deliberately and sequentially, with the
 spurious-`.accdb`-diff sweep before staging.
+
+### Session 4 (2026-06-12)
+
+- **Orchestrator used:** Claude Code / Claude Fable 5 (`claude-fable-5`) @ effort=high
+- **Total routed cost:** $0.26 (session-verification x2: gpt-5-4 round 1
+  $0.15 ISSUES_FOUND (2 Minor) -> probe-backed fixes -> round 2 $0.09
+  VERIFIED; change-log via summarization/gemini-flash $0.007 across two
+  runs; next-set recommendation via analysis/gemini-pro $0.017 across two
+  runs)
+- **Deviations from recommendation:** none on orchestration. One routed-call
+  re-run worth recording: the first analysis-routed
+  next-session-set-recommendation instructed regenerating
+  `examples/northwind-output.json` (forbidden — reintroduces the set-005
+  residue) because the routing context omitted that constraint; the call
+  was re-routed with the hard constraints stated inline and the rewrite
+  complies. Constraint-bearing facts must travel IN the routed prompt.
+- **Notes for next-session calibration:** Session 3's two guidances held
+  (conventions cited verbatim; worked examples checked) — R1 still found
+  two evidence-precision Minors, both "claim was proven in-session but the
+  proving probe was not embedded in the verification prompt." Calibration
+  for future closeout-grade verifications: before routing, diff every
+  quantified claim in the deliverable against the embedded evidence
+  sections and run+embed any probe the prompt does not show. The COM run
+  itself was uneventful (10.6s, 86/86, exact-PID self-cleanup held; one
+  spurious .accdb diff swept).

@@ -307,9 +307,9 @@ or startup-surface detection.
 
 | # | Feedback item | Status | Owning set | Notes |
 |---|---|---|---|---|
-| R2-1 | Materialize switchboard navigation rows into structured edges in IR | Open — under assessment | `006` (assessment) | Usage pass already classifies `tblSwitchboardItems` as switchboard-navigation-data; the gap is row-level caption/target/command edges |
-| R2-2 | Harvest report-chain linkage edges (param dialog → query → report) | Open — under assessment | `006` (assessment) | Pieces observable since 1.2.0 (launcher, param dialogs, declared-parameter tokens); connections are not |
-| R2-3 | Optional: single flat reviewed-input export (`export-reviewed-input`) | Open — ownership call | `006` (recommendation) | Downstream's own default is orchestrator-side intake (their F9); upstream command is the alternative |
+| R2-1 | Materialize switchboard navigation rows into structured edges in IR | **Confirmed (2026-06-12)** — accepted for implementation | `006` assessment → proposed `switchboard-and-report-chain-edges` set (P4 in `006`'s `review-recommendations.md`) | Fresh-run proven: `switchboard-navigation-data` signal fires but `tblSwitchboardItems` IR is schema-only (52 rows unexported); no `NavigationGraph` key, no edges. Design sketch in `006` §2; requires the resolver/navigation wiring arc (P3) first |
+| R2-2 | Harvest report-chain linkage edges (param dialog → query → report) | **Confirmed (2026-06-12)** — accepted for implementation | `006` assessment → proposed `switchboard-and-report-chain-edges` set (P4) | Fresh-run proven: every hop individually observable (embedded-macro OpenReport, report-Open dialog reads, RecordSource, declared-parameter tokens, TempVars flows); zero connecting edges. Design sketch in `006` §2; sequenced after F-3-1/F-3-4 wiring and the F-2-1 decode fix |
+| R2-3 | Optional: single flat reviewed-input export (`export-reviewed-input`) | **Assessed (2026-06-12)** — downstream ownership recommended; no upstream command | `006` (recommendation final); casing/name-form ride-along → proposed `output-contract-fidelity-batch` set (P2) | Two-root split reproduced (plus classify slug casing drift: `AccessMetaData/HomeHealthCare/` vs `homehealthcare/`). Both authorities (consumer's F9 default, `project-guidance.md` lean rule) agree on orchestrator-side intake; revisit only if a second consumer materializes |
 
 ### Verbatim feedback
 

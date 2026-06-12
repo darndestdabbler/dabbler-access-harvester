@@ -210,6 +210,81 @@
           "cost_usd": 0.024565
         }
       ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 0,
+      "stepKey": "session-4/setup",
+      "dateTime": "2026-06-12T15:04:04.452318-04:00",
+      "description": "Session 4 start registered (claude-fable-5 @ high); required reading done (guidance, lessons, spec, S1-S3 findings, Round 2 feedback); API keys verified; prior-session commit check clean.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 2,
+      "stepKey": "session-4/feedback-grounding",
+      "dateTime": "2026-06-12T15:15:38.712763-04:00",
+      "description": "Fresh COM run vs HomeHealthCare (run 86/86 ok exit 0; identify-usage 74 objects; classify 13 tables, same --out root). R2-1 CONFIRMED (switchboard-navigation-data signal fires; zero row-level nav edges; tblSwitchboardItems IR is schema-only, 52 rows unexported). R2-2 CONFIRMED (launcher/param-dialog/declared-param/RecordSource/OpenReport pieces all individually observable as raw text; no edge records anywhere; manifest has no NavigationGraph key). R2-3 CONFIRMED (same --out yields disjoint AccessMetaData/HomeHealthCare vs homehealthcare/classification.json roots + casing drift). DAO premise probes on tmp copy: F-1-2 premise CONFIRMED (/ and \\ legal in object names; . rejected so no above-root traversal), F-1-6 premise CONFIRMED (comma/semicolon legal inside bracketed PARAMETERS names). Fresh output corroborates F-2-1, F-2-3, F-3-1, F-3-2, F-2-2/F-3-4 empty-substrate keys. Spurious samples/HomeHealthCare.accdb diff swept.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 3,
+      "stepKey": "session-4/recommendations-authored",
+      "dateTime": "2026-06-12T15:19:27.838682-04:00",
+      "description": "Authored review-recommendations.md: R2-1/R2-2 design sketches + R2-3 downstream-ownership recommendation (not contested - no consensus round; consumer F9 default and project-guidance lean rule agree); S1-S3 findings + feedback merged into 7 proposed follow-up sets P0-P6 with sizes/prereqs, sequenced after the standing integration-test-rebase recommendation; below-bar items recorded-not-recommended. Updated Round 2 status table in docs/planning/harvester-upstream-feedback.md with assessment outcomes.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 6,
+      "stepKey": "session-4/verification",
+      "dateTime": "2026-06-12T15:26:18.668675-04:00",
+      "description": "Closeout-grade cross-provider verification (prose-first lead + JSON block). Round 1 gpt-5-4: ISSUES_FOUND, 2 Minor evidence-precision issues (R2-2 specifics not embedded; byte-for-byte overstatement). Fixes: ran+embedded the missing probes (8-of-12 report-dialog grep, TempVars writer/reader pairs, 266-file whole-tree NavigationGraph/ItemText searches), reworded section 1 and R2-1 absence claims. Round 2 gpt-5-4: VERIFIED, no regressions. Raw outputs saved to s4-verification.md / s4-verification-round-2.md; structured issues in s4-issues.json with resolutions.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.14847
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.085235
+        }
+      ]
+    },
+    {
+      "sessionNumber": 4,
+      "stepNumber": 8,
+      "stepKey": "session-4/closeout-artifacts",
+      "dateTime": "2026-06-12T15:32:13.891875-04:00",
+      "description": "Closeout artifacts authored before the closeout commit: disposition.json (status completed, verdict VERIFIED, next_session_set integration-test-rebase), change-log.md (routed summarization gemini-flash, max_tier=1; counts corrected), next-session-set-recommendation.md (routed analysis gemini-pro; first run violated the never-regenerate-northwind constraint due to missing context - re-routed with constraints inline), ai-assignment.md Session 4 actuals appended.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "summarization",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0067
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0173
+        }
+      ]
     }
   ]
 }

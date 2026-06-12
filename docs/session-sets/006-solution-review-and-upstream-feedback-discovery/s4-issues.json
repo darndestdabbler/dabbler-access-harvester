@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "sessionNumber": 4,
+  "verificationRound": 1,
+  "verificationVerdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "description": "The R2-2 writeup presents some specifics as proven fresh-run facts (notably '8 of 12 reports' and concrete TempVars-fed subreport linkage) that are not established by the embedded console evidence.",
+      "category": "process",
+      "severity": "Minor",
+      "issueId": "S006-S4-V1-001",
+      "issueType": "evidence-overreach",
+      "verificationMethod": "Compared the R2-2 hop table's specifics against the embedded probe evidence sections A-F.",
+      "resolution_status": "fixed",
+      "resolution_notes": "The specifics were true but their probes were not embedded. Ran and embedded the missing probes verbatim (section G of the evidence file): per-report grep over all 12 ir/Reports VbaCode for the OpenForm-dialog pattern (8 hits, listed), TempVars writer lines in rptServicePlanAndShortfall, and the two srpt* record sources that read TempVars!repCID/repFY. The doc's hop table now cites the whole-set counts as probed.",
+      "resolved_in_round": 2
+    },
+    {
+      "description": "Section 1 uses stronger-than-shown wording ('byte-for-byte against the committed-golden evidence' and exhaustive absence language about row data/output surfaces) without an explicit embedded comparison/search proving those whole-tree claims.",
+      "category": "process",
+      "severity": "Minor",
+      "issueId": "S006-S4-V1-002",
+      "issueType": "evidence-overreach",
+      "verificationMethod": "Checked section 1's corroboration sentence and the R2-1 absence claims against the embedded evidence.",
+      "resolution_status": "fixed",
+      "resolution_notes": "Replaced 'byte-for-byte' with 'value-for-value on the probed surfaces'. Backed the exhaustive-absence claims with new whole-tree searches embedded in evidence section G: 'NavigationGraph' appears in zero files across the fresh tree; 'ItemText' appears only in the four tblSwitchboardItems schema artifacts (raw/kb/ir/manifest), so no artifact carries switchboard row content.",
+      "resolved_in_round": 2
+    }
+  ]
+}
