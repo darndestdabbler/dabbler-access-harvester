@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 2,
+  "sessionNumber": 2,
+  "verificationRound": 1,
+  "verificationVerdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "description": "F-2-5: the finding's substance is reasonable, but its Status uses a non-canonical hybrid wording even though the project requires one of the exact labels proven / partially proven / inferred — not verified.",
+      "category": "process",
+      "severity": "Minor",
+      "issueId": "S006-S2-V1-001",
+      "issueType": "standards-departure",
+      "verificationMethod": "Compared each finding's Status line against the canonical label set the spec's Evidence-Over-Inference rule defines.",
+      "resolution_status": "fixed",
+      "resolution_notes": "Relabeled F-2-5 Status to the canonical 'partially proven', separating the proven no-credit mechanism from the inferred end-to-end PossiblyUnused misclassification in both the Status line and the Problem paragraph; title hedged to 'can classify'.",
+      "resolved_in_round": 2
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "sessionSetName": "006-solution-review-and-upstream-feedback-discovery",
   "createdDate": "2026-06-12T13:12:43.414357-04:00",
-  "totalSessions": 0,
+  "totalSessions": 4,
   "entries": [
     {
       "sessionNumber": 1,
@@ -70,6 +70,75 @@
           "inputTokens": 8400,
           "outputTokens": 6540,
           "costUsd": 0.11909999999999998
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/read-strategy-docs",
+      "dateTime": "2026-06-12T13:38:28.627030-04:00",
+      "description": "Read s1-review-findings.md, object-use-identification-strategy.md, object-cleanup-strategy.md; session 2 registered in-progress",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/pipeline-review",
+      "dateTime": "2026-06-12T13:57:04.577438-04:00",
+      "description": "Reviewed Pipeline (NavigationGraph, UsageIdentification, Cleanup, Migration, Classification skim) + Core/Enrichment enrichers; proven probes: golden qxt* crosstab code=16 mislabeled MakeTable and classified PossiblyUnused; NavigationGraphBuilder/UnresolvedItemAggregator/EnrichmentPipelineRunner zero production call sites; BOM on 4 usage/cleanup outputs; Q6 dead code; label provenance casing drift",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/test-posture",
+      "dateTime": "2026-06-12T13:57:04.577438-04:00",
+      "description": "Pipeline.Tests assessed: 794/794 green; gaps: query-type decode unpinned vs DAO ground truth (classifier tests circular on same constants), unwired-substrate tests give false confidence, no strict-JSON read-back of BOM outputs",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-06-12T13:57:04.578911-04:00",
+      "description": "dotnet build solution: 0 errors; dotnet test Pipeline.Tests: 794 passed 0 failed (sequential, foreground)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/findings-authored",
+      "dateTime": "2026-06-12T14:04:21.674534-04:00",
+      "description": "Authored s2-review-findings.md: 2 Major (DAO query-type decode shift proven end-to-end in goldens; Phase 6.3-6.8 substrate unwired - root cause of R2-1/R2-2), 5 Minor, 8 observations, test-posture gaps, Session 4 seam notes",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/cross-provider-verification",
+      "dateTime": "2026-06-12T14:04:21.675537-04:00",
+      "description": "Round 1 gpt-5-4 ISSUES_FOUND (1 Minor: F-2-5 non-canonical Status label) -> fixed -> Round 2 VERIFIED",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 15899,
+          "outputTokens": 9573,
+          "costUsd": 0.1833425
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 9261,
+          "outputTokens": 675,
+          "costUsd": 0.0332775
         }
       ]
     }

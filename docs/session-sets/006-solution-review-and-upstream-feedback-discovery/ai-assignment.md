@@ -56,3 +56,29 @@ claude-code claude-fable-5 @ effort=high
 Rationale: maintainer-assigned for all four sessions (the model choice is
 the set's purpose); recorded here per the spec's deviation note rather
 than via routed analysis.
+
+### Session 2 (2026-06-12)
+
+- **Orchestrator used:** Claude Code / Claude Fable 5 (`claude-fable-5`) @ effort=high
+- **Total routed cost:** $0.22 (session-verification x2: gpt-5-4 round 1
+  $0.18 ISSUES_FOUND (1 Minor) -> fix -> round 2 $0.03 VERIFIED)
+- **Deviations from recommendation:** none — review authored
+  in-conversation per the spec's human-directed deviation; router used
+  only for mandatory cross-provider verification.
+- **Notes for next-session calibration:** Baking the Status-label legend
+  and evidence-basis preambles in from the start (Session 1's note) paid
+  off — round 1 returned a single Minor labelling issue instead of
+  Session 1's four. The one miss: a hybrid Status wording on F-2-5;
+  Session 3 should use ONLY the three canonical labels verbatim and put
+  the proven/inferred split inside the label line. Embedding live probe
+  outputs (golden greps, BOM byte survey, call-site greps) directly in
+  the verification prompt worked well for observability. Session 3
+  scope note: F-2-1 (query-type decode shift) also infects the strategy
+  doc's own table; the parser-stack session should treat the jet-sql
+  parser as the contract-grade query-type source when assessing whether
+  Q-rule classification could re-derive types from parsed SQL.
+
+**Next-session orchestrator recommendation (Session 3):**
+claude-code claude-fable-5 @ effort=high
+Rationale: maintainer-assigned for all four sessions; recorded here per
+the spec's deviation note rather than via routed analysis.
