@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "006-solution-review-and-upstream-feedback-discovery",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Extraction Core, COM Session, And CLI Review",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Pipeline Review — Enrichment, Usage, Classification, Migration",
+      "status": "not-started"
+    },
+    {
+      "number": 3,
+      "title": "Parser Stack And Symbol DB Review",
+      "status": "not-started"
+    },
+    {
+      "number": 4,
+      "title": "Consumer Feedback Grounding, Synthesis, And Closeout",
+      "status": "not-started"
+    }
+  ]
+}

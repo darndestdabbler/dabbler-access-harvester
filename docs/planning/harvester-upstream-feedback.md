@@ -1,5 +1,8 @@
 # Harvester Upstream Feedback
 
+> **Rounds:** Round 1 (2026-06-02, resolved — see Resolution Status table) ·
+> [Round 2 (2026-06-12, open — input to set `006`)](#round-2-2026-06-12--post-120-pilot-feedback)
+
 ## Purpose
 
 Capture concrete upstream feedback for `dabbler-access-harvester` discovered
@@ -284,3 +287,66 @@ useful decomposition is likely:
 The direct-navigation/ribbon uncertainty work can either be folded into the
 cleanup/usage sessions above or scoped as a follow-up if it requires broader IR
 or startup-surface detection.
+
+---
+
+## Round 2 (2026-06-12) — Post-1.2.0 Pilot Feedback
+
+> **Provenance:** Received 2026-06-12 from the downstream migration-orchestrator
+> consumer (a Claude Fable 5 instance running that repo's pilot), after the
+> harvester 1.2.0 cycle resolved all six items packaged in that consumer's
+> previous round. The finding identifiers below (F5, F6, F9) and "set 005"
+> reference the **downstream consumer repo's** findings and session sets, not
+> this repo's. The text is verbatim; annotations are confined to this preamble
+> and the status table.
+>
+> **Disposition:** Input to set
+> `006-solution-review-and-upstream-feedback-discovery` (assessment +
+> design recommendation; implementation, if accepted, lands in follow-up
+> sets that 006 proposes).
+
+| # | Feedback item | Status | Owning set | Notes |
+|---|---|---|---|---|
+| R2-1 | Materialize switchboard navigation rows into structured edges in IR | Open — under assessment | `006` (assessment) | Usage pass already classifies `tblSwitchboardItems` as switchboard-navigation-data; the gap is row-level caption/target/command edges |
+| R2-2 | Harvest report-chain linkage edges (param dialog → query → report) | Open — under assessment | `006` (assessment) | Pieces observable since 1.2.0 (launcher, param dialogs, declared-parameter tokens); connections are not |
+| R2-3 | Optional: single flat reviewed-input export (`export-reviewed-input`) | Open — ownership call | `006` (recommendation) | Downstream's own default is orchestrator-side intake (their F9); upstream command is the alternative |
+
+### Verbatim feedback
+
+Good framing — and the honest answer is: this round surfaced far less upstream
+work than the last one (the 1.2.0 cycle resolved all six packaged items), but
+the pilot did expose three or four things that genuinely belong upstream rather
+than in this repo. Here's my assessment, ordered by value to the process.
+
+**Harvester — strong candidates**
+
+**Materialize switchboard navigation data into structured edges.** The 1.2.0
+usage pass already recognizes tblSwitchboardItems as
+switchboard-navigation-data, but it stops at the signal. The actual menu tree —
+item captions, target objects, commands — is sitting as rows in that table. If
+the harvester parsed those rows into a structured navigation graph in IR, the
+orchestrator's reserved navigation-shell lane (finding F5) could emit platform
+navigation config deterministically instead of routing switchboards to AI.
+That's the difference between a mechanical lane and an AI lane for every Access
+database with a switchboard, which is most of them.
+
+**Harvest the report-chain linkage edges.** This is the gap the verifier forced
+us to be precise about in F6: the graph knows frmReportMenu is a launcher, the
+five frmReportParam_* forms are parameter dialogs, and the queries carry
+declared-parameter tokens — but it records no edges for which dialog feeds
+which query or which query feeds which report. Those edges exist in the source
+(report record sources, OpenReport callers, parameter references). Without
+them, every chain-shaped AI-handoff pack in set 005 has to re-derive linkage ad
+hoc; with them, packaging becomes mechanical. Same pattern as item 1: the
+harvester made the pieces observable in 1.2.0, and the natural next step is
+making the connections observable.
+
+**Optional ergonomics: a single flat reviewed-input export.** The two remaining
+structural workarounds exist because the harvester writes the per-database tree
+under AccessMetaData/<dbName>/ and classify writes classification.json to a
+separate output root, forcing a two-root copy to stage migration-staging/<db>/.
+Per project-guidance.md the default fix is orchestrator-side (a repo-local
+intake command, finding F9), and that remains my recommendation — but if you'd
+rather fix it at the source, an export-reviewed-input command upstream would
+eliminate the workaround for every consumer, not just this repo. This is an
+ownership call for you, not a necessity.
