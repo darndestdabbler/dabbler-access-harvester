@@ -740,11 +740,19 @@ public static class UsageClassifier
 
         // Query SQL references
         bool sqlRef = index.UsedInQuerySql.Contains(objectName);
+        var sqlRefEvidence = new List<string>();
+        if (sqlRef) sqlRefEvidence.Add("appears-in-query-FROM-or-JOIN");
+        // Q6 marker: this query's OWN FROM/JOIN targets are all other queries (no base
+        // table). The QuestionGenerator gates the QueryReferencesNoTables clarifying
+        // question on this evidence string; before F-2-4 it was never emitted, so the
+        // question was unreachable even though the rule was documented.
+        if (objectType == "Query" && QueryRefsNoTables(objectName, index))
+            sqlRefEvidence.Add("references-no-tables");
         signals.Add(new SignalEntry
         {
             SignalType = UsageSignalType.QueryTableReference,
             Fired = sqlRef,
-            Evidence = sqlRef ? ["appears-in-query-FROM-or-JOIN"] : [],
+            Evidence = sqlRefEvidence,
         });
 
         // FK relationships
@@ -905,9 +913,12 @@ public static class UsageClassifier
             return false;  // SQL absent; don't fire
         if (targets.Count == 0)
             return false;
-        // "References no tables" means all references are to other queries (not base tables)
-        // We can't distinguish here without a full object catalog; for now fire when empty SQL refs
-        return false;
+        // "References no tables" (strategy doc Q6) = every FROM/JOIN target is another
+        // query, not a base table — a pure intermediate-computation query layered over
+        // queries. KnownQueryNames is the known-query set; any target not in it is a
+        // base table (or unresolved name), which disqualifies Q6. The Count > 0 guard
+        // above keeps an empty/unanalyzable target set from accidentally qualifying (F-2-4).
+        return targets.All(index.KnownQueryNames.Contains);
     }
 
 

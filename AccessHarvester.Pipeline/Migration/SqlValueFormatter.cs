@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace AccessHarvester.Pipeline.Migration;
 
 /// <summary>
@@ -30,6 +32,12 @@ public static class SqlValueFormatter
     public static bool IsBinary(int typeCode) =>
         typeCode is DbBinary or DbLongBinary or DbVarBinary;
 
+    // Invariant numeric literal: optional sign, integer digits, optional fraction,
+    // optional exponent. Anything else interpolated bare into an INSERT would be
+    // malformed or arbitrary SQL, so it is degraded to NULL (F-2-7).
+    private static readonly Regex NumericToken =
+        new(@"^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$", RegexOptions.Compiled);
+
     /// <summary>Formats <paramref name="raw"/> as a SQL literal for a column of <paramref name="typeCode"/>.</summary>
     public static string Format(int typeCode, string? raw)
     {
@@ -40,7 +48,36 @@ public static class SqlValueFormatter
             DbText or DbChar or DbMemo => "N'" + raw.Replace("'", "''") + "'",
             DbDate or DbGuid           => "'" + raw.Replace("'", "''") + "'",
             DbBoolean                  => FormatBit(raw),
-            _                          => raw, // numeric families: emit the invariant token bare
+            // numeric families: emit the invariant token bare, but only when it is a
+            // valid numeric literal; otherwise degrade to NULL rather than inject it.
+            _                          => NumericToken.IsMatch(raw) ? raw : "NULL",
+        };
+    }
+
+    /// <summary>
+    /// True when a non-null CSV token cannot be emitted as a safe literal for this
+    /// column type and <see cref="Format"/> therefore substitutes <c>NULL</c>: an
+    /// out-of-pattern numeric token, or a bit token outside the known set. Text /
+    /// date / GUID values are always quoted-and-escaped, so they are never "invalid"
+    /// in this sense. The generator uses this to record a single
+    /// <see cref="MigrationDegradationKind.InvalidDataToken"/> per affected column (F-2-7).
+    /// </summary>
+    public static bool IsInvalidDataToken(int typeCode, string? raw)
+    {
+        // null / empty / whitespace cells are a clean NULL (Format emits NULL for them),
+        // not an invalid token — never flag them as a degradation.
+        if (string.IsNullOrWhiteSpace(raw)) return false;
+        // Binary/OLE columns are omitted from the INSERT upstream (the generator skips
+        // them via IsBinary before the row loop), so they never reach this predicate in
+        // practice; guard explicitly so a direct caller cannot mis-flag a hex/binary
+        // token through the numeric branch below.
+        if (IsBinary(typeCode)) return false;
+        return typeCode switch
+        {
+            DbBoolean                  => !IsKnownBit(raw),
+            DbText or DbChar or DbMemo
+                or DbDate or DbGuid    => false,
+            _                          => !NumericToken.IsMatch(raw),
         };
     }
 
@@ -48,6 +85,9 @@ public static class SqlValueFormatter
     {
         "true" or "True" or "TRUE" or "1"  => "1",
         "false" or "False" or "FALSE" or "0" => "0",
-        _ => raw, // already a 0/1-ish token from upstream; pass through unquoted
+        _ => "NULL", // not a recognized bit token; degrade to NULL rather than inject (F-2-7)
     };
+
+    private static bool IsKnownBit(string raw) => raw is
+        "true" or "True" or "TRUE" or "1" or "false" or "False" or "FALSE" or "0";
 }

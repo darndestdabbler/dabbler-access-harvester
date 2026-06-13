@@ -68,15 +68,14 @@ public sealed class SaveAsTextTranslator : IObjectTranslator
 
     private static object BuildPayload(string file, string name, string category)
     {
-        // SaveAsText output is Windows-1252 (ANSI). Reading it with the .NET
-        // default (UTF-8) corrupts every non-ASCII byte to U+FFFD one-way
-        // (006 review F-1-1). Passing GetEncoding(1252) still honours a BOM
-        // when present (File.ReadAllText opens the StreamReader with
-        // detectEncodingFromByteOrderMarks: true), matching the BOM-detect-
-        // then-cp1252 strategy the CLI parse path (RunParse) and the manifest
-        // path (Pipeline.EmitManifestArtifacts) already use.
-        var cp1252 = Encoding.GetEncoding(1252);
-        string text = File.ReadAllText(file, cp1252).TrimStart();
+        // SaveAsText output is not a single fixed encoding: modern Access emits
+        // UTF-8 (with or without a BOM), legacy/ANSI content is Windows-1252.
+        // SaveAsTextDecoder honours a BOM, else tries strict UTF-8, else falls back
+        // to cp1252 — fixing both the cp1252-as-UTF-8 → U+FFFD failure (006 F-1-1)
+        // and the UTF-8-without-BOM-as-cp1252 → mojibake regression the 010 golden
+        // regen surfaced (a UTF-8 "§" decoding to "Â§"). Shared with the manifest
+        // read path so the run pipeline agrees on encoding.
+        string text = SaveAsTextDecoder.ReadText(file).TrimStart();
 
         if (text.StartsWith("<?xml"))
             return new { Name = name, Type = "Macro", XmlContent = text };
@@ -88,6 +87,6 @@ public sealed class SaveAsTextTranslator : IObjectTranslator
         // enclosing Begin Macro block). Return the document root with all Begin
         // children intact so downstream enrichers can walk every block.
         bool keepRoot = category == "Macros";
-        return AccessTextParser.ParseBlockFormat(File.ReadAllLines(file, cp1252), keepRoot);
+        return AccessTextParser.ParseBlockFormat(SaveAsTextDecoder.ReadLines(file), keepRoot);
     }
 }

@@ -1,7 +1,7 @@
 {
   "sessionSetName": "010-output-contract-fidelity-batch",
   "createdDate": "2026-06-13T11:01:57.690940+00:00",
-  "totalSessions": 0,
+  "totalSessions": 2,
   "entries": [
     {
       "sessionNumber": 1,
@@ -13,6 +13,105 @@
       "routedApiCalls": [],
       "kind": "verification_mode",
       "choice": "out-of-band-or-none"
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "s2/setup-and-reground",
+      "dateTime": "2026-06-13T09:26:37.732171-04:00",
+      "description": "Read planning docs + 006 findings (F-2-3/4/5/6/7, F-1-4/7, O-1-1/2); re-grounded each Minor against current tree (BOM x4 confirmed; Q6 dead code confirmed; F-2-5 no-credit mechanism live on HHC tblServiceRateLimits; F-1-4/F-1-7 confirmed).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "s2/decision-consensus",
+      "dateTime": "2026-06-13T09:26:37.732171-04:00",
+      "description": "Cross-provider decision consensus (gpt-5-4 + gemini-pro) on F-2-4 (implement vs strike) and F-2-5 (fix-now vs defer). Both agree: IMPLEMENT Q6 (golden-neutral) and FIX-NOW F-2-5 (Option A). Recorded in s2-decision-consensus.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "analysis",
+          "costUsd": 0.0359
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "costUsd": 0.008
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "s2-minors-resolved",
+      "dateTime": "2026-06-13T10:30:01.549479-04:00",
+      "description": "Implemented F-2-3 (BOM strip x4 writers via UTF8Encoding(false)), F-2-4 (Q6 references-no-tables now live + question wired + OutOfBand suppression), F-2-5 (inline-SQL FROM/JOIN catalog targets credit used-as-RecordSource), F-2-7 (numeric/bit token validation -> NULL + InvalidDataToken degradation), F-1-4 (FORM_SPEC_MISSING diagnostic), F-1-7 (shared SystemObjectNames helper). Hermetic tests added across all.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "s2-casing-reconciled",
+      "dateTime": "2026-06-13T10:30:01.549479-04:00",
+      "description": "F-2-6 label-provenance casing reconciled to shipped PascalCase (project-guidance + ir-schema-forms-reports.md + interpretation-guide(.md/outline)); O-1-2 database name-form table + O-1-1 interim unresolved-items note added to interpretation guide.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "s2-encoding-regression-fix",
+      "dateTime": "2026-06-13T10:30:01.550480-04:00",
+      "description": "Golden regen surfaced a Set-009 encoding regression: UTF-8-without-BOM SaveAsText (a UTF-8 section-sign) decoded to mojibake under fixed-cp1252. Added shared SaveAsTextDecoder (BOM->strict-UTF-8->cp1252), adopted at the two run-pipeline sites (translator + manifest read); RunParse left as DW-5. 4 hermetic decoder tests. DW-5/DW-6 updated. Beyond the 5 named findings; disclosed for verification.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "s2-golden-regenerated",
+      "dateTime": "2026-06-13T10:30:01.550480-04:00",
+      "description": "Single coordinated HHC golden regen. Gated CanonicalGoldenRegressionTests GREEN. Deltas all explained: ir/kb qxt QueryType MakeTable->Crosstab (F-2-1/F-3-7); manifest QueryType + PassingMechanism ByVal/ByRef (F-3-5); ir/kb basDataOperations+basUtilities U+FFFD->U+2014 em-dash (009 F-1-1 landing, preserved by new decoder); usage reclassification (F-2-1 crosstabs->Reporting, F-2-5 tblServiceRateLimits->MainDataEntry) + BOM strip; cleanup BOM strip. basResetFixture section-sign preserved correct (no mojibake) by the encoding fix. migration/ unchanged (F-2-7 golden-neutral).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "s2-hermetic-green",
+      "dateTime": "2026-06-13T10:30:01.550480-04:00",
+      "description": "Build 0 errors. AccessHarvester.Pipeline.Tests 822/822; AccessHarvester.Tests hermetic subset 66/66 (incl. 4 SaveAsTextDecoder pins, SystemObjectNames, BOM read-back). COM gate green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "s2-verified",
+      "dateTime": "2026-06-13T10:41:42.427057-04:00",
+      "description": "Cross-provider verification (gpt-5-4). R1 ISSUES_FOUND (Major: F-2-7 blank-cell spurious degradation; Minor: F-1-4 missing-ir-dir early-return) both fixed + tests. R2 ISSUES_FOUND (Major: IsInvalidDataToken binary-family hole) accepted-with-clarification (unreachable in generator; binary omitted upstream) + defensive guard + test. R3 VERIFIED. Total verification ~$0.428; decision-consensus $0.044.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.265877
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.14801
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.01444
+        }
+      ]
     }
   ]
 }

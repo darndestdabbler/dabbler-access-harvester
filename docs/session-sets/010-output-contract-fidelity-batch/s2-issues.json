@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "sessionSet": "010-output-contract-fidelity-batch",
+  "session": 2,
+  "round": 1,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": "S2-R1-1",
+      "severity": "Major",
+      "location": "AccessHarvester.Pipeline/Migration/SqlValueFormatter.cs",
+      "summary": "IsInvalidDataToken flagged empty/whitespace numeric/bit cells as invalid even though Format emits a clean NULL, causing spurious InvalidDataToken degradations on ordinary nullable columns.",
+      "resolution_status": "fixed",
+      "resolution": "Added string.IsNullOrWhiteSpace(raw) short-circuit returning false; theory test covers empty Long, whitespace Double, empty Bit."
+    },
+    {
+      "id": "S2-R1-2",
+      "severity": "Minor",
+      "location": "AccessHarvester.Core/Pipeline.cs",
+      "summary": "BuildFormOrReportExports early-returned when the ir/<category> directory was absent, before the FORM_SPEC_MISSING diff, so a non-empty parserOutputs with a missing ir dir emitted no diagnostics.",
+      "resolution_status": "fixed",
+      "resolution": "Removed the early return (missing dir -> empty ir-file set); extracted the diff to an internal AddMissingSpecDiagnostics helper with three unit tests."
+    }
+  ]
+}

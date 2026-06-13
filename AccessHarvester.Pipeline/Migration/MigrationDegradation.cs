@@ -69,6 +69,17 @@ public enum MigrationDegradationKind
     /// from the generated <c>INSERT</c> column list.
     /// </summary>
     DataColumnOmitted,
+
+    /// <summary>
+    /// A numeric- or bit-typed column whose sanitized CSV carried a token that is
+    /// not a valid invariant numeric / bit literal (a stale pre-rename CSV, a
+    /// hand-edited cell, or a classification-vs-CSV type drift). The generator emits
+    /// <c>NULL</c> for the offending cell rather than interpolating the raw token bare
+    /// into the <c>INSERT</c> — which would produce malformed or arbitrary SQL —
+    /// following the project's validate-or-degrade posture (F-2-7). Flagged once per
+    /// affected column.
+    /// </summary>
+    InvalidDataToken,
 }
 
 /// <summary>

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "sessionSet": "010-output-contract-fidelity-batch",
+  "session": 2,
+  "round": 2,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": "S2-R2-1",
+      "severity": "Major",
+      "location": "AccessHarvester.Pipeline/Migration/SqlValueFormatter.cs:IsInvalidDataToken",
+      "summary": "Binary families (DbBinary/DbLongBinary/DbVarBinary) were not handled, so a hex token could fall into the numeric-regex branch and be flagged invalid.",
+      "resolution_status": "fixed",
+      "resolution": "Accepted-with-clarification: unreachable in the generator (binary columns are omitted upstream via IsBinary before the row loop; Format has no binary branch). Added a defensive `if (IsBinary(typeCode)) return false;` guard to the public predicate + a theory test (DEADBEEF/0102FF/AB). R3 VERIFIED."
+    }
+  ]
+}

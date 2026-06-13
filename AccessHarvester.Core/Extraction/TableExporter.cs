@@ -33,7 +33,7 @@ public sealed class TableExporter : IObjectExporter
         foreach (dynamic td in tableDefs)
         {
             string name = td.Name;
-            if (name.StartsWith("MSys") || name.StartsWith("~")) continue;
+            if (SystemObjectNames.IsSystemObjectName(name)) continue;
 
             try
             {

@@ -409,6 +409,27 @@ A populated run has the arrays filled in; the per-category stubs
 keep the consumer's iteration shape constant across empty and
 populated cases.
 
+> **Database name-form across surfaces (join carefully).** The
+> database name is **not** spelled identically on every output surface,
+> so a consumer joining records across files by database name must
+> normalise first:
+>
+> | Surface | Field | Name-form | Example |
+> |---|---|---|---|
+> | `manifest.json` | `Database.Name` | **suffixed** (keeps `.accdb`/`.mdb`) | `HomeHealthCare.accdb` |
+> | `object-use.json` / `object-use-checklist.json` | `database` | **stripped** (extension removed) | `HomeHealthCare` |
+> | `object-cleanup.json` / `object-cleanup-checklist.json` | `database` | **stripped** | `HomeHealthCare` |
+>
+> The manifest keeps the on-disk file name (`Path.GetFileName`); the
+> usage/cleanup classification surfaces use the extension-stripped form
+> (`Path.GetFileNameWithoutExtension`, via the COM session's
+> `DatabaseName`). To join usage/cleanup findings to the manifest,
+> compare on the **stripped** form (strip the manifest's extension), or
+> rely on the per-database output directory — every surface for one
+> database lives under the same `<output>/<DatabaseName>/` folder, which
+> is the unambiguous join key. (Documented 2026-06-13 per 006 O-1-2; the
+> divergence itself is left as-is to avoid churning either contract.)
+
 ### Required record snippets
 
 The audience-check probe identified three manifest-level arrays
@@ -1095,6 +1116,18 @@ property.
 
 ## 6. The `UnresolvedItems` array
 
+> **Interim status (as of 2026-06-13, set 010 / P2): `unresolved-items.json`
+> currently always ships as an empty list `[]`.** The producers that surface
+> these records (the resolver, SQL/form-reference, dynamic-SQL, navigation-target,
+> and function-classification seams) are parsed and tested but are **not yet wired
+> into the `run` pipeline** — that wiring is the P3 resolver-and-navigation arc
+> (006 findings F-3-4 / F-2-2). Until P3 lands, a consumer should treat an empty
+> `unresolved-items.json` as "the aggregation seam is not connected yet," **not**
+> as "every reference resolved cleanly." The per-reference `ResolutionReason` /
+> `ResolutionStatus` fields on each `ParserOutput.Body.References[]` entry (see
+> below) are the resolved/unresolved signal that IS populated today. This note is
+> removed when P3 wires the aggregator.
+
 `unresolved-items.json` is a flat list of `UnresolvedItem` records,
 one per reference the harvester could not fully bind. The record
 shape:
@@ -1183,19 +1216,21 @@ in this section use lower-case keys verbatim. Consumers should
 match on the lower-case spelling.
 
 ```json
-"Label": { "source": "attached", "text": "Customer Name" }
-"Label": { "source": "unresolved" }
+"Label": { "source": "Attached", "text": "Customer Name" }
+"Label": { "source": "Unresolved" }
 "Binding": { "kind": "Unbound" }
 ```
 
-A consumer reading `Label.source` knows whether the label came from
-an attached `Label` control (`attached`), from the control's caption
-(`caption`), from the control's `Name` as a fallback
-(`nameFallback`), or whether the label could not be resolved at all
-(`unresolved`). Bare missing keys are reserved for "this property is
-at its Access default"; an explicit `{ source: "unresolved" }` is
-"the harvester looked here and found nothing the consumer should
-trust."
+The provenance *keys* are lower-case (`source`, `text`, `kind`); the
+`Label.source` *value* is a **closed PascalCase set** emitted verbatim
+by the resolver: `"Attached"` (an attached `Label` control's caption),
+`"Proximity"` (a nearby peer label, conservative 2× rule), `"FromName"`
+(camelCase split of a non-generic control `Name`), `"FromBinding"`
+(camelCase split of a simple `ControlSource`), or `"Unresolved"` (none
+resolved). Match these values exactly. Bare missing keys are reserved
+for "this property is at its Access default"; an explicit
+`{ source: "Unresolved" }` is "the harvester looked here and found
+nothing the consumer should trust."
 
 ### Null versus omission
 

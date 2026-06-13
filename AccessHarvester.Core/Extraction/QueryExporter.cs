@@ -30,7 +30,7 @@ public sealed class QueryExporter : IObjectExporter
         foreach (dynamic qd in queryDefs)
         {
             string name = qd.Name;
-            if (name.StartsWith("~")) continue;
+            if (SystemObjectNames.IsSystemObjectName(name)) continue;
 
             try
             {

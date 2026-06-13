@@ -131,10 +131,21 @@ public static class SqlServerDataLoadGenerator
         }
 
         string columnList = string.Join(", ", insertCols.Select(ic => Quote(ic.Col.Name)));
+        // Track numeric/bit columns already flagged for an invalid token so the
+        // degradation fires once per column, not once per offending row (F-2-7).
+        var invalidTokenCols = new HashSet<string>(IdComparer);
         foreach (var row in csv.Rows)
         {
-            var values = insertCols.Select(ic =>
-                SqlValueFormatter.Format(ic.Col.TypeCode, ic.CsvIndex < row.Count ? row[ic.CsvIndex] : null));
+            var values = new List<string>(insertCols.Count);
+            foreach (var ic in insertCols)
+            {
+                string? cell = ic.CsvIndex < row.Count ? row[ic.CsvIndex] : null;
+                if (SqlValueFormatter.IsInvalidDataToken(ic.Col.TypeCode, cell) && invalidTokenCols.Add(ic.Col.Name))
+                    degradations.Add(new MigrationDegradation(
+                        MigrationDegradationKind.InvalidDataToken, table.Name, ic.Col.Name,
+                        $"Sanitized CSV carried a token ('{cell}') that is not a valid numeric/bit literal for this column type; emitted NULL for the offending cell(s) instead of interpolating the raw token into the INSERT."));
+                values.Add(SqlValueFormatter.Format(ic.Col.TypeCode, cell));
+            }
             sb.Append("INSERT INTO ").Append(Quote(table.Name)).Append(" (").Append(columnList)
               .Append(") VALUES (").Append(string.Join(", ", values)).Append(");").Append(NL);
         }

@@ -1,4 +1,4 @@
-﻿{
+{
   "ProjectName": "HomeHealthCare \u2014 Object Use Checklist",
   "Review": [
     {
@@ -551,11 +551,16 @@
     {
       "FunctionalArea": "Query",
       "Subarea": "qxtClientServiceCosts",
-      "ItemLabel": "Query \u0027qxtClientServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "ItemLabel": "Crosstab query \u0027qxtClientServiceCosts\u0027 used for reporting or data analysis",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "No harvested reference was found for Query \u0027qxtClientServiceCosts\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
+          "Action": "No harvested opener was found for Query \u0027qxtClientServiceCosts\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "Verifications": []
+        },
+        {
+          "StepNumber": 2,
+          "Action": "Query \u0027qxtClientServiceCosts\u0027 is a crosstab query \u2014 is it used for reporting, for driving a form or chart control, or for data exports?",
           "Verifications": []
         }
       ],
@@ -566,11 +571,16 @@
     {
       "FunctionalArea": "Query",
       "Subarea": "qxtClientServiceHours",
-      "ItemLabel": "Query \u0027qxtClientServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "ItemLabel": "Crosstab query \u0027qxtClientServiceHours\u0027 used for reporting or data analysis",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "No harvested reference was found for Query \u0027qxtClientServiceHours\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
+          "Action": "No harvested opener was found for Query \u0027qxtClientServiceHours\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "Verifications": []
+        },
+        {
+          "StepNumber": 2,
+          "Action": "Query \u0027qxtClientServiceHours\u0027 is a crosstab query \u2014 is it used for reporting, for driving a form or chart control, or for data exports?",
           "Verifications": []
         }
       ],
@@ -581,11 +591,16 @@
     {
       "FunctionalArea": "Query",
       "Subarea": "qxtProviderServiceCosts",
-      "ItemLabel": "Query \u0027qxtProviderServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "ItemLabel": "Crosstab query \u0027qxtProviderServiceCosts\u0027 used for reporting or data analysis",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "No harvested reference was found for Query \u0027qxtProviderServiceCosts\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
+          "Action": "No harvested opener was found for Query \u0027qxtProviderServiceCosts\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "Verifications": []
+        },
+        {
+          "StepNumber": 2,
+          "Action": "Query \u0027qxtProviderServiceCosts\u0027 is a crosstab query \u2014 is it used for reporting, for driving a form or chart control, or for data exports?",
           "Verifications": []
         }
       ],
@@ -596,11 +611,16 @@
     {
       "FunctionalArea": "Query",
       "Subarea": "qxtProviderServiceHours",
-      "ItemLabel": "Query \u0027qxtProviderServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "ItemLabel": "Crosstab query \u0027qxtProviderServiceHours\u0027 used for reporting or data analysis",
       "Steps": [
         {
           "StepNumber": 1,
-          "Action": "No harvested reference was found for Query \u0027qxtProviderServiceHours\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
+          "Action": "No harvested opener was found for Query \u0027qxtProviderServiceHours\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "Verifications": []
+        },
+        {
+          "StepNumber": 2,
+          "Action": "Query \u0027qxtProviderServiceHours\u0027 is a crosstab query \u2014 is it used for reporting, for driving a form or chart control, or for data exports?",
           "Verifications": []
         }
       ],
@@ -665,7 +685,7 @@
     {
       "FunctionalArea": "Table",
       "Subarea": "tblServiceRateLimits",
-      "ItemLabel": "Standalone utility table \u0027tblServiceRateLimits\u0027 not referenced by any form or report",
+      "ItemLabel": "Main data entry table",
       "Steps": [],
       "IsJudgmentItem": true,
       "Passes": false,

@@ -271,10 +271,18 @@ experiments only.
 ### Output JSON Conventions
 
 - Provenance fields use a `{ source, ... }` shape (e.g.,
-  `Label: { source: "attached", text: "First Name" }`,
-  `Label: { source: "unresolved" }`). Consumers should never need to
-  special-case missing keys — emit explicit `unresolved` rather than
-  omitting the field.
+  `Label: { source: "Attached", text: "First Name" }`,
+  `Label: { source: "Unresolved" }`). Consumers should never need to
+  special-case missing keys — emit explicit `Unresolved` rather than
+  omitting the field. **The `Label.source` token is a closed PascalCase
+  set**, emitted verbatim by `LabelResolver` and pinned in the goldens:
+  `"Attached"`, `"Proximity"`, `"FromName"`, `"FromBinding"`,
+  `"Unresolved"`. A downstream AI prompted with these values must match
+  the PascalCase forms exactly. (Reconciled to the emitter 2026-06-13
+  per 006 F-2-6 — the doc previously showed lowercase tokens that
+  contradicted shipped output; the emitter is authoritative because
+  changing it would churn every form golden and any consumer already
+  coded to reality.)
 - Numeric units are explicit in field names where ambiguity is
   possible: `GeometryIn: { X, Y, W, H }` for inches alongside the
   raw twip values, not a bare `Geometry`.

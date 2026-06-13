@@ -5,7 +5,7 @@
 | Session | Task class | Orchestrator used | Verification model | Routed cost | Fit assessment |
 | :------ | :--------- | :---------------- | :----------------- | :---------- | :------------- |
 | 1 | Multi-file emission/decode correctness (2 Majors + 1 Minor) + contract-decision + hermetic test authoring | Claude Opus 4.8 | GPT-5-4 | ~$0.2888 | Good |
-| 2 | Minors + docs + COM-tier coordinated golden regen + decision-consensus | _pending_ | _pending_ | _pending_ | _pending_ |
+| 2 | Minors + docs + COM-tier coordinated golden regen + decision-consensus + emergent Set-009 encoding-regression fix | Claude Opus 4.8 | GPT-5-4 | ~$0.47 | Good |
 
 ## Actuals Summary — Session 1 (2026-06-13)
 
@@ -75,3 +75,19 @@ the O-1-2/O-1-1 doc ride-alongs, and **authoring the next session set**. The
 golden-regen coordination + the explain-every-delta gate + cross-session evidence
 assembly favor an Opus-class orchestrator. Host precondition: Windows + Microsoft
 Access (COM tier). Cross-provider verification routes to GPT-5-4.
+
+
+---
+
+### Actuals (Session 2)
+
+*   **Orchestrator used:** Claude Opus 4.8 (1M context)
+*   **Total routed cost:** ~$0.47
+*   **Deviations:** The Set-009 encoding regression fix was an emergent task discovered and resolved within this session's scope.
+
+*   **Notes for next-session calibration:**
+    Opus-4.8 was an excellent fit for this high-effort, multi-faceted session. Its 1M context window was critical for the cross-session evidence assembly that linked the current batch's behavior to the latent Set-009 encoding regression. The model's strong adherence to the 'explain-every-delta' discipline was instrumental in surfacing that bug, demonstrating a superior capability for maintaining high-fidelity implementation and self-correction.
+
+    The orchestrator effectively managed the complex coordination required for the COM golden regeneration and synthesized the decision-consensus inputs from GPT-5-4 and Gemini-Pro. This ability to reason over complex instructions and diverse data sources confirms its suitability for high-level orchestration roles. The overall session was highly productive, delivering five minor features, documentation, a critical regression fix, and a verified golden master, all managed seamlessly by the orchestrator.
+
+    *   **Next-session-set orchestrator:** Continue with Claude Opus 4.8 for complex implementation sessions requiring deep context and analytical synthesis.

@@ -88,6 +88,26 @@ public class SqlServerDataLoadGeneratorTests
     }
 
     [Fact]
+    public void Invalid_numeric_token_degrades_to_NULL_and_is_flagged_once()  // 006 F-2-7
+    {
+        // A numeric column whose CSV carries a non-numeric token (stale CSV / hand-edit
+        // / type drift) must NOT interpolate the raw token into the INSERT — it emits
+        // NULL and records a single InvalidDataToken degradation for the column.
+        var table = Tbl("Scores", Col("Id", 4, identity: true), Col("Value", 7)); // 7 = Double
+        var result = Run(table, "Id,Value\r\n1,1.5\r\n2,not-a-number\r\n3,oops\r\n");
+
+        Assert.Contains("VALUES (1, 1.5);", result.Sql);
+        Assert.Contains("VALUES (2, NULL);", result.Sql);
+        Assert.Contains("VALUES (3, NULL);", result.Sql);
+        // The raw bad tokens are never emitted into the script.
+        Assert.DoesNotContain("not-a-number", result.Sql);
+        Assert.DoesNotContain("oops", result.Sql);
+        // Flagged once for the column, not once per offending row.
+        Assert.Single(result.Degradations, d =>
+            d.Kind == MigrationDegradationKind.InvalidDataToken && d.Table == "Scores" && d.Column == "Value");
+    }
+
+    [Fact]
     public void Flags_a_missing_data_file()
     {
         var table = Tbl("Orphan", Col("Id", 4, identity: true));

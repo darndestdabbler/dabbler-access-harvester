@@ -159,4 +159,76 @@ public class CsvTableReaderAndValueTests
         Assert.False(SqlValueFormatter.IsBinary(10));  // text
         Assert.False(SqlValueFormatter.IsBinary(4));   // long
     }
+
+    // ── F-2-7: numeric/bit tokens are validated, not interpolated bare ───────────
+
+    [Theory]
+    [InlineData(4, "123")]            // Long, plain integer
+    [InlineData(7, "-1.5")]           // Double, signed fraction
+    [InlineData(5, "9.99")]           // Currency
+    [InlineData(7, "1.2e10")]         // Double, exponent
+    [InlineData(4, "+7")]             // signed
+    public void Valid_numeric_tokens_pass_through_bare(int typeCode, string raw)
+    {
+        Assert.Equal(raw, SqlValueFormatter.Format(typeCode, raw));
+        Assert.False(SqlValueFormatter.IsInvalidDataToken(typeCode, raw));
+    }
+
+    [Theory]
+    [InlineData(4, "12; DROP TABLE x")]   // injection attempt
+    [InlineData(7, "abc")]                // non-numeric
+    [InlineData(5, "1,234")]              // thousands separator (not invariant)
+    [InlineData(4, "0x1F")]               // hex literal
+    public void Invalid_numeric_tokens_degrade_to_NULL(int typeCode, string raw)
+    {
+        // Rather than interpolate a raw/arbitrary token into the INSERT (malformed
+        // or injected SQL), the formatter emits NULL and the generator records an
+        // InvalidDataToken degradation (F-2-7).
+        Assert.Equal("NULL", SqlValueFormatter.Format(typeCode, raw));
+        Assert.True(SqlValueFormatter.IsInvalidDataToken(typeCode, raw));
+    }
+
+    [Fact]
+    public void Bit_tokens_outside_the_known_set_degrade_to_NULL()
+    {
+        Assert.Equal("1", SqlValueFormatter.Format(1, "1"));
+        Assert.Equal("0", SqlValueFormatter.Format(1, "False"));
+        Assert.Equal("NULL", SqlValueFormatter.Format(1, "maybe"));
+        Assert.True(SqlValueFormatter.IsInvalidDataToken(1, "maybe"));
+        Assert.False(SqlValueFormatter.IsInvalidDataToken(1, "true"));
+    }
+
+    [Fact]
+    public void Quoted_families_and_null_are_never_invalid_tokens()
+    {
+        // Text/date/GUID are quoted-and-escaped, so they are never "invalid" in the
+        // injection sense; a null cell is a clean NULL, not a degradation.
+        Assert.False(SqlValueFormatter.IsInvalidDataToken(10, "anything '; --"));
+        Assert.False(SqlValueFormatter.IsInvalidDataToken(8, "not-a-date"));
+        Assert.False(SqlValueFormatter.IsInvalidDataToken(4, null));
+    }
+
+    [Theory]
+    [InlineData(4, "")]      // Long, empty cell (quoted-empty CSV)
+    [InlineData(7, "   ")]   // Double, whitespace
+    [InlineData(1, "")]      // Bit, empty
+    public void Blank_or_whitespace_numeric_bit_cells_are_clean_NULL_not_invalid(int typeCode, string raw)
+    {
+        // An empty/whitespace numeric or bit cell is a missing value → clean NULL, not
+        // an "invalid token" — it must NOT raise a degradation (verifier R1 fix).
+        Assert.Equal("NULL", SqlValueFormatter.Format(typeCode, raw));
+        Assert.False(SqlValueFormatter.IsInvalidDataToken(typeCode, raw));
+    }
+
+    [Theory]
+    [InlineData(9, "DEADBEEF")]   // binary
+    [InlineData(11, "0102FF")]    // OLE / long binary
+    [InlineData(17, "AB")]        // varbinary
+    public void Binary_tokens_are_not_invalid_tokens(int typeCode, string raw)
+    {
+        // Binary/OLE columns are omitted from the INSERT upstream (the generator skips
+        // them before the row loop), so IsInvalidDataToken must never flag a binary
+        // payload — its hex digits would otherwise miss the numeric pattern (verifier R2).
+        Assert.False(SqlValueFormatter.IsInvalidDataToken(typeCode, raw));
+    }
 }

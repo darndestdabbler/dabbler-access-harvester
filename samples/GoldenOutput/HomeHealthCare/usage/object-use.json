@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0",
   "database": "HomeHealthCare",
   "generatedAt": "2026-06-03T00:58:28.6797955Z",
@@ -3431,9 +3431,9 @@
     {
       "objectType": "Query",
       "objectName": "qxtClientServiceCosts",
-      "classification": "PossiblyUnused",
-      "confidence": 0.65,
-      "usageSummary": "Query \u0027qxtClientServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "classification": "Reporting",
+      "confidence": 0.7,
+      "usageSummary": "Crosstab query \u0027qxtClientServiceCosts\u0027 used for reporting or data analysis",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -3495,17 +3495,21 @@
       ],
       "questions": [
         {
-          "questionText": "No harvested reference was found for Query \u0027qxtClientServiceCosts\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
-          "uncertaintySignal": "UnreferencedObject"
+          "questionText": "No harvested opener was found for Query \u0027qxtClientServiceCosts\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "uncertaintySignal": "OutOfBandEntryPossible"
+        },
+        {
+          "questionText": "Query \u0027qxtClientServiceCosts\u0027 is a crosstab query \u2014 is it used for reporting, for driving a form or chart control, or for data exports?",
+          "uncertaintySignal": "CrosstabQuery"
         }
       ]
     },
     {
       "objectType": "Query",
       "objectName": "qxtClientServiceHours",
-      "classification": "PossiblyUnused",
-      "confidence": 0.65,
-      "usageSummary": "Query \u0027qxtClientServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "classification": "Reporting",
+      "confidence": 0.7,
+      "usageSummary": "Crosstab query \u0027qxtClientServiceHours\u0027 used for reporting or data analysis",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -3567,17 +3571,21 @@
       ],
       "questions": [
         {
-          "questionText": "No harvested reference was found for Query \u0027qxtClientServiceHours\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
-          "uncertaintySignal": "UnreferencedObject"
+          "questionText": "No harvested opener was found for Query \u0027qxtClientServiceHours\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "uncertaintySignal": "OutOfBandEntryPossible"
+        },
+        {
+          "questionText": "Query \u0027qxtClientServiceHours\u0027 is a crosstab query \u2014 is it used for reporting, for driving a form or chart control, or for data exports?",
+          "uncertaintySignal": "CrosstabQuery"
         }
       ]
     },
     {
       "objectType": "Query",
       "objectName": "qxtProviderServiceCosts",
-      "classification": "PossiblyUnused",
-      "confidence": 0.65,
-      "usageSummary": "Query \u0027qxtProviderServiceCosts\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "classification": "Reporting",
+      "confidence": 0.7,
+      "usageSummary": "Crosstab query \u0027qxtProviderServiceCosts\u0027 used for reporting or data analysis",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -3639,17 +3647,21 @@
       ],
       "questions": [
         {
-          "questionText": "No harvested reference was found for Query \u0027qxtProviderServiceCosts\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
-          "uncertaintySignal": "UnreferencedObject"
+          "questionText": "No harvested opener was found for Query \u0027qxtProviderServiceCosts\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "uncertaintySignal": "OutOfBandEntryPossible"
+        },
+        {
+          "questionText": "Query \u0027qxtProviderServiceCosts\u0027 is a crosstab query \u2014 is it used for reporting, for driving a form or chart control, or for data exports?",
+          "uncertaintySignal": "CrosstabQuery"
         }
       ]
     },
     {
       "objectType": "Query",
       "objectName": "qxtProviderServiceHours",
-      "classification": "PossiblyUnused",
-      "confidence": 0.65,
-      "usageSummary": "Query \u0027qxtProviderServiceHours\u0027 is not referenced by any form, report, query, VBA, or macro",
+      "classification": "Reporting",
+      "confidence": 0.7,
+      "usageSummary": "Crosstab query \u0027qxtProviderServiceHours\u0027 used for reporting or data analysis",
       "signals": [
         {
           "signalType": "RecordSource",
@@ -3711,8 +3723,12 @@
       ],
       "questions": [
         {
-          "questionText": "No harvested reference was found for Query \u0027qxtProviderServiceHours\u0027. In Access it may still be reached via application startup, direct object-pane navigation, the ribbon, or other access outside the harvested graph \u2014 a missing reference is not by itself evidence of staleness. Is it still in use, or genuinely obsolete?",
-          "uncertaintySignal": "UnreferencedObject"
+          "questionText": "No harvested opener was found for Query \u0027qxtProviderServiceHours\u0027. In Access it may still be reached via application startup, direct navigation in the object pane, a ribbon/menu command, or VBA in another object. Was it opened one of those ways, or is it genuinely unused?",
+          "uncertaintySignal": "OutOfBandEntryPossible"
+        },
+        {
+          "questionText": "Query \u0027qxtProviderServiceHours\u0027 is a crosstab query \u2014 is it used for reporting, for driving a form or chart control, or for data exports?",
+          "uncertaintySignal": "CrosstabQuery"
         }
       ]
     },
@@ -4163,14 +4179,16 @@
     {
       "objectType": "Table",
       "objectName": "tblServiceRateLimits",
-      "classification": "StandaloneUtility",
+      "classification": "MainDataEntry",
       "confidence": 0.7,
-      "usageSummary": "Standalone utility table \u0027tblServiceRateLimits\u0027 not referenced by any form or report",
+      "usageSummary": "Main data entry table",
       "signals": [
         {
           "signalType": "RecordSource",
-          "fired": false,
-          "evidence": []
+          "fired": true,
+          "evidence": [
+            "used-as-RecordSource"
+          ]
         },
         {
           "signalType": "RowSource",

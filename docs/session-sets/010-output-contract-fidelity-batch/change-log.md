@@ -1,8 +1,9 @@
 # Change Log — 010-output-contract-fidelity-batch
 
-**Set:** `010-output-contract-fidelity-batch` (006 P2) · **Sessions:** 1 of 2
-(in progress) · **Orchestrator:** Claude (Opus 4.8) · **Verification:** gpt-5-4
-(cross-provider), R1 ISSUES_FOUND → R2 VERIFIED
+**Set:** `010-output-contract-fidelity-batch` (006 P2) · **Sessions:** 2 of 2
+(**complete**) · **Orchestrator:** Claude (Opus 4.8) · **Verification:** gpt-5-4
+(cross-provider) — S1: R1 ISSUES_FOUND → R2 VERIFIED; S2: R1 ISSUES_FOUND →
+R2 ISSUES_FOUND → R3 VERIFIED
 
 ## Session 1 of 2 — Query-Type Decode + ByVal Emission (F-2-1, F-3-7, F-3-5)
 
@@ -96,3 +97,149 @@ Cross-provider gpt-5-4. R1 ISSUES_FOUND ($0.164565): two Majors, both DAO code 1
 internal inconsistency the session left). Both accepted and fixed (distinct
 `SqlPassthroughBulk` label + map entry; Q11 includes 144; strategy doc + new
 classifier pin). R2 VERIFIED ($0.124255), empty issues. Total ~$0.2888.
+
+---
+
+## Session 2 of 2 — BOM, Casing, Dead-Code, Docs + Coordinated Golden Regen
+
+The Minors, the documentation ride-alongs, the single end-of-set golden
+regeneration with COM confirmation, **and** an emergent encoding-regression fix
+the regen surfaced. The F-2-4 (implement-or-strike) and F-2-5 (fix-now-or-defer)
+forks were resolved by **cross-provider decision consensus** (gpt-5-4 + gemini-pro
+both agreed: implement Q6, fix F-2-5 now — `s2-decision-consensus.md`).
+
+### F-2-3 (Minor) — UTF-8 BOM stripped from the four usage/cleanup JSON outputs
+
+`UsageChecklistWriter` and `CleanupChecklistWriter` passed
+`System.Text.Encoding.UTF8` (BOM-emitting) to `File.WriteAllText` for
+`object-use.json`, `object-use-checklist.json`, `object-cleanup.json`,
+`object-cleanup-checklist.json` — the only 4 of 182 outputs with a BOM, which
+RFC 8259 §8.1 forbids and strict parsers reject. Now use `new UTF8Encoding(false)`
+(mirrors the sanitization writers). Pinned by read-back tests asserting first byte
+is `{`/`[` and strict parse succeeds.
+
+### F-2-4 (Minor) — strategy rule Q6 ("references no tables") was dead code
+
+`QueryRefsNoTables` unconditionally returned `false`, so the documented Q6 rule
+(Unknown 0.40 + the `QueryReferencesNoTables` question) and its question were
+unreachable — a silent divergence from the authoritative strategy doc.
+**Implemented** (decision-consensus): `targets.Count > 0 &&
+targets.All(KnownQueryNames.Contains)`. Also wired the `references-no-tables`
+marker into the `QueryTableReference` signal evidence (the gate the
+`QuestionGenerator` reads — never emitted before) and suppressed the generic
+OutOfBand pile-on when Q6 fires (mirroring the PossiblyUnused suppression).
+**Golden-neutral on HHC** (no HHC query references only queries). One existing
+test (`LauncherSurfaceTests.Query_Consumed_By_Another_Query`) pinned the OLD
+dead-Q6 behavior; updated to the corrected behavior (a legitimate correction, not
+a weakening — endorsed by the verifier).
+
+### F-2-5 (Minor) — inline-SQL RecordSource tables now earn referenced-ness credit
+
+The `SignalIndex` phase-2 inline-SQL scan credited only **query** names, so a
+table bound only via an inline-SQL RecordSource (`SELECT * FROM tblFoo`) got no
+`used-as-RecordSource` credit. **Fixed** (decision-consensus): credit all
+catalog-resolved (`db.Tables ∪ db.Queries`) FROM/JOIN names into the broad
+`UsedAsRecordSource` set; the form/report-specific sets stay query-only.
+**Golden-affecting on HHC** (the live case): `tblServiceRateLimits` (bound via a
+form's inline-SQL `FROM tblServiceRateLimits`) flips `StandaloneUtility 0.70` →
+`MainDataEntry 0.70` (rule T4b) and gains a `RecordSource` signal.
+
+### F-2-7 (Minor) — `data.sql` numeric/bit tokens validated, not interpolated bare
+
+`SqlValueFormatter` emitted numeric-family and bit tokens unquoted into INSERT
+VALUES, so a stale/hand-edited CSV token could inject malformed or arbitrary SQL.
+Now validates numeric tokens against `^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$` and bit
+tokens against the known set; on mismatch emits `NULL` and the generator records
+one `InvalidDataToken` degradation per column (the project's validate-or-degrade
+posture). Blank/whitespace and binary tokens are explicitly **not** flagged
+(verifier R1/R2 fixes). Golden-neutral (HHC data is clean).
+
+### F-1-4 (Minor) — FORM_SPEC_MISSING diagnostic now emitted
+
+`Pipeline.BuildFormOrReportExports`' header promised a diagnostic for a parsed
+module with no matching ir spec, but emitted none (and early-returned when the
+whole ir directory was absent). Now emits a sorted `FORM_SPEC_MISSING` warning for
+the set-difference, via an `internal AddMissingSpecDiagnostics` helper (unit
+tested incl. the missing-directory case — verifier R1 fix). Golden-neutral on HHC.
+
+### F-1-7 (Minor) — one shared system-object-name predicate
+
+`TableExporter`/`QueryExporter` used bare culture-sensitive
+`StartsWith("MSys")`/`StartsWith("~")` (CA1310) while the schema reader used
+explicit `StringComparison`. Added `SystemObjectNames.IsSystemObjectName` (MSys
+OrdinalIgnoreCase, `~` Ordinal), used by both exporters. Golden-neutral.
+
+### F-2-6 / O-1-2 / O-1-1 (docs)
+
+- **F-2-6:** the convention docs showed lowercase `Label.source` tokens; the
+  emitter ships a closed PascalCase set (`Attached`/`Proximity`/`FromName`/
+  `FromBinding`/`Unresolved`, verified against the golden + `LabelResolver`).
+  Reconciled `project-guidance.md`, `ir-schema-forms-reports.md`, and the
+  interpretation guide (+ outline) to the emitter (cheaper side).
+- **O-1-2:** documented the database name-form drift (manifest keeps `.accdb`;
+  usage/cleanup strip it) as a join-key table in the interpretation guide.
+- **O-1-1:** added the interim note that `unresolved-items.json` is always empty
+  until P3 wires the aggregator.
+
+### Encoding regression fix (Set-009 follow-on — beyond the 5 named findings)
+
+The mandated golden regen surfaced a real correctness bug: Set 009's
+**fixed-cp1252** SaveAsText decode mojibakes UTF-8-without-BOM output. Ground truth
+from the raw bytes — `basResetFixture`'s section sign is stored as UTF-8 (`C2 A7`)
+and decoded to `Â§` under 009's cp1252 read, where the pre-009 golden correctly had
+`§`; meanwhile the em-dashes in `basUtilities`/`basDataOperations` are cp1252
+(`0x97`) and 009 correctly fixes those (`U+FFFD`→`U+2014`). The corpus has **mixed
+per-file encoding** and a single fixed decode is wrong for one side. Added a shared
+`SaveAsTextDecoder` (honour BOM → strict UTF-8 → cp1252 fallback) adopted at the
+two run-pipeline read sites (`SaveAsTextTranslator` + `Pipeline.cs` module read);
+`RunParse` left as DW-5. Result: the golden is fully correct (`§` preserved, em-dashes
+fixed). DW-5/DW-6 updated to note the shared helper now covers 2 of 3 sites.
+
+## Golden deltas (HomeHealthCare; single coordinated regen; all explained)
+
+- ir/kb `qxt*` (8 files): `QueryTypeName` `MakeTable`→`Crosstab` (F-2-1/F-3-7).
+- manifest.json: 8 `QueryType` `MakeTable`→`Crosstab`, 5 `ByRef:true`→
+  `PassingMechanism:ByRef`, 103 `PassingMechanism:ByVal` added, 100 `Type` lines
+  repositioned net-zero (F-3-5). No count/diagnostic changes (F-1-4 golden-neutral).
+- ir/kb `basDataOperations` + `basUtilities` (4 files): `U+FFFD`→`U+2014` em-dash
+  (009 F-1-1 landing, preserved by the new decoder via the cp1252 fallback).
+  `basResetFixture` unchanged — `§` preserved by the UTF-8 decode (no mojibake).
+- usage/object-use.json + checklist: 4 crosstabs `PossiblyUnused 0.65`→
+  `Reporting 0.70` (F-2-1/F-3-7); `tblServiceRateLimits`
+  `StandaloneUtility`→`MainDataEntry` +RecordSource (F-2-5); BOM stripped (F-2-3).
+  `generatedAt` preserved (volatile field).
+- cleanup/object-cleanup.json + checklist: BOM stripped (F-2-3) only; `generatedAt`
+  + `harvestDate` preserved (volatile/COM-touch fields).
+- migration/: unchanged (F-2-7 golden-neutral on clean HHC data).
+
+## Tests
+
+- `UsageClassifierTests` — Q6 (references-only-queries → Unknown + question) +
+  guard; F-2-5 inline-SQL table credit + catalog guard.
+- `CsvTableReaderAndValueTests` — F-2-7 valid/invalid numeric & bit, blank/
+  whitespace, binary; `SqlServerDataLoadGeneratorTests` — InvalidDataToken once
+  per column.
+- `UsageChecklistWriterTests` + new `CleanupChecklistWriterTests` — F-2-3 BOM
+  read-back (first byte + strict parse).
+- new `SystemObjectNamesTests` (F-1-7), `SaveAsTextDecoderTests` (encoding, 4
+  cases), `MissingSpecDiagnosticsTests` (F-1-4, 3 cases).
+
+`dotnet build` 0 errors. `AccessHarvester.Pipeline.Tests` 828/828;
+`AccessHarvester.Tests` hermetic subset green. COM `CanonicalGoldenRegressionTests`
+GREEN (gated slice: manifest/kb/ir/reports-baseline).
+
+## Verification
+
+Cross-provider gpt-5-4. R1 ISSUES_FOUND ($0.265877): Major (F-2-7 blank/whitespace
+cells spuriously flagged) + Minor (F-1-4 missing-ir-dir early-return) — both
+accepted and fixed + tests. R2 ISSUES_FOUND ($0.14801): Major
+(`IsInvalidDataToken` binary-family hole) — accepted-with-clarification
+(unreachable: binary columns omitted upstream) + defensive guard + test. R3
+VERIFIED ($0.01444), empty issues. Decision-consensus ~$0.044. Total routed
+~$0.47.
+
+## Set complete
+
+Both sessions VERIFIED; set 010 (006 P2) closed. Next set authored:
+`011-resolver-and-navigation-wiring` (006 P3, 3 sessions) — wire F-3-4 (resolver)
++ F-2-2 (navigation/enrichment substrate), delivering consumer R2-1/R2-2.

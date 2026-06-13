@@ -136,6 +136,13 @@
   reaches `parse`, OR a session unifies the three read sites behind one helper
   (see DW-6).
 - **Owning set candidate:** the DW-6 decode-centralization set, or a CLI-robustness set.
+- **010 Session 2 update (2026-06-13):** the two **run-pipeline** sites (translate
+  + manifest read) now share `SaveAsTextDecoder` (BOM → strict UTF-8 → cp1252), so
+  this divergence is **narrowed to `RunParse` only** — and `RunParse` now also
+  lags on the no-BOM-UTF-8 case (the regression 010 fixed for the run pipeline:
+  a UTF-8-encoded `§` mis-read as cp1252 → `Â§`). Discharging DW-5 is now a
+  one-line change: point `RunParse` at `SaveAsTextDecoder.ReadText` too. Left
+  deferred per the 010 scope boundary (CLI `parse` path is not golden-exercised).
 
 ### DW-6 — Centralize SaveAsText decode (consider transcoding raw→UTF-8 at the exporter boundary)
 - **What:** three disjoint code paths each manage their own cp1252 provider
@@ -164,6 +171,17 @@
   consumer needs the `raw/` tier in a canonical (UTF-8) encoding.
 - **Owning set candidate:** a future `encoding-architecture` / CLI-robustness set
   (would also absorb DW-5).
+- **010 Session 2 update (2026-06-13): the shared-helper half is partly done.**
+  The 010 golden regen surfaced a real correctness bug — Set 009's fixed-cp1252
+  decode mojibakes UTF-8-without-BOM SaveAsText output (a UTF-8 `§` → `Â§`) — so
+  010 introduced `AccessHarvester.Core.Translation.SaveAsTextDecoder` (BOM →
+  strict UTF-8 → cp1252) and adopted it at the **two run-pipeline read sites**
+  (`SaveAsTextTranslator`, `Pipeline.cs` module read). What remains of DW-6:
+  (a) point the third site, `RunParse` (`Program.cs`), at the same helper
+  (also discharges DW-5); and (b) the larger **transcode-`raw/`-to-UTF-8-at-the-
+  exporter-boundary** option, which alters the `raw/` on-disk encoding contract
+  and is the genuinely out-of-scope architecture change. The helper itself is no
+  longer speculative — it is the live decode for the run pipeline.
 
 ### DW-7 — Crosstab (TRANSFORM) abstraction drops the embedded SELECT
 - **What:** `QueryAbstractionBuilder.cs:~398` maps `TransformStatement =>

@@ -173,4 +173,29 @@ public class UsageChecklistWriterTests
             if (Directory.Exists(tempDir)) Directory.Delete(tempDir, recursive: true);
         }
     }
+
+    [Fact]
+    public void Write_Outputs_Have_No_Utf8_Bom()  // 006 F-2-3 (RFC 8259 §8.1)
+    {
+        string tempDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        try
+        {
+            Directory.CreateDirectory(tempDir);
+            UsageChecklistWriter.Write(SampleFindings(), tempDir);
+            foreach (var file in new[] { "object-use.json", "object-use-checklist.json" })
+            {
+                byte[] bytes = File.ReadAllBytes(Path.Combine(tempDir, file));
+                // RFC 8259 forbids a BOM on JSON; a strict parser rejects EF BB BF.
+                Assert.False(bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF,
+                    $"{file} must not start with a UTF-8 BOM.");
+                // First non-whitespace byte must be a JSON structural opener.
+                Assert.True(bytes[0] == (byte)'{' || bytes[0] == (byte)'[',
+                    $"{file} must begin with '{{' or '['.");
+            }
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, recursive: true);
+        }
+    }
 }

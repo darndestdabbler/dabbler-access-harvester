@@ -104,8 +104,8 @@ wrappers.
 
 | Field | Type | Notes |
 |---|---|---|
-| `Source` | `string` (required) | Provenance of the label: `"attached"` (a Label child's Caption), `"proximity"` (a nearby peer Label, conservative 2× rule), `"from-name"` (camelCase split of a non-generic control Name), `"from-binding"` (camelCase split of a simple `ControlSource` identifier), `"unresolved"` (none of the above resolved). |
-| `Text` | `string?` | The resolved label text. Null only when `Source` is `"unresolved"`. |
+| `Source` | `string` (required) | Provenance of the label. A **closed PascalCase set** emitted verbatim by `LabelResolver`: `"Attached"` (a Label child's Caption), `"Proximity"` (a nearby peer Label, conservative 2× rule), `"FromName"` (camelCase split of a non-generic control Name), `"FromBinding"` (camelCase split of a simple `ControlSource` identifier), `"Unresolved"` (none of the above resolved). |
+| `Text` | `string?` | The resolved label text. Null only when `Source` is `"Unresolved"`. |
 
 ---
 
@@ -239,7 +239,7 @@ surfaced on the typed records. Consumers that need them should read the IR JSON 
             "Left": "1440", "Top": "120", "Width": "2880", "Height": "360"
           },
           "GeometryIn": { "X": 1.0, "Y": 0.083, "W": 2.0, "H": 0.25 },
-          "Label": { "source": "attached", "text": "Last Name" }
+          "Label": { "source": "Attached", "text": "Last Name" }
         }
       ]
     }
@@ -274,7 +274,7 @@ Children:
             Properties: { "ControlSource": "LastName", "Left": "1440",
                           "Top": "120", "Width": "2880", "Height": "360" }
             GeometryIn: { X: 1.0, Y: 0.083, W: 2.0, H: 0.25 }
-            Label:      { Source: "attached", Text: "Last Name" }
+            Label:      { Source: "Attached", Text: "Last Name" }
 ```
 
 ---

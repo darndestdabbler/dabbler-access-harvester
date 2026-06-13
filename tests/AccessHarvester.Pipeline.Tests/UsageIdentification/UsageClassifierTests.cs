@@ -458,6 +458,80 @@ public class UsageClassifierTests
         Assert.Equal(UsageCategory.Reporting, f.Classification);
     }
 
+    // ── Q6 references-no-tables (006 F-2-4 — was dead code) ──────────────────────
+
+    [Fact]
+    public void Query_Q6_ReferencesOnlyQueries_Is_Unknown()  // 006 F-2-4
+    {
+        // A query whose FROM/JOIN targets are all OTHER queries (no base table) is a
+        // pure intermediate-computation step — strategy doc Q6 → Unknown 0.40 plus the
+        // QueryReferencesNoTables clarifying question. Before F-2-4 the QueryRefsNoTables
+        // helper unconditionally returned false, so Q6 never fired.
+        var db = EmptyDb() with
+        {
+            Queries =
+            [
+                Query("qryBase", typeCode: 0, sql: "SELECT * FROM tblClients"),
+                Query("qryDerived", typeCode: 0, sql: "SELECT * FROM qryBase"),
+            ],
+            Tables = [Table("tblClients", 10)],
+        };
+        var f = Classify(db, "qryDerived");
+        Assert.Equal(UsageCategory.Unknown, f.Classification);
+        Assert.Contains(f.Questions, q => q.UncertaintySignal == UncertaintySignal.QueryReferencesNoTables);
+    }
+
+    [Fact]
+    public void Query_ReferencesBaseTable_DoesNot_FireQ6()  // 006 F-2-4 (guard)
+    {
+        // A query whose FROM/JOIN includes a base table must NOT fire Q6, even when it
+        // also references a query — Q6 requires that EVERY target be a query.
+        var db = EmptyDb() with
+        {
+            Queries =
+            [
+                Query("qryBase", typeCode: 0, sql: "SELECT * FROM tblClients"),
+                Query("qryMixed", typeCode: 0,
+                      sql: "SELECT * FROM qryBase INNER JOIN tblOrders ON qryBase.ID = tblOrders.ClientID"),
+            ],
+            Tables = [Table("tblClients", 10), Table("tblOrders", 5)],
+        };
+        var f = Classify(db, "qryMixed");
+        Assert.DoesNotContain(f.Questions, q => q.UncertaintySignal == UncertaintySignal.QueryReferencesNoTables);
+    }
+
+    // ── Inline-SQL RecordSource table credit (006 F-2-5) ─────────────────────────
+
+    [Fact]
+    public void Table_BoundOnlyViaInlineSqlRecordSource_EarnsRecordSourceCredit()  // 006 F-2-5
+    {
+        // A table named only inside a form's inline-SQL RecordSource
+        // ("SELECT * FROM tblRates …") must earn used-as-RecordSource credit. Before
+        // F-2-5 the phase-2 inline-SQL scan credited only query names, so the table
+        // got no RecordSource signal and could read as unreferenced.
+        var db = EmptyDb() with
+        {
+            Forms = [Form("frmRates", "SELECT * FROM tblRates WHERE Active = True")],
+            Tables = [Table("tblRates", 8)],
+        };
+        var f = Classify(db, "tblRates");
+        Assert.Contains(f.Signals, s => s.SignalType == UsageSignalType.RecordSource && s.Fired);
+    }
+
+    [Fact]
+    public void Table_NotInCatalog_NotCredited_FromInlineSql()  // 006 F-2-5 (catalog guard)
+    {
+        // An inline-SQL FROM name that is NOT a catalog object (alias / unknown) must
+        // not earn credit — only names in db.Tables ∪ db.Queries are credited.
+        var db = EmptyDb() with
+        {
+            Forms = [Form("frmRates", "SELECT * FROM tblRates WHERE Active = True")],
+            Tables = [Table("tblRates", 8), Table("tblOther", 6)],
+        };
+        var f = Classify(db, "tblOther");
+        Assert.DoesNotContain(f.Signals, s => s.SignalType == UsageSignalType.RecordSource && s.Fired);
+    }
+
     // ── Q10 Union handling ─────────────────────────────────────────────────────
 
     [Fact]

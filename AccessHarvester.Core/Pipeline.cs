@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -8,6 +9,7 @@ using AccessHarvester.Core.Abstractions;
 using AccessHarvester.Core.Com;
 using AccessHarvester.Core.Enrichment;
 using AccessHarvester.Core.Extraction;
+using AccessHarvester.Core.Translation;
 using AccessHarvester.Core.Translation;
 using AccessHarvester.Pipeline.Enrichment;
 using AccessHarvester.Pipeline.Manifest;
@@ -331,7 +333,10 @@ public sealed class Pipeline
                     }
                     else
                     {
-                        text = File.ReadAllText(file, Encoding.GetEncoding(1252));
+                        // Shared SaveAsText decode (BOM → strict UTF-8 → cp1252),
+                        // matching the translate path so the run pipeline agrees on
+                        // encoding (010: UTF-8-without-BOM "§" no longer mojibakes).
+                        text = SaveAsTextDecoder.ReadText(file);
 
                         // Within ModulesAndClasses, class modules carry the
                         // "VERSION 1.0 CLASS" SaveAsText header; standalone
@@ -725,17 +730,23 @@ public sealed class Pipeline
             parserOutputs[p.Name] = output;
         }
 
-        // Load form specs from ir/<category>/*.ir.json
+        // Load form specs from ir/<category>/*.ir.json. A missing directory means
+        // zero ir files — fall through to the FORM_SPEC_MISSING diff below so a
+        // parsed-but-unenriched module is still reported (F-1-4), rather than
+        // early-returning and silently dropping every parser output.
         var irCategoryDir = Path.Combine(irDir, category);
-        if (!Directory.Exists(irCategoryDir))
-            return new List<FormExport>();
+        var irFiles = Directory.Exists(irCategoryDir)
+            ? Directory.GetFiles(irCategoryDir, "*.ir.json").OrderBy(f => f, StringComparer.Ordinal)
+            : Enumerable.Empty<string>();
 
         var exports = new List<FormExport>();
-        foreach (var irFile in Directory.GetFiles(irCategoryDir, "*.ir.json").OrderBy(f => f, StringComparer.Ordinal))
+        var irNamesSeen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var irFile in irFiles)
         {
             // ir/Forms/frmSomething.ir.json → name = "frmSomething"
             var irName = Path.GetFileNameWithoutExtension(
                 Path.GetFileNameWithoutExtension(irFile));
+            irNamesSeen.Add(irName);
             try
             {
                 var irJson = File.ReadAllText(irFile, Encoding.UTF8);
@@ -756,7 +767,35 @@ public sealed class Pipeline
             }
         }
 
+        AddMissingSpecDiagnostics(parserOutputs.Keys, irNamesSeen, category, diagnostics);
+
         return exports;
+    }
+
+    // Honour the contract BuildFormOrReportExports' header promises: a parsed module
+    // with no matching ir/<category>/*.ir.json (its enrichment failed, so it exists in
+    // raw/ but not ir/) is dropped from the export set — record the skip so a manifest
+    // consumer sees a Diagnostics[] entry rather than a silently shrunk object set
+    // (F-1-4). Works whether the whole ir/<category> directory was absent (irNamesSeen
+    // empty → every parsed module is reported) or only some specs were missing.
+    // Deterministic Ordinal order for the determinism gate. Internal for unit testing.
+    internal static void AddMissingSpecDiagnostics(
+        IEnumerable<string> parserOutputNames,
+        ISet<string> irNamesSeen,
+        string category,
+        List<HarvesterDiagnostic> diagnostics)
+    {
+        foreach (var missing in parserOutputNames
+                     .Where(n => !irNamesSeen.Contains(n))
+                     .OrderBy(n => n, StringComparer.Ordinal))
+        {
+            diagnostics.Add(new HarvesterDiagnostic
+            {
+                Severity = HarvesterDiagnosticSeverity.Warning,
+                Message = $"Parser output for {category} '{missing}' has no matching ir/{category}/{missing}.ir.json; the module was parsed but its enriched spec is absent, so it is omitted from the manifest.",
+                Code = "FORM_SPEC_MISSING",
+            });
+        }
     }
 
     // Reads saved-query JSON files from raw/Queries/, parses each query's SQL

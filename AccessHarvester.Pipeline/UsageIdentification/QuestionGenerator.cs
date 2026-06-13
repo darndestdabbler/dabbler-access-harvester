@@ -23,6 +23,14 @@ public static class QuestionGenerator
     {
         var questions = new List<ClarifyingQuestion>();
 
+        // Q6 marker (006 F-2-4): this query's FROM/JOIN targets are all other queries.
+        // It drives the QueryReferencesNoTables question below and, like PossiblyUnused,
+        // suppresses the generic OutOfBand "is it genuinely unused?" pile-on — the
+        // QueryReferencesNoTables question already frames the same uncertainty.
+        bool referencesOnlyQueries = objectType == "Query" && signals
+            .FirstOrDefault(s => s.SignalType == UsageSignalType.QueryTableReference)?.Evidence
+            .Any(e => e.Contains("references-no-tables")) == true;
+
         // OutOfBandEntryPossible — no harvested opener was found, but the object may
         // still be reached via application startup, direct object-pane navigation,
         // the ribbon, or VBA in another object. This replaces the older
@@ -40,6 +48,7 @@ public static class QuestionGenerator
             && confidence < 0.8
             && category != UsageCategory.NavigationShell
             && category != UsageCategory.PossiblyUnused
+            && !referencesOnlyQueries
             && !HasHarvestedOpener(objectName, isNavigationTarget, index))
         {
             questions.Add(new ClarifyingQuestion
@@ -92,20 +101,14 @@ public static class QuestionGenerator
             });
         }
 
-        // QueryReferencesNoTables — query SQL references only other queries
-        if (objectType == "Query")
+        // QueryReferencesNoTables — query SQL references only other queries (Q6)
+        if (referencesOnlyQueries)
         {
-            bool noDirectTables = signals
-                .FirstOrDefault(s => s.SignalType == UsageSignalType.QueryTableReference)?.Evidence
-                .Any(e => e.Contains("references-no-tables")) ?? false;
-            if (noDirectTables)
+            questions.Add(new ClarifyingQuestion
             {
-                questions.Add(new ClarifyingQuestion
-                {
-                    QuestionText    = $"Query '{objectName}' references only other queries — is it an intermediate computation step, a parameter source, or can it be merged into its callers?",
-                    UncertaintySignal = UncertaintySignal.QueryReferencesNoTables,
-                });
-            }
+                QuestionText    = $"Query '{objectName}' references only other queries — is it an intermediate computation step, a parameter source, or can it be merged into its callers?",
+                UncertaintySignal = UncertaintySignal.QueryReferencesNoTables,
+            });
         }
 
         // CrosstabQuery — query is crosstab type

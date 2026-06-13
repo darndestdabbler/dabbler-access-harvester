@@ -277,8 +277,10 @@ Why some fields look like `{ source: "...", ... }` instead of bare
 values. Covers:
 
 - The `{ source, ... }` shape for fields that may be resolved,
-  attached, or unresolved (e.g., `Label: { source: "attached", text:
-  "First Name" }` vs. `Label: { source: "unresolved" }`).
+  attached, or unresolved (e.g., `Label: { source: "Attached", text:
+  "First Name" }` vs. `Label: { source: "Unresolved" }`; the
+  `source` value is a closed PascalCase set —
+  `Attached`/`Proximity`/`FromName`/`FromBinding`/`Unresolved`).
 - Why some fields are nullable rather than omitted: nullability means
   "the harvester looked; Access did not provide one." Omission means
   "Access used its default for this property."

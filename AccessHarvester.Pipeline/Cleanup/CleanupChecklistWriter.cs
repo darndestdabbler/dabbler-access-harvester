@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -24,6 +25,10 @@ public static class CleanupChecklistWriter
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
+    // BOM-less UTF-8 (RFC 8259 §8.1 forbids a BOM on JSON). Mirrors the
+    // sanitization writers' encoding so every output surface is BOM-free (F-2-3).
+    private static readonly UTF8Encoding _utf8NoBom = new(false);
+
     /// <summary>Writes both output files into the given directory.</summary>
     public static void Write(CleanupFindings findings, string outputDir)
     {
@@ -45,7 +50,7 @@ public static class CleanupChecklistWriter
             findings.ThresholdDays,
             findings.DegradationNotes.ToArray(),
             findings.Findings.Select(ToJsonFinding).ToArray());
-        File.WriteAllText(path, JsonSerializer.Serialize(doc, _camelOpts), System.Text.Encoding.UTF8);
+        File.WriteAllText(path, JsonSerializer.Serialize(doc, _camelOpts), _utf8NoBom);
     }
 
     private static CleanupFindingJson ToJsonFinding(CleanupFinding f)
@@ -116,7 +121,7 @@ public static class CleanupChecklistWriter
     private static void WriteChecklist(CleanupFindings findings, string path)
     {
         var doc = BuildChecklist(findings);
-        File.WriteAllText(path, JsonSerializer.Serialize(doc, _pascalOpts), System.Text.Encoding.UTF8);
+        File.WriteAllText(path, JsonSerializer.Serialize(doc, _pascalOpts), _utf8NoBom);
     }
 
     // ── JSON shapes ────────────────────────────────────────────────────────────

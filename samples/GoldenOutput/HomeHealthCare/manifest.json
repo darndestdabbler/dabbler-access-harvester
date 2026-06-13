@@ -42993,7 +42993,8 @@
               "Parameters": [
                 {
                   "Name": "strFormName",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "Boolean"
@@ -43863,7 +43864,8 @@
               "Parameters": [
                 {
                   "Name": "strFormName",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "Boolean"
@@ -46230,7 +46232,8 @@
               "Parameters": [
                 {
                   "Name": "strFormName",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "Boolean"
@@ -47110,7 +47113,8 @@
               "Parameters": [
                 {
                   "Name": "strFormName",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "Boolean"
@@ -47880,7 +47884,8 @@
               "Parameters": [
                 {
                   "Name": "strFormName",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "Boolean"
@@ -48728,11 +48733,13 @@
               "Parameters": [
                 {
                   "Name": "ProviderID",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "FiscalYear",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "String"
@@ -50060,7 +50067,8 @@
               "Parameters": [
                 {
                   "Name": "strFormName",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "Boolean"
@@ -50936,7 +50944,8 @@
               "Parameters": [
                 {
                   "Name": "strFormName",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "Boolean"
@@ -53841,7 +53850,7 @@
     {
       "ItemKind": "Query",
       "Name": "qxtClientServiceCosts",
-      "QueryType": "MakeTable",
+      "QueryType": "Crosstab",
       "QueryTypeCode": 16,
       "Connect": "",
       "ReturnsRecords": true,
@@ -53850,7 +53859,7 @@
         "OriginalText": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
         "Parsed": {
           "Raw": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
-          "QueryType": "MakeTable"
+          "QueryType": "Crosstab"
         }
       },
       "Abstraction": {
@@ -53860,7 +53869,7 @@
     {
       "ItemKind": "Query",
       "Name": "qxtClientServiceHours",
-      "QueryType": "MakeTable",
+      "QueryType": "Crosstab",
       "QueryTypeCode": 16,
       "Connect": "",
       "ReturnsRecords": true,
@@ -53869,7 +53878,7 @@
         "OriginalText": "TRANSFORM Sum(csp.HoursPerWeek) AS TotalHours\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
         "Parsed": {
           "Raw": "TRANSFORM Sum(csp.HoursPerWeek) AS TotalHours\r\nSELECT c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName AS ClientName\r\nFROM tblServices AS s INNER JOIN ((tblClients AS c INNER JOIN tblClientServiceNeeds AS csn ON c.ClientID = csn.ClientID) INNER JOIN tblClientServicePlan AS csp ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY c.LastName \u0026 \u0022, \u0022 \u0026 c.FirstName\r\nPIVOT s.ServiceName;\r\n",
-          "QueryType": "MakeTable"
+          "QueryType": "Crosstab"
         }
       },
       "Abstraction": {
@@ -53879,7 +53888,7 @@
     {
       "ItemKind": "Query",
       "Name": "qxtProviderServiceCosts",
-      "QueryType": "MakeTable",
+      "QueryType": "Crosstab",
       "QueryTypeCode": 16,
       "Connect": "",
       "ReturnsRecords": true,
@@ -53888,7 +53897,7 @@
         "OriginalText": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
         "Parsed": {
           "Raw": "TRANSFORM Sum(csp.AnnualEstCost) AS TotalCost\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
-          "QueryType": "MakeTable"
+          "QueryType": "Crosstab"
         }
       },
       "Abstraction": {
@@ -53898,7 +53907,7 @@
     {
       "ItemKind": "Query",
       "Name": "qxtProviderServiceHours",
-      "QueryType": "MakeTable",
+      "QueryType": "Crosstab",
       "QueryTypeCode": 16,
       "Connect": "",
       "ReturnsRecords": true,
@@ -53907,7 +53916,7 @@
         "OriginalText": "TRANSFORM Sum(csp.HoursPerWeek) AS TotalHours\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
         "Parsed": {
           "Raw": "TRANSFORM Sum(csp.HoursPerWeek) AS TotalHours\r\nSELECT p.ProviderName\r\nFROM tblServices AS s INNER JOIN (tblProviders AS p INNER JOIN (tblClientServiceNeeds AS csn INNER JOIN (tblProviderServiceCatalog AS psc INNER JOIN tblClientServicePlan AS csp ON psc.ProviderServiceCatalogID = csp.ProviderServiceCatalogID) ON csn.ClientServiceNeedID = csp.ClientServiceNeedID) ON p.ProviderID = psc.ProviderID) ON s.ServiceID = csn.ServiceID\r\nWHERE (((csp.FiscalYear)=GetCurrentFiscalYear()))\r\nGROUP BY p.ProviderName\r\nPIVOT s.ServiceName;\r\n",
-          "QueryType": "MakeTable"
+          "QueryType": "Crosstab"
         }
       },
       "Abstraction": {
@@ -54071,6 +54080,7 @@
                 {
                   "Name": "overwrite",
                   "Type": "Variant",
+                  "PassingMechanism": "ByVal",
                   "Optional": true
                 }
               ],
@@ -57030,18 +57040,19 @@
                 {
                   "Name": "overwrite",
                   "Type": "Variant",
+                  "PassingMechanism": "ByVal",
                   "Optional": true
                 },
                 {
                   "Name": "plansCopied",
                   "Type": "Long",
-                  "ByRef": true,
+                  "PassingMechanism": "ByRef",
                   "Optional": true
                 },
                 {
                   "Name": "plansSkipped",
                   "Type": "Long",
-                  "ByRef": true,
+                  "PassingMechanism": "ByRef",
                   "Optional": true
                 }
               ],
@@ -60607,6 +60618,7 @@
                 {
                   "Name": "overwrite",
                   "Type": "Variant",
+                  "PassingMechanism": "ByVal",
                   "Optional": true
                 }
               ],
@@ -66455,7 +66467,8 @@
               "Parameters": [
                 {
                   "Name": "s",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "String"
@@ -67967,7 +67980,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -68309,7 +68323,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -68519,23 +68534,28 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "fy",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "startDt",
-                  "Type": "Date"
+                  "Type": "Date",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "endDt",
-                  "Type": "Date"
+                  "Type": "Date",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "isCurrent",
-                  "Type": "Boolean"
+                  "Type": "Boolean",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -69077,7 +69097,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -69800,27 +69821,33 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "code",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "name",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "cat",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "active",
-                  "Type": "Boolean"
+                  "Type": "Boolean",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -70130,7 +70157,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -71423,23 +71451,28 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "svcId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "fy",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "maxRate",
-                  "Type": "Currency"
+                  "Type": "Currency",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -71568,7 +71601,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -71949,31 +71983,38 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "name",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "StateCode",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "City",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "active",
-                  "Type": "Boolean"
+                  "Type": "Boolean",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "licExp",
-                  "Type": "Date"
+                  "Type": "Date",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -72851,7 +72892,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -75911,27 +75953,33 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "provId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "svcId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "fy",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "rate",
-                  "Type": "Currency"
+                  "Type": "Currency",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -76076,7 +76124,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -76799,43 +76848,53 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "first",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "last",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "dob",
-                  "Type": "Date"
+                  "Type": "Date",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "enroll",
-                  "Type": "Date"
+                  "Type": "Date",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "Gender",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "StateCode",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "City",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "active",
-                  "Type": "Boolean"
+                  "Type": "Boolean",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -77852,7 +77911,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -79088,23 +79148,28 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "ClientID",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "fy",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "annual",
-                  "Type": "Currency"
+                  "Type": "Currency",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -79233,7 +79298,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -82806,43 +82872,53 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "ClientID",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "svcId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "fy",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "Priority",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "days",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "startTime",
-                  "Type": "Variant"
+                  "Type": "Variant",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "endTime",
-                  "Type": "Variant"
+                  "Type": "Variant",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "Hours",
-                  "Type": "Double"
+                  "Type": "Double",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -83175,7 +83251,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -86178,27 +86255,33 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "needId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "catId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "fy",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "Hours",
-                  "Type": "Double"
+                  "Type": "Double",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -86538,27 +86621,33 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "needId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "catId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "fy",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "Hours",
-                  "Type": "Double"
+                  "Type": "Double",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -86703,27 +86792,33 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "id",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "needId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "catId",
-                  "Type": "Long"
+                  "Type": "Long",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "fy",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "Hours",
-                  "Type": "Double"
+                  "Type": "Double",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -86910,7 +87005,8 @@
               "Parameters": [
                 {
                   "Name": "db",
-                  "Type": "DAO.Database"
+                  "Type": "DAO.Database",
+                  "PassingMechanism": "ByVal"
                 }
               ]
             },
@@ -87401,7 +87497,8 @@
               "Parameters": [
                 {
                   "Name": "s",
-                  "Type": "Variant"
+                  "Type": "Variant",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "String"
@@ -87640,7 +87737,8 @@
               "Parameters": [
                 {
                   "Name": "d",
-                  "Type": "Variant"
+                  "Type": "Variant",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "String"
@@ -87831,7 +87929,8 @@
               "Parameters": [
                 {
                   "Name": "t",
-                  "Type": "Variant"
+                  "Type": "Variant",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "String"
@@ -88022,7 +88121,8 @@
               "Parameters": [
                 {
                   "Name": "b",
-                  "Type": "Boolean"
+                  "Type": "Boolean",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "String"
@@ -88293,11 +88393,13 @@
               "Parameters": [
                 {
                   "Name": "ClientID",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 },
                 {
                   "Name": "FiscalYear",
-                  "Type": "Integer"
+                  "Type": "Integer",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "String"
@@ -89337,12 +89439,12 @@
                 {
                   "Name": "sourceFY",
                   "Type": "Integer",
-                  "ByRef": true
+                  "PassingMechanism": "ByRef"
                 },
                 {
                   "Name": "targetFY",
                   "Type": "Integer",
-                  "ByRef": true
+                  "PassingMechanism": "ByRef"
                 }
               ],
               "ReturnType": "Boolean"
@@ -89626,7 +89728,7 @@
                 {
                   "Name": "fy",
                   "Type": "Integer",
-                  "ByRef": true
+                  "PassingMechanism": "ByRef"
                 }
               ],
               "ReturnType": "Boolean"
@@ -93057,7 +93159,8 @@
               "Parameters": [
                 {
                   "Name": "s",
-                  "Type": "String"
+                  "Type": "String",
+                  "PassingMechanism": "ByVal"
                 }
               ],
               "ReturnType": "String"

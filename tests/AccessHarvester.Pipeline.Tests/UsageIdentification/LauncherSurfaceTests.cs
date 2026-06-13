@@ -313,12 +313,15 @@ public class LauncherSurfaceTests
         Assert.DoesNotContain(inner.Questions,
             q => q.UncertaintySignal == UncertaintySignal.UnreferencedObject);
 
-        // qryOuter is referenced by nobody → PossiblyUnused → the reframed
-        // UnreferencedObject question, not the out-of-band one.
+        // qryOuter's FROM references only another query (qryInner), no base table, so
+        // strategy-doc Q6 fires (006 F-2-4, previously dead code): it classifies
+        // Unknown 0.40 with the QueryReferencesNoTables question — an intermediate
+        // computation step, not an out-of-band entry. (Before Q6 was wired it fell to
+        // PossiblyUnused / the UnreferencedObject question.)
         var outer = Classify(db, "qryOuter");
-        Assert.Equal(UsageCategory.PossiblyUnused, outer.Classification);
+        Assert.Equal(UsageCategory.Unknown, outer.Classification);
         Assert.Contains(outer.Questions,
-            q => q.UncertaintySignal == UncertaintySignal.UnreferencedObject);
+            q => q.UncertaintySignal == UncertaintySignal.QueryReferencesNoTables);
         Assert.DoesNotContain(outer.Questions,
             q => q.UncertaintySignal == UncertaintySignal.OutOfBandEntryPossible);
     }

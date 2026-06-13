@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "011-resolver-and-navigation-wiring",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Resolver Wiring (F-3-4)",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Navigation & Enrichment Wiring (F-2-2)",
+      "status": "not-started"
+    },
+    {
+      "number": 3,
+      "title": "R2-1/R2-2 Consumer Validation + Docs + Coordinated Closeout",
+      "status": "not-started"
+    }
+  ]
+}

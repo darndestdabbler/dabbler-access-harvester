@@ -110,19 +110,42 @@ public sealed class SignalIndex
               .Select(r => r.RecordSource!.Trim()),
             StringComparer.OrdinalIgnoreCase);
 
-        // Phase 2: scan inline-SQL RecordSource strings for named query references.
-        // A report RecordSource like "SELECT * FROM qryFoo WHERE …" counts as using qryFoo.
+        // IR object catalog (tables ∪ queries). Inline-SQL FROM/JOIN targets are
+        // credited to the broad used-as-RecordSource set only when they resolve to a
+        // catalog object, so aliases / unresolved names never earn false credit (F-2-5).
+        var objectCatalog = new HashSet<string>(
+            db.Tables.Select(t => t.Name).Concat(db.Queries.Select(q => q.Name)),
+            StringComparer.OrdinalIgnoreCase);
+
+        // Phase 2: scan inline-SQL RecordSource strings for named references.
+        // - The form/report-specific sets (Q2/Q3) credit only known QUERY names, since
+        //   Q2/Q3 distinguish a query record source from a table one.
+        // - The broad used-as-RecordSource set credits ALL catalog targets (tables AND
+        //   queries), so a table bound only via an inline-SQL RecordSource — e.g.
+        //   "SELECT * FROM tblFoo WHERE …" — still earns referenced-ness credit and is
+        //   not mis-classified as unreferenced (F-2-5). The form/report-specific sets
+        //   stay query-only by design (per the F-2-5 decision-consensus caveat).
+        var inlineSqlRecordSourceTargets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var form in db.Forms.Where(f => f.RecordSource != null && SqlDetection.IsInlineSql(f.RecordSource)))
-            foreach (var name in ExtractQueryNamesFromSql(form.RecordSource!, knownQueryNamesEarly))
+        {
+            foreach (var name in ExtractNamedTargetsFromSql(form.RecordSource!, knownQueryNamesEarly))
                 usedAsFormRecordSource.Add(name);
+            foreach (var name in ExtractNamedTargetsFromSql(form.RecordSource!, objectCatalog))
+                inlineSqlRecordSourceTargets.Add(name);
+        }
         foreach (var report in db.Reports.Where(r => r.RecordSource != null && SqlDetection.IsInlineSql(r.RecordSource)))
-            foreach (var name in ExtractQueryNamesFromSql(report.RecordSource!, knownQueryNamesEarly))
+        {
+            foreach (var name in ExtractNamedTargetsFromSql(report.RecordSource!, knownQueryNamesEarly))
                 usedAsReportRecordSource.Add(name);
+            foreach (var name in ExtractNamedTargetsFromSql(report.RecordSource!, objectCatalog))
+                inlineSqlRecordSourceTargets.Add(name);
+        }
 
         var usedAsRecordSource = new HashSet<string>(
             recordSourceByObject.Values, StringComparer.OrdinalIgnoreCase);
-        // Include inline-SQL-sourced query names in the broad used-as-RS set.
-        foreach (var name in usedAsFormRecordSource.Concat(usedAsReportRecordSource))
+        // Include inline-SQL-sourced names (form/report-specific query names plus all
+        // catalog targets, incl. tables) in the broad used-as-RS set.
+        foreach (var name in usedAsFormRecordSource.Concat(usedAsReportRecordSource).Concat(inlineSqlRecordSourceTargets))
             usedAsRecordSource.Add(name);
 
         // RowSources
@@ -203,9 +226,11 @@ public sealed class SignalIndex
             knownQueryNamesEarly);
     }
 
-    // Extracts query names referenced via FROM or JOIN in an inline SQL string.
-    // Only returns names that are in the knownQueryNames set (avoids false positives on table names).
-    private static IEnumerable<string> ExtractQueryNamesFromSql(string sql, IReadOnlySet<string> knownQueryNames)
+    // Extracts names referenced via FROM or JOIN in an inline SQL string, filtered to
+    // the caller-supplied set. Passing the known-query set returns only query names
+    // (Q2/Q3 record-source classification); passing the table∪query catalog returns
+    // both, so inline-SQL-bound tables earn used-as-RecordSource credit (F-2-5).
+    private static IEnumerable<string> ExtractNamedTargetsFromSql(string sql, IReadOnlySet<string> filterSet)
     {
         var tokens = sql.Split(new char[] { ' ', '\t', '\n', '\r', ',', '(', ')' },
                                StringSplitOptions.RemoveEmptyEntries);
@@ -217,7 +242,7 @@ public sealed class SignalIndex
                 string candidate = token.Trim('[', ']');
                 int asIdx = candidate.IndexOf(' ');
                 if (asIdx > 0) candidate = candidate[..asIdx];
-                if (knownQueryNames.Contains(candidate))
+                if (filterSet.Contains(candidate))
                     yield return candidate;
                 nextIsName = false;
             }
