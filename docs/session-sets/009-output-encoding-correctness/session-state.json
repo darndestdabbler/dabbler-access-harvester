@@ -1,14 +1,14 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "009-output-encoding-correctness",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
       "title": "Translator cp1252 Decode Fix And Hermetic Encoding Pins",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-13T05:48:07.506947-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-13T05:49:54.797332-04:00",
       "orchestrator": {
         "engine": "claude",
         "provider": "anthropic",
