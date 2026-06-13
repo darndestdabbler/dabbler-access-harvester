@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AccessHarvester.Vba.Parser.Ast;
 using AccessHarvester.Vba.Resolver.Declarations;
+using AccessHarvester.Vba.Resolver.DefaultMembers;
 using AccessHarvester.Vba.Resolver.Scopes;
 
 namespace AccessHarvester.Vba.Resolver.References;
@@ -439,7 +440,6 @@ public sealed class ReferenceResolver
             // differs from the inner target's, so dispatching on the
             // inner outcome would be wrong. Those fall through to
             // default-member-not-yet-resolved as before.
-            _ = isBang; // bang vs. dot does not change Session 1 dispatch
             var logicalTarget = UnwrapTransparent(target);
             ResolutionOutcome? targetOutcome = null;
             if (_outcomesByExpression.TryGetValue(logicalTarget, out var recorded))
@@ -470,16 +470,59 @@ public sealed class ReferenceResolver
                         UnresolvedReasons.MemberAccessOnUnresolvedTarget);
 
                 default:
-                    // Resolved-with-no-registry-hit, ResolvedToBuiltIn,
+                    // F-3-4 / Phase 3.5: a bang access on a resolved
+                    // source-typed target whose declared type carries a
+                    // curated default member binds through that default
+                    // member (`rs!Notes` ≡ `rs.Fields("Notes")`). This
+                    // retires the hardcoded default-member-not-yet-resolved
+                    // arm WHERE THE REGISTRY RESOLVES (the rest still
+                    // fall through). Everything else here —
+                    // Resolved-with-no-default-member, ResolvedToBuiltIn,
                     // ResolvedToMe-without-registry-hit, or no recorded
-                    // target outcome (non-emitting wrapper). All fall
-                    // back to default-member-not-yet-resolved pending
-                    // Phase 3.5 work.
+                    // outcome — stays deferred.
+                    if (isBang
+                        && TryResolveBangDefaultMember(targetOutcome, memberName) is { } dm)
+                        return dm;
                     return new ResolutionOutcome.Unresolved(
                         UnresolvedReasons.DefaultMemberNotYetResolved);
             }
 
             // Local helpers ----------------------------------------------------
+
+            // F-3-4: consult the curated DefaultMemberRegistry for a bang
+            // access. Only fires when the target resolved to a SOURCE
+            // declaration with a declared type whose default member is
+            // PARAMETERIZED — the bang supplies a key argument
+            // (`rs!Notes`), which a scalar default (e.g. TextBox.Value)
+            // cannot take. Resolves the indirection (the default member),
+            // never a fabricated symbol for the bang key — without the
+            // recordset's source schema we cannot prove `Notes` is a real
+            // field. Returns null to leave the prior deferred reason.
+            ResolutionOutcome? TryResolveBangDefaultMember(
+                ResolutionOutcome? outcome, string accessedName)
+            {
+                if (outcome is not ResolutionOutcome.Resolved resolved)
+                    return null;
+                var declaredType = DeclaredType(resolved.Declaration);
+                if (declaredType is not { QualifiedName.Count: > 0 } typeRef)
+                    return null;
+                var defaultMember = DefaultMemberRegistry.TryGet(typeRef.QualifiedName);
+                if (defaultMember is not { IsParameterized: true })
+                    return null;
+                return new ResolutionOutcome.ResolvedToObjectModel(
+                    new SyntheticDefaultMemberDeclaration(defaultMember, accessedName));
+            }
+
+            // The declared type of a source declaration that can host a
+            // default-member bang. Variables and parameters cover the
+            // corpus (`Dim rs As DAO.Recordset`, `(rs As Recordset)`);
+            // other declaration kinds have no bang-relevant type.
+            static TypeReference? DeclaredType(Declaration decl) => decl switch
+            {
+                VariableDeclaration v => v.Type,
+                ParameterDeclaration p => p.Type,
+                _ => null,
+            };
 
             Declaration? MeRegistryLookup(ClassDeclaration owningClass, string member)
             {

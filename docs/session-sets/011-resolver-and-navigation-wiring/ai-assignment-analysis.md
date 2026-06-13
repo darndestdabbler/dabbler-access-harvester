@@ -1,0 +1,1 @@
+Gemini, 1.0 Pro, medium: This session's known-pattern integration wiring has a lower synthesis ceiling than Session 1's novel design work, making the premium cost of an Opus-class model unnecessary.

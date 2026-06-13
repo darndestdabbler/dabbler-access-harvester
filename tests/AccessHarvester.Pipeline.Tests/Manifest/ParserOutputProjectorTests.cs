@@ -257,13 +257,23 @@ End Sub";
     // ── Tests: Body.SqlStrings ────────────────────────────────────────
 
     [Fact]
-    public void SqlStrings_AlwaysEmptyArrayInSessionOne()
+    public void SqlStrings_OmittedNotEmittedAsEmptyArray()
     {
+        // F-3-4: the projector no longer emits an empty SqlStrings array.
+        // The DynamicSqlAnalyzer that would populate it has no production
+        // call site yet (deferred — DW-8), and an always-empty array
+        // synthesizes the forbidden default "this procedure builds no SQL"
+        // (project-guidance → Output JSON Conventions). The schema marks
+        // Body.SqlStrings optional, so omission is valid; the key is simply
+        // absent rather than present-and-empty.
         var resolved = Resolve("Public Sub DoSomething()\nEnd Sub");
         var item = Item(Project(resolved), 0)!;
-        var sqlStrings = item["Body"]!["SqlStrings"]!.AsArray();
+        var body = item["Body"]!.AsObject();
 
-        Assert.Empty(sqlStrings);
+        Assert.False(body.ContainsKey("SqlStrings"));
+        // References/Calls are still present (they carry real content).
+        Assert.True(body.ContainsKey("References"));
+        Assert.True(body.ContainsKey("Calls"));
     }
 
     // ── Tests: schema envelope ────────────────────────────────────────

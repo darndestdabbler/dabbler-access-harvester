@@ -1,0 +1,44 @@
+{
+  "status": "completed",
+  "summary": "Set 011 Session 1 (Resolver Wiring, 006 P3 / F-3-4) VERIFIED. Wired the harvester's built-but-unwired Access-integrated resolver into production manifest output, four items: (1) ONE shared ProjectScope across a two-pass manifest parse loop (SymbolDbBuilder pattern) so cross-module Public lookup fires; (2) AccessObjectModelRegistry built from the enriched ir/ form/report metadata + a Form/Report owningClass (ClassDeclaration) passed to BuildModuleScope, so Me/Me.<control>/bare-control bind; (3) DefaultMemberRegistry consultation in DecideMemberOutcome for a bang access on a resolved source-typed target with a PARAMETERIZED default member (rs!Notes => Recordset.Fields(\"Notes\")) — design chosen by cross-provider consensus (gpt-5-4 + gemini-pro both picked Option B): a new SyntheticDefaultMemberDeclaration wraps the default member and is emitted via the EXISTING ResolvedToObjectModel variant (no breaking change to the closed ResolutionOutcome), resolving the indirection only, never a fabricated field symbol; gated on isBang + IsParameterized; (4) SqlStrings OMITTED rather than emitted as the forbidden always-empty array (schema marks it optional) — DynamicSqlAnalyzer wiring deferred as DW-8. Coordinated HomeHealthCare golden regen (COM, TRX-confirmed; CanonicalGoldenRegressionTests GREEN): ONLY manifest.json changed; structural invariants hold (object counts / Diagnostics / FileMap / SchemaVersion / unresolved-items unchanged; no new VBA_RESOLVE_FAILURE). EVERY reference transition maps to F-3-4 (total refs 5049->5049, same sites): me-in-standard-module->Form/Report 559 (item2); member-access-on-unresolved->Resolved 293 + ->default-member 400 (item2 cascade, spec-predicted deeper gap); default-member->Resolved:DefaultMember 37 (item3 rs!field); ->Resolved 14 (item2/3); not-in-scope->Procedure 11 (item1); SqlStrings 233->0 (item4). Net Resolved 3182->4103 (+921). Directly serves consumer R2-1/R2-2. Hermetic green: Vba.Resolver.Tests 410, Pipeline.Tests 835, AccessHarvester.Tests F-3-4 pins (5) + ingestion + projector. 9 new hermetic pins; 2 pre-existing fixture tests updated to the new correct rs!field behavior (disclosed; not weakened). Cross-provider verification: R1 ISSUES_FOUND (Major A shared-project contamination + Minor B owningClass name-alignment); A rebutted with reachability evidence (Statement is not a ModuleItem -> the visitor's post-attach guards are unreachable from parser ASTs; parse failure precedes scope creation; resolve-failure leaves complete valid scopes = correct) + documented the degradation contract in code; B discharged with a ModuleName-diverges-from-Name hermetic pin; R2 VERIFIED, empty issues. Hard constraints honored: NorthwindDevEdition untouched; HHC-only golden via AH_REGEN_GOLDEN; COM foreground/sequential/TRX-as-truth; spurious samples/*.accdb swept before staging; quarantined sanitize test untouched.",
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "verification_rounds": 2,
+  "files_changed": [
+    "AccessHarvester.Core/Pipeline.cs",
+    "AccessHarvester.Pipeline/Manifest/ParserOutputProjector.cs",
+    "AccessHarvester.Vba.Resolver/References/ReferenceResolver.cs",
+    "AccessHarvester.Vba.Resolver/DefaultMembers/SyntheticDefaultMemberDeclaration.cs",
+    "tests/AccessHarvester.Tests/ManifestResolverWiringTests.cs",
+    "tests/AccessHarvester.Vba.Resolver.Tests/DefaultMembers/BangDefaultMemberResolutionTests.cs",
+    "tests/AccessHarvester.Vba.Resolver.Tests/References/ResolverFixtureAnnotationTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Manifest/ParserOutputProjectorTests.cs",
+    "docs/planning/deferred-work.md",
+    "samples/GoldenOutput/HomeHealthCare/manifest.json",
+    "docs/session-sets/011-resolver-and-navigation-wiring/ai-assignment.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/ai-assignment-analysis.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s1-item3-design-consensus.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s1-verification.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s1-verification-round-2.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/disposition.json",
+    "docs/session-sets/011-resolver-and-navigation-wiring/activity-log.json",
+    "docs/session-sets/011-resolver-and-navigation-wiring/session-state.json",
+    "tools/vahs011_log.py",
+    "tools/vahs011_item3_consensus.py",
+    "tools/vahs011_s1_verify.py",
+    "tools/vahs011_s1_verify_r2.py",
+    "tools/vahs011_assignment.py"
+  ],
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "effort": "medium",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 (F-2-2 navigation & enrichment wiring) is known-pattern integration off the existing resolvedModules + crossRefs seam plus a new Switchboard Items table reader and EndToEndFixtureTests reconciliation — a lower synthesis ceiling than Session 1's closed-type design work, so the routed analysis (gemini-pro) recommended a mid-tier orchestrator at effort=medium. Sonnet-on-Claude keeps the existing gpt-5-4 session-verification override valid; if run under Gemini, swap the verifier override to a non-Google model first."
+    }
+  },
+  "blockers": []
+}

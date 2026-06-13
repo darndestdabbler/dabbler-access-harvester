@@ -205,6 +205,31 @@
   `Sql.Parsed` carrying only `Raw` + `QueryType`; the absence of a structured body
   is visible there and in `QueryAbstractionBuilderTests`.
 
+### DW-8 — DynamicSqlAnalyzer / FormReferenceResolver output is not wired into ParserOutput
+- **What:** `ParserOutput` `Body.SqlStrings` is now **omitted** (011 S1, F-3-4)
+  rather than emitted as the forbidden always-empty array. The
+  `DynamicSqlAnalyzer` (`AccessHarvester.Sql.Parser/DynamicSql/`) and
+  `FormReferenceResolver` (`AccessHarvester.Sql.Parser/FormReferences/`) are
+  built and hermetically tested but have **no production call site**, so
+  VBA-constructed dynamic SQL (string-built `SELECT … & x & …`) and SQL form
+  references (`Forms!frmFoo!ctl` inside query/validation SQL) are not surfaced
+  in the manifest.
+- **Origin:** 006 review F-3-4 (the dynamic-SQL / SQL-form-reference half); 011
+  Session 1 chose the spec-sanctioned "omit the key until wired" option for
+  `SqlStrings` and recorded it here.
+- **Why deferred:** wiring `DynamicSqlAnalyzer` is a distinct Phase 5.4
+  capability — per-procedure symbolic string-build tracking with its own golden
+  churn and analysis surface — materially larger than 011 S1's resolver-wiring
+  scope. Omitting the empty array is the minimal correct change (the schema
+  marks `Body.SqlStrings` optional, so omission is valid and reads as "not
+  analyzed" rather than the synthesized default "builds no SQL").
+- **Trigger to pull back in:** a consumer needs dynamic-SQL or SQL-form-reference
+  surfaces, OR a dynamic-sql-wiring / query-fidelity set is scoped.
+- **Owning set candidate:** a future `dynamic-sql-and-form-reference-wiring` set
+  (the P4/P5/P6 remainder 011's next-set recommendation will rank).
+- **Mechanical backstop:** `ParserOutputProjectorTests.SqlStrings_OmittedNotEmittedAsEmptyArray`
+  pins the omission; the unwired analyzers' tests remain green in isolation.
+
 ## Closed
 
 _(none yet)_

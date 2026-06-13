@@ -3,6 +3,7 @@ using System.Linq;
 using AccessHarvester.Vba.Parser;
 using AccessHarvester.Vba.Parser.Ast;
 using AccessHarvester.Vba.Resolver.Declarations;
+using AccessHarvester.Vba.Resolver.DefaultMembers;
 using AccessHarvester.Vba.Resolver.References;
 using AccessHarvester.Vba.Resolver.Scopes;
 using Xunit;
@@ -110,8 +111,15 @@ public sealed class ResolverFixtureAnnotationTests
     }
 
     [Fact]
-    public void Fixture08_BangAccessOnRs_IsDefaultMemberNotYetResolved()
+    public void Fixture08_BangAccessOnRs_ResolvesViaRecordsetDefaultMember()
     {
+        // F-3-4 (011 S1): `rs!FormName` / `rs!FilterTemplate` on a
+        // `Dim rs As DAO.Recordset` now resolve through Recordset's
+        // parameterized default member (Fields) — they were
+        // default-member-not-yet-resolved before this wiring. The binding
+        // target is the default member itself, never a fabricated field
+        // symbol named after the bang key (the field name survives only as
+        // AccessedName provenance).
         var rm = ResolveFixture("08-unresolvable.bas", "modConfigDriven");
 
         var bangs = rm.References
@@ -119,9 +127,13 @@ public sealed class ResolverFixtureAnnotationTests
             .ToList();
         Assert.True(bangs.Count > 0,
             "Expected at least one bang-access reference on rs.");
-        Assert.All(bangs, r => Assert.Equal(
-            UnresolvedReasons.DefaultMemberNotYetResolved,
-            Assert.IsType<ResolutionOutcome.Unresolved>(r.Outcome).Reason));
+        Assert.All(bangs, r =>
+        {
+            var objModel = Assert.IsType<ResolutionOutcome.ResolvedToObjectModel>(r.Outcome);
+            var dm = Assert.IsType<SyntheticDefaultMemberDeclaration>(objModel.Declaration);
+            Assert.Equal("Fields", dm.DefaultMember.MemberName);
+            Assert.Equal("Recordset", dm.DefaultMember.TypeName);
+        });
     }
 
     [Fact]
@@ -318,8 +330,12 @@ public sealed class ResolverFixtureAnnotationTests
     }
 
     [Fact]
-    public void Fixture11_BangAccessOnRs_IsDefaultMemberNotYetResolved()
+    public void Fixture11_BangAccessOnRs_ResolvesViaRecordsetDefaultMember()
     {
+        // F-3-4 (011 S1): `rs!UserID` / `rs!UserName` / `rs!RoleName` on a
+        // `Dim rs As DAO.Recordset` now resolve through Recordset's
+        // parameterized default member (Fields), previously
+        // default-member-not-yet-resolved.
         var rm = ResolveFixture("11-autoexec-startup-chain.bas", "modStartup");
 
         var bangs = rm.References
@@ -329,9 +345,13 @@ public sealed class ResolverFixtureAnnotationTests
             .ToList();
         Assert.True(bangs.Count > 0,
             "Expected at least one bang-access reference on rs (rs!UserID etc.).");
-        Assert.All(bangs, r => Assert.Equal(
-            UnresolvedReasons.DefaultMemberNotYetResolved,
-            Assert.IsType<ResolutionOutcome.Unresolved>(r.Outcome).Reason));
+        Assert.All(bangs, r =>
+        {
+            var objModel = Assert.IsType<ResolutionOutcome.ResolvedToObjectModel>(r.Outcome);
+            var dm = Assert.IsType<SyntheticDefaultMemberDeclaration>(objModel.Declaration);
+            Assert.Equal("Fields", dm.DefaultMember.MemberName);
+            Assert.Equal("Recordset", dm.DefaultMember.TypeName);
+        });
     }
 
     [Fact]

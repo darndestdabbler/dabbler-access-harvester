@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using AccessHarvester.Pipeline.Enrichment;
 using AccessHarvester.Vba.Parser.Ast;
 using AccessHarvester.Vba.Resolver.Declarations;
+using AccessHarvester.Vba.Resolver.DefaultMembers;
 using AccessHarvester.Vba.Resolver.References;
 using AccessHarvester.Vba.Resolver.Scopes;
 using ParserPropertyKind = AccessHarvester.Vba.Parser.Ast.PropertyKind;
@@ -243,11 +244,12 @@ public static class ParserOutputProjector
             ["IsStatic"] = false,
             ["Lib"] = decl.LibraryName,
             ["Signature"] = sig,
+            // SqlStrings omitted (F-3-4) — see BuildBody for rationale. A
+            // Declare statement has no body to analyze for SQL anyway.
             ["Body"] = new JsonObject
             {
                 ["References"] = new JsonArray(),
                 ["Calls"] = new JsonArray(),
-                ["SqlStrings"] = new JsonArray(),
             },
         };
         if (decl.AliasName is not null)
@@ -310,11 +312,18 @@ public static class ParserOutputProjector
                 calls.Add(BuildCallSite(r));
         }
 
+        // F-3-4: SqlStrings is OMITTED, not emitted as an empty array. The
+        // DynamicSqlAnalyzer that would populate it has no production call
+        // site yet (deferred to a future dynamic-SQL wiring set — DW-8); an
+        // always-empty array synthesizes the forbidden default "this
+        // procedure builds no SQL" (project-guidance → Output JSON
+        // Conventions: only emit fields the producer actually wrote). The
+        // schema marks Body.SqlStrings optional, so omission is valid and
+        // reads as "not analyzed" rather than "analyzed, none found".
         return new JsonObject
         {
             ["References"] = references,
             ["Calls"] = calls,
-            ["SqlStrings"] = new JsonArray(),
         };
     }
 
@@ -435,6 +444,29 @@ public static class ParserOutputProjector
 
     private static JsonNode? BuildDeclarationTarget(Declaration decl)
     {
+        // F-3-4: a bang-access default-member binding (`rs!Notes`) carries
+        // the default member it resolved through — NOT a fabricated symbol
+        // for the bang key. The target conveys, using existing schema
+        // fields only: the default member (Name), the type that owns it
+        // (Container), the member's return type (Type), and the honest
+        // access path (FullyQualifiedName, e.g. `Recordset.Fields("Notes")`).
+        // The bang key appears only inside that path string, never as a
+        // resolved member Name.
+        if (decl is SyntheticDefaultMemberDeclaration dm)
+        {
+            var target = new JsonObject
+            {
+                ["Kind"] = "DefaultMember",
+                ["Name"] = dm.DefaultMember.MemberName,
+                ["Container"] = dm.DefaultMember.TypeName,
+                ["FullyQualifiedName"] =
+                    $"{dm.DefaultMember.TypeName}.{dm.DefaultMember.MemberName}(\"{dm.AccessedName}\")",
+            };
+            if (dm.DefaultMember.ReturnType is { } returnType)
+                target["Type"] = returnType;
+            return target;
+        }
+
         return new JsonObject
         {
             ["Kind"] = DeclarationKindString(decl),

@@ -1,0 +1,131 @@
+{
+  "sessionSetName": "011-resolver-and-navigation-wiring",
+  "createdDate": "2026-06-13T21:02:32.048431+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/verification-mode",
+      "dateTime": "2026-06-13T21:02:32.048431+00:00",
+      "description": "Operator set verificationMode: out-of-band-or-none.",
+      "status": "complete",
+      "routedApiCalls": [],
+      "kind": "verification_mode",
+      "choice": "out-of-band-or-none"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "s1-reground",
+      "dateTime": "2026-06-13T17:10:44.783725-04:00",
+      "description": "Re-grounded F-3-4 against current tree: Pipeline.cs:380-384 builds fresh per-module ProjectScope + bare VbaReferenceResolver inside parse loop; confirmed cross-module/Me/control/default-member can never fire. Measured corpus impact: 559 me-in-standard-module + 909 member-access-on-unresolved-target + 505 not-in-scope + 331 default-member-not-yet-resolved; 233 hardcoded empty SqlStrings. Schema: Body.SqlStrings optional (omit is valid). ~129 rs!field bang accesses are item-3 targets.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "s1-shared-projectscope",
+      "dateTime": "2026-06-13T18:13:55.981750-04:00",
+      "description": "Two-pass restructure of EmitManifestArtifacts: one shared ProjectScope across the parse loop (SymbolDbBuilder pattern); pass 1 builds all module scopes, pass 2 resolves. Hermetic pin CrossModulePublicCall_ResolvesAcrossModules green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "s1-registry-wired",
+      "dateTime": "2026-06-13T18:13:56.173346-04:00",
+      "description": "Built AccessObjectModelRegistry from ir/ form/report metadata + TypeLibraryRegistry; pass Form/Report owningClass (ClassDeclaration) to BuildModuleScope; resolve with new ReferenceResolver(registry). 3 hermetic pins green: Me->Form, Me.control->ObjectModel, bare-control->ObjectModel.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "s1-sqlstrings-decided",
+      "dateTime": "2026-06-13T18:13:56.344033-04:00",
+      "description": "DECISION: omit SqlStrings key (schema-valid; Body.SqlStrings optional). Removes the forbidden synthesized default 'builds no SQL'. DynamicSqlAnalyzer wiring deferred -> DW-8. Updated both projector sites + the projector test.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "s1-default-members-consulted-decision",
+      "dateTime": "2026-06-13T18:17:12.499314-04:00",
+      "description": "Decision-consensus (GPT-5.4 + Gemini Pro, $0.0841): BOTH pick Option B - synthesize Declaration wrapping the DefaultMember, emit via existing ResolvedToObjectModel (no closed-type breaking change). Gate on isBang only; target=default member (Fields), NOT a fabricated field 'Notes'; do not claim field value type. Saved s1-item3-design-consensus.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "analysis",
+          "costUsd": 0.0749
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "costUsd": 0.0092
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "s1-default-members-consulted",
+      "dateTime": "2026-06-13T18:24:57.796507-04:00",
+      "description": "Implemented Option B: SyntheticDefaultMemberDeclaration wraps the curated DefaultMember, emitted via existing ResolvedToObjectModel (no closed-type breaking change). DecideMemberOutcome consults DefaultMemberRegistry for isBang on a resolved source-typed target with a PARAMETERIZED default member; resolves the indirection only (Recordset.Fields), never a fabricated field symbol. Projector emits honest target using existing schema fields. 5 resolver pins + over-claim guard green; updated 2 pre-existing fixture tests (rs!field now resolves). DW-8 recorded.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "s1-hermetic-green",
+      "dateTime": "2026-06-13T18:24:57.953925-04:00",
+      "description": "Hermetic gate green pre-regen: solution builds; Vba.Resolver.Tests 410, Pipeline.Tests 835, SymbolDb.Tests 71, AccessHarvester.Tests F-3-4 pins + ingestion 10. No assertions weakened; behavioral fixture-test updates disclosed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "s1-golden-regen",
+      "dateTime": "2026-06-13T18:28:41.033180-04:00",
+      "description": "Coordinated HomeHealthCare golden regen (AH_REGEN_GOLDEN COM run, TRX-confirmed). ONLY manifest.json changed (kb/ir unchanged). Structural invariants hold (object counts/Diagnostics/FileMap/SchemaVersion unchanged; no new VBA_RESOLVE_FAILURE). Resolution: 3182->4103 Resolved (+921). Every transition maps to F-3-4: me-in-standard-module->Form/Report 559 (item2), member-access-on-unresolved->Resolved 293 + ->default-member 400 cascade (item2, spec-predicted deeper gap), default-member->DefaultMember 37 (item3 rs!field), not-in-scope->Procedure 11 (item1), SqlStrings 233->0 (item4). CanonicalGoldenRegressionTests gate GREEN.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "s1-verify-r1",
+      "dateTime": "2026-06-13T18:39:46.876436-04:00",
+      "description": "Cross-provider verification R1 (gpt-5-4, $0.2084): ISSUES_FOUND - 1 Major (A: shared-project contamination from degraded modules) + 1 Minor (B: owningClass name-alignment). Disposition: A rebutted with reachability evidence (Statement is not a ModuleItem -> visitor post-creation throws unreachable from parser ASTs; parse failure precedes scope creation; resolve-failure leaves complete valid scopes = benign) + documented the degradation contract in code; B discharged with a ModuleName-diverges-from-Name hermetic pin. Re-verifying R2.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.2084
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "s1-verified",
+      "dateTime": "2026-06-13T18:41:08.390983-04:00",
+      "description": "Cross-provider verification R2 (gpt-5-4): VERIFIED, empty issues. Verifier closed A1 (accepted unreachability evidence: Statement is not a ModuleItem so the visitor's post-attach guards are unreachable from parser ASTs), A2 (resolve-failure leaves complete valid scopes = correct), and B (divergence pin discharges it). No code behavior changed between R1 and R2.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.0314
+        }
+      ]
+    }
+  ]
+}

@@ -15,13 +15,16 @@ using AccessHarvester.Pipeline.Enrichment;
 using AccessHarvester.Pipeline.Manifest;
 using AccessHarvester.Sql.Parser;
 using AccessHarvester.Vba.Parser;
+using AccessHarvester.Vba.Resolver.AccessIntegration;
 using AccessHarvester.Vba.Resolver.CrossReference;
+using AccessHarvester.Vba.Resolver.Declarations;
 using AccessHarvester.Vba.Resolver.References;
 using VbaReferenceResolver = AccessHarvester.Vba.Resolver.References.ReferenceResolver;
 using AccessHarvester.Vba.Resolver.Scopes;
 using ManifestModuleKind = AccessHarvester.Pipeline.Manifest.ModuleKind;
 using ResolverModuleKind = AccessHarvester.Vba.Resolver.Scopes.ModuleKind;
 using VbaParseMode = AccessHarvester.Vba.Parser.ParseMode;
+using VbaModule = AccessHarvester.Vba.Parser.Ast.Module;
 
 namespace AccessHarvester.Core;
 
@@ -289,6 +292,31 @@ public sealed class Pipeline
         // (manifest.Modules.length == ir/ModulesAndClasses/*.ir.json).
         var moduleParseFailures =
             new List<(string Name, ManifestModuleKind Kind)>();
+
+        // F-3-4: one Access object-model registry, built once from the
+        // already-enriched ir/ form/report metadata and shared across the
+        // whole resolve pass. It supplies Me/bare-control resolution and
+        // member-chain walks (Forms!/Reports!/subform navigation). The
+        // prior code constructed the resolver with NO registry, so every
+        // form/report Me.<control> reference fell to Unresolved.
+        var accessRegistry = BuildAccessObjectModelRegistry(irDir);
+
+        // F-3-4: ONE ProjectScope shared across every module so the
+        // resolver's cross-module Public lookup (ReferenceResolver
+        // Step 1.5, which walks project.Children for sibling modules) can
+        // fire. The prior code built `new ProjectScope()` INSIDE the
+        // per-module loop, making each module an only child — so a bare
+        // call to another module's Public proc could never resolve. This
+        // mirrors SymbolDbBuilder's shared-ProjectScope pattern, the
+        // correct wiring already proven in-repo.
+        var project = new ProjectScope();
+
+        // Pass 1: parse + scope-build every module INTO the shared
+        // project. Resolution is deferred to pass 2 (below) so that every
+        // sibling module's scope is registered in `project` before any
+        // module is resolved — otherwise the first module would resolve
+        // against a project that does not yet contain its siblings.
+        var pendingModules = new List<PendingModule>();
         foreach (var category in new[] { "ModulesAndClasses", "Forms", "Reports" })
         {
             // Forms and Reports source their VBA from the kb tier's
@@ -377,14 +405,48 @@ public sealed class Pipeline
                         _ => ResolverModuleKind.Standard,
                     };
 
-                    var project = new ProjectScope();
+                    // F-3-4: Form/Report modules get an owningClass so the
+                    // resolver can bind `Me`, `Me.<control>`, and bare
+                    // control names through the Access registry. The
+                    // owningClass name is the module name (= the kb file
+                    // name = FormMetadata.Name), which the registry's
+                    // by-Name index resolves controls against. Standard
+                    // and standalone-class modules have no host
+                    // form/report context, so owningClass stays null
+                    // (scoped to Form/Report per the 006 recommendation).
+                    var owningClass = resolverKind switch
+                    {
+                        ResolverModuleKind.Form =>
+                            NewOwningClass(name, ClassDeclarationKind.FormModule),
+                        ResolverModuleKind.Report =>
+                            NewOwningClass(name, ClassDeclarationKind.ReportModule),
+                        _ => null,
+                    };
+
                     var visitor = new ScopeBuildingVisitor();
-                    var scope = visitor.BuildModuleScope(project, ast, name, resolverKind);
-                    var resolved = new VbaReferenceResolver().Resolve(scope, ast);
-                    parsed.Add(new ParsedModuleEntry(name, manifestKind, category, resolved));
+                    var scope = visitor.BuildModuleScope(
+                        project, ast, name, resolverKind, owningClass);
+                    pendingModules.Add(
+                        new PendingModule(name, manifestKind, category, ast, scope));
                 }
                 catch (Exception ex)
                 {
+                    // Degradation contract under the shared ProjectScope:
+                    // the failure here is a PARSE failure — LoadAndParse
+                    // throws (the F-3-2 AstBuilder NRE class) BEFORE
+                    // BuildModuleScope runs, so no ModuleScope is created
+                    // and nothing is attached to `project`. (A scope-build
+                    // exception cannot leak a usable partial scope either:
+                    // ScopeBuildingVisitor's only post-`new ModuleScope`
+                    // throws are the LocalDeclaration/LocalConstant
+                    // "outside a procedure scope" guards, which are
+                    // unreachable from a parser-produced module AST —
+                    // Statements are not ModuleItems, so a local
+                    // declaration can only be walked inside a ProcedureScope
+                    // where CurrentProcedureScope is non-null.) So a
+                    // degraded module contributes no sibling-visible
+                    // symbols, matching the prior per-module-isolation
+                    // behavior.
                     diagnostics.Add(new HarvesterDiagnostic
                     {
                         Severity = HarvesterDiagnosticSeverity.Warning,
@@ -399,6 +461,39 @@ public sealed class Pipeline
                                 : ManifestModuleKind.Standard));
                     }
                 }
+            }
+        }
+
+        // Pass 2: resolve every parsed module against the shared project +
+        // registry. Cross-module Public lookup, Me/control resolution, and
+        // member-chain walks all fire now that `project` holds every
+        // sibling scope and the resolver carries the Access registry
+        // (F-3-4). A resolution failure degrades that one module — it
+        // keeps a kind-correct stub for ModulesAndClasses, same as a parse
+        // failure — rather than aborting the whole manifest. The degraded
+        // module's scope was already FULLY built in pass 1, so its Public
+        // declarations remain visible to sibling modules; that is correct
+        // (those symbols genuinely exist in source — a sibling's bare call
+        // to the module resolves accurately even though the module's own
+        // ParserOutput is a stub), not a leak.
+        foreach (var pm in pendingModules)
+        {
+            try
+            {
+                var resolved = new VbaReferenceResolver(accessRegistry)
+                    .Resolve(pm.Scope, pm.Ast);
+                parsed.Add(new ParsedModuleEntry(pm.Name, pm.Kind, pm.Category, resolved));
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add(new HarvesterDiagnostic
+                {
+                    Severity = HarvesterDiagnosticSeverity.Warning,
+                    Message = $"VBA resolution failed for '{pm.Name}': {ex.Message}",
+                    Code = "VBA_RESOLVE_FAILURE",
+                });
+                if (pm.Category == "ModulesAndClasses")
+                    moduleParseFailures.Add((pm.Name, pm.Kind));
             }
         }
 
@@ -960,6 +1055,67 @@ public sealed class Pipeline
 
     private sealed record ParsedModuleEntry(
         string Name, ManifestModuleKind Kind, string Category, ResolvedModule Resolved);
+
+    // Carrier across the F-3-4 two-pass split: pass 1 parses + scope-builds
+    // into the shared ProjectScope and stores the AST + scope here; pass 2
+    // resolves each against the now-complete project + Access registry.
+    private sealed record PendingModule(
+        string Name, ManifestModuleKind Kind, string Category, VbaModule Ast, ModuleScope Scope);
+
+    // F-3-4: build the Access object-model registry from the enriched
+    // ir/ form/report metadata so the resolver can bind Me/control
+    // references in form and report code-behind. Best-effort per file —
+    // a form/report whose ir JSON cannot be read is skipped (its Me
+    // references simply stay Unresolved) rather than failing the whole
+    // manifest; the same metadata is re-read with explicit diagnostics in
+    // BuildFormOrReportExports, so a load failure is not silently lost.
+    private static IAccessObjectModelRegistry BuildAccessObjectModelRegistry(string irDir)
+    {
+        var forms = new List<FormMetadata>();
+        foreach (var (name, json) in ReadIrJsonFiles(irDir, "Forms"))
+        {
+            try { forms.Add(FormMetadataExtractor.Extract(name, json)); }
+            catch { /* surfaced as FORM_SPEC_LOAD_FAILURE in BuildFormOrReportExports */ }
+        }
+
+        var reports = new List<ReportMetadata>();
+        foreach (var (name, json) in ReadIrJsonFiles(irDir, "Reports"))
+        {
+            try { reports.Add(ReportMetadataExtractor.Extract(name, json)); }
+            catch { /* surfaced as FORM_SPEC_LOAD_FAILURE in BuildFormOrReportExports */ }
+        }
+
+        return new AccessObjectModelRegistry(forms, reports, new TypeLibraryRegistry());
+    }
+
+    private static IEnumerable<(string Name, string Json)> ReadIrJsonFiles(
+        string irDir, string category)
+    {
+        var dir = Path.Combine(irDir, category);
+        if (!Directory.Exists(dir)) yield break;
+        foreach (var file in Directory.GetFiles(dir, "*.ir.json")
+                                      .OrderBy(f => f, StringComparer.Ordinal))
+        {
+            // ir/Forms/frmFoo.ir.json → "frmFoo" (strip .ir then .json).
+            var name = Path.GetFileNameWithoutExtension(
+                Path.GetFileNameWithoutExtension(file));
+            yield return (name, File.ReadAllText(file, Encoding.UTF8));
+        }
+    }
+
+    // F-3-4: a minimal owningClass for a Form/Report module so the
+    // resolver has a class context for Me/bare-control binding. The
+    // declaration's provenance is never emitted — a degenerate
+    // (0,0)-(0,1) range mirrors the resolver's own integration tests.
+    private static ClassDeclaration NewOwningClass(string name, ClassDeclarationKind kind)
+        => new(
+            name,
+            new SourceDeclarationProvenance(
+                new AccessHarvester.Vba.Parser.Ast.SourceRange(
+                    new AccessHarvester.Vba.Parser.Ast.SourceLocation("", 0, 0),
+                    new AccessHarvester.Vba.Parser.Ast.SourceLocation("", 0, 1))),
+            kind,
+            Array.Empty<AccessHarvester.Vba.Parser.Ast.TypeReference>());
 
     // Manifest provenance is sourced from the single canonical helper on
     // DatabaseManifest so the version stamped into manifest.json matches
