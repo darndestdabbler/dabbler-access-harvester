@@ -421,10 +421,27 @@ experiments only.
 ### Workflow Expectations
 
 - Before every session, read this file, `docs/planning/lessons-learned.md`,
-  and `docs/planning/session-set-authoring-guide.md`. The authoring guide
+  `docs/planning/session-set-authoring-guide.md`, and
+  `docs/planning/deferred-work.md`. The authoring guide
   is the source of truth for *spec* authoring (slug naming, sizing, the
   Session Set Configuration block); `docs/ai-led-session-workflow.md`
   remains the source of truth for *execution* mechanics.
+- **Memorialize deferred work in `docs/planning/deferred-work.md` — never
+  only in chat or a buried disposition.** When a session deliberately
+  defers a gap that no planned session set already owns (a half-finished
+  seam, a scoped-out construct, a known limitation), add a `DW-<n>` entry
+  to the register with its origin, why-deferred, the concrete trigger that
+  should pull it back in, and a candidate owning set. The register is
+  required reading (above), so every session sees open items; every
+  closeout must check whether an open item's trigger has arrived and, if
+  so, address it or carry it into the next-session-set recommendation.
+  Remove an entry only when the work lands (cite the commit/set) or the
+  human cancels it — never a silent drop. Where practical, back the
+  deferral with a `Skip`-ped or known-limitation test naming the `DW-<n>`
+  id so the gap also surfaces mechanically on every test run. Added
+  2026-06-13 after the 006 review found the "unwired-seams /
+  half-implemented code" pattern across three layers; the register is the
+  standing defense against silently forgetting deferred work.
 - Save verifier output raw and never edit session-review files after
   they are written.
 - Log every AI-led session step in the active session set. Specifically:

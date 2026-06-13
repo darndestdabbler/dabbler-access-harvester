@@ -95,3 +95,145 @@ commit, not accepted on the checkpoint's word.
 - **Risk: safer.** Additive and scope-respecting. Recorded for completeness.
 - **Interim:** pending.
 - **Fable:** pending-fable.
+
+---
+
+## Interim review verdicts — 008 Session 2
+
+### Gemini Pro (devil's-advocate), 2026-06-13 — raw at `s2-external-verification-gemini.md`
+
+GPT 5.4 pass still pending; synthesis deferred until both are in. Opus
+reconciled each verdict against the actual corpus (the discipline cuts both
+ways — the review caught real issues; empirical checks corrected overstated
+severities).
+
+- **H1 / S2-1 (grammar ambiguity): Gemini OVERTURNED.** Agrees ALL(*) resolves
+  `ReDim Preserve(10)` vs `… a(10)` and the `For … Step` forms; no ambiguity.
+  Matches Opus's no-regression sweep. **Action:** still add the anchored-use pins
+  to lock it, but no defect.
+- **H2 / S2-2 (error-swallow guard): Gemini UPHELD, Major. Opus CONFIRMS — real.**
+  `catch (Exception) when (HasErrorNode(item))` spans an entire `moduleItem`
+  (a whole procedure body). A genuine builder bug (NRE/IndexOutOfRange) deep in a
+  procedure that *also* has an unrelated syntax error elsewhere gets swallowed as
+  a recovered stub, masking the real defect. **Action: fix** — narrow the catch to
+  the specific recovery failure mode (e.g. `NullReferenceException`, or a
+  shallow head-of-item error-node check) rather than blanket `Exception`. The
+  explicit null-name guards already added to each procedure builder cover the
+  known F-3-2 cascade, so the broad backstop can be tightened safely.
+- **H3 / S2-1+S2-3 (keyword scope too narrow): Gemini UPHELD, Critical. Opus
+  PARTIAL — real gap, but mischaracterized and NOT corpus-impacting / NOT a
+  regression.** The listed constructs (`Sub Step()`, `Step` as type/enum member,
+  `Compare:` label, `Step:=1` named arg, `Declare Function Compare`) do fail —
+  but they failed *before* Fable's change too (STEP/COMPARE/etc. lex as keyword
+  tokens, never as identifiers), so this is a pre-existing gap, not a regression
+  Gemini's "now throw fatal errors because they no longer lex as identifiers" is
+  factually wrong. **None of these constructs appear in the HomeHealthCare
+  corpus** (only `Dim step` + `step` expressions, both covered). So not
+  golden-impacting and not Critical. **Action: scope decision** — widen the
+  contextual-keyword slots to procedure-names/type-member/enum-member/label/
+  named-arg/declare (cheap, makes the fix complete) vs. defer as unproven-need
+  (Fable's stated bounded-over-acceptance rationale). Lean toward widening the
+  clearly-safe ones; confirm no new ambiguity via pins. Decide with GPT + at synthesis.
+- **H4 / S2-4 (TypeSuffix dropped → wrong return type): Gemini UPHELD, Critical.
+  Opus PARTIAL — real latent issue, but NO HomeHealthCare golden impact.** Gemini
+  correctly traces that `Function SqlStr$()` would emit `ReturnType=null` →
+  consumer reads Variant, not String (silent-wrong, the F-3-5 class). BUT **no
+  suffixed function/property name exists in the HHC corpus**, so the committed
+  golden is NOT corrupted and is safe to regenerate. The issue is real for (a)
+  the planned corpus case 14 if it includes `Function SqlStr$()`, and (b) any
+  real customer DB. Note this is also a PRE-EXISTING variable behavior (`Dim s$`
+  already set Type=null + suffix) that Fable propagated to functions/params, not
+  newly invented. **Action: fix or explicitly defer with disclosure** — see H5.
+- **H5 / S2-4 (better strategy): Gemini UPHELD, Major. Opus AGREES it's the
+  cleaner design.** Map the type-declaration char to a real `TypeReference`
+  (`$`→String, `%`→Integer, `&`→Long, `!`→Single, `#`→Double, `@`→Currency) at
+  AstBuilder time so the resolver/SymbolDb/projector see a normally-typed
+  declaration — eliminating the downstream-blind `TypeSuffix` field and resolving
+  H4 at the source. **Caveats to weigh at synthesis:** (a) it's a broader refactor
+  touching pre-existing variable handling, possibly beyond Session 2's F-3-3
+  scope; (b) consider keeping BOTH the mapped type AND a "was-a-suffix" signal if
+  round-trip fidelity matters; (c) confirm against the repo's "only emit what
+  Access wrote" convention (suffix→type is lossless inference, likely fine).
+- **Overall (Gemini): "NOT safe to build further work upon; fix H3+H4 before
+  locking any golden."** Opus reconciliation: the **HHC golden is safe to
+  regenerate** (no corpus trigger for H3/H4). H2 is a real fix worth making
+  regardless. H3/H4/H5 are genuine and worth resolving, but they are
+  latent/scope/architecture calls, not golden-corrupting blockers — to be
+  decided at synthesis once GPT's pass is in.
+
+### GPT 5.4 (devil's-advocate), 2026-06-13 — raw at `s2-external-verification-gpt-5.4.md`
+
+GPT ran actual `AccessHarvester parse` probes (stronger evidence than reasoning).
+- **H1 (ambiguity): OVERTURNED.** Probed the exact collisions incl. `ReDim
+  Preserve a(10)` vs `ReDim Preserve(10)` — both parse, the discriminator proving
+  ALL(*) disambiguates as intended. Add anchored-use pins.
+- **H2 (error-swallow): PARTIAL, Minor.** Catch is broader than the spec sketch,
+  but GPT "could not make that concrete against the current codebase" — the
+  current throw sites are exactly the recovery-mangled head-token cases this
+  converts to stubs. Keep the failure-scoped guard; add a regression pin (malformed
+  proc preserves neighbors) and consider surfacing the caught exception in
+  debug/test builds. (Gemini rated this Major; GPT Minor — GPT is closer.)
+- **H3 (scope): UPHELD, Major — SHARPENED.** The real, change-induced must-fix is
+  the **named-argument symmetry hole**: Fable added `contextualKeywordName` to the
+  parameter rules, so `Sub F(step As Long)` now parses — but `namedArgument` still
+  requires `IDENTIFIER`, so the matching call `F Step:=1` fails. That is internally
+  inconsistent with a declaration shape the grammar now allows (not pre-existing —
+  the change created it). The other slots (proc names, type/enum members) GPT
+  confirms fail too but says "do not widen every slot blindly; fix the
+  declaration/use symmetry hole first."
+- **H4 (TypeSuffix → null ReturnType): UPHELD, Major.** Confirmed mechanism:
+  `Function SqlStr$()` parses but projects with no `Signature.ReturnType` and
+  SymbolDb hashes it `Function(...):Void` — real semantic loss on newly-accepted
+  input. Fix via the EXISTING `ReturnType` channel (derive it from the suffix when
+  no `As` clause); not a schema change.
+- **H5 (drop TypeSuffix → synthesize TypeReference): OVERTURNED.** Directly
+  contradicts Gemini's H5. GPT argues KEEP the separate `TypeSuffix` — it is the
+  repo's established representation for variables/params/loop-vars/identifiers;
+  synthesizing a `TypeReference` and erasing the suffix throws away raw spelling
+  and complicates recovery-shaped inputs. The real problem is H4's missing bridge,
+  not the representation.
+
+### Northwind representativeness benchmark, 2026-06-13 (local-only, genericized)
+
+Ran the H3/H4 construct greps over the **local NorthwindDevEdition mirror (66
+Microsoft-authored modules** vs HHC's 32; gitignored, no COM). Genericized counts
+(no Northwind structural identifiers committed, per the hard constraint):
+- Suffixed `Function`/`Property Get` NAMES: **0** (H4 trigger absent).
+- Suffixed `Dim`/`Const`/`Static`/`ByVal`/param DECLARATIONS: **0**.
+- Procedures named with a contextual keyword (`Sub Step()` etc.): **0** (H3 absent).
+- `.Line (x,y)-(x,y)` / `.Circle` graphics methods: **0** (the HHC `rptClientProfile`
+  gap is HHC-only).
+- Only `$`-suffix usage: ~7 string-function CALL sites (`Format$(…)` class), which
+  already parse — not declarations.
+- **Conclusion:** the H3/H4 constructs are absent from BOTH databases — genuinely
+  rare even in Microsoft's reference DB. Confirms "latent, not golden-impacting"
+  for the committed HHC golden AND the local Northwind golden. (Caveat: greps are
+  heuristic, not a full parse; the named-argument hole below is corpus-independent.)
+
+### Synthesis (Gemini + GPT + both corpora), 2026-06-13 — Opus
+
+- **H1:** no defect; **add anchored-use pins** (both reviewers).
+- **H2:** defensible; **narrow the catch** (specific exception / shallow head check)
+  + **regression pin**. In-scope (this session's own code).
+- **H3 named-argument symmetry:** **FIX** — add `contextualKeywordName` to
+  `namedArgument`. Change-induced inconsistency, corpus-independent, cheap. In-scope.
+- **H3 other slots (proc names / type & enum members / labels / declare):**
+  pre-existing, absent from both corpora → **scope decision** (defer vs widen the
+  safe ones); not a blocker.
+- **H4 return-type-from-suffix:** real but **latent (0 in both corpora)**. It is the
+  type-emission class the spec's Non-Goals defer (F-3-5-adjacent). **Decision for
+  the human:** fix now via the existing `ReturnType` channel (small; matters for
+  corpus case 14 + real customer DBs) vs defer per spec stop-rule discipline +
+  document. Affects corpus-case-14 design.
+- **H5:** reviewers split; **Opus adjudicates toward GPT** — keep `TypeSuffix`
+  (established convention, preserves raw spelling), resolve via the H4 bridge, not a
+  representation swap. Gemini's broader refactor is not adopted.
+- **Overall:** the committed HHC golden is **safe to regenerate**. No
+  golden-corrupting blocker. Worth fixing before further build-out: H2 (narrow),
+  H3-namedarg, the H1 pins; H4/H3-other-slots are human scope calls.
+- **Human decision (2026-06-13):** fix H4 now (return-type from suffix, function/
+  property-get); fix H3 named-arg + H2 narrow + H1 pins; **defer** H3 other-slots.
+  Deferrals memorialized in `docs/planning/deferred-work.md` — **DW-1** (keyword
+  slots: proc names / type & enum members / labels / declare), **DW-2** (`.Line`/
+  `.Circle` graphics syntax, the `rptClientProfile` gap), **DW-3** (variable
+  suffix→type, the H4 variable parallel, F-3-5 class).
