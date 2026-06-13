@@ -144,6 +144,23 @@
       "description": "Implemented the synthesis-approved fixes + pins, all hermetic-green. Fixes: (1) H3 named-arg symmetry - contextualKeywordName added to namedArgument grammar rule + BuildArgument; (2) H4 - TypeReferenceFromSuffix maps $/%/&/!/#/@ to built-in type, wired into BuildFunctionProcedure + BuildPropertyProcedure(Get) so suffixed function/property-get names carry ReturnType (TypeSuffix retained per GPT adjudication of H5); (3) H2 - BuildModuleItem catch narrowed from catch(Exception) to IsRecoveryShapeFault (NRE/IndexOOR/ArgOOR/InvalidOp) so real builder bugs are not masked; (4) SymbolDbBuilder Pass 2 per-module try/catch + additive BuildResult.ParseFailedModuleFqns (non-silent). Pins added: S2ParserHardeningTests (Parser, 23 pins - trigger inputs, H4 return-type map, named-arg symmetry, anchored-use regressions ReDim Preserve/Option Compare/Declare Lib-Alias/For Step, H2 neighbor-preserve, DW-1 known-limitation backstop), S2TypeSuffixResolutionTests (Resolver, 5 F-3-3 chain pins), S2PerModuleResilienceTests (SymbolDb, 2 pins). Corpus case 14 (14-typed-suffix-and-contextual-names.bas + .expected.json) parses clean + schema-v1.0-valid. Two pin-discovered findings: (a) Function Calc!() fails (BANG ambiguity) -> memorialized DW-4, ! excluded from name-slot theory; (b) mangled-neighbor pin adjusted to assert the guaranteed property (no throw + first good sub survives). Hermetic totals: Grammar 295, Parser 92, Resolver 405, SymbolDb 71 all green; Pipeline 789/790 - sole failure is the expected parse-success-report golden staleness (basResetFixture parseFailed->parseOk from the Session-2 contextualKeyword grammar fix), to be resolved by the single golden regen. All S2 code fixes are golden-neutral (no corpus trigger). CHECKPOINT before COM: remaining = golden regen (hermetic parse-success-report + COM GoldenOutput manifest) + Integration TRX + routed gpt-5-4 verification + closeout. Uncommitted work is disk-durable; closeout commit per workflow comes after verification.",
       "status": "complete",
       "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/step-8-com-verify-closeout",
+      "dateTime": "2026-06-13T03:19:04.041822-04:00",
+      "description": "COM golden regen + Integration + routed verification + closeout. Regenerated HomeHealthCare manifest golden via guarded RegenerateCommittedPipelineCorpus (COM) and parse-success-report golden (hermetic); change localized to basResetFixture (parse-failed stub -> fully parsed, F-3-2 fix), all other modules byte-stable, .accdb swept. Integration TRX: total=61 passed=58 failed=0 skipped=3 (CanonicalGoldenRegressionTests passed against regenerated golden). Validated work committed durably (77a5943) ahead of verification per context/storm risk. Routed session-verification gpt-5-4 (complexity 75, 103s, USD 0.2322): VERIFIED round 1 with substantive 5-concern analysis, empty issues - confirmed H2 catch-narrowing sound/better-than-pre-scan, H1 no ambiguity, H4 right implementation, H3 correct+necessary, DW-1/DW-4 deferrals intentional+fenced, no hard-constraint violations. Raw at s2-verification.md. Closeout: disposition.json updated (Session 2, VERIFIED, next_orchestrator claude-opus-4-8 @ medium for Session 3), ai-assignment.md Session 2 actuals filled. close_session + state flip + notify follow.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 17928,
+          "outputTokens": 12494,
+          "costUsd": 0.2322
+        }
+      ]
     }
   ]
 }

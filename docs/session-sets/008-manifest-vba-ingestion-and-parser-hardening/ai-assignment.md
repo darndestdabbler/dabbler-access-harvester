@@ -72,7 +72,33 @@ high
 | 9    | Closeout: update `disposition.json`, run `close_session`, commit, push, and notify. | orchestrator-direct |
 
 ### Actuals (post-session)
-- (to be filled at session close)
+- Orchestrator used: claude-code claude-fable-5 @ effort=high for Step 1-3 (grammar +
+  AstBuilder + F-3-3, pre-storm), then **claude-code claude-opus-4-8 @ default** carried
+  the work forward after Fable was shut down by Anthropic 2026-06-13 (human switched
+  the model mid-set). The recommended codex gpt-5-5 did not orchestrate; human direction
+  took precedence.
+- Total routed cost: ~$0.23 (session-verification gpt-5-4 $0.2322; the two interim
+  devil's-advocate reviews were NON-routed in-IDE Copilot, $0).
+- Deviations / notes:
+  - Mid-set model handoff (Fable -> Opus) introduced a validation-first + Fable-review-queue
+    discipline (now in project-guidance.md + .claude memory + docs/planning/fable-review-queue.md):
+    Fable's uncommitted work was validated empirically before building on it, and an interim
+    devil's-advocate review (Gemini Pro + GPT 5.4, non-routed) was run before the routed
+    verification. Both caught/confirmed real issues (H2/H3/H4), all fixed.
+  - H4 (derive ReturnType from suffix) goes slightly beyond the spec's literal "strip into
+    TypeSuffix"; justified + verifier-endorsed (completes F-3-2, existing field, golden-neutral).
+  - Two gaps deferred + memorialized: DW-1, DW-4 in docs/planning/deferred-work.md.
+- Next calibration: keep the interim non-routed in-IDE review for inherited/high-risk work
+  (free, caught the named-arg symmetry hole the routed pass alone might not have prioritized).
+  The routed verification's prose-first lead + soft-spot disclosure + embedded evidence drove
+  a clean R1 VERIFIED, as in prior sets.
+
+**Next-session recommendation (Session 3):**
+claude-code claude-opus-4-8 @ effort=medium (per the routed Session 3 recommendation;
+the ai-assignment named opus-4-7, 4-8 is the current Opus). Rationale: F-3-6 schema-additive
+coding + the F-3-9 conformance-contract decision (reasoning, decision-time-consensus eligible)
++ next-set authoring (prose). Session 3 must read docs/planning/deferred-work.md (DW-1..4) per
+the new required-reading convention. session-verification stays cross-provider (gpt-5-4).
 
 ## Session 3: Diagnostics Surfacing And Conformance-Contract Decision (F-3-6, F-3-9)
 
