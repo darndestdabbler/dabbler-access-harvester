@@ -830,6 +830,74 @@ reference; if it proves out twice in *this* repo, propose promotion to
   manifest-under-coverage pattern, promote this to a Convention in
   `project-guidance.md`.
 
+### Embed Earlier-Session Evidence In A Final Session's Verification Packet — Prose Disclosure Is Not Enough
+
+- **Context:** The closeout (final) session of a session set whose scope was
+  deliberately split across earlier sessions. First hit in
+  `008-manifest-vba-ingestion-and-parser-hardening` Session 3 (2026-06-13).
+- **Failure or friction:** F-3-6's manifest-diagnostics work was split S1/S3 by
+  the spec (Session 1 did the per-module `VBA_PARSE_DEGRADED`/`FAILURE` fold as
+  part of the F-3-1 ingestion fix; Session 3 added the query-side
+  `QUERY_SQL_PARSE_FAILURE` + `ResolutionReason`). The Session-3 closeout
+  verification packet *prose-disclosed* that the module-side fold was a
+  Session-1 deliverable but did not SHOW the S1 code or test. The
+  cross-provider verifier (correctly cautious under the requested
+  false-positive bias) returned `ISSUES_FOUND` with a Major: the fold was "not
+  shown or test-pinned." It cost a second verification round (~$0.016) to
+  resolve — R2 returned VERIFIED once the S1 `Pipeline.cs` snippet and the
+  `DegradedParse_SurfacesVbaParseDegradedDiagnostic` test were embedded. No code
+  changed; the deliverable existed all along.
+- **Lesson:** This is the existing "Send Related Files To The Cross-Provider
+  Verifier Or Disclaim What Is Out Of Scope" Convention applied to *time*, not
+  just *space*: when a final session verifies a deliverable that landed in an
+  earlier session of the same set, the verifier has no memory of the earlier
+  session. A prose sentence ("Session 1 already did this") is a claim, not
+  evidence — the verifier cannot confirm a claim it cannot see. Embed the prior
+  session's actual code + test snippet in the R1 packet.
+- **Action for future sessions:** When assembling a closeout/final-session
+  verification prompt, list every scoped deliverable of the SET (not just the
+  current session) and, for any delivered in an earlier session, paste the
+  proving code + test snippet (or a tight diff) into the R1 packet under an
+  "earlier-session evidence" heading. If a second final session hits the same
+  cross-session evidence gap, fold this into the parent "Send Related Files…"
+  Convention in `project-guidance.md` as an explicit cross-session clause.
+
+### Additive Field On An `additionalProperties`-Tolerant Shared `$def` → Bump The Sub-Document Version, Not The Envelope File
+
+- **Context:** Adding an optional output field that lives on a JSON-schema
+  `$def` shared across multiple parts of the manifest. First hit in
+  `008-manifest-vba-ingestion-and-parser-hardening` Session 3 (2026-06-13),
+  adding `ResolutionReason` to the `ResolvedReference` `$def`.
+- **Failure or friction:** None realized — this records the decision that
+  *avoided* friction. The naive reading of "schema changes are additive — bump
+  per the established versioning discipline" pointed at a full manifest-envelope
+  `v1.1 → v1.2` file bump (the v1.0→v1.1 precedent created a whole new schema
+  file). That would have rippled through ~15 test files asserting `"1.1"`, the
+  CLI's `SupportedSchemaVersions`, `DatabaseManifest.SchemaVersionLiteral`, the
+  embedded-in-binary schema, the golden's top-level version, and the
+  v1.0-shaped smoke fixture — disproportionate for one optional field.
+- **Lesson:** Check two things before bumping an envelope version: (a) does the
+  target `$def` already lack `additionalProperties: false`? If so the new field
+  is *already schema-valid* — no envelope change is needed for conformance.
+  (b) does the field belong to a *sub-document* that carries its own version
+  string validated as a free `pattern` (not a `const`)? If so, bump THAT
+  sub-version and document the optional property in place on the shared `$def`;
+  the envelope const stays put. In Session 3: `ParserOutput.SchemaVersion` is a
+  free pattern, so it went `1.0 → 1.1` while the manifest envelope stayed
+  `"1.1"`, and `ResolutionReason` was documented in-place as optional. The
+  cross-provider verifier endorsed this (its only caveat: it is correct *only
+  if* the repo treats the `vX.Y.json` file as the living schema for that
+  envelope version, not an immutable released artifact — which this repo does).
+- **Action for future sessions:** When a finding says "additive schema field,
+  bump the version," first locate which version string actually governs the
+  field's shape (envelope const vs. sub-document pattern) and whether the host
+  `$def` is `additionalProperties`-tolerant. Prefer the smallest correct bump.
+  Only do a full envelope-file bump when the change is to the envelope's own
+  required/structural shape or when a strict (`additionalProperties: false`)
+  def must admit a new property. If a second set independently makes the same
+  sub-document-vs-envelope call, promote to a Convention under Output JSON
+  Conventions.
+
 ---
 
 ## Cost Guard On Verification: Skip When Verifier Cost Greatly Exceeds Generator
