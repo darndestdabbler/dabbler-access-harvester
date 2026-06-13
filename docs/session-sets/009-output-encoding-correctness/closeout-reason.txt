@@ -1,0 +1,15 @@
+Close-out reason: Set 009-output-encoding-correctness, Session 1 of 1 (final),
+complete. F-1-1 cp1252 translator decode fix + F-1-8 hermetic pins landed;
+build green (0 errors); SaveAsTextTranslatorTests 9/9 and adjacent
+AccessTextParserTests 5/5 pass; no golden regeneration (ASCII-stable by
+construction); no COM tier. Work committed (2067c9f) and pushed to origin/main.
+Next set authored: 010-output-contract-fidelity-batch (P2).
+
+Manual-verify attestation: cross-provider session-verification was performed in
+this session via the AI router to gpt-5-4 (different provider than the
+Claude/Opus orchestrator), closeout-grade with prose-first lead + trailing JSON
+block. Round 1 returned ISSUES_FOUND with three Minor test-posture findings
+(saved to s1-issues.json / s1-verification.md); all three were addressed and the
+strengthened test file re-verified. Round 2 returned VERIFIED with an empty
+issues array (s1-verification-round-2.md). The verification verdict for this
+session is VERIFIED.
