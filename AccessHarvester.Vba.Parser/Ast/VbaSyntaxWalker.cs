@@ -25,6 +25,7 @@ public abstract class VbaSyntaxWalker
             case DeclareStatement n:                    VisitDeclareStatement(n); break;
             case EventDeclaration n:                    VisitEventDeclaration(n); break;
             case PreprocessorDirective n:               VisitPreprocessorDirective(n); break;
+            case UnknownModuleItem n:                   VisitUnknownModuleItem(n); break;
             case SubProcedure n:                        VisitSubProcedure(n); break;
             case FunctionProcedure n:                   VisitFunctionProcedure(n); break;
             case PropertyProcedure n:                   VisitPropertyProcedure(n); break;
@@ -124,6 +125,7 @@ public abstract class VbaSyntaxWalker
     public virtual void VisitDeclareStatement(DeclareStatement n) => DefaultVisit(n);
     public virtual void VisitEventDeclaration(EventDeclaration n) => DefaultVisit(n);
     public virtual void VisitPreprocessorDirective(PreprocessorDirective n) => DefaultVisit(n);
+    public virtual void VisitUnknownModuleItem(UnknownModuleItem n) => DefaultVisit(n);
 
     // Procedures
     public virtual void VisitSubProcedure(SubProcedure n) => DefaultVisit(n);

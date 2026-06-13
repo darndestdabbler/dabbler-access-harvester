@@ -61,6 +61,9 @@ internal static class AstChildren
             case PreprocessorDirective:
                 break;
 
+            case UnknownModuleItem:                     // recovery sentinel — leaf
+                break;
+
             case ProcedureDeclaration n:                // SubProcedure / FunctionProcedure / PropertyProcedure
                 foreach (var p in n.Parameters) yield return p;
                 if (n.ReturnType is not null) yield return n.ReturnType;

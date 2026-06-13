@@ -1,0 +1,127 @@
+{
+  "SchemaType": "DatabaseManifest",
+  "SchemaVersion": "1.0",
+  "HarvesterVersion": "hand-authored-008-s2",
+  "Database": {
+    "Name": "14-typed-suffix-and-contextual-names.expected",
+    "FilePath": "docs\\test-cases\\14-typed-suffix-and-contextual-names.expected.json",
+    "ExportedAt": "2026-06-13T00:00:00.0000000+00:00"
+  },
+  "Modules": [
+    {
+      "ModuleName": "modSuffixAndContextual",
+      "ModuleKind": "Standard",
+      "ParserOutput": {
+        "SchemaVersion": "0.1",
+        "Source": {
+          "Kind": "Procedure",
+          "Location": {
+            "File": "14-typed-suffix-and-contextual-names.bas",
+            "Module": "modSuffixAndContextual",
+            "StartLine": 24,
+            "StartColumn": 1,
+            "EndLine": 26,
+            "EndColumn": 12
+          },
+          "HostContext": {
+            "HostKind": "Standard"
+          },
+          "OriginalSource": "Public Function SqlStr$(ByVal s As Variant)\n    SqlStr = \"'\" & s & \"'\"\nEnd Function"
+        },
+        "Items": [
+          {
+            "ItemKind": "Procedure",
+            "Name": "SqlStr",
+            "ProcedureKind": "Function",
+            "Visibility": "Public",
+            "IsStatic": false,
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "s",
+                  "Type": "Variant",
+                  "ByRef": false
+                }
+              ]
+            },
+            "Classification": {
+              "PurposeTags": [
+                "Utility"
+              ],
+              "Purity": "Pure",
+              "Complexity": 1,
+              "LinesOfCode": 1,
+              "Translatability": "Mechanical"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Assignment",
+                  "Location": {
+                    "StartLine": 25,
+                    "StartColumn": 5,
+                    "EndLine": 25,
+                    "EndColumn": 26
+                  },
+                  "Summary": "Wraps the argument in single quotes (SqlStr returns String via the $ suffix)."
+                }
+              ],
+              "References": [],
+              "Calls": []
+            }
+          },
+          {
+            "ItemKind": "Procedure",
+            "Name": "RunStep",
+            "ProcedureKind": "Sub",
+            "Visibility": "Public",
+            "IsStatic": false,
+            "Signature": {
+              "Parameters": [
+                {
+                  "Name": "step",
+                  "Type": "Long",
+                  "ByRef": true
+                }
+              ]
+            },
+            "Classification": {
+              "PurposeTags": [
+                "SideEffect"
+              ],
+              "Purity": "Mixed",
+              "Complexity": 1,
+              "LinesOfCode": 3,
+              "Translatability": "Mechanical"
+            },
+            "Body": {
+              "Statements": [
+                {
+                  "Kind": "Declaration",
+                  "Location": {
+                    "StartLine": 29,
+                    "StartColumn": 5,
+                    "EndLine": 29,
+                    "EndColumn": 12
+                  },
+                  "Details": {
+                    "Declarations": [
+                      {
+                        "Name": "msg",
+                        "Type": "String"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "References": [],
+              "Calls": []
+            }
+          }
+        ],
+        "UnresolvedItems": [],
+        "Diagnostics": []
+      }
+    }
+  ]
+}

@@ -14,7 +14,15 @@ public abstract record ProcedureDeclaration(
     IReadOnlyList<Parameter> Parameters,
     TypeReference? ReturnType,                          // null on Sub / PropertyLet / PropertySet
     IReadOnlyList<Statement> Body)
-    : ModuleItem(Provenance);
+    : ModuleItem(Provenance)
+{
+    // '$' / '%' / '&' / '!' / '#' / '@' when the source declared the
+    // return type via a type-declaration character on the procedure
+    // name (`Function SqlStr$()`, `Property Get Title$()`); null
+    // otherwise. Name is always the suffix-stripped form so references
+    // resolve against it.
+    public string? TypeSuffix { get; init; }
+}
 
 public sealed record SubProcedure(
     Provenance Provenance,

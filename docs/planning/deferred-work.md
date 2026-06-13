@@ -85,6 +85,26 @@
   F-3-5 (ByVal emission), which is the natural home for suffix→type emission too.
 - **Owning set candidate:** `output-contract-fidelity-batch` (P2).
 
+### DW-4 — `!`-suffixed function / property-get NAME does not parse (BANG ambiguity)
+- **What:** `Function Calc!()` / `Property Get P!()` fails to parse —
+  `extraneous input '!' expecting '('`. In the procedure-name + `(` position the
+  lexer reads `!` as the BANG operator, not a type-declaration suffix, so the
+  Single-return form via `!` is rejected. The other five suffixes
+  (`$ % & # @`) parse and type correctly in that position (008 S2 H4 fix).
+- **Origin:** Set 008 Session 2 — surfaced by a Session-2 pin
+  (`S2ParserHardeningTests.FunctionSuffix_MapsToBuiltInReturnType`) while
+  validating the H4 return-type-from-suffix fix.
+- **Why deferred:** narrow (the `!`/Single return form on a function *name* is
+  rare) and absent from both the HHC and Northwind corpora; resolving the
+  BANG-vs-suffix lexer ambiguity in the name+`(` position is a grammar change
+  beyond the F-3-2 scope. The `!`→Single *mapping* is already correct for
+  variable/parameter contexts; only the function-name lexing is gapped.
+- **Trigger to pull back in:** a real DB (or corpus case) declares a `!`-suffixed
+  function/property name, OR a parser-grammar-completeness set.
+- **Owning set candidate:** `parser-grammar-completeness` (with DW-1, DW-2).
+- **Mechanical backstop:** the `!` case is deliberately excluded from the H4
+  suffix-mapping theory with a comment pointing here.
+
 ## Closed
 
 _(none yet)_

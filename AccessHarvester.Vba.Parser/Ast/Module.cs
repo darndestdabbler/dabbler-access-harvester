@@ -109,6 +109,13 @@ public sealed record PreprocessorDirective(
 
 public enum PreprocessorKind { If, ElseIf, Else, EndIf, Const }
 
+// Recovery sentinel at module-item position. Mirrors UnknownStatement:
+// emitted when error recovery mangled a module item's subtree beyond
+// what the per-item builder can read (e.g. a procedure context whose
+// name token recovery dropped). Always carries RecoveredProvenance so
+// the loss is explicit, never silent.
+public sealed record UnknownModuleItem(Provenance Provenance) : ModuleItem(Provenance);
+
 // One declared variable inside a module-level or local declaration.
 // `WithEvents` is module-only and is therefore tracked via the boolean
 // flag on the declarator rather than a separate declarator type.

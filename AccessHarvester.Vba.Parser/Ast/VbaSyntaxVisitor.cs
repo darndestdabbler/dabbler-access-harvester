@@ -24,6 +24,7 @@ public abstract class VbaSyntaxVisitor<TResult>
             DeclareStatement n                          => VisitDeclareStatement(n),
             EventDeclaration n                          => VisitEventDeclaration(n),
             PreprocessorDirective n                     => VisitPreprocessorDirective(n),
+            UnknownModuleItem n                         => VisitUnknownModuleItem(n),
             SubProcedure n                              => VisitSubProcedure(n),
             FunctionProcedure n                         => VisitFunctionProcedure(n),
             PropertyProcedure n                         => VisitPropertyProcedure(n),
@@ -115,6 +116,7 @@ public abstract class VbaSyntaxVisitor<TResult>
     public virtual TResult? VisitDeclareStatement(DeclareStatement n) => DefaultVisit(n);
     public virtual TResult? VisitEventDeclaration(EventDeclaration n) => DefaultVisit(n);
     public virtual TResult? VisitPreprocessorDirective(PreprocessorDirective n) => DefaultVisit(n);
+    public virtual TResult? VisitUnknownModuleItem(UnknownModuleItem n) => DefaultVisit(n);
 
     public virtual TResult? VisitSubProcedure(SubProcedure n) => DefaultVisit(n);
     public virtual TResult? VisitFunctionProcedure(FunctionProcedure n) => DefaultVisit(n);

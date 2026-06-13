@@ -265,6 +265,24 @@ reservedKeywordName
     | REDIM | ERASE | DEBUG | PRINT
     ;
 
+// Keywords real VBA treats as ordinary identifiers outside their
+// anchored syntactic positions (STEP only after a For-bound expression,
+// COMPARE only after OPTION, PRESERVE only after REDIM, LIB / ALIAS
+// only inside a Declare head, EXPLICIT only after OPTION). The VBE
+// accepts `Dim step As String` — proven by the committed HomeHealthCare
+// fixture's basResetFixture module (006 review F-3-2 breadth probe).
+// This rule folds them back into variable-class name positions
+// (declaration names, parameter names, loop variables, and bare
+// expression references via `primary`). ERROR_KW is deliberately
+// absent: real VBA reserves `Error` (the breadth probe's one reserved
+// hit), so admitting it would over-accept. Anchored uses win
+// structurally, not lexically: ALL(*) prediction picks the anchored
+// alternative when both could begin at the same token (e.g.
+// `ReDim Preserve a(10)` vs an array variable named `preserve`).
+contextualKeywordName
+    : STEP | COMPARE | EXPLICIT | PRESERVE | LIB | ALIAS
+    ;
+
 primary
     : literal                                                        # LiteralPrimary
     | ME                                                             # MeExpr
@@ -276,6 +294,7 @@ primary
     | DEBUG                                                          # DebugObjectExpr
     | IDENTIFIER                                                     # IdentExpr
     | TYPED_IDENTIFIER                                               # TypedIdentExpr
+    | contextualKeywordName                                          # ContextualKeywordExpr
     | LPAREN expression RPAREN                                       # ParenExpr
     ;
 
@@ -310,8 +329,13 @@ argument
     | expression
     ;
 
+// The argument name accepts `contextualKeywordName` for symmetry with the
+// parameter rules, which admit those keywords as parameter names: a callee
+// declaring `Sub F(step As Long)` must be callable as `F Step:=1`. Without
+// this the grammar would accept the declaration but reject the matching
+// named-argument call (006 review H3, 008 Session 2).
 namedArgument
-    : IDENTIFIER COLON_EQ expression
+    : (IDENTIFIER | contextualKeywordName) COLON_EQ expression
     ;
 
 // ============================================================
@@ -514,16 +538,16 @@ inlineStatement
 // --- 2. For / For Each (§5.4.3, §5.4.4) ---------------------------
 
 forNextStatement
-    : FOR (IDENTIFIER | TYPED_IDENTIFIER) EQ expression TO expression
+    : FOR (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName) EQ expression TO expression
           (STEP expression)? NEWLINE
         statementListBody
-      NEXT (IDENTIFIER | TYPED_IDENTIFIER)?
+      NEXT (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName)?
     ;
 
 forEachStatement
-    : FOR EACH (IDENTIFIER | TYPED_IDENTIFIER) IN expression NEWLINE
+    : FOR EACH (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName) IN expression NEWLINE
         statementListBody
-      NEXT (IDENTIFIER | TYPED_IDENTIFIER)?
+      NEXT (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName)?
     ;
 
 // --- 3. Do / Loop (§5.4.5) ----------------------------------------
@@ -697,7 +721,7 @@ localDeclHead
 // `a(10)`) lex as a parenthesized list of arrayBound entries.
 
 variableDecl
-    : (IDENTIFIER | TYPED_IDENTIFIER)
+    : (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName)
       (LPAREN arrayBoundsList? RPAREN)?
       (AS variableTypeSpec)?
     ;
@@ -717,7 +741,7 @@ redimStatement
     ;
 
 redimDecl
-    : (IDENTIFIER | TYPED_IDENTIFIER) LPAREN arrayBoundsList RPAREN (AS variableTypeSpec)?
+    : (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName) LPAREN arrayBoundsList RPAREN (AS variableTypeSpec)?
     ;
 
 // --- 14. Const (§4.4) ---------------------------------------------
@@ -737,7 +761,7 @@ constStatement
     ;
 
 constDecl
-    : (IDENTIFIER | TYPED_IDENTIFIER) (AS typeSpec)? EQ expression
+    : (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName) (AS typeSpec)? EQ expression
     ;
 
 // --- 15. Type specification (statement-level) ---------------------
@@ -969,8 +993,8 @@ moduleVariableDeclHead
 // retains the full `typeSpec` (including `NEW?` and `STAR <expr>`
 // fixed-length-string forms) and array bounds.
 moduleVariableDeclItem
-    : WITHEVENTS (IDENTIFIER | TYPED_IDENTIFIER) AS typeName    # WithEventsVarItem
-    | (IDENTIFIER | TYPED_IDENTIFIER)
+    : WITHEVENTS (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName) AS typeName    # WithEventsVarItem
+    | (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName)
       (LPAREN arrayBoundsList? RPAREN)?
       (AS variableTypeSpec)?                                    # RegularVarItem
     ;
@@ -1059,7 +1083,7 @@ eventParameterList
     ;
 
 eventParameter
-    : (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER)
+    : (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName)
       (LPAREN RPAREN)? (AS typeSpec)?
     ;
 
@@ -1103,8 +1127,14 @@ subDeclaration
       END SUB
     ;
 
+// The name slot accepts TYPED_IDENTIFIER because legacy VBA declares
+// the return type via a type-declaration character on the name
+// (`Function SqlStr$(...)`) — legal per §4.5; rejecting it cost whole
+// modules via NRE cascade (006 review F-3-2). Sub and Property Let/Set
+// names stay IDENTIFIER-only: they return nothing, so a suffix there
+// is a real VBA error.
 functionDeclaration
-    : procedureModifier? STATIC? FUNCTION IDENTIFIER
+    : procedureModifier? STATIC? FUNCTION (IDENTIFIER | TYPED_IDENTIFIER)
         LPAREN parameterList? RPAREN (AS typeSpec)? NEWLINE
         statementListBody
       END FUNCTION
@@ -1126,7 +1156,7 @@ functionDeclaration
 // rejected here rather than living through to a resolver error).
 
 propertyGetDeclaration
-    : procedureModifier? STATIC? PROPERTY GET IDENTIFIER
+    : procedureModifier? STATIC? PROPERTY GET (IDENTIFIER | TYPED_IDENTIFIER)
         LPAREN parameterList? RPAREN (AS typeSpec)? NEWLINE
         statementListBody
       END PROPERTY
@@ -1190,17 +1220,17 @@ positionalParameters
     ;
 
 requiredParameter
-    : (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER)
+    : (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName)
       (LPAREN RPAREN)? (AS typeSpec)?
     ;
 
 optionalParameter
-    : OPTIONAL (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER)
+    : OPTIONAL (BYVAL | BYREF)? (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName)
       (LPAREN RPAREN)? (AS typeSpec)? (EQ expression)?
     ;
 
 paramArrayParameter
-    : PARAMARRAY (IDENTIFIER | TYPED_IDENTIFIER) LPAREN RPAREN
+    : PARAMARRAY (IDENTIFIER | TYPED_IDENTIFIER | contextualKeywordName) LPAREN RPAREN
       (AS typeSpec)?
     ;
 

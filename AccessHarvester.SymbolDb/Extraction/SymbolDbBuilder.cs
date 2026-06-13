@@ -77,19 +77,36 @@ public sealed class SymbolDbBuilder
 
         // Pass 2: parse + scope-build + resolve every non-deferred module.
         var parsed = new List<ParsedModule>();
+        var parseFailedFqns = new List<string>();
         var project = new ProjectScope();
         foreach (var raw in rawModules)
         {
             if (deferredFqns.Contains(raw.Fqn)) continue;
 
-            var (ast, parseResult) = VbaModuleBodyLoader.LoadAndParse(
-                raw.Source,
-                new ParseOptions(ParseMode.Recovering, LossyFallbackErrorThreshold: 100, SourcePath: raw.SourcePath),
-                raw.SourcePath);
-            var visitor = new ScopeBuildingVisitor();
-            var moduleScope = visitor.BuildModuleScope(project, ast, raw.Fqn, ToModuleKind(raw.Kind));
+            try
+            {
+                var (ast, parseResult) = VbaModuleBodyLoader.LoadAndParse(
+                    raw.Source,
+                    new ParseOptions(ParseMode.Recovering, LossyFallbackErrorThreshold: 100, SourcePath: raw.SourcePath),
+                    raw.SourcePath);
+                var visitor = new ScopeBuildingVisitor();
+                var moduleScope = visitor.BuildModuleScope(project, ast, raw.Fqn, ToModuleKind(raw.Kind));
 
-            parsed.Add(new ParsedModule(raw, ast, moduleScope));
+                parsed.Add(new ParsedModule(raw, ast, moduleScope));
+            }
+            catch (Exception)
+            {
+                // Mirror Pipeline.cs's per-file catch: a module that fails to
+                // parse / scope-build degrades that module (it keeps its Pass-1
+                // ModuleRow but contributes no symbols or references) instead of
+                // failing the entire Build. The FQN is recorded on
+                // BuildResult.ParseFailedModuleFqns so the loss is explicit, not
+                // silent. Broad catch is intentional — this is the coarse
+                // build-loop resilience boundary and the failure is recorded
+                // (006 review F-3-2: Pass 2 previously had no catch, so one bad
+                // module failed the whole build).
+                parseFailedFqns.Add(raw.Fqn);
+            }
         }
 
         // Pass 3: resolve references for each parsed module so the cross-
@@ -112,7 +129,8 @@ public sealed class SymbolDbBuilder
         var (referenceRows, memberAccessRows) = ReferencesExtractor.Extract(resolvedModules);
 
         var statistics = ComputeStatistics(moduleRows, symbolRows, deferredFqns);
-        return new BuildResult(moduleRows, symbolRows, parameterRows, referenceRows, memberAccessRows, statistics);
+        return new BuildResult(moduleRows, symbolRows, parameterRows, referenceRows, memberAccessRows, statistics,
+            ParseFailedModuleFqns: parseFailedFqns);
     }
 
     private static void ExtractModuleSymbols(

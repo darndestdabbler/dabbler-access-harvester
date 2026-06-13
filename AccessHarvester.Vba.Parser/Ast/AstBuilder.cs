@@ -44,36 +44,70 @@ internal sealed class AstBuilder
 
     private ModuleItem? BuildModuleItem(VbaParser.ModuleItemContext item)
     {
-        switch (item)
+        if (item is VbaParser.BlankLineItemContext)
+            return null;                                // blank lines do not become AST nodes
+
+        try
         {
-            case VbaParser.OptionItemContext n:
-                return BuildOption(n.optionStatement());
-            case VbaParser.ImplementsItemContext n:
-                return BuildImplements(n.implementsStatement());
-            case VbaParser.TypeItemContext n:
-                return BuildTypeDeclaration(n.typeDeclaration());
-            case VbaParser.EnumItemContext n:
-                return BuildEnumDeclaration(n.enumDeclaration());
-            case VbaParser.DeclareItemContext n:
-                return BuildDeclareStatement(n.declareStatement());
-            case VbaParser.EventItemContext n:
-                return BuildEventDeclaration(n.publicEventDeclaration());
-            case VbaParser.ProcedureItemContext n:
-                return BuildProcedureDeclaration(n.procedureDeclaration());
-            case VbaParser.ConstItemContext n:
-                return BuildModuleConstant(n.moduleConstStatement());
-            case VbaParser.VariableItemContext n:
-                return BuildModuleVariable(n.moduleVariableDecl());
-            case VbaParser.PreprocessorItemContext n:
-                return BuildPreprocessor(n.preprocessorLine());
-            case VbaParser.BlankLineItemContext:
-                return null;                            // blank lines do not become AST nodes
-            default:
-                return null;                            // unknown alt — drop silently (recovery may surface IErrorNode)
+            switch (item)
+            {
+                case VbaParser.OptionItemContext n:
+                    return BuildOption(n.optionStatement());
+                case VbaParser.ImplementsItemContext n:
+                    return BuildImplements(n.implementsStatement());
+                case VbaParser.TypeItemContext n:
+                    return BuildTypeDeclaration(n.typeDeclaration());
+                case VbaParser.EnumItemContext n:
+                    return BuildEnumDeclaration(n.enumDeclaration());
+                case VbaParser.DeclareItemContext n:
+                    return BuildDeclareStatement(n.declareStatement());
+                case VbaParser.EventItemContext n:
+                    return BuildEventDeclaration(n.publicEventDeclaration());
+                case VbaParser.ProcedureItemContext n:
+                    return BuildProcedureDeclaration(n.procedureDeclaration());
+                case VbaParser.ConstItemContext n:
+                    return BuildModuleConstant(n.moduleConstStatement());
+                case VbaParser.VariableItemContext n:
+                    return BuildModuleVariable(n.moduleVariableDecl());
+                case VbaParser.PreprocessorItemContext n:
+                    return BuildPreprocessor(n.preprocessorLine());
+                default:
+                    // Closed-grammar-unreachable alt: a recovered stub keeps
+                    // the loss explicit rather than dropping the item.
+                    return new UnknownModuleItem(MakeProvenance(item, recoveredOverride: true));
+            }
+        }
+        catch (Exception ex) when (HasErrorNode(item) && IsRecoveryShapeFault(ex))
+        {
+            // Error recovery mangled this item's subtree beyond what the
+            // per-item builder can read — e.g. trailing `Exit Sub`/`End Sub`
+            // tokens re-parsed as a procedure start with no name token
+            // (006 review F-3-2). The catch is doubly scoped — the subtree
+            // must contain a recovery error node AND the fault must be a
+            // shape-assumption violation (see IsRecoveryShapeFault) — so a
+            // genuine builder bug is NOT silently masked just because the
+            // item also happens to contain an unrelated syntax error
+            // (006 review H2). Only recovery-shaped trees degrade, and only
+            // to a stub for this one item instead of an exception that costs
+            // the whole module.
+            return new UnknownModuleItem(MakeProvenance(item, recoveredOverride: true));
         }
     }
 
-    private OptionDirective BuildOption(VbaParser.OptionStatementContext ctx) => ctx switch
+    // Exceptions a per-item builder can throw when ANTLR error recovery
+    // hands it a structurally-mangled subtree: a null name token
+    // (`ctx.IDENTIFIER().GetText()`), an empty token list a builder indexes
+    // (`literals[0]`), or a single-element accessor on an empty collection.
+    // These are shape-assumption violations, not arbitrary builder logic
+    // errors — narrowing the BuildModuleItem catch to them (vs a blanket
+    // `catch (Exception)`) is the 006 review H2 fix.
+    private static bool IsRecoveryShapeFault(Exception ex) =>
+        ex is NullReferenceException
+            or IndexOutOfRangeException
+            or ArgumentOutOfRangeException
+            or InvalidOperationException;
+
+    private ModuleItem BuildOption(VbaParser.OptionStatementContext ctx) => ctx switch
     {
         VbaParser.OptionExplicitStmtContext n =>
             new OptionDirective(MakeProvenance(n), OptionKind.Explicit, null),
@@ -83,7 +117,9 @@ internal sealed class AstBuilder
             new OptionDirective(MakeProvenance(n), OptionKind.Base, n.INTEGER_LITERAL()?.GetText()),
         VbaParser.OptionPrivateModuleStmtContext n =>
             new OptionDirective(MakeProvenance(n), OptionKind.PrivateModule, n.IDENTIFIER()?.GetText()),
-        _ => new OptionDirective(MakeProvenance(ctx), OptionKind.Explicit, null),
+        // Grammar-unreachable alt: a recovered stub is honest where a
+        // synthesized `Option Explicit` would be a silent guess.
+        _ => new UnknownModuleItem(MakeProvenance(ctx, recoveredOverride: true)),
     };
 
     private ImplementsDirective BuildImplements(VbaParser.ImplementsStatementContext ctx) =>
@@ -146,8 +182,8 @@ internal sealed class AstBuilder
                 var passMode = ep.BYVAL() is not null ? ParameterPassMode.ByVal
                              : ep.BYREF() is not null ? ParameterPassMode.ByRef
                              : ParameterPassMode.Unspecified;
-                string pName = ep.IDENTIFIER()?.GetText() ?? ep.TYPED_IDENTIFIER()?.GetText() ?? "";
-                string? suffix = ExtractTypeSuffix(ep.TYPED_IDENTIFIER()?.GetText(), pName);
+                var (pName, suffix) = SplitDeclaredName(
+                    ep.IDENTIFIER()?.GetText() ?? ep.TYPED_IDENTIFIER()?.GetText() ?? ep.contextualKeywordName()?.GetText());
                 var type = ep.typeSpec() is { } ts ? BuildTypeReference(ts) : null;
                 bool isArray = ep.LPAREN() is not null;
                 parameters.Add(new Parameter(MakeProvenance(ep), pName, suffix, passMode, ParameterModifier.Required, type, isArray, null));
@@ -177,8 +213,8 @@ internal sealed class AstBuilder
         {
             case VbaParser.WithEventsVarItemContext we:
             {
-                string name = we.IDENTIFIER()?.GetText() ?? we.TYPED_IDENTIFIER()?.GetText() ?? "";
-                string? suffix = ExtractTypeSuffix(we.TYPED_IDENTIFIER()?.GetText(), name);
+                var (name, suffix) = SplitDeclaredName(
+                    we.IDENTIFIER()?.GetText() ?? we.TYPED_IDENTIFIER()?.GetText() ?? we.contextualKeywordName()?.GetText());
                 var type = BuildTypeReference(we.typeName(), isAutoInstantiated: false);
                 return new VariableDeclarator(
                     MakeProvenance(we), name, suffix, WithEvents: true, IsAutoInstantiated: false,
@@ -186,8 +222,8 @@ internal sealed class AstBuilder
             }
             case VbaParser.RegularVarItemContext rv:
             {
-                string name = rv.IDENTIFIER()?.GetText() ?? rv.TYPED_IDENTIFIER()?.GetText() ?? "";
-                string? suffix = ExtractTypeSuffix(rv.TYPED_IDENTIFIER()?.GetText(), name);
+                var (name, suffix) = SplitDeclaredName(
+                    rv.IDENTIFIER()?.GetText() ?? rv.TYPED_IDENTIFIER()?.GetText() ?? rv.contextualKeywordName()?.GetText());
                 IReadOnlyList<ArrayBound> bounds = rv.arrayBoundsList() is { } b ? BuildArrayBounds(b) : Array.Empty<ArrayBound>();
                 bool isArray = rv.LPAREN() is not null;
                 var (type, isNew) = BuildVariableType(rv.variableTypeSpec());
@@ -213,8 +249,8 @@ internal sealed class AstBuilder
 
     private ConstantDeclarator BuildConstantDeclarator(VbaParser.ConstDeclContext ctx)
     {
-        string name = ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? "";
-        string? suffix = ExtractTypeSuffix(ctx.TYPED_IDENTIFIER()?.GetText(), name);
+        var (name, suffix) = SplitDeclaredName(
+            ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? ctx.contextualKeywordName()?.GetText());
         var type = ctx.typeSpec() is { } ts ? BuildTypeReference(ts) : null;
         var value = BuildExpression(ctx.expression());
         return new ConstantDeclarator(MakeProvenance(ctx), name, suffix, type, value);
@@ -222,24 +258,21 @@ internal sealed class AstBuilder
 
     private PreprocessorStatement BuildPreprocessorStatement(VbaParser.PreprocessorLineContext ctx)
     {
-        var kind = ctx.HASH_IF() is not null ? PreprocessorKind.If
-                 : ctx.HASH_ELSEIF() is not null ? PreprocessorKind.ElseIf
-                 : ctx.HASH_ELSE() is not null ? PreprocessorKind.Else
-                 : ctx.HASH_END_IF() is not null ? PreprocessorKind.EndIf
-                 : PreprocessorKind.Const;
-
-        string body = "";
-        if (ctx.Start is not null && ctx.Stop is not null && ctx.Start.InputStream is { } stream)
-        {
-            int headStop = ctx.Start.StopIndex;
-            int tailStop = ctx.Stop.StopIndex;
-            if (tailStop > headStop)
-                body = stream.GetText(new Antlr4.Runtime.Misc.Interval(headStop + 1, tailStop)).TrimStart();
-        }
+        var (kind, body) = ReadPreprocessorLine(ctx);
         return new PreprocessorStatement(MakeProvenance(ctx), kind, body);
     }
 
     private PreprocessorDirective BuildPreprocessor(VbaParser.PreprocessorLineContext ctx)
+    {
+        var (kind, body) = ReadPreprocessorLine(ctx);
+        return new PreprocessorDirective(MakeProvenance(ctx), kind, body);
+    }
+
+    // Shared by the statement-position and module-item-position
+    // preprocessor builders. Body = the source text between the directive
+    // head and the line terminator, reconstructed from the token stream
+    // rather than ctx.GetText() (which strips whitespace).
+    private static (PreprocessorKind Kind, string Body) ReadPreprocessorLine(VbaParser.PreprocessorLineContext ctx)
     {
         var kind = ctx.HASH_IF() is not null ? PreprocessorKind.If
                  : ctx.HASH_ELSEIF() is not null ? PreprocessorKind.ElseIf
@@ -247,9 +280,6 @@ internal sealed class AstBuilder
                  : ctx.HASH_END_IF() is not null ? PreprocessorKind.EndIf
                  : PreprocessorKind.Const;
 
-        // Body = the source text between the directive head and the line
-        // terminator. Reconstruct from token stream rather than ctx.GetText()
-        // (which strips whitespace).
         string body = "";
         if (ctx.Start is not null && ctx.Stop is not null && ctx.Start.InputStream is { } stream)
         {
@@ -258,69 +288,98 @@ internal sealed class AstBuilder
             if (tailStop > headStop)
                 body = stream.GetText(new Antlr4.Runtime.Misc.Interval(headStop + 1, tailStop)).TrimStart();
         }
-        return new PreprocessorDirective(MakeProvenance(ctx), kind, body);
+        return (kind, body);
     }
 
     // ── Procedures ────────────────────────────────────────────────
 
-    private ProcedureDeclaration BuildProcedureDeclaration(VbaParser.ProcedureDeclarationContext ctx) => ctx switch
+    private ModuleItem BuildProcedureDeclaration(VbaParser.ProcedureDeclarationContext ctx) => ctx switch
     {
         VbaParser.SubDeclContext n         => BuildSubProcedure(n.subDeclaration()),
         VbaParser.FunctionDeclContext n    => BuildFunctionProcedure(n.functionDeclaration()),
         VbaParser.PropertyGetDeclContext n => BuildPropertyProcedure(n.propertyGetDeclaration(), PropertyKind.Get),
         VbaParser.PropertyLetDeclContext n => BuildPropertyProcedure(n.propertyLetDeclaration(), PropertyKind.Let),
         VbaParser.PropertySetDeclContext n => BuildPropertyProcedure(n.propertySetDeclaration(), PropertyKind.Set),
-        _ => new SubProcedure(MakeProvenance(ctx), "", AccessModifier.Unspecified, false,
-                              Array.Empty<Parameter>(), Array.Empty<Statement>()),
+        _ => new UnknownModuleItem(MakeProvenance(ctx, recoveredOverride: true)),
     };
 
-    private SubProcedure BuildSubProcedure(VbaParser.SubDeclarationContext ctx)
+    // Procedure name tokens are null when error recovery synthesized the
+    // declaration context without one (e.g. orphaned `End Sub` tokens
+    // re-parsed as a procedure start — 006 review F-3-2). Each builder
+    // degrades that case to a recovered stub instead of an NRE.
+
+    private ModuleItem BuildSubProcedure(VbaParser.SubDeclarationContext ctx)
     {
+        string? name = ctx.IDENTIFIER()?.GetText();
+        if (name is null)
+            return new UnknownModuleItem(MakeProvenance(ctx, recoveredOverride: true));
         var access = AccessFromProcedureModifier(ctx.procedureModifier());
         bool isStatic = ctx.STATIC() is not null;
-        string name = ctx.IDENTIFIER().GetText();
         IReadOnlyList<Parameter> parameters = ctx.parameterList() is { } pl ? BuildParameters(pl) : Array.Empty<Parameter>();
         var body = BuildStatementList(ctx.statementListBody());
         return new SubProcedure(MakeProvenance(ctx), name, access, isStatic, parameters, body);
     }
 
-    private FunctionProcedure BuildFunctionProcedure(VbaParser.FunctionDeclarationContext ctx)
+    private ModuleItem BuildFunctionProcedure(VbaParser.FunctionDeclarationContext ctx)
     {
+        // `Function SqlStr$(...)` declares the return type via the name's
+        // type-declaration character; Name carries the stripped form so
+        // references resolve against it (006 review F-3-2 / F-3-3).
+        string? raw = ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText();
+        if (raw is null)
+            return new UnknownModuleItem(MakeProvenance(ctx, recoveredOverride: true));
+        var (name, suffix) = SplitDeclaredName(raw);
         var access = AccessFromProcedureModifier(ctx.procedureModifier());
         bool isStatic = ctx.STATIC() is not null;
-        string name = ctx.IDENTIFIER().GetText();
         IReadOnlyList<Parameter> parameters = ctx.parameterList() is { } pl ? BuildParameters(pl) : Array.Empty<Parameter>();
-        var ret = ctx.typeSpec() is { } ts ? BuildTypeReference(ts) : null;
+        // Explicit `As` wins; otherwise derive the return type from the
+        // name suffix so `Function SqlStr$()` reports String, not null.
+        var ret = ctx.typeSpec() is { } ts ? BuildTypeReference(ts) : TypeReferenceFromSuffix(suffix, ctx);
         var body = BuildStatementList(ctx.statementListBody());
-        return new FunctionProcedure(MakeProvenance(ctx), name, access, isStatic, parameters, ret, body);
+        return new FunctionProcedure(MakeProvenance(ctx), name, access, isStatic, parameters, ret, body)
+        {
+            TypeSuffix = suffix,
+        };
     }
 
-    private PropertyProcedure BuildPropertyProcedure(VbaParser.PropertyGetDeclarationContext ctx, PropertyKind kind)
+    private ModuleItem BuildPropertyProcedure(VbaParser.PropertyGetDeclarationContext ctx, PropertyKind kind)
     {
+        string? raw = ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText();
+        if (raw is null)
+            return new UnknownModuleItem(MakeProvenance(ctx, recoveredOverride: true));
+        var (name, suffix) = SplitDeclaredName(raw);
         var access = AccessFromProcedureModifier(ctx.procedureModifier());
         bool isStatic = ctx.STATIC() is not null;
-        string name = ctx.IDENTIFIER().GetText();
         IReadOnlyList<Parameter> parameters = ctx.parameterList() is { } pl ? BuildParameters(pl) : Array.Empty<Parameter>();
-        var ret = ctx.typeSpec() is { } ts ? BuildTypeReference(ts) : null;
+        // Explicit `As` wins; otherwise derive the return type from the
+        // name suffix so `Property Get Title$()` reports String, not null.
+        var ret = ctx.typeSpec() is { } ts ? BuildTypeReference(ts) : TypeReferenceFromSuffix(suffix, ctx);
         var body = BuildStatementList(ctx.statementListBody());
-        return new PropertyProcedure(MakeProvenance(ctx), name, access, isStatic, kind, parameters, ret, body);
+        return new PropertyProcedure(MakeProvenance(ctx), name, access, isStatic, kind, parameters, ret, body)
+        {
+            TypeSuffix = suffix,
+        };
     }
 
-    private PropertyProcedure BuildPropertyProcedure(VbaParser.PropertyLetDeclarationContext ctx, PropertyKind kind)
+    private ModuleItem BuildPropertyProcedure(VbaParser.PropertyLetDeclarationContext ctx, PropertyKind kind)
     {
+        string? name = ctx.IDENTIFIER()?.GetText();
+        if (name is null)
+            return new UnknownModuleItem(MakeProvenance(ctx, recoveredOverride: true));
         var access = AccessFromProcedureModifier(ctx.procedureModifier());
         bool isStatic = ctx.STATIC() is not null;
-        string name = ctx.IDENTIFIER().GetText();
         var parameters = BuildParameters(ctx.parameterList());
         var body = BuildStatementList(ctx.statementListBody());
         return new PropertyProcedure(MakeProvenance(ctx), name, access, isStatic, kind, parameters, null, body);
     }
 
-    private PropertyProcedure BuildPropertyProcedure(VbaParser.PropertySetDeclarationContext ctx, PropertyKind kind)
+    private ModuleItem BuildPropertyProcedure(VbaParser.PropertySetDeclarationContext ctx, PropertyKind kind)
     {
+        string? name = ctx.IDENTIFIER()?.GetText();
+        if (name is null)
+            return new UnknownModuleItem(MakeProvenance(ctx, recoveredOverride: true));
         var access = AccessFromProcedureModifier(ctx.procedureModifier());
         bool isStatic = ctx.STATIC() is not null;
-        string name = ctx.IDENTIFIER().GetText();
         var parameters = BuildParameters(ctx.parameterList());
         var body = BuildStatementList(ctx.statementListBody());
         return new PropertyProcedure(MakeProvenance(ctx), name, access, isStatic, kind, parameters, null, body);
@@ -357,8 +416,8 @@ internal sealed class AstBuilder
         var passMode = ctx.BYVAL() is not null ? ParameterPassMode.ByVal
                      : ctx.BYREF() is not null ? ParameterPassMode.ByRef
                      : ParameterPassMode.Unspecified;
-        string name = ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? "";
-        string? suffix = ExtractTypeSuffix(ctx.TYPED_IDENTIFIER()?.GetText(), name);
+        var (name, suffix) = SplitDeclaredName(
+            ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? ctx.contextualKeywordName()?.GetText());
         var type = ctx.typeSpec() is { } ts ? BuildTypeReference(ts) : null;
         bool isArray = ctx.LPAREN() is not null;
         return new Parameter(MakeProvenance(ctx), name, suffix, passMode, ParameterModifier.Required, type, isArray, null);
@@ -369,8 +428,8 @@ internal sealed class AstBuilder
         var passMode = ctx.BYVAL() is not null ? ParameterPassMode.ByVal
                      : ctx.BYREF() is not null ? ParameterPassMode.ByRef
                      : ParameterPassMode.Unspecified;
-        string name = ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? "";
-        string? suffix = ExtractTypeSuffix(ctx.TYPED_IDENTIFIER()?.GetText(), name);
+        var (name, suffix) = SplitDeclaredName(
+            ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? ctx.contextualKeywordName()?.GetText());
         var type = ctx.typeSpec() is { } ts ? BuildTypeReference(ts) : null;
         bool isArray = ctx.LPAREN() is not null;
         var defaultValue = ctx.expression() is { } e ? BuildExpression(e) : null;
@@ -379,8 +438,8 @@ internal sealed class AstBuilder
 
     private Parameter BuildParamArrayParameter(VbaParser.ParamArrayParameterContext ctx)
     {
-        string name = ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? "";
-        string? suffix = ExtractTypeSuffix(ctx.TYPED_IDENTIFIER()?.GetText(), name);
+        var (name, suffix) = SplitDeclaredName(
+            ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? ctx.contextualKeywordName()?.GetText());
         var type = ctx.typeSpec() is { } ts ? BuildTypeReference(ts) : null;
         return new Parameter(MakeProvenance(ctx), name, suffix, ParameterPassMode.Unspecified, ParameterModifier.ParamArray, type, IsArray: true, null);
     }
@@ -519,11 +578,10 @@ internal sealed class AstBuilder
 
     private ForStatement BuildForNext(VbaParser.ForNextStatementContext ctx)
     {
-        string varText = ctx.IDENTIFIER().FirstOrDefault()?.GetText()
-                      ?? ctx.TYPED_IDENTIFIER().FirstOrDefault()?.GetText()
-                      ?? "";
-        string varName = StripTypeSuffix(varText);
-        string? suffix = varText != varName ? varText[^1].ToString() : null;
+        var (varName, suffix) = SplitDeclaredName(
+            ctx.IDENTIFIER().FirstOrDefault()?.GetText()
+            ?? ctx.TYPED_IDENTIFIER().FirstOrDefault()?.GetText()
+            ?? ctx.contextualKeywordName().FirstOrDefault()?.GetText());
         var exprs = ctx.expression();
         var from = BuildExpression(exprs[0]);
         var to = BuildExpression(exprs[1]);
@@ -534,11 +592,10 @@ internal sealed class AstBuilder
 
     private ForEachStatement BuildForEach(VbaParser.ForEachStatementContext ctx)
     {
-        string varText = ctx.IDENTIFIER().FirstOrDefault()?.GetText()
-                      ?? ctx.TYPED_IDENTIFIER().FirstOrDefault()?.GetText()
-                      ?? "";
-        string varName = StripTypeSuffix(varText);
-        string? suffix = varText != varName ? varText[^1].ToString() : null;
+        var (varName, suffix) = SplitDeclaredName(
+            ctx.IDENTIFIER().FirstOrDefault()?.GetText()
+            ?? ctx.TYPED_IDENTIFIER().FirstOrDefault()?.GetText()
+            ?? ctx.contextualKeywordName().FirstOrDefault()?.GetText());
         var collection = BuildExpression(ctx.expression());
         var body = BuildStatementList(ctx.statementListBody());
         return new ForEachStatement(MakeProvenance(ctx), varName, suffix, collection, body);
@@ -615,16 +672,19 @@ internal sealed class AstBuilder
             new CaseRangeExpression(MakeProvenance(n),
                 BuildExpression(n.expression(0)), BuildExpression(n.expression(1))),
         VbaParser.CaseIsCompareContext n =>
-            new CaseIsCompareExpression(MakeProvenance(n),
-                ComparisonOperatorFromCtx(n.comparisonOperator()),
-                BuildExpression(n.expression())),
+            ComparisonOperatorFromCtx(n.comparisonOperator()) is { } op
+                ? new CaseIsCompareExpression(MakeProvenance(n), op, BuildExpression(n.expression()))
+                : new CaseValueExpression(MakeProvenance(n),
+                    new UnknownExpression(MakeProvenance(n, recoveredOverride: true))),
         VbaParser.CaseValueContext n =>
             new CaseValueExpression(MakeProvenance(n), BuildExpression(n.expression())),
         _ => new CaseValueExpression(MakeProvenance(ctx),
             new UnknownExpression(MakeProvenance(ctx, recoveredOverride: true))),
     };
 
-    private static BinaryOperator ComparisonOperatorFromCtx(VbaParser.ComparisonOperatorContext ctx)
+    // Null on a grammar-unreachable operator shape: the caller emits a
+    // recovered stub where a defaulted Equal would be a silent guess.
+    private static BinaryOperator? ComparisonOperatorFromCtx(VbaParser.ComparisonOperatorContext ctx)
     {
         if (ctx.EQ() is not null) return BinaryOperator.Equal;
         if (ctx.NEQ() is not null) return BinaryOperator.NotEqual;
@@ -632,7 +692,7 @@ internal sealed class AstBuilder
         if (ctx.GT() is not null) return BinaryOperator.Greater;
         if (ctx.LE() is not null) return BinaryOperator.LessOrEqual;
         if (ctx.GE() is not null) return BinaryOperator.GreaterOrEqual;
-        return BinaryOperator.Equal;
+        return null;
     }
 
     private WithStatement BuildWith(VbaParser.WithStatementContext ctx)
@@ -642,13 +702,15 @@ internal sealed class AstBuilder
         return new WithStatement(MakeProvenance(ctx), target, body);
     }
 
-    private OnErrorStatement BuildOnError(VbaParser.OnErrorStatementContext ctx) => ctx switch
+    private Statement BuildOnError(VbaParser.OnErrorStatementContext ctx) => ctx switch
     {
         VbaParser.OnErrorGotoContext n =>
             new OnErrorStatement(MakeProvenance(n), OnErrorKind.Goto, n.labelOrZero().GetText()),
         VbaParser.OnErrorResumeNextContext n =>
             new OnErrorStatement(MakeProvenance(n), OnErrorKind.ResumeNext, null),
-        _ => new OnErrorStatement(MakeProvenance(ctx), OnErrorKind.ResumeNext, null),
+        // Grammar-unreachable alt: a defaulted ResumeNext would silently
+        // invert the module's error-handling semantics.
+        _ => new UnknownStatement(MakeProvenance(ctx, recoveredOverride: true)),
     };
 
     private ResumeStatement BuildResume(VbaParser.ResumeStatementContext ctx)
@@ -664,15 +726,20 @@ internal sealed class AstBuilder
     private GosubStatement BuildGosub(VbaParser.GosubStatementContext ctx) =>
         new(MakeProvenance(ctx), ctx.labelOrZero().GetText());
 
-    private ExitStatement BuildExit(VbaParser.ExitStatementContext ctx)
+    private Statement BuildExit(VbaParser.ExitStatementContext ctx)
     {
         var k = ctx.exitKind();
-        var kind = k.SUB() is not null ? ExitKind.Sub
-                 : k.FUNCTION() is not null ? ExitKind.Function
-                 : k.PROPERTY() is not null ? ExitKind.Property
-                 : k.FOR() is not null ? ExitKind.For
-                 : ExitKind.Do;
-        return new ExitStatement(MakeProvenance(ctx), kind);
+        ExitKind? kind = k.SUB() is not null ? ExitKind.Sub
+                       : k.FUNCTION() is not null ? ExitKind.Function
+                       : k.PROPERTY() is not null ? ExitKind.Property
+                       : k.FOR() is not null ? ExitKind.For
+                       : k.DO() is not null ? ExitKind.Do
+                       : null;
+        return kind is { } known
+            ? new ExitStatement(MakeProvenance(ctx), known)
+            // Grammar-unreachable kind: a defaulted Exit Do would silently
+            // retarget the control flow.
+            : new UnknownStatement(MakeProvenance(ctx, recoveredOverride: true));
     }
 
     private RaiseEventStatement BuildRaiseEvent(VbaParser.RaiseEventStatementContext ctx)
@@ -691,9 +758,8 @@ internal sealed class AstBuilder
 
     private VariableDeclarator BuildVariableDeclarator(VbaParser.VariableDeclContext ctx)
     {
-        string text = ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? "";
-        string name = StripTypeSuffix(text);
-        string? suffix = text != name ? text[^1].ToString() : null;
+        var (name, suffix) = SplitDeclaredName(
+            ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? ctx.contextualKeywordName()?.GetText());
         IReadOnlyList<ArrayBound> bounds = ctx.arrayBoundsList() is { } b ? BuildArrayBounds(b) : Array.Empty<ArrayBound>();
         bool isArray = ctx.LPAREN() is not null;
         var (type, isNew) = BuildVariableType(ctx.variableTypeSpec());
@@ -709,9 +775,8 @@ internal sealed class AstBuilder
 
     private RedimDeclarator BuildRedimDeclarator(VbaParser.RedimDeclContext ctx)
     {
-        string text = ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? "";
-        string name = StripTypeSuffix(text);
-        string? suffix = text != name ? text[^1].ToString() : null;
+        var (name, suffix) = SplitDeclaredName(
+            ctx.IDENTIFIER()?.GetText() ?? ctx.TYPED_IDENTIFIER()?.GetText() ?? ctx.contextualKeywordName()?.GetText());
         var bounds = BuildArrayBounds(ctx.arrayBoundsList());
         var type = ctx.variableTypeSpec() is { } vts ? BuildVariableType(vts).Type : null;
         return new RedimDeclarator(MakeProvenance(ctx), name, suffix, bounds, type);
@@ -782,8 +847,9 @@ internal sealed class AstBuilder
                                                   n.PLUS() is not null ? BinaryOperator.Add : BinaryOperator.Subtract,
                                                   n.expression(0), n.expression(1)),
             VbaParser.ConcatExprContext n    => MakeBinary(n, BinaryOperator.Concat, n.expression(0), n.expression(1)),
-            VbaParser.CompareExprContext n   => MakeBinary(n, ComparisonFromCtx(n),
-                                                  n.expression(0), n.expression(1)),
+            VbaParser.CompareExprContext n   => ComparisonFromCtx(n) is { } cmp
+                                                  ? MakeBinary(n, cmp, n.expression(0), n.expression(1))
+                                                  : new UnknownExpression(MakeProvenance(n, recoveredOverride: true)),
             VbaParser.NotExprContext n       => new UnaryExpression(MakeProvenance(n),
                                                   UnaryOperator.Not, BuildExpression(n.expression())),
             VbaParser.AndExprContext n       => MakeBinary(n, BinaryOperator.And, n.expression(0), n.expression(1)),
@@ -803,11 +869,14 @@ internal sealed class AstBuilder
         VbaParser.ExpressionContext left, VbaParser.ExpressionContext right) =>
         new(MakeProvenance(n), op, BuildExpression(left), BuildExpression(right));
 
-    private static BinaryOperator ComparisonFromCtx(VbaParser.CompareExprContext ctx)
+    // Null when the labeled `op` token is missing or carries a
+    // grammar-unreachable type: the caller emits a recovered stub where
+    // a defaulted Equal would silently rewrite the comparison.
+    private static BinaryOperator? ComparisonFromCtx(VbaParser.CompareExprContext ctx)
     {
         // CompareExpr captures op=(EQ|NEQ|LT|GT|LE|GE|LIKE|IS) into the labeled `op` field.
         var op = ctx.op;
-        if (op is null) return BinaryOperator.Equal;
+        if (op is null) return null;
         return op.Type switch
         {
             VbaLexer.EQ   => BinaryOperator.Equal,
@@ -818,7 +887,7 @@ internal sealed class AstBuilder
             VbaLexer.GE   => BinaryOperator.GreaterOrEqual,
             VbaLexer.LIKE => BinaryOperator.Like,
             VbaLexer.IS   => BinaryOperator.Is,
-            _             => BinaryOperator.Equal,
+            _             => null,
         };
     }
 
@@ -931,6 +1000,8 @@ internal sealed class AstBuilder
         VbaParser.DebugObjectExprContext n => new DebugExpression(MakeProvenance(n)),
         VbaParser.IdentExprContext n       => new IdentifierExpression(MakeProvenance(n), n.IDENTIFIER().GetText(), null),
         VbaParser.TypedIdentExprContext n  => BuildTypedIdent(n),
+        VbaParser.ContextualKeywordExprContext n =>
+            new IdentifierExpression(MakeProvenance(n), n.contextualKeywordName().GetText(), null),
         VbaParser.ParenExprContext n       => new ParenthesizedExpression(MakeProvenance(n), BuildExpression(n.expression())),
         _                                  => new UnknownExpression(MakeProvenance(ctx, recoveredOverride: true)),
     };
@@ -965,11 +1036,8 @@ internal sealed class AstBuilder
         // The grammar threads optional argument slots between commas;
         // missing slots are H-D08 positional gaps.
         var result = new List<Argument>();
-        int commaCount = ctx.COMMA().Length;
-        var args = ctx.argument();
         // Walk children in order to interleave commas correctly.
         bool firstSlotConsumed = false;
-        int argIdx = 0;
         bool lastWasComma = false;
         for (int i = 0; i < ctx.ChildCount; i++)
         {
@@ -979,7 +1047,6 @@ internal sealed class AstBuilder
                 result.Add(BuildArgument(a));
                 firstSlotConsumed = true;
                 lastWasComma = false;
-                argIdx++;
             }
             else if (child is ITerminalNode t && t.Symbol.Type == VbaLexer.COMMA)
             {
@@ -1022,7 +1089,12 @@ internal sealed class AstBuilder
     private Argument BuildArgument(VbaParser.ArgumentContext ctx)
     {
         if (ctx.namedArgument() is { } na)
-            return new NamedArgument(MakeProvenance(na), na.IDENTIFIER().GetText(), BuildExpression(na.expression()));
+        {
+            // The name slot is IDENTIFIER or a contextual keyword used as an
+            // argument name (e.g. `F Step:=1` binding a parameter named `step`).
+            string argName = na.IDENTIFIER()?.GetText() ?? na.contextualKeywordName()?.GetText() ?? "";
+            return new NamedArgument(MakeProvenance(na), argName, BuildExpression(na.expression()));
+        }
         if (ctx.expression() is { } e)
             return new PositionalArgument(MakeProvenance(ctx), BuildExpression(e));
         return new MissingArgument(MakeProvenance(ctx));
@@ -1076,13 +1148,24 @@ internal sealed class AstBuilder
     private static string StripStringLiteral(string s) =>
         s.Length >= 2 && s[0] == '"' && s[^1] == '"' ? s.Substring(1, s.Length - 2) : s;
 
+    // Splits a declared name into its suffix-stripped form plus the
+    // type-declaration character, so every declaration carries the same
+    // Name its references resolve against (006 review F-3-3). Null input
+    // means recovery dropped the name token; "" keeps downstream
+    // null-safety unchanged.
+    private static (string Name, string? Suffix) SplitDeclaredName(string? rawText)
+    {
+        if (string.IsNullOrEmpty(rawText)) return ("", null);
+        string name = StripTypeSuffix(rawText);
+        return (name, ExtractTypeSuffix(rawText, name));
+    }
+
     private static string? ExtractTypeSuffix(string? typedIdentifierText, string strippedName)
     {
-        if (typedIdentifierText is null) return null;
-        if (typedIdentifierText.Length == 0) return null;
+        if (string.IsNullOrEmpty(typedIdentifierText)) return null;
+        if (typedIdentifierText.Length <= strippedName.Length) return null;
         char last = typedIdentifierText[^1];
-        if ("$%&!#@".Contains(last)) return last.ToString();
-        return null;
+        return "$%&!#@".Contains(last) ? last.ToString() : null;
     }
 
     private static string StripTypeSuffix(string text)
@@ -1090,6 +1173,31 @@ internal sealed class AstBuilder
         if (text.Length == 0) return text;
         char last = text[^1];
         return "$%&!#@".Contains(last) ? text[..^1] : text;
+    }
+
+    // Maps a type-declaration suffix to its implied built-in type per
+    // MS-VBAL §3.3.3 ($=String, %=Integer, &=Long, !=Single, #=Double,
+    // @=Currency); null when there is no suffix. Used to populate a
+    // function / property-get ReturnType from `Function F$()` /
+    // `Property Get P$()` so the suffix's type is not silently lost
+    // downstream (006 review H4) — the raw TypeSuffix is retained
+    // alongside for spelling fidelity. An explicit `As` clause always
+    // wins over the suffix at the call sites.
+    private TypeReference? TypeReferenceFromSuffix(string? suffix, ParserRuleContext ctx)
+    {
+        string? builtIn = suffix switch
+        {
+            "$" => "String",
+            "%" => "Integer",
+            "&" => "Long",
+            "!" => "Single",
+            "#" => "Double",
+            "@" => "Currency",
+            _ => null,
+        };
+        return builtIn is null
+            ? null
+            : new TypeReference(MakeProvenance(ctx), new[] { builtIn }, IsAutoInstantiated: false, FixedStringSize: null, IsArray: false);
     }
 
     private Provenance MakeProvenance(ParserRuleContext ctx, bool recoveredOverride = false)
