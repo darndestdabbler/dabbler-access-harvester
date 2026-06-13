@@ -7,7 +7,7 @@
       "number": 1,
       "title": "Translator cp1252 Decode Fix And Hermetic Encoding Pins",
       "status": "in-progress",
-      "startedAt": "2026-06-13T05:25:09.941169-04:00",
+      "startedAt": "2026-06-13T05:48:07.506947-04:00",
       "completedAt": null,
       "orchestrator": {
         "engine": "claude",

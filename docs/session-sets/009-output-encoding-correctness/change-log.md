@@ -4,6 +4,11 @@
 **Completed:** 2026-06-13 · **Orchestrator:** Claude (Opus 4.8) ·
 **Verification:** gpt-5-4 (cross-provider), R1 ISSUES_FOUND → R2 VERIFIED
 
+## Session 1 of 1 — Translator cp1252 Decode Fix And Hermetic Encoding Pins
+
+Session 1 is the sole (final) session of this set; it delivers the entire P1b
+scope below and closes the set complete.
+
 ## What shipped
 
 The kb/ → ir/ pipeline no longer silently corrupts non-ASCII text. Both
