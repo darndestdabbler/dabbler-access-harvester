@@ -1,0 +1,90 @@
+{
+  "sessionSetName": "009-output-encoding-correctness",
+  "createdDate": "2026-06-13T09:25:09.941169+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/verification-mode",
+      "dateTime": "2026-06-13T09:25:09.941169+00:00",
+      "description": "Operator set verificationMode: dedicated-sessions.",
+      "status": "complete",
+      "routedApiCalls": [],
+      "kind": "verification_mode",
+      "choice": "dedicated-sessions"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "setup",
+      "dateTime": "2026-06-13T05:28:45.858347-04:00",
+      "description": "Read pre-session docs (project-guidance, lessons-learned, deferred-work), 006 F-1-1/F-1-8, spec; registered session start",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "grounding",
+      "dateTime": "2026-06-13T05:28:45.858347-04:00",
+      "description": "Re-grounded F-1-1: probe wrote cp1252 bytes 43 E9 6C; default UTF-8 read -> U+FFFD, cp1252 read -> Cel (U+00E9). Source read sites SaveAsTextTranslator.cs:59/71 confirmed still UTF-8-default. Bug reproduces.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "implement",
+      "dateTime": "2026-06-13T05:28:45.859346-04:00",
+      "description": "F-1-1 fix: BuildPayload reads with Encoding.GetEncoding(1252) (BOM still honoured) on both ReadAllText and ReadAllLines; static ctor registers CodePagesEncodingProvider for non-CLI hosts",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "tests",
+      "dateTime": "2026-06-13T05:28:45.859346-04:00",
+      "description": "F-1-8 hermetic SaveAsTextTranslatorTests added: 3 routing branches + keepRoot Macros/Forms + cp1252 canonical + end-to-end round-trip",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "validate",
+      "dateTime": "2026-06-13T05:34:48.701951-04:00",
+      "description": "dotnet build solution (0 errors) + AccessHarvester.Tests SaveAsTextTranslatorTests 7/7 + AccessTextParserTests 5/5 green. No COM tier (pure file-to-file). No golden regen (ASCII-stable by construction). No .accdb mutations.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "verify-r1",
+      "dateTime": "2026-06-13T05:34:48.702944-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4, $0.141): ISSUES_FOUND, 3 Minor test-posture findings. Production fix/scope/ASCII-stability endorsed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "verify-r1-fixes",
+      "dateTime": "2026-06-13T05:34:48.702944-04:00",
+      "description": "Addressed all 3 Minor: (1) dropped test pre-registration, build cp1252 input from literal bytes so translator self-bootstraps; (2) added Module ReadAllText-path accented test; (3) added UTF-8-BOM precedence test. Now 9/9 green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "verify-r2",
+      "dateTime": "2026-06-13T05:36:53.427795-04:00",
+      "description": "R2 cross-provider session-verification (gpt-5-4, $0.091): VERIFIED, all 3 R1 Minor findings resolved, no new issues. 9/9 hermetic green.",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}

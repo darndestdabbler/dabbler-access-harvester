@@ -1,0 +1,29 @@
+{
+  "status": "complete",
+  "sessionSet": "009-output-encoding-correctness",
+  "summary": "006 P1b: fixed F-1-1 (translator decoded SaveAsText as UTF-8, corrupting non-ASCII to U+FFFD one-way in kb/ir) by reading both BuildPayload sites as Encoding.GetEncoding(1252) with BOM detection preserved + static-ctor code-pages registration; added F-1-8 hermetic SaveAsTextTranslatorTests (9 facts) covering every routing branch, the keepRoot flag, both repaired read sites, an end-to-end caption, and BOM precedence. No golden regen (ASCII-stable by construction); no COM tier. Verification R1 ISSUES_FOUND (3 Minor test-posture) -> all fixed -> R2 VERIFIED (gpt-5-4).",
+  "files_changed": [
+    "AccessHarvester.Core/Translation/SaveAsTextTranslator.cs",
+    "tests/AccessHarvester.Tests/SaveAsTextTranslatorTests.cs",
+    "docs/session-sets/009-output-encoding-correctness/spec.md",
+    "docs/session-sets/009-output-encoding-correctness/session-state.json",
+    "docs/session-sets/009-output-encoding-correctness/activity-log.json",
+    "docs/session-sets/009-output-encoding-correctness/session-events.jsonl",
+    "docs/session-sets/009-output-encoding-correctness/s1-verify-prompt.md",
+    "docs/session-sets/009-output-encoding-correctness/s1-verification.md",
+    "docs/session-sets/009-output-encoding-correctness/s1-verify-prompt-r2.md",
+    "docs/session-sets/009-output-encoding-correctness/s1-verification-round-2.md",
+    "docs/session-sets/009-output-encoding-correctness/s1-issues.json",
+    "docs/session-sets/009-output-encoding-correctness/change-log.md",
+    "docs/session-sets/009-output-encoding-correctness/disposition.json",
+    "docs/session-sets/009-output-encoding-correctness/next-session-set-recommendation.md",
+    "docs/session-sets/009-output-encoding-correctness/ai-assignment.md",
+    "docs/session-sets/010-output-contract-fidelity-batch/spec.md",
+    "docs/session-sets/010-output-contract-fidelity-batch/session-state.json"
+  ],
+  "next_session_set": {
+    "slug": "010-output-contract-fidelity-batch",
+    "summary": "006 P2 (2 sessions): correct the shifted DAO query-type decode (F-2-1, crosstabs mislabeled MakeTable) with the jet-sql parser cross-check (F-3-7); emit explicit ByVal (F-3-5); strip the UTF-8 BOM from the four usage/cleanup JSON outputs (F-2-3); reconcile label-provenance casing (F-2-6); resolve or defer the source-only Minors (F-2-4/F-2-5/F-2-7/F-1-4/F-1-7); document classify name-form (O-1-2) and the interim unresolved-items note (O-1-1). One coordinated HomeHealthCare golden regen at the end of Session 2."
+  },
+  "blockers": []
+}

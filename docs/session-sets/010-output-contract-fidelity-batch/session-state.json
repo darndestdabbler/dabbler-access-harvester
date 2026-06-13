@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "010-output-contract-fidelity-batch",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Query-Type Decode + ByVal Emission (F-2-1, F-3-7, F-3-5)",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "BOM, Casing, Dead-Code, Docs + Coordinated Golden Regen",
+      "status": "not-started"
+    }
+  ]
+}

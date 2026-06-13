@@ -1,0 +1,43 @@
+{
+  "sessionSet": "009-output-encoding-correctness",
+  "session": 1,
+  "verifier": "gpt-5-4",
+  "rounds": [
+    {
+      "round": 1,
+      "verdict": "ISSUES_FOUND",
+      "costUsd": 0.14075,
+      "notes": "Production fix, ASCII-stability/no-golden argument, no-COM decision, and scope discipline all endorsed. Three Minor test-posture findings only.",
+      "issues": [
+        {
+          "severity": "Minor",
+          "location": "tests/AccessHarvester.Tests/SaveAsTextTranslatorTests.cs",
+          "summary": "Test class globally pre-registered CodePagesEncodingProvider, masking whether the translator's own static-ctor registration is sufficient for non-CLI hosts.",
+          "resolution": "Removed the test pre-registration and the GetEncoding(1252)-built field; all cp1252 inputs now assembled from literal bytes via a Bytes() helper, so only the translator's static ctor registers cp1252.",
+          "status": "resolved"
+        },
+        {
+          "severity": "Minor",
+          "location": "tests/AccessHarvester.Tests/SaveAsTextTranslatorTests.cs",
+          "summary": "No non-ASCII fixture exercised a branch returning the ReadAllText payload directly (Module/XML), so a revert of only the ReadAllText site to UTF-8 would still pass.",
+          "resolution": "Added Cp1252Module_ReadAllTextPath_DecodesAccentedLiteral_NoReplacementChar exercising the Module (VbaCode = text) branch with a cp1252 0xE9 byte.",
+          "status": "resolved"
+        },
+        {
+          "severity": "Minor",
+          "location": "tests/AccessHarvester.Tests/SaveAsTextTranslatorTests.cs",
+          "summary": "BOM-detect-then-cp1252 contract validated only by inspection, not a hermetic BOM test.",
+          "resolution": "Added Utf8Bom_HonouredOverCp1252Fallback: UTF-8 BOM + UTF-8 'Café' (é = C3 A9, which would mis-decode to 'Ã©' under cp1252); asserts caption == 'Café' and does not contain 'Ã'.",
+          "status": "resolved"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verdict": "VERIFIED",
+      "costUsd": 0.090927,
+      "notes": "All three R1 Minor findings confirmed resolved; no new issues. Production code unchanged since R1; only the test file strengthened. 9/9 hermetic green.",
+      "issues": []
+    }
+  ]
+}
