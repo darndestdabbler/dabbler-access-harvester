@@ -289,23 +289,27 @@ and applies these rules in order. The first matching rule wins.
 
 ### Queries
 
-Access `QueryTypeCode` values: 0 = Select, 1 = Crosstab, 2 = Delete,
-3 = Update, 4 = Append, 5 = MakeTable, 6 = Data Definition, 64 = Union,
-128 = Pass-through.
+Access `QueryTypeCode` values are the DAO `QueryDefTypeEnum` constants (the
+values Access stores in `QueryDef.Type`; corrected per 006 F-2-1 — the earlier
+small-integer table here was wrong and disagreed with the emitter): 0 = Select,
+16 = Crosstab, 32 = Delete, 48 = Update, 64 = Append, 80 = MakeTable,
+96 = Data Definition, 112 = Pass-through, 128 = Set-operation (Union),
+144 = Pass-through (bulk), 160 = Compound, 224 = Procedure. The single source of
+truth is `AccessHarvester.Pipeline.UsageIdentification.DaoQueryTypeCodes`.
 
 | Rule | Condition | Category | Base confidence |
 |---|---|---|---|
-| Q1 | QueryTypeCode = 1 (Crosstab) | Reporting | 0.70 (mark CrosstabQuery question) |
+| Q1 | QueryTypeCode = 16 (Crosstab) | Reporting | 0.70 (mark CrosstabQuery question) |
 | Q2 | QueryTypeCode = 0 (Select) AND used as RecordSource for a form | MainDataEntry | 0.75 |
 | Q3 | QueryTypeCode = 0 (Select) AND used as RecordSource for a report | Reporting | 0.80 |
 | Q4 | QueryTypeCode = 0 (Select) AND not used as RecordSource anywhere AND no parameter markers (`?` or `[`) | Reporting | 0.60 |
 | Q5 | Contains parameter markers (`?` or `[...Param...]`) | Reporting | 0.65 |
 | Q6 | References no tables (only other queries in FROM) | Unknown | 0.40 (mark QueryReferencesNoTables question) |
 | Q7 | Not referenced as RecordSource, RowSource, or in any other query SQL | PossiblyUnused | 0.65 |
-| Q8 | QueryTypeCode ∈ {2, 3, 4, 5} (Delete, Update, Append, MakeTable — Action Queries) AND opened by VBA or macro | StandaloneUtility | 0.75 |
-| Q9 | QueryTypeCode ∈ {2, 3, 4, 5} (Action Query) AND NOT opened by any VBA or macro | PossiblyUnused | 0.65 |
-| Q10 | QueryTypeCode = 64 (Union) — treat identically to Select: apply Q2/Q3/Q4/Q5/Q6/Q7 logic with Union as the query type | same as equivalent Select rule | same base confidence |
-| Q11 | QueryTypeCode ∈ {6, 128} (Data Definition, Pass-through) | StandaloneUtility | 0.60 |
+| Q8 | QueryTypeCode ∈ {32, 48, 64, 80} (Delete, Update, Append, MakeTable — Action Queries) AND opened by VBA or macro | StandaloneUtility | 0.75 |
+| Q9 | QueryTypeCode ∈ {32, 48, 64, 80} (Action Query) AND NOT opened by any VBA or macro | PossiblyUnused | 0.65 |
+| Q10 | QueryTypeCode = 128 (Set-operation / Union) — treat identically to Select: apply Q2/Q3/Q4/Q5/Q6/Q7 logic with Union as the query type | same as equivalent Select rule | same base confidence |
+| Q11 | QueryTypeCode ∈ {96, 112, 144} (Data Definition, Pass-through, Pass-through bulk) | StandaloneUtility | 0.60 |
 
 > **Notes on rule priority:**
 > - Q8/Q9 take priority over Q7 when QueryTypeCode identifies an action
@@ -315,7 +319,7 @@ Access `QueryTypeCode` values: 0 = Select, 1 = Crosstab, 2 = Delete,
 >   classification path as Select queries (Q2–Q7): if used as RecordSource
 >   for a form → MainDataEntry; if used as RecordSource for a report →
 >   Reporting; if unreferenced → PossiblyUnused. Rules Q2–Q7 apply to
->   `QueryTypeCode ∈ {0, 64}` (Select and Union).
+>   `QueryTypeCode ∈ {0, 128}` (Select and Set-operation/Union).
 > - DDL and Pass-through (Q11) are infrastructure queries; StandaloneUtility
 >   is the appropriate fallback regardless of reference signals.
 > - **Parameter expectation is a signal, not a category (set 001 Session

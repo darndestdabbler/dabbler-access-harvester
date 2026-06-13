@@ -274,8 +274,13 @@ public static class ParserOutputProjector
     {
         var node = new JsonObject { ["Name"] = p.Name };
         if (p.Type is not null) node["Type"] = string.Join(".", p.Type.QualifiedName);
-        // ByRef is the default; only emit when source was explicit ByVal or ByRef.
-        if (p.PassMode == ParameterPassMode.ByRef) node["ByRef"] = true;
+        // 006 F-3-5: emit the schema-declared PassingMechanism enum for both explicit
+        // pass modes (the prior code emitted a bare "ByRef" boolean only, so explicit
+        // ByVal was indistinguishable from default ByRef). Per the output-omission
+        // convention, an unspecified pass mode is omitted (consumer reads omission as
+        // the VBA default, ByRef).
+        if (p.PassMode == ParameterPassMode.ByVal) node["PassingMechanism"] = "ByVal";
+        else if (p.PassMode == ParameterPassMode.ByRef) node["PassingMechanism"] = "ByRef";
         if (p.Modifier == ParameterModifier.Optional) node["Optional"] = true;
         if (p.Modifier == ParameterModifier.ParamArray) node["ParamArray"] = true;
         return node;

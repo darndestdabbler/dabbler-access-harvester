@@ -193,7 +193,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qxtBySvc", typeCode: 112)],
+            Queries = [Query("qxtBySvc", typeCode: 16)],  // dbQCrosstab = 16 (006 F-2-1)
         };
         var f = Classify(db, "qxtBySvc");
         Assert.Equal(UsageCategory.Reporting, f.Classification);
@@ -230,7 +230,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qryDeleteOld", typeCode: 64)],  // TypeDelete = 64
+            Queries = [Query("qryDeleteOld", typeCode: 32)],  // dbQDelete = 32 (006 F-2-1)
             Macros = [new IrMacro
             {
                 Name = "mcrMaintenance",
@@ -246,7 +246,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qryDeleteStale", typeCode: 64)],  // TypeDelete = 64
+            Queries = [Query("qryDeleteStale", typeCode: 32)],  // dbQDelete = 32 (006 F-2-1)
         };
         var f = Classify(db, "qryDeleteStale");
         Assert.Equal(UsageCategory.PossiblyUnused, f.Classification);
@@ -257,10 +257,35 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qryPassThrough", typeCode: 144)],  // TypePassThrough = 144
+            Queries = [Query("qryPassThrough", typeCode: 112)],  // dbQSQLPassThrough = 112 (006 F-2-1)
         };
         var f = Classify(db, "qryPassThrough");
         Assert.Equal(UsageCategory.StandaloneUtility, f.Classification);
+    }
+
+    [Fact]
+    public void Query_Q11_PassThroughBulk_Is_StandaloneUtility()  // 006 F-2-1 (dbQSPTBulk = 144)
+    {
+        var db = EmptyDb() with
+        {
+            Queries = [Query("qrySptBulk", typeCode: 144)],  // dbQSPTBulk = 144
+        };
+        var f = Classify(db, "qrySptBulk");
+        Assert.Equal(UsageCategory.StandaloneUtility, f.Classification);
+    }
+
+    [Fact]
+    public void Query_MakeTable_Unreferenced_Is_PossiblyUnused()  // 006 F-2-1 (decode-shift guard)
+    {
+        // dbQMakeTable = 80 is an action query (Q9 → PossiblyUnused when
+        // unreferenced). Before the F-2-1 fix, 80 decoded as "Union" and took the
+        // Select path, so this pins the corrected high end of the shifted table.
+        var db = EmptyDb() with
+        {
+            Queries = [Query("qryMakeTbl", typeCode: 80)],
+        };
+        var f = Classify(db, "qryMakeTbl");
+        Assert.Equal(UsageCategory.PossiblyUnused, f.Classification);
     }
 
     // ── Table rules ────────────────────────────────────────────────────────────
@@ -441,7 +466,7 @@ public class UsageClassifierTests
         var db = EmptyDb() with
         {
             Forms = [Form("frmUnion", "qryUnionAll")],
-            Queries = [Query("qryUnionAll", typeCode: 80, sql: "SELECT * FROM tblA UNION ALL SELECT * FROM tblB")],  // TypeUnion = 80
+            Queries = [Query("qryUnionAll", typeCode: 128, sql: "SELECT * FROM tblA UNION ALL SELECT * FROM tblB")],  // dbQSetOperation = 128 (006 F-2-1)
         };
         var f = Classify(db, "qryUnionAll");
         // Union queries follow Q2 path when used as form RecordSource
@@ -453,7 +478,7 @@ public class UsageClassifierTests
     {
         var db = EmptyDb() with
         {
-            Queries = [Query("qryUnionOrphan", typeCode: 80, sql: "SELECT * FROM tblA UNION ALL SELECT * FROM tblB")],  // TypeUnion = 80
+            Queries = [Query("qryUnionOrphan", typeCode: 128, sql: "SELECT * FROM tblA UNION ALL SELECT * FROM tblB")],  // dbQSetOperation = 128 (006 F-2-1)
         };
         var f = Classify(db, "qryUnionOrphan");
         // Q7 applies to unreferenced Select/Union queries

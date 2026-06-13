@@ -115,7 +115,7 @@ public class QuestionGeneratorTests
         var questions = QuestionGenerator.Generate(
             "Query", "qxtSummary", UsageCategory.Reporting, 0.7,
             NoSignals(), null, hasVbaCode: false,
-            isNavigationTarget: false, queryTypeCode: 112, index);
+            isNavigationTarget: false, queryTypeCode: 16, index);  // dbQCrosstab = 16 (006 F-2-1)
         Assert.Contains(questions, q => q.UncertaintySignal == UncertaintySignal.CrosstabQuery);
         Assert.Contains("crosstab",
                         questions.First(q => q.UncertaintySignal == UncertaintySignal.CrosstabQuery).QuestionText);

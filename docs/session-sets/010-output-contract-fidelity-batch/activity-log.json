@@ -1,0 +1,18 @@
+{
+  "sessionSetName": "010-output-contract-fidelity-batch",
+  "createdDate": "2026-06-13T11:01:57.690940+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/verification-mode",
+      "dateTime": "2026-06-13T11:01:57.690940+00:00",
+      "description": "Operator set verificationMode: out-of-band-or-none.",
+      "status": "complete",
+      "routedApiCalls": [],
+      "kind": "verification_mode",
+      "choice": "out-of-band-or-none"
+    }
+  ]
+}

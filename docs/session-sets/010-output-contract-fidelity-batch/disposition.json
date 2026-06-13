@@ -1,0 +1,40 @@
+{
+  "status": "complete",
+  "summary": "Set 010 Session 1 (Query-Type Decode + ByVal Emission) VERIFIED. F-2-1 (Major): the DAO query-type decode was shifted one slot (crosstabs decoded as MakeTable and mis-classified PossiblyUnused); corrected QueryExporter.QueryTypeName + the strategy-doc §4 table, centralized the DAO QueryDefTypeEnum codes in a new DaoQueryTypeCodes (the finding's 'share one decode table'), and rewired UsageClassifier + QuestionGenerator off it (removing the shifted private constants and the duplicate name-recompute). F-3-7 (Minor): Sql.Parsed.QueryType now derives from the parsed AST Shape (DAO code retained as QueryTypeCode provenance), falling back to the DAO type on parse failure; the embedded-SELECT projection for TRANSFORM is deferred as DW-7. F-3-5 (Major): ParserOutputProjector now emits the schema-declared PassingMechanism enum (ByVal/ByRef explicit, Unspecified omitted per the omission convention), retiring the undeclared bare ByRef boolean; DW-3 (suffix->type for variables) explicitly evaluated and deferred. Golden regen DEFERRED to Session 2 (single coordinated regen) per the set's regen discipline; committed goldens are intentionally stale. Hermetic green: AccessHarvester.Pipeline.Tests 803/803 (new pins: per-DAO-code classification, F-3-7 AST-type, F-3-5 PassingMechanism), AccessHarvester.Tests new QueryExporterDecodeTests 13/13. Cross-provider verification (gpt-5-4): R1 ISSUES_FOUND (two Majors, both DAO code 144/dbQSPTBulk — label collision + Q11 exclusion, the session's own internal inconsistency; both accepted and fixed: distinct SqlPassthroughBulk label + map entry, Q11 includes 144, strategy doc + new pin), R2 VERIFIED empty issues.",
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "verification_rounds": 2,
+  "files_changed": [
+    "AccessHarvester.Core/Extraction/QueryExporter.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/DaoQueryTypeCodes.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/UsageClassifier.cs",
+    "AccessHarvester.Pipeline/UsageIdentification/QuestionGenerator.cs",
+    "AccessHarvester.Pipeline/Manifest/QuerySqlProjector.cs",
+    "AccessHarvester.Pipeline/Manifest/ParserOutputProjector.cs",
+    "docs/planning/object-use-identification-strategy.md",
+    "docs/planning/deferred-work.md",
+    "tests/AccessHarvester.Tests/QueryExporterDecodeTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/UsageClassifierTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/UsageIdentification/QuestionGeneratorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Manifest/QuerySqlProjectorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Manifest/ParserOutputProjectorTests.cs",
+    "docs/session-sets/010-output-contract-fidelity-batch/ai-assignment.md",
+    "docs/session-sets/010-output-contract-fidelity-batch/s1-verification.md",
+    "docs/session-sets/010-output-contract-fidelity-batch/s1-verification-round-2.md",
+    "docs/session-sets/010-output-contract-fidelity-batch/s1-issues.json",
+    "docs/session-sets/010-output-contract-fidelity-batch/change-log.md",
+    "docs/session-sets/010-output-contract-fidelity-batch/disposition.json"
+  ],
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Session 2 (BOM, Casing, Dead-Code, Docs + Coordinated Golden Regen) is the heavier of the two: it carries the single coordinated COM-tier HomeHealthCare golden regeneration (every delta must map to a named finding's fix — the S1 emission changes produce the crosstab QueryType/classification and parameter PassingMechanism deltas listed in change-log.md), the CanonicalGoldenRegressionTests confirmation, a decision-consensus call for F-2-4 (Q6 implement-or-strike), several Minors (F-2-3 BOM, F-2-6 casing, F-2-5/F-2-7/F-1-4/F-1-7), the O-1-2/O-1-1 doc ride-alongs, and authoring the next session set (P3 resolver-and-navigation-wiring per the 006 ranking). The golden-regen coordination + explain-every-delta stop-rule + cross-session evidence assembly favor an Opus-class orchestrator. Host precondition: Windows + Microsoft Access (COM tier). Cross-provider verification routes to gpt-5-4."
+    }
+  },
+  "blockers": []
+}

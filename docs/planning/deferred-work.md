@@ -84,6 +84,16 @@
 - **Trigger to pull back in:** the output-contract-fidelity batch (P2) that owns
   F-3-5 (ByVal emission), which is the natural home for suffix→type emission too.
 - **Owning set candidate:** `output-contract-fidelity-batch` (P2).
+- **010 Session 1 decision (2026-06-13): evaluated and explicitly DEFERRED** (per
+  the 010 spec's "decide explicitly whether to pull DW-3 in here" instruction).
+  Rationale: DW-3 is golden-neutral with **zero** occurrences in either corpus
+  (no real-data fixture exercises it), and it spans the variable/const/module
+  declaration projection paths — separate from F-3-5's parameter `BuildParameter`
+  site. Pulling it into a session already landing two Majors (F-2-1 query-type
+  decode + F-3-5 ByVal) plus the F-3-7 reconcile would broaden the verification
+  surface for no corpus-observable benefit, against the set's scope-discipline
+  Stop Rule. The natural home is now a focused parser/type-emission set that can
+  do params + variables + constants uniformly. Remains **open**.
 
 ### DW-4 — `!`-suffixed function / property-get NAME does not parse (BANG ambiguity)
 - **What:** `Function Calc!()` / `Property Get P!()` fails to parse —
@@ -154,6 +164,28 @@
   consumer needs the `raw/` tier in a canonical (UTF-8) encoding.
 - **Owning set candidate:** a future `encoding-architecture` / CLI-robustness set
   (would also absorb DW-5).
+
+### DW-7 — Crosstab (TRANSFORM) abstraction drops the embedded SELECT
+- **What:** `QueryAbstractionBuilder.cs:~398` maps `TransformStatement =>
+  (QueryShape.Transform, null, null, …)` — the inner SELECT's select-list / FROM /
+  JOIN / WHERE, which the parsed AST already carries, is discarded. So a crosstab
+  query ships with `Sql.Parsed.QueryType = "Crosstab"` (now correctly derived from
+  the AST, 010 S1 / F-3-7) but no structured `Select`/`From`/`Joins`/`Where`
+  abstraction — the one query family with no structured SQL body.
+- **Origin:** 006 review F-3-7 recommendation part (b); 010 Session 1 implemented
+  part (a) (derive `Sql.Parsed.QueryType` from the AST shape) and deferred part (b).
+- **Why deferred:** out of scope for 010 Session 1, whose F-3-7 ask was narrowly
+  "reconcile the query type so the parser result is no longer discarded/re-stamped"
+  (done). Projecting the embedded SELECT of a TRANSFORM is a distinct
+  abstraction-builder feature with its own golden churn (the 4 HHC crosstabs would
+  gain a populated `Sql.Parsed` body), larger than the type reconcile warranted.
+- **Trigger to pull back in:** a consumer needs the structured body of crosstab
+  queries (e.g. to migrate the inner aggregate/grouping), OR a query-abstraction
+  completeness set is scoped.
+- **Owning set candidate:** a future query-abstraction / migration-fidelity set.
+- **Mechanical backstop:** the committed HHC golden records the 4 crosstabs with a
+  `Sql.Parsed` carrying only `Raw` + `QueryType`; the absence of a structured body
+  is visible there and in `QueryAbstractionBuilderTests`.
 
 ## Closed
 

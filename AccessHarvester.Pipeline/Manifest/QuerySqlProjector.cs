@@ -20,6 +20,10 @@ public static class QuerySqlProjector
         WriteIndented = false,
     };
 
+    // Maps the raw DAO query-type label (QueryExporter.QueryTypeName) to the
+    // manifest schema's QueryType enum. Keys must track the corrected DAO decode
+    // (006 F-2-1). Unmapped labels (e.g. Compound, Procedure — never present in any
+    // corpus) fall through to the raw label and rely on QueryTypeCode for truth.
     private static readonly Dictionary<string, string> QueryTypeMap =
         new(StringComparer.OrdinalIgnoreCase)
         {
@@ -28,11 +32,28 @@ public static class QuerySqlProjector
             ["Append"]         = "Insert",
             ["Update"]         = "Update",
             ["Delete"]         = "Delete",
-            ["Union"]          = "Union",
-            ["CrossTab"]       = "Crosstab",
-            ["DataDefinition"] = "DataDefinition",
-            ["SqlPassthrough"] = "PassThrough",
+            ["Union"]              = "Union",
+            ["Crosstab"]           = "Crosstab",
+            ["DataDefinition"]     = "DataDefinition",
+            ["SqlPassthrough"]     = "PassThrough",
+            ["SqlPassthroughBulk"] = "PassThrough",  // dbQSPTBulk → same schema type
         };
+
+    // 006 F-3-7: the Jet SQL parser already determines the query shape
+    // structurally; Sql.Parsed.QueryType is derived from the parsed AST (below)
+    // rather than re-stamping the DAO decode, so the parser's contract-grade
+    // knowledge is no longer discarded. Returns null for shapes with no manifest
+    // QueryType (Unknown), in which case the DAO-derived type is used as fallback.
+    private static string? ShapeToSchemaType(QueryShape shape) => shape switch
+    {
+        QueryShape.Select    => "Select",
+        QueryShape.Union     => "Union",
+        QueryShape.Transform => "Crosstab",
+        QueryShape.Insert    => "Insert",
+        QueryShape.Update    => "Update",
+        QueryShape.Delete    => "Delete",
+        _ => null,
+    };
 
     /// <summary>
     /// Projects one saved query into a <c>QueryItem</c> JSON object.
@@ -111,10 +132,16 @@ public static class QuerySqlProjector
     private static JsonNode BuildParsedSql(
         string sqlText, string schemaQueryType, QueryAbstraction? abstraction)
     {
+        // 006 F-3-7: prefer the parser's structurally-determined shape; fall back
+        // to the DAO-derived type when the SQL did not parse or the shape is Unknown.
+        string parsedQueryType = abstraction is not null
+            ? ShapeToSchemaType(abstraction.Shape) ?? schemaQueryType
+            : schemaQueryType;
+
         var parsed = new JsonObject
         {
             ["Raw"] = sqlText,
-            ["QueryType"] = schemaQueryType,
+            ["QueryType"] = parsedQueryType,
         };
 
         if (abstraction is null)

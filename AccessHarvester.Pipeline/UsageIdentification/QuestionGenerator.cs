@@ -109,7 +109,7 @@ public static class QuestionGenerator
         }
 
         // CrosstabQuery — query is crosstab type
-        if (objectType == "Query" && queryTypeCode == 112)
+        if (objectType == "Query" && queryTypeCode == DaoQueryTypeCodes.Crosstab)
         {
             questions.Add(new ClarifyingQuestion
             {

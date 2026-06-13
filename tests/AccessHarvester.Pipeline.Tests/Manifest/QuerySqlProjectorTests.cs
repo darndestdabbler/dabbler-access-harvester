@@ -183,6 +183,37 @@ public sealed class QuerySqlProjectorTests
         Assert.NotNull(abstr!["SuggestedMethodName"]);
     }
 
+    // ── Tests: parsed query type from AST (006 F-3-7) ─────────────────
+
+    [Fact]
+    public void ParsedQueryType_DerivesFromAst_ForCrosstab_EvenWhenDaoLabelDisagrees()
+    {
+        // The Jet parser determines the shape structurally (TRANSFORM → Crosstab).
+        // Sql.Parsed.QueryType must reflect that, not the (deliberately wrong here)
+        // DAO label — the parser result is no longer discarded/re-stamped.
+        const string sql = """
+            TRANSFORM Count(o.OrderID)
+            SELECT o.CustomerID
+            FROM tblOrders AS o
+            GROUP BY o.CustomerID
+            PIVOT o.Quarter
+            """;
+        var node = QuerySqlProjector.Project(
+            "qxt", "MakeTable", sql, Build("qxt", sql), queryTypeCode: 16);
+
+        Assert.Equal("Crosstab", node["Sql"]!["Parsed"]!["QueryType"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void ParsedQueryType_FallsBackToDaoLabel_WhenSqlDoesNotParse()
+    {
+        // No abstraction (parse failure) → Sql.Parsed.QueryType keeps the DAO type.
+        var node = QuerySqlProjector.Project(
+            "q", "Crosstab", "not valid sql", abstraction: null);
+
+        Assert.Equal("Crosstab", node["Sql"]!["Parsed"]!["QueryType"]!.GetValue<string>());
+    }
+
     // ── Tests: optional DAO fields ────────────────────────────────────
 
     [Fact]

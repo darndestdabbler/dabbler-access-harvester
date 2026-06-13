@@ -11,16 +11,9 @@ namespace AccessHarvester.Pipeline.UsageIdentification;
 /// </summary>
 public static class UsageClassifier
 {
-    // QueryTypeCode constants — values from QueryExporter.QueryTypeName() / DAO dbQueryType enum.
-    private const int TypeSelect      = 0;
-    private const int TypeMakeTable   = 16;
-    private const int TypeAppend      = 32;
-    private const int TypeUpdate      = 48;
-    private const int TypeDelete      = 64;
-    private const int TypeUnion       = 80;
-    private const int TypeCrosstab    = 112;
-    private const int TypeDataDef     = 128;
-    private const int TypePassThrough = 144;
+    // QueryTypeCode constants are centralized in DaoQueryTypeCodes (006 F-2-1:
+    // the previously-inlined table was shifted, mis-classifying crosstabs as
+    // possibly-unused action queries).
 
     /// <summary>
     /// Produces one <see cref="UsageFinding"/> per object in the database.
@@ -282,14 +275,14 @@ public static class UsageClassifier
 
         int tc = query.QueryTypeCode;
 
-        if (tc == TypeCrosstab)
+        if (tc == DaoQueryTypeCodes.Crosstab)
         {
             // Q1
             category   = UsageCategory.Reporting;
             confidence = 0.70;
             evidence.Add("Crosstab");
         }
-        else if (tc is TypeDelete or TypeUpdate or TypeAppend or TypeMakeTable)
+        else if (DaoQueryTypeCodes.IsActionQuery(tc))
         {
             if (openedByNav || openedByVba)
             {
@@ -307,7 +300,8 @@ public static class UsageClassifier
                 evidence.Add($"ActionQuery(type={tc})");
             }
         }
-        else if (tc is TypeDataDef or TypePassThrough)
+        else if (tc is DaoQueryTypeCodes.DataDefinition or DaoQueryTypeCodes.PassThrough
+                    or DaoQueryTypeCodes.SptBulk)
         {
             // Q11
             category   = UsageCategory.StandaloneUtility;
@@ -667,7 +661,7 @@ public static class UsageClassifier
                 ? $"Main data entry {objectType.ToLowerInvariant()} backed by {recordSource}"
                 : $"Main data entry {objectType.ToLowerInvariant()}",
             UsageCategory.LookupReference => $"Lookup/reference {objectType.ToLowerInvariant()} '{name}'",
-            UsageCategory.Reporting       => queryTypeCode == TypeCrosstab
+            UsageCategory.Reporting       => queryTypeCode == DaoQueryTypeCodes.Crosstab
                 ? $"Crosstab query '{name}' used for reporting or data analysis"
                 : recordSource != null
                     ? $"Report backed by {recordSource}"
@@ -885,9 +879,6 @@ public static class UsageClassifier
 
     private static bool IsLookupSource(string source, SignalIndex index)
         => index.IsLookupTable(source);
-
-    private static bool IsActionQueryType(int tc)
-        => tc is TypeDelete or TypeUpdate or TypeAppend or TypeMakeTable;
 
     private static bool ContainsParamBracket(string sql)
     {

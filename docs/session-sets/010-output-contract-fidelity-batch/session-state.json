@@ -1,17 +1,30 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "010-output-contract-fidelity-batch",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
       "title": "Query-Type Decode + ByVal Emission (F-2-1, F-3-7, F-3-5)",
-      "status": "not-started"
+      "status": "in-progress",
+      "startedAt": "2026-06-13T07:01:57.690940-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "high"
+      },
+      "verificationVerdict": null
     },
     {
       "number": 2,
       "title": "BOM, Casing, Dead-Code, Docs + Coordinated Golden Regen",
-      "status": "not-started"
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     }
   ]
 }

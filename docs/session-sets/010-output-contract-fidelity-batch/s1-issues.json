@@ -1,0 +1,36 @@
+{
+  "sessionSet": "010-output-contract-fidelity-batch",
+  "session": 1,
+  "verifier": "gpt-5-4",
+  "rounds": [
+    {
+      "round": 1,
+      "verdict": "ISSUES_FOUND",
+      "costUsd": 0.164565,
+      "notes": "F-2-1 decode correctness, the DaoQueryTypeCodes centralization, the F-3-7 AST-derivation, the F-3-5 PassingMechanism contract decision, the DW-3 / F-3-7(b) deferrals, and the deferred-golden-regen posture were all endorsed. Two Major findings, both about DAO code 144 (dbQSPTBulk): an internal inconsistency the session introduced/left.",
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "AccessHarvester.Core/Extraction/QueryExporter.cs",
+          "summary": "DAO code 144 decoded as \"SqlPassthrough\", colliding with 112's label and losing the distinct QueryDefTypeEnum member dbQSPTBulk.",
+          "resolution": "144 now decodes to the distinct label \"SqlPassthroughBulk\"; QuerySqlProjector.QueryTypeMap maps it to the schema's \"PassThrough\" type; QueryExporterDecodeTests updated to expect \"SqlPassthroughBulk\".",
+          "status": "resolved"
+        },
+        {
+          "severity": "Major",
+          "location": "AccessHarvester.Pipeline/UsageIdentification/UsageClassifier.cs",
+          "summary": "Q11 branch matched only {96,112}, so dbQSPTBulk (144) bypassed StandaloneUtility classification and fell through to the Select path despite being documented as pass-through bulk.",
+          "resolution": "Q11 branch now includes DaoQueryTypeCodes.SptBulk (144); strategy doc §4 Q11 lists 144; added classifier pin Query_Q11_PassThroughBulk_Is_StandaloneUtility.",
+          "status": "resolved"
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verdict": "VERIFIED",
+      "costUsd": 0.124255,
+      "notes": "Both R1 Major findings (DAO code 144 / dbQSPTBulk: label collision and Q11 exclusion) confirmed resolved; no new issues or regressions. 803 Pipeline + 13 decode hermetic green.",
+      "issues": []
+    }
+  ]
+}

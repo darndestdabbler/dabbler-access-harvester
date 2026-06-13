@@ -59,24 +59,26 @@ public sealed class QueryExporter : IObjectExporter
         return outcomes;
     }
 
-    // DAO dbQueryType enumeration.
-    private static string QueryTypeName(int code) => code switch
+    // DAO QueryDefTypeEnum (the values Access stores in QueryDef.Type). The prior
+    // table was shifted by one slot (006 F-2-1): crosstabs (16) decoded as
+    // "MakeTable" and mis-classified as possibly-unused action queries. The numeric
+    // codes here must stay in agreement with the classification-layer source of
+    // truth, AccessHarvester.Pipeline.UsageIdentification.DaoQueryTypeCodes.
+    // Reference: Microsoft DAO QueryDefTypeEnum.
+    internal static string QueryTypeName(int code) => code switch
     {
-        0 => "Select",
-        16 => "MakeTable",
-        32 => "Append",
-        48 => "Update",
-        64 => "Delete",
-        80 => "Union",
-        96 => "Xbase",
-        112 => "CrossTab",
-        128 => "DataDefinition",
-        144 => "SqlPassthrough",
-        160 => "SetOperation",
-        176 => "SpMakeTable",
-        192 => "SpAppend",
-        208 => "SpUpdate",
-        224 => "SpDelete",
+        0 => "Select",           // dbQSelect
+        16 => "Crosstab",        // dbQCrosstab
+        32 => "Delete",          // dbQDelete
+        48 => "Update",          // dbQUpdate
+        64 => "Append",          // dbQAppend
+        80 => "MakeTable",       // dbQMakeTable
+        96 => "DataDefinition",  // dbQDDL
+        112 => "SqlPassthrough", // dbQSQLPassThrough
+        128 => "Union",            // dbQSetOperation
+        144 => "SqlPassthroughBulk", // dbQSPTBulk (distinct bulk pass-through member)
+        160 => "Compound",       // dbQCompound
+        224 => "Procedure",      // dbQProcedure
         _ => $"Unknown({code})"
     };
 

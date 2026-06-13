@@ -320,4 +320,24 @@ End Sub";
         var result = ParserOutputProjector.TryExtractEventBinding("_Click");
         Assert.Null(result);
     }
+
+    // ── Tests: parameter pass mode (006 F-3-5) ────────────────────────
+
+    [Fact]
+    public void Parameter_ExplicitPassModes_EmitPassingMechanism()
+    {
+        // Explicit ByVal and ByRef each emit the schema-declared PassingMechanism
+        // enum; an unspecified pass mode is omitted (omission convention → the
+        // consumer reads the VBA default, ByRef). The deprecated bare "ByRef"
+        // boolean is no longer emitted.
+        var resolved = Resolve(
+            "Public Sub Copy(ByVal src As Long, ByRef dst As Long, plain As String)\nEnd Sub");
+        var item = Item(Project(resolved), 0)!;
+        var ps = item["Signature"]!["Parameters"]!.AsArray();
+
+        Assert.Equal("ByVal", ps[0]!["PassingMechanism"]!.GetValue<string>());
+        Assert.Equal("ByRef", ps[1]!["PassingMechanism"]!.GetValue<string>());
+        Assert.Null(ps[2]!["PassingMechanism"]);
+        Assert.Null(ps[1]!["ByRef"]);  // old boolean form retired
+    }
 }
