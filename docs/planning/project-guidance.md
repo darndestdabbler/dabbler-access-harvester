@@ -905,6 +905,32 @@ experiments only.
   → "Force-Push From A Fresh Clone Via gh As The Sole Credential
   Helper".
 
+- **Regenerate every committed example/golden the same set that changes their
+  schema or output — and prove a "no regen needed" claim byte-level, never by
+  assuming "looks stable".** Committed example and golden artifacts (`examples/`,
+  `samples/GoldenOutput/`, fixture corpora) are part of the output contract. When
+  a session set changes a schema or any schema-/output-touching behavior, that
+  same set regenerates every committed artifact the change affects — in the same
+  commit, not a later amendment. A set that *defers* its regen, or asserts "output
+  unchanged / ASCII-stable / no regen needed" **without a byte-level diff to back
+  it**, leaves the verification gap for the *next* mandatory regen to surface — and
+  that next regen surfaces not only the deferred fix's real deltas but any
+  **regression** the stale golden was hiding, where it is far harder to attribute.
+  Promoted from `lessons-learned.md` → "Regenerate Committed Example Files
+  Alongside The Schema Set That Produces Them" on 2026-06-13 after the second
+  confirming context (the lesson's own promotion trigger): (1)
+  `harvester-finish-operations-and-interpretation-docs` Session 3 — `examples/`
+  stale vs the canonical schema, surfaced only when a docs set exercised them;
+  (2) `010-output-contract-fidelity-batch` Session 2 — Set 009 claimed
+  "ASCII-stable, no golden regen" but the golden carried two non-ASCII deltas
+  (an em-dash repair *and* a UTF-8 `§` its cp1252 decode silently regressed to
+  `Â§`); 010's mandatory regen surfaced both, the regression included. The
+  lessons-learned entry is retained as the action-detail reference (the
+  per-set "add a regenerate step" / "diff one form file before the probe"
+  procedure). Corollary: when chasing an output delta during a regen, take the
+  **raw-byte / codepoint** ground truth — a terminal's rendering of an encoding
+  is unreliable and will mislead a glyph-level read.
+
 ### Token-Window Budget Overrides
 
 The human has recurring token allotments across three orchestrator providers with

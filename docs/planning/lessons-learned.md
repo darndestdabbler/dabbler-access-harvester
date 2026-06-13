@@ -1664,6 +1664,14 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Regenerate Committed Example Files Alongside The Schema Set That Produces Them
 
+> **Promoted to a Convention** in `docs/planning/project-guidance.md` →
+> Conventions → Workflow Expectations on 2026-06-13 (second confirming context:
+> `010-output-contract-fidelity-batch` S2, where Set 009's deferred "ASCII-stable,
+> no regen" claim hid a `§`→`Â§` encoding regression until 010's regen surfaced
+> it). This entry is retained as the action-detail reference: the per-set
+> "add a regenerate step" / "diff one form file before the probe" procedure and
+> the raw-byte-ground-truth corollary.
+
 - **Context:** Session 3 of
   `harvester-finish-operations-and-interpretation-docs` (2026-05-18).
   The set's spec listed `examples/*.json` as the consumer-facing
