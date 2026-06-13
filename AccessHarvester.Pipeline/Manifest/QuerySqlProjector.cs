@@ -134,9 +134,18 @@ public static class QuerySqlProjector
     {
         // 006 F-3-7: prefer the parser's structurally-determined shape; fall back
         // to the DAO-derived type when the SQL did not parse or the shape is Unknown.
-        string parsedQueryType = abstraction is not null
-            ? ShapeToSchemaType(abstraction.Shape) ?? schemaQueryType
-            : schemaQueryType;
+        // BUT never let the generic "Select" AST shape override a more-specific DAO
+        // action/crosstab type: an action query like a MakeTable (SELECT ... INTO ...)
+        // parses as the Select shape, which would otherwise contradict the top-level
+        // QueryType (e.g. "MakeTable") and feed a consumer two disagreeing labels.
+        // The DAO decode is authoritative for the query family post-F-2-1; the AST
+        // only adds value where it refines Select into a distinct structure
+        // (Transform→Crosstab, Union) — those still win. (010 devil's-advocate review.)
+        string? astType = abstraction is not null ? ShapeToSchemaType(abstraction.Shape) : null;
+        string parsedQueryType =
+            astType is not null && !(astType == "Select" && schemaQueryType != "Select")
+                ? astType
+                : schemaQueryType;
 
         var parsed = new JsonObject
         {

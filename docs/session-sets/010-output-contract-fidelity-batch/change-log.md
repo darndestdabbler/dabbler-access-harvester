@@ -5,6 +5,23 @@
 (cross-provider) — S1: R1 ISSUES_FOUND → R2 VERIFIED; S2: R1 ISSUES_FOUND →
 R2 ISSUES_FOUND → R3 VERIFIED
 
+> **Post-review follow-up (2026-06-13, golden-neutral).** A manual whole-set
+> devil's-advocate review (in-IDE Gemini Pro + GPT-5.4) ran after closeout.
+> GPT returned VERIFIED; Gemini raised 5 mostly-theoretical points. Two were
+> real-but-latent and fixed as a follow-up (routed re-verify VERIFIED,
+> `s2-postreview-verification.md`): **(1)** `QuerySqlProjector` no longer lets a
+> generic `Select` AST shape override a more-specific DAO action type — a MakeTable
+> (`SELECT … INTO …`, which parses as Select) would otherwise emit
+> `QueryType:"MakeTable"` but `Sql.Parsed.QueryType:"Select"` (Transform→Crosstab /
+> Union refinements still win); **(2)** the F-2-7 numeric regex broadened to accept
+> valid T-SQL `.5` / `1.` while still rejecting injection and non-T-SQL forms.
+> Both golden-neutral on HHC (no action queries; no such numeric tokens). The other
+> three (Q6 Unknown-vs-PossiblyUnused — the documented strategy-doc design;
+> F-2-5 subquery/secondary-join over-credit — a known precision limit of the
+> 006-recommended regex extraction, no HHC over-fire; QueryExporter MSys-skip —
+> per the F-1-7 recommendation, a practical no-op since Access exposes no
+> MSys-prefixed queries) were dispositioned as accept-with-reason / not-a-defect.
+
 ## Session 1 of 2 — Query-Type Decode + ByVal Emission (F-2-1, F-3-7, F-3-5)
 
 The two golden-affecting Majors plus the F-3-7 parser-reconcile Minor. Emission

@@ -214,6 +214,21 @@ public sealed class QuerySqlProjectorTests
         Assert.Equal("Crosstab", node["Sql"]!["Parsed"]!["QueryType"]!.GetValue<string>());
     }
 
+    [Fact]
+    public void ParsedQueryType_DoesNotOverrideActionDaoTypeWithGenericSelectShape()
+    {
+        // A MakeTable query (SELECT ... INTO ...) parses as the Select shape. The AST
+        // Select must NOT override the more-specific DAO "MakeTable" type, or a
+        // consumer would read QueryType="MakeTable" but Sql.Parsed.QueryType="Select"
+        // — two disagreeing labels (010 devil's-advocate review). The DAO type wins.
+        const string sql = "SELECT a, b INTO tblArchive FROM tblSource WHERE x = 1";
+        var node = QuerySqlProjector.Project(
+            "qMake", "MakeTable", sql, Build("qMake", sql), queryTypeCode: 80);
+
+        Assert.Equal("MakeTable", node["QueryType"]!.GetValue<string>());
+        Assert.Equal("MakeTable", node["Sql"]!["Parsed"]!["QueryType"]!.GetValue<string>());
+    }
+
     // ── Tests: optional DAO fields ────────────────────────────────────
 
     [Fact]

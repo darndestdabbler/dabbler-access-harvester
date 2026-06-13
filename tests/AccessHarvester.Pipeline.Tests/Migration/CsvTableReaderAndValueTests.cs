@@ -168,10 +168,23 @@ public class CsvTableReaderAndValueTests
     [InlineData(5, "9.99")]           // Currency
     [InlineData(7, "1.2e10")]         // Double, exponent
     [InlineData(4, "+7")]             // signed
+    [InlineData(7, ".5")]             // leading-dot fraction (010 review) — valid T-SQL
+    [InlineData(7, "1.")]             // trailing-dot (010 review) — valid T-SQL
+    [InlineData(7, "-.25")]           // signed leading-dot
     public void Valid_numeric_tokens_pass_through_bare(int typeCode, string raw)
     {
         Assert.Equal(raw, SqlValueFormatter.Format(typeCode, raw));
         Assert.False(SqlValueFormatter.IsInvalidDataToken(typeCode, raw));
+    }
+
+    [Theory]
+    [InlineData(7, "1D2")]            // VB D-exponent is NOT valid T-SQL → still rejected
+    [InlineData(7, ".")]             // lone dot
+    [InlineData(7, "1.2.3")]          // multiple dots
+    public void Still_rejects_non_tsql_numeric_forms(int typeCode, string raw)
+    {
+        Assert.Equal("NULL", SqlValueFormatter.Format(typeCode, raw));
+        Assert.True(SqlValueFormatter.IsInvalidDataToken(typeCode, raw));
     }
 
     [Theory]

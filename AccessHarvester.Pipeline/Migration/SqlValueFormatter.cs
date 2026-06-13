@@ -32,11 +32,15 @@ public static class SqlValueFormatter
     public static bool IsBinary(int typeCode) =>
         typeCode is DbBinary or DbLongBinary or DbVarBinary;
 
-    // Invariant numeric literal: optional sign, integer digits, optional fraction,
-    // optional exponent. Anything else interpolated bare into an INSERT would be
-    // malformed or arbitrary SQL, so it is degraded to NULL (F-2-7).
+    // Invariant numeric literal: optional sign; digits with an optional fraction
+    // (`1`, `1.`, `1.5`) OR a leading-dot fraction (`.5`); optional `e`/`E` exponent.
+    // Both `1.` and `.5` are valid SQL Server numeric literals, so accepting them
+    // avoids degrading legitimate values to NULL (010 devil's-advocate review); a
+    // VB `D`-exponent (`1D2`) is intentionally NOT accepted — it is not valid T-SQL.
+    // Anything else interpolated bare into an INSERT would be malformed or arbitrary
+    // SQL, so it is degraded to NULL (F-2-7).
     private static readonly Regex NumericToken =
-        new(@"^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$", RegexOptions.Compiled);
+        new(@"^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$", RegexOptions.Compiled);
 
     /// <summary>Formats <paramref name="raw"/> as a SQL literal for a column of <paramref name="typeCode"/>.</summary>
     public static string Format(int typeCode, string? raw)
