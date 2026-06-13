@@ -471,6 +471,41 @@ experiments only.
   important here because the harvester's pipeline crosses many
   files (extractor → translator → enricher → schema), and any one
   session typically only touches one stage.
+- **Continuing another model's in-flight work: validate empirically,
+  don't trust the handoff prose.** When picking up work a prior
+  model or session started (a resume checkpoint, an uncommitted
+  tree), treat the handoff document as a hypothesis, not ground
+  truth. Build and run the existing affected test suites/corpus
+  **before** adding new work, so inherited regressions surface
+  immediately; for grammar/parser/concurrency or other
+  subtle-correctness changes, add regression pins that *prove* the
+  claimed-safe behavior rather than assuming it; preserve documented
+  design deviations but re-derive their correctness; and name the
+  prior model's weakest design points to the cross-provider verifier.
+  This is the Evidence-Over-Inference principle applied to inherited
+  work, where subtle design errors are hardest for a successor to
+  catch by inspection. (Established 2026-06-13 carrying Fable 5's
+  uncommitted `008` Session 2 work forward under Opus.)
+- **Flag high-value/high-risk work for a safer-vs-riskier review
+  ledger, and review it devil's-advocate.** When an activity is
+  high-stakes and would especially benefit from a stronger model's
+  judgment (grammar/parser ambiguity, subtle correctness,
+  architecture), record it in `docs/planning/fable-review-queue.md`
+  with an explicit safer-vs-riskier call and reasoning, then seek
+  **interim review via the subscription-paid in-IDE orchestrator
+  pair** (GitHub Copilot → Gemini Pro AND GPT 5.4), not via `route()`.
+  Frame those interim reviews **devil's-advocate**: the reviewer's
+  null hypothesis is that the work is wrong, and they steelman a
+  *specific* contrarian hypothesis per item (never generic "be
+  contrarian" — that yields theatrically negative, low-value
+  reviews). Use the canonical **bias-cautions preamble** and
+  **two-pass devil's-advocate pattern** in
+  `dabbler-ai-orchestration/docs/ai-led-session-workflow.md` →
+  *Prompt-framing discipline*. The ledger keeps a durable
+  safer-vs-riskier record so a higher-tier model (e.g. Fable, while
+  shut down by Anthropic 2026-06-13 and possibly restored later) can
+  re-engage quickly. This is **additive to**, never a replacement
+  for, the mandatory routed cross-provider `session-verification`.
 - **Mark `[Obsolete]` instead of deleting types whose consumers a
   future session already owns.** Before physically deleting a type
   whose consumers number in the dozens and a later session is
