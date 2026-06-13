@@ -7,21 +7,37 @@ migration harvester described in `VBA-Parser-Migration-Harvester-Plan.md`.
 Each case is a paired source/expected-output set that exercises a specific
 combination of features the harvester must handle.
 
-The test cases serve three roles in the project:
+The test cases serve two roles in the project:
 
-1. **Specification** — the expected outputs document what the harvester
-   should produce for each input pattern. They drive schema design and
-   resolver behavior.
-2. **Regression suite** — once the harvester is implemented, running it
-   against these inputs and diffing against the expected outputs catches
-   regressions.
-3. **Onboarding artifact** — for a new developer joining the project, the
+1. **Specification (design intent)** — the expected outputs document what
+   the harvester *should* produce for each input pattern. They drove schema
+   design and resolver behavior. They were authored **before** the
+   implementation and encode intent fields the harvester does not (and may
+   never) emit, in a shape that predates the operative `DatabaseManifest`
+   output. Treat them as illustrative design intent, **not** an executable
+   output contract.
+2. **Onboarding artifact** — for a new developer joining the project, the
    cases plus expected outputs are the fastest way to understand what the
    harvester is doing and what "correct" looks like.
 
-The test cases were authored before the harvester implementation. They
-represent the design intent. As real Access databases reveal patterns
-these cases don't cover, add new cases rather than modifying existing ones.
+> **What is actually enforced (008 Session 3, F-3-9 — decided by
+> cross-provider consensus).** No test diffs harvester output against these
+> `expected.json` files, and none is intended to. The enforced parser
+> contract is two-layered: (1) **schema-shape conformance** — every
+> `<n>.expected.json` validates against the operative harvester schema
+> (`TestCaseFixtureConformanceTests`), with one stop-rule exclusion (case
+> 12, see the v1 ADR); and (2) **targeted behavioral tests** that parse the
+> inputs and assert selected annotations on named cases
+> (`ResolverFixtureAnnotationTests`, `FixtureCrossCutTests`,
+> `DynamicSqlFixtureTests`, the grammar corpus tests), backed by the
+> byte-level full-output golden on the real fixture
+> (`CanonicalGoldenRegressionTests`). When a parser feature lands, add a
+> targeted behavioral pin and (optionally) a corpus case as illustration —
+> not a whole-corpus diff. Rationale + the consensus record:
+> `docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/s3-f39-decision.md`.
+
+As real Access databases reveal patterns these cases don't cover, add new
+cases rather than modifying existing ones.
 
 ## Structure
 
@@ -29,12 +45,17 @@ Each case is a pair of files:
 
 - `NN-name.{bas|cls|sql|txt}` — the source artifact as if extracted by a
   text dump from an Access database.
-- `NN-name.expected.json` — the structured output the harvester should
-  produce, validated against `harvester-schema.v0.json`.
+- `NN-name.expected.json` — the design-intent structured output, validated
+  for **shape** against the operative harvester schema
+  (`harvester-schema.v1.1.json`).
 
-The `harvester-schema.v0.json` file is the provisional output schema. It
-will iterate; the schema version field in each expected output tracks the
-schema version the case was authored against.
+The expected outputs were migrated from the provisional `harvester-schema.v0.json`
+to the v1.0 `DatabaseManifest` envelope (PascalCase) and are now pinned for
+shape against the operative `harvester-schema.v1.1.json` by
+`TestCaseFixtureConformanceTests`. See the v1 ADR
+([`docs/schema/v1-adr.md`](../schema/v1-adr.md)) for the migration and the
+case-12 stop-rule exclusion. The `SchemaVersion` field inside each expected
+output records the schema version the case currently conforms to.
 
 ## Running validation
 
@@ -48,7 +69,11 @@ A successful run prints `PASS:` for each `*.expected.json` file. The
 schema is verified to be a valid Draft 2020-12 JSON Schema before
 instance validation.
 
-## The 12 cases
+## The 14 cases
+
+Cases 01–12 are the original design-intent set; 13–14 were added as the
+parser gained features (every parser feature lands with an illustrative
+corpus case per the testing convention).
 
 ### Difficulty: low
 
@@ -165,6 +190,32 @@ routes everything to `unresolvedItems` with `suggestedNextStep` notes
 and zero confidence on the runtime-determined targets. Confirms the
 harvester says "I can't resolve this" rather than guessing.
 
+### Added as the parser gained features
+
+**13 - Preprocessor directives** (`13-preprocessor.bas`)
+`#If` / `#Else` / `#End If` / `#Const` at module and procedure level,
+including `#If VBA7 Then` conditional `Declare PtrSafe` API declarations.
+Exercises the parser's conditional-compilation handling. Added with the
+preprocessor grammar/AstBuilder support.
+
+**14 - Type-suffixed names and contextual keywords**
+(`14-typed-suffix-and-contextual-names.bas`)
+Type-declaration suffix on a `Function` return name (`SqlStr$`), on a
+module variable (`g_sTitle$`) and a local (`msg$`); the contextual keyword
+`step` as a parameter and a local name; named-argument binding of a
+contextual-keyword parameter (`step:=1`); and anchored
+`Option Compare Database` winning over the keyword. Every construct parses
+cleanly (no recovery). Added by 008 Session 2 (F-3-2 / F-3-3 + review
+fixes); the deliberately un-handled variants are recorded as DW-1 / DW-4 in
+`docs/planning/deferred-work.md`.
+
+> **Stop-rule exclusion — case 12.** `12-switchboard-navigation.expected.json`
+> is migrated to the v1.0 envelope but retains one semantic incompatibility
+> (a VBA variable name where the schema requires a `ParserQueryParameter.Source`
+> enum value) and is excluded from the schema-shape conformance gate via the
+> `StopRuleExclusions` set in `TestCaseFixtureConformanceTests`. See
+> [`docs/schema/v1-adr.md`](../schema/v1-adr.md) → Known Issues.
+
 ## Schema design notes
 
 The provisional `harvester-schema.v0.json` includes several design
@@ -239,7 +290,9 @@ When adding new cases:
 ```
 test-cases/
   README.md                              # this file
-  harvester-schema.v0.json               # provisional output schema
+  harvester-schema.v0.json               # provisional (archived) output schema
+  harvester-schema.v1.0.json             # v1.0 DatabaseManifest schema
+  harvester-schema.v1.1.json             # operative schema (shape-conformance target)
   validate.py                            # all-cases validator
   validate_verbose.py                    # detailed error reporter
   fix_locations.py                       # data-fix helper
@@ -268,4 +321,8 @@ test-cases/
   11-autoexec-startup-chain.expected.json
   12-switchboard-navigation.bas
   12-switchboard-navigation.expected.json
+  13-preprocessor.bas
+  13-preprocessor.expected.json
+  14-typed-suffix-and-contextual-names.bas
+  14-typed-suffix-and-contextual-names.expected.json
 ```

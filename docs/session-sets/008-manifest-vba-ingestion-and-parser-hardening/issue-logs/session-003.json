@@ -1,0 +1,9 @@
+[
+  {
+    "round": 1,
+    "severity": "Major",
+    "location": "AccessHarvester.Core/Pipeline.cs + ManifestVbaIngestionTests.cs",
+    "summary": "Verifier R1 could not confirm per-module VBA parse-diagnostic fold (counts + ModeUsed) into manifest Diagnostics.",
+    "resolution": "FALSE POSITIVE / context-gap. The fold was implemented in Session 1 (VBA_PARSE_DEGRADED embeds mode={ModeUsed}, diagnostics={count} at Pipeline.cs:351-362) and pinned by DegradedParse_SurfacesVbaParseDegradedDiagnostic. R1 prompt disclosed this in prose but did not show the S1 code/test, so the verifier (correctly cautious) could not confirm it. Resolved by re-verifying (R2) with the S1 evidence embedded; no code change needed."
+  }
+]

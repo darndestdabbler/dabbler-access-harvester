@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "009-output-encoding-correctness",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Translator cp1252 Decode Fix And Hermetic Encoding Pins",
+      "status": "not-started"
+    }
+  ]
+}

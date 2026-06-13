@@ -78,10 +78,27 @@ relocations — and the human accepts or rejects each (see
   `{ source: "unresolved", reason: "<string>" }`) rather than
   swallowing the construct or substituting a guess. Test case 08
   (`08-unresolvable.bas`) is the canonical example.
-- Test cases in `docs/test-cases/` are the source of truth for parser
-  behavior. The `<n>.expected.json` file pinned next to each input is
-  the contract; parser changes are validated by re-running each input
-  and comparing against the expected output.
+- Test cases in `docs/test-cases/` are **design-intent and onboarding
+  artifacts**, not an executable output contract. Each `<n>.expected.json`
+  was hand-authored before implementation to document what "correct" should
+  look like; it encodes intent fields the harvester does not (and may never)
+  emit and is in a different shape from the operative `DatabaseManifest`
+  output. **The enforced parser contract is two-layered:** (1) schema-shape
+  conformance — every `<n>.expected.json` validates against the operative
+  harvester schema (`TestCaseFixtureConformanceTests`; one stop-rule
+  exclusion, case 12); and (2) targeted behavioral tests that parse the
+  `.bas`/`.sql`/`.cls` inputs and assert selected annotations on named cases
+  (`ResolverFixtureAnnotationTests`, `FixtureCrossCutTests`,
+  `DynamicSqlFixtureTests`, the grammar corpus tests) plus the byte-level
+  full-output golden on the real fixture
+  (`CanonicalGoldenRegressionTests` over `samples/GoldenOutput/HomeHealthCare/`).
+  When a parser feature lands, add a targeted behavioral pin (and a corpus
+  case as illustration) — **not** a whole-corpus diff. If a consumer ever
+  needs whole-corpus output pinning, author a *separate* small golden suite
+  in the real `DatabaseManifest` shape rather than retrofitting these
+  design-intent fixtures. (Decided 008 Session 3, F-3-9, by cross-provider
+  consensus — record at
+  `docs/session-sets/008-manifest-vba-ingestion-and-parser-hardening/s3-f39-decision.md`.)
 - Prefer a real grammar over regex pattern-matching. Even when a
   feature could be extracted with a regex (e.g., procedure
   signatures), the maintenance cost of a half-grammar exceeds the

@@ -128,6 +128,45 @@ public sealed class ManifestVbaIngestionTests
         Assert.Empty(EnumerateDiagnosticCodes(manifest));
     }
 
+    // F-3-6: a saved query whose SQL fails to parse must surface a
+    // QUERY_SQL_PARSE_FAILURE diagnostic (the downgrade to Raw-only Parsed
+    // used to be silent — the bare catch in BuildQueryExports swallowed it).
+    [Fact]
+    public void QuerySqlParseFailure_SurfacesQuerySqlParseFailureDiagnostic()
+    {
+        using var tree = StagedTree.Create();
+        // The recovering SQL parser builds a statement context with no
+        // recognized DML body, so AstBuilder throws — exercising the inner
+        // catch. (Same unparseable string QuerySqlProjectorTests uses.)
+        tree.AddRawQuery("qryBad", "THIS IS NOT VALID SQL AT ALL @@@@", "Select");
+
+        var manifest = tree.EmitAndReadManifest();
+
+        var failures = manifest.RootElement.GetProperty("Diagnostics").EnumerateArray()
+            .Where(d => d.GetProperty("Code").GetString() == "QUERY_SQL_PARSE_FAILURE")
+            .ToList();
+        var hit = Assert.Single(failures);
+        Assert.Contains("qryBad", hit.GetProperty("Message").GetString());
+
+        // The query is still shipped (Raw-only Parsed), not dropped.
+        var query = Assert.Single(manifest.RootElement.GetProperty("Queries").EnumerateArray());
+        Assert.Equal("qryBad", query.GetProperty("Name").GetString());
+    }
+
+    // A well-formed query parses without emitting the failure diagnostic —
+    // proves the diagnostic is failure-scoped, not unconditional.
+    [Fact]
+    public void WellFormedQuery_EmitsNoParseFailureDiagnostic()
+    {
+        using var tree = StagedTree.Create();
+        tree.AddRawQuery("qryGood", "SELECT a FROM b", "Select");
+
+        var manifest = tree.EmitAndReadManifest();
+
+        Assert.DoesNotContain(
+            EnumerateDiagnosticCodes(manifest), c => c == "QUERY_SQL_PARSE_FAILURE");
+    }
+
     private static System.Collections.Generic.IEnumerable<string> EnumerateDiagnosticCodes(
         JsonDocument manifest)
         => manifest.RootElement.GetProperty("Diagnostics").EnumerateArray()
@@ -165,6 +204,20 @@ public sealed class ManifestVbaIngestionTests
             };
             if (vbaCode is not null)
                 node["VbaCode"] = vbaCode;
+            File.WriteAllText(
+                Path.Combine(categoryDir, name + ".json"), node.ToJsonString());
+        }
+
+        public void AddRawQuery(string name, string sql, string queryTypeName)
+        {
+            string categoryDir = Path.Combine(RawDir, "Queries");
+            Directory.CreateDirectory(categoryDir);
+            var node = new System.Text.Json.Nodes.JsonObject
+            {
+                ["Name"] = name,
+                ["Sql"] = sql,
+                ["QueryTypeName"] = queryTypeName,
+            };
             File.WriteAllText(
                 Path.Combine(categoryDir, name + ".json"), node.ToJsonString());
         }

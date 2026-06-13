@@ -419,6 +419,10 @@
             { "type": "null" }
           ]
         },
+        "ResolutionReason": {
+          "type": "string",
+          "description": "Additive (008 Session 3, F-3-6). Present on Unresolved references only: the resolver's reason for why the name did not resolve. Lets a consumer triage an Unresolved reference (a genuine miss vs. a known capability gap) without re-deriving it. Drawn from the resolver's UnresolvedReasons set, which is append-only (extended, never renamed): currently 'not-in-scope', 'me-in-standard-module', 'default-member-not-yet-resolved', 'with-block-flattening-deferred', 'member-access-on-unresolved-target'. Left as a free string (not an enum) so future reasons remain schema-valid. Optional, so documents without it stay valid."
+        },
         "ImplicitContext": {
           "type": "object",
           "properties": {

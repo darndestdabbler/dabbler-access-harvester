@@ -356,13 +356,30 @@ on-disk order the writer emits, are:
   could not fully bind. See §6 for the shape and the per-reason
   narrative pointer.
 - **`Diagnostics`** — harvester run diagnostics. Each entry carries
-  a severity (`Info` / `Warning` / `Error`), a source component
-  (e.g., the extractor that emitted it), a location (file path,
-  object name, or line), and a message string. Recommended
-  downstream-AI action class: surface `Error`-severity entries to
-  the human before consuming the affected object's `ir/` record;
-  treat `Warning` and `Info` as advisory unless the consumer is
-  doing a strict-mode review.
+  a `Severity` (`Info` / `Warning` / `Error`), a `Message` string
+  (the affected object name and any location detail are embedded in
+  the message text), and an optional stable `Code` for filtering
+  without parsing the message. The codes the manifest emitter
+  produces today:
+  - `VBA_PARSE_DEGRADED` — a module/form/report VBA parse succeeded
+    but in a degraded mode (parse diagnostics present, or the lossy
+    fallback engaged). The message reports `mode=` and the diagnostic
+    count. The module still ships a `ParserOutput`.
+  - `VBA_PARSE_FAILURE` — a module's VBA parse threw; the module
+    ships as a stub `ParserOutput=null` rather than being dropped.
+  - `QUERY_SQL_PARSE_FAILURE` — a saved query's SQL failed to parse;
+    the query still ships with a Raw-only `Sql.Parsed` (added 008
+    Session 3, F-3-6 — previously this downgrade was silent).
+  - `QUERY_EXPORT_FAILURE`, `FORM_SPEC_LOAD_FAILURE`,
+    `TABLE_IR_LOAD_FAILURE`, `RELATIONSHIP_IR_LOAD_FAILURE` — a
+    per-object record could not be loaded/exported; the object is
+    skipped and the rest of the manifest is still written.
+  Recommended downstream-AI action class: surface `Error`-severity
+  entries to the human before consuming the affected object's `ir/`
+  record; treat `Warning` and `Info` as advisory unless the consumer
+  is doing a strict-mode review. A degraded/failed parse means the
+  affected object's `ParserOutput` is reduced or absent — cross-check
+  the `Code` against the object you are about to read.
 
 A run on an empty fixture looks like this (snipped from
 [`samples/GoldenOutput/HomeHealthCare/manifest.json`](../../samples/GoldenOutput/HomeHealthCare/manifest.json)
@@ -1123,6 +1140,19 @@ Fields:
   one dynamic-prefix family
   (`member-not-found-at-segment-<N>`), the next-steps fall back to
   the generic list.
+
+**Inline reason on each reference (008 Session 3, F-3-6).** The same
+resolver reason is now also emitted inline on every unresolved
+reference inside a module/form/report `ParserOutput`, as
+`ResolutionReason` on the `Body.References[]` entry (alongside
+`ResolutionStatus: "Unresolved"`). A consumer triaging one specific
+reference can read the reason in place rather than cross-walking to
+this aggregated `UnresolvedItems` list. The reason values are the
+resolver's append-only `UnresolvedReasons` set (`not-in-scope`,
+`me-in-standard-module`, `default-member-not-yet-resolved`,
+`with-block-flattening-deferred`,
+`member-access-on-unresolved-target`); the same narrative doc above
+is authoritative for their meanings.
 
 **Reason-class summary.** The full per-reason narrative is the
 authority — read it before acting on an unresolved entry. The

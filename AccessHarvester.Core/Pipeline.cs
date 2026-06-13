@@ -782,7 +782,12 @@ public sealed class Pipeline
                     File.ReadAllText(file, Encoding.UTF8), readOptions)
                     ?? throw new InvalidDataException("Null JSON root.");
 
-                // Parse the SQL; graceful fallback when parse fails.
+                // Parse the SQL; graceful fallback when parse fails. A parse
+                // failure still ships the query (Raw-only Parsed), but no
+                // longer silently — F-3-6: the bare catch here previously
+                // erased the fact that a query downgraded to Raw-only, so a
+                // consumer could not tell a Raw-only query apart from one the
+                // parser never attempted.
                 QueryAbstraction? abstraction = null;
                 try
                 {
@@ -791,9 +796,17 @@ public sealed class Pipeline
                     var sqlAst = parseResult.BuildAst(raw.Name ?? name);
                     abstraction = QueryAbstractionBuilder.Build(raw.Name ?? name, sqlAst);
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Parse failure → abstraction stays null → Raw-only Parsed
+                    // Parse failure → abstraction stays null → Raw-only Parsed,
+                    // recorded as a diagnostic so the downgrade is visible.
+                    diagnostics.Add(new HarvesterDiagnostic
+                    {
+                        Severity = HarvesterDiagnosticSeverity.Warning,
+                        Message = $"Query SQL parse failed for '{raw.Name ?? name}'; "
+                            + $"shipping Raw-only Sql.Parsed: {ex.Message}",
+                        Code = "QUERY_SQL_PARSE_FAILURE",
+                    });
                 }
 
                 var queryNode = QuerySqlProjector.Project(

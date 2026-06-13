@@ -165,6 +165,70 @@ End Sub";
             "Expected at least one Unresolved reference for DoUnknownThing");
     }
 
+    // ── Tests: F-3-6 ResolutionReason surfacing ──────────────────────
+
+    [Fact]
+    public void UnresolvedReference_CarriesResolutionReason_NotInScope()
+    {
+        // A bare unknown identifier walks the scope chain without a match →
+        // the resolver's NotInScope reason, which the projector now surfaces.
+        const string source = @"
+Option Explicit
+Public Sub DoSomething()
+    DoUnknownThing
+End Sub";
+        var resolved = Resolve(source);
+        var item = Item(Project(resolved), 0)!;
+        var refs = item["Body"]!["References"]!.AsArray();
+
+        var unresolved = refs.First(r =>
+            r!["ResolutionStatus"]?.GetValue<string>() == "Unresolved")!;
+
+        Assert.Equal("not-in-scope", unresolved["ResolutionReason"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void MeInStandardModule_CarriesResolutionReason_MeInStandardModule()
+    {
+        // `Me` has no class context in a standard module → the resolver's
+        // MeInStandardModule reason. Distinct from not-in-scope, so this
+        // proves the reason is the resolver's actual value, not a constant.
+        const string source = @"
+Option Explicit
+Public Sub DoSomething()
+    Me.Requery
+End Sub";
+        var resolved = Resolve(source, kind: ResolverModuleKind.Standard);
+        var item = Item(Project(resolved), 0)!;
+        var refs = item["Body"]!["References"]!.AsArray();
+
+        var meRef = refs.FirstOrDefault(r =>
+            r!["ResolutionReason"]?.GetValue<string>() == "me-in-standard-module");
+
+        Assert.NotNull(meRef);
+    }
+
+    [Fact]
+    public void ResolvedReference_HasNoResolutionReason()
+    {
+        // A resolved reference (built-in) must NOT carry a reason — the
+        // field is unresolved-only, by omission semantics.
+        const string source = @"
+Public Sub DoSomething()
+    Dim s As String
+    s = Format(Now(), ""yyyy-mm-dd"")
+End Sub";
+        var resolved = Resolve(source);
+        var item = Item(Project(resolved), 0)!;
+        var refs = item["Body"]!["References"]!.AsArray();
+
+        foreach (var r in refs.Where(r =>
+            r!["ResolutionStatus"]?.GetValue<string>() == "Resolved"))
+        {
+            Assert.Null(r!["ResolutionReason"]);
+        }
+    }
+
     // ── Tests: Body.Calls ─────────────────────────────────────────────
 
     [Fact]
@@ -211,7 +275,11 @@ End Sub";
             moduleName: "modFoo");
         var root = Project(resolved, "modFoo");
 
-        Assert.Equal("1.0", root["SchemaVersion"]!.GetValue<string>());
+        // 1.1: F-3-6 added the optional ResolutionReason on unresolved
+        // references; the ParserOutput sub-document version is bumped to
+        // signal the new field (the schema validates it as a free pattern,
+        // not a const, so no manifest-envelope churn).
+        Assert.Equal("1.1", root["SchemaVersion"]!.GetValue<string>());
         Assert.NotNull(root["Source"]!["Kind"]);
         Assert.NotNull(root["Source"]!["Location"]);
         // Standard module → Kind = "Procedure"

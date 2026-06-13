@@ -122,4 +122,34 @@ moderate
 | 7    | Closeout: update `disposition.json`, `change-log.md`, `next-session-set-recommendation.md` (routed), `close_session`, commit, push, notify. | orchestrator-direct |
 
 ### Actuals (post-session)
-- (to be filled at session close)
+- Orchestrator used: claude-code claude-opus-4-8 @ effort=high (the
+  ai-assignment named opus-4-7; 4-8 is the current Opus). As recommended class.
+- Total routed cost: ~$0.21 (F-3-9 consensus: gpt-5-4 $0.0441 + gemini-pro
+  $0.0090; next-set analysis ~$0.0037; session-verification gpt-5-4 R1 $0.1366
+  + R2 $0.0162).
+- Deviations / notes:
+  - **Schema versioning scoped to the ParserOutput sub-document, not the
+    manifest envelope.** `ResolutionReason` lives on the shared
+    `ResolvedReference` $def (already `additionalProperties`-tolerant), so the
+    field is additive and already valid under v1.1. Rather than a full envelope
+    v1.1→v1.2 file bump (~15 test files + CLI embedded schema + top-level
+    version), bumped only the ParserOutput sub-version 1.0→1.1 (a free pattern
+    string in the schema) and documented the optional property in-place.
+    Disclosed to and endorsed by the verifier (D1).
+  - **F-3-9 routed for decision-time consensus** (gpt-5-4 + gemini-pro, both
+    Option B high-confidence) before deciding — the spec flagged it eligible.
+    No routed `route()` consensus journal exists in this repo's config, so the
+    decision record is `s3-f39-decision.md` + the raw replies.
+  - **Per-module diagnostic fold was a Session-1 deliverable** (the spec split
+    F-3-6's manifest-diagnostics work S1/S3). The R1 verifier flagged it as
+    "not shown" — a context/evidence gap, not a code gap; R2 VERIFIED after the
+    S1 code+test were embedded (no code change). Lesson reinforced: show
+    cross-session prior-work evidence in the closeout packet, do not only
+    disclose it in prose.
+- Next calibration: the closeout-grade prose-first lead + embedded diffs + the
+  explicit "challenge these 4 design decisions" framing drove substantive D1–D4
+  affirmations on R1; the only R1 issue was the cross-session evidence gap. For
+  a final session whose scope spans earlier sessions, pre-embed the prior
+  sessions' code/test evidence in R1.
+
+**Set complete.** Next set authored: `009-output-encoding-correctness` (P1b).

@@ -89,7 +89,16 @@ public static class ParserOutputProjector
 
         return new JsonObject
         {
-            ["SchemaVersion"] = "1.0",
+            // 1.1 (008 Session 3, F-3-6): ResolvedReference now carries an
+            // optional ResolutionReason on Unresolved references — the
+            // resolver's closed reason set (UnresolvedReasons), previously
+            // dropped at this projection layer. Additive: the field is
+            // optional and the manifest envelope schema's ResolvedReference
+            // $def already tolerated it (no additionalProperties:false), so
+            // old consumers ignore it. The ParserOutput SchemaVersion is a
+            // free pattern string in the schema, not a const, so the bump
+            // costs no manifest-envelope (v1.1) churn.
+            ["SchemaVersion"] = "1.1",
             ["Source"] = new JsonObject
             {
                 ["Kind"] = sourceKind,
@@ -322,7 +331,7 @@ public static class ParserOutputProjector
 
     private static JsonNode BuildResolvedReference(ResolvedReference r)
     {
-        var (status, kind, target, confidence) = MapOutcome(r.Outcome);
+        var (status, kind, target, confidence, reason) = MapOutcome(r.Outcome);
 
         var node = new JsonObject
         {
@@ -334,6 +343,11 @@ public static class ParserOutputProjector
         if (kind is not null) node["ReferenceKind"] = kind;
         if (target is not null) node["ResolvedTarget"] = target;
         if (confidence is double conf) node["Confidence"] = conf;
+        // F-3-6: surface the resolver's reason for an unresolved reference
+        // (the closed UnresolvedReasons set). The project principle is
+        // "unresolvable constructs are explicit, not silent"; the resolver
+        // honored it and this layer previously erased the explanation.
+        if (reason is not null) node["ResolutionReason"] = reason;
 
         return node;
     }
@@ -351,26 +365,26 @@ public static class ParserOutputProjector
 
     // ── Outcome mapping ───────────────────────────────────────────────
 
-    private static (string Status, string? Kind, JsonNode? Target, double? Confidence)
+    private static (string Status, string? Kind, JsonNode? Target, double? Confidence, string? Reason)
         MapOutcome(ResolutionOutcome outcome) => outcome switch
     {
         ResolutionOutcome.Resolved r => (
             "Resolved",
             DeclarationKindString(r.Declaration),
             BuildDeclarationTarget(r.Declaration),
-            1.0),
+            1.0, null),
 
         ResolutionOutcome.ResolvedToObjectModel r => (
             "Resolved",
             "ObjectModel",
             BuildDeclarationTarget(r.Declaration),
-            1.0),
+            1.0, null),
 
         ResolutionOutcome.ResolvedToBuiltIn r => (
             "Resolved",
             "BuiltIn",
             new JsonObject { ["Name"] = r.Function.Name, ["Category"] = r.Function.Category.ToString() },
-            1.0),
+            1.0, null),
 
         ResolutionOutcome.ResolvedToMe r => (
             "Resolved",
@@ -380,22 +394,30 @@ public static class ParserOutputProjector
                 ["Kind"] = r.OwningClass.Kind == ClassDeclarationKind.ReportModule ? "Report" : "Form",
                 ["Name"] = r.OwningClass.Name,
             },
-            1.0),
+            1.0, null),
 
         ResolutionOutcome.ResolvedViaWithFlattening f =>
             MapOutcomeWithFlattening(f),
 
-        ResolutionOutcome.Unresolved =>
-            ("Unresolved", null, null, null),
+        // The reason string is preserved verbatim from the resolver's
+        // closed UnresolvedReasons set so the consumer can distinguish a
+        // genuine miss (not-in-scope) from a known capability gap
+        // (default-member-not-yet-resolved) without re-deriving it.
+        ResolutionOutcome.Unresolved u =>
+            ("Unresolved", null, null, null, u.Reason),
 
-        _ => ("Unresolved", null, null, null),
+        _ => ("Unresolved", null, null, null, null),
     };
 
-    private static (string Status, string? Kind, JsonNode? Target, double? Confidence)
+    private static (string Status, string? Kind, JsonNode? Target, double? Confidence, string? Reason)
         MapOutcomeWithFlattening(ResolutionOutcome.ResolvedViaWithFlattening f)
     {
-        var (status, kind, target, _) = MapOutcome(f.InnerOutcome);
-        return (status, kind, target, 0.9);
+        // A flattened implicit-with member can itself end up Unresolved
+        // (e.g. the member name was not found on the With target); carry
+        // the inner reason forward so the explanation is not lost behind
+        // the 0.9 flattening-confidence wrapper.
+        var (status, kind, target, _, reason) = MapOutcome(f.InnerOutcome);
+        return (status, kind, target, 0.9, reason);
     }
 
     private static Declaration? FlattenDeclaration(ResolutionOutcome outcome) => outcome switch

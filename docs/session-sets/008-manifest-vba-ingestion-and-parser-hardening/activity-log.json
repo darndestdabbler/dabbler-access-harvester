@@ -161,6 +161,60 @@
           "costUsd": 0.2322
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "setup",
+      "dateTime": "2026-06-13T03:55:14.874474-04:00",
+      "description": "Bootstrap env, register_session_start; verified S2 committed+pushed clean; read guidance/lessons/deferred-work/006 F-3-6+F-3-9",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "f36-implement",
+      "dateTime": "2026-06-13T03:55:14.875359-04:00",
+      "description": "F-3-6: surfaced ResolutionReason on Unresolved refs in ParserOutputProjector (ParserOutput SchemaVersion 1.0->1.1); replaced bare inner catch in BuildQueryExports with QUERY_SQL_PARSE_FAILURE diagnostic; documented ResolutionReason additively in v1.1 schema + interpretation-guide diagnostic codes",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "f39-decide",
+      "dateTime": "2026-06-13T03:55:14.876584-04:00",
+      "description": "F-3-9: routed cross-provider consensus (gpt-5-4 + gemini-pro, both Option B high-confidence); decided Option B; amended project-guidance VBA Parser Strategy + test-cases README (14 cases, schema-version sentence, design-intent re-classification); recorded s3-f39-decision.md",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "hermetic-validate",
+      "dateTime": "2026-06-13T03:55:14.876584-04:00",
+      "description": "dotnet build clean (0 errors); Pipeline.Tests 798/798; ManifestVbaIngestionTests 6/6 (incl new F-3-6 query-diagnostic + ResolutionReason pins)",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "com-golden-integration",
+      "dateTime": "2026-06-13T03:55:14.877622-04:00",
+      "description": "Regenerated HomeHealthCare golden (manifest.json only; 34 ParserOutput now 1.1, 0 left at 1.0; 2306 ResolutionReason = disclosed post-F-3-1 Unresolved wall); Integration 58/58 passed 0 failed (TRX Counters), 3 skipped (2 regenerators + quarantined sanitize); .accdb swept",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "next-set-authored",
+      "dateTime": "2026-06-13T03:55:14.877622-04:00",
+      "description": "Authored 009-output-encoding-correctness (P1b) spec + v4 state stub; routed next-set analysis confirmed P1b-next",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
