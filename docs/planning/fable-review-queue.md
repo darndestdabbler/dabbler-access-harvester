@@ -313,5 +313,49 @@ reviewers' null hypothesis is that the call is wrong.
   the self-bootstrap property is not a hard per-test guarantee (acknowledged).
 - **Why it benefits from Fable:** confirm no remaining "green for the wrong
   reason" path — i.e. a production reversion that leaves all 9 tests green.
-- **Interim:** pending.
+- **Interim:** DA-3 OVERTURNED (GPT) / PARTIAL-Minor (Gemini) — see verdicts.
 - **Fable:** pending-fable.
+
+## Interim review verdicts — 009 Session 1 (devil's-advocate)
+
+Both reviewers ran real probes (write-bytes / grep / build). Raws:
+`docs/session-sets/009-…/s1-external-verification-gpt.md` and
+`…/s1-devils-advocate-prompt-gemini.md`. Overall: **GPT `SAFE_TO_BUILD_ON`**,
+**Gemini `MUST_FIX`**. Opus reconciled against the tree (empirical checks win);
+the split reduces to severity + one misread artifact + one out-of-scope
+architecture preference. **Net: 009's shipped code is safe to build on; no
+must-fix.** Two doc tightenings applied + two DW entries opened (DW-5, DW-6).
+
+- **DA-1 (cross-surface BOM divergence) — UPHELD, but PARTIAL/Minor (Opus, with
+  GPT).** Both probes agree on the *fact*: the translator/manifest StreamReader
+  honours a UTF-16-BE BOM that `RunParse`'s manual two-BOM check does not. But
+  the intended invariant (translator ≡ **manifest**, the kb/ir surfaces F-1-1
+  named) holds; the `RunParse`-only narrowness is on synthetic input with no
+  evidence Access emits UTF-16-BE SaveAsText. Gemini's Major overstates a latent
+  divergence. **Action (done):** narrowed the change-log claim from "matches
+  RunParse" to "matches the manifest path; RunParse is narrower"; opened **DW-5**.
+- **DA-2 (no-golden-regen unverified) — OVERTURNED as a blocker (Opus, with
+  GPT).** Direct byte-grep at reconciliation: committed **kb/ (0/86)** and **ir/
+  (0/87)** golden trees have zero non-ASCII bytes and zero U+FFFD — so the
+  translator-only fix is provably byte-stable on the golden corpus. Gemini's
+  MUST_FIX rested on non-ASCII bytes in `samples/DatabaseYaml/.../PrtDevMode`
+  blobs — a mirror artifact the translator **never reads**; it conflated the
+  mirror with the golden. GPT's "kb/ir is ASCII; wording was too broad" is
+  correct. **Action (done):** restated the rationale to the committed kb/ir
+  corpus specifically; COM golden run unnecessary (output-grep is airtight and
+  avoids re-dirtying the fixture).
+- **DA-3 (BOM test non-discriminating) — UPHELD/Minor, no code defect (both
+  agree).** The UTF-8-BOM test would pass even if the fix were reverted (pre-fix
+  `ReadAllText` also honoured BOMs); the real lock is the three no-BOM cp1252
+  tests. **Action (done):** test comment + change-log now describe it as a
+  non-regression guard, not the F-1-1 lock. No code change.
+- **DA-4 (centralize decode / transcode at exporter) — OVERTURNED as a must-fix
+  (Opus, with GPT).** GPT confirmed the static-ctor is necessary (no sibling
+  read site left on the UTF-8 default) and the per-site registration is
+  idempotent bootstrap, not an abstraction failure. Gemini's transcode-at-
+  exporter is a legitimate *architecture* idea but out of scope for P1b and a
+  larger change (alters the `raw/` tier's on-disk encoding contract). **Action
+  (done):** opened **DW-6** (centralization, would absorb DW-5); no 009 code
+  change, per lean-by-default (factor the helper on a second real need).
+- **Fable:** pending-fable on all four — Fable may still weigh in on the DA-1
+  severity and the DA-4 architecture call when restored.

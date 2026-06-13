@@ -105,6 +105,56 @@
 - **Mechanical backstop:** the `!` case is deliberately excluded from the H4
   suffix-mapping theory with a comment pointing here.
 
+### DW-5 — `RunParse` honours a narrower BOM set than the translator / manifest paths
+- **What:** the CLI `parse` path (`RunParse`, `Program.cs:~590-600`) detects only
+  a UTF-8 BOM (`EF BB BF`) and a UTF-16 **LE** BOM (`FF FE`) via a manual byte
+  check, then falls back to cp1252. The translator (`SaveAsTextTranslator`, Set
+  009) and the manifest path (`Pipeline`) read via
+  `File.ReadAllText(path, GetEncoding(1252))`, whose StreamReader auto-detects a
+  **broader** BOM set (UTF-8, UTF-16 LE **and BE**, UTF-32). So a UTF-16-BE-BOM
+  file decodes correctly through `translate`/manifest but is mis-read as cp1252
+  through `parse`.
+- **Origin:** Set 009 Session 1 devil's-advocate interim review (Gemini + GPT,
+  finding DA-1). Both reviewers ran the same probe and confirmed the divergence;
+  they split only on severity (GPT Minor, Gemini Major).
+- **Why deferred:** **latent / unproven need.** There is no evidence Access
+  SaveAsText ever emits UTF-16-BE output (the kb/ir flow this set fixed does not
+  go through `RunParse` at all), so the divergence is on synthetic-but-valid
+  input, not demonstrated real Access output. Out of scope for 009 (P1b =
+  translator decode only).
+- **Trigger to pull back in:** a real `.txt`/VBA input with a UTF-16-BE BOM
+  reaches `parse`, OR a session unifies the three read sites behind one helper
+  (see DW-6).
+- **Owning set candidate:** the DW-6 decode-centralization set, or a CLI-robustness set.
+
+### DW-6 — Centralize SaveAsText decode (consider transcoding raw→UTF-8 at the exporter boundary)
+- **What:** three disjoint code paths each manage their own cp1252 provider
+  registration and (differing) BOM logic to read SaveAsText output:
+  `SaveAsTextTranslator` (Set 009), `Pipeline.EmitManifestArtifacts`, and
+  `RunParse`. A cleaner architecture would normalize the encoding **once** — e.g.
+  transcode `raw/*.txt` to UTF-8 inside `SaveAsTextExporter` immediately after
+  `Application.SaveAsText` (the cp1252-ness is a property of the COM exporter's
+  output, not of every downstream reader), so consumers read plain UTF-8 with no
+  code-page registration or per-site BOM logic — or, more conservatively, a
+  single shared `OpenAccessText(path)` helper with BOM-detect-then-cp1252.
+- **Origin:** Set 009 Session 1 devil's-advocate interim review (Gemini DA-4,
+  UPHELD Major; GPT DA-4 OVERTURNED — GPT confirmed the current per-site
+  registration is *correct* and that no sibling read site was left on the UTF-8
+  default, and advised factoring a helper only on a second real maintenance pain,
+  not pre-emptively). Opus reconciliation: the static-ctor registration is **not**
+  dead code (no must-fix for 009); the centralization is a legitimate but
+  **out-of-scope architecture** change with its own risk (transcoding alters the
+  `raw/` tier's on-disk encoding contract and would touch the golden raw flow).
+- **Why deferred:** out of scope for P1b (009 spec stop-rule: anything broader
+  than the translator decode → DW entry); larger change than the bug warranted;
+  the lean-by-default principle says factor the shared helper when a second
+  concrete maintenance need appears, not speculatively.
+- **Trigger to pull back in:** a third read site needs the same decode, OR DW-5
+  is actioned (unifying BOM behavior is the natural moment to centralize), OR a
+  consumer needs the `raw/` tier in a canonical (UTF-8) encoding.
+- **Owning set candidate:** a future `encoding-architecture` / CLI-robustness set
+  (would also absorb DW-5).
+
 ## Closed
 
 _(none yet)_

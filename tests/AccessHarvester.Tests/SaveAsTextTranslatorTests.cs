@@ -234,6 +234,13 @@ public class SaveAsTextTranslatorTests
         // the two bytes C3 A9, which under cp1252 would decode to "Ã©". With a
         // UTF-8 BOM present the translator must honour UTF-8 and yield "é",
         // proving BOM-detect-then-cp1252 (not blind cp1252).
+        //
+        // NB (DA-3 devil's-advocate finding): this is a NON-REGRESSION GUARD on
+        // the reader configuration, NOT a discriminating lock for F-1-1 — the
+        // pre-fix default ReadAllText(file) ALSO honoured a BOM, so this test
+        // would pass even if the cp1252 fix were reverted. The actual F-1-1 lock
+        // is the three no-BOM cp1252 tests above (block-format, Module-string,
+        // end-to-end), each of which fails on a reversion.
         var raw = Bytes(
             new byte[] { 0xEF, 0xBB, 0xBF },                       // UTF-8 BOM
             Encoding.UTF8.GetBytes("Begin Form\n    Caption =\"Café\"\nEnd"));

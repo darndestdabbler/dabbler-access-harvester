@@ -33,12 +33,17 @@ confirmed still live before the fix.
 **Fix:** `BuildPayload` now reads both sites with
 `Encoding.GetEncoding(1252)`. `File.ReadAllText(path, encoding)` still detects a
 BOM (StreamReader `detectEncodingFromByteOrderMarks: true`), so a UTF-8/UTF-16
-BOM is honoured and only the no-BOM case falls back to cp1252 — identical to the
-BOM-detect-then-cp1252 strategy the CLI `parse` path (`RunParse`) and the
-manifest path (`Pipeline.EmitManifestArtifacts`) already use. A static
-constructor registers `CodePagesEncodingProvider.Instance` (idempotent) so the
-cp1252 read works from any host, including one that never went through the CLI's
-`Main`.
+BOM is honoured and only the **no-BOM** case falls back to cp1252. This makes
+the translator decode **identical to the manifest path**
+(`Pipeline.EmitManifestArtifacts`, which also reads via `GetEncoding(1252)`) —
+the surface F-1-1 flagged as diverging. (The CLI `parse` path `RunParse` reaches
+the same no-BOM cp1252 result but via a *narrower* manual BOM check — it sniffs
+only `EF BB BF` / `FF FE`, so it does not honour a UTF-16 **BE** BOM the
+StreamReader path would; that residual `RunParse`-only narrowness is tracked as
+**DW-5**, see below — it is not an output surface this set's kb/ir flow uses.) A
+static constructor registers `CodePagesEncodingProvider.Instance` (idempotent)
+so the cp1252 read works from any host, including one that never went through the
+CLI's `Main`.
 
 ### F-1-8 (Minor, test posture) — hermetic translator pins
 
@@ -51,9 +56,15 @@ file-to-file `Translate` seam:
   `Option `→Module;
 - the `keepRoot` flag — Macros keep-root vs Forms first-child promotion;
 - the F-1-1 lock — the canonical `43 E9 6C`→"Cél" cp1252 round-trip (block-format
-  `ReadAllLines` path), an accented Module literal (the `ReadAllText` path), an
-  end-to-end `Caption ="Re/Création"` asserting no U+FFFD reaches the kb JSON,
-  and a UTF-8-BOM test proving BOM precedence over the cp1252 fallback.
+  `ReadAllLines` path), an accented Module literal (the `ReadAllText` path), and
+  an end-to-end `Caption ="Re/Création"` asserting no U+FFFD reaches the kb JSON.
+  These three no-BOM cp1252 tests are the **actual** F-1-1 lock — each fails if
+  the production fix is reverted.
+- a UTF-8-BOM precedence test. Note (per the DA-3 devil's-advocate finding) this
+  is a **non-regression guard on the reader configuration, not a discriminating
+  lock for F-1-1**: the pre-fix default `ReadAllText(file)` also honoured a BOM,
+  so this test would pass even with the fix reverted. It is kept as behavioural
+  documentation that BOM detection survives the cp1252 change.
 
 Inputs are built from literal cp1252 bytes (no `GetEncoding(1252)` in test
 setup) so the tests exercise the translator self-bootstrapping cp1252 support
@@ -72,10 +83,19 @@ rather than masking it.
 - `SaveAsTextTranslatorTests`: 9/9 pass. Adjacent `AccessTextParserTests`: 5/5
   still green.
 - **No golden regeneration** — ASCII bytes (0x00–0x7F) decode identically under
-  cp1252 and UTF-8 and BOM detection is preserved, so the all-ASCII committed
-  HomeHealthCare golden is byte-stable by construction (verifier-endorsed). The
-  COM `CanonicalGoldenRegressionTests` was deliberately not run (the change is
-  pure file-to-file logic below the COM layer). No `.accdb` mutations.
+  cp1252 and UTF-8 and BOM detection is preserved, so the translator's output is
+  byte-stable on ASCII input. The decisive evidence is a direct byte-grep (run at
+  the devil's-advocate reconciliation, per DA-2): the committed **kb/ and ir/
+  golden trees** — exactly what `CanonicalGoldenRegressionTests` compares against
+  — contain **0/86 and 0/87 non-ASCII-byte files and zero U+FFFD**. Since the old
+  UTF-8 read would have stamped U+FFFD into the golden had any raw SaveAsText byte
+  been non-ASCII, the raw inputs feeding kb/ir are provably ASCII, so the cp1252
+  fix yields byte-identical golden output. (The claim is scoped to the committed
+  kb/ir golden corpus — **not** the broader `samples/DatabaseYaml` mirror, whose
+  binary `PrtDevMode` blobs carry non-ASCII bytes but are never read by the
+  translator.) The COM `CanonicalGoldenRegressionTests` was therefore not run —
+  the by-output byte-grep is the airtight proof and avoids re-dirtying the
+  fixture. No `.accdb` mutations committed.
 
 ## Scope discipline
 
