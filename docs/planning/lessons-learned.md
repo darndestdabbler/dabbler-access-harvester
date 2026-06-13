@@ -898,6 +898,40 @@ reference; if it proves out twice in *this* repo, propose promotion to
   sub-document-vs-envelope call, promote to a Convention under Output JSON
   Conventions.
 
+### Register Full-Tier Sets That Verify Inline With `--verification-mode out-of-band-or-none`, Not `dedicated-sessions`
+
+- **Context:** Step-0 `start_session` for a Full-tier set whose workflow does
+  the cross-provider `session-verification` **inline** within the work session
+  (the established harvester pattern — 007, 008, 009 all route the verifier
+  from inside the work session; none spins up a separate verification session).
+  First hit in `009-output-encoding-correctness` Session 1 (2026-06-13).
+- **Failure or friction:** Session 1 was registered with
+  `start_session --verification-mode dedicated-sessions`. That is wrong for the
+  inline pattern: at close-out the **`dedicated_verification` gate** (router
+  "Set 057 Q6, hard-TTY") fails because no separate verification session exists
+  in `sessions[]`, even though a genuine cross-provider routed verification
+  (gpt-5-4, R2 VERIFIED) was performed and attested. The sanctioned
+  `change_verification_mode` writer only records the A→B transition
+  (out-of-band → dedicated) and **refuses B→A**, so the mislabel cannot be
+  cleanly undone. Re-running `start_session` to "fix" the mode is a no-op on the
+  mode **but bumps `startedAt`**, which then trips the `change_log_fresh` gate
+  (the already-committed `change-log.md` now predates the new `startedAt`). Net:
+  three wasted close-out rounds.
+- **Lesson:** Match the registered `verificationMode` to how the set actually
+  verifies. Inline routed cross-provider verification = `out-of-band-or-none`.
+  Reserve `dedicated-sessions` for sets that genuinely run a separate
+  verification session on a different engine. The mode is one-way-correctable
+  (out-of-band → dedicated only), so erring toward `out-of-band-or-none` at
+  start is the safe default.
+- **Action for future sessions:** At Step 0, pass
+  `--verification-mode out-of-band-or-none` for the standard inline-verify
+  Full-tier harvester set. If you discover a `dedicated-sessions` mislabel at
+  close-out and the verification really was done inline, the headless escape is
+  `close_session --manual-verify --reason-file <attestation> --accept-suggestions`
+  (the gate downgrades to a recorded soft-warning). Do **not** re-run
+  `start_session` to relabel — it bumps `startedAt` and cascades into the
+  `change_log_fresh` gate. If a second set hits this, promote to a Convention.
+
 ---
 
 ## Cost Guard On Verification: Skip When Verifier Cost Greatly Exceeds Generator
