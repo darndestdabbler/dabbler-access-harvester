@@ -20,16 +20,16 @@
     {
       "number": 2,
       "title": "Grammar And AstBuilder Hardening, Corpus Pins",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-12T17:44:39.395563-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-13T03:20:00.408192-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
         "model": "claude-fable-5",
         "effort": "high"
       },
-      "verificationVerdict": null
+      "verificationVerdict": "VERIFIED"
     },
     {
       "number": 3,
