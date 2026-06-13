@@ -237,3 +237,81 @@ Microsoft-authored modules** vs HHC's 32; gitignored, no COM). Genericized count
   slots: proc names / type & enum members / labels / declare), **DW-2** (`.Line`/
   `.Circle` graphics syntax, the `rptClientProfile` gap), **DW-3** (variable
   suffix→type, the H4 variable parallel, F-3-5 class).
+
+---
+
+## 009-output-encoding-correctness — Session 1 (F-1-1 cp1252 decode + F-1-8 pins)
+
+Work authored by **Opus 4.8** (orchestrator), routed cross-provider verification
+gpt-5-4 (R1 ISSUES_FOUND 3 Minor → fixed → R2 VERIFIED). Small diff, but **broad
+consumer blast radius** — the decode path runs over *every* non-ASCII caption,
+label, validation string, and VBA literal in *every* real customer DB — so it is
+flagged for the higher-tier devil's-advocate pass even though the routed verifier
+passed it. Interim review prompt: `s1-devils-advocate-prompt.md` (run in-IDE via
+Gemini Pro AND GPT 5.4). Each item carries Opus's safer/riskier call; the
+reviewers' null hypothesis is that the call is wrong.
+
+### S1-1 — cp1252 read preserves BOM + agrees across output surfaces
+- **What:** both `BuildPayload` read sites now pass `Encoding.GetEncoding(1252)`;
+  the claim is that `File.ReadAllText(path, enc)` / `ReadAllLines(path, enc)`
+  still honour a BOM (StreamReader `detectEncodingFromByteOrderMarks: true`) and
+  only the **no-BOM** case falls back to cp1252 — making the translator agree
+  with the manifest path (`Pipeline` also reads via `GetEncoding(1252)`) and not
+  re-introduce the cross-surface mismatch F-1-1 set out to kill.
+- **Risk: medium.** The common cases are pinned (cp1252 round-trip both read
+  sites + a UTF-8-BOM precedence test). The subtle, *unproven* edge is that the
+  translator's StreamReader BOM detection is **broader** than `RunParse`'s manual
+  `EF BB BF` / `FF FE` byte check (StreamReader also auto-detects UTF-16 **BE**
+  and UTF-32). The intended invariant (translator ≡ manifest) holds; a *secondary*
+  divergence (translator vs RunParse on a UTF-16-BE-BOM'd file) is possible but
+  likely inert — to be confirmed, not assumed.
+- **Why it benefits from Fable:** anticipating a cross-surface encoding
+  divergence by inspection of three read strategies is the higher-tier strength;
+  Opus pinned the common path and reasons the rest is inert.
+- **Interim:** pending (Gemini Pro / GPT 5.4 in-IDE).
+- **Fable:** pending-fable.
+
+### S1-2 — "no golden regen needed" without running the COM golden test
+- **What:** the set's stop-rule says no golden regeneration is expected because
+  the committed HomeHealthCare fixtures are all-ASCII; `CanonicalGoldenRegressionTests`
+  (COM tier) was deliberately **not run**. The fix is argued ASCII-stable by
+  construction (0x00–0x7F decode identically under cp1252 and UTF-8; BOM
+  preserved).
+- **Risk: medium → riskier if unverified.** The by-construction argument is
+  sound *given* the premise that the raw SaveAsText `.txt` inputs (not just the
+  kb output) are all-ASCII. The 006 probe found no U+FFFD/non-ASCII byte in the
+  committed kb golden, which *implies* the raw inputs are ASCII-only (else the
+  old UTF-8 read would have left U+FFFD in the golden) — but that inference was
+  **not re-confirmed against the raw `.txt` fixtures this session**, and the COM
+  regression test that would catch a real delta was skipped.
+- **Why it benefits from Fable:** "the test I didn't run would have passed" is
+  exactly the inference an adversarial reviewer should try to falsify with a
+  direct byte-grep of the raw fixtures and/or a COM regen.
+- **Interim:** pending.
+- **Fable:** pending-fable.
+
+### S1-3 — static-ctor `CodePagesEncodingProvider` registration (lean?)
+- **What:** a static constructor on `SaveAsTextTranslator` registers the
+  code-pages provider so the cp1252 read works from hosts that never ran the
+  CLI's `Main` (the new hermetic tests, an embedding caller).
+- **Risk: safer.** Idempotent, runs before any member access, correct. The only
+  question is lean-by-default: the CLI `Main` and the manifest path already
+  register it, so a reviewer could argue the translator-local registration is
+  redundant for the production path. Recorded for completeness.
+- **Why it benefits from Fable:** the redundant-vs-necessary call is a judgment
+  about where defensive registration earns its keep.
+- **Interim:** pending.
+- **Fable:** pending-fable.
+
+### S1-4 — hermetic tests lock the fix (not passing for the wrong reason)
+- **What:** 9 hermetic facts; cp1252 inputs built from literal bytes (no
+  test-side provider pre-registration) so they exercise the translator
+  self-bootstrapping cp1252; both repaired read sites pinned independently.
+- **Risk: safer.** R1 routed verification already drove out the three posture
+  gaps (masked self-registration, untested `ReadAllText` path, no BOM pin) and
+  R2 VERIFIED the fixes. Residual: provider registration is process-global, so
+  the self-bootstrap property is not a hard per-test guarantee (acknowledged).
+- **Why it benefits from Fable:** confirm no remaining "green for the wrong
+  reason" path — i.e. a production reversion that leaves all 9 tests green.
+- **Interim:** pending.
+- **Fable:** pending-fable.
