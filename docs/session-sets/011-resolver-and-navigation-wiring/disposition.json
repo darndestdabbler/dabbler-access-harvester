@@ -1,41 +1,38 @@
 {
   "status": "completed",
-  "summary": "Set 011 Session 2 (Navigation & Enrichment Wiring, 006 P3 / F-2-2) VERIFIED. Re-grounding against the current tree DISPROVED the spec's R2-1 premise: tblSwitchboardItems ships '(no data file)' and no harvested artifact carries switchboard row content (the 006 review's own probe confirms this), so a 'Switchboard Items table reader' would need a NEW OleDb/DAO row-read = new COM surface, which this set's Hard Constraints forbid; and 006 already ranked R2-1/R2-2 as a separate 3-session P4 set. Scope decision Option A (deliver core F-2-2 wiring; defer R2-1/R2-2 to P4 via DW-9/DW-10) was chosen by cross-provider consensus (gpt-5-4 + gemini-pro both Option A) AND human sign-off. DELIVERED (no new COM surface): (1) NavigationGraph wired into manifest.json off the existing resolvedModules+crossRefs seam (NavigationGraphBuilder.Build, inputs=null) -> 22 edges (13 OpenForm + 1 OpenReport + 8 Close) + 22 unresolved targets from VBA code-behind; (2) unresolved-items.json populated via UnresolvedItemAggregator.Build(navigationGraph, functionClassifications) matching the proven hermetic path -> 1414 items (1392 FunctionClassification-sourced, EXACTLY matching the per-reference ResolutionStatus=Unresolved count reason-by-reason -> faithful aggregation, no double-count/loss; +22 navigation non-literal-target); resolver diagnostics deliberately NOT fed (would double-emit); (3) enrichment classification content via EnrichmentPipelineRunner per form/report (EventHandlerClassifier + ValidationRuleExtractor + RowSourceSpecBuilder) threaded into per-reference Classification slots AND run-wide arrays, plus FunctionClassifications pass-through, plus table-field validation via ExtractFromTable -> manifest ValidationRules 0->76, RowSourceSpecs 0->19, FunctionClassifications 0->233, EventHandlerClassifications 0->81; (4) removed the 010 interim 'unresolved-items always empty' note from interpretation-guide section 6; (5) DW-9 (switchboard/macro inputs) + DW-10 (R2-2 chains) recorded in deferred-work.md. ALSO fixed a PRE-EXISTING S1 (F-3-4) bug surfaced by running the full ManifestSchemaConformanceTests gate (S1 had run only the golden-compare gate): ParserOutputProjector.BuildDeclarationTarget wrote schema-invalid '\"Kind\": null' for 325 ObjectModel (Me.<control>) targets whose declaration type DeclarationKindString does not enumerate (proven pre-existing: identical 325 count in the HEAD/S1 golden; orthogonal to F-2-2) -> fix omits Kind when null (omit-null convention; in the Stop-Rule's F-3-4 golden-delta envelope). Coordinated HHC golden regen (COM, TRX-confirmed): ONLY manifest.json + unresolved-items.json changed; kb/ir/migration/READ-ME byte-identical; samples/*.accdb timestamp churn swept; object counts + SchemaVersion 1.1 unchanged; every delta maps to F-2-2 (NavigationGraph + 5 enrichment arrays) or the F-3-4 Kind-omission (ResolvedTarget Kind keys 3561->3236). GREEN: hermetic AccessHarvester.Tests 646/2-skip (+6 new F-2-2 pins +1 F-3-4 omit-null pin), Pipeline.Tests 835, Vba.Resolver.Tests 410, Vba.Parser.Tests 92, SymbolDb.Tests 71; full Integration COM suite 58 pass / 3 skip (2 regen guards + quarantined sanitize) / 0 fail incl. CanonicalGoldenRegressionTests AND ManifestSchemaConformanceTests (was red before the Kind fix). Cross-provider verification: R1 VERIFIED (gpt-5-4), empty issues, first round; its only non-blocking note (RowSourceSpecs lacked a dedicated pin) closed post-verdict. Hard constraints honored: NorthwindDevEdition untouched; HHC-only golden via AH_REGEN_GOLDEN; COM foreground/sequential/TRX-as-truth; quarantined sanitize test untouched. NOTE for S3: R2-1/R2-2 validation is replaced by validating the delivered NavigationGraph/unresolved-items/enrichment surfaces against a fresh run + documenting the nav-graph consumer surface + authoring the P4 switchboard-and-report-chain-edges set as the next set.",
-  "verification_method": "api",
-  "verification_verdict": "VERIFIED",
-  "verification_rounds": 1,
+  "summary": "Set 011 Session 3 (closeout; R2-1/R2-2 validation -> docs + next-set authoring, scope adjusted in S2). DELIVERED: (1) Grounded the S2-delivered surfaces against current output, COM-confirmed equal to a fresh extraction (CanonicalGoldenRegressionTests + ManifestSchemaConformanceTests 6/6) -- NavigationGraph 22 edges/22 unresolved, arrays 76/19/233/81, UnresolvedItems 1414; R2-1/R2-2 surfaces correctly absent (deferred to P4). (2) Documented the navigation-graph consumer surface: interpretation-guide new section 5.7 + section 4 envelope entry + section 8 limitation + section 3.2 reading step; fixed stale SchemaVersion 1.0->1.1. (3) Authored the P4 next set 012-switchboard-and-report-chain-edges (spec + not-started v4 stub) carrying the Hard Constraints verbatim + a narrow-shape-gated-row-read constraint; repointed DW-9/DW-10 owning-set. NO C# source or golden output changed this session (docs/artifacts only). VERIFICATION: closeout-grade cross-provider via in-IDE devil's-advocate pair (GitHub Copilot -> Gemini Pro + GPT-5.4), 2 prompts (S3 + set-wide S1/S2 addendum) over 2 rounds. The pair surfaced 4 distinct findings the prior single-provider routed verifications missed. R1: C1 (Major, GPT) section-5.7/section-4 join-key doc wrong (Forms/Reports are {Spec,...}, name=Spec.SourceFormName) -> FIXED; C9 (Major GPT / Critical Gemini) unresolved-items.json undercounts (procedure-body-scoped; GPT-proven reproducer) -> DEFERRED (DW-11, operator-adjudicated) + section-6 disclosure; C7b (Gemini Major / GPT not-triggerable) latent Resolved-ref-to-VBA_RESOLVE_FAILURE-stub -> doc guard added (section 4) + DW-12; C7a/C8 disproved by both. R2 re-verify: Gemini VERIFIED; GPT ISSUES_FOUND with 2 new Major in the R1 fixes themselves -- R2-1 section-4 ParserOutput-optional-on-both (golden 18/19 forms + 10/12 reports) -> FIXED; R2-2 section-6 overclaimed completeness (module-level refs dropped at projection, ParserOutputProjector.cs:66 -> no manifest signal) -> FIXED (section 6 split Layer A header / Layer B module-level; DW-11 broadened, both reproducers captured). All R1 dispositions held in R2; no code defect found. Operator declined an R3 confirm (findings converged to doc-precision, R2 fixes ground-truthed against golden + projector code). Verdict ISSUES_FOUND across 2 rounds, all findings fixed-in-session (ground-truthed) or deferred-with-DW + operator sign-off. SET 011 COMPLETE (3/3 sessions VERIFIED-or-dispositioned).",
+  "verification_method": "manual-in-ide-devils-advocate (GitHub Copilot -> Gemini Pro + GPT-5.4; subscription, cross-provider preserved)",
+  "verification_verdict": "ISSUES_FOUND",
+  "verification_rounds": 2,
   "files_changed": [
-    "AccessHarvester.Core/Pipeline.cs",
-    "AccessHarvester.Pipeline/Manifest/ParserOutputProjector.cs",
-    "tests/AccessHarvester.Tests/ManifestEnrichmentWiringTests.cs",
-    "tests/AccessHarvester.Tests/ManifestResolverWiringTests.cs",
-    "tests/AccessHarvester.Pipeline.Tests/EndToEndFixtureTests.cs",
     "docs/harvester/interpretation-guide.md",
     "docs/planning/deferred-work.md",
-    "samples/GoldenOutput/HomeHealthCare/manifest.json",
-    "samples/GoldenOutput/HomeHealthCare/unresolved-items.json",
     "docs/session-sets/011-resolver-and-navigation-wiring/ai-assignment.md",
-    "docs/session-sets/011-resolver-and-navigation-wiring/s2-verification.md",
-    "docs/session-sets/011-resolver-and-navigation-wiring/s2-scope-consensus-gpt-5-4.md",
-    "docs/session-sets/011-resolver-and-navigation-wiring/s2-scope-consensus-gemini-pro.md",
-    "docs/session-sets/011-resolver-and-navigation-wiring/s3-orchestrator-recommendation.md",
-    "docs/session-sets/011-resolver-and-navigation-wiring/disposition.json",
     "docs/session-sets/011-resolver-and-navigation-wiring/activity-log.json",
     "docs/session-sets/011-resolver-and-navigation-wiring/session-state.json",
-    "tools/vahs011_s2_scope_consensus.py",
-    "tools/vahs011_s2_verify.py",
-    "tools/vahs011_s3_assign.py"
+    "docs/session-sets/011-resolver-and-navigation-wiring/session-events.jsonl",
+    "docs/session-sets/011-resolver-and-navigation-wiring/disposition.json",
+    "docs/session-sets/011-resolver-and-navigation-wiring/next-session-set-recommendation.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-prompt.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-prompt-setwide-addendum.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-prompt-round-2.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-gemini.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-gpt-5.4.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-setwide-addendum-gemini.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-setwide-gpt-5.4.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-round-2-gemini.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-round-2-gpt-5.4.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-verification-synthesis.md",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-issues.json",
+    "docs/session-sets/011-resolver-and-navigation-wiring/s3-issues-round-2.json",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/spec.md",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/session-state.json",
+    "tools/vahs011_s3_log.py"
   ],
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-sonnet-4-6",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 3 is the closeout. With R2-1/R2-2 deferred to P4 in S2, S3's actual scope is validation of the S2-delivered navigation-graph/unresolved-items/enrichment surfaces against a fresh run, interpretation-guide documentation of the nav-graph consumer surface, authoring the P4 switchboard-and-report-chain-edges next set, and coordinated closeout with closeout-grade cross-provider verification. Routed analysis (gemini-pro) recommended a mid-tier orchestrator at effort=medium: documentation + validation + spec-authoring synthesis, not novel design. Sonnet-on-Claude keeps the gpt-5-4 session-verification override valid; if run under Gemini, swap the verifier override to a non-Google model first."
-    }
+  "next_session_set": {
+    "slug": "012-switchboard-and-report-chain-edges",
+    "summary": "006's P4 (authored this session): R2-1 switchboard rows -> structured navigation (DW-9) + R2-2 dialog->query->report chain edges (DW-10); 3 sessions; one narrow shape-gated COM row-read. Prereqs P3 (011) + P2 (010) both met. Recommended Session-1 orchestrator: Claude Code Opus 4.8 @ effort=high (synthesis-heavy). DW-11 (unresolved-items undercount) + DW-12 (resolve-failure asymmetry) are separate backlog, NOT owned by 012."
   },
   "blockers": []
 }

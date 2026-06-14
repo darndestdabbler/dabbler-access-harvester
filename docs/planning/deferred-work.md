@@ -256,12 +256,15 @@
   human sign-off; see `docs/session-sets/011-.../s2-scope-consensus-*.md`.
 - **Trigger to pull back in:** the P4 set is scoped, OR a consumer needs the
   switchboard/ribbon/macro entry-point surfaces.
-- **Owning set candidate:** P4 `switchboard-and-report-chain-edges` (006 ranked,
-  3 sessions; its scope already lists the "narrow OleDb row-read").
+- **Owning set candidate:** **`012-switchboard-and-report-chain-edges`**
+  (006's P4; authored 2026-06-14 by 011 Session 3 — Session 1 owns this).
+  Its scope lists the shape-gated detection + narrow OleDb row-read +
+  `NavigationGraphInputs.Switchboard` population.
 - **Mechanical backstop:** the committed HHC golden records a `NavigationGraph`
   with populated `Edges`/`UnresolvedTargets` but empty `EntryPoints` /
-  `Switchboard` / `Ribbon` / `Macros`; the absence is visible there and pinned
-  by the production-wiring hermetic test added in 011 S2.
+  `Macros` and absent (omitted) `Switchboard` / `Ribbon`; the absence is
+  visible there and pinned by the production-wiring hermetic test added in
+  011 S2.
 
 ### DW-10 — Dialog→query→report chain edges (R2-2) are not derived
 - **What:** the navigation graph surfaces individual `DoCmd` dispatches and
@@ -281,10 +284,118 @@
   P4 boundary and record deferred work.
 - **Trigger to pull back in:** the P4 set is scoped, OR a consumer needs the
   chain-shaped handoff packs.
-- **Owning set candidate:** P4 `switchboard-and-report-chain-edges` (with DW-9).
+- **Owning set candidate:** **`012-switchboard-and-report-chain-edges`**
+  (006's P4; authored 2026-06-14 by 011 Session 3 — Sessions 2–3 own this,
+  with DW-9).
 - **Mechanical backstop:** the committed HHC golden's `NavigationGraph.Edges`
   records the report→dialog `OpenForm` edges (with `OpenArgs`/`WhereCondition`)
   but no derived cross-object chain records; the absence is visible there.
+
+### DW-11 — `unresolved-items.json` is procedure-body-scoped and undercounts header / module-level unresolved references
+- **What:** the unresolved surfaces undercount in **two distinct layers**, both
+  surfaced by the 011 S3 devil's-advocate review (R1 + R2):
+  - **Layer A — aggregator drops procedure-header refs (index-only gap).** The VBA
+    half of `unresolved-items.json` is built from
+    `FunctionClassification.UnresolvedReferences` —
+    `UnresolvedItemAggregator.Build(navigationGraph, functionClassifications)` at
+    `AccessHarvester.Core/Pipeline.cs:612-614`. `FunctionClassificationBuilder`
+    walks only procedure **bodies** (`procedureAst.Body`), so an unresolved
+    reference in a procedure **header** (an optional parameter's default
+    expression) is **absent from `unresolved-items.json`** — but it **is** present
+    inline on `ParserOutput.Body.References[]` (the projector groups by procedure
+    *scope*, header included). So the index is not a structural superset of
+    `Body.References[ResolutionStatus="Unresolved"]`.
+  - **Layer B — projection drops module-level refs (no manifest signal at all).**
+    `ParserOutputProjector.GroupReferencesByProcedure` keeps only references with
+    an enclosing `ProcedureScope` and explicitly drops module-level references
+    ("the v1.0 schema has no module-level item type",
+    `ParserOutputProjector.cs:65-67`). So a module-level unresolved reference
+    (`Const`/`Dim` initializer, `Implements <unresolved>`, module
+    `Private x As New <unresolved>`) appears in **neither**
+    `ParserOutput.Body.References[]` **nor** `unresolved-items.json` — there is no
+    complete manifest signal for it. Fixing Layer B is the larger change (it needs
+    a manifest home for module-level references, i.e. a schema addition).
+- **Proven reproducers (GPT-5.4 devil's-advocate probes, 011 S3):**
+  - Layer A: `Public Sub Demo(Optional ByVal x As Variant = MissingThing)`
+    (trivial body) projects **one** unresolved reference (`MissingThing`,
+    `not-in-scope`) into `Body.References`, while
+    `FunctionClassification.UnresolvedReferences` is **0** and
+    `UnresolvedItemAggregator.Build(functionClassifications: …)` returns **0**.
+  - Layer B: `Public Const DemoConst = MissingThing` (plus a trivial procedure)
+    yields one unresolved reference on the raw `ResolvedModule`, but
+    `ParserOutput.Body.References[]` is **0** and the aggregator is **0** — the
+    module-level reference is dropped at projection.
+- **Origin:** 011 Session 3 closeout devil's-advocate review (Gemini + GPT, set-wide
+  addendum, concern C9). Both providers independently flagged it (GPT Major, Gemini
+  Critical); GPT proved it with the probe above. The defect was introduced by 011
+  Session 2's `UnresolvedItemAggregator` wiring (F-2-2).
+- **Why deferred:** both layers carry real design decisions. **Layer A** — the
+  aggregator was *deliberately* fed only `functionClassifications` (not
+  `resolverDiagnostics`) to avoid **double-emitting** the references both sources
+  carry; the fix must aggregate the *full* procedure-scoped reference set the
+  `ParserOutputProjector` already uses **without** re-introducing that
+  double-count. **Layer B** is larger — module-level references have no manifest
+  home today (the v1.0 schema has no module-level item type), so surfacing them
+  needs a schema addition (a module-level reference slot) plus the projector change
+  to stop dropping them — an envelope-level change with its own golden churn, not a
+  wiring tweak. Both are golden-neutral on HomeHealthCare (zero
+  such cases), so they cannot be validated by the standard golden-regen gate and
+  need synthetic pins; doing it as a closeout afterthought (S3 is docs/validation
+  scope) would ship an under-verified change to a subtle aggregation path and (for
+  Layer B) a schema bump. Consumer impact is bounded **for Layer A** — the inline
+  per-reference `ResolutionReason` / `ResolutionStatus` remain a complete signal for
+  procedure-scoped references (body and header). **Layer B** module-level
+  references have **no** manifest signal until the schema gains a home for them; a
+  consumer that must account for them reads the source directly. 011 S3 disclosed
+  both layers in `interpretation-guide.md` §6.
+- **Trigger to pull back in:** a focused unresolved-items-completeness session is
+  scoped, OR a consumer relies on `unresolved-items.json` as a complete index, OR a
+  real DB exercises header / module-level unresolved references.
+- **Owning set candidate:** a focused `unresolved-items-completeness` set (small;
+  P0-only prereq). NOT folded into `012-switchboard-and-report-chain-edges` (that
+  set's theme is navigation, not unresolved-item aggregation).
+- **Mechanical backstop (owning session's first task):** encode both proven
+  reproducers as hermetic pins — Layer A
+  (`Public Sub Demo(Optional ByVal x As Variant = MissingThing)`) asserting the
+  reference appears in **both** `Body.References` and the aggregated
+  `UnresolvedItems`; Layer B (`Public Const DemoConst = MissingThing`) asserting
+  the module-level reference reaches whatever manifest home the fix gives it. 011 S3
+  captured the reproducers here rather than adding `Skip`-ped pins in the docs-only
+  closeout.
+
+### DW-12 — Latent: a `"Resolved"` reference can point to a `VBA_RESOLVE_FAILURE` stub (degradation-contract asymmetry)
+- **What:** under the shared `ProjectScope` (011 S1, F-3-4), a module's public
+  declarations are attached to the shared project in pass 1 (scope build); pass 2
+  resolves each module. A module that **throws during pass-2 resolution** is caught
+  with a `VBA_RESOLVE_FAILURE` diagnostic and **excluded from `resolvedModules`**
+  (`AccessHarvester.Core/Pipeline.cs:480-499` — the `parsed.Add(...)` only runs on
+  success), so it ships as a degraded stub (`ParserOutput=null` for standard
+  modules). **But its pass-1 scope remains in the shared project**, so a sibling
+  resolved in pass 2 can bind a cross-module reference to its public members —
+  producing a `ResolutionStatus:"Resolved"` reference whose **target module shipped
+  as a `ParserOutput=null` stub**.
+- **Origin:** 011 Session 3 closeout devil's-advocate review (concern C7(b)).
+  Gemini flagged it as a consumer-deref hazard; GPT could **not** find a live
+  `VbaReferenceResolver.Resolve()` throw path (only null-argument guards), so the
+  state is **reachable by contract but not currently triggerable** on any known
+  input. (The original 011 S1 R1→R2 review had reasoned the resolve-failure case
+  "benign" on the grounds the symbols are genuine — true, but it did not consider
+  the target shipping as a `null`-`ParserOutput` stub.)
+- **Why deferred:** latent — no input is known to make `Resolve()` throw, so it
+  affects no current output; and the consumer-facing hazard is closed by the 011 S3
+  documentation note (`interpretation-guide.md` §4 `VBA_RESOLVE_FAILURE` bullet:
+  "null-check a referenced module's `ParserOutput` regardless of the reference's
+  resolved status"). The code-side hardening (prune resolve-failed scopes from the
+  shared project before sibling resolution, or annotate the resolved reference as
+  pointing at a degraded target) is a real but low-priority change with its own
+  re-resolve cost.
+- **Trigger to pull back in:** a real DB (or a parser change) produces a
+  `VBA_RESOLVE_FAILURE`, OR a consumer reports a deref crash on a resolved target,
+  OR the shared-`ProjectScope` degradation contract is revisited.
+- **Owning set candidate:** a future resolver-hardening / degradation-contract set.
+- **Mechanical backstop:** none added (not currently triggerable, so no input
+  reproduces it); the `interpretation-guide.md` §4 note is the standing consumer
+  guard.
 
 ## Closed
 

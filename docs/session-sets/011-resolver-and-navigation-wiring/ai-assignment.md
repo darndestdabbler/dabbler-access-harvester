@@ -123,3 +123,70 @@ author is the P4 `switchboard-and-report-chain-edges` set (carrying DW-9/DW-10 +
 the Hard Constraints verbatim). Sonnet-on-Claude keeps the gpt-5-4
 session-verification override valid; if run under Gemini, swap the verifier
 override to a non-Google model first.
+
+---
+
+## Session 3: R2-1/R2-2 Consumer Validation + Docs + Coordinated Closeout
+
+### Recommended orchestrator
+Claude Sonnet 4.6 @ effort=medium (routed analysis: gemini-pro, per Session 2's
+next-session recommendation).
+
+### Orchestrator actually used
+Claude Code Opus 4.8 @ effort=medium — **deviation from the Sonnet
+recommendation** (the human opened the session under Opus). Opus is strictly more
+capable than the recommended Sonnet and keeps the cross-provider verifier
+constraint satisfiable; the closeout's synthesis (next-set spec authoring +
+closeout-grade verification framing) rides Opus comfortably.
+
+### Rationale
+With R2-1/R2-2 deferred to P4 in Session 2, Session 3's actual scope is
+validation of the S2-delivered NavigationGraph / unresolved-items / enrichment
+surfaces against the current output, interpretation-guide documentation of the
+navigation-graph consumer surface (§5.7 added), authoring the P4
+`012-switchboard-and-report-chain-edges` next set, and coordinated closeout. This
+is moderate documentation + spec-synthesis work, not novel design.
+
+### Estimated routed cost
+Low — no routed `session-verification` this session (verification is the human's
+in-IDE devil's-advocate Gemini + GPT pair via GitHub Copilot, per the
+subscription-in-IDE-orchestrator-pair convention); the only routed call is the
+next-session-set recommendation analysis at closeout.
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| Ground delivered surfaces vs current output | Inspect golden NavigationGraph / unresolved-items / enrichment arrays | Orchestrator direct (mechanical read) |
+| Document nav-graph consumer surface | interpretation-guide §5.7 + §4 envelope + §8 limitations | Orchestrator direct |
+| Residual-gap triage | confirm DW-8/9/10 cover all gaps; no new gap | Orchestrator direct |
+| Author P4 next set | `012-switchboard-and-report-chain-edges` spec + state stub | Orchestrator direct (synthesis, Opus in-conversation) |
+| Final validation | hermetic suites + COM CanonicalGoldenRegression / SchemaConformance confirm | Orchestrator direct (COM babysat) |
+| Closeout verification | **devil's-advocate** Gemini + GPT (in-IDE Copilot, human-run) | Out-of-band (subscription in-IDE pair) |
+| Next-session-set recommendation | routed analysis | **Routed** → gemini-pro |
+
+### Actuals (filled after the session)
+- Orchestrator used: Claude Code Opus 4.8 @ effort=medium.
+- Total routed cost: **$0.0025** (next-session-set recommendation analysis,
+  gemini-pro). No routed `session-verification` — verification was the in-IDE
+  devil's-advocate pair (subscription, $0 metered).
+- Deviations from recommendation: ran Opus (recommended Sonnet) — human's choice
+  of orchestrator. Verification method also deviates from the S1/S2 routed
+  `gpt-5-4` pattern: this closeout used the human-run in-IDE devil's-advocate
+  Gemini + GPT pair (GitHub Copilot) per the subscription-in-IDE-orchestrator-pair
+  convention. The cross-provider property is preserved (two non-Anthropic
+  providers review an Anthropic-orchestrated session). **The pair earned its keep:**
+  across two rounds it surfaced 4 distinct findings the prior single-provider
+  routed verifications missed — C1 (Major: §5.7/§4 join-key doc wrong), C9
+  (Major/Critical: unresolved-items.json undercount, demonstrated by probe), plus
+  R2-1/R2-2 (two factual errors in the orchestrator's *own* R1 fixes). C1/C7b/R2
+  fixed in-session; C9→DW-11, C7b-code→DW-12.
+- Notes for next-session calibration: S3 changed only documentation + session
+  artifacts; no production code or golden output changed, so no golden regen was
+  required (per the spec's "regen only if step 2/3 changed output" conditional).
+  The committed golden is current as of S2's COM regen with no intervening
+  behavioral change, so it equals a fresh run; the COM
+  CanonicalGoldenRegressionTests + ManifestSchemaConformanceTests pass confirms
+  the committed golden still matches a fresh extraction.
+
+**Next-session-set recommendation:** authored as the routed
+`next-session-set-recommendation.md` (P4 `012-switchboard-and-report-chain-edges`
+carrying DW-9/DW-10 and the Hard Constraints block verbatim).

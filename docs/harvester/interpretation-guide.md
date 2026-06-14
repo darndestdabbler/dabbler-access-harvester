@@ -204,7 +204,8 @@ any detail:
 1. Open `manifest.json` for the per-category counts and the
    envelope-level cross-cutting arrays (`RowSourceSpecs`,
    `FunctionClassifications`, `EventHandlerClassifications`,
-   `ValidationRules`, `UnresolvedItems`, `Diagnostics`).
+   `ValidationRules`, `UnresolvedItems`, `Diagnostics`) plus the
+   `NavigationGraph` object.
 2. For each form or report of interest, open the corresponding
    `ir/Forms/<name>.ir.json` or `ir/Reports/<name>.ir.json` for the
    structural detail the manifest only summarises.
@@ -223,7 +224,13 @@ any detail:
    the caller / callee graph and the side-effect classification a
    migration agent reads to pick a translation strategy. See §5.4 for
    the joining shape.
-5. After interpreting the records, consult `unresolved-items.json`
+5. To map how the application moves between screens — which event
+   handler opens which form or report — read
+   `manifest.NavigationGraph.Edges` (the VBA-derived form→form /
+   form→report dispatches) and `.UnresolvedTargets` (dispatches whose
+   target was a non-literal expression). See §5.7 for the consumer
+   surface and the top-level facets that are not yet populated.
+6. After interpreting the records, consult `unresolved-items.json`
    for anything the harvester flagged as unresolvable. The full
    per-reason narrative at
    [`docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md`](../session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md)
@@ -323,9 +330,14 @@ on-disk order the writer emits, are:
 
 - **`SchemaType`** — always `"DatabaseManifest"`. A consumer that
   loads JSON without a path may switch on this to identify the file.
-- **`SchemaVersion`** — currently `"1.0"`. A consumer should treat
-  this as load-time gating: `"1.0"` and any later `"1.x"` are
-  expected to read with the same field set.
+- **`SchemaVersion`** — currently `"1.1"`. A consumer should treat
+  this as load-time gating: `"1.0"` and `"1.1"` (the two values the
+  CLI's `validate` accepts) and any later `"1.x"` are expected to read
+  with the same field set. The `1.0 → 1.1` bump was additive (the
+  `ResolutionReason` sub-document field, 008 Session 3); the
+  `NavigationGraph` key documented below rides the same `"1.1"`
+  envelope (it sits on an `additionalProperties`-tolerant envelope, so
+  its addition did not require an envelope bump).
 - **`HarvesterVersion`** — semantic version of the harvester binary
   that produced the run. Normalised to a sentinel in the golden
   corpus so test fixtures stay diff-clean across releases.
@@ -336,10 +348,26 @@ on-disk order the writer emits, are:
   `UnresolvedItemCount`. Use these to size the read job before
   walking the arrays.
 - **`Forms`, `Reports`, `Queries`, `Modules`, `Tables`,
-  `Relationships`** — per-category stub entries. Each entry is a
-  small `{ Name, ... }` record naming the object; the full
-  structural detail lives in the corresponding
-  `ir/<Category>/<Name>.ir.json` file.
+  `Relationships`** — per-category entries. **The entry shape and the
+  field that carries the object name differ by category** — there is no
+  uniform top-level `Name` on every category:
+  - `Forms` and `Reports` entries always carry **`Spec`** and **may
+    also carry `ParserOutput`** — present when the form/report has VBA
+    code-behind, absent when it does not (so an entry is `{ Spec }` or
+    `{ Spec, ParserOutput }` depending on the object; in the
+    HomeHealthCare golden 18 of 19 forms and 10 of 12 reports carry
+    `ParserOutput`). The object name is **`Spec.SourceFormName`**
+    (reports reuse that same key, not a `Name` field), and
+    `Spec.SuggestedComponentName` is the migration-friendly name.
+  - `Modules` entries are `{ ModuleName, ModuleKind, ParserOutput }` —
+    the name is **`ModuleName`**.
+  - `Queries`, `Tables`, and `Relationships` entries do carry a
+    top-level **`Name`**.
+
+  The corresponding `ir/<Category>/<objectName>.ir.json` file (keyed by
+  the object name above) always holds the per-object detail; for
+  forms/reports/tables the manifest entry also carries substantial
+  structural detail inline under `Spec` / the table fields.
 - **`ValidationRules`** — flat consumer-friendly index over both
   table-level and field-level validation rules from across the
   database. Pre-flattened so a consumer that wants "all rules" does
@@ -352,6 +380,13 @@ on-disk order the writer emits, are:
   ExternalIO, LateBound). Shape in §5.4.
 - **`EventHandlerClassifications`** — per-event-handler effect-class
   classifications across all forms and reports. Shape in §5.4.
+- **`NavigationGraph`** — the application-wide navigation structure:
+  the VBA-derived form→form / form→report edges, the non-literal
+  dispatch targets that could not be resolved, and the (currently
+  empty) top-level entry-point / ribbon / switchboard / macro facets.
+  A single object, not an array. Emitted between
+  `EventHandlerClassifications` and `UnresolvedItems`. See §5.7 for the
+  full consumer surface and what is and is not populated today.
 - **`UnresolvedItems`** — the flat list of references the resolver
   could not fully bind. See §6 for the shape and the per-reason
   narrative pointer.
@@ -366,7 +401,22 @@ on-disk order the writer emits, are:
     fallback engaged). The message reports `mode=` and the diagnostic
     count. The module still ships a `ParserOutput`.
   - `VBA_PARSE_FAILURE` — a module's VBA parse threw; the module
-    ships as a stub `ParserOutput=null` rather than being dropped.
+    ships as a stub `ParserOutput=null` rather than being dropped. A
+    parse failure happens before scope-building, so the module
+    contributes **no** symbols to cross-module resolution.
+  - `VBA_RESOLVE_FAILURE` — a module parsed and built its scope but
+    threw during reference resolution; it ships as a degraded
+    stub (`ParserOutput=null` for standard modules) **yet its
+    already-built public declarations remain visible to sibling
+    modules** (they are genuine source-level symbols). Consequence: a
+    sibling can carry a `ResolutionStatus: "Resolved"` reference whose
+    target module shipped as a `ParserOutput=null` stub. A consumer
+    must therefore **null-check a referenced module's `ParserOutput`
+    before dereferencing it regardless of the reference's resolved
+    status** — a `"Resolved"` reference is not a guarantee the target's
+    body is present. (Not observed on the HomeHealthCare corpus — no
+    module currently triggers a resolve-time throw — but the contract
+    permits it; tracked as DW-12.)
   - `QUERY_SQL_PARSE_FAILURE` — a saved query's SQL failed to parse;
     the query still ships with a Raw-only `Sql.Parsed` (added 008
     Session 3, F-3-6 — previously this downgrade was silent).
@@ -388,7 +438,7 @@ with normalisation sentinels for the volatile fields):
 ```json
 {
   "SchemaType": "DatabaseManifest",
-  "SchemaVersion": "1.0",
+  "SchemaVersion": "1.1",
   "HarvesterVersion": "<NORMALIZED:HarvesterVersion>",
   "Database": {
     "Name": "HomeHealthCare.accdb",
@@ -401,11 +451,13 @@ with normalisation sentinels for the volatile fields):
   "Tables": [], "Relationships": [],
   "ValidationRules": [], "RowSourceSpecs": [],
   "FunctionClassifications": [], "EventHandlerClassifications": [],
+  "NavigationGraph": { "EntryPoints": [], "Edges": [],
+                       "UnresolvedTargets": [], "Macros": [] },
   "UnresolvedItems": [], "Diagnostics": []
 }
 ```
 
-A populated run has the arrays filled in; the per-category stubs
+A populated run has the arrays filled in; the per-category entries
 keep the consumer's iteration shape constant across empty and
 populated cases.
 
@@ -1112,6 +1164,124 @@ of whether the host is a form or a report. The harvester does
 preserving the binding to the host control is the higher-value
 property.
 
+### 5.7 The navigation graph (`manifest.NavigationGraph`)
+
+`manifest.NavigationGraph` is the application-wide map of how the UI
+moves between screens. It is a single object (not an array), emitted
+in the envelope between `EventHandlerClassifications` and
+`UnresolvedItems`. It was wired into the `run` pipeline in set 011
+(P3, F-2-2); before that the builder existed but had no production
+call site.
+
+**What is populated today (VBA-derived).** The graph is built from the
+parsed VBA bodies only — the pipeline calls the builder with no
+metadata-extractor inputs (`inputs: null`). So today the graph carries
+exactly the two VBA-side facets:
+
+- **`Edges`** — one record per `DoCmd.OpenForm` / `DoCmd.OpenReport` /
+  `DoCmd.Close` / `DoCmd.BrowseTo` dispatch in a procedure body whose
+  target was a **string literal**. Each edge names who triggers the
+  navigation (`SourceModule` + `SourceProcedure` +
+  `SourceProcedureKind` + `SourceLine`/`SourceColumn`), the verb
+  (`Action`), where it leads (`TargetKind` + `TargetName`), and the
+  raw `WhereCondition` / `OpenArgs` source text the dispatch carried
+  (each null when the argument was omitted).
+- **`UnresolvedTargets`** — one record per recognised dispatch whose
+  target was **not** a string literal (a variable, function call, or
+  concatenation). Same source provenance as an edge, plus a `Reason`
+  (`"non-literal-target"` or `"missing-target"`) and the
+  `TargetExpressionText` (the original VBA expression, e.g.
+  `"detailFormName"`). These dispatch sites are *also* projected into
+  `unresolved-items.json` with `Source: "NavigationTarget"` (§6), so a
+  consumer building a manual-review queue can read them from either
+  surface.
+
+Example edge and unresolved target from the HomeHealthCare golden
+(22 edges — 13 `OpenForm`, 8 `Close`, 1 `OpenReport`; 22 unresolved
+targets, all `non-literal-target`):
+
+```json
+// NavigationGraph.Edges[*]
+{ "SourceModule": "frmClientDetail", "SourceProcedure": "btnPrint_Click",
+  "SourceProcedureKind": "Sub", "SourceLine": 349, "SourceColumn": 4,
+  "Action": "OpenReport", "TargetKind": "Report",
+  "TargetName": "rptClientProfile" }
+
+// NavigationGraph.UnresolvedTargets[*]
+{ "SourceModule": "basListHelpers", "SourceProcedure": "OpenDetailFromList",
+  "SourceProcedureKind": "Sub", "SourceLine": 128, "SourceColumn": 4,
+  "Action": "OpenForm", "Reason": "non-literal-target",
+  "TargetExpressionText": "detailFormName" }
+```
+
+**Joining edges to the rest of the manifest.** `SourceModule` +
+`SourceProcedure` is the same `(ModuleName, ProcedureName)` key used by
+`FunctionClassifications` and `EventHandlerClassifications` (§5.4), so a
+consumer can pin a navigation edge to its side-effect classification
+and its event-handler binding. `TargetName` is the form/report object
+name; join it to the manifest's `Forms` / `Reports` entries by
+**`Spec.SourceFormName`** (the per-entry name field — reports use that
+same `Spec.SourceFormName` key, not a `Name` field), or equivalently to
+the `ir/Forms|Reports/<TargetName>.ir.json` filename stem. Do **not**
+expect a top-level `Name` on a `Forms` / `Reports` entry — those entries
+are `{ Spec, … }` records (see §4). `WhereCondition` / `OpenArgs` are
+preserved as raw source text so a migration consumer can pass a
+`WhereCondition` through to a parameterised-query translator without
+re-stringifying it.
+
+**What is NOT populated today (needs metadata-extractor inputs).** The
+top-level, non-VBA facets stay empty because they require inputs the
+VBA AST does not carry:
+
+- **`EntryPoints`** — emitted as an empty array `[]`. The ordered
+  AutoExec → default-form → switchboard-root root list needs the
+  startup options and macro chain.
+- **`Macros`** — empty array `[]`. Needs the macro extractor to supply
+  `MSysObjects` action sequences (the HomeHealthCare switchboard is
+  driven by a harvested macro, but turning the macro IR into
+  `NavigationGraphInputs.Macros` is new production code).
+- **`Ribbon`** and **`Switchboard`** — **omitted entirely** (null, so
+  the omit-null serializer drops the key) rather than emitted as empty
+  objects. `Switchboard` needs the `Switchboard Items` table rows,
+  which ship `(no data file)` in the harvested output — reading them
+  needs a new OleDb/DAO row-read (a new COM surface). `Ribbon` needs
+  the `USysRibbons` XML parsed into structure.
+
+This is the **omit-null vs empty-array split** a consumer must code
+for: the four list facets (`EntryPoints`, `Edges`,
+`UnresolvedTargets`, `Macros`) are **always present** (possibly empty);
+the two object facets (`Ribbon`, `Switchboard`) are **absent when
+null**. Test for `("Switchboard" in NavigationGraph)`, not for a
+non-null value.
+
+**Relationship to the R2-1 / R2-2 consumer requests.** The two
+consumer asks that motivated this arc are **not** satisfied by the
+graph as it stands today, and that is a recorded, deliberate deferral
+— not a gap a consumer should read as "done":
+
+- **R2-1 (switchboard menu tree → structured edges)** needs
+  `Switchboard` populated from the switchboard item rows. Those rows
+  are not in any harvested artifact (`tblSwitchboardItems` ships
+  `(no data file)`), so this needs a new row-read surface. Deferred as
+  **DW-9** in [`docs/planning/deferred-work.md`](../planning/deferred-work.md).
+- **R2-2 (dialog → query → report chains)** needs the individual
+  edges/`WhereCondition`/`OpenArgs` (present today) **joined** into
+  cross-object chains, plus report-menu embedded-macro parsing and
+  `RecordSource` edges. That derivation is substantial new logic, not
+  a wiring task. Deferred as **DW-10**.
+
+Both are owned by the planned next set,
+`012-switchboard-and-report-chain-edges` (006's P4). A consumer that
+needs the switchboard tree or the launcher→report→dialog→query chains
+today must treat them as unavailable and fall back to reading the raw
+edges plus the per-object `ir/` records.
+
+**Determinism.** Every collection is sorted at construction
+(`Edges` and `UnresolvedTargets` by source module → procedure → line →
+column, case-insensitive), so identical input yields a byte-identical
+graph across runs — the determinism standard the project guidance pins
+for enrichment outputs.
+
 ---
 
 ## 6. The `UnresolvedItems` array
@@ -1126,9 +1296,37 @@ property.
 > and the switchboard/macro navigation inputs (DW-9). An empty
 > `unresolved-items.json` therefore means "no unresolved navigation targets or
 > unresolved code references were found," not necessarily "every construct in the
-> database resolved." The per-reference `ResolutionReason` / `ResolutionStatus`
-> fields on each `ParserOutput.Body.References[]` entry (see below) remain the
-> authoritative per-reference resolved/unresolved signal.
+> database resolved."
+>
+> **Scope caveat (DW-11): the unresolved surfaces undercount in two distinct
+> ways.** Neither affects the HomeHealthCare golden (that corpus exercises
+> neither case) but both will undercount on databases that do:
+>
+> 1. **Procedure-header unresolved references are missing from the run-wide
+>    index, but present inline.** The VBA half of `unresolved-items.json` is drawn
+>    from `FunctionClassification.UnresolvedReferences`, which the classifier
+>    collects by walking only procedure **bodies**. An unresolved reference in a
+>    procedure **header** — e.g. an optional parameter's default expression,
+>    `Optional ByVal x As Variant = MissingThing` — is **absent from
+>    `unresolved-items.json`** but **is** flagged inline on
+>    `ParserOutput.Body.References[]` (the projector groups by procedure *scope*,
+>    header included). For these, the inline per-reference fields are the complete
+>    signal.
+> 2. **Module-level unresolved references have NO manifest-level signal at all.**
+>    References outside any procedure — a module-level `Const`/`Dim` initializer,
+>    `Implements <unresolved>`, `Private x As New <unresolved>` — are dropped at
+>    projection: `ParserOutputProjector` keeps only references with an enclosing
+>    `ProcedureScope` (the v1.0 schema has no module-level item type). So such a
+>    reference appears in **neither** `ParserOutput.Body.References[]` **nor**
+>    `unresolved-items.json`. There is currently no complete manifest signal for
+>    module-level unresolved references; until DW-11 lands, a consumer that must
+>    account for them has to read the source directly.
+>
+> So the per-reference `ResolutionReason` / `ResolutionStatus` fields on each
+> `ParserOutput.Body.References[]` entry (see below) are the authoritative signal
+> for everything **inside a procedure** (body and header) — they capture the
+> header references the run-wide index omits — but they are **not** complete for
+> module-level references, which no manifest surface currently carries.
 
 `unresolved-items.json` is a flat list of `UnresolvedItem` records,
 one per reference the harvester could not fully bind. The record
@@ -1300,6 +1498,15 @@ Unless Reauthorized (2026-05-17)*:
 - **No late-binding type inference.** Member-access chains on
   Object-typed locals surface as `LateBound` classifications and
   `UnresolvedReferences` entries rather than getting resolved.
+- **No top-level navigation surfaces yet.**
+  `manifest.NavigationGraph` carries only the VBA-derived `Edges` and
+  `UnresolvedTargets` today; `EntryPoints` / `Macros` are empty and
+  `Switchboard` / `Ribbon` are absent (they need metadata-extractor
+  inputs the pipeline does not yet supply — DW-9). The
+  launcher→report→dialog→query **chain** derivation (R2-2) is likewise
+  not done — the constituent edges are present but not joined (DW-10).
+  Both are owned by the planned set
+  `012-switchboard-and-report-chain-edges`. See §5.7.
 
 A consumer should not assume the harvester does any of the above —
 the explicit `null` interpretive slots and the `UnresolvedItems`

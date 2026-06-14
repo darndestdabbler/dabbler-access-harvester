@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "012-switchboard-and-report-chain-edges",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Switchboard Row Materialization + Entry Points (R2-1, DW-9)",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Chain-Edge Model + Mechanical Producers (R2-2 part 1, DW-10)",
+      "status": "not-started"
+    },
+    {
+      "number": 3,
+      "title": "Code-Behind Chain Edges + Coordinated Closeout (R2-2 part 2, DW-10)",
+      "status": "not-started"
+    }
+  ]
+}

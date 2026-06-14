@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 2,
+  "sessionNumber": 3,
+  "verificationRound": 2,
+  "verificationVerdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "issueId": "R2-1",
+      "description": "The Round-1 C1 §4 fix introduced a new inaccuracy while correcting the name-field guidance: it stated `Forms` entries are `{ Spec }` and `Reports` entries are `{ Spec, ParserOutput }`, but `ParserOutput` is optional on BOTH — present when the form/report has code-behind. In the current golden 18 of 19 forms and 10 of 12 reports carry `ParserOutput`.",
+      "category": "documentation",
+      "severity": "Major",
+      "issueType": "deterministic-defect",
+      "verificationMethod": "GPT-5.4 R2 (named frmBudgetServicePlan/frmClientDetail/frmClientSearch as {Spec,ParserOutput}); orchestrator confirmed entry key-set distribution against the golden (Forms: 18×{ParserOutput,Spec} + 1×{Spec}; Reports: 10×{ParserOutput,Spec} + 2×{Spec}).",
+      "resolution_status": "fixed",
+      "resolved_in_round": 2,
+      "resolution_notes": "§4 bullet rewritten: forms and reports always carry Spec and MAY also carry ParserOutput (present when code-behind exists), with the golden counts cited."
+    },
+    {
+      "issueId": "R2-2",
+      "description": "The Round-1 C9 §6 disclosure overclaimed completeness: it said the inline per-reference fields on `ParserOutput.Body.References[]` are the authoritative COMPLETE signal capturing both header AND module-level unresolved references. That is false for module-level references: `ParserOutputProjector.GroupReferencesByProcedure` drops references with no enclosing ProcedureScope (the v1.0 schema has no module-level item type), so module-level unresolveds appear in NEITHER Body.References[] NOR unresolved-items.json — there is no complete manifest signal for them.",
+      "category": "documentation",
+      "severity": "Major",
+      "issueType": "deterministic-defect",
+      "verificationMethod": "GPT-5.4 R2 scratch-probe `Public Const DemoConst = MissingThing` (raw ResolvedModule has 1 unresolved; Body.References[]=0; aggregator=0); orchestrator confirmed ParserOutputProjector.cs:65-67 drops module-level references.",
+      "resolution_status": "fixed",
+      "resolved_in_round": 2,
+      "resolution_notes": "§6 caveat rewritten into two explicit layers — Layer A (procedure-header refs: inline-complete, missing only from the index) and Layer B (module-level refs: no manifest signal at all, read source until DW-11 lands). DW-11 updated to capture both layers (Layer B needs a schema home for module-level refs) with both proven reproducers."
+    }
+  ]
+}

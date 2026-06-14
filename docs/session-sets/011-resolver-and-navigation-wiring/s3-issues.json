@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 2,
+  "sessionNumber": 3,
+  "verificationRound": 1,
+  "verificationVerdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "issueId": "C9",
+      "description": "unresolved-items.json is procedure-body-scoped: UnresolvedItemAggregator.Build is fed only navigationGraph + functionClassifications (Pipeline.cs:612-614), and FunctionClassificationBuilder walks only procedure bodies, so unresolved references in procedure headers (proven reproducer: `Public Sub Demo(Optional ByVal x As Variant = MissingThing)` -> 1 unresolved in Body.References, 0 in the aggregated index) and at module level (Implements/Private As New/Const initializers) are dropped from the run-wide index. It is therefore not a structural superset of Body.References[ResolutionStatus=Unresolved].",
+      "category": "correctness",
+      "severity": "Major",
+      "issueType": "deterministic-defect",
+      "verificationMethod": "GPT-5.4 scratch-probe against the current assemblies (set-wide addendum C9); Gemini independently flagged the module-level manifestation. Orchestrator confirmed the production call args and the absence of any superset pin.",
+      "suggestedTestOrCheck": "Hermetic pin: parse `Public Sub Demo(Optional ByVal x As Variant = MissingThing)`, assert MissingThing appears in BOTH ParserOutput.Body.References AND the aggregated UnresolvedItems; add a module-level case.",
+      "resolution_status": "accepted-risk",
+      "resolution_notes": "DEFERRED to DW-11 (operator-adjudicated at closeout). Rationale: the correct fix carries a real design decision (avoid re-introducing the double-emit the original wiring deliberately avoided) and is golden-neutral on HHC, so it belongs in a focused, properly-verified session rather than a docs-scope closeout. Consumer risk bounded + disclosed: interpretation-guide §6 now documents the scoping caveat and points to the inline per-reference ResolutionReason as the authoritative COMPLETE signal. Proven reproducer captured in DW-11 as the owning session's first task."
+    },
+    {
+      "issueId": "C1",
+      "description": "interpretation-guide §5.7 told consumers to join NavigationGraph.TargetName against a `Name` field on the manifest's Forms/Reports entries, and §4 described every per-category entry as a small `{ Name, ... }` record. Both are inaccurate: Forms entries are `{ Spec }` and Reports entries are `{ Spec, ParserOutput }` with the object name at Spec.SourceFormName (reports reuse that key); Modules use ModuleName; only Queries/Tables/Relationships carry a top-level Name. A consumer coding the join literally would look up a nonexistent property.",
+      "category": "documentation",
+      "severity": "Major",
+      "issueType": "deterministic-defect",
+      "verificationMethod": "GPT-5.4 main-prompt C1 (PowerShell probe of the golden); orchestrator confirmed entry shapes across all six categories against samples/GoldenOutput/HomeHealthCare/manifest.json.",
+      "resolution_status": "fixed",
+      "resolved_in_round": 1,
+      "resolution_notes": "Fixed this session: §5.7 join sentence now points to Spec.SourceFormName / the ir/ filename stem and warns there is no top-level Name on Forms/Reports entries; §4 stub bullet rewritten to give the per-category name field accurately."
+    },
+    {
+      "issueId": "C7b",
+      "description": "Under the shared ProjectScope, a module that throws during pass-2 resolution (VBA_RESOLVE_FAILURE) is excluded from resolvedModules and ships as a ParserOutput=null stub, yet its pass-1 scope stays in the shared project, so a sibling can carry a `ResolutionStatus:Resolved` reference whose target shipped as a null-ParserOutput stub. A consumer dereferencing the target's body on the strength of the Resolved status could crash.",
+      "category": "correctness/documentation",
+      "severity": "Minor",
+      "issueType": "contingent-risk",
+      "verificationMethod": "Gemini set-wide addendum C7(b) flagged the deref hazard; GPT-5.4 could find no live Resolve() throw path (only null-arg guards) so the state is reachable-by-contract but not currently triggerable. Orchestrator confirmed the exclude-but-keep-scope code path at Pipeline.cs:480-499.",
+      "resolution_status": "fixed",
+      "resolved_in_round": 1,
+      "resolution_notes": "Consumer-facing risk fixed via doc: interpretation-guide §4 now documents VBA_RESOLVE_FAILURE and instructs consumers to null-check a referenced module's ParserOutput regardless of the reference's resolved status. The latent code-side hardening (prune resolve-failed scopes / annotate the reference) is deferred as DW-12 (not currently triggerable)."
+    }
+  ]
+}

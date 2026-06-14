@@ -34,10 +34,15 @@
     {
       "number": 3,
       "title": "R2-1/R2-2 Consumer Validation + Docs + Coordinated Closeout",
-      "status": "not-started",
-      "startedAt": null,
+      "status": "in-progress",
+      "startedAt": "2026-06-14T02:22:04.056280-04:00",
       "completedAt": null,
-      "orchestrator": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "medium"
+      },
       "verificationVerdict": null
     }
   ]
