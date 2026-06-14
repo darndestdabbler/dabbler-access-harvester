@@ -513,6 +513,28 @@ experiments only.
   important here because the harvester's pipeline crosses many
   files (extractor → translator → enricher → schema), and any one
   session typically only touches one stage.
+  - **Cross-session clause (the same Convention applied to *time*, not
+    just *space*).** On a **closeout / final** session, the verifier has
+    no memory of earlier sessions of the same set. (a) For any
+    *deliverable* that landed in an earlier session, paste the proving
+    code + test snippet (or a tight diff) into the verification packet
+    under an "earlier-session evidence" heading — a prose claim
+    ("Session 1 already did this") is not evidence the verifier can
+    confirm. (b) Go further on closeout-grade work: author a **set-wide
+    addendum** that actively re-tests the prior sessions' claims that
+    were closed on **weak evidence** — a finding rebutted by *reasoning*
+    rather than a code change, discharged by a *single* pin, or a
+    reconciliation validated *empirically on one corpus* rather than
+    proven structurally. Mine those for the devil's-advocate pass; they
+    are where a clean prior verdict is most likely to have missed a real
+    defect. Promoted from `lessons-learned.md` → "Embed Earlier-Session
+    Evidence In A Final Session's Verification Packet" on 2026-06-14
+    after the second confirming context: `008` Session 3 (embedding the
+    S1 code+test closed a false-positive Major) and `011` Session 3
+    (a set-wide devil's-advocate addendum mining S1/S2 weak-evidence
+    closures surfaced C9 — a Major/Critical `unresolved-items.json`
+    undercount — that S2's clean single-provider routed R1 had missed).
+    The lessons-learned entry is retained as the action-detail reference.
 - **Continuing another model's in-flight work: validate empirically,
   don't trust the handoff prose.** When picking up work a prior
   model or session started (a resume checkpoint, an uncommitted

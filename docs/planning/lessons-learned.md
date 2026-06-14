@@ -832,9 +832,20 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### Embed Earlier-Session Evidence In A Final Session's Verification Packet — Prose Disclosure Is Not Enough
 
+> **Promoted to `project-guidance.md` → Conventions → Workflow Expectations**
+> (as the cross-session clause of the "Send related files to the cross-provider
+> verifier" Convention) on 2026-06-14 (after `011` Session 3, second-context
+> confirmation — a set-wide devil's-advocate addendum mining S1/S2 weak-evidence
+> closures surfaced the C9 Major/Critical `unresolved-items.json` undercount that
+> S2's clean single-provider routed R1 had missed). The Convention also
+> strengthens the rule: actively re-test prior-session claims closed on weak
+> evidence (reasoning-only rebuttals, single pins, single-corpus reconciliations).
+> Retained here as the action-detail reference.
+
 - **Context:** The closeout (final) session of a session set whose scope was
   deliberately split across earlier sessions. First hit in
-  `008-manifest-vba-ingestion-and-parser-hardening` Session 3 (2026-06-13).
+  `008-manifest-vba-ingestion-and-parser-hardening` Session 3 (2026-06-13);
+  second context `011` Session 3 (2026-06-14).
 - **Failure or friction:** F-3-6's manifest-diagnostics work was split S1/S3 by
   the spec (Session 1 did the per-module `VBA_PARSE_DEGRADED`/`FAILURE` fold as
   part of the F-3-1 ingestion fix; Session 3 added the query-side
@@ -2465,3 +2476,38 @@ reference; if it proves out twice in *this* repo, propose promotion to
   session independently finds a golden-green-but-schema-invalid manifest, promote
   the "run both gates" rule to a Convention in `project-guidance.md` → Testing
   Conventions.
+
+### Ground-Truth A Doc/Data-Shape Fix Against The FULL Artifact, Not One Sampled Entry — Before Re-Verifying
+
+- **Context:** Fixing a cross-provider verifier's documentation / data-shape
+  finding, then re-verifying. First hit in `011-resolver-and-navigation-wiring`
+  Session 3 (2026-06-14), correcting interpretation-guide claims about the
+  `manifest.json` per-category entry shapes and the `unresolved-items.json`
+  completeness contract.
+- **Failure or friction:** Round-1 doc fixes were authored from **partial**
+  inspection and introduced *new* inaccuracies that Round-2 (GPT-5.4
+  devil's-advocate) caught: (1) §4 was "corrected" to say `Forms` entries are
+  `{ Spec }` after probing only `Forms[0]` (`frmAbout`, the **one** form with no
+  code-behind) — but 18 of 19 forms carry `{ Spec, ParserOutput }`; `ParserOutput`
+  is optional on both forms and reports. (2) §6 was "corrected" to claim the inline
+  `Body.References[]` fields are the **complete** signal for header *and*
+  module-level unresolved references — but `ParserOutputProjector` drops
+  module-level references at projection (`ParserOutputProjector.cs:~66`, "no
+  module-level item type"), so module-level refs are in *neither* surface. Each
+  was a generalization from one example or from the aggregator layer without
+  reading the projection layer.
+- **Lesson:** A fix to a *finding about a data shape or a contract* is itself a
+  claim, and the same devil's-advocate verifier that found the original will
+  re-test the fix. Before re-verifying, ground-truth the corrected statement
+  against the **whole** artifact (every entry's key-set across the golden — e.g.
+  `Counter(tuple(sorted(e.keys())) for e in arr)` — not `arr[0]`) and against the
+  **actual code path** that produces it (read the projector/emitter, not just the
+  one layer the finding named). This is the Evidence-Over-Inference principle
+  applied to your own corrections: a fix authored from a single sample inherits
+  the sampling bias the original defect had.
+- **Action for future sessions:** When fixing a verifier's data-shape/contract
+  finding: (a) enumerate the full distribution (all entries, all categories) and
+  cite the counts in the doc; (b) trace the value to its emitter and confirm which
+  layer actually drops/keeps it; (c) only then re-verify. If a second session
+  independently ships a fix-introduced inaccuracy a re-verify catches, promote
+  this to a Convention.
