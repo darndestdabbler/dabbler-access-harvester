@@ -2432,3 +2432,36 @@ reference; if it proves out twice in *this* repo, propose promotion to
   broken". If a second flake disposition hits a context-mismatched historical
   measurement, propose promoting this to a Convention in
   `project-guidance.md` → Testing Conventions.
+
+### A Green Golden-Compare Gate Does Not Imply A Schema-Valid Manifest — Run The Full Integration Suite Before Closeout
+
+- **Context:** Any session that changes manifest output shape and regenerates the
+  committed golden. First hit in `011-resolver-and-navigation-wiring` Session 2
+  (2026-06-14), where the F-2-2 wiring's full Integration COM run surfaced a
+  **pre-existing** Session-1 (F-3-4) defect.
+- **Failure or friction:** Session 1 validated its F-3-4 resolver wiring by
+  regenerating the HomeHealthCare golden and running `CanonicalGoldenRegressionTests`
+  (a golden-vs-fresh-run *compare*), which passed. But S1 did **not** run
+  `ManifestSchemaConformanceTests` (which validates a fresh run against the embedded
+  `harvester-schema.v1.1.json`). S1's registry-backed `Me.<control>` resolution made
+  `ParserOutputProjector.BuildDeclarationTarget` emit `"Kind": null` for 325 ObjectModel
+  targets whose declaration type `DeclarationKindString` does not enumerate. A
+  golden-compare gate is blind to this: the golden itself contains the invalid
+  `Kind: null`, so fresh-run == golden and the compare is green. Only the
+  schema-conformance gate catches it. S2 discovered it 1 session later by running
+  the **whole** Integration project.
+- **Lesson:** The golden-compare gate proves *reproducibility* (the run is
+  deterministic), NOT *contract validity* (the run matches the schema). They are
+  orthogonal: a deterministic run that emits a schema-invalid field passes the
+  compare and fails conformance. Both gates must be run before any closeout that
+  touches output shape. Relatedly, `"<field>": null` on disk is never correct
+  (omit-null convention) **and** is frequently schema-invalid (typed fields) — the
+  projector must omit, not null-fill, a value it cannot determine.
+- **Action for future sessions:** Before closing any session that regenerates a
+  golden or changes manifest shape, run the **full** `tests/AccessHarvester.Integration`
+  suite (not just `CanonicalGoldenRegressionTests`) so `ManifestSchemaConformanceTests`
+  and the determinism checks run too. When a projector builds a target object, omit
+  any property whose source is null rather than writing `"X": null`. If a second
+  session independently finds a golden-green-but-schema-invalid manifest, promote
+  the "run both gates" rule to a Convention in `project-guidance.md` → Testing
+  Conventions.
