@@ -69,6 +69,30 @@ public sealed class Pipeline
     public IReadOnlyList<string> TranslatorCategories
         => _translators.Select(t => t.Category).ToArray();
 
+    public IReadOnlyList<string> EnricherCategories
+        => _enrichers.Select(e => e.Category).ToArray();
+
+    /// <summary>
+    /// The distinct set of category names this pipeline can act on — the union of
+    /// its exporter, translator, and enricher categories, case-insensitively
+    /// de-duplicated and kept in first-seen (exporter-declaration) order. This is
+    /// the source of truth a <c>--types</c> filter is validated against (006 F-1-3):
+    /// a value outside this set silently matches nothing through
+    /// <see cref="WithCategories"/>, so callers reject it as a usage error rather
+    /// than producing an empty "success".
+    /// </summary>
+    public IReadOnlyList<string> KnownCategories
+        => _exporters.Select(e => e.Category)
+            .Concat(_translators.Select(t => t.Category))
+            .Concat(_enrichers.Select(e => e.Category))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+    /// <summary>True when this pipeline has no exporters, translators, or enrichers
+    /// left to run — e.g. after a <c>--types</c> filter selected nothing.</summary>
+    public bool IsEmpty
+        => _exporters.Count == 0 && _translators.Count == 0 && _enrichers.Count == 0;
+
     /// <summary>
     /// Default pipeline covering all categories the harvester currently supports.
     /// </summary>

@@ -265,7 +265,28 @@ public static class Program
         if (opts.TryGetValue("types", out var types))
         {
             var cats = types.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            pipeline = pipeline.WithCategories(cats);
+
+            // 006 F-1-3: --types values are otherwise passed straight into the pure
+            // WithCategories set filter, so a typo'd or stale category name matches
+            // nothing and the run reports "Ok: 0, Failed: 0" and exits 0 — a silent
+            // empty success the exit-code-keying consumer reads as "all objects
+            // processed." Reject any unknown value (and an all-filtered-out result)
+            // as a usage error (the existing ArgumentException → exit-1 path) so the
+            // failure is honest.
+            var known = pipeline.KnownCategories;
+            var knownSet = new HashSet<string>(known, StringComparer.OrdinalIgnoreCase);
+            var unknown = cats.Where(c => !knownSet.Contains(c)).ToArray();
+            if (unknown.Length > 0)
+                throw new ArgumentException(
+                    $"Unknown --types value(s): {string.Join(", ", unknown)}. "
+                    + $"Valid categories: {string.Join(", ", known)}.");
+
+            var filtered = pipeline.WithCategories(cats);
+            if (filtered.IsEmpty)
+                throw new ArgumentException(
+                    $"--types selected no categories to process. "
+                    + $"Valid categories: {string.Join(", ", known)}.");
+            pipeline = filtered;
         }
         return pipeline;
     }
@@ -748,8 +769,10 @@ public static class Program
 
             --types         Comma-separated category filter. Valid categories:
                               Forms, Reports, Macros, ModulesAndClasses,
-                              Queries, Tables, Relationships
-                            Default: all.
+                              Queries, Tables, Relationships, Navigation
+                            Default: all. An unknown value (or a filter that
+                            selects nothing) is a usage error (exit 1), not a
+                            silent empty success.
             --no-clean      Skip the default per-tier clean. By default `run`/`extract`/`translate`
                             delete the target tier directory (raw/ for extract, kb/ for translate,
                             raw+kb+ir for run) before writing, so a re-harvest of a database whose

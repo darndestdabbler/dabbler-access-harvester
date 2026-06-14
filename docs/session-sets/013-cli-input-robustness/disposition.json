@@ -1,0 +1,32 @@
+{
+  "status": "completed",
+  "summary": "Set 013 (006's P5) Session 1 of 2 COMPLETE. Delivered the two Major exit-code-correctness fixes. F-1-3: BuildPipeline now validates each --types value against Pipeline.KnownCategories (the live union of exporter/translator/enricher categories, case-insensitive, de-duplicated) and throws ArgumentException (existing exit-1 usage path) listing the valid set; a defensive Pipeline.IsEmpty guard rejects an all-filtered-out selection (e.g. '--types ,,'). Added KnownCategories/EnricherCategories/IsEmpty to Pipeline; updated the stale usage text (now lists Navigation -- the post-012 category the hardcoded list omitted -- and states an unknown/empty selection is a usage error exit 1). A misspelled --types value is no longer a silent empty success (exit 0); valid runs keep their exit code. F-1-2: SaveAsTextExporter now sanitises the object-name path component (mirrors the sibling QueryExporter/TableExporter/RelationshipExporter SanitizeFileName) via a pure, hermetically-testable PlanOutputFiles; a collision guard reports a non-overwrite failure when two distinct object names sanitise to the same file rather than silently overwriting. Audited siblings (already sanitise) and SwitchboardExporter (fixed file names, no object-name component) -- SaveAsTextExporter was the lone unsanitised Path.Combine. NO golden regen: proven BYTE-LEVEL by CanonicalGoldenRegressionTests (COM, TRX passed=1/failed=0) reproducing the committed HHC golden -- SanitizeFileName is identity on HHC's Hungarian-named objects, so F-1-2/F-1-3 are golden-neutral. VERIFICATION: routed cross-provider gpt-5-4 R1 VERIFIED (empty issues, substantive 4-concern analysis: F-1-3 ordering/exit-code correctness, F-1-2 honest collision guard, set-specific constraints hold, factoring + pins adequate). Hermetic pins: AccessHarvester.Tests 22/22 (PipelineCategoryValidationTests + SaveAsTextExporterSanitizeTests); Integration CLI black-box 7/7 (3 new CliTypesValidationTests on the COM-free translate path + 4 usage drift gates). S2 carries O-1-4 (shared ParseOptions), F-1-5 (OleDbConnectionStringBuilder), F-1-6 (bracket-aware PARAMETERS -- the one fix that can touch the golden), O-1-7 (dispatch-table drift) + closeout.",
+  "verification_method": "routed cross-provider session-verification (gpt-5-4, R1 VERIFIED)",
+  "verification_verdict": "VERIFIED",
+  "verification_rounds": 1,
+  "files_changed": [
+    "AccessHarvester.Cli/Program.cs",
+    "AccessHarvester.Core/Pipeline.cs",
+    "AccessHarvester.Core/Extraction/SaveAsTextExporter.cs",
+    "tests/AccessHarvester.Tests/PipelineCategoryValidationTests.cs",
+    "tests/AccessHarvester.Tests/SaveAsTextExporterSanitizeTests.cs",
+    "tests/AccessHarvester.Integration/Cli/CliTypesValidationTests.cs",
+    "docs/session-sets/013-cli-input-robustness/ai-assignment.md",
+    "docs/session-sets/013-cli-input-robustness/s1-verification.md",
+    "docs/session-sets/013-cli-input-robustness/activity-log.json",
+    "docs/session-sets/013-cli-input-robustness/session-events.jsonl",
+    "docs/session-sets/013-cli-input-robustness/session-state.json"
+  ],
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "S2 combines a wide-impact ParseOptions consolidation (O-1-4, 7 subcommands), a subtle bracket-aware PARAMETERS tokenisation (F-1-6, the one fix that can change shipped output and trigger a coordinated golden regen), and closeout synthesis (next-set authoring + Step 9). The routed ai-assignment recommends Opus 4.8 @ high for that complexity."
+    }
+  },
+  "blockers": []
+}
