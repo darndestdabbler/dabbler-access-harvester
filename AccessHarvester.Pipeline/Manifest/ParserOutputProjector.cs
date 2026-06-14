@@ -467,11 +467,19 @@ public static class ParserOutputProjector
             return target;
         }
 
-        return new JsonObject
-        {
-            ["Kind"] = DeclarationKindString(decl),
-            ["Name"] = decl.Name,
-        };
+        // Omit `Kind` when the declaration type is one DeclarationKindString
+        // does not enumerate (the `_ => null` arm) rather than writing
+        // `"Kind": null`. A null on disk is never correct (omit-null
+        // convention) AND it is schema-invalid: the harvester schema types
+        // ResolvedTarget.Kind as a string, so a null tripped
+        // ManifestSchemaConformanceTests. Discovered in 011 S2 while running
+        // the full schema-conformance gate (S1's F-3-4 wiring routed more
+        // declarations through this projector, surfacing the latent null);
+        // the fix is an F-3-4 conformance correction, not an F-2-2 delta.
+        var node = new JsonObject { ["Name"] = decl.Name };
+        var kind = DeclarationKindString(decl);
+        if (kind is not null) node["Kind"] = kind;
+        return node;
     }
 
     private static string? DeclarationKindString(Declaration decl) => decl switch

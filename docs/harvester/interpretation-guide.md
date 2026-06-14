@@ -1116,17 +1116,19 @@ property.
 
 ## 6. The `UnresolvedItems` array
 
-> **Interim status (as of 2026-06-13, set 010 / P2): `unresolved-items.json`
-> currently always ships as an empty list `[]`.** The producers that surface
-> these records (the resolver, SQL/form-reference, dynamic-SQL, navigation-target,
-> and function-classification seams) are parsed and tested but are **not yet wired
-> into the `run` pipeline** — that wiring is the P3 resolver-and-navigation arc
-> (006 findings F-3-4 / F-2-2). Until P3 lands, a consumer should treat an empty
-> `unresolved-items.json` as "the aggregation seam is not connected yet," **not**
-> as "every reference resolved cleanly." The per-reference `ResolutionReason` /
-> `ResolutionStatus` fields on each `ParserOutput.Body.References[]` entry (see
-> below) are the resolved/unresolved signal that IS populated today. This note is
-> removed when P3 wires the aggregator.
+> **Status (as of set 011 / P3, F-2-2): `unresolved-items.json` is now wired
+> into the `run` pipeline.** It aggregates the navigation graph's unresolved
+> dispatch targets (`DoCmd.OpenForm`/`OpenReport` with a non-literal or missing
+> target) and the per-procedure unresolved references the function-classification
+> pass collected, so a non-empty list now reflects genuine manual-review items.
+> Two producer seams remain **not** fed into this array yet: the SQL/form-reference
+> and dynamic-SQL seams (their analyzers have no production call site — see DW-8),
+> and the switchboard/macro navigation inputs (DW-9). An empty
+> `unresolved-items.json` therefore means "no unresolved navigation targets or
+> unresolved code references were found," not necessarily "every construct in the
+> database resolved." The per-reference `ResolutionReason` / `ResolutionStatus`
+> fields on each `ParserOutput.Body.References[]` entry (see below) remain the
+> authoritative per-reference resolved/unresolved signal.
 
 `unresolved-items.json` is a flat list of `UnresolvedItem` records,
 one per reference the harvester could not fully bind. The record

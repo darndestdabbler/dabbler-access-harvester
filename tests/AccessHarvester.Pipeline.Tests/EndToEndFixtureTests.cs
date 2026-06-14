@@ -24,6 +24,19 @@ namespace AccessHarvester.Pipeline.Tests;
 // output assembles against harvester-schema.v0.json.
 //
 // These tests are hermetic; no Access COM is required.
+//
+// RECONCILIATION (011 Session 2, F-2-2): these tests assemble the
+// substrate chain DIRECTLY on the synthetic docs/test-cases fixtures —
+// they remain valid SUBSTRATE-LEVEL coverage (they verify the builders
+// produce the right facets per fixture, independent of file IO). As of
+// 011 S2 the same substrate is ALSO wired into the production manifest
+// path (Pipeline.EmitManifestArtifacts → manifest.NavigationGraph,
+// unresolved-items.json, and the classification arrays); that PRODUCTION
+// wiring is pinned separately by
+// AccessHarvester.Tests.ManifestEnrichmentWiringTests. Both are kept:
+// this file proves the substrate is correct on hand-authored fixtures;
+// that file proves the production pipeline now calls it. Neither was
+// deleted (per the spec's "do not delete coverage" rule).
 public sealed class EndToEndFixtureTests
 {
     // ── Path resolution ──────────────────────────────────────────────

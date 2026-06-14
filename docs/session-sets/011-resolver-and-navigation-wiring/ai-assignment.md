@@ -54,3 +54,72 @@ a Claude orchestrator (→ gpt-5-4). If Session 2 runs under Gemini, swap the ov
 to a non-Google verifier (opus or gpt-5-4) before Step 6, per the verifier-selection
 lesson; Sonnet @ medium is a Claude-side alternative that keeps the existing
 gpt-5-4 override valid.
+
+---
+
+## Session 2: Navigation & Enrichment Wiring (F-2-2)
+
+### Recommended orchestrator
+Mid-tier @ effort=medium (Sonnet 4.6 / Gemini-Pro-class), per Session 1's routed
+next-session analysis.
+
+### Orchestrator actually used
+Claude Code Opus 4.8 @ effort=medium — **deviation from the mid-tier
+recommendation**, see Actuals. (Opus is strictly more capable than the
+recommended Sonnet and keeps the gpt-5-4 cross-provider verifier override valid;
+the re-grounding surfaced a material scope decision that benefited from
+Opus-level judgment plus routed cross-provider consensus.)
+
+### Rationale
+F-2-2 is wiring the already-built-but-unwired Phase 6 enrichment substrate
+(`NavigationGraphBuilder`, `UnresolvedItemAggregator`, `EnrichmentPipelineRunner`
++ `EventHandlerClassifier` / `ValidationRuleExtractor` / `RowSourceSpecBuilder`)
+into the production manifest pipeline off the existing `resolvedModules` +
+`crossRefs` seam. No new COM/data surface for the core wiring.
+
+### Estimated routed cost
+Moderate (one scope-decision consensus pair + cross-provider verification).
+
+| Step | Action | Routing Decision |
+|------|--------|------------------|
+| Re-ground F-2-2 vs current tree | Map substrate call sites; probe switchboard data | Orchestrator direct (Explore fan-out) |
+| **Scope decision** (R2-1 premise disproven) | switchboard rows NOT harvested → R2-1/R2-2 = P4 | **Routed decision consensus** → gpt-5-4 + gemini-pro (both Option A); human-approved |
+| NavigationGraph + UnresolvedItems wiring | Pass `navigation` + aggregator to manifest | Orchestrator direct (implementation) |
+| Enrichment classification content | `EnrichmentPipelineRunner` per form/report + table validation | Orchestrator direct |
+| DW entries + interp-guide §6 note removal | Defer R2-1/R2-2 to P4; remove "always empty" note | Orchestrator direct |
+| Hermetic pins + golden regen | Production-wiring pins + COM regen + canonical gate | Orchestrator direct (COM babysat) |
+| End-of-session verification | Independent review | **Routed** → gpt-5-4 (cross-provider, mandatory) |
+
+### Actuals (filled after the session)
+- Orchestrator used: Claude Code Opus 4.8 @ effort=medium.
+- Total routed cost: ~$0.155 — scope consensus (gpt-5-4 $0.0283 + gemini-pro
+  $0.0038) + session-verification (gpt-5-4 $0.1208) + S3 orchestrator analysis
+  (gemini-pro $0.0014).
+- Deviations from recommendation: ran Opus (recommended mid-tier). The session's
+  defining work turned out to be a scope correction (the spec's R2-1 "switchboard
+  rows are harvested" premise is disproven by the tree), not the anticipated
+  known-pattern wiring — so Option A (core wiring; defer R2-1/R2-2 to the
+  006-ranked P4 set) was chosen by routed consensus + human sign-off. The core
+  wiring itself was mechanical once the seam was understood; the Opus-level value
+  was in the re-grounding + scope adjudication.
+- Verification: R1 VERIFIED (gpt-5-4), empty issues, first round. The only
+  (non-blocking) note — RowSourceSpecs lacked a dedicated hermetic pin — was closed
+  post-verdict by adding `RowSourceSpecs_PopulatedForComboWithRowSource`.
+- Notes for next-session calibration: the full `ManifestSchemaConformanceTests`
+  gate caught a PRE-EXISTING S1 (F-3-4) bug — `ResolvedTarget` emitting
+  `"Kind": null` for ObjectModel control targets — that S1's golden-compare-only
+  validation missed. Lesson: run the full Integration suite (not just the golden
+  gate) before closeout; a green golden does not imply a schema-valid manifest.
+
+**Next-session orchestrator recommendation (Session 3 — closeout):**
+Claude Sonnet 4.6 @ effort=medium (routed analysis: gemini-pro). Rationale:
+R2-1/R2-2 were deferred to P4 in S2, so S3's actual scope is validation +
+interpretation-guide documentation of the delivered navigation-graph surface +
+authoring the P4 next-set + coordinated closeout — moderate synthesis, not novel
+design. **S3 scope adjustment (carry forward):** the spec's S3 R2-1/R2-2
+*validation* steps are replaced by validating the S2-delivered NavigationGraph /
+unresolved-items / enrichment surfaces against a fresh run; the "next set" to
+author is the P4 `switchboard-and-report-chain-edges` set (carrying DW-9/DW-10 +
+the Hard Constraints verbatim). Sonnet-on-Claude keeps the gpt-5-4
+session-verification override valid; if run under Gemini, swap the verifier
+override to a non-Google model first.

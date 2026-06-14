@@ -25,6 +25,7 @@ using ManifestModuleKind = AccessHarvester.Pipeline.Manifest.ModuleKind;
 using ResolverModuleKind = AccessHarvester.Vba.Resolver.Scopes.ModuleKind;
 using VbaParseMode = AccessHarvester.Vba.Parser.ParseMode;
 using VbaModule = AccessHarvester.Vba.Parser.Ast.Module;
+using ParserProcedure = AccessHarvester.Vba.Parser.Ast.ProcedureDeclaration;
 
 namespace AccessHarvester.Core;
 
@@ -502,6 +503,26 @@ public sealed class Pipeline
         var crossRefs = new CrossReferenceIndex(resolvedModules);
         var classifications = FunctionClassificationBuilder.BuildAll(resolvedModules, crossRefs);
 
+        // ── 2b. Navigation graph (F-2-2) ───────────────────────────────
+        // Build the navigation graph off the SAME resolvedModules + crossRefs
+        // seam that feeds FunctionClassificationBuilder above (006 F-2-2:
+        // "the seam already exists"). This surfaces the VBA-side navigation
+        // edges — DoCmd.OpenForm / OpenReport / Close / BrowseTo in form,
+        // report, and standard-module code-behind — and the dynamic
+        // (non-literal / missing-target) dispatches as unresolved targets.
+        //
+        // inputs=null is deliberate: NavigationGraphInputs' top-level surfaces
+        // (Switchboard / Ribbon / Macros / default form) require a producer
+        // that reads switchboard *row* data and parses macros. Those rows are
+        // NOT in the harvested output today (tblSwitchboardItems ships
+        // "(no data file)"; 006's own probe confirms no artifact carries row
+        // content), so a reader would need a NEW row-read surface — which the
+        // 006 review scopes, together with the R2-1/R2-2 consumer surfaces, to
+        // the dedicated P4 set (`switchboard-and-report-chain-edges`). Deferred
+        // here as DW-9 (switchboard inputs) / DW-10 (R2-2 chain derivation);
+        // no new COM surface is introduced by this session.
+        var navigationGraph = NavigationGraphBuilder.Build(resolvedModules, crossRefs);
+
         // ── 3. Standalone module exports ───────────────────────────────
         // Emits one ModuleExport per standalone module AND per
         // class module discovered under raw/ModulesAndClasses/.
@@ -534,10 +555,17 @@ public sealed class Pipeline
             .ToList();
 
         // ── 4. Form and report exports (merge spec + parser output) ────
-        var formExports = BuildFormOrReportExports(
+        // F-2-2: BuildFormOrReportExports now also runs the Phase 6.3–6.5
+        // enrichers per object (EventHandlerClassifier / ValidationRuleExtractor
+        // / RowSourceSpecBuilder, stitched by EnrichmentPipelineRunner): it
+        // populates the per-reference Classification slots on the emitted
+        // FormComponentSpec and accumulates the run-wide enrichment arrays.
+        var formResult = BuildFormOrReportExports(
             parsed, classifications, irDir, "Forms", diagnostics);
-        var reportExports = BuildFormOrReportExports(
+        var reportResult = BuildFormOrReportExports(
             parsed, classifications, irDir, "Reports", diagnostics);
+        var formExports = formResult.Exports;
+        var reportExports = reportResult.Exports;
 
         // ── 4b. Query exports (D14: Sql.Parsed + Sql.Parameters) ──────
         var queryExports = BuildQueryExports(rawDir, diagnostics);
@@ -550,8 +578,40 @@ public sealed class Pipeline
         var tableExports = BuildTableExports(irDir, diagnostics);
         var relationshipExports = BuildRelationshipExports(irDir, diagnostics);
 
+        // ── 4d. Run-wide enrichment arrays (F-2-2) ─────────────────────
+        // ValidationRules unions all three ValidationRuleExtractor entry
+        // points: table-field / table-level rules (ExtractFromTable), plus
+        // the form/report control + BeforeUpdate-handler rules accumulated
+        // by the per-object EnrichmentPipelineRunner pass above. Order is
+        // deterministic: tables (ir order) → forms (ir order) → reports
+        // (ir order); each source is internally deterministic and the
+        // manifest aggregator preserves caller order.
+        var validationRules = new List<ValidationRule>();
+        foreach (var table in tableExports)
+            validationRules.AddRange(ValidationRuleExtractor.ExtractFromTable(table));
+        validationRules.AddRange(formResult.ValidationRules);
+        validationRules.AddRange(reportResult.ValidationRules);
+
+        var rowSourceSpecs = new List<RowSourceSpec>();
+        rowSourceSpecs.AddRange(formResult.RowSourceSpecs);
+        rowSourceSpecs.AddRange(reportResult.RowSourceSpecs);
+
+        var eventHandlerClassifications = new List<EventHandlerClassification>();
+        eventHandlerClassifications.AddRange(formResult.EventHandlerClassifications);
+        eventHandlerClassifications.AddRange(reportResult.EventHandlerClassifications);
+
         // ── 5. Assemble and write ──────────────────────────────────────
-        IReadOnlyList<UnresolvedItem> unresolvedItems = Array.Empty<UnresolvedItem>();
+        // F-2-2: aggregate unresolved items from the navigation graph's
+        // unresolved targets + the per-procedure unresolved references the
+        // function-classification pass collected. This is exactly the
+        // aggregation the proven hermetic EndToEndFixtureTests exercise.
+        // Resolver diagnostics (ResolvedModule.Diagnostics) are not fed
+        // separately: the same unresolved references already surface via
+        // FunctionClassification.UnresolvedReferences, so adding them would
+        // double-emit one construct under two UnresolvedSource values.
+        var unresolvedItems = UnresolvedItemAggregator.Build(
+            navigationGraph: navigationGraph,
+            functionClassifications: classifications);
 
         // v1.1 (Session 2 of harvester-manifest-index-and-batch-readiness):
         // build the navigation index AFTER the per-object ir/ files have
@@ -588,6 +648,11 @@ public sealed class Pipeline
             modules: moduleExports,
             tables: tableExports,
             relationships: relationshipExports,
+            validationRules: validationRules,
+            rowSourceSpecs: rowSourceSpecs,
+            functionClassifications: classifications,
+            eventHandlerClassifications: eventHandlerClassifications,
+            navigationGraph: navigationGraph,
             unresolvedItems: unresolvedItems,
             diagnostics: diagnostics,
             documentation: documentation,
@@ -808,22 +873,35 @@ public sealed class Pipeline
     // has both a spec (from ir/) and parser output (from raw/).
     // Forms with no spec are omitted; the parser output is not lost — the
     // HarvesterDiagnostic records the skip so the human can investigate.
-    private static List<FormExport> BuildFormOrReportExports(
+    private static FormReportExports BuildFormOrReportExports(
         List<ParsedModuleEntry> parsed,
         IReadOnlyList<FunctionClassification> classifications,
         string irDir,
         string category,
         List<HarvesterDiagnostic> diagnostics)
     {
-        // Build parser-output map: form name → JsonNode
+        // Build parser-output map: form name → JsonNode, and a parallel
+        // resolved-module map so the F-2-2 enrichment pass can recover each
+        // object's parsed VBA procedures (for EventHandlerClassifier /
+        // BeforeUpdate validation extraction) by name.
         var parserOutputs = new Dictionary<string, System.Text.Json.Nodes.JsonNode>(
+            StringComparer.OrdinalIgnoreCase);
+        var resolvedByName = new Dictionary<string, ResolvedModule>(
             StringComparer.OrdinalIgnoreCase);
         foreach (var p in parsed.Where(e => e.Category == category))
         {
             var output = ParserOutputProjector.Project(
                 p.Resolved, classifications, p.Name, p.Kind);
             parserOutputs[p.Name] = output;
+            resolvedByName[p.Name] = p.Resolved;
         }
+
+        // F-2-2 run-wide enrichment accumulators (this category only; the
+        // caller unions Forms + Reports). The per-object EnrichmentPipelineRunner
+        // pass below appends to these in deterministic ir-file order.
+        var validationRules = new List<ValidationRule>();
+        var rowSourceSpecs = new List<RowSourceSpec>();
+        var eventHandlerClassifications = new List<EventHandlerClassification>();
 
         // Load form specs from ir/<category>/*.ir.json. A missing directory means
         // zero ir files — fall through to the FORM_SPEC_MISSING diff below so a
@@ -848,8 +926,27 @@ public sealed class Pipeline
                 var metadata = FormMetadataExtractor.Extract(irName, irJson);
                 var spec = FormComponentSpecBuilder.Build(metadata);
 
+                // F-2-2: run the Phase 6.3–6.5 enrichers for this object.
+                // EnrichmentPipelineRunner stitches EventHandlerClassifier
+                // (event-handler categories), ValidationRuleExtractor
+                // (design-time + BeforeUpdate-handler rules), and
+                // RowSourceSpecBuilder (combo/list row sources + cascading
+                // drivers), returning an enriched spec whose EventHandler /
+                // ValidationRule references carry their Classification slots
+                // populated. Procedures come from the object's resolved
+                // module (null/empty when it has no code-behind, in which
+                // case only design-time validation rules are produced).
+                IReadOnlyList<ParserProcedure> procedures =
+                    resolvedByName.TryGetValue(irName, out var resolvedModule)
+                        ? resolvedModule.Ast.Items.OfType<ParserProcedure>().ToList()
+                        : Array.Empty<ParserProcedure>();
+                var enrichment = EnrichmentPipelineRunner.Run(spec, metadata, procedures);
+                validationRules.AddRange(enrichment.ValidationRules);
+                rowSourceSpecs.AddRange(enrichment.RowSourceSpecs);
+                eventHandlerClassifications.AddRange(enrichment.EventHandlerClassifications);
+
                 parserOutputs.TryGetValue(irName, out var parserOutput);
-                exports.Add(new FormExport { Spec = spec, ParserOutput = parserOutput });
+                exports.Add(new FormExport { Spec = enrichment.EnrichedSpec, ParserOutput = parserOutput });
             }
             catch (Exception ex)
             {
@@ -864,7 +961,8 @@ public sealed class Pipeline
 
         AddMissingSpecDiagnostics(parserOutputs.Keys, irNamesSeen, category, diagnostics);
 
-        return exports;
+        return new FormReportExports(
+            exports, validationRules, rowSourceSpecs, eventHandlerClassifications);
     }
 
     // Honour the contract BuildFormOrReportExports' header promises: a parsed module
@@ -1055,6 +1153,17 @@ public sealed class Pipeline
 
     private sealed record ParsedModuleEntry(
         string Name, ManifestModuleKind Kind, string Category, ResolvedModule Resolved);
+
+    // F-2-2: carrier for BuildFormOrReportExports' two outputs — the
+    // per-object FormExport list (unchanged) plus the run-wide enrichment
+    // arrays the per-object EnrichmentPipelineRunner pass accumulated. The
+    // caller unions the Forms and Reports results before handing them to
+    // DatabaseManifestAggregator.
+    private sealed record FormReportExports(
+        List<FormExport> Exports,
+        List<ValidationRule> ValidationRules,
+        List<RowSourceSpec> RowSourceSpecs,
+        List<EventHandlerClassification> EventHandlerClassifications);
 
     // Carrier across the F-3-4 two-pass split: pass 1 parses + scope-builds
     // into the shared ProjectScope and stores the AST + scope here; pass 2

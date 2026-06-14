@@ -96,6 +96,35 @@ public sealed class ManifestResolverWiringTests
     }
 
     [Fact]
+    public void MeControlResolvedTarget_OmitsKind_RatherThanWritingSchemaInvalidNull()
+    {
+        // 011 S2: a Me.<control> ObjectModel resolution binds to a synthetic
+        // control declaration whose type DeclarationKindString does not
+        // enumerate. The projector must OMIT the Kind key rather than write
+        // "Kind": null — a null on disk is never correct and is schema-invalid
+        // (ResolvedTarget.Kind is typed string), which tripped
+        // ManifestSchemaConformanceTests. This is an F-3-4 conformance fix
+        // surfaced by S2's full schema-gate run.
+        using var tree = StagedTree.Create();
+        tree.AddKbForm("Forms", "frmKind",
+            "CodeBehindForm\r\n"
+            + "Private Sub Form_Load()\r\n"
+            + "    Me.txtName = \"\"\r\n"
+            + "End Sub\r\n");
+        tree.AddIrForm("Forms", "frmKind", new[] { ("TextBox", "txtName") });
+
+        var manifest = tree.EmitAndReadManifest();
+
+        var reference = FindReference(manifest, module: "frmKind", originalText: "Me.txtName");
+        Assert.Equal("ObjectModel", reference.GetProperty("ReferenceKind").GetString());
+        var target = reference.GetProperty("ResolvedTarget");
+        // Kind is omitted (not present), never present-and-null.
+        if (target.TryGetProperty("Kind", out var kind))
+            Assert.NotEqual(JsonValueKind.Null, kind.ValueKind);
+        Assert.Equal("txtName", target.GetProperty("Name").GetString());
+    }
+
+    [Fact]
     public void MeControl_ResolvesViaByNameIndex_WhenModuleNameDivergesFromFormName()
     {
         // Verifier (011 S1 R1) Minor B: owningClass.Name = the module/file

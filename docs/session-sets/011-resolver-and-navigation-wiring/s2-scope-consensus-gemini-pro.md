@@ -1,0 +1,5 @@
+Select Option A. This choice strictly adheres to the session's hard constraints (no new COM surface) and its Stop Rule. The spec's premise for R2-1 is verifiably false, and the set-006 review correctly scopes R2-1/R2-2 as a separate, P4-level effort.
+
+Proceeding with Option B would constitute scope creep by introducing new, unplanned production code (a macro-IR reader) to deliver a partial, low-quality feature. This partial implementation would be throwaway work, as the correctly-scoped P4 set would need to replace it with a full implementation based on the required row-read logic. Option A delivers the clean, valuable, and correctly-scoped P3 work (F-2-2) while properly deferring the out-of-scope P4 work, preventing technical debt and respecting the project's established process. The need for sign-off is a feature of this disciplined process, not a bug.
+
+VERDICT: A — Prioritize scope integrity over a disproven premise, avoiding wasted effort and technical debt.

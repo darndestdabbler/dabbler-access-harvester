@@ -230,6 +230,62 @@
 - **Mechanical backstop:** `ParserOutputProjectorTests.SqlStrings_OmittedNotEmittedAsEmptyArray`
   pins the omission; the unwired analyzers' tests remain green in isolation.
 
+### DW-9 — Switchboard / Ribbon / Macro navigation inputs are not produced (NavigationGraphInputs unwired)
+- **What:** `NavigationGraphBuilder.Build` is now wired in production (011 S2,
+  F-2-2) but is always called with `inputs: null`, so the navigation graph
+  carries only the **VBA-side** edges (`DoCmd.OpenForm/OpenReport/Close/BrowseTo`
+  in code-behind) and **no top-level surfaces**: `NavigationGraph.Switchboard`,
+  `.Ribbon`, `.Macros`, and the AutoExec/default-form/switchboard-root
+  `EntryPoints` are all empty. The R2-1 consumer request (switchboard menu tree
+  → structured edges) needs `NavigationGraphInputs.Switchboard` populated from
+  the switchboard **item rows**.
+- **Origin:** 011 Session 2 (F-2-2 wiring) + re-grounding against the tree.
+- **Why deferred (premise disproven):** the 011 spec assumed "rows are in the
+  harvested table data; no new COM surface." **They are not.**
+  `tblSwitchboardItems` ships `(no data file)` in the migration output; its 52
+  rows (ItemText / Command / Argument — the actual menu tree) are absent from
+  **every** harvested artifact, and the 006 review's own probe says verbatim
+  "no artifact in the fresh output carries row content." Reading them requires a
+  **new** OleDb/DAO row-read — new COM/data surface, which the 011 Hard
+  Constraints forbid and the Stop Rule pushes to the owning set. The HHC
+  switchboard is *also* driven by a harvested macro (`mcrSwitchboardActions`:
+  named sub-macros → `OpenForm`), but turning the macro IR into
+  `NavigationGraphInputs.Macros` is itself new production code and still omits
+  the menu captions (which live only in the unharvested rows). Scope decision
+  recorded by cross-provider consensus (gpt-5-4 + gemini-pro both Option A) +
+  human sign-off; see `docs/session-sets/011-.../s2-scope-consensus-*.md`.
+- **Trigger to pull back in:** the P4 set is scoped, OR a consumer needs the
+  switchboard/ribbon/macro entry-point surfaces.
+- **Owning set candidate:** P4 `switchboard-and-report-chain-edges` (006 ranked,
+  3 sessions; its scope already lists the "narrow OleDb row-read").
+- **Mechanical backstop:** the committed HHC golden records a `NavigationGraph`
+  with populated `Edges`/`UnresolvedTargets` but empty `EntryPoints` /
+  `Switchboard` / `Ribbon` / `Macros`; the absence is visible there and pinned
+  by the production-wiring hermetic test added in 011 S2.
+
+### DW-10 — Dialog→query→report chain edges (R2-2) are not derived
+- **What:** the navigation graph surfaces individual `DoCmd` dispatches and
+  preserves `NavigationEdge.WhereCondition` / `OpenArgs`, and `IrQuery.Parameters`
+  carries declared/form-reference/report-reference parameter provenance — but
+  nothing **joins** them into the consumer-requested chain
+  (launcher → report → parameter dialog → query → parameters). The report-menu
+  embedded macros (`OnClickEmMacro` `OpenReport` targets), the report Open-event
+  `DoCmd.OpenForm "frmReportParam_*", , , , , acDialog` dialog opens, the
+  `RecordSource` → named-query edges, and the `TempVars!` flows are each
+  observable individually but not linked.
+- **Origin:** 006 review R2-2 (Confirmed); 011 Session 2 (deferred with DW-9).
+- **Why deferred:** the 006 review explicitly scopes "embedded-macro parsing,
+  record-source edges, dialog/parameter edges, TempVars flows" to the P4 set,
+  and the derivation is substantial new logic (not a wiring task). 011 is P3
+  (resolver + navigation **wiring**), scoped by its Stop Rule to stop at the
+  P4 boundary and record deferred work.
+- **Trigger to pull back in:** the P4 set is scoped, OR a consumer needs the
+  chain-shaped handoff packs.
+- **Owning set candidate:** P4 `switchboard-and-report-chain-edges` (with DW-9).
+- **Mechanical backstop:** the committed HHC golden's `NavigationGraph.Edges`
+  records the report→dialog `OpenForm` edges (with `OpenArgs`/`WhereCondition`)
+  but no derived cross-object chain records; the absence is visible there.
+
 ## Closed
 
 _(none yet)_
