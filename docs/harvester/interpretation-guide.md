@@ -382,11 +382,12 @@ on-disk order the writer emits, are:
   classifications across all forms and reports. Shape in §5.4.
 - **`NavigationGraph`** — the application-wide navigation structure:
   the VBA-derived form→form / form→report edges, the non-literal
-  dispatch targets that could not be resolved, and the (currently
-  empty) top-level entry-point / ribbon / switchboard / macro facets.
-  A single object, not an array. Emitted between
-  `EventHandlerClassifications` and `UnresolvedItems`. See §5.7 for the
-  full consumer surface and what is and is not populated today.
+  dispatch targets that could not be resolved, and the metadata-derived
+  top-level facets — ordered `EntryPoints`, the `Switchboard` page tree,
+  and `Macros` (populated in set 012 S1 / R2-1); `Ribbon` stays null on
+  switchboard-driven corpora. A single object, not an array. Emitted
+  between `EventHandlerClassifications` and `UnresolvedItems`. See §5.7
+  for the full consumer surface and the switchboard contract.
 - **`UnresolvedItems`** — the flat list of references the resolver
   could not fully bind. See §6 for the shape and the per-reason
   narrative pointer.
@@ -1173,10 +1174,9 @@ in the envelope between `EventHandlerClassifications` and
 (P3, F-2-2); before that the builder existed but had no production
 call site.
 
-**What is populated today (VBA-derived).** The graph is built from the
-parsed VBA bodies only — the pipeline calls the builder with no
-metadata-extractor inputs (`inputs: null`). So today the graph carries
-exactly the two VBA-side facets:
+**VBA-derived facets.** The graph is always built from the parsed VBA
+bodies; these two facets are present on every run regardless of the
+navigation inputs below:
 
 - **`Edges`** — one record per `DoCmd.OpenForm` / `DoCmd.OpenReport` /
   `DoCmd.Close` / `DoCmd.BrowseTo` dispatch in a procedure body whose
@@ -1229,23 +1229,30 @@ preserved as raw source text so a migration consumer can pass a
 `WhereCondition` through to a parameterised-query translator without
 re-stringifying it.
 
-**What is NOT populated today (needs metadata-extractor inputs).** The
-top-level, non-VBA facets stay empty because they require inputs the
-VBA AST does not carry:
+**Metadata-derived facets (R2-1 / DW-9, set 012 S1).** The non-VBA
+facets are populated from the materialised navigation chrome — the
+switchboard row dump (`raw|kb/Navigation/switchboard-items.json`), the
+macro IR, and the `StartUpForm` database property:
 
-- **`EntryPoints`** — emitted as an empty array `[]`. The ordered
-  AutoExec → default-form → switchboard-root root list needs the
-  startup options and macro chain.
-- **`Macros`** — empty array `[]`. Needs the macro extractor to supply
-  `MSysObjects` action sequences (the HomeHealthCare switchboard is
-  driven by a harvested macro, but turning the macro IR into
-  `NavigationGraphInputs.Macros` is new production code).
-- **`Ribbon`** and **`Switchboard`** — **omitted entirely** (null, so
-  the omit-null serializer drops the key) rather than emitted as empty
-  objects. `Switchboard` needs the `Switchboard Items` table rows,
-  which ship `(no data file)` in the harvested output — reading them
-  needs a new OleDb/DAO row-read (a new COM surface). `Ribbon` needs
-  the `USysRibbons` XML parsed into structure.
+- **`EntryPoints`** — the ordered root list: AutoExec macro (when
+  present) → default startup form (the `StartUpForm` property) →
+  switchboard roots (one per switchboard page). On HomeHealthCare:
+  `DefaultForm: frmSwitchboard` followed by two `SwitchboardRoot`
+  entries (`"Home Health Care Services Tracking"`, `"Reports Menu"`).
+  Still `[]` when none of those inputs exist.
+- **`Macros`** — one `MacroChain` per `ir/Macros/*.ir.json`, each with
+  its `Actions` (`ActionName` + named/positional `Arguments` +
+  `CallsProcedureName` for `RunCode`). HomeHealthCare emits all four
+  (`AutoKeys`, `mcrErrorHandler`, `mcrSwitchboardActions`,
+  `mcrValidation`).
+- **`Switchboard`** — the page tree built from the switchboard table
+  rows. See the **switchboard contract** note below. `null` (key
+  omitted) when no switchboard-shaped table exists.
+- **`Ribbon`** — still `null` (key omitted) on this corpus.
+  HomeHealthCare is switchboard-driven with no custom `USysRibbons`
+  ribbon, and no ribbon producer exists yet; populating it from a real
+  custom-ribbon corpus is left to a future case (no synthesized
+  fixture). Recorded as a deliberate decision, not a silent gap.
 
 This is the **omit-null vs empty-array split** a consumer must code
 for: the four list facets (`EntryPoints`, `Edges`,
@@ -1254,27 +1261,42 @@ the two object facets (`Ribbon`, `Switchboard`) are **absent when
 null**. Test for `("Switchboard" in NavigationGraph)`, not for a
 non-null value.
 
-**Relationship to the R2-1 / R2-2 consumer requests.** The two
-consumer asks that motivated this arc are **not** satisfied by the
-graph as it stands today, and that is a recorded, deliberate deferral
-— not a gap a consumer should read as "done":
+**The switchboard contract (generic over canonical *and* custom
+tables).** The harvester does **not** assume the wizard-generated
+Access *Switchboard Manager* layout. A table is detected as a
+switchboard by **column signature** (`SwitchboardID, ItemNumber,
+ItemText, Command, Argument`), and its rows are dumped losslessly to
+`raw/Navigation/switchboard-items.json` (all canonical columns plus
+`ParentID` when the table carries it). The structured `Switchboard`
+tree then applies one mechanical, generic rule:
 
-- **R2-1 (switchboard menu tree → structured edges)** needs
-  `Switchboard` populated from the switchboard item rows. Those rows
-  are not in any harvested artifact (`tblSwitchboardItems` ships
-  `(no data file)`), so this needs a new row-read surface. Deferred as
-  **DW-9** in [`docs/planning/deferred-work.md`](../planning/deferred-work.md).
-- **R2-2 (dialog → query → report chains)** needs the individual
-  edges/`WhereCondition`/`OpenArgs` (present today) **joined** into
-  cross-object chains, plus report-menu embedded-macro parsing and
-  `RecordSource` edges. That derivation is substantial new logic, not
-  a wiring task. Deferred as **DW-10**.
+- **Page key** = `ParentID` when the table has that column
+  (hand-rolled hierarchy tables, e.g. HomeHealthCare), else the
+  (non-unique) `SwitchboardID` (canonical wizard tables).
+- **Page `Name`** = the `ItemText` of the page's lowest-`ItemNumber`
+  row (the canonical `ItemNumber = 0` header, or a custom title row).
+- **`Command` is the raw integer, never decoded.** The canonical
+  Switchboard Manager scheme (1 = goto, 2/3 = open form, 4 = open
+  report, …) is only one possible convention; HomeHealthCare's custom
+  table uses `{0 = label/header, 1 = open form, 2 = go to page,
+  3 = open report}`. Interpreting a command code is downstream-AI work
+  — the harvester preserves the raw value so nothing is guessed.
+- Each item carries `Provenance { Source: "switchboard-row", Table,
+  SwitchboardId, ItemNumber, ParentId? }` tracing it to its source row.
+- **`UnlinkedItemCount`** records rows that carry no page linkage (for
+  a `ParentID` table, rows whose `ParentID` is null — e.g.
+  HomeHealthCare's 32 embedded audit rows). They stay in the raw dump
+  but are not placed in a page; the count makes the exclusion explicit
+  rather than silent.
 
-Both are owned by the planned next set,
-`012-switchboard-and-report-chain-edges` (006's P4). A consumer that
-needs the switchboard tree or the launcher→report→dialog→query chains
-today must treat them as unavailable and fall back to reading the raw
-edges plus the per-object `ir/` records.
+R2-1 / DW-9 is therefore **landed**. **R2-2 (dialog → query → report
+chains)** is still open: the individual edges/`WhereCondition`/`OpenArgs`
+(present today) are **not yet joined** into cross-object chains, and the
+report-menu embedded-macro / `RecordSource` edges are not yet derived.
+That is substantial new logic deferred as **DW-10**, owned by sessions
+2–3 of `012-switchboard-and-report-chain-edges`. A consumer needing the
+launcher→report→dialog→query chains today must still fall back to the
+raw edges plus the per-object `ir/` records.
 
 **Determinism.** Every collection is sorted at construction
 (`Edges` and `UnresolvedTargets` by source module → procedure → line →
@@ -1498,14 +1520,13 @@ Unless Reauthorized (2026-05-17)*:
 - **No late-binding type inference.** Member-access chains on
   Object-typed locals surface as `LateBound` classifications and
   `UnresolvedReferences` entries rather than getting resolved.
-- **No top-level navigation surfaces yet.**
-  `manifest.NavigationGraph` carries only the VBA-derived `Edges` and
-  `UnresolvedTargets` today; `EntryPoints` / `Macros` are empty and
-  `Switchboard` / `Ribbon` are absent (they need metadata-extractor
-  inputs the pipeline does not yet supply — DW-9). The
-  launcher→report→dialog→query **chain** derivation (R2-2) is likewise
-  not done — the constituent edges are present but not joined (DW-10).
-  Both are owned by the planned set
+- **Partial navigation surfaces.** `manifest.NavigationGraph` now
+  carries the VBA-derived `Edges`/`UnresolvedTargets` **and** the
+  metadata-derived `EntryPoints`, `Switchboard` tree, and `Macros`
+  (set 012 S1 / R2-1, DW-9 closed); `Ribbon` stays null on
+  switchboard-driven corpora. The launcher→report→dialog→query
+  **chain** derivation (R2-2) is **not** done — the constituent edges
+  are present but not joined (DW-10), owned by sessions 2–3 of
   `012-switchboard-and-report-chain-edges`. See §5.7.
 
 A consumer should not assume the harvester does any of the above —

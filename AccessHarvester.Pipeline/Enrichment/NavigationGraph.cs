@@ -428,25 +428,61 @@ public sealed record RibbonControl
 }
 
 /// <summary>
-/// Top-level switchboard parsed from the <c>Switchboard Items</c>
-/// table. Supplied by the metadata extractor; the navigation builder
-/// does not query the table itself.
+/// Top-level switchboard parsed from a switchboard-shaped table (one
+/// whose columns carry the canonical <c>SwitchboardID, ItemNumber,
+/// ItemText, Command, Argument</c> signature). Supplied by the metadata
+/// extractor; the navigation builder does not query the table itself.
 /// </summary>
+/// <remarks>
+/// The harvester does not assume the canonical Access Switchboard
+/// Manager layout. Both the wizard-generated table (rows grouped by a
+/// non-unique <c>SwitchboardID</c> page id; <c>ItemNumber = 0</c> the
+/// page header) and hand-rolled custom variants (e.g. an autonumber
+/// <c>SwitchboardID</c> plus a <c>ParentID</c> hierarchy column) are
+/// materialised. The page-grouping rule is mechanical and generic — see
+/// <see cref="SwitchboardStructureBuilder"/>. Command codes are
+/// preserved as raw integers (see <see cref="SwitchboardItem.Command"/>)
+/// and are NOT decoded against any assumed command set; the downstream
+/// AI consumer interprets them.
+/// </remarks>
 public sealed record SwitchboardStructure
 {
     /// <summary>
-    /// Switchboard pages in declaration order. Each page carries the
-    /// items the user can pick from; one page is typically the root
-    /// (the first one or the one with <c>ItemNumber = 0</c>).
+    /// Switchboard pages ordered by page key. Each page carries the
+    /// items grouped under it.
     /// </summary>
     public required IReadOnlyList<SwitchboardPage> Pages { get; init; }
+
+    /// <summary>
+    /// Count of materialised switchboard rows that carry no page
+    /// linkage (for a <c>ParentID</c>-hierarchy table, rows whose
+    /// <c>ParentID</c> is null) and therefore belong to no page. They
+    /// are preserved losslessly in the raw
+    /// <c>raw/Navigation/switchboard-items.json</c> dump but are not
+    /// reflected in <see cref="Pages"/> — recorded here explicitly so
+    /// the absence is never silent. 0 for canonical tables (where the
+    /// page key is the never-null <c>SwitchboardID</c>).
+    /// </summary>
+    public int UnlinkedItemCount { get; init; }
 }
 
 /// <summary>One switchboard page.</summary>
 public sealed record SwitchboardPage
 {
-    /// <summary>Switchboard ID as stored in <c>Switchboard Items</c>.</summary>
+    /// <summary>
+    /// Page key: the table's <c>ParentID</c> value when it has a
+    /// <c>ParentID</c> column (hand-rolled hierarchy tables), else the
+    /// (non-unique) <c>SwitchboardID</c> (canonical wizard tables). Not
+    /// globally unique when more than one switchboard table is present —
+    /// pair with <see cref="Table"/> for page identity in that case.
+    /// </summary>
     public required int SwitchboardId { get; init; }
+
+    /// <summary>
+    /// The switchboard-shaped table this page's rows came from. Page-level
+    /// source identity so multi-table corpora stay unambiguous.
+    /// </summary>
+    public required string Table { get; init; }
 
     /// <summary>Page label (the switchboard heading shown to the user).</summary>
     public required string Name { get; init; }
@@ -466,20 +502,70 @@ public sealed record SwitchboardItem
     public required string Text { get; init; }
 
     /// <summary>
-    /// Switchboard command code (per the Access switchboard convention:
-    /// 1 = go to switchboard, 2 = open form add, 3 = open form browse,
-    /// 4 = open report, 5 = design app, 6 = exit application,
-    /// 7 = run macro, 8 = run code). Preserved as the raw integer so
-    /// older Access versions with extended codes round-trip.
+    /// The row's <c>Command</c> value, preserved as the <b>raw integer
+    /// exactly as stored in the table</b>. The harvester does NOT decode
+    /// it against any assumed command set: the canonical Access
+    /// Switchboard Manager scheme (1 = go to switchboard, 2 = open form
+    /// add, 3 = open form browse, 4 = open report, 5 = design app,
+    /// 6 = exit, 7 = run macro, 8 = run code) is only <i>one</i> possible
+    /// convention, and hand-rolled switchboard tables use their own codes
+    /// (e.g. HomeHealthCare uses 0 = label/header, 1 = open form,
+    /// 2 = go to page, 3 = open report). Interpreting the code is
+    /// downstream-AI work; the harvester preserves the raw value so no
+    /// meaning is lost or guessed. Nullable: a row with no stored
+    /// <c>Command</c> surfaces as null (omitted), never coerced to a
+    /// synthetic 0 that would collide with a real command-0 label.
     /// </summary>
-    public required int Command { get; init; }
+    public required int? Command { get; init; }
 
     /// <summary>
-    /// Argument the command consumes. Typically a form name (commands
-    /// 2 / 3), report name (4), macro name (7), or function name (8).
-    /// Null when the command takes no argument (5 / 6).
+    /// The row's <c>Argument</c> value (typically a form / report / macro
+    /// / function name, or a target page). Null when the table stored no
+    /// argument (Access Null or an empty/zero-length string — both
+    /// surface here as null, since an empty argument is "no argument").
     /// </summary>
     public string? Argument { get; init; }
+
+    /// <summary>
+    /// Per-row provenance tying this structured item back to the
+    /// materialised switchboard row it came from. Null only on items
+    /// synthesised by tests; always populated for harvested switchboards.
+    /// </summary>
+    public SwitchboardItemProvenance? Provenance { get; init; }
+}
+
+/// <summary>
+/// Provenance for one <see cref="SwitchboardItem"/>, per the output
+/// <c>{ source, ... }</c> convention. Lets the consumer trace a
+/// structured item back to its exact source row.
+/// </summary>
+public sealed record SwitchboardItemProvenance
+{
+    /// <summary>Always <c>"switchboard-row"</c>.</summary>
+    public required string Source { get; init; }
+
+    /// <summary>Name of the switchboard-shaped table the row came from.</summary>
+    public required string Table { get; init; }
+
+    /// <summary>
+    /// The row's raw <c>SwitchboardID</c> value (the autonumber/PK for a
+    /// custom table; the page id for a canonical one). Nullable so a row
+    /// with no stored value is not coerced to a synthetic 0.
+    /// </summary>
+    public required int? SwitchboardId { get; init; }
+
+    /// <summary>
+    /// The row's <c>ItemNumber</c> (display order within its page).
+    /// Nullable so a row with no stored value is not coerced to 0.
+    /// </summary>
+    public required int? ItemNumber { get; init; }
+
+    /// <summary>
+    /// The row's <c>ParentID</c> when the table carries that column
+    /// (hand-rolled hierarchy tables); null for canonical tables that
+    /// have no <c>ParentID</c> column.
+    /// </summary>
+    public int? ParentId { get; init; }
 }
 
 /// <summary>

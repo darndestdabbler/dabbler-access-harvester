@@ -22,6 +22,13 @@ public sealed class JsonPassthroughTranslator : IObjectTranslator
     public static JsonPassthroughTranslator Tables { get; } = new("Tables");
     public static JsonPassthroughTranslator Relationships { get; } = new("Relationships");
 
+    /// <summary>
+    /// Navigation chrome (the switchboard row dump + startup options) is
+    /// already structured JSON from <see cref="Extraction.SwitchboardExporter"/>;
+    /// pass it through unchanged.
+    /// </summary>
+    public static JsonPassthroughTranslator Navigation { get; } = new("Navigation");
+
     public IReadOnlyList<TranslateOutcome> Translate(string rawCategoryDir, string kbCategoryDir)
     {
         Directory.CreateDirectory(kbCategoryDir);

@@ -1,0 +1,430 @@
+{
+  "Source": "switchboard-row",
+  "DetectedTables": [
+    "tblSwitchboardItems"
+  ],
+  "Tables": [
+    {
+      "Table": "tblSwitchboardItems",
+      "HasParentId": true,
+      "Rows": [
+        {
+          "SwitchboardID": 1,
+          "ItemNumber": 1,
+          "ItemText": "Home Health Care Services Tracking",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 2,
+          "ItemNumber": 2,
+          "ItemText": "Client Search",
+          "Command": 1,
+          "Argument": "frmClientSearch",
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 3,
+          "ItemNumber": 3,
+          "ItemText": "Add New Client",
+          "Command": 1,
+          "Argument": "frmClientDetail",
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 4,
+          "ItemNumber": 4,
+          "ItemText": "Provider Search",
+          "Command": 1,
+          "Argument": "frmProviderSearch",
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 5,
+          "ItemNumber": 5,
+          "ItemText": "Service List",
+          "Command": 1,
+          "Argument": "frmServiceList",
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 6,
+          "ItemNumber": 6,
+          "ItemText": "Service Plan Entry",
+          "Command": 1,
+          "Argument": "frmServicePlanEntry",
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 7,
+          "ItemNumber": 7,
+          "ItemText": "Manage Rate Limits",
+          "Command": 1,
+          "Argument": "frmServiceRateLimits",
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 8,
+          "ItemNumber": 8,
+          "ItemText": "Copy Fiscal Year Data",
+          "Command": 1,
+          "Argument": "frmCopyFiscalYearData",
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 9,
+          "ItemNumber": 9,
+          "ItemText": "Reports",
+          "Command": 2,
+          "Argument": null,
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 10,
+          "ItemNumber": 10,
+          "ItemText": "About",
+          "Command": 1,
+          "Argument": "frmAbout",
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 11,
+          "ItemNumber": 1,
+          "ItemText": "Reports Menu",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 12,
+          "ItemNumber": 2,
+          "ItemText": "Client Profile",
+          "Command": 3,
+          "Argument": "rptClientProfile",
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 13,
+          "ItemNumber": 3,
+          "ItemText": "Client Service Plan \u0026 Shortfall",
+          "Command": 3,
+          "Argument": "rptClientServicePlanAndShortfall",
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 14,
+          "ItemNumber": 4,
+          "ItemText": "Provider Service Catalog",
+          "Command": 3,
+          "Argument": "rptProviderServiceCatalog",
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 15,
+          "ItemNumber": 5,
+          "ItemText": "Provider Plans By Client",
+          "Command": 3,
+          "Argument": "rptProviderPlansByClient",
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 16,
+          "ItemNumber": 6,
+          "ItemText": "Provider Plans By Service",
+          "Command": 3,
+          "Argument": "rptProviderPlansByService",
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 17,
+          "ItemNumber": 7,
+          "ItemText": "Provider Service Statistics",
+          "Command": 3,
+          "Argument": "rptProviderServiceStatistics",
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 18,
+          "ItemNumber": 8,
+          "ItemText": "Provider Costs",
+          "Command": 3,
+          "Argument": "rptProviderCosts",
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 19,
+          "ItemNumber": 9,
+          "ItemText": "Service Costs",
+          "Command": 3,
+          "Argument": "rptServiceCosts",
+          "ParentID": 1
+        },
+        {
+          "SwitchboardID": 20,
+          "ItemNumber": 10,
+          "ItemText": "Back to Main",
+          "Command": 2,
+          "Argument": null,
+          "ParentID": 0
+        },
+        {
+          "SwitchboardID": 21,
+          "ItemNumber": 99,
+          "ItemText": "Plan 1 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 22,
+          "ItemNumber": 99,
+          "ItemText": "Plan 2 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 23,
+          "ItemNumber": 99,
+          "ItemText": "Plan 3 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 24,
+          "ItemNumber": 99,
+          "ItemText": "Plan 4 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 25,
+          "ItemNumber": 99,
+          "ItemText": "Plan 5 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 26,
+          "ItemNumber": 99,
+          "ItemText": "Plan 6 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 27,
+          "ItemNumber": 99,
+          "ItemText": "Plan 7 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 28,
+          "ItemNumber": 99,
+          "ItemText": "Plan 8 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 29,
+          "ItemNumber": 99,
+          "ItemText": "Plan 9 status: Completed \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 30,
+          "ItemNumber": 99,
+          "ItemText": "Plan 10 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 31,
+          "ItemNumber": 99,
+          "ItemText": "Plan 11 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 32,
+          "ItemNumber": 99,
+          "ItemText": "Plan 12 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 33,
+          "ItemNumber": 99,
+          "ItemText": "Plan 13 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 34,
+          "ItemNumber": 99,
+          "ItemText": "Plan 14 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 35,
+          "ItemNumber": 99,
+          "ItemText": "Plan 16 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 36,
+          "ItemNumber": 99,
+          "ItemText": "Plan 17 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 37,
+          "ItemNumber": 99,
+          "ItemText": "Plan 18 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 38,
+          "ItemNumber": 99,
+          "ItemText": "Plan 19 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 39,
+          "ItemNumber": 99,
+          "ItemText": "Plan 21 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 40,
+          "ItemNumber": 99,
+          "ItemText": "Plan 22 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 41,
+          "ItemNumber": 99,
+          "ItemText": "Plan 23 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 42,
+          "ItemNumber": 99,
+          "ItemText": "Plan 24 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 43,
+          "ItemNumber": 99,
+          "ItemText": "Plan 26 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 44,
+          "ItemNumber": 99,
+          "ItemText": "Plan 27 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 45,
+          "ItemNumber": 99,
+          "ItemText": "Plan 28 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 46,
+          "ItemNumber": 99,
+          "ItemText": "Plan 30 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 47,
+          "ItemNumber": 99,
+          "ItemText": "Plan 32 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 48,
+          "ItemNumber": 99,
+          "ItemText": "Plan 33 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 49,
+          "ItemNumber": 99,
+          "ItemText": "Plan 34 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 50,
+          "ItemNumber": 99,
+          "ItemText": "Plan 35 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 51,
+          "ItemNumber": 99,
+          "ItemText": "Plan 38 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        },
+        {
+          "SwitchboardID": 52,
+          "ItemNumber": 99,
+          "ItemText": "Plan 39 status: Active \u2192 Approved",
+          "Command": 0,
+          "Argument": null,
+          "ParentID": null
+        }
+      ]
+    }
+  ]
+}

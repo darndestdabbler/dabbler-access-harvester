@@ -230,7 +230,17 @@
 - **Mechanical backstop:** `ParserOutputProjectorTests.SqlStrings_OmittedNotEmittedAsEmptyArray`
   pins the omission; the unwired analyzers' tests remain green in isolation.
 
-### DW-9 — Switchboard / Ribbon / Macro navigation inputs are not produced (NavigationGraphInputs unwired)
+### DW-9 — Switchboard / Macro / EntryPoint navigation inputs are not produced (NavigationGraphInputs unwired) — **CLOSED 2026-06-14 (012 S1)**
+> **CLOSED** by `012-switchboard-and-report-chain-edges` Session 1 (R2-1).
+> A shape-gated `SwitchboardExporter` (DAO row-read, Category `Navigation`)
+> now materialises the switchboard rows to `raw|kb/Navigation/switchboard-items.json`,
+> a `StartUpForm` DAO read yields the default form, and `MacroChainBuilder`
+> projects the macro IR; `Pipeline.BuildNavigationInputs` threads the populated
+> `NavigationGraphInputs` into `NavigationGraphBuilder.Build` (the `inputs: null`
+> is retired). The HHC golden's `NavigationGraph` now carries ordered
+> `EntryPoints`, the generic `Switchboard` page tree, and `Macros`. The
+> **`Ribbon`** facet was the one sub-part NOT landed (HHC has no custom
+> `USysRibbons`; no producer exists) — carved out as **DW-13**.
 - **What:** `NavigationGraphBuilder.Build` is now wired in production (011 S2,
   F-2-2) but is always called with `inputs: null`, so the navigation graph
   carries only the **VBA-side** edges (`DoCmd.OpenForm/OpenReport/Close/BrowseTo`
@@ -397,6 +407,27 @@
   reproduces it); the `interpretation-guide.md` §4 note is the standing consumer
   guard.
 
+### DW-13 — Ribbon (`USysRibbons`) navigation surface is not produced
+- **What:** `NavigationGraph.Ribbon` / `NavigationGraphInputs.Ribbon` and the
+  `RibbonStructure` model exist, but no producer reads `USysRibbons` custom-ribbon
+  XML into structure, so the facet ships null on every corpus. (Carved out of DW-9,
+  whose switchboard / macro / entry-point parts landed in 012 S1.)
+- **Origin:** 012 Session 1 (R2-1). HomeHealthCare is switchboard-driven with no
+  custom ribbon, so there is no fixture to drive or pin a ribbon producer against;
+  per the spec's Step 5 ribbon decision, populating it from a **real** custom-ribbon
+  corpus is left here rather than synthesising a fixture.
+- **Why deferred:** no in-corpus signal to build against; populating it requires a
+  real `USysRibbons` corpus case so the producer is validated against ground truth
+  (not a hand-built fixture), consistent with the no-synthesized-fixture posture.
+- **Trigger to pull back in:** a harvested database with a custom `USysRibbons`
+  ribbon, OR a consumer needs the ribbon entry-point surface.
+- **Owning set candidate:** a future navigation-ribbon set (or folded into the next
+  set that ingests a custom-ribbon corpus).
+- **Mechanical backstop:** the HHC golden's `NavigationGraph` omits `Ribbon` (null);
+  the §5.7 interpretation-guide note records the deliberate null.
+
 ## Closed
 
-_(none yet)_
+- **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED
+  2026-06-14** by `012-switchboard-and-report-chain-edges` Session 1 (R2-1). Full
+  entry retained above with its CLOSED banner. Ribbon remainder → **DW-13**.

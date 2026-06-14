@@ -122339,7 +122339,21 @@
     }
   ],
   "NavigationGraph": {
-    "EntryPoints": [],
+    "EntryPoints": [
+      {
+        "Kind": "DefaultForm",
+        "Name": "frmSwitchboard",
+        "OpensFormName": "frmSwitchboard"
+      },
+      {
+        "Kind": "SwitchboardRoot",
+        "Name": "Home Health Care Services Tracking"
+      },
+      {
+        "Kind": "SwitchboardRoot",
+        "Name": "Reports Menu"
+      }
+    ],
     "Edges": [
       {
         "SourceModule": "frmClientDetail",
@@ -122785,7 +122799,591 @@
         "TargetExpressionText": "Me.name"
       }
     ],
-    "Macros": []
+    "Switchboard": {
+      "Pages": [
+        {
+          "SwitchboardId": 0,
+          "Table": "tblSwitchboardItems",
+          "Name": "Home Health Care Services Tracking",
+          "Items": [
+            {
+              "Text": "Home Health Care Services Tracking",
+              "Command": 0,
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 1,
+                "ItemNumber": 1,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "Client Search",
+              "Command": 1,
+              "Argument": "frmClientSearch",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 2,
+                "ItemNumber": 2,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "Add New Client",
+              "Command": 1,
+              "Argument": "frmClientDetail",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 3,
+                "ItemNumber": 3,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "Provider Search",
+              "Command": 1,
+              "Argument": "frmProviderSearch",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 4,
+                "ItemNumber": 4,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "Service List",
+              "Command": 1,
+              "Argument": "frmServiceList",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 5,
+                "ItemNumber": 5,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "Service Plan Entry",
+              "Command": 1,
+              "Argument": "frmServicePlanEntry",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 6,
+                "ItemNumber": 6,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "Manage Rate Limits",
+              "Command": 1,
+              "Argument": "frmServiceRateLimits",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 7,
+                "ItemNumber": 7,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "Copy Fiscal Year Data",
+              "Command": 1,
+              "Argument": "frmCopyFiscalYearData",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 8,
+                "ItemNumber": 8,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "About",
+              "Command": 1,
+              "Argument": "frmAbout",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 10,
+                "ItemNumber": 10,
+                "ParentId": 0
+              }
+            },
+            {
+              "Text": "Back to Main",
+              "Command": 2,
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 20,
+                "ItemNumber": 10,
+                "ParentId": 0
+              }
+            }
+          ]
+        },
+        {
+          "SwitchboardId": 1,
+          "Table": "tblSwitchboardItems",
+          "Name": "Reports Menu",
+          "Items": [
+            {
+              "Text": "Reports Menu",
+              "Command": 0,
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 11,
+                "ItemNumber": 1,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Client Profile",
+              "Command": 3,
+              "Argument": "rptClientProfile",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 12,
+                "ItemNumber": 2,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Client Service Plan \u0026 Shortfall",
+              "Command": 3,
+              "Argument": "rptClientServicePlanAndShortfall",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 13,
+                "ItemNumber": 3,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Provider Service Catalog",
+              "Command": 3,
+              "Argument": "rptProviderServiceCatalog",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 14,
+                "ItemNumber": 4,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Provider Plans By Client",
+              "Command": 3,
+              "Argument": "rptProviderPlansByClient",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 15,
+                "ItemNumber": 5,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Provider Plans By Service",
+              "Command": 3,
+              "Argument": "rptProviderPlansByService",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 16,
+                "ItemNumber": 6,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Provider Service Statistics",
+              "Command": 3,
+              "Argument": "rptProviderServiceStatistics",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 17,
+                "ItemNumber": 7,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Provider Costs",
+              "Command": 3,
+              "Argument": "rptProviderCosts",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 18,
+                "ItemNumber": 8,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Reports",
+              "Command": 2,
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 9,
+                "ItemNumber": 9,
+                "ParentId": 1
+              }
+            },
+            {
+              "Text": "Service Costs",
+              "Command": 3,
+              "Argument": "rptServiceCosts",
+              "Provenance": {
+                "Source": "switchboard-row",
+                "Table": "tblSwitchboardItems",
+                "SwitchboardId": 19,
+                "ItemNumber": 9,
+                "ParentId": 1
+              }
+            }
+          ]
+        }
+      ],
+      "UnlinkedItemCount": 32
+    },
+    "Macros": [
+      {
+        "Name": "AutoKeys",
+        "Actions": [
+          {
+            "ActionName": "RunCommand",
+            "Arguments": {
+              "Command": "97"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmClientSearch",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "Requery",
+            "Arguments": {}
+          },
+          {
+            "ActionName": "RunCommand",
+            "Arguments": {
+              "Command": "54"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "mcrErrorHandler",
+        "Actions": [
+          {
+            "ActionName": "SetTempVar",
+            "Arguments": {
+              "Name": "LastError",
+              "Expression": "[MacroError].[Number]"
+            }
+          },
+          {
+            "ActionName": "MsgBox",
+            "Arguments": {
+              "Message": "\\\u0022A non-critical error occurred: \\\u0022 \u0026 [MacroError].[Description]",
+              "Beep": "0",
+              "Type": "4"
+            }
+          },
+          {
+            "ActionName": "ClearMacroError",
+            "Arguments": {}
+          },
+          {
+            "ActionName": "SetTempVar",
+            "Arguments": {
+              "Name": "LastError",
+              "Expression": "[MacroError].[Number]"
+            }
+          },
+          {
+            "ActionName": "MsgBox",
+            "Arguments": {
+              "Message": "\\\u0022Error: \\\u0022 \u0026 [MacroError].[Description] \u0026 \\\u0022 (Error #\\\u0022 \u0026 [MacroError].[Number] \u0026 \\\u0022)\\\u0022",
+              "Beep": "-1",
+              "Type": "1"
+            }
+          },
+          {
+            "ActionName": "StopMacro",
+            "Arguments": {}
+          }
+        ]
+      },
+      {
+        "Name": "mcrSwitchboardActions",
+        "Actions": [
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmClientSearch",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmClientDetail",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "0",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmProviderSearch",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmProviderDetail",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "0",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmServiceList",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmServiceDetail",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "0",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmServicePlanEntry",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmReportMenu",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmServiceRateLimits",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmCopyFiscalYearData",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          },
+          {
+            "ActionName": "OpenForm",
+            "Arguments": {
+              "FormName": "frmAbout",
+              "View": "0",
+              "FilterName": "",
+              "WhereCondition": "",
+              "DataMode": "-1",
+              "WindowMode": "0"
+            }
+          }
+        ]
+      },
+      {
+        "Name": "mcrValidation",
+        "Actions": [
+          {
+            "ActionName": "SetTempVar",
+            "Arguments": {
+              "Name": "InputValid",
+              "Expression": "True"
+            }
+          },
+          {
+            "ActionName": "StopMacro",
+            "Arguments": {}
+          },
+          {
+            "ActionName": "SetLocalVar",
+            "Arguments": {
+              "Argument1": "__*L0_",
+              "Argument2": "InStr([TempVars]![InputValue],\\\u0022@\\\u0022)=0 Or InStr([TempVars]![InputValue],\\\u0022.\\\u0022)=0"
+            }
+          },
+          {
+            "ActionName": "SetLocalVar",
+            "Arguments": {
+              "Argument1": "__*L0C_",
+              "Argument2": "[LocalVars]![__*L0_]"
+            }
+          },
+          {
+            "ActionName": "SetTempVar",
+            "Arguments": {
+              "Name": "InputValid",
+              "Expression": "False"
+            }
+          },
+          {
+            "ActionName": "MsgBox",
+            "Arguments": {
+              "Message": "Please enter a valid email address.",
+              "Beep": "-1",
+              "Type": "3"
+            }
+          },
+          {
+            "ActionName": "SetLocalVar",
+            "Arguments": {
+              "Argument1": "__*L0C_",
+              "Argument2": "(Not [LocalVars]![__*L0_])"
+            }
+          },
+          {
+            "ActionName": "SetTempVar",
+            "Arguments": {
+              "Name": "InputValid",
+              "Expression": "True"
+            }
+          },
+          {
+            "ActionName": "SetLocalVar",
+            "Arguments": {
+              "Argument1": "__*L0C_",
+              "Argument2": "False"
+            }
+          },
+          {
+            "ActionName": "SetTempVar",
+            "Arguments": {
+              "Name": "InputValid",
+              "Expression": "True"
+            }
+          },
+          {
+            "ActionName": "StopMacro",
+            "Arguments": {}
+          },
+          {
+            "ActionName": "SetLocalVar",
+            "Arguments": {
+              "Argument1": "__*L0_",
+              "Argument2": "Len(Replace(Replace(Replace(Replace([TempVars]![InputValue],\\\u0022(\\\u0022,\\\u0022\\\u0022),\\\u0022)\\\u0022,\\\u0022"
+            }
+          },
+          {
+            "ActionName": "SetLocalVar",
+            "Arguments": {
+              "Argument1": "__*L0C_",
+              "Argument2": "[LocalVars]![__*L0_]"
+            }
+          },
+          {
+            "ActionName": "SetTempVar",
+            "Arguments": {
+              "Name": "InputValid",
+              "Expression": "False"
+            }
+          },
+          {
+            "ActionName": "MsgBox",
+            "Arguments": {
+              "Message": "Phone number must have at least 10 digits.",
+              "Beep": "-1",
+              "Type": "3"
+            }
+          },
+          {
+            "ActionName": "SetLocalVar",
+            "Arguments": {
+              "Argument1": "__*L0C_",
+              "Argument2": "(Not [LocalVars]![__*L0_])"
+            }
+          },
+          {
+            "ActionName": "SetTempVar",
+            "Arguments": {
+              "Name": "InputValid",
+              "Expression": "True"
+            }
+          },
+          {
+            "ActionName": "SetLocalVar",
+            "Arguments": {
+              "Argument1": "__*L0C_",
+              "Argument2": "False"
+            }
+          }
+        ]
+      }
+    ]
   },
   "UnresolvedItems": [
     {

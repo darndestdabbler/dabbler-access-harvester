@@ -1,0 +1,53 @@
+{
+  "status": "completed",
+  "summary": "Set 012 Session 1 (R2-1 / DW-9): materialise the switchboard rows (previously in NO harvested artifact) and populate the navigation inputs the builder already modelled. RE-GROUNDING (OLE DB probe of the 52 tblSwitchboardItems rows) DISPROVED the spec's canonical-Switchboard-Manager premise: HHC's table is hand-rolled custom (autonumber PK, ParentID page-tree, command codes 0-3, 32 embedded audit rows). Surfaced the spec-vs-fixture conflict to the human (former Access dev), who chose a GENERIC faithful-mechanical design and directed it must document BOTH custom and generic switchboards. DELIVERED: (1) pure SwitchboardSignatureDetector (column-signature, name/locale-independent); (2) generic SwitchboardStructureBuilder (page key = ParentID-if-the-column-exists else SwitchboardID; page Name = lowest-ItemNumber row text; raw Command preserved with NO canonical decode; null-page-key rows preserved in the raw dump + counted in UnlinkedItemCount, not dropped); (3) DAO row-read SwitchboardExporter (Category Navigation; OleDbValueSampler EscapeIdentifier/degradation discipline via DAO on the open COM session rather than a 2nd OLE DB connection; StartUpForm membership-probe) -> raw/Navigation/switchboard-items.json + startup-options.json -> kb passthrough -> ir; (4) MacroChainBuilder (ir/Macros -> MacroChain[], documented arg names + Argument{n} fallback, RunCode->CallsProcedureName); (5) NavigationGraph model extended additively (SwitchboardItem.Provenance + nullable Command, SwitchboardItemProvenance, SwitchboardPage.Table, SwitchboardStructure.UnlinkedItemCount) on additionalProperties-tolerant schema (no envelope bump); (6) Pipeline.BuildNavigationInputs threads the populated NavigationGraphInputs into NavigationGraphBuilder.Build (inputs:null retired). RIBBON: stays null on HHC (no custom USysRibbons, no producer) -- recorded decision, carved out of DW-9 as DW-13. VALIDATION: solution builds 0 errors; hermetic Pipeline.Tests 846/846 (incl. new detector 7/7, structure-builder + macro-builder pins, multi-table + null-preservation regression pins); coordinated HHC golden regen (COM, TRX) -- NavigationGraph now carries EntryPoints (DefaultForm frmSwitchboard + 2 SwitchboardRoots), the 2-page Switchboard tree (10 items each, UnlinkedItemCount=32), and 4 Macros; new kb/ir Navigation files (52 rows); CanonicalGoldenRegressionTests + ManifestSchemaConformanceTests 6/6 (TRX-confirmed); every golden delta maps to R2-1. Interpretation-guide §5.7 + summary blocks updated. DW-9 CLOSED (switchboard/macros/entry-points landed); Ribbon -> DW-13. VERIFICATION: cross-provider session-verification routed to gpt-5-4, 2 rounds. R1 ISSUES_FOUND -> 2 Major (null->0 numeric coercion; multi-table page identity) + 1 Minor (StartUpForm silent read failure), ALL FIXED (nullable Command/ids; SwitchboardPage.Table; StartUpForm membership-probe + failed ExportOutcome) with 2 new regression pins. R2: all three VERIFIED; 1 NEW Minor (NULL ItemText coerced to '' for page Name / item Text) ACCEPTED-BY-DESIGN -- captions have no value collision (unlike command-0), Name must be a non-null label, and the raw dump preserves the exact ItemText (null vs '') losslessly; mirrors the Argument normalization. Bounded 2-round discipline honoured.",
+  "verification_method": "api",
+  "verification_verdict": "ISSUES_FOUND",
+  "verification_rounds": 2,
+  "files_changed": [
+    "AccessHarvester.Core/Pipeline.cs",
+    "AccessHarvester.Core/Extraction/SwitchboardSignatureDetector.cs",
+    "AccessHarvester.Core/Extraction/SwitchboardExporter.cs",
+    "AccessHarvester.Core/Translation/JsonPassthroughTranslator.cs",
+    "AccessHarvester.Pipeline/Enrichment/NavigationGraph.cs",
+    "AccessHarvester.Pipeline/Enrichment/SwitchboardArtifact.cs",
+    "AccessHarvester.Pipeline/Enrichment/SwitchboardStructureBuilder.cs",
+    "AccessHarvester.Pipeline/Enrichment/MacroChainBuilder.cs",
+    "tests/AccessHarvester.Tests/SwitchboardSignatureDetectorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/SwitchboardStructureBuilderTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/MacroChainBuilderTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/NavigationGraphBuilderTests.cs",
+    "docs/test-cases/harvester-schema.v1.1.json",
+    "docs/harvester/interpretation-guide.md",
+    "docs/planning/deferred-work.md",
+    "samples/GoldenOutput/HomeHealthCare/manifest.json",
+    "samples/GoldenOutput/HomeHealthCare/kb/Navigation/switchboard-items.json",
+    "samples/GoldenOutput/HomeHealthCare/kb/Navigation/startup-options.json",
+    "samples/GoldenOutput/HomeHealthCare/ir/Navigation/switchboard-items.ir.json",
+    "samples/GoldenOutput/HomeHealthCare/ir/Navigation/startup-options.ir.json",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/ai-assignment.md",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/ai-assignment-analysis.md",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/s1-verification.md",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/s1-verification-round-2.md",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/activity-log.json",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/session-state.json",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/session-events.jsonl",
+    "docs/session-sets/012-switchboard-and-report-chain-edges/disposition.json",
+    "tools/vahs012_assignment.py",
+    "tools/vahs012_s1_verify.py",
+    "tools/vahs012_s1_verify_r2.py",
+    "tools/vahs012_s1_log.py"
+  ],
+  "verification_message_ids": [],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Routed recommendation (gemini-pro, do-not-self-opine): Session 2 (R2-2 part 1, DW-10 -- chain-edge model + mechanical producers) is synthesis-heavy on the high-leverage task (designing the closed chain-edge kind + provenance set extending the NavigationEdge family), which earns Opus@high; the mechanical producer sub-tasks (record-source / embedded-macro / declared-parameter edges) can route to cheaper models. Cross-provider session-verification stays mandatory (gpt-5-4). DW-9 is CLOSED this session; DW-13 (ribbon) is separate backlog, NOT owned by S2."
+    }
+  },
+  "blockers": []
+}

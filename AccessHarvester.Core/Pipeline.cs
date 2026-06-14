@@ -82,6 +82,7 @@ public sealed class Pipeline
             QueryExporter.Instance,
             TableExporter.Instance,
             RelationshipExporter.Instance,
+            SwitchboardExporter.Instance,
         },
         translators: new IObjectTranslator[]
         {
@@ -92,6 +93,7 @@ public sealed class Pipeline
             JsonPassthroughTranslator.Queries,
             JsonPassthroughTranslator.Tables,
             JsonPassthroughTranslator.Relationships,
+            JsonPassthroughTranslator.Navigation,
         },
         enrichers: new IObjectEnricher[]
         {
@@ -503,7 +505,7 @@ public sealed class Pipeline
         var crossRefs = new CrossReferenceIndex(resolvedModules);
         var classifications = FunctionClassificationBuilder.BuildAll(resolvedModules, crossRefs);
 
-        // ── 2b. Navigation graph (F-2-2) ───────────────────────────────
+        // ── 2b. Navigation graph (F-2-2 + 012 R2-1 / DW-9) ─────────────
         // Build the navigation graph off the SAME resolvedModules + crossRefs
         // seam that feeds FunctionClassificationBuilder above (006 F-2-2:
         // "the seam already exists"). This surfaces the VBA-side navigation
@@ -511,17 +513,16 @@ public sealed class Pipeline
         // report, and standard-module code-behind — and the dynamic
         // (non-literal / missing-target) dispatches as unresolved targets.
         //
-        // inputs=null is deliberate: NavigationGraphInputs' top-level surfaces
-        // (Switchboard / Ribbon / Macros / default form) require a producer
-        // that reads switchboard *row* data and parses macros. Those rows are
-        // NOT in the harvested output today (tblSwitchboardItems ships
-        // "(no data file)"; 006's own probe confirms no artifact carries row
-        // content), so a reader would need a NEW row-read surface — which the
-        // 006 review scopes, together with the R2-1/R2-2 consumer surfaces, to
-        // the dedicated P4 set (`switchboard-and-report-chain-edges`). Deferred
-        // here as DW-9 (switchboard inputs) / DW-10 (R2-2 chain derivation);
-        // no new COM surface is introduced by this session.
-        var navigationGraph = NavigationGraphBuilder.Build(resolvedModules, crossRefs);
+        // 012 S1 (DW-9) retires the former inputs=null: the SwitchboardExporter
+        // now materialises the switchboard *rows* (in NO harvested artifact
+        // before) into raw/Navigation, the macro IR yields MacroChains, and the
+        // StartUpForm DAO property yields the default form. Those populate the
+        // already-modelled NavigationGraphInputs so the graph emits the
+        // Switchboard tree, ordered EntryPoints, and Macros. Ribbon stays null
+        // until a real-ribbon corpus case (DW-9 ribbon note). DW-10 (R2-2 chain
+        // derivation) remains for sessions 2-3.
+        var navigationInputs = BuildNavigationInputs(kbDir, irDir, diagnostics);
+        var navigationGraph = NavigationGraphBuilder.Build(resolvedModules, crossRefs, navigationInputs);
 
         // ── 3. Standalone module exports ───────────────────────────────
         // Emits one ModuleExport per standalone module AND per
@@ -1103,6 +1104,75 @@ public sealed class Pipeline
         }
 
         return exports;
+    }
+
+    // 012 S1 (DW-9): assembles the NavigationGraphInputs from the
+    // materialised navigation chrome — the switchboard row dump
+    // (kb/Navigation/switchboard-items.json), the macro IR (ir/Macros),
+    // and the startup form (kb/Navigation/startup-options.json). Returns
+    // null when no navigation inputs exist at all, so the builder leaves
+    // the top-level surfaces null exactly as before this set landed.
+    // Ribbon stays null (no USysRibbons producer; deferred).
+    internal static NavigationGraphInputs? BuildNavigationInputs(
+        string kbDir, string irDir, List<HarvesterDiagnostic> diagnostics)
+    {
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+        SwitchboardStructure? switchboard = null;
+        var switchboardFile = Path.Combine(kbDir, "Navigation", "switchboard-items.json");
+        if (File.Exists(switchboardFile))
+        {
+            try
+            {
+                var artifact = JsonSerializer.Deserialize<SwitchboardItemsArtifact>(
+                    File.ReadAllText(switchboardFile, Encoding.UTF8), options);
+                switchboard = SwitchboardStructureBuilder.Build(artifact);
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add(new HarvesterDiagnostic
+                {
+                    Severity = HarvesterDiagnosticSeverity.Warning,
+                    Message = $"Switchboard items load failed: {ex.Message}",
+                    Code = "SWITCHBOARD_LOAD_FAILURE",
+                });
+            }
+        }
+
+        string? defaultForm = null;
+        var startupFile = Path.Combine(kbDir, "Navigation", "startup-options.json");
+        if (File.Exists(startupFile))
+        {
+            try
+            {
+                var startup = JsonSerializer.Deserialize<StartupOptionsArtifact>(
+                    File.ReadAllText(startupFile, Encoding.UTF8), options);
+                defaultForm = startup?.StartUpForm;
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add(new HarvesterDiagnostic
+                {
+                    Severity = HarvesterDiagnosticSeverity.Warning,
+                    Message = $"Startup options load failed: {ex.Message}",
+                    Code = "STARTUP_OPTIONS_LOAD_FAILURE",
+                });
+            }
+        }
+
+        var macros = MacroChainBuilder.Build(Path.Combine(irDir, "Macros"));
+
+        // Nothing to supply -> null inputs (graph keeps VBA-side edges only).
+        if (switchboard is null && macros.Count == 0 && string.IsNullOrEmpty(defaultForm))
+            return null;
+
+        return new NavigationGraphInputs
+        {
+            Ribbon = null,
+            Switchboard = switchboard,
+            Macros = macros,
+            DefaultFormName = defaultForm,
+        };
     }
 
     // Reads ir/Relationships/*.ir.json (byte-equivalent to

@@ -569,6 +569,7 @@ End Sub", inputs: inputs);
                     new SwitchboardPage
                     {
                         SwitchboardId = 1,
+                        Table = "Switchboard Items",
                         Name = "Main Menu",
                         Items = Array.Empty<SwitchboardItem>(),
                     },
@@ -617,7 +618,7 @@ End Sub", inputs: inputs);
                 {
                     new SwitchboardPage
                     {
-                        SwitchboardId = 1, Name = "Main", Items = Array.Empty<SwitchboardItem>(),
+                        SwitchboardId = 1, Table = "Switchboard Items", Name = "Main", Items = Array.Empty<SwitchboardItem>(),
                     },
                 },
             },
@@ -677,7 +678,7 @@ End Sub", inputs: inputs);
             {
                 new SwitchboardPage
                 {
-                    SwitchboardId = 1, Name = "Main",
+                    SwitchboardId = 1, Table = "Switchboard Items", Name = "Main",
                     Items = new[]
                     {
                         new SwitchboardItem

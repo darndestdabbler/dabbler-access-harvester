@@ -1,0 +1,132 @@
+{
+  "sessionSetName": "012-switchboard-and-report-chain-edges",
+  "createdDate": "2026-06-14T08:37:17.532203+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/verification-mode",
+      "dateTime": "2026-06-14T08:37:17.533200+00:00",
+      "description": "Operator set verificationMode: out-of-band-or-none.",
+      "status": "complete",
+      "routedApiCalls": [],
+      "kind": "verification_mode",
+      "choice": "out-of-band-or-none"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/re-ground",
+      "dateTime": "2026-06-14T05:57:07.676603-04:00",
+      "description": "Re-grounded R2-1 against the tree: confirmed Build(inputs:null) call site, NavigationGraphInputs/Switchboard shapes; OLE DB probe of the 52 tblSwitchboardItems rows DISPROVED the canonical-Switchboard-Manager premise (custom ParentID tree, command codes 0-3, 32 embedded audit rows).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-001/ai-assignment",
+      "dateTime": "2026-06-14T05:57:07.677014-04:00",
+      "description": "Routed per-session orchestrator recommendation for ai-assignment.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 762,
+          "outputTokens": 168,
+          "costUsd": 0.0026
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-001/human-decision",
+      "dateTime": "2026-06-14T05:57:07.677555-04:00",
+      "description": "Surfaced the spec-vs-fixture conflict; human (former Access dev) chose generic faithful-mechanical design + StartUpForm read, and directed it must document BOTH custom and generic switchboards.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-001/detector-and-model",
+      "dateTime": "2026-06-14T05:57:07.678076-04:00",
+      "description": "Pure SwitchboardSignatureDetector (column-signature); extended NavigationGraph model (SwitchboardItem.Provenance, SwitchboardItemProvenance, SwitchboardStructure.UnlinkedItemCount + page Table); additive on additionalProperties-tolerant schema (no envelope bump).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-001/producers",
+      "dateTime": "2026-06-14T05:57:07.678076-04:00",
+      "description": "Pure generic SwitchboardStructureBuilder (page key = ParentID-if-present else SwitchboardID; raw Command preserved, no decode; null-parent rows counted not dropped) + MacroChainBuilder (ir/Macros -> MacroChain[]).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-001/exporter-and-wiring",
+      "dateTime": "2026-06-14T05:57:07.678592-04:00",
+      "description": "DAO row-read SwitchboardExporter (Category Navigation; EscapeIdentifier discipline; StartUpForm membership-probe) + JsonPassthroughTranslator.Navigation; wired NavigationGraphInputs into NavigationGraphBuilder.Build (retired inputs:null).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-001/hermetic-tests",
+      "dateTime": "2026-06-14T05:57:07.678592-04:00",
+      "description": "Hermetic pins: detector 7/7; SwitchboardStructureBuilder (canonical + custom + null-parent + multi-table + null-preservation) + MacroChainBuilder; full Pipeline.Tests 846/846 green; ribbon decision recorded (null on HHC, no producer, deferred).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-001/golden-and-docs",
+      "dateTime": "2026-06-14T05:57:07.679305-04:00",
+      "description": "Coordinated HHC golden regen (COM, TRX): NavigationGraph now populated (EntryPoints DefaultForm frmSwitchboard + 2 roots; Switchboard 2 pages/10 items, UnlinkedItemCount=32; 4 Macros) + new kb/ir Navigation files; every delta maps to R2-1. CanonicalGoldenRegression + ManifestSchemaConformance 6/6. Interpretation-guide 5.7 updated.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-001/verification-r1",
+      "dateTime": "2026-06-14T05:57:07.679823-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4): ISSUES_FOUND R1 (2 Major: null->0 coercion, multi-table page identity; 1 Minor: StartUpForm silent failure).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 11766,
+          "outputTokens": 10030,
+          "costUsd": 0.1799
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-001/verification-r2",
+      "dateTime": "2026-06-14T05:57:07.680346-04:00",
+      "description": "Fixed all three (nullable Command/ids; page Table; StartUpForm membership-probe + failed outcome) + 2 regression pins; golden re-regen (page Table added); gate 6/6. R2 (gpt-5-4): both Majors + Minor VERIFIED; 1 new Minor (NULL ItemText->'' caption) accepted-by-design (no value collision; raw dump preserves it).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 6411,
+          "outputTokens": 8041,
+          "costUsd": 0.1366
+        }
+      ]
+    }
+  ]
+}

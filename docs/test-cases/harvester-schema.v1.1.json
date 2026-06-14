@@ -1060,25 +1060,40 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["SwitchboardId", "Name", "Items"],
+            "required": ["SwitchboardId", "Table", "Name", "Items"],
             "properties": {
-              "SwitchboardId": { "type": "integer" },
-              "Name": { "type": "string" },
+              "SwitchboardId": { "type": "integer", "description": "Page key: the table's ParentID value when it has a ParentID column (hand-rolled hierarchy tables), else the (non-unique) SwitchboardID (canonical Switchboard Manager tables). Not globally unique across multiple switchboard tables — pair with Table." },
+              "Table": { "type": "string", "description": "The switchboard-shaped table this page's rows came from (page-level source identity for multi-table corpora)." },
+              "Name": { "type": "string", "description": "Page display name: the ItemText of the page's lowest-ordered row." },
               "Items": {
                 "type": "array",
                 "items": {
                   "type": "object",
-                  "required": ["Text", "Command"],
+                  "required": ["Text"],
                   "properties": {
                     "Text": { "type": "string" },
-                    "Command": { "type": "integer" },
-                    "Argument": { "type": "string" }
+                    "Command": { "type": "integer", "description": "Raw, undecoded Command value as stored in the table; meaning is database-specific (the canonical Switchboard Manager 1-8 scheme is only one possibility). Omitted when the row stored no Command (never coerced to 0)." },
+                    "Argument": { "type": "string" },
+                    "Provenance": { "$ref": "#/$defs/SwitchboardItemProvenance", "description": "Per-row provenance tracing this item to its source row." }
                   }
                 }
               }
             }
           }
-        }
+        },
+        "UnlinkedItemCount": { "type": "integer", "description": "Count of materialised switchboard rows that carry no page linkage (null ParentID on a hierarchy table); preserved in the raw row dump but not reflected in Pages. 0 for canonical tables." }
+      }
+    },
+
+    "SwitchboardItemProvenance": {
+      "type": "object",
+      "required": ["Source", "Table"],
+      "properties": {
+        "Source": { "type": "string", "description": "Always \"switchboard-row\"." },
+        "Table": { "type": "string", "description": "Switchboard-shaped table the row came from." },
+        "SwitchboardId": { "type": "integer", "description": "The row's raw SwitchboardID; omitted when the row stored no value (never coerced to 0)." },
+        "ItemNumber": { "type": "integer", "description": "The row's ItemNumber (display order within its page); omitted when the row stored no value." },
+        "ParentId": { "type": "integer", "description": "The row's ParentID when the table carries that column; absent for canonical tables." }
       }
     },
 
