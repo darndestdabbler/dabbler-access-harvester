@@ -2511,3 +2511,71 @@ reference; if it proves out twice in *this* repo, propose promotion to
   layer actually drops/keeps it; (c) only then re-verify. If a second session
   independently ships a fix-introduced inaccuracy a re-verify catches, promote
   this to a Convention.
+
+### Enumerate The Finite Input-API Surface Up Front When Adding An "Unmatched / Missing X" Cross-Producer Check
+
+- **Context:** Set 012 Session 3 added `tempvar-no-supplier` — a cross-producer
+  check that flags a record-source `TempVars!x` reference with no harvested
+  code-behind setter. The "supplied" universe was built by recognising
+  `TempVars!x =` assignment targets.
+- **Failure or friction:** The setter-recognition was discovered piecemeal across
+  three separate review interactions, each surfacing a *new* false-positive: the
+  routed R1 caught standard-module setters (fixed by scanning all modules); routed
+  R2 caught the `.Add dynamicName, "value"` scan-forward bug *and* the non-bang
+  `TempVars("x")=` / `TempVars.Add` forms; the devil's-advocate pair then caught
+  the `TempVars.Item("x")=` and `Name:=` forms. Each round shipped a fix that the
+  next round holed, because the check was authored against the *one* setter form
+  the fixture happened to use rather than the *whole* Access TempVars mutation API.
+- **Lesson:** A "does anything supply / set / reference X?" check is only as sound
+  as its enumeration of the ways X can be supplied. When the input is a fixed
+  library API (here the TempVars collection: `!name`, `("name")`, `.Item("name")`,
+  `.Add name,value` incl. `Name:=`), that surface is **finite and closeable** —
+  enumerate it up front from the API docs, not via successive verifier rounds. A
+  golden-neutral feature (no fixture exercises the alternative forms) gets *zero*
+  protection from the golden gate, so the only defense is enumerating the surface
+  and pinning each form synthetically. Bias the conservative direction:
+  under-recognising a setter produces a *false* "broken chain" (worse than a
+  missing edge).
+- **Action for future sessions:** Before shipping an "unmatched/missing X"
+  detector, list every syntactic form X can take in the source language/API and
+  add a synthetic pin per form in the same session. If the surface is open-ended
+  (not a fixed API), prefer deferring the detector or making it explicitly
+  conservative (emit only on high confidence) over shipping a false-positive-prone
+  version. If a second cross-producer "unmatched X" check hits the same
+  discovered-piecemeal churn, promote to a Convention.
+
+### A Clean Routed Cross-Provider VERIFIED Is Not Sufficient For Closeout — The In-IDE Devil's-Advocate Pair Catches Wrong-Data Defects It Misses
+
+- **Context:** End-of-set closeout verification. Set 012 Session 3's new
+  code-behind producer passed routed cross-provider `session-verification`
+  (gpt-5-4) across four rounds, ending **VERIFIED**. The set-wide manual
+  devil's-advocate pair (GitHub Copilot → Gemini Pro + GPT-5.4), run afterward as
+  the primary closeout review, was then pointed at the same code with specific
+  contrarian hypotheses per concern.
+- **Failure or friction:** Both devil's-advocate providers *independently*
+  surfaced **C3** — a form/report name-collision where the owner-kind map
+  (`owners[name]=Form` then `owners[name]=Report`) let the report overwrite the
+  form, so a colliding form module's chain edges shipped with a fabricated
+  `Report` endpoint. This is **wrong data**, not a coverage gap, and the routed
+  verifier had VERIFIED the code that contained it across R1–R4. The routed
+  verifier and the in-IDE pair have non-overlapping blind spots: the routed prompt
+  framed concerns the orchestrator already suspected; the adversarial pair, told
+  "the null hypothesis is each concern is a real defect," went looking for the
+  collision the orchestrator had not surfaced.
+- **Lesson:** "Routed VERIFIED" certifies the concerns the orchestrator thought to
+  ask about. For closeout-grade work it is a floor, not a ceiling. An independent
+  adversarial pass — framed devil's-advocate with a specific contrarian hypothesis
+  per concern, and run over the *fresh* code, not only the prior-sessions'
+  weak-evidence closures — catches a distinct defect class (especially
+  invariant-assumption bugs like "names are unique"). This is the second confirming
+  context for the devil's-advocate-pair value: 011 S3 (the C9 `unresolved-items`
+  undercount routed R1 missed) and 012 S3 (the C3 name-collision routed R1–R4
+  missed).
+- **Action for future sessions:** On a closeout/final session, run the in-IDE
+  devil's-advocate pair as the **primary** review in addition to the mandatory
+  routed `session-verification`, and frame it with per-concern contrarian
+  hypotheses (never generic "be skeptical"). **Promotion candidate** (second
+  context reached): fold into the existing `project-guidance.md` → Conventions →
+  "Flag high-value/high-risk work … review it devil's-advocate" Convention an
+  explicit clause that a clean routed VERIFIED does not waive the devil's-advocate
+  pass on closeout-grade work, because the two have non-overlapping blind spots.
