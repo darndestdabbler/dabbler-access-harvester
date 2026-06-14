@@ -382,10 +382,13 @@ on-disk order the writer emits, are:
   classifications across all forms and reports. Shape in §5.4.
 - **`NavigationGraph`** — the application-wide navigation structure:
   the VBA-derived form→form / form→report edges, the non-literal
-  dispatch targets that could not be resolved, and the metadata-derived
+  dispatch targets that could not be resolved, the metadata-derived
   top-level facets — ordered `EntryPoints`, the `Switchboard` page tree,
-  and `Macros` (populated in set 012 S1 / R2-1); `Ribbon` stays null on
-  switchboard-driven corpora. A single object, not an array. Emitted
+  and `Macros` (populated in set 012 S1 / R2-1; `Ribbon` stays null on
+  switchboard-driven corpora) — and the cross-object **chain** surface
+  `ChainEdges` / `UnresolvedChainTargets` (the launcher→report→query→
+  parameter relationships; mechanical producers landed in set 012 S2 /
+  R2-2, code-behind hops in S3). A single object, not an array. Emitted
   between `EventHandlerClassifications` and `UnresolvedItems`. See §5.7
   for the full consumer surface and the switchboard contract.
 - **`UnresolvedItems`** — the flat list of references the resolver
@@ -453,7 +456,8 @@ with normalisation sentinels for the volatile fields):
   "ValidationRules": [], "RowSourceSpecs": [],
   "FunctionClassifications": [], "EventHandlerClassifications": [],
   "NavigationGraph": { "EntryPoints": [], "Edges": [],
-                       "UnresolvedTargets": [], "Macros": [] },
+                       "UnresolvedTargets": [], "Macros": [],
+                       "ChainEdges": [], "UnresolvedChainTargets": [] },
   "UnresolvedItems": [], "Diagnostics": []
 }
 ```
@@ -1255,11 +1259,11 @@ macro IR, and the `StartUpForm` database property:
   fixture). Recorded as a deliberate decision, not a silent gap.
 
 This is the **omit-null vs empty-array split** a consumer must code
-for: the four list facets (`EntryPoints`, `Edges`,
-`UnresolvedTargets`, `Macros`) are **always present** (possibly empty);
-the two object facets (`Ribbon`, `Switchboard`) are **absent when
-null**. Test for `("Switchboard" in NavigationGraph)`, not for a
-non-null value.
+for: the six list facets (`EntryPoints`, `Edges`, `UnresolvedTargets`,
+`Macros`, `ChainEdges`, `UnresolvedChainTargets`) are **always present**
+(possibly empty); the two object facets (`Ribbon`, `Switchboard`) are
+**absent when null**. Test for `("Switchboard" in NavigationGraph)`, not
+for a non-null value.
 
 **The switchboard contract (generic over canonical *and* custom
 tables).** The harvester does **not** assume the wizard-generated
@@ -1289,20 +1293,72 @@ tree then applies one mechanical, generic rule:
   but are not placed in a page; the count makes the exclusion explicit
   rather than silent.
 
-R2-1 / DW-9 is therefore **landed**. **R2-2 (dialog → query → report
-chains)** is still open: the individual edges/`WhereCondition`/`OpenArgs`
-(present today) are **not yet joined** into cross-object chains, and the
-report-menu embedded-macro / `RecordSource` edges are not yet derived.
-That is substantial new logic deferred as **DW-10**, owned by sessions
-2–3 of `012-switchboard-and-report-chain-edges`. A consumer needing the
-launcher→report→dialog→query chains today must still fall back to the
-raw edges plus the per-object `ir/` records.
+R2-1 / DW-9 is therefore **landed**.
 
-**Determinism.** Every collection is sorted at construction
-(`Edges` and `UnresolvedTargets` by source module → procedure → line →
-column, case-insensitive), so identical input yields a byte-identical
-graph across runs — the determinism standard the project guidance pins
-for enrichment outputs.
+**The chain surface (`ChainEdges` / `UnresolvedChainTargets`) — R2-2 /
+DW-10.** Where `Edges` carries individual VBA `DoCmd` dispatches,
+`ChainEdges` joins two application objects across a structural
+relationship — the **launcher → report → dialog → query → parameter**
+chain. Each `ChainEdge` is
+`{ From: ChainEndpoint, To: ChainEndpoint, Kind, Provenance }`; a
+`ChainEndpoint` is `{ Kind, Name, Member? }` where `Member` names the
+control / parameter / token the relationship hangs off of.
+
+- **`Kind`** (closed PascalCase set): `OpensDialog` | `OpensReport` |
+  `OpensForm` | `FeedsRecordSource` | `SuppliesParameter`. Direction is
+  **launcher → target** for the open kinds and **supplier → consumer**
+  for `FeedsRecordSource` (source → owner) and `SuppliesParameter`
+  (supplier → consumer).
+- **`Provenance`** (closed kebab-case set): `vba-call` | `embedded-macro`
+  | `macro-action` | `record-source` | `query-form-reference` |
+  `query-declared-parameter` | `tempvar-flow`. Session 2 (this set)
+  produces the **mechanical** subset over the IR surfaces —
+  `embedded-macro` (a control's `EventMacros` `OpenReport`/`OpenForm`),
+  `record-source` (a form/report `RecordSource` naming a query/table, or
+  the FROM/JOIN targets of an inline-SQL record source),
+  `query-form-reference` (a query's `[Forms]!`/`[Reports]!` reference),
+  and `tempvar-flow` (a `TempVars!` reference in an inline record
+  source). `vba-call` is produced by the Session-3 code-behind pass (the
+  report's `Report_Open` `acDialog` open, `Forms!dlg!ctl` reads, and the
+  `TempVars!x =` **assignments** that pair the supplier to a
+  `tempvar-flow` reference). `macro-action` is reserved (no producer in
+  this set).
+- **`ChainNodeKind`** on an endpoint: `Form` | `Report` | `Query` |
+  `Table` | `TempVar` | `Prompt` | `Unknown`. A record-source FROM target
+  that matches no harvested query or table is `Unknown` (named but not
+  found), not dropped.
+
+`UnresolvedChainTargets` is the explicit-unresolved channel:
+`{ Kind, Consumer, Provenance, Reason, Detail? }`. The common case is a
+**prompt-style declared query parameter** (`Reason: "prompt-parameter"`)
+whose value the runtime user types — there is no static supplier, so it
+is recorded against its consuming query with the parameter name in
+`Detail`. An inline record source the SQL parser cannot turn into a
+usable tree surfaces as `Reason: "record-source-unparsed"`. On
+HomeHealthCare: 4 `OpensReport` (the `frmReportMenu` buttons), 29
+`FeedsRecordSource` (named-query / table / inline-SQL FROM targets), 4
+`SuppliesParameter` `tempvar-flow` (`TempVars!repCID` / `!repFY` in the
+two shortfall sub-reports), and 3 `UnresolvedChainTargets` (the prompt
+parameters of `qryClientServicePlan_ByClient` and
+`qryProviderPlansByClient_Param`).
+
+> **Re-grounding note (set 012 S2).** Two spec-wording points were
+> reconciled to the actual tree: (1) the embedded-macro producer consumes
+> the enricher's already-structured `EventMacros` (named args, derived
+> from the canonical `_AXL` XML) rather than re-parsing the legacy
+> `On*EmMacro` block-format property; (2) `TempVars!` references are
+> recovered by a **textual** scan, because the JET SQL grammar models
+> bang-access only for `Forms`/`Reports` roots — `TempVars!x` is not a
+> parsed node. The report → parameter-dialog `acDialog` hop is VBA
+> code-behind and lands in Session 3.
+
+**Determinism.** Every collection is sorted at construction (`Edges`
+and `UnresolvedTargets` by source module → procedure → line → column,
+case-insensitive; `ChainEdges` by kind → endpoints → provenance,
+`UnresolvedChainTargets` by kind → consumer → provenance → reason →
+detail), so identical input yields a byte-identical graph across runs —
+the determinism standard the project guidance pins for enrichment
+outputs.
 
 ---
 

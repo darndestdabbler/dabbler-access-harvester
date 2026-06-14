@@ -297,9 +297,24 @@
 - **Owning set candidate:** **`012-switchboard-and-report-chain-edges`**
   (006's P4; authored 2026-06-14 by 011 Session 3 — Sessions 2–3 own this,
   with DW-9).
-- **Mechanical backstop:** the committed HHC golden's `NavigationGraph.Edges`
-  records the report→dialog `OpenForm` edges (with `OpenArgs`/`WhereCondition`)
-  but no derived cross-object chain records; the absence is visible there.
+- **012 Session 2 progress (2026-06-14, R2-2 part 1):** the **mechanical**
+  chain edges are landed. A new `NavigationChainBuilder` derives, over the IR
+  surfaces, the closed chain-edge family
+  (`NavigationGraph.ChainEdges` / `.UnresolvedChainTargets`; kinds
+  `OpensDialog|OpensReport|OpensForm|FeedsRecordSource|SuppliesParameter`;
+  closed kebab-case provenance set): the embedded-macro launcher→report hop
+  (`embedded-macro`), the record-source → query/table edges incl. inline-SQL
+  FROM/JOIN (`record-source`), the query `[Forms]!`/`[Reports]!` references
+  (`query-form-reference`), the `TempVars!` record-source references
+  (`tempvar-flow`), and prompt-style declared parameters as explicit
+  `UnresolvedChainTarget`s (`query-declared-parameter`). HHC golden: 37
+  edges + 3 unresolved. **Still open for S3:** the `vba-call` code-behind hops
+  (`acDialog` → `OpensDialog`, `Forms!dlg!ctl` reads, the `TempVars!x =`
+  assignments that pair a supplier to a `tempvar-flow` reference). DW-10 closes
+  with the S3 landing commit per the spec's end-of-set deliverables.
+- **Mechanical backstop:** `NavigationChainBuilderTests` pins each producer; the
+  committed HHC golden's `NavigationGraph.ChainEdges` now records the derived
+  chains. Before S2 the golden had only `Edges` and no chain records.
 
 ### DW-11 — `unresolved-items.json` is procedure-body-scoped and undercounts header / module-level unresolved references
 - **What:** the unresolved surfaces undercount in **two distinct layers**, both

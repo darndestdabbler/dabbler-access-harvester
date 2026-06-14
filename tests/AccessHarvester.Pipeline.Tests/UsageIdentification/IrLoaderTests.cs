@@ -60,6 +60,58 @@ public class IrLoaderTests
     }
 
     /// <summary>
+    /// 012 S2 (R2-2 / DW-10): the loader captures a control's enriched
+    /// <c>EventMacros</c> block (the structure MacroActionsEnricher derives
+    /// from the control's <c>_AXL</c> XML) into <see cref="IrControl.EventMacros"/>
+    /// with named arguments, so the chain-edge builder consumes it instead of
+    /// re-parsing the raw block-format property string.
+    /// </summary>
+    [Fact]
+    public void Control_EventMacros_Block_Is_Captured_With_Named_Arguments()
+    {
+        string root = Path.Combine(Path.GetTempPath(),
+            "iht-irloader-" + System.Guid.NewGuid().ToString("N"));
+        string formsDir = Path.Combine(root, "ir", "Forms");
+        Directory.CreateDirectory(formsDir);
+        try
+        {
+            string json = """
+                {
+                    "Properties": { "Name": "frmReportMenu" },
+                    "Children": [
+                        {
+                            "Type": "CommandButton",
+                            "Properties": { "Name": "btnClientProfile" },
+                            "EventMacros": {
+                                "OnClick": {
+                                    "Actions": [
+                                        { "Action": "OpenReport",
+                                          "Arguments": { "ReportName": "rptClientProfile" } }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+                """;
+            File.WriteAllText(Path.Combine(formsDir, "frmReportMenu.ir.json"), json);
+
+            var db = IrLoader.Load(root);
+            var control = db.Forms.Single().Controls.Single(c => c.Name == "btnClientProfile");
+            Assert.NotNull(control.EventMacros);
+            var em = Assert.Single(control.EventMacros!);
+            Assert.Equal("OnClick", em.Event);
+            var action = Assert.Single(em.Actions);
+            Assert.Equal("OpenReport", action.Action);
+            Assert.Equal("rptClientProfile", action.Arguments["ReportName"]);
+        }
+        finally
+        {
+            try { Directory.Delete(root, recursive: true); } catch { }
+        }
+    }
+
+    /// <summary>
     /// Sibling check: a generic non-Begin control node (CommandButton) still
     /// flows through the generic-properties branch and produces an IrControl
     /// with its Properties. This guards against an over-eager fix that would

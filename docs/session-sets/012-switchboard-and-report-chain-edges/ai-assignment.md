@@ -61,6 +61,33 @@ sub-tasks can be routed to cheaper models.
 ### Estimated routed cost
 Moderate.
 
+### Actuals (filled after the session)
+- Orchestrator used: Claude Code Opus 4.8 @ effort=high.
+- Total routed cost: ~$0.64 (verification gpt-5-4 ×4 rounds $0.2122 + $0.1513 +
+  $0.1379 + $0.1121; next-orchestrator analysis gemini-pro $0.0014). All
+  implementation (model design, producers, wiring, tests, golden regen, docs)
+  handled in-conversation by Opus per the "orchestrator matches routing target"
+  convention; only the mandatory cross-provider verification + the
+  do-not-self-opine next-orch analysis were routed.
+- Deviations from recommendation: two spec-wording deviations reconciled by
+  re-grounding (consume the enricher's structured `EventMacros` rather than
+  re-parse `OnClickEmMacro` block text; recover `TempVars!` textually because
+  the JET grammar models bang-access only for Forms/Reports roots), both
+  disclosed to the verifier.
+- Verification: 4 convergent rounds (R1 3 Major + 2 Minor → R2 2 follow-ons →
+  R3 2 narrower variants → R4 VERIFIED). The R3 fix replaced the regex
+  TempVars recovery with a token-aware scanner (structural, not another patch),
+  which closed the class. Exceeded the nominal 2-retry guidance but the
+  sequence was convergent (each round strictly narrower, ending clean) and the
+  HHC golden was byte-identical across all rounds. Opus@high was the right call.
+
+**Next-session orchestrator recommendation (Session 3, routed gemini-pro):**
+Claude Code Opus 4.8 @ effort=high — S3's code-behind chain edges hinge on
+tracing stateful VBA data flow (`DoCmd.OpenForm … acDialog` → `Forms!dlg!ctl`
+reads → `TempVars!x =` assignment pairing), which is static-analysis reasoning
+beyond pattern matching; S3 also authors the next set and runs closeout-grade
+verification.
+
 ## Session 3: Code-Behind Chain Edges + Coordinated Closeout (R2-2 part 2, DW-10)
 
 ### Recommended orchestrator

@@ -109,6 +109,30 @@ public sealed record NavigationGraph
     /// independently of entry points see the full action sequence.
     /// </summary>
     public required IReadOnlyList<MacroChain> Macros { get; init; }
+
+    /// <summary>
+    /// Cross-object navigation **chain** edges derived from the metadata
+    /// surfaces (embedded macros, record sources, query parameters) by
+    /// <see cref="NavigationChainBuilder"/> — the R2-2 / DW-10 launcher →
+    /// report → dialog → query → parameter chain the consumer requested.
+    /// Distinct from the VBA-side <see cref="Edges"/> (individual
+    /// <c>DoCmd</c> dispatches): a <see cref="ChainEdge"/> joins two
+    /// application objects across a structural relationship. Empty when no
+    /// chain relationships were found (e.g., when the builder was not run).
+    /// Sorted deterministically.
+    /// </summary>
+    public IReadOnlyList<ChainEdge> ChainEdges { get; init; } = System.Array.Empty<ChainEdge>();
+
+    /// <summary>
+    /// Chain relationships whose far endpoint could not be resolved
+    /// mechanically — most commonly a prompt-style declared query parameter
+    /// whose supplier is the runtime user, or an inline record source that
+    /// did not parse. Surfaced explicitly (never silently dropped) so the
+    /// consumer sees "a chain exists here but its supplier is dynamic"
+    /// rather than silence. Sorted deterministically.
+    /// </summary>
+    public IReadOnlyList<UnresolvedChainTarget> UnresolvedChainTargets { get; init; }
+        = System.Array.Empty<UnresolvedChainTarget>();
 }
 
 /// <summary>
@@ -674,4 +698,165 @@ public sealed record NavigationGraphInputs
     /// is configured.
     /// </summary>
     public string? DefaultFormName { get; init; }
+}
+
+// ── Chain edges (R2-2 / DW-10) ─────────────────────────────────────────
+
+/// <summary>
+/// One cross-object navigation **chain** edge — a structural relationship
+/// joining two application objects, derived mechanically from the metadata
+/// surfaces (embedded macros, record sources, query parameters) rather than
+/// from a single VBA dispatch. The launcher → report → dialog → query →
+/// parameter chain a downstream AI consumer walks to understand "what opens
+/// what, fed by which data, parameterised by which control."
+/// </summary>
+/// <remarks>
+/// Direction is always supplier → consumer for the data/parameter kinds
+/// (<c>FeedsRecordSource</c>: source → owner; <c>SuppliesParameter</c>:
+/// supplier → consumer) and launcher → target for the open kinds
+/// (<c>OpensReport</c>/<c>OpensForm</c>/<c>OpensDialog</c>:
+/// trigger → opened object).
+/// </remarks>
+public sealed record ChainEdge
+{
+    /// <summary>The originating endpoint (launcher / data source / parameter supplier).</summary>
+    public required ChainEndpoint From { get; init; }
+
+    /// <summary>The destination endpoint (opened object / record-source owner / parameter consumer).</summary>
+    public required ChainEndpoint To { get; init; }
+
+    /// <summary>The chain relationship kind.</summary>
+    public required ChainEdgeKind Kind { get; init; }
+
+    /// <summary>
+    /// How the edge was derived. A **closed kebab-case string set** (emitted
+    /// verbatim; mirrors <see cref="UnresolvedNavigationTarget.Reason"/>'s
+    /// raw-string discipline so on-disk values match the consumer contract
+    /// exactly). Future producers append to the set; existing values are
+    /// never renamed:
+    /// <list type="bullet">
+    ///   <item><description><c>"vba-call"</c> — a code-behind <c>DoCmd</c> dispatch (S3 producer).</description></item>
+    ///   <item><description><c>"embedded-macro"</c> — a control's embedded <c>EventMacros</c> <c>OpenForm</c>/<c>OpenReport</c> action.</description></item>
+    ///   <item><description><c>"macro-action"</c> — a standalone macro action (reserved; no producer in this set).</description></item>
+    ///   <item><description><c>"record-source"</c> — a form/report record source (named object or inline-SQL FROM/JOIN target).</description></item>
+    ///   <item><description><c>"query-form-reference"</c> — a query's implicit <c>[Forms]!</c>/<c>[Reports]!</c> control reference (in a query body or an inline record source).</description></item>
+    ///   <item><description><c>"query-declared-parameter"</c> — a query's declared <c>PARAMETERS</c> entry.</description></item>
+    ///   <item><description><c>"tempvar-flow"</c> — a <c>TempVars!</c> reference in a record source (its setter is paired in by the S3 code-behind producer).</description></item>
+    /// </list>
+    /// </summary>
+    public required string Provenance { get; init; }
+}
+
+/// <summary>
+/// One endpoint of a <see cref="ChainEdge"/> or
+/// <see cref="UnresolvedChainTarget"/>. Identifies an application object by
+/// kind + name, with an optional <see cref="Member"/> for the control,
+/// parameter, or token the relationship hangs off of.
+/// </summary>
+public sealed record ChainEndpoint
+{
+    /// <summary>The object kind this endpoint names.</summary>
+    public required ChainNodeKind Kind { get; init; }
+
+    /// <summary>
+    /// The object name (form / report / query / table name; the TempVar
+    /// name for a <see cref="ChainNodeKind.TempVar"/>; a stable label for
+    /// <see cref="ChainNodeKind.Prompt"/>).
+    /// </summary>
+    public required string Name { get; init; }
+
+    /// <summary>
+    /// The control, parameter, or token within <see cref="Name"/> the
+    /// relationship is anchored to (e.g., the launching command button on a
+    /// form, or the referenced control on a dialog). Null when the
+    /// relationship is at object granularity.
+    /// </summary>
+    public string? Member { get; init; }
+}
+
+/// <summary>Discriminates the endpoint object kind on <see cref="ChainEndpoint.Kind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ChainNodeKind
+{
+    /// <summary>An Access form.</summary>
+    Form,
+
+    /// <summary>An Access report.</summary>
+    Report,
+
+    /// <summary>A saved query.</summary>
+    Query,
+
+    /// <summary>A table.</summary>
+    Table,
+
+    /// <summary>A <c>TempVars!</c> temporary variable (supplier resolved in the S3 code-behind pass).</summary>
+    TempVar,
+
+    /// <summary>A runtime user prompt (a prompt-style declared parameter's supplier).</summary>
+    Prompt,
+
+    /// <summary>
+    /// A named target that could not be classified as a known query or
+    /// table (e.g., an inline-SQL FROM target naming an object not present
+    /// in the harvested set).
+    /// </summary>
+    Unknown,
+}
+
+/// <summary>Discriminates the chain relationship on <see cref="ChainEdge.Kind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ChainEdgeKind
+{
+    /// <summary>Opens a form modally as a parameter dialog (<c>acDialog</c>); distinguished only in the S3 VBA pass.</summary>
+    OpensDialog,
+
+    /// <summary>Opens a report.</summary>
+    OpensReport,
+
+    /// <summary>Opens a form (non-dialog).</summary>
+    OpensForm,
+
+    /// <summary>Supplies the record source of a form/report (the data the object binds to).</summary>
+    FeedsRecordSource,
+
+    /// <summary>Supplies a parameter value consumed by a query/report.</summary>
+    SuppliesParameter,
+}
+
+/// <summary>
+/// A chain relationship whose far endpoint is not mechanically resolvable —
+/// the explicit-unresolved channel for chains, mirroring
+/// <see cref="UnresolvedNavigationTarget"/> for the VBA edges. Most commonly
+/// a prompt-style declared query parameter (the supplier is the runtime
+/// user) or an inline record source that failed to parse.
+/// </summary>
+public sealed record UnresolvedChainTarget
+{
+    /// <summary>The chain kind that could not be completed.</summary>
+    public required ChainEdgeKind Kind { get; init; }
+
+    /// <summary>The known (consumer) endpoint of the would-be chain.</summary>
+    public required ChainEndpoint Consumer { get; init; }
+
+    /// <summary>The provenance closed-set value (see <see cref="ChainEdge.Provenance"/>).</summary>
+    public required string Provenance { get; init; }
+
+    /// <summary>
+    /// Why the far endpoint is unresolved. A closed kebab-case string set:
+    /// <list type="bullet">
+    ///   <item><description><c>"prompt-parameter"</c> — a declared parameter whose value is entered at runtime.</description></item>
+    ///   <item><description><c>"record-source-unparsed"</c> — an inline record source the SQL parser could not turn into a usable tree (no FROM/JOIN data source recovered).</description></item>
+    ///   <item><description><c>"embedded-macro-unparsed"</c> — a control/object carries an <c>On…EmMacro</c> property the enricher did not structure into <c>EventMacros</c>, so no chain edge could be derived (the raw property is still preserved in <c>ir/</c>).</description></item>
+    ///   <item><description><c>"unresolvable-reference"</c> — a query <c>[Forms]!</c>/<c>[Reports]!</c> parameter whose path named no resolvable object.</description></item>
+    /// </list>
+    /// </summary>
+    public required string Reason { get; init; }
+
+    /// <summary>
+    /// The unresolved token's source text (e.g., the declared parameter name
+    /// <c>"[Enter Provider ID:]"</c>) so the consumer sees the original
+    /// without re-reading the object. Null when there is nothing to quote.
+    /// </summary>
+    public string? Detail { get; init; }
 }

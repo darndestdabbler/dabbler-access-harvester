@@ -1,7 +1,7 @@
 {
   "sessionSetName": "012-switchboard-and-report-chain-edges",
   "createdDate": "2026-06-14T08:37:17.532203+00:00",
-  "totalSessions": 0,
+  "totalSessions": 3,
   "entries": [
     {
       "sessionNumber": 1,
@@ -125,6 +125,103 @@
           "inputTokens": 6411,
           "outputTokens": 8041,
           "costUsd": 0.1366
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/reground",
+      "dateTime": "2026-06-14T06:58:18.508454-04:00",
+      "description": "Re-grounded R2-2 surfaces against the tree: embedded EventMacros already enriched; TempVars not a JET AST node; report->dialog is VBA (S3). Wrote s2-regrounding-and-design.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/chain-model",
+      "dateTime": "2026-06-14T06:58:18.508454-04:00",
+      "description": "Added closed ChainEdge family on NavigationGraph (ChainEdges/UnresolvedChainTargets; ChainEdgeKind enum; ChainEndpoint/ChainNodeKind; closed kebab-case provenance + reason sets).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/ir-eventmacros",
+      "dateTime": "2026-06-14T06:58:18.508454-04:00",
+      "description": "Extended IrControl + IrFormOrReport with EventMacros; IrLoader captures control- and object-level EventMacros from the form/report IR.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/producers",
+      "dateTime": "2026-06-14T06:58:18.508454-04:00",
+      "description": "NavigationChainBuilder: embedded-macro, record-source (named + inline-SQL FROM/JOIN via SqlSyntaxWalker; [Forms]!/[Reports]! refs; token-aware TempVars scan), and declared-parameter producers; explicit unresolved channel.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/wiring-schema",
+      "dateTime": "2026-06-14T06:58:18.508454-04:00",
+      "description": "Wired NavigationChainBuilder into Pipeline.cs (attached via `with`); added ChainEdge/ChainEndpoint/UnresolvedChainTarget $defs + optional NavigationGraph properties to harvester-schema.v1.1 (no envelope bump).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/tests-golden",
+      "dateTime": "2026-06-14T06:58:18.524294-04:00",
+      "description": "Hermetic pins (NavigationChainBuilderTests + IrLoader EventMacros); Pipeline.Tests 865/865; coordinated HHC golden regen -> NavigationGraph gains 37 ChainEdges + 3 UnresolvedChainTargets only; CanonicalGoldenRegression + ManifestSchemaConformance 6/6 (TRX).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/docs",
+      "dateTime": "2026-06-14T06:58:18.524294-04:00",
+      "description": "interpretation-guide \u00a75.7 chain-surface section + summary blocks; deferred-work DW-10 S2 progress note.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-06-14T06:58:18.527409-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4), 4 rounds: R1 3 Major + 2 Minor (all fixed) -> R2 2 follow-ons (fixed) -> R3 2 narrower variants (structural token-aware-scanner + strict-path rewrite) -> R4 VERIFIED. Golden byte-identical throughout.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "round": 1,
+          "costUsd": 0.2122
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "round": 2,
+          "costUsd": 0.1513
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "round": 3,
+          "costUsd": 0.1379
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "round": 4,
+          "costUsd": 0.1121
         }
       ]
     }

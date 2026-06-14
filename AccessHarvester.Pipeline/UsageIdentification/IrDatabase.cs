@@ -34,6 +34,15 @@ public sealed record IrFormOrReport
     public bool HasOnDelete { get; init; }
     public required IReadOnlyList<IrMacroAction> MacroActions { get; init; }
     public IReadOnlyDictionary<string, string> Properties { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// Object-level embedded ("UI") macros attached to the form/report's own
+    /// events (e.g. <c>OnOpen</c>, <c>OnLoad</c>, <c>OnClose</c>), structured
+    /// by <c>MacroActionsEnricher</c> from the object's <c>_AXL</c> XML (set
+    /// 012 Session 2, R2-2 / DW-10). Distinct from a control's
+    /// <see cref="IrControl.EventMacros"/>. Null when the object has none.
+    /// </summary>
+    public IReadOnlyList<IrControlEventMacro>? EventMacros { get; init; }
 }
 
 /// <summary>One control node found in a form or report's design tree.</summary>
@@ -44,6 +53,44 @@ public sealed record IrControl
     public string? RowSource { get; init; }
     public string? RowSourceType { get; init; }
     public IReadOnlyDictionary<string, string> Properties { get; init; } = new Dictionary<string, string>();
+
+    /// <summary>
+    /// Embedded ("UI") macros attached to this control's events, as already
+    /// structured by <c>MacroActionsEnricher</c> from the control's
+    /// <c>_AXL</c> XML (set 012 Session 2, R2-2 / DW-10). One entry per
+    /// event (e.g. <c>OnClick</c>); each carries the parsed action sequence
+    /// with named arguments. Null when the control has no embedded macros.
+    /// The chain-edge builder reads this rather than re-parsing the raw
+    /// <c>On*EmMacro</c> block-format property string.
+    /// </summary>
+    public IReadOnlyList<IrControlEventMacro>? EventMacros { get; init; }
+}
+
+/// <summary>
+/// One control event's embedded-macro action sequence (set 012 Session 2).
+/// </summary>
+public sealed record IrControlEventMacro
+{
+    /// <summary>Event name the macro is bound to (e.g. <c>"OnClick"</c>, <c>"OnLoad"</c>).</summary>
+    public required string Event { get; init; }
+
+    /// <summary>Ordered macro actions for the event.</summary>
+    public required IReadOnlyList<IrEventMacroAction> Actions { get; init; }
+}
+
+/// <summary>
+/// One action inside an embedded control macro (set 012 Session 2). Unlike
+/// <see cref="IrMacroAction"/> (positional string arguments from the raw
+/// block format), this carries the enricher's <b>named</b> arguments parsed
+/// from the canonical <c>_AXL</c> XML.
+/// </summary>
+public sealed record IrEventMacroAction
+{
+    /// <summary>Access macro action name (e.g. <c>"OpenReport"</c>, <c>"OpenForm"</c>).</summary>
+    public required string Action { get; init; }
+
+    /// <summary>Action arguments keyed by Access's argument name (e.g. <c>ReportName</c>).</summary>
+    public required IReadOnlyDictionary<string, string> Arguments { get; init; }
 }
 
 /// <summary>Minimal parsed representation of a query IR file.</summary>

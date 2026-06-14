@@ -964,7 +964,42 @@
         "UnresolvedTargets": { "type": "array", "items": { "$ref": "#/$defs/UnresolvedNavigationTarget" } },
         "Ribbon": { "$ref": "#/$defs/RibbonStructure" },
         "Switchboard": { "$ref": "#/$defs/SwitchboardStructure" },
-        "Macros": { "type": "array", "items": { "$ref": "#/$defs/MacroChain" } }
+        "Macros": { "type": "array", "items": { "$ref": "#/$defs/MacroChain" } },
+        "ChainEdges": { "type": "array", "items": { "$ref": "#/$defs/ChainEdge" }, "description": "Cross-object navigation chain edges (R2-2 / DW-10): launcher -> report -> dialog -> query -> parameter relationships derived from embedded macros, record sources, and query parameters." },
+        "UnresolvedChainTargets": { "type": "array", "items": { "$ref": "#/$defs/UnresolvedChainTarget" }, "description": "Chain relationships whose far endpoint is dynamic (prompt-style declared parameters, unparseable record sources), surfaced explicitly." }
+      }
+    },
+
+    "ChainEdge": {
+      "type": "object",
+      "required": ["From", "To", "Kind", "Provenance"],
+      "properties": {
+        "From": { "$ref": "#/$defs/ChainEndpoint" },
+        "To": { "$ref": "#/$defs/ChainEndpoint" },
+        "Kind": { "enum": ["OpensDialog", "OpensReport", "OpensForm", "FeedsRecordSource", "SuppliesParameter"] },
+        "Provenance": { "type": "string", "description": "Closed kebab-case set: vba-call | embedded-macro | macro-action | record-source | query-form-reference | query-declared-parameter | tempvar-flow." }
+      }
+    },
+
+    "ChainEndpoint": {
+      "type": "object",
+      "required": ["Kind", "Name"],
+      "properties": {
+        "Kind": { "enum": ["Form", "Report", "Query", "Table", "TempVar", "Prompt", "Unknown"] },
+        "Name": { "type": "string" },
+        "Member": { "type": "string", "description": "The control / parameter / token within Name the relationship is anchored to. Omitted at object granularity." }
+      }
+    },
+
+    "UnresolvedChainTarget": {
+      "type": "object",
+      "required": ["Kind", "Consumer", "Provenance", "Reason"],
+      "properties": {
+        "Kind": { "enum": ["OpensDialog", "OpensReport", "OpensForm", "FeedsRecordSource", "SuppliesParameter"] },
+        "Consumer": { "$ref": "#/$defs/ChainEndpoint" },
+        "Provenance": { "type": "string" },
+        "Reason": { "type": "string", "description": "Closed set: prompt-parameter | record-source-unparsed | embedded-macro-unparsed | unresolvable-reference." },
+        "Detail": { "type": "string" }
       }
     },
 

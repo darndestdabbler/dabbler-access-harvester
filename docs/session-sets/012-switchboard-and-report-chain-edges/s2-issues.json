@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "verificationRound": 1,
+  "verifierModel": "gpt-5-4",
+  "issues": [
+    {
+      "severity": "Major",
+      "location": "IrLoader.cs / NavigationChainBuilder.cs",
+      "summary": "The embedded-macro producer only consumed control-level EventMacros, so form/report-owned OnOpenEmMacro edges were not representable and any raw *EmMacro missed by the enricher was silently dropped.",
+      "fix": "Surface object-level EventMacros on IrFormOrReport, scan both object and control level, and emit an explicit embedded-macro-unparsed UnresolvedChainTarget when a *EmMacro property has no structured EventMacros.",
+      "status": "fixed"
+    },
+    {
+      "severity": "Major",
+      "location": "NavigationChainBuilder.cs",
+      "summary": "TempVars recovery used a non-token-aware regex that could fabricate SuppliesParameter edges from string literals or substring matches.",
+      "fix": "Add a left identifier boundary and blank string literals before scanning (R1 fix); ultimately replaced with a token-aware scanner (R3) that skips string-literal and bracketed spans wholesale.",
+      "status": "fixed"
+    },
+    {
+      "severity": "Major",
+      "location": "NavigationChainBuilder.cs",
+      "summary": "Inline SQL was marked parsed on any exception-free recovered AST, so a recovered-but-empty parse silently lost FeedsRecordSource edges with no record-source-unparsed entry.",
+      "fix": "Emit record-source-unparsed whenever an inline record source yields zero FROM/JOIN table sources, a stronger criterion than 'no exception'.",
+      "status": "fixed"
+    },
+    {
+      "severity": "Minor",
+      "location": "NavigationChainBuilder.cs",
+      "summary": "SortEdges/SortUnresolved comparators were not total (case-insensitive Name/Member with no ordinal tie-breaker; List.Sort is unstable).",
+      "fix": "Add Ordinal tie-breakers after the OrdinalIgnoreCase compares in CompareEndpoint.",
+      "status": "fixed"
+    },
+    {
+      "severity": "Minor",
+      "location": "NavigationChainBuilder.cs",
+      "summary": "ParseFormRefPath fabricated '?' Form/Report endpoints for blank or malformed reference paths (default-injection).",
+      "fix": "Return (null, null) for blank/malformed paths and emit an explicit unresolvable-reference UnresolvedChainTarget instead of a synthetic endpoint.",
+      "status": "fixed"
+    }
+  ],
+  "timestamp": "2026-06-14"
+}

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "verificationRound": 2,
+  "verifierModel": "gpt-5-4",
+  "note": "Round 2 confirmed all 3 R1 Major findings resolved; raised 2 follow-on issues from the fixes.",
+  "issues": [
+    {
+      "severity": "Major",
+      "location": "NavigationChainBuilder.cs",
+      "summary": "The TempVars extractor still matched inside bracketed identifiers such as [TempVars!fake], so the token-awareness fix was incomplete.",
+      "fix": "R2: extend the left look-behind to exclude '['. Superseded by the R3 token-aware scanner that skips all bracketed spans.",
+      "status": "fixed"
+    },
+    {
+      "severity": "Minor",
+      "location": "NavigationChainBuilder.cs",
+      "summary": "ParseFormRefPath removed empty '!' segments before validation, so [Forms]!![txtId] could collapse into a fabricated supplier.",
+      "fix": "R2: keep empty segments and require a Forms/Reports root + non-empty object. Tightened to a strict 2-or-3 segment shape in R3.",
+      "status": "fixed"
+    }
+  ],
+  "timestamp": "2026-06-14"
+}

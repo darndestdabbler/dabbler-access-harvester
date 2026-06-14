@@ -524,6 +524,20 @@ public sealed class Pipeline
         var navigationInputs = BuildNavigationInputs(kbDir, irDir, diagnostics);
         var navigationGraph = NavigationGraphBuilder.Build(resolvedModules, crossRefs, navigationInputs);
 
+        // 012 S2 (DW-10 / R2-2): derive the cross-object navigation CHAIN
+        // edges — launcher → report (embedded macros), report/form →
+        // record-source query/table, and query parameter suppliers — over
+        // the IR surfaces the pipeline just wrote. Pure, no VBA (the
+        // code-behind hops are the S3 producer's job). Attached to the
+        // already-built navigation graph so the VBA-side Edges are untouched.
+        var chainResult = NavigationChainBuilder.Build(
+            AccessHarvester.Pipeline.UsageIdentification.IrLoader.Load(Path.GetDirectoryName(irDir)!));
+        navigationGraph = navigationGraph with
+        {
+            ChainEdges = chainResult.Edges,
+            UnresolvedChainTargets = chainResult.UnresolvedTargets,
+        };
+
         // ── 3. Standalone module exports ───────────────────────────────
         // Emits one ModuleExport per standalone module AND per
         // class module discovered under raw/ModulesAndClasses/.

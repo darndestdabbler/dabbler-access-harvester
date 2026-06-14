@@ -123383,6 +123383,488 @@
           }
         ]
       }
+    ],
+    "ChainEdges": [
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportMenu",
+          "Member": "btnClientProfile"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptClientProfile"
+        },
+        "Kind": "OpensReport",
+        "Provenance": "embedded-macro"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportMenu",
+          "Member": "btnPlansByClient"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "OpensReport",
+        "Provenance": "embedded-macro"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportMenu",
+          "Member": "btnProviderCatalog"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptProviderServiceCatalog"
+        },
+        "Kind": "OpensReport",
+        "Provenance": "embedded-macro"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportMenu",
+          "Member": "btnServicePlanShortfall"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlanAndShortfall"
+        },
+        "Kind": "OpensReport",
+        "Provenance": "embedded-macro"
+      },
+      {
+        "From": {
+          "Kind": "Query",
+          "Name": "qryClientNeedsNotMet"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptServiceShortfall"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Query",
+          "Name": "qryClientServicePlanDetail"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptServicePlanEntries"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Query",
+          "Name": "qryProviderServiceCatalogDetail"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptProviderServiceCatalog"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Query",
+          "Name": "qryProviderServiceCosts_ByFiscalYear"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptProviderCosts"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Query",
+          "Name": "qryProviderServiceStatistics"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptProviderServiceStatistics"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Query",
+          "Name": "qryServiceCosts_ByFiscalYear"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServiceCosts"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Query",
+          "Name": "qryServicePlansByService"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByService"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClientBudgets"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmBudgetServicePlan"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClientBudgets"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptClientBudgets"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClients"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmBudgetServicePlan"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClients"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmClientDetail"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClients"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptClientProfile"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClients"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlanAndShortfall"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClients"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClientServiceNeeds"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmClientServiceNeedDetail"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClientServiceNeeds"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClientServiceNeeds"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptClientCurrentNeeds"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClientServicePlan"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmClientServicePlanDetail"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblClientServicePlan"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblProviders"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmProviderDetail"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblProviders"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblProviderServiceCatalog"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmProviderServiceCatalogDetail"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblProviderServiceCatalog"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblServiceRateLimits"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmServiceRateLimits"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblServices"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmServiceDetail"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblServices"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmServiceList"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblServices"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmServiceRateLimits"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblServices"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Table",
+          "Name": "tblServices"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptClientCurrentNeeds"
+        },
+        "Kind": "FeedsRecordSource",
+        "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "TempVar",
+          "Name": "repCID"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptServicePlanEntries"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "tempvar-flow"
+      },
+      {
+        "From": {
+          "Kind": "TempVar",
+          "Name": "repCID"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptServiceShortfall"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "tempvar-flow"
+      },
+      {
+        "From": {
+          "Kind": "TempVar",
+          "Name": "repFY"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptServicePlanEntries"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "tempvar-flow"
+      },
+      {
+        "From": {
+          "Kind": "TempVar",
+          "Name": "repFY"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "srptServiceShortfall"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "tempvar-flow"
+      }
+    ],
+    "UnresolvedChainTargets": [
+      {
+        "Kind": "SuppliesParameter",
+        "Consumer": {
+          "Kind": "Query",
+          "Name": "qryClientServicePlan_ByClient"
+        },
+        "Provenance": "query-declared-parameter",
+        "Reason": "prompt-parameter",
+        "Detail": "Enter Client ID:"
+      },
+      {
+        "Kind": "SuppliesParameter",
+        "Consumer": {
+          "Kind": "Query",
+          "Name": "qryProviderPlansByClient_Param"
+        },
+        "Provenance": "query-declared-parameter",
+        "Reason": "prompt-parameter",
+        "Detail": "Enter Fiscal Year:"
+      },
+      {
+        "Kind": "SuppliesParameter",
+        "Consumer": {
+          "Kind": "Query",
+          "Name": "qryProviderPlansByClient_Param"
+        },
+        "Provenance": "query-declared-parameter",
+        "Reason": "prompt-parameter",
+        "Detail": "Enter Provider ID:"
+      }
     ]
   },
   "UnresolvedItems": [

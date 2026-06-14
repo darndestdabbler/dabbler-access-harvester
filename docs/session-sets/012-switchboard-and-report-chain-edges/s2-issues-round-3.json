@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0",
+  "verificationRound": 3,
+  "verifierModel": "gpt-5-4",
+  "note": "Round 3 raised 2 narrower variants in the same two areas, prompting a structural (token-aware scanner + strict segment shape) rewrite rather than another regex patch. Round 4 returned VERIFIED.",
+  "issues": [
+    {
+      "severity": "Major",
+      "location": "NavigationChainBuilder.cs",
+      "summary": "The TempVars regex still matched inside bracketed spans when TempVars was not the first character after '[' (e.g. [prompt TempVars!x]).",
+      "fix": "Replaced the regex with a token-aware single-pass scanner that skips entire string-literal and bracketed spans and only matches TempVars at a top-level position.",
+      "status": "fixed"
+    },
+    {
+      "severity": "Minor",
+      "location": "NavigationChainBuilder.cs",
+      "summary": "ParseFormRefPath still accepted malformed paths with extra '!' segments such as [Forms]![frm]!![txtId].",
+      "fix": "Require exactly 2 or 3 segments after split, a Forms/Reports root, and non-empty object/member slots; otherwise return (null, null) -> unresolvable-reference.",
+      "status": "fixed"
+    }
+  ],
+  "timestamp": "2026-06-14"
+}

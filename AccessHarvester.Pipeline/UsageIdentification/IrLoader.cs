@@ -127,6 +127,7 @@ public static class IrLoader
             HasOnDelete     = hasOnDelete,
             MacroActions    = macroActions,
             Properties      = properties,
+            EventMacros     = ReadEventMacros(root),
         };
     }
 
@@ -171,6 +172,7 @@ public static class IrLoader
                     RowSource = NullIfEmpty(rowSource),
                     RowSourceType = NullIfEmpty(rowSourceType),
                     Properties = childProps,
+                    EventMacros = ReadEventMacros(child),
                 });
             }
             else if (type == "Begin" && child.TryGetProperty("Properties", out var bProps))
@@ -204,6 +206,7 @@ public static class IrLoader
                         RowSource = null,
                         RowSourceType = null,
                         Properties = childProps,
+                        EventMacros = ReadEventMacros(child),
                     });
                 }
             }
@@ -215,6 +218,46 @@ public static class IrLoader
                 WalkChildren(nested, controls, macroActions);
             }
         }
+    }
+
+    // Reads the structured `EventMacros` block MacroActionsEnricher attaches
+    // to a control node (set 012 S2). Shape:
+    //   "EventMacros": { "OnClick": { "Actions": [ { "Action": "...",
+    //                    "Arguments": { "ReportName": "..." } } ] } }
+    // Returns null when the control has no embedded macros so the IR model
+    // omits the field rather than carrying an empty list.
+    private static IReadOnlyList<IrControlEventMacro>? ReadEventMacros(JsonElement controlNode)
+    {
+        if (!controlNode.TryGetProperty("EventMacros", out var em)
+            || em.ValueKind != JsonValueKind.Object)
+            return null;
+
+        var events = new List<IrControlEventMacro>();
+        foreach (var ev in em.EnumerateObject())
+        {
+            if (ev.Value.ValueKind != JsonValueKind.Object) continue;
+            var actions = new List<IrEventMacroAction>();
+            if (ev.Value.TryGetProperty("Actions", out var acts)
+                && acts.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var act in acts.EnumerateArray())
+                {
+                    string? actionName = GetString(act, "Action");
+                    if (actionName is null) continue;
+                    var args = new Dictionary<string, string>(StringComparer.Ordinal);
+                    if (act.TryGetProperty("Arguments", out var argObj)
+                        && argObj.ValueKind == JsonValueKind.Object)
+                    {
+                        foreach (var a in argObj.EnumerateObject())
+                            if (a.Value.ValueKind == JsonValueKind.String)
+                                args[a.Name] = a.Value.GetString() ?? "";
+                    }
+                    actions.Add(new IrEventMacroAction { Action = actionName, Arguments = args });
+                }
+            }
+            events.Add(new IrControlEventMacro { Event = ev.Name, Actions = actions });
+        }
+        return events.Count == 0 ? null : events;
     }
 
     private static bool HasEventProcedure(JsonElement props, string propertyName)
