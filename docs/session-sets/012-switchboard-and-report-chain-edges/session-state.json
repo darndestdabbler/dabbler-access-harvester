@@ -34,10 +34,15 @@
     {
       "number": 3,
       "title": "Code-Behind Chain Edges + Coordinated Closeout (R2-2 part 2, DW-10)",
-      "status": "not-started",
-      "startedAt": null,
+      "status": "in-progress",
+      "startedAt": "2026-06-14T07:30:39.110559-04:00",
       "completedAt": null,
-      "orchestrator": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "high"
+      },
       "verificationVerdict": null
     }
   ]

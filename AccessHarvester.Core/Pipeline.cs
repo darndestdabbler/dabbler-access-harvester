@@ -524,14 +524,18 @@ public sealed class Pipeline
         var navigationInputs = BuildNavigationInputs(kbDir, irDir, diagnostics);
         var navigationGraph = NavigationGraphBuilder.Build(resolvedModules, crossRefs, navigationInputs);
 
-        // 012 S2 (DW-10 / R2-2): derive the cross-object navigation CHAIN
-        // edges — launcher → report (embedded macros), report/form →
-        // record-source query/table, and query parameter suppliers — over
-        // the IR surfaces the pipeline just wrote. Pure, no VBA (the
-        // code-behind hops are the S3 producer's job). Attached to the
-        // already-built navigation graph so the VBA-side Edges are untouched.
+        // 012 S2 + S3 (DW-10 / R2-2): derive the cross-object navigation CHAIN
+        // edges over the IR surfaces the pipeline just wrote — launcher →
+        // report (embedded macros), report/form → record-source query/table,
+        // and query parameter suppliers (S2, pure-IR) — plus the S3 code-behind
+        // hops over the resolved VBA modules: the report/form Report_Open
+        // DoCmd.OpenForm/OpenReport dispatches (acDialog → OpensDialog), the
+        // Forms!dlg!ctl control reads, and the TempVars!x = setters that pair
+        // a supplier to each record-source tempvar-flow reference. Attached to
+        // the already-built navigation graph so the VBA-side Edges are untouched.
         var chainResult = NavigationChainBuilder.Build(
-            AccessHarvester.Pipeline.UsageIdentification.IrLoader.Load(Path.GetDirectoryName(irDir)!));
+            AccessHarvester.Pipeline.UsageIdentification.IrLoader.Load(Path.GetDirectoryName(irDir)!),
+            resolvedModules);
         navigationGraph = navigationGraph with
         {
             ChainEdges = chainResult.Edges,

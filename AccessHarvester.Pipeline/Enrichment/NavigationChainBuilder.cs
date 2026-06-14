@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using AccessHarvester.Pipeline.UsageIdentification;
 using AccessHarvester.Sql.Parser;
 using AccessHarvester.Sql.Parser.Ast;
+using AccessHarvester.Vba.Resolver.References;
 
 namespace AccessHarvester.Pipeline.Enrichment;
 
@@ -42,12 +43,20 @@ namespace AccessHarvester.Pipeline.Enrichment;
 ///   </description></item>
 /// </list>
 /// <para>
-/// Code-behind hops (the report's <c>Report_Open</c> <c>acDialog</c> open,
-/// <c>Forms!dlg!ctl</c> reads, and <c>TempVars!x =</c> assignments) need the
-/// VBA AST and are the S3 producer's job; this builder touches no VBA.
+/// A fourth <b>code-behind</b> producer (S3, R2-2 part 2) runs over the
+/// resolved VBA modules when they are supplied to <see cref="Build"/>: a
+/// form/report's <c>Report_Open</c>/event <c>DoCmd.OpenForm/OpenReport</c>
+/// dispatch (distinguishing an <c>acDialog</c> open as
+/// <see cref="ChainEdgeKind.OpensDialog"/>), its <c>Forms!dlg!ctl</c> /
+/// <c>Reports!rpt!ctl</c> control reads (a dialog/object control
+/// <see cref="ChainEdgeKind.SuppliesParameter"/>), and its
+/// <c>TempVars!x = …</c> setters (the supplier side of the
+/// <c>tempvar-flow</c> the record-source producer surfaces as the consumer
+/// side). It lives in the partial <c>NavigationChainBuilder.CodeBehind.cs</c>
+/// so the VBA-AST dependency stays isolated from the SQL-AST producers above.
 /// </para>
 /// </remarks>
-public static class NavigationChainBuilder
+public static partial class NavigationChainBuilder
 {
     /// <summary>The chain edges and unresolved chain targets a build produced.</summary>
     public sealed record Result(
@@ -60,12 +69,15 @@ public static class NavigationChainBuilder
     private const string ProvQueryFormReference = "query-form-reference";
     private const string ProvQueryDeclaredParameter = "query-declared-parameter";
     private const string ProvTempVarFlow = "tempvar-flow";
+    private const string ProvVbaCall = "vba-call";
 
     // Unresolved-reason closed-set values.
     private const string ReasonPromptParameter = "prompt-parameter";
     private const string ReasonRecordSourceUnparsed = "record-source-unparsed";
     private const string ReasonEmbeddedMacroUnparsed = "embedded-macro-unparsed";
     private const string ReasonUnresolvableReference = "unresolvable-reference";
+    private const string ReasonNonLiteralTarget = "non-literal-target";
+    private const string ReasonTempVarNoSupplier = "tempvar-no-supplier";
 
     private static readonly Regex InlineSqlPrefix = new(
         @"^\s*(SELECT|PARAMETERS|TRANSFORM)\b",
@@ -75,7 +87,19 @@ public static class NavigationChainBuilder
     /// Builds the chain edges for a harvested database. Returns an empty
     /// result (never null) when no chain relationships exist.
     /// </summary>
-    public static Result Build(IrDatabase db)
+    /// <param name="db">The harvested IR surfaces (forms / reports / queries / tables).</param>
+    /// <param name="modules">
+    /// Optional resolved VBA modules. When supplied, the S3 code-behind
+    /// producer runs over the form/report code-behind modules — the
+    /// <c>DoCmd.OpenForm/OpenReport</c> dispatches (distinguishing
+    /// <c>acDialog</c> opens), the <c>Forms!dlg!ctl</c> / <c>Reports!rpt!ctl</c>
+    /// control reads, and the <c>TempVars!x = …</c> setters — and the
+    /// <c>TempVars!</c> supply matching (a record source that references a
+    /// <c>TempVars!</c> with no harvested setter becomes an explicit
+    /// <see cref="UnresolvedChainTarget"/>). When null, only the S2 mechanical
+    /// producers run (the VBA-free pure-IR path the S2 tests exercise).
+    /// </param>
+    public static Result Build(IrDatabase db, IReadOnlyList<ResolvedModule>? modules = null)
     {
         ArgumentNullException.ThrowIfNull(db);
 
@@ -96,7 +120,52 @@ public static class NavigationChainBuilder
         foreach (var query in db.Queries)
             CollectQueryParameterEdges(query, edges, unresolved);
 
+        if (modules is not null)
+        {
+            CollectCodeBehindEdges(modules, edges, unresolved);
+            // The supplied universe is every TempVar assigned ANYWHERE in
+            // harvested VBA — not only the form/report-owner setter edges — so
+            // a TempVar set in a standard/class module (which has no chain
+            // owner, hence no supplier edge) does not produce a false
+            // "broken chain" against its record-source consumers.
+            FlagUnsuppliedTempVars(edges, unresolved, CollectAssignedTempVars(modules));
+        }
+
         return new Result(SortEdges(edges), SortUnresolved(unresolved));
+    }
+
+    // ── TempVar supply matching (S3, R2-2 part 2) ───────────────────────
+
+    // A record source that references a TempVars! the S2 producer surfaced as
+    // a consumer-side `tempvar-flow` SuppliesParameter edge (From={TempVar} →
+    // To={owner}) has a complete chain only if some code-behind setter assigns
+    // that TempVar (an S3 supplier-side edge From={owner} → To={TempVar}). A
+    // referenced-but-never-set TempVar is a broken supply chain — surface it
+    // explicitly (the consumer sees "this data depends on TempVars!x but no
+    // harvested code sets it") rather than letting the gap pass silently.
+    // Only runs when the code-behind producer ran (modules supplied); without
+    // it every consumed TempVar would falsely read as unsupplied.
+    private static void FlagUnsuppliedTempVars(
+        List<ChainEdge> edges,
+        List<UnresolvedChainTarget> unresolved,
+        IReadOnlySet<string> suppliedTempVars)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var e in edges)
+        {
+            if (e.Provenance != ProvTempVarFlow || e.From.Kind != ChainNodeKind.TempVar) continue;
+            if (suppliedTempVars.Contains(e.From.Name)) continue;
+            // One unresolved per (consuming object, TempVar) pair.
+            if (!seen.Add($"{e.To.Kind}|{e.To.Name}|{e.From.Name}")) continue;
+            unresolved.Add(new UnresolvedChainTarget
+            {
+                Kind = ChainEdgeKind.SuppliesParameter,
+                Consumer = e.To,
+                Provenance = ProvTempVarFlow,
+                Reason = ReasonTempVarNoSupplier,
+                Detail = e.From.Name,
+            });
+        }
     }
 
     // ── Producer 1: embedded-macro edges ───────────────────────────────

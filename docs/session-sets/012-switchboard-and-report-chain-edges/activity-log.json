@@ -224,6 +224,96 @@
           "costUsd": 0.1121
         }
       ]
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 1,
+      "stepKey": "session-003/s3-setup-reground",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Re-grounded the S3 code-behind hops against the HHC golden: module name == bare form/report name; acDialog at OpenForm WindowMode slot 5; Forms!dlg!ctl reads on RHS; TempVars!repCID/repFY set in rptServicePlanAndShortfall.Report_Open.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 2,
+      "stepKey": "session-003/s3-codebehind-producer",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Added NavigationChainBuilder.CodeBehind.cs (partial): vba-call producer over resolved VBA modules -- DoCmd open dispatches (acDialog->OpensDialog), Forms!/Reports! control reads -> SuppliesParameter, TempVars!x= setters -> tempvar-flow; owner kind from ModuleScope.Kind.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 3,
+      "stepKey": "session-003/s3-unresolved-channel",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Explicit unresolved: non-literal-target (dynamic DoCmd target) + tempvar-no-supplier (record-source TempVars with no harvested setter); supplied universe scans all modules' setter forms (bang/indexer/.Item/.Add incl Name:=).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 4,
+      "stepKey": "session-003/s3-hermetic-pins",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Added 46 NavigationChainBuilderTests pins (code-behind opens, acDialog, control reads, write-target exclusion incl member-wrapped, TempVars setter forms + dynamic-name guard, name-collision attribution, standard-module skip, dedup).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 5,
+      "stepKey": "session-003/s3-golden-regen",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Coordinated HHC golden regen (COM, TRX): NavigationGraph.ChainEdges 37->63 (+24 vba-call, +2 tempvar-flow setters); UnresolvedChainTargets unchanged at 3; kb/ir byte-identical; CanonicalGoldenRegressionTests + ManifestSchemaConformanceTests 6/6; every delta maps to R2-2.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 6,
+      "stepKey": "session-003/s3-interpretation-guide",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Updated interpretation-guide section 5.7 (code-behind producer, vba-call provenance, DW-14 coverage boundary, non-bang setter edge gap) + section 8 limitations (navigation surfaces mostly complete).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 7,
+      "stepKey": "session-003/s3-routed-verification",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Routed cross-provider session-verification (gpt-5-4): R1 ISSUES_FOUND (3 Major false-positives in new code) -> fixed -> R2/R3 -> R4 VERIFIED. Reviews saved s3-verification*.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 8,
+      "stepKey": "session-003/s3-devils-advocate",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "PRIMARY set-wide devil's-advocate (Gemini Pro + GPT-5.4 in-IDE): both surfaced C3 name-collision (wrong-data bug routed missed) -> fixed via ModuleScope.Kind; C4 setter-syntax (.Item, Name:=) -> fixed; C1/C2/C4-edge -> DW-14; C5/C6/C7 no-action. DW-10 closed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 9,
+      "stepKey": "session-003/s3-next-set-authored",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Authored 013-cli-input-robustness (006's P5; spec + not-started v4 stub) per routed recommendation (Sonnet 4.6 @ effort=high).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 3,
+      "stepNumber": 10,
+      "stepKey": "session-003/s3-closeout",
+      "dateTime": "2026-06-14T08:27:19.460034-04:00",
+      "description": "Closeout artifacts: change-log.md, disposition.json, next-session-set-recommendation.md; DW-9/DW-10 closed, DW-13/DW-14 opened.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }

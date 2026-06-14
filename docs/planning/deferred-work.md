@@ -276,7 +276,16 @@
   visible there and pinned by the production-wiring hermetic test added in
   011 S2.
 
-### DW-10 — Dialog→query→report chain edges (R2-2) are not derived
+### DW-10 — Dialog→query→report chain edges (R2-2) are not derived — **CLOSED 2026-06-14 (012 S2+S3)**
+> **CLOSED** by `012-switchboard-and-report-chain-edges` Sessions 2 (mechanical
+> producers) and 3 (code-behind producer). `NavigationGraph.ChainEdges` /
+> `.UnresolvedChainTargets` now carry the closed chain-edge family across the
+> embedded-macro, record-source, query-parameter (S2) and code-behind `vba-call`
+> (S3: `acDialog`→`OpensDialog`, `Forms!dlg!ctl` reads, `TempVars!x=` setters)
+> producers; HHC golden 63 ChainEdges + 3 UnresolvedChainTargets. Residual
+> **coverage** gaps (named-argument opens, indexer/`With` reads, non-bang setter
+> supplier edges) carved out as **DW-14** — they are unsurfaced hops, not wrong
+> data.
 - **What:** the navigation graph surfaces individual `DoCmd` dispatches and
   preserves `NavigationEdge.WhereCondition` / `OpenArgs`, and `IrQuery.Parameters`
   carries declared/form-reference/report-reference parameter provenance — but
@@ -441,8 +450,56 @@
 - **Mechanical backstop:** the HHC golden's `NavigationGraph` omits `Ribbon` (null);
   the §5.7 interpretation-guide note records the deliberate null.
 
+### DW-14 — Navigation-target resolution misses named-argument and indexer/`With` reference forms
+- **What:** the navigation layer resolves a `DoCmd.OpenForm/OpenReport` target only
+  from the **first positional** argument, and the S3 chain code-behind producer
+  recognises dialog-control references only as the bare two-bang
+  `Forms!obj!ctl` / `Reports!obj!ctl` shape. Three realistic Access VBA forms are
+  therefore not surfaced: (a) a **named-argument** target
+  (`DoCmd.OpenForm FormName:="frmX"`, `DoCmd.OpenReport ReportName:="rptX"`) —
+  the existing **VBA-edge** layer (`NavigationGraphBuilder`, 011) records it as a
+  `missing-target` unresolved and the S3 chain producer emits nothing; (b) an
+  **indexer** control reference (`Forms("frmX")!ctl`); (c) a `With Forms!frmX …`
+  block with implicit `!ctl` members (`ImplicitWithBangExpression`). And (d) a
+  **non-bang TempVars setter in form/report code-behind**
+  (`TempVars("x") = …`, `TempVars.Add "x", …`) does not emit the
+  `Owner → TempVar` `SuppliesParameter` chain edge that the canonical
+  `TempVars!x = …` form emits — the non-bang forms are recognised only in the
+  **supplied universe** (so they correctly suppress a false `tempvar-no-supplier`),
+  not in owner-side edge production, so the walkable chain edge is missing for
+  them.
+- **Origin:** 012 Session 3 routed cross-provider verification (gpt-5-4, R1
+  concerns 1 + 2(a); R2 confirmed item (d)). The write-direction false-positive
+  (R1 concern 2b), the TempVars non-bang **setter** false-positive in the
+  supplied universe (R1 concern 4), and the `.Add` name-slot scan-forward bug
+  (R2 Major 1) were **fixed in S3**; only these **read/target/edge coverage**
+  gaps (no false data, just unsurfaced hops) are deferred.
+- **Why deferred:** golden-neutral on HomeHealthCare (every HHC `DoCmd` open uses
+  a positional string-literal target; every dialog read is a bare two-bang), so
+  no fixture exercises them. The named-argument gap (a) is **shared with the
+  already-shipped VBA-edge layer** — fixing it only in the chain layer would make
+  the two layers disagree on the same call (chain emits an edge, `Edges` shows a
+  missing-target unresolved); a correct fix resolves named-arg targets in
+  `NavigationGraphBuilder` **and** the chain producer together, which is 011's
+  navigation-extraction surface, beyond this set's R2-2 (DW-10) scope. Pulling it
+  into the S3 closeout would ship an under-verified multi-pattern change to the
+  navigation extractor against the scope-discipline Stop Rule.
+- **Trigger to pull back in:** a real DB (or a corpus case) uses a
+  named-argument `DoCmd` open, an indexer/`With` dialog-control reference, OR a
+  navigation-extraction-completeness set is scoped.
+- **Owning set candidate:** a future `navigation-target-completeness` set (would
+  span the VBA-edge layer + the chain code-behind producer; small, P0-only
+  prereq).
+- **Mechanical backstop:** none added (golden-neutral, no fixture reproduces it);
+  the §5.7 interpretation-guide note records that chain opens/reads resolve only
+  positional-literal targets and bare two-bang control references.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED
   2026-06-14** by `012-switchboard-and-report-chain-edges` Session 1 (R2-1). Full
   entry retained above with its CLOSED banner. Ribbon remainder → **DW-13**.
+- **DW-10** — Dialog→query→report chain edges (R2-2) — **CLOSED 2026-06-14** by
+  `012-switchboard-and-report-chain-edges` Sessions 2 (mechanical producers) +
+  3 (code-behind producer). Full entry retained above with its CLOSED banner.
+  Residual coverage gaps → **DW-14**.

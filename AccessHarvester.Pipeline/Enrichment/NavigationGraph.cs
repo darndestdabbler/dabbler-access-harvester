@@ -849,6 +849,8 @@ public sealed record UnresolvedChainTarget
     ///   <item><description><c>"record-source-unparsed"</c> — an inline record source the SQL parser could not turn into a usable tree (no FROM/JOIN data source recovered).</description></item>
     ///   <item><description><c>"embedded-macro-unparsed"</c> — a control/object carries an <c>On…EmMacro</c> property the enricher did not structure into <c>EventMacros</c>, so no chain edge could be derived (the raw property is still preserved in <c>ir/</c>).</description></item>
     ///   <item><description><c>"unresolvable-reference"</c> — a query <c>[Forms]!</c>/<c>[Reports]!</c> parameter whose path named no resolvable object.</description></item>
+    ///   <item><description><c>"non-literal-target"</c> — (S3 code-behind) a <c>DoCmd.OpenForm/OpenReport</c> whose target is a variable/expression, not a string literal — the chain exists but its target is dynamic.</description></item>
+    ///   <item><description><c>"tempvar-no-supplier"</c> — (S3 code-behind) a record source references a <c>TempVars!</c> value that no harvested VBA sets, so the supply side of the chain is missing.</description></item>
     /// </list>
     /// </summary>
     public required string Reason { get; init; }

@@ -123388,6 +123388,126 @@
       {
         "From": {
           "Kind": "Form",
+          "Name": "frmClientServiceNeedDetail"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmServiceDetail"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptClientProfile"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmReportParam_Client"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptProviderCosts"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmReportParam_FY"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptProviderServiceCatalog"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmReportParam_Provider"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptProviderServiceStatistics"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmReportParam_FY"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptServiceCosts"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmReportParam_FY"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptServicePlanAndShortfall"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ClientFY"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ProviderFY"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByService"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ProviderFY"
+        },
+        "Kind": "OpensDialog",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmClientDetail"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptClientProfile"
+        },
+        "Kind": "OpensReport",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
           "Name": "frmReportMenu",
           "Member": "btnClientProfile"
         },
@@ -123436,6 +123556,42 @@
         },
         "Kind": "OpensReport",
         "Provenance": "embedded-macro"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmClientSearch"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmClientDetail"
+        },
+        "Kind": "OpensForm",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmProviderSearch"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmProviderDetail"
+        },
+        "Kind": "OpensForm",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmServiceList"
+        },
+        "To": {
+          "Kind": "Form",
+          "Name": "frmServiceDetail"
+        },
+        "Kind": "OpensForm",
+        "Provenance": "vba-call"
       },
       {
         "From": {
@@ -123784,6 +123940,173 @@
         },
         "Kind": "FeedsRecordSource",
         "Provenance": "record-source"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_Client",
+          "Member": "cboClient"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptClientProfile"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ClientFY",
+          "Member": "cboClient"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlanAndShortfall"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ClientFY",
+          "Member": "cboFiscalYear"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlanAndShortfall"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_FY",
+          "Member": "cboFiscalYear"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptProviderCosts"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_FY",
+          "Member": "cboFiscalYear"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptProviderServiceStatistics"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_FY",
+          "Member": "cboFiscalYear"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServiceCosts"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_Provider",
+          "Member": "cboProvider"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptProviderServiceCatalog"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ProviderFY",
+          "Member": "cboFiscalYear"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ProviderFY",
+          "Member": "cboFiscalYear"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByService"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ProviderFY",
+          "Member": "cboProvider"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByClient"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Form",
+          "Name": "frmReportParam_ProviderFY",
+          "Member": "cboProvider"
+        },
+        "To": {
+          "Kind": "Report",
+          "Name": "rptServicePlansByService"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "vba-call"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptServicePlanAndShortfall"
+        },
+        "To": {
+          "Kind": "TempVar",
+          "Name": "repCID"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "tempvar-flow"
+      },
+      {
+        "From": {
+          "Kind": "Report",
+          "Name": "rptServicePlanAndShortfall"
+        },
+        "To": {
+          "Kind": "TempVar",
+          "Name": "repFY"
+        },
+        "Kind": "SuppliesParameter",
+        "Provenance": "tempvar-flow"
       },
       {
         "From": {

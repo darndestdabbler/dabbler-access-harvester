@@ -386,9 +386,10 @@ on-disk order the writer emits, are:
   top-level facets — ordered `EntryPoints`, the `Switchboard` page tree,
   and `Macros` (populated in set 012 S1 / R2-1; `Ribbon` stays null on
   switchboard-driven corpora) — and the cross-object **chain** surface
-  `ChainEdges` / `UnresolvedChainTargets` (the launcher→report→query→
-  parameter relationships; mechanical producers landed in set 012 S2 /
-  R2-2, code-behind hops in S3). A single object, not an array. Emitted
+  `ChainEdges` / `UnresolvedChainTargets` (the launcher→report→dialog→
+  query→parameter relationships; mechanical producers landed in set 012
+  S2 and the code-behind producer in S3 / R2-2, DW-10 closed). A single
+  object, not an array. Emitted
   between `EventHandlerClassifications` and `UnresolvedItems`. See §5.7
   for the full consumer surface and the switchboard contract.
 - **`UnresolvedItems`** — the flat list of references the resolver
@@ -1311,46 +1312,94 @@ control / parameter / token the relationship hangs off of.
   (supplier → consumer).
 - **`Provenance`** (closed kebab-case set): `vba-call` | `embedded-macro`
   | `macro-action` | `record-source` | `query-form-reference` |
-  `query-declared-parameter` | `tempvar-flow`. Session 2 (this set)
-  produces the **mechanical** subset over the IR surfaces —
-  `embedded-macro` (a control's `EventMacros` `OpenReport`/`OpenForm`),
-  `record-source` (a form/report `RecordSource` naming a query/table, or
-  the FROM/JOIN targets of an inline-SQL record source),
-  `query-form-reference` (a query's `[Forms]!`/`[Reports]!` reference),
-  and `tempvar-flow` (a `TempVars!` reference in an inline record
-  source). `vba-call` is produced by the Session-3 code-behind pass (the
-  report's `Report_Open` `acDialog` open, `Forms!dlg!ctl` reads, and the
-  `TempVars!x =` **assignments** that pair the supplier to a
-  `tempvar-flow` reference). `macro-action` is reserved (no producer in
-  this set).
+  `query-declared-parameter` | `tempvar-flow`. Session 2 produces the
+  **mechanical** subset over the IR surfaces — `embedded-macro` (a
+  control's `EventMacros` `OpenReport`/`OpenForm`), `record-source` (a
+  form/report `RecordSource` naming a query/table, or the FROM/JOIN
+  targets of an inline-SQL record source), `query-form-reference` (a
+  query's `[Forms]!`/`[Reports]!` reference), and `tempvar-flow` (a
+  `TempVars!` reference in an inline record source — the **consumer**
+  side). Session 3 adds the **code-behind** subset `vba-call`, derived
+  from the form/report code-behind VBA: the `Report_Open`/event
+  `DoCmd.OpenForm`/`OpenReport` dispatch (an `acDialog` open becomes
+  `OpensDialog`, otherwise `OpensForm`/`OpensReport`), the
+  `Forms!dlg!ctl` / `Reports!rpt!ctl` control reads (a dialog/object
+  control supplying a parameter the owner reads → `SuppliesParameter`),
+  plus the `TempVars!x = …` **setters** under `tempvar-flow` (the
+  **supplier** side that pairs to a record-source `tempvar-flow`
+  reference, completing the report → `TempVar` → sub-report chain).
+  Only modules whose name matches a harvested form/report are walked, so
+  a `DoCmd` in a standard/class module stays in the `Edges` (VBA-edge)
+  layer and is not promoted to a chain edge. `macro-action` is reserved
+  (no producer in this set — standalone-macro chains are future work).
 - **`ChainNodeKind`** on an endpoint: `Form` | `Report` | `Query` |
   `Table` | `TempVar` | `Prompt` | `Unknown`. A record-source FROM target
   that matches no harvested query or table is `Unknown` (named but not
   found), not dropped.
 
 `UnresolvedChainTargets` is the explicit-unresolved channel:
-`{ Kind, Consumer, Provenance, Reason, Detail? }`. The common case is a
-**prompt-style declared query parameter** (`Reason: "prompt-parameter"`)
-whose value the runtime user types — there is no static supplier, so it
-is recorded against its consuming query with the parameter name in
-`Detail`. An inline record source the SQL parser cannot turn into a
-usable tree surfaces as `Reason: "record-source-unparsed"`. On
-HomeHealthCare: 4 `OpensReport` (the `frmReportMenu` buttons), 29
-`FeedsRecordSource` (named-query / table / inline-SQL FROM targets), 4
-`SuppliesParameter` `tempvar-flow` (`TempVars!repCID` / `!repFY` in the
-two shortfall sub-reports), and 3 `UnresolvedChainTargets` (the prompt
-parameters of `qryClientServicePlan_ByClient` and
-`qryProviderPlansByClient_Param`).
+`{ Kind, Consumer, Provenance, Reason, Detail? }`. The closed `Reason`
+set is `prompt-parameter` | `record-source-unparsed` |
+`embedded-macro-unparsed` | `unresolvable-reference` | `non-literal-target`
+| `tempvar-no-supplier`. The common case is a **prompt-style declared
+query parameter** (`Reason: "prompt-parameter"`) whose value the runtime
+user types — there is no static supplier, so it is recorded against its
+consuming query with the parameter name in `Detail`. An inline record
+source the SQL parser cannot turn into a usable tree surfaces as
+`Reason: "record-source-unparsed"`. Session 3 adds two code-behind
+reasons (both golden-neutral on HomeHealthCare, so not present in the
+counts below): `non-literal-target` — a `DoCmd.OpenForm/OpenReport`
+whose target is a variable, so "a chain exists here but its target is
+dynamic"; and `tempvar-no-supplier` — a record source references a
+`TempVars!x` that no harvested code-behind sets (a broken supply chain),
+recorded against the consuming object with the TempVar name in `Detail`.
 
-> **Re-grounding note (set 012 S2).** Two spec-wording points were
-> reconciled to the actual tree: (1) the embedded-macro producer consumes
-> the enricher's already-structured `EventMacros` (named args, derived
-> from the canonical `_AXL` XML) rather than re-parsing the legacy
-> `On*EmMacro` block-format property; (2) `TempVars!` references are
-> recovered by a **textual** scan, because the JET SQL grammar models
-> bang-access only for `Forms`/`Reports` roots — `TempVars!x` is not a
-> parsed node. The report → parameter-dialog `acDialog` hop is VBA
-> code-behind and lands in Session 3.
+On HomeHealthCare the chain surface has **63 `ChainEdges`** — 4
+`OpensReport` (`embedded-macro`, the `frmReportMenu` buttons) + 1
+`OpensReport` (`vba-call`, `frmClientDetail` → `rptClientProfile`); 9
+`OpensDialog` (`vba-call`, the eight reports opening their
+`frmReportParam_*` dialog plus `frmClientServiceNeedDetail`); 3
+`OpensForm` (`vba-call`); 29 `FeedsRecordSource` (`record-source`,
+named-query / table / inline-SQL FROM targets); 11 `SuppliesParameter`
+(`vba-call`, the dialog `Forms!…!cbo…` control reads); and 6
+`SuppliesParameter` (`tempvar-flow`) — 4 consumer-side `TempVars!repCID`
+/ `!repFY` references in the two shortfall sub-reports plus the 2
+supplier-side setters in `rptServicePlanAndShortfall`'s `Report_Open`,
+which complete the `rptServicePlanAndShortfall` → `TempVar` → sub-report
+chain. **3 `UnresolvedChainTargets`** (the prompt parameters of
+`qryClientServicePlan_ByClient` and `qryProviderPlansByClient_Param`).
+
+> **Re-grounding note (set 012 S2/S3).** Spec-wording points reconciled
+> to the actual tree: (1) the embedded-macro producer consumes the
+> enricher's already-structured `EventMacros` (named args, derived from
+> the canonical `_AXL` XML) rather than re-parsing the legacy
+> `On*EmMacro` block-format property; (2) `TempVars!` references in a
+> record source are recovered by a **textual** scan, because the JET SQL
+> grammar models bang-access only for `Forms`/`Reports` roots —
+> `TempVars!x` is not a parsed SQL node. (3) **(S3)** in the VBA AST, the
+> code-behind producer recognises `Forms!`/`Reports!` control references
+> **syntactically** (the bang-access root identifier), the same
+> textual-recognition posture the VBA-edge builder uses for the
+> `acForm`/`acDialog` enum constants — the resolver's symbol resolution
+> adds no precision for this literal pattern. A form/report code-behind
+> module's name **is** the bare object name, which is how a module is
+> tied to its owning application object.
+>
+> **Coverage boundary (DW-14).** The code-behind producer resolves a chain
+> open only from a **positional string-literal** target and recognises a
+> dialog-control read only as the bare two-bang `Forms!obj!ctl` /
+> `Reports!obj!ctl` shape. Named-argument opens
+> (`DoCmd.OpenForm FormName:="frmX"`), indexer reads (`Forms("frmX")!ctl`),
+> and `With Forms!frmX … !ctl` blocks are **not** surfaced as chain edges
+> (golden-neutral on HomeHealthCare; deferred to a navigation-target
+> -completeness set, since the named-argument gap is shared with the
+> VBA-edge `Edges` layer). A consumer needing every navigation site should
+> still cross-read `Edges` for the per-call-site VBA dispatches. A TempVar
+> set via a **non-bang** form (`TempVars("x") = …`, `TempVars.Item("x") = …`,
+> `TempVars.Add "x", …`) is correctly counted as supplied (so it is **not**
+> false-flagged `tempvar-no-supplier`), but its owner→`TempVar` supplier
+> **edge** is emitted only for the canonical `TempVars!x = …` form — the
+> non-bang supplier hop is not yet a walkable `ChainEdge` (also DW-14).
 
 **Determinism.** Every collection is sorted at construction (`Edges`
 and `UnresolvedTargets` by source module → procedure → line → column,
@@ -1576,14 +1625,17 @@ Unless Reauthorized (2026-05-17)*:
 - **No late-binding type inference.** Member-access chains on
   Object-typed locals surface as `LateBound` classifications and
   `UnresolvedReferences` entries rather than getting resolved.
-- **Partial navigation surfaces.** `manifest.NavigationGraph` now
-  carries the VBA-derived `Edges`/`UnresolvedTargets` **and** the
+- **Navigation surfaces (mostly complete).** `manifest.NavigationGraph`
+  carries the VBA-derived `Edges`/`UnresolvedTargets`, the
   metadata-derived `EntryPoints`, `Switchboard` tree, and `Macros`
-  (set 012 S1 / R2-1, DW-9 closed); `Ribbon` stays null on
-  switchboard-driven corpora. The launcher→report→dialog→query
-  **chain** derivation (R2-2) is **not** done — the constituent edges
-  are present but not joined (DW-10), owned by sessions 2–3 of
-  `012-switchboard-and-report-chain-edges`. See §5.7.
+  (set 012 S1 / R2-1, DW-9 closed), **and** the cross-object
+  launcher→report→dialog→query→parameter **chain** surface
+  `ChainEdges`/`UnresolvedChainTargets` (set 012 S2 mechanical producers
+  + S3 code-behind producer / R2-2, DW-10 closed). See §5.7. The one
+  navigation facet still null is `Ribbon` (`USysRibbons` custom-ribbon
+  XML), which has no producer because no corpus exercises it — DW-13.
+  Standalone-macro chain edges (`macro-action` provenance) are reserved
+  but unproduced.
 
 A consumer should not assume the harvester does any of the above —
 the explicit `null` interpretive slots and the `UnresolvedItems`
