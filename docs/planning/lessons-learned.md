@@ -2546,6 +2546,11 @@ reference; if it proves out twice in *this* repo, propose promotion to
 
 ### A Clean Routed Cross-Provider VERIFIED Is Not Sufficient For Closeout — The In-IDE Devil's-Advocate Pair Catches Wrong-Data Defects It Misses
 
+> **Promoted to `project-guidance.md` → Conventions → "Flag high-value/high-risk
+> work … review it devil's-advocate"** (as the closeout clause) on 2026-06-14
+> after the second confirming context (`011` S3 C9 + `012` S3 C3). Retained here
+> as the action-detail reference; the rule itself is now a Convention.
+
 - **Context:** End-of-set closeout verification. Set 012 Session 3's new
   code-behind producer passed routed cross-provider `session-verification`
   (gpt-5-4) across four rounds, ending **VERIFIED**. The set-wide manual

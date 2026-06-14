@@ -570,6 +570,22 @@ experiments only.
   shut down by Anthropic 2026-06-13 and possibly restored later) can
   re-engage quickly. This is **additive to**, never a replacement
   for, the mandatory routed cross-provider `session-verification`.
+  - **A clean routed `session-verification` VERIFIED does not waive the
+    devil's-advocate pass on closeout-grade work.** The routed verifier and
+    the in-IDE devil's-advocate pair have **non-overlapping blind spots**:
+    a routed prompt certifies the concerns the orchestrator thought to ask
+    about, while the adversarial pair — told the null hypothesis is that each
+    concern is a real defect, with a *specific* contrarian hypothesis per
+    concern — goes looking for the invariant-assumption bugs the orchestrator
+    never surfaced. On a closeout/final session, run the in-IDE pair as the
+    **primary** review over the *fresh* code (not only prior sessions'
+    weak-evidence closures), even when the routed rounds already returned
+    VERIFIED. Promoted from `lessons-learned.md` on 2026-06-14 at the second
+    confirming context: `011` Session 3 (the pair caught the C9
+    `unresolved-items.json` undercount a clean routed R1 missed) and `012`
+    Session 3 (the pair caught the C3 form/report name-collision — a wrong-data
+    bug — that routed R1–R4 had VERIFIED). The lessons-learned entry is
+    retained as the action-detail reference.
 - **Mark `[Obsolete]` instead of deleting types whose consumers a
   future session already owns.** Before physically deleting a type
   whose consumers number in the dozens and a later session is
