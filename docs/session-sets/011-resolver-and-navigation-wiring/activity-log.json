@@ -126,6 +126,118 @@
           "costUsd": 0.0314
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-002/re-ground-f-2-2",
+      "dateTime": "2026-06-14T01:47:45.095361-04:00",
+      "description": "Re-grounded F-2-2 call sites: substrate has zero production call sites; switchboard rows NOT harvested (tblSwitchboardItems '(no data file)').",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-002/scope-consensus",
+      "dateTime": "2026-06-14T01:47:45.096507-04:00",
+      "description": "Scope decision (R2-1 premise disproven): routed cross-provider consensus -> both Option A (core wiring; defer R2-1/R2-2 to P4); human approved.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "analysis",
+          "inputTokens": 1143,
+          "outputTokens": 1696,
+          "costUsd": 0.0283
+        },
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1211,
+          "outputTokens": 228,
+          "costUsd": 0.0038
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-002/navgraph-unresolved-wired",
+      "dateTime": "2026-06-14T01:47:45.096507-04:00",
+      "description": "Wired NavigationGraphBuilder -> manifest.NavigationGraph and UnresolvedItemAggregator -> unresolved-items.json off the resolvedModules+crossRefs seam.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-002/enrichment-wired",
+      "dateTime": "2026-06-14T01:47:45.097508-04:00",
+      "description": "Wired EnrichmentPipelineRunner per form/report + ExtractFromTable + FunctionClassifications pass-through into manifest top-level arrays + per-reference Classification slots.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-002/f-3-4-kind-omit-null-fix",
+      "dateTime": "2026-06-14T01:47:45.097508-04:00",
+      "description": "Fixed pre-existing S1 F-3-4 bug surfaced by full schema gate: ParserOutputProjector omits ResolvedTarget.Kind when null (was schema-invalid '\"Kind\": null', 325x).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-002/docs-and-pins",
+      "dateTime": "2026-06-14T01:47:45.098507-04:00",
+      "description": "Removed 010 interim unresolved-items note (interp guide 6); added DW-9/DW-10; added 7 hermetic production-wiring pins; reconciled EndToEndFixtureTests note.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-002/build-test-golden",
+      "dateTime": "2026-06-14T01:47:45.098507-04:00",
+      "description": "Build + hermetic suites green; HHC golden regen (COM, TRX); full Integration COM 58 pass/3 skip/0 fail incl. golden + schema gates; every golden delta maps to F-2-2 or the F-3-4 fix.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-002/cross-provider-verification",
+      "dateTime": "2026-06-14T01:47:45.099507-04:00",
+      "description": "Cross-provider session verification routed to gpt-5-4: VERIFIED R1, empty issues; non-blocking RowSourceSpecs-pin note closed post-verdict.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 7543,
+          "outputTokens": 6799,
+          "costUsd": 0.1208
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-002/s3-orchestrator-recommendation",
+      "dateTime": "2026-06-14T01:47:45.099507-04:00",
+      "description": "Routed S3 orchestrator recommendation (scope adjusted: R2-1/R2-2 deferred -> S3 validates delivered surfaces + docs + authors P4 set).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 520,
+          "outputTokens": 90,
+          "costUsd": 0.0014
+        }
+      ]
     }
   ]
 }
