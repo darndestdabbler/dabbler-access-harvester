@@ -22,5 +22,15 @@
     "tools/vahs015_s1_verify.py",
     "tools/vahs015_s1_verify_r2.py",
     "tools/vahs015_s1_closeout.py"
-  ]
+  ],
+  "next_orchestrator": {
+    "engine": "claude-code",
+    "provider": "anthropic",
+    "model": "claude-opus-4-8",
+    "effort": "high",
+    "reason": {
+      "code": "continue-current-trajectory",
+      "specifics": "Routed gemini-pro recommends Opus @ high, multi-pass: Layer B's coordinated golden regen for the module-level-unresolved schema change needs Opus's analytical-explanatory strength to justify every unresolved-items.json delta, and the session interweaves schema design, implementation, no-double-count verification, cross-session-evidence embedding, and forward-planning docs (next set + DW-11 discharge)."
+    }
+  }
 }
