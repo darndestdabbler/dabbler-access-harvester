@@ -5,6 +5,7 @@ using System.Text;
 using AccessHarvester.Vba.Parser.Ast;
 using AccessHarvester.Vba.Resolver.CrossReference;
 using AccessHarvester.Vba.Resolver.References;
+using AccessHarvester.Vba.Resolver.Scopes;
 using ParserProcedure = AccessHarvester.Vba.Parser.Ast.ProcedureDeclaration;
 
 namespace AccessHarvester.Pipeline.Enrichment;
@@ -849,22 +850,39 @@ public static class NavigationGraphBuilder
         };
     }
 
-    // Index every harvested procedure by name (case-insensitive, VBA
-    // semantics). Two procedures sharing a name across modules both land under
-    // the key, which is what makes the callback Ambiguous. A name declared
-    // twice in the SAME module (illegal VBA, but the parser does not enforce
-    // it) is de-duplicated to one (module, name) entry so it does not falsely
-    // read as ambiguous.
+    // Index the harvested procedures a ribbon callback can actually bind to,
+    // keyed by name (case-insensitive, VBA semantics). Two bindable procedures
+    // sharing a name across modules both land under the key, which is what
+    // makes the callback Ambiguous. A name declared twice in the SAME module
+    // (illegal VBA, but the parser does not enforce it) is de-duplicated to one
+    // (module, name) entry so it does not falsely read as ambiguous.
+    //
+    // Bindability gate (016 S2 set-wide review, gpt-5-4 + in-IDE pair, Major):
+    // Access dispatches a ribbon `onAction`/`onLoad` callback only to a
+    // procedure that is callable as a project-global entry point — a Public
+    // (or modifier-less, which is Public by default) procedure in a STANDARD
+    // module. A `Private`/`Friend` procedure, or any procedure in a class /
+    // form / report module, cannot be the runtime target. Indexing those too
+    // (the original name-only pass) let a same-named private helper or
+    // code-behind sub force a false `Ambiguous` that HID the one real,
+    // uniquely-bindable target. Filtering to bindable procedures applies
+    // Access's STATIC binding rule (not dynamic interpretation): a name whose
+    // only matches are non-bindable now resolves to `Unresolved` — faithful,
+    // since Access could not bind it either — and the `CallbackName` is still
+    // retained verbatim, so nothing is lost.
     private static IReadOnlyDictionary<string, List<ProcedureReference>> BuildProcedureIndex(
         IReadOnlyList<ResolvedModule> modules)
     {
         var byName = new Dictionary<string, List<ProcedureReference>>(StringComparer.OrdinalIgnoreCase);
         foreach (var module in modules)
         {
+            // Only standard modules expose project-global ribbon-callback targets.
+            if (module.ModuleScope.Kind != ModuleKind.Standard) continue;
             var moduleName = module.ModuleScope.ModuleName;
             foreach (var item in module.Ast.Items)
             {
                 if (item is not ParserProcedure proc) continue;
+                if (!IsBindableCallbackTarget(proc.Access)) continue;
                 if (!byName.TryGetValue(proc.Name, out var list))
                 {
                     list = new List<ProcedureReference>();
@@ -881,6 +899,18 @@ public static class NavigationGraphBuilder
         }
         return byName;
     }
+
+    // A ribbon callback binds only to a Public-visible standard-module
+    // procedure. A modifier-less Sub/Function is Public by default in a
+    // standard module (Unspecified), and Global is project-wide public; both
+    // are bindable. Private and Friend are not; Dim is not a procedure modifier.
+    private static bool IsBindableCallbackTarget(AccessModifier access) => access switch
+    {
+        AccessModifier.Public => true,
+        AccessModifier.Unspecified => true,
+        AccessModifier.Global => true,
+        _ => false,
+    };
 
     private static MacroChain? FindAutoExec(IReadOnlyList<MacroChain> macros)
     {

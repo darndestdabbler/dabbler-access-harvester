@@ -8,7 +8,35 @@
       "round": 1,
       "verdict": "VERIFIED",
       "issues": []
+    },
+    {
+      "round": 2,
+      "context": "Post-close set-wide adversarial review follow-up (bindability filter F1/A1 + A5 empty-table guard + interpretation-guide F3/A7).",
+      "verdict": "VERIFIED",
+      "issues": []
     }
   ],
+  "setWideAdversarialReview": {
+    "reviewers": ["gpt-5-4 (in-IDE)", "gemini (in-IDE)"],
+    "responses": ["s2-set-wide-evaluation-gpt-5-4.md", "s2-set-wide-evaluation-reply.md"],
+    "disposition": "s2-set-wide-evaluation-disposition.md",
+    "fixed": [
+      {"id": "F1/A1", "severity": "Major", "summary": "Callback resolution indexed all procedures by bare name -> false Ambiguous hid the real bindable target.", "fix": "BuildProcedureIndex gated to Public/default procedures in standard modules (Access static binding rule)."},
+      {"id": "F3/A7", "severity": "Major", "summary": "interpretation-guide.md still said no ribbon producer exists.", "fix": "Guide updated to describe the 016 ribbon surface + coverage boundary + null/[] semantics."},
+      {"id": "A5", "severity": "Minor", "summary": "Detected-but-empty USysRibbons wrote a rows:[] artifact vs nothing for a missing table.", "fix": "RibbonExporter returns no artifact when rows.Count == 0."}
+    ],
+    "refuted": [
+      {"id": "A6", "severity": "Major", "summary": "Claimed FormatException crashes the pipeline.", "why": "RibbonStructureBuilder.Build catches FormatException per row; BuildNavigationInputs wraps it as RIBBON_LOAD_FAILURE."}
+    ],
+    "deferred": [
+      {"id": "A8+A9", "to": "DW-22", "summary": "ResolvedProcedure non-null typing + callback signature capture (additive contract refinements)."},
+      {"id": "F2", "to": "DW-23", "summary": "Prefer canonical USysRibbons over signature-only ribbon-table detection."}
+    ],
+    "noChange": [
+      {"id": "A2", "summary": "onLoad vs onAction signature differ; Kind already discriminates; documented in guide."},
+      {"id": "A3", "summary": "get* dynamic callbacks -> already DW-20."},
+      {"id": "A4", "summary": "Attributes source-order is the deliberate faithful-mechanical contract; raw XML is the lossless record."}
+    ]
+  },
   "finalVerdict": "VERIFIED"
 }

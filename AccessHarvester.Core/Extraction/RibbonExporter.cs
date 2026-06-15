@@ -94,8 +94,11 @@ public sealed class RibbonExporter : IObjectExporter
         // Shape-gated: a database with no ribbon-shaped table produces NOTHING
         // (no artifact file), so a non-ribbon corpus (e.g. HomeHealthCare) stays
         // byte-for-byte unchanged and NavigationGraph.Ribbon stays null. Only
-        // emit the artifact when a ribbon table was actually detected.
-        if (detected.Count == 0)
+        // emit the artifact when a ribbon table was actually detected AND it
+        // carried at least one row: a detected-but-empty USysRibbons defines no
+        // ribbon, so it must behave identically to a missing table (no artifact)
+        // rather than emitting a rows:[] payload (016 S2 set-wide review, A5).
+        if (detected.Count == 0 || rows.Count == 0)
             return outcomes;
 
         // Deterministic ordering independent of DAO enumeration order. RibbonXml

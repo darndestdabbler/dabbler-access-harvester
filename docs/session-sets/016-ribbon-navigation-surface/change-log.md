@@ -70,6 +70,24 @@ custom ribbon.
   `RibbonEntryPoints` resolves `cmdAbout_OnAction` → `modRibbonCallback`, surfaces the
   nested `ddMRU_OnAction`, and every entry carries a resolution status.
 
+## Post-close set-wide adversarial review (2026-06-15)
+
+After closeout, the human ran the set-wide in-IDE devil's-advocate prompt
+(`s2-set-wide-evaluation-prompt.md`) in GPT-5.4 + Gemini. Triage:
+`s2-set-wide-evaluation-disposition.md`. Outcome — three fixes landed (re-verified
+gpt-5-4 R2 VERIFIED, golden re-proven byte-neutral):
+- **F1/A1 (Major, both reviewers) — fixed.** `BuildProcedureIndex` now gates
+  callback resolution to **bindable** targets (Public/modifier-less procedures in
+  **standard** modules), so a same-named Private / class-module procedure no longer
+  forces a false `Ambiguous` that hid the real target. Applies Access's static
+  binding rule; a non-bindable-only collision now resolves to `Unresolved`. 4 new
+  hermetic tests (956 Pipeline.Tests).
+- **F3/A7 (Major) — fixed.** `interpretation-guide.md` no longer says "no ribbon
+  producer exists"; it now describes the shipped 016 surface, the coverage boundary
+  (DW-20/DW-21), and the null-vs-`[]` semantics.
+- **A5 (Minor) — fixed.** A detected-but-empty `USysRibbons` writes no artifact.
+- **A6 refuted** (FormatException already guarded). **F2 → DW-23**, **A8/A9 → DW-22**.
+
 ## Deferred-work ledger
 - **DW-13 CLOSED** (this set) — moved to the Closed section, full entry retained with a
   CLOSED banner.

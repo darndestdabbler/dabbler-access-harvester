@@ -112,9 +112,10 @@ public sealed record NavigationGraph
     /// controls → children, then contextual tab sets.
     /// </para>
     /// <para>
-    /// An <c>onAction</c> whose name matches no harvested procedure is surfaced
-    /// as <see cref="RibbonCallbackResolution.Unresolved"/> (never dropped); a
-    /// name matching procedures in more than one module is
+    /// An <c>onAction</c> whose name matches no <i>bindable</i> procedure
+    /// (Public/default in a standard module) is surfaced as
+    /// <see cref="RibbonCallbackResolution.Unresolved"/> (never dropped); a name
+    /// matching bindable procedures in more than one module is
     /// <see cref="RibbonCallbackResolution.Ambiguous"/> with no guessed module
     /// — the unresolvable-constructs-are-explicit principle.
     /// </para>
@@ -600,13 +601,20 @@ public sealed record RibbonControl
 /// resolves uniquely) is the procedure named by <see cref="ResolvedProcedure"/>.
 /// </summary>
 /// <remarks>
-/// Faithful-mechanical: the callback is matched to a procedure by name only
-/// (case-insensitive, per VBA semantics) — no signature or visibility check,
-/// which would be interpretation. A name found in exactly one module resolves;
-/// a name found in none is <see cref="RibbonCallbackResolution.Unresolved"/>;
-/// a name found in more than one is <see cref="RibbonCallbackResolution.Ambiguous"/>
-/// with <see cref="ResolvedProcedure"/> left null (the producer never guesses
-/// which module). All cases are surfaced — none is silently dropped.
+/// Faithful-mechanical: the callback is matched by name (case-insensitive, per
+/// VBA semantics) against the procedures a ribbon callback can actually bind to
+/// — Public (or modifier-less, which is Public by default) procedures in
+/// <b>standard</b> modules. Private/Friend procedures and class/form/report
+/// code-behind are excluded because Access cannot dispatch a ribbon callback to
+/// them; this applies Access's static binding rule, not a dynamic-signature
+/// check. A name matching exactly one bindable procedure
+/// <see cref="RibbonCallbackResolution.Resolved"/>s; a name matching none is
+/// <see cref="RibbonCallbackResolution.Unresolved"/> (its <c>CallbackName</c>
+/// is still retained verbatim — Access could not bind it either); a name
+/// matching more than one bindable procedure is
+/// <see cref="RibbonCallbackResolution.Ambiguous"/> with
+/// <see cref="ResolvedProcedure"/> left null (the producer never guesses which
+/// module). All cases are surfaced — none is silently dropped.
 /// </remarks>
 public sealed record RibbonEntryPoint
 {

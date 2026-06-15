@@ -50,7 +50,38 @@ Key confirmations:
 }
 ```
 
-## Validation evidence (all green at R1)
+## Round 2 — VERIFIED (post-close set-wide-review follow-up)
+
+After the human ran the set-wide adversarial review (`s2-set-wide-evaluation-*.md`),
+the resolution-bindability finding (F1/A1, Major, both reviewers) + the A5 empty-table
+guard + the interpretation-guide staleness (F3/A7) were fixed (triage:
+`s2-set-wide-evaluation-disposition.md`). The bindability filter — a real semantic
+change — was re-routed to gpt-5-4 (cross-provider) and returned VERIFIED, no issues:
+
+- **Bindability correctness:** limiting candidates to Public/modifier-less/Global
+  procedures in standard modules is "the right filter"; treating `Unspecified` as
+  bindable is correct (VBA default); excluding Private/Friend + class/form/report
+  code-behind is correct.
+- **Faithful-mechanical:** "stays on the faithful/mechanical side … removing
+  candidates Access could never bind … a better surface, not over-interpretation."
+  Reclassifying a non-bindable-only collision from `Ambiguous` → `Unresolved` is
+  "the more faithful result"; the old Ambiguous "was overstating ambiguity by
+  counting impossible targets."
+- **Determinism:** "a pure eligibility predicate … remains deterministic and
+  order-independent."
+- **A5 guard** correct and side-effect-free; **docs** now "match the implementation
+  much better" with no over/under-claim.
+
+```json
+{"verdict":"VERIFIED","issues":[]}
+```
+
+Re-validation: 956 Pipeline.Tests (4 new bindability tests); HHC golden byte-level
+re-reproduced via fresh COM run; Northwind `cmdAbout_OnAction` still resolves to
+`modRibbonCallback` under the filter. Findings A6 refuted (already guarded); F2/A8/A9
+deferred as DW-22 / DW-23.
+
+## Validation evidence (R1)
 - `dotnet build`: 0 errors.
 - `AccessHarvester.Pipeline.Tests`: 952 passed / 0 failed (incl. 10 new ribbon-entry-point
   hermetic tests).

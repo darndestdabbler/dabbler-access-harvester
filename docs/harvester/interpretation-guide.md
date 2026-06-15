@@ -384,8 +384,10 @@ on-disk order the writer emits, are:
   the VBA-derived form→form / form→report edges, the non-literal
   dispatch targets that could not be resolved, the metadata-derived
   top-level facets — ordered `EntryPoints`, the `Switchboard` page tree,
-  and `Macros` (populated in set 012 S1 / R2-1; `Ribbon` stays null on
-  switchboard-driven corpora) — and the cross-object **chain** surface
+  and `Macros` (populated in set 012 S1 / R2-1; the `Ribbon` structure +
+  `RibbonEntryPoints` callbacks ship in set 016 / DW-13 but stay omitted on
+  switchboard-driven corpora with no custom `USysRibbons` ribbon) — and the
+  cross-object **chain** surface
   `ChainEdges` / `UnresolvedChainTargets` (the launcher→report→dialog→
   query→parameter relationships; mechanical producers landed in set 012
   S2 and the code-behind producer in S3 / R2-2, DW-10 closed). A single
@@ -1253,18 +1255,47 @@ macro IR, and the `StartUpForm` database property:
 - **`Switchboard`** — the page tree built from the switchboard table
   rows. See the **switchboard contract** note below. `null` (key
   omitted) when no switchboard-shaped table exists.
-- **`Ribbon`** — still `null` (key omitted) on this corpus.
-  HomeHealthCare is switchboard-driven with no custom `USysRibbons`
-  ribbon, and no ribbon producer exists yet; populating it from a real
-  custom-ribbon corpus is left to a future case (no synthesized
-  fixture). Recorded as a deliberate decision, not a silent gap.
+- **`Ribbon`** — `null` (key omitted) on this corpus because
+  HomeHealthCare is switchboard-driven with **no custom `USysRibbons`
+  ribbon** — not because the producer is missing. The ribbon producer
+  **ships** (set 016 / DW-13): on a database that *does* carry a custom
+  `USysRibbons` ribbon, `Ribbon` is the parsed `RibbonStructure`
+  (tabs → groups → controls, with each control's `idMso`/`id`/`label`
+  and static `onAction`). It is omitted here only because HHC has no
+  ribbon. Validated against a real custom-ribbon database locally; the
+  committed corpus simply has none.
+- **`RibbonEntryPoints`** — `null` (key omitted) on this corpus, for the
+  same reason (no ribbon). When a ribbon is present (set 016 S2) this is
+  the resolved ribbon-callback surface: one `RibbonEntryPoint` per control
+  `onAction` plus the root `onLoad`, each carrying the verbatim
+  `CallbackName`, the owning control's metadata, a `Resolution`
+  (`Resolved` / `Unresolved` / `Ambiguous`), and — when `Resolved` — the
+  bound `ResolvedProcedure` (`{ModuleName, ProcedureName}`). **Coverage
+  boundary (do not over-read):** entry points are derived only from the
+  structured `<tabs>` / `<contextualTabs>` view plus the root `onLoad`;
+  the dynamic `get*` callbacks (`getVisible`, `getEnabled`,
+  `getItemLabel`, …) and the non-`<tabs>` customUI sections (`<qat>`,
+  `<officeMenu>`, `<backstage>`) are preserved verbatim in the raw tier
+  (`raw/Navigation/ribbon-xml.json`) but are **not** projected as entry
+  points (DW-20 / DW-21). So `RibbonEntryPoints` is **not** the complete
+  ribbon→VBA edge set — it is the static `onAction`/`onLoad` navigation
+  surface. An **empty** `RibbonEntryPoints` (present but `[]`) means "a
+  ribbon exists but surfaces no static callbacks"; **omitted** means "no
+  custom ribbon at all." Resolution applies Access's static binding rule
+  — a callback resolves only to a Public (or modifier-less) procedure in
+  a **standard** module; a name whose only matches are Private/Friend or
+  in class/form/report code-behind is `Unresolved`, never bound.
 
 This is the **omit-null vs empty-array split** a consumer must code
 for: the six list facets (`EntryPoints`, `Edges`, `UnresolvedTargets`,
 `Macros`, `ChainEdges`, `UnresolvedChainTargets`) are **always present**
-(possibly empty); the two object facets (`Ribbon`, `Switchboard`) are
-**absent when null**. Test for `("Switchboard" in NavigationGraph)`, not
-for a non-null value.
+(possibly empty); the object facet `Switchboard` and the
+corpus-conditional ribbon facets (`Ribbon`, `RibbonEntryPoints`) are
+**absent when there is no such feature**. `Ribbon` and
+`RibbonEntryPoints` track together: both omitted when the database has
+no custom ribbon, both present when it does. Test for
+`("Switchboard" in NavigationGraph)` / `("Ribbon" in NavigationGraph)`,
+not for a non-null value.
 
 **The switchboard contract (generic over canonical *and* custom
 tables).** The harvester does **not** assume the wizard-generated
@@ -1655,11 +1686,15 @@ Unless Reauthorized (2026-05-17)*:
   (set 012 S1 / R2-1, DW-9 closed), **and** the cross-object
   launcher→report→dialog→query→parameter **chain** surface
   `ChainEdges`/`UnresolvedChainTargets` (set 012 S2 mechanical producers
-  + S3 code-behind producer / R2-2, DW-10 closed). See §5.7. The one
-  navigation facet still null is `Ribbon` (`USysRibbons` custom-ribbon
-  XML), which has no producer because no corpus exercises it — DW-13.
-  Standalone-macro chain edges (`macro-action` provenance) are reserved
-  but unproduced.
+  + S3 code-behind producer / R2-2, DW-10 closed). See §5.7. The custom
+  ribbon surface — `Ribbon` (parsed `USysRibbons` customUI structure) and
+  `RibbonEntryPoints` (`onAction`/`onLoad` → resolved VBA callbacks) — ships
+  in set 016 (DW-13 closed); it is omitted on HomeHealthCare only because
+  HHC has no custom ribbon (validated against a real custom-ribbon database
+  locally). Standalone-macro chain edges (`macro-action` provenance) are
+  reserved but unproduced; the ribbon's dynamic `get*` callbacks (DW-20) and
+  non-`<tabs>` customUI sections (DW-21) are preserved raw-only, not as entry
+  points.
 
 A consumer should not assume the harvester does any of the above —
 the explicit `null` interpretive slots and the `UnresolvedItems`

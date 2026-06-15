@@ -776,6 +776,67 @@
 - **Mechanical backstop:** none committed (no corpus exercises these sections); the
   `RibbonXmlParser` doc records the boundary and the raw-tier lossless fallback.
 
+### DW-22 — Ribbon entry-point contract: `ResolvedProcedure` is not a non-null type, and the bound callback's signature is not captured
+- **What:** two consumer-contract refinements on `RibbonEntryPoint` (016 S2),
+  surfaced by the set-wide adversarial review (in-IDE GPT + Gemini): (a) a
+  `Resolved` ribbon entry point always populates
+  `ResolvedProcedure.ModuleName`, but the shared `ProcedureReference` type makes
+  `ModuleName` nullable (macro `RunCode` entries on
+  `NavigationEntryPoint.CallsProcedure` leave it null) — so a consumer cannot
+  rely on the type to guarantee a module, only on the `Resolution=Resolved`
+  invariant. A distinct non-null `ResolvedProcedureReference` would encode the
+  guarantee in the type. (b) The entry point records *which* procedure binds but
+  not its **signature** (parameter count / shape), so a downstream code-generator
+  cannot mechanically flag a callback bound to a procedure with the wrong arity
+  (Access ribbon `onAction` requires `(control As IRibbonControl)`; `onLoad`
+  requires `(ribbon As IRibbonUI)`).
+- **Origin:** 016 S2 set-wide evaluation (`s2-set-wide-evaluation-*.md`): A8
+  (Major, type-split) + A9 (in-IDE rated Critical, signature capture). The
+  routed closeout verifier (gpt-5-4) had judged `ProcedureReference` reuse
+  "appropriate", so this is a refinement, not a defect — no `Resolved` entry
+  ever ships a null module today.
+- **Why deferred:** purely additive consumer-ergonomics; the resolved procedure's
+  full signature is already recoverable from the manifest's
+  `FunctionClassification` / `ModuleExport` for that module + procedure, so no
+  information is lost — only the convenience of a co-located signature and a
+  type-level non-null guarantee. Changing `ResolvedProcedure`'s type or adding a
+  signature field touches the schema + every consumer; out of scope for the
+  closed 016 set.
+- **Trigger to pull back in:** a downstream code-generator needs to validate
+  ribbon-callback signatures inline, OR a ribbon-completeness set is scoped.
+- **Owning set candidate:** the ribbon-completeness set (natural bundle with
+  DW-20 / DW-21).
+- **Mechanical backstop:** none; the `Resolution=Resolved` invariant (module
+  always present) is asserted by the hermetic builder tests and the
+  `NorthwindLocalInvariantTests` ribbon-entry-point assertions.
+
+### DW-23 — Ribbon-table detection is signature-only; a non-canonical table with `RibbonName`+`RibbonXML` columns could surface as the ribbon
+- **What:** `RibbonSignatureDetector` flags any non-system table carrying both a
+  `RibbonName` and a `RibbonXML` column as a ribbon source (mirroring the
+  switchboard signature precedent), without preferring the canonical
+  `USysRibbons` table name. An unrelated user table with those two column names
+  would be harvested as the ribbon and could become the published
+  `NavigationGraph.Ribbon` + `RibbonEntryPoints`.
+- **Origin:** 016 S1 routed verification raised this as a Minor (disposed:
+  signature-based detection is the repo precedent, consistent with switchboard);
+  016 S2 set-wide review (gpt-5-4) **escalated to Major** because a false-positive
+  now propagates past the raw tier into the resolved entry-point surface, not
+  just `raw/Navigation/ribbon-xml.json`.
+- **Why deferred:** practical risk is low — a table needs **both** the
+  `RibbonName` and `RibbonXML` column names (and to pass the malformed-XML
+  degradation guard) to be mistaken for a ribbon, which is essentially always the
+  real `USysRibbons`; no corpus (HHC, Northwind) exercises a false positive, and
+  the raw tier preserves the truth. A safe hardening is cheap (prefer the literal
+  `USysRibbons` table when present; demote non-canonical signature matches to a
+  diagnostic) but is a behaviour change to a closed, golden-validated set.
+- **Trigger to pull back in:** a real DB surfaces a false-positive ribbon table,
+  OR the ribbon-completeness set is scoped (fold the canonical-name preference in).
+- **Owning set candidate:** the ribbon-completeness set (with DW-20 / DW-21 / DW-22).
+- **Mechanical backstop:** the malformed-XML degradation path
+  (`RIBBON_XML_PARSE_FAILURE`) catches a non-customUI payload, so a non-ribbon
+  table with garbage XML degrades rather than fabricating a ribbon; only a table
+  with both columns AND valid customUI would mislead.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED

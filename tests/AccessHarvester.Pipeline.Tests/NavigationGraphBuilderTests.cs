@@ -982,6 +982,84 @@ End Sub", "modNav"));
         Assert.Empty(graph.RibbonEntryPoints!);
     }
 
+    // ── Bindability gate (016 S2 set-wide review, F1/A1) ──────────────
+
+    [Fact]
+    public void Build_RibbonOnAction_NameAlsoInClassModule_ResolvesToStandardOnly()
+    {
+        // A ribbon callback binds only to a standard-module procedure. A
+        // same-named sub in a form/report class module is NOT a binding
+        // candidate, so it must not turn the unique standard-module match into
+        // a false Ambiguous.
+        var inputs = new NavigationGraphInputs { Ribbon = RibbonWithButton("cmdAbout_OnAction") };
+        var resolvedStd = Resolve(@"
+Sub cmdAbout_OnAction(control As IRibbonControl)
+End Sub", "modRibbonCallback", ModuleKind.Standard);
+        var resolvedClass = Resolve(@"
+Public Sub cmdAbout_OnAction()
+End Sub", "Form_frmAbout", ModuleKind.Form);
+        var index = new CrossReferenceIndex(new[] { resolvedStd, resolvedClass });
+        var graph = NavigationGraphBuilder.Build(new[] { resolvedStd, resolvedClass }, index, inputs);
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal(RibbonCallbackResolution.Resolved, ep.Resolution);
+        Assert.Equal("modRibbonCallback", ep.ResolvedProcedure!.ModuleName);
+    }
+
+    [Fact]
+    public void Build_RibbonOnAction_NameAlsoPrivateInOtherStandardModule_ResolvesToPublic()
+    {
+        // A Private procedure cannot be a ribbon-callback target, so a unique
+        // Public match elsewhere resolves cleanly rather than being masked as
+        // Ambiguous.
+        var inputs = new NavigationGraphInputs { Ribbon = RibbonWithButton("Shared_OnAction") };
+        var graph = BuildWithModules(inputs,
+            (@"
+Public Sub Shared_OnAction(control As IRibbonControl)
+End Sub", "modPublic"),
+            (@"
+Private Sub Shared_OnAction(control As IRibbonControl)
+End Sub", "modPrivate"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal(RibbonCallbackResolution.Resolved, ep.Resolution);
+        Assert.Equal("modPublic", ep.ResolvedProcedure!.ModuleName);
+    }
+
+    [Fact]
+    public void Build_RibbonOnAction_OnlyPrivateMatch_IsUnresolved()
+    {
+        // If the ONLY same-named procedure is Private (non-bindable), the
+        // callback is Unresolved — Access could not dispatch to it either —
+        // and the verbatim name is still retained.
+        var inputs = new NavigationGraphInputs { Ribbon = RibbonWithButton("cmdHidden_OnAction") };
+        var graph = BuildWithModules(inputs,
+            (@"
+Private Sub cmdHidden_OnAction(control As IRibbonControl)
+End Sub", "modStd"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal(RibbonCallbackResolution.Unresolved, ep.Resolution);
+        Assert.Equal("cmdHidden_OnAction", ep.CallbackName);
+        Assert.Null(ep.ResolvedProcedure);
+    }
+
+    [Fact]
+    public void Build_RibbonOnAction_ModifierlessSubIsBindable()
+    {
+        // A modifier-less Sub in a standard module is Public by default, so it
+        // is a bindable target (the most common authored shape).
+        var inputs = new NavigationGraphInputs { Ribbon = RibbonWithButton("cmdGo_OnAction") };
+        var graph = BuildWithModules(inputs,
+            (@"
+Sub cmdGo_OnAction(control As IRibbonControl)
+End Sub", "modStd"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal(RibbonCallbackResolution.Resolved, ep.Resolution);
+        Assert.Equal("modStd", ep.ResolvedProcedure!.ModuleName);
+    }
+
     [Fact]
     public void Build_RibbonBuiltInControlOnAction_SurfacesIdMso()
     {
