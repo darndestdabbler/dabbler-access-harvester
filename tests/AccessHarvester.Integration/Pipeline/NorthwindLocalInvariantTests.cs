@@ -1,9 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Text.Json;
 using AccessHarvester.Core;
 using AccessHarvester.Integration.TestSupport;
+using AccessHarvester.Pipeline.Enrichment;
+using AccessHarvester.Pipeline.Manifest;
+using AccessHarvester.Pipeline.Validation;
 using Xunit;
 using CorePipeline = AccessHarvester.Core.Pipeline;
 
@@ -88,12 +93,7 @@ public sealed class NorthwindLocalInvariantTests
 
             // Invariant 5 (DW-13 precondition): NorthwindDevEdition's custom
             // ribbon table (USysRibbons) is harvested, so the DW-13 ribbon
-            // producer has real input to validate against. This documents that
-            // the ground-truth custom-ribbon corpus the DW-13 deferral claimed
-            // did not exist is, in fact, present and harvestable. When DW-13
-            // lands its producer, extend this test to assert the parsed
-            // NavigationGraph.Ribbon matches the local USysRibbons (validated
-            // here, never committed as a golden).
+            // producer has real input to validate against.
             bool usysRibbonsHarvested = Directory
                 .EnumerateFiles(runResult.IrDir, "USysRibbons*", SearchOption.AllDirectories)
                 .Any();
@@ -101,11 +101,68 @@ public sealed class NorthwindLocalInvariantTests
                 "Expected NorthwindDevEdition's USysRibbons table to be harvested under ir/ " +
                 "(the DW-13 ribbon producer's input). If this fixture lost its custom ribbon, " +
                 "update the DW-13 corpus note in docs/planning/deferred-work.md.");
+
+            // Invariant 6 (DW-13, 016 S1): the producer parses the REAL custom
+            // ribbon. The RibbonExporter row-read of USysRibbons.RibbonXML +
+            // RibbonXmlParser must populate NavigationGraph.Ribbon, and its
+            // tab/control ids + onAction callbacks must match the local ribbon.
+            // Validated locally only — never committed as a golden (proprietary).
+            string manifestJson = File.ReadAllText(Path.Combine(runResult.BaseDir, "manifest.json"));
+
+            // Invariant 6a: the ribbon-bearing manifest conforms to the updated
+            // harvester-schema.v1.1 RibbonStructure $def (HHC carries no ribbon,
+            // so this is the only run that exercises the new recursive shape).
+            var schemaResult = new SchemaValidator(RepoPaths.SchemaFile()).Validate(manifestJson);
+            Assert.True(schemaResult.IsValid,
+                "NorthwindDevEdition manifest (with a populated NavigationGraph.Ribbon) failed " +
+                "schema validation:\n  - " + string.Join("\n  - ", schemaResult.Errors));
+
+            var manifest = JsonSerializer.Deserialize<DatabaseManifest>(
+                manifestJson,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var ribbon = manifest?.NavigationGraph?.Ribbon;
+            Assert.True(ribbon is not null,
+                "NavigationGraph.Ribbon is null on a database that HAS a custom USysRibbons " +
+                "ribbon — the DW-13 producer did not populate the facet.");
+
+            // The single Northwind ribbon row is named "Main" and opens with a
+            // custom "Home" tab (id tHome).
+            Assert.Equal("Main", ribbon!.Name);
+            Assert.Contains(ribbon.Tabs, t => t.Id == "tHome" && t.Label == "Home");
+
+            // Built-in idMso tabs/controls are surfaced as full nodes (not dropped).
+            Assert.Contains(ribbon.Tabs, t => t.IdMso == "TabAddIns");
+            // The contextualTabs section is modelled.
+            Assert.NotEmpty(ribbon.ContextualTabSets);
+
+            // The onAction callbacks (the navigation entry points S2 resolves)
+            // are surfaced, including nested ones. cmdAbout_OnAction lives in
+            // modRibbonCallback; ddMRU_OnAction is on the MRU dropDown.
+            var onActions = CollectOnActions(ribbon);
+            Assert.Contains("cmdAbout_OnAction", onActions);
+            Assert.Contains("ddMRU_OnAction", onActions);
         }
         finally
         {
             if (Directory.Exists(stagingRoot))
                 Directory.Delete(stagingRoot, recursive: true);
         }
+    }
+
+    // All onAction callbacks anywhere in the ribbon (tabs/groups/controls and
+    // nested splitButton/menu/box children).
+    private static IReadOnlyCollection<string> CollectOnActions(RibbonStructure ribbon)
+    {
+        var found = new HashSet<string>(StringComparer.Ordinal);
+        void Walk(RibbonControl c)
+        {
+            if (c.OnAction is { } a) found.Add(a);
+            foreach (var child in c.Children) Walk(child);
+        }
+        foreach (var tab in ribbon.Tabs)
+            foreach (var group in tab.Groups)
+                foreach (var control in group.Controls)
+                    Walk(control);
+        return found;
     }
 }

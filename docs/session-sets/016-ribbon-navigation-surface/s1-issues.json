@@ -1,0 +1,37 @@
+{
+  "session": 1,
+  "set": "016-ribbon-navigation-surface",
+  "verifier": "gpt-5-4",
+  "finalVerdict": "VERIFIED",
+  "rounds": 3,
+  "issues": [
+    {
+      "round": 1,
+      "severity": "Major",
+      "location": "RibbonXmlParser.cs",
+      "summary": "Promoted attribute extraction returns present-but-empty values as \"\" rather than null (claimed empty->null contract).",
+      "disposition": "REJECTED (misread). The empty->null contract is for whole-XML Parse, never per-attribute. Faithful-mechanical preserves present-empty (\"\") as distinct from absent (null). Pinned by PresentButEmptyAttribute_IsPreservedAsEmpty_DistinctFromAbsent and documented. R2 verifier accepted the rejection."
+    },
+    {
+      "round": 1,
+      "severity": "Major",
+      "location": "RibbonXmlParser.cs",
+      "summary": "Structured view drops authored customUI content outside tabs (qat/officeMenu/backstage, root attrs beyond onLoad), breaking 'surface not drop'.",
+      "disposition": "PARTIAL ACCEPT. Every control element within projected tabs IS surfaced; only non-tabs sections + root attrs are unprojected, and the raw byte-verbatim XML is preserved losslessly in raw/Navigation/ribbon-xml.json. Resolved by documenting the boundary explicitly in RibbonXmlParser (no longer silent) + filing DW-20 (dynamic callbacks) and DW-21 (unmodeled sections). No model expansion (navigation-irrelevant chrome, absent from both corpora, lean/scope). R3 verifier confirmed the documented boundary names the sections + raw fallback + DW and returned VERIFIED."
+    },
+    {
+      "round": 1,
+      "severity": "Major",
+      "location": "RibbonStructureBuilder.cs; RibbonExporter.cs",
+      "summary": "Singular ribbon selection not fully deterministic when rows share (RibbonName, Table) — fell back to DAO order.",
+      "disposition": "ACCEPTED + FIXED. Added RibbonXml as the final ordinal tiebreaker in both the builder's selection ordering and the exporter's raw-dump ordering. Pinned by DuplicateNameAndTable_SelectsDeterministically_ByXmlTiebreaker. R2 verifier confirmed the tie-break is now total."
+    },
+    {
+      "round": 1,
+      "severity": "Minor",
+      "location": "RibbonExporter.cs; RibbonSignatureDetector.cs",
+      "summary": "Signature-only detection can emit ribbon-xml.json for an unrelated table carrying RibbonName + RibbonXML columns.",
+      "disposition": "REJECTED (by-design). Identical to the shipped, accepted SwitchboardSignatureDetector; name-independent detection is a deliberate project principle so the producer matches USysRibbons AND hand-rolled variants. The RibbonName+RibbonXML pair is a specific signature. R2 verifier accepted the rejection as consistent with precedent."
+    }
+  ]
+}

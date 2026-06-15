@@ -1,0 +1,99 @@
+{
+  "sessionSetName": "016-ribbon-navigation-surface",
+  "createdDate": "2026-06-15T13:38:56.440525+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/verification-mode",
+      "dateTime": "2026-06-15T13:38:56.441518+00:00",
+      "description": "Operator set verificationMode: out-of-band-or-none.",
+      "status": "complete",
+      "routedApiCalls": [],
+      "kind": "verification_mode",
+      "choice": "out-of-band-or-none"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "s1-reground-and-local-northwind",
+      "dateTime": "2026-06-15T09:39:19.822211-04:00",
+      "description": "Started Session 1: registered session start, read guidance/spec/DW-13; beginning re-grounding of RibbonStructure models, NavigationGraphInputs.Ribbon wiring, USysRibbons schema-only extraction, and SwitchboardExporter row-read template.",
+      "status": "in-progress",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "s1-reground-and-local-northwind",
+      "dateTime": "2026-06-15T09:51:23.225579-04:00",
+      "description": "Re-grounded all spec pointers (RibbonStructure models, NavigationGraphInputs.Ribbon wiring at NavigationGraphBuilder:94, USysRibbons schema-only confirmed via local ir/, SwitchboardExporter/SignatureDetector/StructureBuilder/BuildNavigationInputs templates). Did local Northwind harvest of real USysRibbons.RibbonXML (C:/temp, never committed): namespace is 2006/01 NOT 2009/07, with idMso built-ins, deep nesting (box/splitButton/menu), and a contextualTabs section. Ran cross-provider consensus (gpt-5-4+gemini-pro) on the model shape: both chose a faithful recursive tree; synthesized to Option 2 + per-node verbatim Attributes bag. Decision recorded in s1-ribbon-model-consensus.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "s1-usysribbons-exporter",
+      "dateTime": "2026-06-15T09:57:43.436496-04:00",
+      "description": "Added RibbonSignatureDetector + RibbonExporter (shape-gated USysRibbons row-read, Category Navigation, mirrors SwitchboardExporter; USys* is not a system-object skip) writing raw/Navigation/ribbon-xml.json; registered in Pipeline.Default(). Solution builds green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "s1-ribbon-xml-parser",
+      "dateTime": "2026-06-15T09:57:43.437488-04:00",
+      "description": "Extended RibbonStructure model to a faithful recursive tree (nullable Id/Label, IdMso, ControlType open-string, per-node verbatim Attributes bag, Children, ContextualTabSets, OnLoad, Name) per the consensus; added pure namespace-tolerant RibbonXmlParser (match by local name; 2006/01 + 2009/07) and pure RibbonStructureBuilder (deterministic single-ribbon selection + multiplicity/malformed signals).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "s1-navgraph-wiring",
+      "dateTime": "2026-06-15T09:57:43.437488-04:00",
+      "description": "Wired BuildNavigationInputs to load ribbon-xml.json -> RibbonStructureBuilder -> NavigationGraphInputs.Ribbon (with RIBBON_MULTIPLE_DEFINITIONS / RIBBON_XML_PARSE_FAILURE / RIBBON_LOAD_FAILURE diagnostics). NavigationGraphBuilder already threads Ribbon=inputs?.Ribbon.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "s1-synthetic-and-local-pins",
+      "dateTime": "2026-06-15T10:07:58.044912-04:00",
+      "description": "Hermetic pins: RibbonXmlParserTests (13, hand-authored committed customUI fixture \u2014 nested tabs/groups, onAction + declarative + idMso built-ins, splitButton/menu nesting NOT flattened, contextualTabs, verbatim Attributes, 2006/01 + prefixed-2009/07 namespaces, empty->null + malformed->FormatException, determinism), RibbonStructureBuilderTests (5: shape-gated populated/null, multiplicity surfaces one + counts rest, malformed-row recorded), RibbonSignatureDetectorTests (7). Updated harvester-schema.v1.1.json RibbonStructure $def to the recursive shape (relaxed required Id/Label, added IdMso/ControlType/Attributes/Children/ContextualTabSets/RibbonAttribute/RibbonContextualTabSet defs; additionalProperties-tolerant -> backward-compatible, no envelope bump). Extended NorthwindLocalInvariantTests: asserts NavigationGraph.Ribbon populated (Name=Main, tHome/Home, idMso TabAddIns, contextualTabs, onActions cmdAbout_OnAction+ddMRU_OnAction) AND the ribbon-bearing manifest passes v1.1 schema validation. 940/940 hermetic Pipeline.Tests green; 7 detector + 39 nav-builder green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "s1-golden-neutral",
+      "dateTime": "2026-06-15T10:07:58.046117-04:00",
+      "description": "Proved HHC golden byte-level neutral: CanonicalGoldenRegressionTests PASSED (shape-gated RibbonExporter writes nothing when no USysRibbons -> no new file, NavigationGraph.Ribbon stays null/omitted; git status on samples/GoldenOutput/HomeHealthCare clean). ManifestSchemaConformanceTests 5/5 green. Real Northwind ribbon validated locally (never committed). Swept spurious samples/*.accdb COM-timestamp diffs.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "s1-verified",
+      "dateTime": "2026-06-15T10:19:58.628540-04:00",
+      "description": "Cross-provider routed verification (gpt-5-4) over 3 rounds: R1 ISSUES_FOUND (4) -> R3 VERIFIED. Disposition: Issue 3 (determinism tie-break) ACCEPTED+FIXED (RibbonXml final ordinal tiebreaker in builder+exporter, pinned); Issue 1 (empty->null attrs) REJECTED as misread (present-empty preserved distinct from absent, pinned); Issue 2 (unmodeled customUI sections) PARTIAL ACCEPT -> documented structured-view boundary + lossless raw fallback + DW-20/DW-21 (no model expansion, lean/scope); Issue 4 (signature collision) REJECTED by-design (SwitchboardSignatureDetector precedent). Saved s1-verification.md (raw rounds), s1-issues.json, s1-in-ide-devils-advocate-prompt.md (user-run pair). 942 hermetic Pipeline + 7 detector green; model-consensus also routed (gpt-5-4+gemini-pro).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "s1-commit",
+      "dateTime": "2026-06-15T10:20:48.492725-04:00",
+      "description": "Staged + committing S1: RibbonExporter/RibbonSignatureDetector (COM shape-gated row-read), RibbonXmlParser/RibbonStructureBuilder/RibbonArtifact, extended RibbonStructure model, BuildNavigationInputs wiring, harvester-schema.v1.1 RibbonStructure def, hermetic pins + Northwind local invariant ext, DW-20/DW-21. HHC golden byte-neutral; samples/*.accdb swept.",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}

@@ -23,9 +23,10 @@ public sealed class JsonPassthroughTranslator : IObjectTranslator
     public static JsonPassthroughTranslator Relationships { get; } = new("Relationships");
 
     /// <summary>
-    /// Navigation chrome (the switchboard row dump + startup options) is
-    /// already structured JSON from <see cref="Extraction.SwitchboardExporter"/>;
-    /// pass it through unchanged.
+    /// Navigation chrome (the switchboard row dump + startup options from
+    /// <see cref="Extraction.SwitchboardExporter"/>, and the USysRibbons row dump
+    /// from <see cref="Extraction.RibbonExporter"/>) is already structured JSON;
+    /// pass every <c>*.json</c> in the category through unchanged.
     /// </summary>
     public static JsonPassthroughTranslator Navigation { get; } = new("Navigation");
 

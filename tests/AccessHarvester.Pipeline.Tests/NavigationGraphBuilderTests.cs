@@ -652,6 +652,7 @@ End Sub", inputs: inputs);
                             {
                                 new RibbonControl
                                 {
+                                    ControlType = "button",
                                     Id = "btnHome", Label = "Home",
                                     OnAction = "OpenHome",
                                 },

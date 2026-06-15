@@ -107,6 +107,7 @@ public sealed class Pipeline
             TableExporter.Instance,
             RelationshipExporter.Instance,
             SwitchboardExporter.Instance,
+            RibbonExporter.Instance,
         },
         translators: new IObjectTranslator[]
         {
@@ -542,9 +543,11 @@ public sealed class Pipeline
         // before) into raw/Navigation, the macro IR yields MacroChains, and the
         // StartUpForm DAO property yields the default form. Those populate the
         // already-modelled NavigationGraphInputs so the graph emits the
-        // Switchboard tree, ordered EntryPoints, and Macros. Ribbon stays null
-        // until a real-ribbon corpus case (DW-9 ribbon note). DW-10 (R2-2 chain
-        // derivation) remains for sessions 2-3.
+        // Switchboard tree, ordered EntryPoints, and Macros. 016 S1 (DW-13) adds
+        // the Ribbon facet: RibbonExporter reads USysRibbons (RibbonName,
+        // RibbonXML) and RibbonStructureBuilder parses the customUI XML, so a
+        // custom-ribbon database now emits NavigationGraph.Ribbon (HHC has none
+        // -> stays null, golden-neutral). DW-10 (R2-2 chain derivation) landed in 012.
         var navigationInputs = BuildNavigationInputs(kbDir, irDir, diagnostics);
         var navigationGraph = NavigationGraphBuilder.Build(resolvedModules, crossRefs, navigationInputs);
 
@@ -1240,15 +1243,62 @@ public sealed class Pipeline
             }
         }
 
+        // 016 S1 (DW-13): the custom-ribbon surface. RibbonExporter writes the
+        // USysRibbons (RibbonName, RibbonXML) rows to raw/Navigation/ribbon-xml.json;
+        // the pure RibbonStructureBuilder parses the selected row's customUI XML.
+        // HHC has no USysRibbons -> no artifact -> ribbon stays null (golden-neutral).
+        RibbonStructure? ribbon = null;
+        var ribbonFile = Path.Combine(kbDir, "Navigation", "ribbon-xml.json");
+        if (File.Exists(ribbonFile))
+        {
+            try
+            {
+                var artifact = JsonSerializer.Deserialize<RibbonXmlArtifact>(
+                    File.ReadAllText(ribbonFile, Encoding.UTF8), options);
+                var outcome = RibbonStructureBuilder.Build(artifact);
+                ribbon = outcome.Ribbon;
+                if (outcome.AdditionalRibbonCount > 0)
+                {
+                    diagnostics.Add(new HarvesterDiagnostic
+                    {
+                        Severity = HarvesterDiagnosticSeverity.Info,
+                        Message =
+                            $"USysRibbons defines {outcome.AdditionalRibbonCount + 1} ribbon(s); " +
+                            $"NavigationGraph.Ribbon surfaces '{ribbon?.Name}' (all rows preserved in " +
+                            "raw/Navigation/ribbon-xml.json).",
+                        Code = "RIBBON_MULTIPLE_DEFINITIONS",
+                    });
+                }
+                foreach (var bad in outcome.MalformedRows)
+                {
+                    diagnostics.Add(new HarvesterDiagnostic
+                    {
+                        Severity = HarvesterDiagnosticSeverity.Warning,
+                        Message = $"Ribbon customUI XML malformed for row {bad}; skipped (raw XML preserved).",
+                        Code = "RIBBON_XML_PARSE_FAILURE",
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                diagnostics.Add(new HarvesterDiagnostic
+                {
+                    Severity = HarvesterDiagnosticSeverity.Warning,
+                    Message = $"Ribbon items load failed: {ex.Message}",
+                    Code = "RIBBON_LOAD_FAILURE",
+                });
+            }
+        }
+
         var macros = MacroChainBuilder.Build(Path.Combine(irDir, "Macros"));
 
         // Nothing to supply -> null inputs (graph keeps VBA-side edges only).
-        if (switchboard is null && macros.Count == 0 && string.IsNullOrEmpty(defaultForm))
+        if (ribbon is null && switchboard is null && macros.Count == 0 && string.IsNullOrEmpty(defaultForm))
             return null;
 
         return new NavigationGraphInputs
         {
-            Ribbon = null,
+            Ribbon = ribbon,
             Switchboard = switchboard,
             Macros = macros,
             DefaultFormName = defaultForm,

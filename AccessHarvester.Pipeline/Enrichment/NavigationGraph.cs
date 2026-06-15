@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -389,66 +390,174 @@ public sealed record UnresolvedNavigationTarget
 }
 
 /// <summary>
-/// Top-level ribbon structure parsed from <c>USysRibbons</c>. Supplied
-/// by the metadata extractor; the navigation builder does not parse
-/// the XML itself.
+/// Top-level ribbon structure parsed from <c>USysRibbons</c> Office Fluent
+/// customUI XML by <see cref="RibbonXmlParser"/>. A <b>faithful recursive
+/// tree</b>: every authored tab/group/control is surfaced (custom
+/// <c>id</c>-bearing controls AND built-in <c>idMso</c> controls), nesting
+/// is preserved via <see cref="RibbonControl.Children"/>, and any attribute
+/// without a typed slot is preserved verbatim in source order on the node's
+/// <c>Attributes</c> bag. The harvester does not interpret the ribbon
+/// (no <c>imageMso</c> decode, no dynamic <c>get*</c>/<c>getVisible</c>
+/// evaluation) beyond surfacing the static <see cref="RibbonControl.OnAction"/>
+/// callbacks, which are navigation entry points. Design rationale +
+/// cross-provider consensus: <c>docs/session-sets/016-ribbon-navigation-surface/s1-ribbon-model-consensus.md</c>.
 /// </summary>
 public sealed record RibbonStructure
 {
     /// <summary>
+    /// The <c>USysRibbons.RibbonName</c> of the row this structure was parsed
+    /// from (e.g. <c>"Main"</c>), or null when set directly (e.g. a builder
+    /// test). When a database defines more than one ribbon row, this names the
+    /// one surfaced here; all rows are preserved losslessly in the raw
+    /// <c>raw/Navigation/ribbon-xml.json</c> dump regardless.
+    /// </summary>
+    public string? Name { get; init; }
+
+    /// <summary>
+    /// Attributes of the <c>&lt;ribbon&gt;</c> element with no typed slot
+    /// (e.g. <c>startFromScratch</c>), in source order. Verbatim, not interpreted.
+    /// </summary>
+    public IReadOnlyList<RibbonAttribute> Attributes { get; init; } = Array.Empty<RibbonAttribute>();
+
+    /// <summary>
+    /// The <c>customUI</c> root's <c>onLoad</c> callback (a ribbon-load VBA
+    /// procedure), or null when absent. Surfaced as the one typed root
+    /// callback; other dynamic callbacks ride verbatim in node
+    /// <see cref="Attributes"/> and are not resolved this set.
+    /// </summary>
+    public string? OnLoad { get; init; }
+
+    /// <summary>
     /// Tabs in source order (the ribbon XML's display order). Each
     /// tab carries its own ordered group/control children.
     /// </summary>
-    public required IReadOnlyList<RibbonTab> Tabs { get; init; }
+    public IReadOnlyList<RibbonTab> Tabs { get; init; } = Array.Empty<RibbonTab>();
+
+    /// <summary>
+    /// Contextual tab sets (the <c>&lt;contextualTabs&gt;</c> section), in
+    /// source order. Empty when the ribbon defines none.
+    /// </summary>
+    public IReadOnlyList<RibbonContextualTabSet> ContextualTabSets { get; init; }
+        = Array.Empty<RibbonContextualTabSet>();
 }
 
-/// <summary>One ribbon tab.</summary>
+/// <summary>One verbatim ribbon-XML attribute (name + value) with no typed slot.</summary>
+public sealed record RibbonAttribute
+{
+    /// <summary>Attribute local name, exactly as written.</summary>
+    public required string Name { get; init; }
+
+    /// <summary>Attribute value, exactly as written.</summary>
+    public required string Value { get; init; }
+}
+
+/// <summary>
+/// One contextual tab set (<c>&lt;tabSet&gt;</c>), which scopes a built-in or
+/// custom tool tab to a selection context. Carries its own tabs.
+/// </summary>
+public sealed record RibbonContextualTabSet
+{
+    /// <summary>Custom <c>id</c>, or null for a built-in <c>idMso</c> tab set.</summary>
+    public string? Id { get; init; }
+
+    /// <summary>Built-in <c>idMso</c>, or null for a custom tab set.</summary>
+    public string? IdMso { get; init; }
+
+    /// <summary>Unslotted attributes in source order. Verbatim.</summary>
+    public IReadOnlyList<RibbonAttribute> Attributes { get; init; } = Array.Empty<RibbonAttribute>();
+
+    /// <summary>Tabs inside the set in source order.</summary>
+    public IReadOnlyList<RibbonTab> Tabs { get; init; } = Array.Empty<RibbonTab>();
+}
+
+/// <summary>One ribbon tab. Custom (<c>id</c>) or built-in (<c>idMso</c>).</summary>
 public sealed record RibbonTab
 {
-    /// <summary>Tab id as written in the ribbon XML's <c>id</c> attribute.</summary>
-    public required string Id { get; init; }
+    /// <summary>Custom <c>id</c> attribute, or null for a built-in <c>idMso</c> tab.</summary>
+    public string? Id { get; init; }
 
-    /// <summary>Display label, sourced from the XML's <c>label</c> attribute.</summary>
-    public required string Label { get; init; }
+    /// <summary>Built-in <c>idMso</c> attribute, or null for a custom tab.</summary>
+    public string? IdMso { get; init; }
+
+    /// <summary>Display label from the <c>label</c> attribute, or null when absent.</summary>
+    public string? Label { get; init; }
+
+    /// <summary>Unslotted attributes (e.g. <c>visible</c>) in source order. Verbatim.</summary>
+    public IReadOnlyList<RibbonAttribute> Attributes { get; init; } = Array.Empty<RibbonAttribute>();
 
     /// <summary>Groups inside the tab in source order.</summary>
-    public required IReadOnlyList<RibbonGroup> Groups { get; init; }
+    public IReadOnlyList<RibbonGroup> Groups { get; init; } = Array.Empty<RibbonGroup>();
 }
 
 /// <summary>One ribbon group (visual cluster of controls inside a tab).</summary>
 public sealed record RibbonGroup
 {
-    /// <summary>Group id as written in the ribbon XML.</summary>
-    public required string Id { get; init; }
+    /// <summary>Custom <c>id</c>, or null for a built-in <c>idMso</c> group.</summary>
+    public string? Id { get; init; }
 
-    /// <summary>Display label.</summary>
-    public required string Label { get; init; }
+    /// <summary>Built-in <c>idMso</c>, or null for a custom group.</summary>
+    public string? IdMso { get; init; }
+
+    /// <summary>Display label, or null when absent.</summary>
+    public string? Label { get; init; }
+
+    /// <summary>Unslotted attributes (e.g. <c>getVisible</c>) in source order. Verbatim.</summary>
+    public IReadOnlyList<RibbonAttribute> Attributes { get; init; } = Array.Empty<RibbonAttribute>();
 
     /// <summary>Controls inside the group in source order.</summary>
-    public required IReadOnlyList<RibbonControl> Controls { get; init; }
+    public IReadOnlyList<RibbonControl> Controls { get; init; } = Array.Empty<RibbonControl>();
 }
 
 /// <summary>
-/// One ribbon control (button, toggle, etc.). The
-/// <see cref="OnAction"/> attribute names the VBA callback, which is a
-/// navigation entry point in its own right.
+/// One ribbon control. Covers every customUI control element
+/// (<c>button</c>, <c>toggleButton</c>, <c>splitButton</c>, <c>menu</c>,
+/// <c>dropDown</c>, <c>gallery</c>, <c>comboBox</c>, <c>box</c>,
+/// <c>control</c>, <c>menuSeparator</c>, …) via the open-string
+/// <see cref="ControlType"/>; nested children (a <c>splitButton</c>'s
+/// <c>button</c>/<c>menu</c>, a <c>box</c>'s contents, a <c>menu</c>'s items)
+/// hang off <see cref="Children"/>. The <see cref="OnAction"/> attribute
+/// names the static VBA callback, which is a navigation entry point in its
+/// own right.
 /// </summary>
 public sealed record RibbonControl
 {
-    /// <summary>Control id as written in the ribbon XML.</summary>
-    public required string Id { get; init; }
+    /// <summary>
+    /// The XML element's local name (e.g. <c>"button"</c>, <c>"dropDown"</c>,
+    /// <c>"menuSeparator"</c>). Open string — a new Fluent element never
+    /// breaks the schema.
+    /// </summary>
+    public required string ControlType { get; init; }
 
-    /// <summary>Display label.</summary>
-    public required string Label { get; init; }
+    /// <summary>Custom <c>id</c>, or null for a built-in <c>idMso</c> control.</summary>
+    public string? Id { get; init; }
+
+    /// <summary>Built-in <c>idMso</c>, or null for a custom control.</summary>
+    public string? IdMso { get; init; }
+
+    /// <summary>Display label, or null when absent (e.g. an <c>idMso</c> control).</summary>
+    public string? Label { get; init; }
 
     /// <summary>
-    /// VBA procedure name the control's <c>onAction</c> attribute
-    /// points to. Null when the control is purely declarative
-    /// (separators, labels). The matching procedure may itself appear
-    /// as <see cref="NavigationEdge.SourceProcedure"/> on one or more
-    /// edges.
+    /// VBA procedure name the control's <c>onAction</c> attribute points to.
+    /// Null when the control has no static <c>onAction</c> (declarative
+    /// separators/boxes, or built-in <c>idMso</c> commands). The matching
+    /// procedure may itself appear as
+    /// <see cref="NavigationEdge.SourceProcedure"/> on one or more edges.
     /// </summary>
     public string? OnAction { get; init; }
+
+    /// <summary>
+    /// Unslotted attributes (e.g. <c>imageMso</c>, <c>size</c>, <c>boxStyle</c>,
+    /// <c>screentip</c>, <c>title</c>, the dynamic <c>get*</c> callbacks) in
+    /// source order. Verbatim, not interpreted.
+    /// </summary>
+    public IReadOnlyList<RibbonAttribute> Attributes { get; init; } = Array.Empty<RibbonAttribute>();
+
+    /// <summary>
+    /// Nested child controls in source order (a <c>splitButton</c>/<c>menu</c>/
+    /// <c>box</c>/<c>gallery</c>'s contents). Empty for leaf controls.
+    /// </summary>
+    public IReadOnlyList<RibbonControl> Children { get; init; } = Array.Empty<RibbonControl>();
 }
 
 /// <summary>

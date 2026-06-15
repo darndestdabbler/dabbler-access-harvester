@@ -706,6 +706,58 @@
   SQL feeds are not passed to the run-wide `Build`). Recorded here so the signature
   is fixed at the same time the feeds are wired.
 
+### DW-20 — Dynamic ribbon callbacks (`onLoad`, `get*`) are surfaced verbatim but not resolved to navigation entry points
+- **What:** the ribbon producer (016 S1) surfaces the `customUI@onLoad` callback
+  (typed slot `RibbonStructure.OnLoad`) and the dynamic control callback family
+  (`getItemCount`, `getItemLabel`, `getSelectedItemIndex`, `getItemID`,
+  `getVisible`, `getEnabled`, …) verbatim in each node's `Attributes` bag — but
+  only the **static `onAction`** is promoted to a typed slot and resolved (016 S2)
+  to a VBA navigation entry point. The dynamic callbacks are real ribbon→VBA edges
+  (a `getVisible` names a VBA function; `onLoad` names the ribbon-load handler) that
+  are **not** surfaced as entry points, so a consumer building the full ribbon→VBA
+  call graph must read them out of the `Attributes` bag itself.
+- **Origin:** 016 Session 1 — cross-provider model consensus (gpt-5-4 flagged the
+  non-`onAction` callbacks as real edges) + confirmed on the local NorthwindDevEdition
+  ribbon (`customUI@onLoad="ribbonLoaded"`, `ddMRU_GetItemCount`/`GetItemLabel`/…).
+- **Why deferred:** the 016 spec explicitly scopes the producer to the **static
+  `onAction`** callback ("do not interpret … dynamic `getVisible`/`getEnabled`
+  callbacks beyond recording the static `onAction`. If a consumer needs dynamic
+  callback evaluation, that is a `DW-<n>`, not scope creep"). The callbacks are
+  faithfully surfaced (in `Attributes`), so nothing is lost; only the convenience
+  of a typed entry-point projection is deferred.
+- **Trigger to pull back in:** a consumer needs the full ribbon→VBA callback graph
+  (not just `onAction`), OR a ribbon-callback-completeness set is scoped.
+- **Owning set candidate:** a future `ribbon-dynamic-callbacks` set (small, P0-only),
+  or fold into a navigation-completeness set.
+- **Mechanical backstop:** the local `NorthwindLocalInvariantTests` exercises a ribbon
+  whose dropDown carries `get*` callbacks; they appear in the node `Attributes` bag
+  (verbatim), not as entry points. No committed pin (HHC has no ribbon).
+
+### DW-21 — Ribbon structured view models `<tabs>`/`<contextualTabs>` only; other customUI sections are raw-only
+- **What:** `RibbonXmlParser` projects the ribbon's `<tabs>` and `<contextualTabs>`
+  into the structured `RibbonStructure` (the navigation surface). Other customUI
+  sections — `<qat>`, `<officeMenu>`, `<backstage>` — and root-level `<customUI>`
+  attributes beyond `onLoad` (e.g. `loadImage`) are **not** projected into the
+  structured tree. A `<backstage>`/`<qat>` control that carries an `onAction` would
+  therefore not surface as a ribbon navigation entry point in the structured view.
+- **Origin:** 016 Session 1 routed cross-provider verification (gpt-5-4, R1 — the
+  "structured tree drops authored content outside tabs" finding). Disposition:
+  documented deliberate boundary, not a code expansion.
+- **Why deferred:** the raw, byte-verbatim customUI XML is preserved losslessly in
+  `raw/Navigation/ribbon-xml.json`, so **nothing is dropped from the harvest** — the
+  omission is only from the navigation-focused *structured view*, and it is now
+  explicitly documented (in `RibbonXmlParser`), not silent. `<qat>`/`<officeMenu>`/
+  `<backstage>` are navigation-irrelevant Office chrome, absent from both the HHC and
+  NorthwindDevEdition corpora, and modeling them is untested scope creep against the
+  lean-by-default principle. The structured view faithfully models every *control
+  element* within the tabs it does project (no control is dropped there).
+- **Trigger to pull back in:** a real DB customises `<backstage>`/`<qat>` with
+  `onAction` callbacks a consumer needs as entry points, OR a ribbon-completeness set
+  is scoped (natural bundling with DW-20).
+- **Owning set candidate:** a future `ribbon-completeness` set (with DW-20).
+- **Mechanical backstop:** none committed (no corpus exercises these sections); the
+  `RibbonXmlParser` doc records the boundary and the raw-tier lossless fallback.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED

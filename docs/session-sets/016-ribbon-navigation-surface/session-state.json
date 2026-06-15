@@ -1,17 +1,30 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "016-ribbon-navigation-surface",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
-      "title": "RibbonStructure facet — parse USysRibbons into NavigationGraph.Ribbon",
-      "status": "not-started"
+      "title": "RibbonStructure facet \u2014 parse USysRibbons into NavigationGraph.Ribbon",
+      "status": "in-progress",
+      "startedAt": "2026-06-15T09:38:56.437528-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "medium"
+      },
+      "verificationVerdict": null
     },
     {
       "number": 2,
-      "title": "Ribbon entry points (onAction → callback) + closeout",
-      "status": "not-started"
+      "title": "Ribbon entry points (onAction \u2192 callback) + closeout",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     }
   ]
 }

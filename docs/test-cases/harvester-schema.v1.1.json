@@ -1048,42 +1048,70 @@
 
     "RibbonStructure": {
       "type": "object",
-      "required": ["Tabs"],
+      "description": "Custom ribbon parsed from USysRibbons customUI XML by RibbonXmlParser (016 / DW-13). A faithful recursive tree: custom (id) AND built-in (idMso) tabs/groups/controls are surfaced, nesting is preserved via RibbonControl.Children, and any attribute with no typed slot is preserved verbatim in source order on the node's Attributes bag (the parser does not interpret imageMso / sizes / dynamic get* callbacks beyond surfacing the static onAction). Id/Label are nullable because built-in idMso nodes carry neither. Design note: docs/session-sets/016-ribbon-navigation-surface/s1-ribbon-model-consensus.md.",
       "properties": {
-        "Tabs": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["Id", "Label", "Groups"],
-            "properties": {
-              "Id": { "type": "string" },
-              "Label": { "type": "string" },
-              "Groups": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "required": ["Id", "Label", "Controls"],
-                  "properties": {
-                    "Id": { "type": "string" },
-                    "Label": { "type": "string" },
-                    "Controls": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "required": ["Id", "Label"],
-                        "properties": {
-                          "Id": { "type": "string" },
-                          "Label": { "type": "string" },
-                          "OnAction": { "type": "string" }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
+        "Name": { "type": "string", "description": "The USysRibbons.RibbonName of the surfaced row (e.g. 'Main'). When a database defines more than one ribbon row, this names the one surfaced here; all rows are preserved in raw/Navigation/ribbon-xml.json." },
+        "OnLoad": { "type": "string", "description": "The customUI@onLoad ribbon-load callback, when present." },
+        "Attributes": { "type": "array", "items": { "$ref": "#/$defs/RibbonAttribute" }, "description": "Unslotted attributes of the <ribbon> element (e.g. startFromScratch), source order, verbatim." },
+        "Tabs": { "type": "array", "items": { "$ref": "#/$defs/RibbonTab" } },
+        "ContextualTabSets": { "type": "array", "items": { "$ref": "#/$defs/RibbonContextualTabSet" }, "description": "The <contextualTabs> section's tab sets, source order." }
+      }
+    },
+
+    "RibbonAttribute": {
+      "type": "object",
+      "required": ["Name", "Value"],
+      "properties": {
+        "Name": { "type": "string", "description": "Attribute local name, verbatim." },
+        "Value": { "type": "string", "description": "Attribute value, verbatim." }
+      }
+    },
+
+    "RibbonContextualTabSet": {
+      "type": "object",
+      "properties": {
+        "Id": { "type": "string", "description": "Custom id, or omitted for a built-in idMso tab set." },
+        "IdMso": { "type": "string", "description": "Built-in idMso, or omitted for a custom tab set." },
+        "Attributes": { "type": "array", "items": { "$ref": "#/$defs/RibbonAttribute" } },
+        "Tabs": { "type": "array", "items": { "$ref": "#/$defs/RibbonTab" } }
+      }
+    },
+
+    "RibbonTab": {
+      "type": "object",
+      "description": "A ribbon tab. Custom (Id) or built-in (IdMso); both Id and Label may be absent on built-in idMso tabs.",
+      "properties": {
+        "Id": { "type": "string" },
+        "IdMso": { "type": "string" },
+        "Label": { "type": "string" },
+        "Attributes": { "type": "array", "items": { "$ref": "#/$defs/RibbonAttribute" } },
+        "Groups": { "type": "array", "items": { "$ref": "#/$defs/RibbonGroup" } }
+      }
+    },
+
+    "RibbonGroup": {
+      "type": "object",
+      "properties": {
+        "Id": { "type": "string" },
+        "IdMso": { "type": "string" },
+        "Label": { "type": "string" },
+        "Attributes": { "type": "array", "items": { "$ref": "#/$defs/RibbonAttribute" } },
+        "Controls": { "type": "array", "items": { "$ref": "#/$defs/RibbonControl" } }
+      }
+    },
+
+    "RibbonControl": {
+      "type": "object",
+      "required": ["ControlType"],
+      "description": "One ribbon control. ControlType is the XML element local name (button, toggleButton, splitButton, menu, dropDown, gallery, comboBox, box, control, menuSeparator, ...). Nested children (a splitButton's button/menu, a box's contents) hang off Children. OnAction is the static VBA callback (a navigation entry point); null when absent (declarative or built-in idMso). Unslotted attributes (imageMso, size, boxStyle, screentip, title, dynamic get* callbacks) ride verbatim on Attributes.",
+      "properties": {
+        "ControlType": { "type": "string" },
+        "Id": { "type": "string" },
+        "IdMso": { "type": "string" },
+        "Label": { "type": "string" },
+        "OnAction": { "type": "string" },
+        "Attributes": { "type": "array", "items": { "$ref": "#/$defs/RibbonAttribute" } },
+        "Children": { "type": "array", "items": { "$ref": "#/$defs/RibbonControl" } }
       }
     },
 
