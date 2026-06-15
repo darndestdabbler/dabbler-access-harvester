@@ -43,7 +43,7 @@
     "QueryCount": 22,
     "ModuleCount": 4,
     "TableCount": 13,
-    "UnresolvedItemCount": 1414
+    "UnresolvedItemCount": 1416
   },
   "Forms": [
     {
@@ -125740,12 +125740,12 @@
         "Line": 57,
         "Column": 24
       },
-      "SurroundingText": "name",
+      "SurroundingText": "Fields",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "name"
+        "memberName": "Fields"
       }
     },
     {
@@ -125758,12 +125758,12 @@
         "Line": 57,
         "Column": 24
       },
-      "SurroundingText": "Fields",
+      "SurroundingText": "name",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Fields"
+        "memberName": "name"
       }
     },
     {
@@ -125813,12 +125813,12 @@
         "Line": 66,
         "Column": 41
       },
-      "SurroundingText": "Value",
+      "SurroundingText": "Fields",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Value"
+        "memberName": "Fields"
       }
     },
     {
@@ -125831,12 +125831,12 @@
         "Line": 66,
         "Column": 41
       },
-      "SurroundingText": "Fields",
+      "SurroundingText": "Value",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Fields"
+        "memberName": "Value"
       }
     },
     {
@@ -126127,12 +126127,12 @@
         "Line": 121,
         "Column": 20
       },
-      "SurroundingText": "Value",
+      "SurroundingText": "Fields",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Value"
+        "memberName": "Fields"
       }
     },
     {
@@ -126145,12 +126145,12 @@
         "Line": 121,
         "Column": 20
       },
-      "SurroundingText": "Fields",
+      "SurroundingText": "Value",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Fields"
+        "memberName": "Value"
       }
     },
     {
@@ -126862,12 +126862,12 @@
         "Line": 509,
         "Column": 8
       },
-      "SurroundingText": "CreateParameter",
+      "SurroundingText": "Append",
       "SuggestedNextSteps": [
         "Resolve the underlying target reference first; the member access cannot be bound until then."
       ],
       "AdditionalContext": {
-        "memberName": "CreateParameter"
+        "memberName": "Append"
       }
     },
     {
@@ -126880,12 +126880,12 @@
         "Line": 509,
         "Column": 8
       },
-      "SurroundingText": "Append",
+      "SurroundingText": "CreateParameter",
       "SuggestedNextSteps": [
         "Resolve the underlying target reference first; the member access cannot be bound until then."
       ],
       "AdditionalContext": {
-        "memberName": "Append"
+        "memberName": "CreateParameter"
       }
     },
     {
@@ -126954,12 +126954,12 @@
         "Line": 510,
         "Column": 8
       },
-      "SurroundingText": "CreateParameter",
+      "SurroundingText": "Append",
       "SuggestedNextSteps": [
         "Resolve the underlying target reference first; the member access cannot be bound until then."
       ],
       "AdditionalContext": {
-        "memberName": "CreateParameter"
+        "memberName": "Append"
       }
     },
     {
@@ -126972,12 +126972,12 @@
         "Line": 510,
         "Column": 8
       },
-      "SurroundingText": "Append",
+      "SurroundingText": "CreateParameter",
       "SuggestedNextSteps": [
         "Resolve the underlying target reference first; the member access cannot be bound until then."
       ],
       "AdditionalContext": {
-        "memberName": "Append"
+        "memberName": "CreateParameter"
       }
     },
     {
@@ -127138,12 +127138,12 @@
         "Line": 512,
         "Column": 8
       },
-      "SurroundingText": "CreateParameter",
+      "SurroundingText": "Append",
       "SuggestedNextSteps": [
         "Resolve the underlying target reference first; the member access cannot be bound until then."
       ],
       "AdditionalContext": {
-        "memberName": "CreateParameter"
+        "memberName": "Append"
       }
     },
     {
@@ -127156,12 +127156,12 @@
         "Line": 512,
         "Column": 8
       },
-      "SurroundingText": "Append",
+      "SurroundingText": "CreateParameter",
       "SuggestedNextSteps": [
         "Resolve the underlying target reference first; the member access cannot be bound until then."
       ],
       "AdditionalContext": {
-        "memberName": "Append"
+        "memberName": "CreateParameter"
       }
     },
     {
@@ -127267,12 +127267,12 @@
         "Line": 527,
         "Column": 8
       },
-      "SurroundingText": "Value",
+      "SurroundingText": "Parameters",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Value"
+        "memberName": "Parameters"
       }
     },
     {
@@ -127285,12 +127285,12 @@
         "Line": 527,
         "Column": 8
       },
-      "SurroundingText": "Parameters",
+      "SurroundingText": "Value",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Parameters"
+        "memberName": "Value"
       }
     },
     {
@@ -127339,12 +127339,12 @@
         "Line": 529,
         "Column": 8
       },
-      "SurroundingText": "Value",
+      "SurroundingText": "Parameters",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Value"
+        "memberName": "Parameters"
       }
     },
     {
@@ -127357,24 +127357,6 @@
         "Line": 529,
         "Column": 8
       },
-      "SurroundingText": "Parameters",
-      "SuggestedNextSteps": [
-        "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
-      ],
-      "AdditionalContext": {
-        "memberName": "Parameters"
-      }
-    },
-    {
-      "Source": "FunctionClassification",
-      "Reason": "default-member-not-yet-resolved",
-      "ConstructDescription": "Member access whose resolution depends on default-member or type-inference passes that have not yet run.",
-      "Location": {
-        "ModuleName": "basDataOperations",
-        "ProcedureName": "CopyServiceRateLimits",
-        "Line": 530,
-        "Column": 8
-      },
       "SurroundingText": "Value",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
@@ -127399,6 +127381,24 @@
       ],
       "AdditionalContext": {
         "memberName": "Parameters"
+      }
+    },
+    {
+      "Source": "FunctionClassification",
+      "Reason": "default-member-not-yet-resolved",
+      "ConstructDescription": "Member access whose resolution depends on default-member or type-inference passes that have not yet run.",
+      "Location": {
+        "ModuleName": "basDataOperations",
+        "ProcedureName": "CopyServiceRateLimits",
+        "Line": 530,
+        "Column": 8
+      },
+      "SurroundingText": "Value",
+      "SuggestedNextSteps": [
+        "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
+      ],
+      "AdditionalContext": {
+        "memberName": "Value"
       }
     },
     {
@@ -128282,12 +128282,12 @@
         "Line": 266,
         "Column": 40
       },
-      "SurroundingText": "name",
+      "SurroundingText": "Fields",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "name"
+        "memberName": "Fields"
       }
     },
     {
@@ -128300,12 +128300,12 @@
         "Line": 266,
         "Column": 40
       },
-      "SurroundingText": "Fields",
+      "SurroundingText": "name",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Fields"
+        "memberName": "name"
       }
     },
     {
@@ -128410,12 +128410,12 @@
         "Line": 281,
         "Column": 52
       },
-      "SurroundingText": "Value",
+      "SurroundingText": "Fields",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Value"
+        "memberName": "Fields"
       }
     },
     {
@@ -128428,12 +128428,12 @@
         "Line": 281,
         "Column": 52
       },
-      "SurroundingText": "Fields",
+      "SurroundingText": "Value",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Fields"
+        "memberName": "Value"
       }
     },
     {
@@ -130645,12 +130645,12 @@
         "Line": 209,
         "Column": 12
       },
-      "SurroundingText": "Value",
+      "SurroundingText": "Fields",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Value"
+        "memberName": "Fields"
       }
     },
     {
@@ -130663,12 +130663,12 @@
         "Line": 209,
         "Column": 12
       },
-      "SurroundingText": "Fields",
+      "SurroundingText": "Value",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Fields"
+        "memberName": "Value"
       }
     },
     {
@@ -130753,12 +130753,12 @@
         "Line": 218,
         "Column": 8
       },
-      "SurroundingText": "Value",
+      "SurroundingText": "Fields",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Value"
+        "memberName": "Fields"
       }
     },
     {
@@ -130771,12 +130771,12 @@
         "Line": 218,
         "Column": 8
       },
-      "SurroundingText": "Fields",
+      "SurroundingText": "Value",
       "SuggestedNextSteps": [
         "Re-run after the default-member resolution pass has executed; if still unresolved, supply a type annotation for the receiver."
       ],
       "AdditionalContext": {
-        "memberName": "Fields"
+        "memberName": "Value"
       }
     },
     {
@@ -150157,6 +150157,42 @@
       ],
       "AdditionalContext": {
         "memberName": "Section"
+      }
+    },
+    {
+      "Source": "ModuleLevelReference",
+      "Reason": "not-in-scope",
+      "ConstructDescription": "Bare identifier reference whose declaration was not in scope.",
+      "Location": {
+        "ModuleName": "basDataOperations",
+        "Line": 4,
+        "Column": 36
+      },
+      "SurroundingText": "vbObjectError",
+      "SuggestedNextSteps": [
+        "Confirm whether the identifier is declared in another module\u0027s Public scope.",
+        "If the identifier is intentional dead code, mark it as such."
+      ],
+      "AdditionalContext": {
+        "memberName": "vbObjectError"
+      }
+    },
+    {
+      "Source": "ModuleLevelReference",
+      "Reason": "not-in-scope",
+      "ConstructDescription": "Bare identifier reference whose declaration was not in scope.",
+      "Location": {
+        "ModuleName": "basDataOperations",
+        "Line": 5,
+        "Column": 36
+      },
+      "SurroundingText": "vbObjectError",
+      "SuggestedNextSteps": [
+        "Confirm whether the identifier is declared in another module\u0027s Public scope.",
+        "If the identifier is intentional dead code, mark it as such."
+      ],
+      "AdditionalContext": {
+        "memberName": "vbObjectError"
       }
     }
   ],

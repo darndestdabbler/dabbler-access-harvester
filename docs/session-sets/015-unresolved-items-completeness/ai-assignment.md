@@ -60,3 +60,48 @@ orchestrator's execution.
   authoring the next set / consumer-driven-only handoff. Apply the "bump the
   sub-document version, not the envelope, when the host `$def` is
   `additionalProperties`-tolerant" lesson before touching the schema.
+
+## Session 2 — actuals
+
+- **Orchestrator:** Claude Code (Opus 4.8 @ high), as registered.
+- **Scope:** DW-11 **Layer B** — module-level unresolved references get a manifest home.
+- **Schema decision (recorded in `s2-design-note.md`, routed critique
+  `s2-schema-decision-critique.md` opus SOUND-WITH-CAVEATS):** the manifest home is the
+  run-wide `unresolved-items.json` index; a module-level ref surfaces under a NEW
+  `UnresolvedSource.ModuleLevelReference` with `ProcedureName=null`. Smallest correct
+  change: the `UnresolvedItem` `$def` is `additionalProperties`-tolerant and we add no
+  property — only **widen the `Source` enum** in the living v1.1 schema. NO envelope bump;
+  NO `ParserOutput` change. The enum serialises as a string (`JsonStringEnumConverter`),
+  so appending is safe.
+- **Delivered:** new `ParserOutputProjector.EnumerateModuleLevelReferences` (the complement
+  of `GroupReferencesByProcedure` — references with no enclosing `ProcedureScope`), new
+  `UnresolvedItemAggregator.FromModuleLevelReferences` feed + `ModuleLevelReference` record,
+  the enum value, the schema widening, and Pipeline.cs wiring. **No double-count**:
+  module-level refs are disjoint from the procedure-scoped feeds by construction.
+- **Golden — NOT neutral (DW-11's "zero cases" was wrong):** the gate caught 2 real HHC
+  module-level refs (`vbObjectError` in `basDataOperations` Const decls). Coordinated HHC
+  regen; **proven multiset delta: exactly +2 `ModuleLevelReference` items, 0 removed**;
+  `UnresolvedItemCount` 1414→1416. Every other diff line is reordering from a determinism
+  fix (below). kb/ir trees byte-unchanged.
+- **Determinism hardening (forced by the regen + verification):** `SortDeterministically`'s
+  key was not a total order (same-key items differing only by member name reshuffled under
+  the non-stable introsort when the +2 items perturbed it). Fixed with a precomputed,
+  **injective `CanonicalResidual`** (full-item JSON serialization) final tiebreaker;
+  `SortDeterministically` exposed `internal` and pinned by a `[Theory]` over every
+  folded-collision class.
+- **Validation:** 3 Layer B completeness pins + 1 determinism `[Fact]` + 1 `[Theory]`
+  (6 cases); full `AccessHarvester.Pipeline.Tests` **922/922**; golden gate + schema
+  conformance **7/7** integration byte-identical; full solution builds.
+- **Verification:** routed cross-provider gpt-5-4 — **R1 ISSUES** (Major: comparer not a
+  total order) → fixed → **R2 ISSUES** (Major: residual not provably injective + Minor) →
+  fixed (injective serialization + expanded pins) → **R3 ISSUES** (Minor: pin breadth) →
+  fixed → **R4 VERIFIED**. Routed cost ≈ $0.40 (R1 $0.187 + R2 $0.099 + R3 $0.095 +
+  R4 $0.017) + schema critique $0.21 + planning $0.003. In-IDE devil's-advocate prompt
+  authored (`s2-devils-advocate-prompt.md`).
+- **Forward:** DW-11 discharged; new **DW-17** (per-module `ParserOutput` asymmetry);
+  next set = **consumer-driven-only handoff** (routed gemini-pro;
+  `next-session-set-recommendation.md`).
+- **Calibration note:** Opus @ high was the right pick — the session's value came from the
+  golden-regen investigation (catching the 2 real cases + the latent non-total sort) and
+  the multi-round adversarial determinism hardening, exactly the analytical-explanatory
+  work the S1 recommendation anticipated.

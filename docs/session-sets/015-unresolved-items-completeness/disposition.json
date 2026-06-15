@@ -1,36 +1,43 @@
 {
-  "status": "in-progress",
-  "session": 1,
-  "summary": "Set 015 Session 1 (DW-11 Layer A) complete — set in-progress (Session 2 = Layer B remains). Procedure-HEADER unresolved references (an Optional parameter's default expression) now reach unresolved-items.json. Root cause: the index's VBA half is built from the procedure-BODY-only FunctionClassification.UnresolvedReferences feed (FunctionClassificationBuilder walks procedureAst.Body), so a header ref was dropped even though ParserOutputProjector groups it into Body.References. Fix — dedup-additive feed: the aggregator additionally consumes the full procedure-scoped resolver reference set (body + header) via the new ParserOutputProjector.EnumerateProcedureScopedReferences (the SAME set that builds Body.References, so the index is a structural superset by construction), filtered to (with-flattened) Unresolved, and suppresses the body overlap with a NON-MUTATING dedup on the key (module, procedure, line, column, reason, memberName). Net-new items are exactly the header refs, tagged Source=FunctionClassification with the body-ref shape. PROVEN GOLDEN-NEUTRAL byte-level on HomeHealthCare: CanonicalGoldenRegressionTests reproduces unresolved-items.json + manifest + kb + ir + reports-baseline byte-identical (no regen; HHC has zero header/module-level unresolved cases). VALIDATION: 5 hermetic pins in UnresolvedItemsCompletenessTests; full Pipeline.Tests 912/912; full solution builds.",
-  "verification_method": "routed cross-provider session-verification (gpt-5-4): R1 ISSUES_FOUND (1 Major: intra-feed dedup over-suppressed distinct chained-header refs, demonstrated via a red pin) -> fixed (non-mutating Contains + member-name in the dedup key) -> R2 VERIFIED",
+  "status": "completed",
+  "session": 2,
+  "summary": "Set 015 COMPLETE (Session 2 = DW-11 Layer B). Module-level unresolved references (a Const/Dim initializer, an Implements <unresolved>, a module-scope As New <unresolved>) — those on ResolvedModule.References with NO enclosing ProcedureScope — now reach unresolved-items.json under the new UnresolvedSource.ModuleLevelReference with ProcedureName=null. Before S2 they had NO manifest signal at all (dropped from both ParserOutput.Body.References and the index because they have no procedure Body to surface in). Schema decision (recorded, routed-critiqued): the manifest home is the run-wide index; the only schema edit is widening the Source enum in the LIVING harvester-schema.v1.1.json (the UnresolvedItem $def is additionalProperties-tolerant and no property is added; the enum serialises as a string), so NO envelope bump and NO ParserOutput change. Implementation: new ParserOutputProjector.EnumerateModuleLevelReferences (the complement of GroupReferencesByProcedure), new UnresolvedItemAggregator.FromModuleLevelReferences feed + ModuleLevelReference record, the enum value, and Pipeline.cs wiring. NO double-count: a module-level ref has no enclosing ProcedureScope, so it is disjoint from both procedure-scoped feeds by construction. GOLDEN-AFFECTING (DW-11's 'zero cases' assumption was WRONG): the gate caught 2 real HHC module-level refs — vbObjectError in basDataOperations Const decls — so HHC was regenerated; proven multiset delta is EXACTLY +2 ModuleLevelReference items, 0 removed, UnresolvedItemCount 1414->1416. Every other golden diff line is reordering from a determinism hardening forced by the regen + verification: SortDeterministically's key was not a total order (same-key items differing only by member name reshuffled under the non-stable introsort once the +2 items perturbed it), fixed with a precomputed INJECTIVE CanonicalResidual (full-item JSON serialization) final tiebreaker. VALIDATION: 3 Layer B completeness pins + a determinism [Fact] + a [Theory] over every folded-collision class; full Pipeline.Tests 922/922; golden gate + schema conformance 7/7 integration byte-identical; full solution builds. DW-11 DISCHARGED (Closed, entry retained). New DW-17 (per-module ParserOutput completeness asymmetry — module-level refs are index-only). Next set = recorded consumer-driven-only handoff (routed gemini-pro).",
+  "verification_method": "routed cross-provider session-verification (gpt-5-4): R1 ISSUES_FOUND (1 Major: SortDeterministically not a total order) -> fixed -> R2 ISSUES_FOUND (1 Major: residual not provably injective + 1 Minor) -> fixed with injective full-serialization residual + expanded pins -> R3 ISSUES_FOUND (1 Minor: pin breadth) -> fixed -> R4 VERIFIED. Pre-implementation architecture critique (opus) SOUND-WITH-CAVEATS; in-IDE devil's-advocate prompt authored for the human GPT+Gemini pass.",
   "verification_verdict": "VERIFIED",
-  "verification_rounds": 2,
+  "verification_rounds": 4,
+  "verification_message_ids": [],
   "files_changed": [
     "AccessHarvester.Core/Pipeline.cs",
+    "AccessHarvester.Pipeline/Enrichment/UnresolvedItem.cs",
     "AccessHarvester.Pipeline/Enrichment/UnresolvedItemAggregator.cs",
     "AccessHarvester.Pipeline/Manifest/ParserOutputProjector.cs",
     "tests/AccessHarvester.Pipeline.Tests/UnresolvedItemsCompletenessTests.cs",
-    "docs/session-sets/015-unresolved-items-completeness/s1-design-note.md",
+    "tests/AccessHarvester.Pipeline.Tests/UnresolvedItemAggregatorTests.cs",
+    "docs/test-cases/harvester-schema.v1.1.json",
+    "samples/GoldenOutput/HomeHealthCare/manifest.json",
+    "samples/GoldenOutput/HomeHealthCare/unresolved-items.json",
+    "docs/planning/deferred-work.md",
+    "docs/session-sets/015-unresolved-items-completeness/s2-design-note.md",
+    "docs/session-sets/015-unresolved-items-completeness/s2-schema-decision-critique.md",
+    "docs/session-sets/015-unresolved-items-completeness/s2-verification.md",
+    "docs/session-sets/015-unresolved-items-completeness/s2-verification-r2.md",
+    "docs/session-sets/015-unresolved-items-completeness/s2-verification-r3.md",
+    "docs/session-sets/015-unresolved-items-completeness/s2-verification-r4.md",
+    "docs/session-sets/015-unresolved-items-completeness/s2-issues.json",
+    "docs/session-sets/015-unresolved-items-completeness/s2-devils-advocate-prompt.md",
     "docs/session-sets/015-unresolved-items-completeness/ai-assignment.md",
-    "docs/session-sets/015-unresolved-items-completeness/ai-assignment-analysis-s1.md",
-    "docs/session-sets/015-unresolved-items-completeness/s1-verification.md",
-    "docs/session-sets/015-unresolved-items-completeness/s1-verification-r2.md",
-    "docs/session-sets/015-unresolved-items-completeness/s1-issues.json",
-    "docs/session-sets/015-unresolved-items-completeness/s1-devils-advocate-prompt.md",
-    "docs/session-sets/015-unresolved-items-completeness/activity-log.json",
+    "docs/session-sets/015-unresolved-items-completeness/next-session-set-recommendation.md",
     "docs/session-sets/015-unresolved-items-completeness/disposition.json",
-    "tools/vahs015_s1_verify.py",
-    "tools/vahs015_s1_verify_r2.py",
-    "tools/vahs015_s1_closeout.py"
+    "tools/vahs015_s2_schema_decision.py",
+    "tools/vahs015_s2_verify.py",
+    "tools/vahs015_s2_verify_r2.py",
+    "tools/vahs015_s2_verify_r3.py",
+    "tools/vahs015_s2_verify_r4.py",
+    "tools/vahs015_s2_next_set.py"
   ],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-8",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Routed gemini-pro recommends Opus @ high, multi-pass: Layer B's coordinated golden regen for the module-level-unresolved schema change needs Opus's analytical-explanatory strength to justify every unresolved-items.json delta, and the session interweaves schema design, implementation, no-double-count verification, cross-session-evidence embedding, and forward-planning docs (next set + DW-11 discharge)."
-    }
-  }
+  "next_orchestrator": null,
+  "blockers": [],
+  "deferred_issues": [
+    "DW-17 (NEW): module-level unresolved refs reach the run-wide index but NOT per-module ParserOutput.Body.References — a completeness asymmetry deferred by design (a ParserOutput module-level slot is a structural envelope change with broad golden churn, for no completeness the index doesn't already provide). No active consumer trigger."
+  ]
 }

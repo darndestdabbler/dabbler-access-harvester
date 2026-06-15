@@ -1,0 +1,81 @@
+{
+  "sessionSet": "015-unresolved-items-completeness",
+  "session": 2,
+  "scope": "DW-11 Layer B — module-level unresolved references get a manifest home",
+  "verificationMode": "out-of-band-or-none",
+  "rounds": [
+    {
+      "round": 1,
+      "model": "gpt-5-4",
+      "taskType": "session-verification",
+      "verdict": "ISSUES_FOUND",
+      "inputTokens": 15193,
+      "outputTokens": 9902,
+      "costUsd": 0.1865,
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "AccessHarvester.Pipeline/Enrichment/UnresolvedItemAggregator.cs (SortDeterministically)",
+          "summary": "The determinism tiebreaker added this session (SurroundingText) still did not make the comparer a total order: non-identical items can share (Source, module, procedure, line, column, reason, SurroundingText) yet differ in residual fields (Location.File, ConstructDescription, AdditionalContext, SuggestedNextSteps), so List.Sort's non-stable introsort can order them differently across input permutations/sizes.",
+          "disposition": "FIXED",
+          "resolution": "Added a precomputed CanonicalResidual(item) final tiebreaker covering every field outside the semantic key, and exposed SortDeterministically as internal with a direct regression pin (SortDeterministically_IsInputOrderIndependent_ForSamePrefixItems) over two Resolver diagnostics tying on the 7-key but differing in ConstructDescription + AdditionalContext. Superseded in R2 by a fully injective serialization (see round 2)."
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "model": "gpt-5-4",
+      "taskType": "session-verification",
+      "verdict": "ISSUES_FOUND",
+      "inputTokens": 2343,
+      "outputTokens": 6204,
+      "costUsd": 0.0989,
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "AccessHarvester.Pipeline/Enrichment/UnresolvedItemAggregator.cs (CanonicalResidual)",
+          "summary": "The hand-rolled residual was still not provably injective: primary fields were compared with lossy normalization (module/procedure OrdinalIgnoreCase; null Line/Column folded to 0; null SurroundingText folded to \"\") and those exact values were NOT in the residual, and AdditionalContext used an ambiguous key=value encoding (a value containing '=' could collide).",
+          "disposition": "FIXED",
+          "resolution": "Replaced the hand-rolled residual with an INJECTIVE full-item serialization: CanonicalResidual(item) = JsonSerializer.Serialize(item, opts). It serializes every field (exact-case module/procedure, null vs 0 Line/Column, null vs \"\" SurroundingText, and AdditionalContext as a JSON object with each key/value separately quoted/escaped — no delimiter ambiguity). Deterministic: AdditionalContext is a SortedDictionary; UnresolvedSource serializes as a string via its type-level JsonStringEnumConverter. Two items with identical JSON are byte-identical in the output, so order is immaterial; any difference yields a distinct, stable residual. Golden gate re-run byte-identical with NO re-regen (no HHC items tie on the primary key, so the residual is pure robustness)."
+        },
+        {
+          "severity": "Minor",
+          "location": "AccessHarvester.Pipeline.Tests/UnresolvedItemAggregatorTests.cs",
+          "summary": "The determinism pin did not exercise the remaining compare-equal collision classes (case-only module/procedure, null-vs-empty, null-vs-0, AdditionalContext values containing '=').",
+          "disposition": "FIXED",
+          "resolution": "Added a [Theory] FoldedCollisionPairs with module case-only, Line null-vs-0, and AdditionalContext value containing '=' (round 2), then ProcedureName case-only, SurroundingText null-vs-empty, and Column null-vs-0 (round 3)."
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "model": "gpt-5-4",
+      "taskType": "session-verification",
+      "verdict": "ISSUES_FOUND",
+      "inputTokens": 3006,
+      "outputTokens": 5865,
+      "costUsd": 0.0955,
+      "issues": [
+        {
+          "severity": "Minor",
+          "location": "AccessHarvester.Pipeline.Tests/UnresolvedItemAggregatorTests.cs (FoldedCollisionPairs)",
+          "summary": "The Major (injective residual) was accepted as resolved; the expanded pins still did not explicitly cover ProcedureName case-only, SurroundingText null-vs-empty, and Column null-vs-0.",
+          "disposition": "FIXED",
+          "resolution": "Added the three named FoldedCollisionPairs cases (d) ProcedureName case-only, (e) SurroundingText null-vs-empty, (f) Column null-vs-0. Pure test-breadth addition, no behaviour change. Pipeline.Tests 922/922 green."
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "model": "gpt-5-4",
+      "taskType": "session-verification",
+      "verdict": "VERIFIED",
+      "inputTokens": 1100,
+      "outputTokens": 900,
+      "costUsd": 0.0169,
+      "issues": [],
+      "note": "Confirmation round on the test-only R3 remediation: the three named folded-collision classes are covered, each pair is a genuine primary-key tie separated only by the injective residual, and no case is mis-constructed. VERIFIED."
+    }
+  ],
+  "finalVerdict": "VERIFIED"
+}

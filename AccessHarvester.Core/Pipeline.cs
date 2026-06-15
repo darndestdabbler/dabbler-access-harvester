@@ -671,10 +671,28 @@ public sealed class Pipeline
                     Reference: scoped.Reference)))
             .ToList();
 
+        // DW-11 Layer B (015 S2): ALSO feed the MODULE-LEVEL resolver references
+        // (a Const/Dim initializer, an `Implements <unresolved>`, etc.) — those
+        // on ResolvedModule.References with no enclosing ProcedureScope. The
+        // projector drops them from Body.References (no procedure Body to surface
+        // in), so before S2 they had no manifest signal at all. They reach
+        // unresolved-items.json here under UnresolvedSource.ModuleLevelReference
+        // at module scope (ProcedureName=null). A module-level reference has no
+        // enclosing procedure, so it is disjoint from the procedure-scoped feeds
+        // above — no double-count.
+        var moduleLevelReferences = resolvedModules
+            .SelectMany(module => ParserOutputProjector
+                .EnumerateModuleLevelReferences(module)
+                .Select(reference => new ModuleLevelReference(
+                    ModuleName: module.ModuleScope.ModuleName,
+                    Reference: reference)))
+            .ToList();
+
         var unresolvedItems = UnresolvedItemAggregator.Build(
             navigationGraph: navigationGraph,
             functionClassifications: classifications,
-            procedureScopedReferences: procedureScopedReferences);
+            procedureScopedReferences: procedureScopedReferences,
+            moduleLevelReferences: moduleLevelReferences);
 
         // v1.1 (Session 2 of harvester-manifest-index-and-batch-readiness):
         // build the navigation index AFTER the per-object ir/ files have

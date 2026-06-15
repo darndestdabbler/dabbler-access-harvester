@@ -630,6 +630,135 @@ public sealed class UnresolvedItemAggregatorTests
         Assert.Equal(new[] { "action", "sourceProcedureKind" }, keys);
     }
 
+    // ── Determinism: SortDeterministically is a TOTAL order ─────────────
+
+    // gpt-5-4 R1 (015 S2): adding SurroundingText as the only extra tiebreaker
+    // left the comparer non-total — two items can share
+    // (Source, module, procedure, line, column, reason, SurroundingText) yet
+    // differ in residual fields (File, ConstructDescription, AdditionalContext,
+    // SuggestedNextSteps). With a non-total comparer, List.Sort's non-stable
+    // introsort can order such items differently depending on input order/size.
+    // The CanonicalResidual final tiebreaker closes this: the output must be a
+    // pure function of the input SET, identical across input permutations.
+    [Fact]
+    public void SortDeterministically_IsInputOrderIndependent_ForSamePrefixItems()
+    {
+        // Two Resolver diagnostics at the SAME location and code, BOTH with
+        // SurroundingText=null — they tie on every comparison component EXCEPT
+        // the residual (different AdditionalContext "message" + ConstructDescription).
+        UnresolvedItem A() => new()
+        {
+            Source = UnresolvedSource.Resolver,
+            Reason = "diag-code",
+            ConstructDescription = "Alpha description",
+            Location = new UnresolvedLocation { ModuleName = "modZ", Line = 10, Column = 4 },
+            SurroundingText = null,
+            SuggestedNextSteps = new[] { "step-A" },
+            AdditionalContext = new SortedDictionary<string, string> { ["message"] = "alpha" },
+        };
+        UnresolvedItem B() => new()
+        {
+            Source = UnresolvedSource.Resolver,
+            Reason = "diag-code",
+            ConstructDescription = "Bravo description",
+            Location = new UnresolvedLocation { ModuleName = "modZ", Line = 10, Column = 4 },
+            SurroundingText = null,
+            SuggestedNextSteps = new[] { "step-B" },
+            AdditionalContext = new SortedDictionary<string, string> { ["message"] = "bravo" },
+        };
+
+        var order1 = UnresolvedItemAggregator.SortDeterministically(new List<UnresolvedItem> { A(), B() });
+        var order2 = UnresolvedItemAggregator.SortDeterministically(new List<UnresolvedItem> { B(), A() });
+
+        // Both permutations must yield the SAME order (residual breaks the tie:
+        // "Alpha description" < "Bravo description" Ordinal), proving totality.
+        Assert.Equal(
+            order1.Select(i => i.ConstructDescription),
+            order2.Select(i => i.ConstructDescription));
+        Assert.Equal("Alpha description", order1[0].ConstructDescription);
+        Assert.Equal("Bravo description", order1[1].ConstructDescription);
+    }
+
+    // gpt-5-4 R2 (015 S2): the primary comparisons are deliberately lossy
+    // (module/procedure OrdinalIgnoreCase; null Line/SurroundingText folded to
+    // 0/""), so the injective CanonicalResidual is what guarantees totality for
+    // items that differ ONLY in a folded distinction. Each pair below ties on
+    // every primary comparison and is separated only by the residual.
+    [Theory]
+    [MemberData(nameof(FoldedCollisionPairs))]
+    public void SortDeterministically_IsInputOrderIndependent_ForFoldedCollisions(
+        UnresolvedItem x, UnresolvedItem y)
+    {
+        var o1 = UnresolvedItemAggregator.SortDeterministically(new List<UnresolvedItem> { x, y });
+        var o2 = UnresolvedItemAggregator.SortDeterministically(new List<UnresolvedItem> { y, x });
+
+        // Same order regardless of input permutation (totality), and both
+        // distinct items survive (the residual did not collapse them).
+        Assert.Equal(o1, o2);
+        Assert.Equal(2, o1.Count);
+    }
+
+    public static IEnumerable<object[]> FoldedCollisionPairs()
+    {
+        // (a) Module name differs ONLY by case — equal under OrdinalIgnoreCase
+        //     primary compare; the residual's exact-case JSON distinguishes.
+        yield return new object[]
+        {
+            ResolverItem(module: "modX", desc: "d", message: "m"),
+            ResolverItem(module: "MODX", desc: "d", message: "m"),
+        };
+        // (b) Line null vs 0 — folded to 0 in the primary compare; residual JSON
+        //     emits null vs 0 distinctly.
+        yield return new object[]
+        {
+            ResolverItem(module: "modX", desc: "d", message: "m", line: null),
+            ResolverItem(module: "modX", desc: "d", message: "m", line: 0),
+        };
+        // (c) AdditionalContext value containing '=' — proves there is no
+        //     key=value delimiter ambiguity (JSON quotes each separately).
+        yield return new object[]
+        {
+            ResolverItem(module: "modX", desc: "d", message: "a=b"),
+            ResolverItem(module: "modX", desc: "d", message: "ab"),
+        };
+        // (d) ProcedureName differs ONLY by case (gpt-5-4 R3) — equal under the
+        //     OrdinalIgnoreCase primary compare; residual exact-case JSON splits.
+        yield return new object[]
+        {
+            ResolverItem(module: "modX", desc: "d", message: "m", procedure: "Proc"),
+            ResolverItem(module: "modX", desc: "d", message: "m", procedure: "PROC"),
+        };
+        // (e) SurroundingText null vs empty string (gpt-5-4 R3) — folded to ""
+        //     in the primary compare; residual JSON emits null vs "".
+        yield return new object[]
+        {
+            ResolverItem(module: "modX", desc: "d", message: "m", surrounding: null),
+            ResolverItem(module: "modX", desc: "d", message: "m", surrounding: ""),
+        };
+        // (f) Column null vs 0 (gpt-5-4 R3) — folded to 0 in the primary compare.
+        yield return new object[]
+        {
+            ResolverItem(module: "modX", desc: "d", message: "m", column: null),
+            ResolverItem(module: "modX", desc: "d", message: "m", column: 0),
+        };
+    }
+
+    private static UnresolvedItem ResolverItem(
+        string module, string desc, string message,
+        int? line = 10, int? column = 4, string? procedure = null,
+        string? surrounding = null)
+        => new()
+        {
+            Source = UnresolvedSource.Resolver,
+            Reason = "diag-code",
+            ConstructDescription = desc,
+            Location = new UnresolvedLocation
+            { ModuleName = module, ProcedureName = procedure, Line = line, Column = column },
+            SurroundingText = surrounding,
+            SuggestedNextSteps = new[] { "step" },
+            AdditionalContext = new SortedDictionary<string, string> { ["message"] = message },
+        };
+
     // ── Helpers ────────────────────────────────────────────────────────
 
     private static FunctionClassification SimpleFunctionClassification(

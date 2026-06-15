@@ -325,7 +325,7 @@
   committed HHC golden's `NavigationGraph.ChainEdges` now records the derived
   chains. Before S2 the golden had only `Edges` and no chain records.
 
-### DW-11 — `unresolved-items.json` is procedure-body-scoped and undercounts header / module-level unresolved references
+### DW-11 — `unresolved-items.json` is procedure-body-scoped and undercounts header / module-level unresolved references — **CLOSED 2026-06-15 (015 S1 Layer A + S2 Layer B)**
 - **What:** the unresolved surfaces undercount in **two distinct layers**, both
   surfaced by the 011 S3 devil's-advocate review (R1 + R2):
   - **Layer A — aggregator drops procedure-header refs (index-only gap).** The VBA
@@ -582,6 +582,41 @@
   the exact-epoch / name-survives / real-date-survives siblings) pin the shipped
   behaviour; the absence of a sampler-side skip is recorded here.
 
+### DW-17 — Module-level unresolved refs reach the index but NOT per-module `ParserOutput` (completeness asymmetry)
+- **What:** after DW-11 Layer B (015 S2), a **module-level** unresolved
+  reference (a `Const`/`Dim` initializer, an `Implements <unresolved>`, etc.)
+  is surfaced in the run-wide `unresolved-items.json` index under
+  `UnresolvedSource.ModuleLevelReference` (`ProcedureName=null`) — but it is
+  **still absent from the per-module `ParserOutput.Body.References`** inline
+  surface, because a module-level reference has no procedure `Body` to live in
+  and `ParserOutput.Items` has no module-level item type. So the two
+  granularities are **asymmetric**: a **procedure-scoped** unresolved ref has
+  TWO signals (inline `ParserOutput.Body.References` + the index), while a
+  **module-level** unresolved ref has ONE (the index only). A consumer
+  processing a single module's `ParserOutput` in isolation sees no signal for
+  its module-level unresolved refs and must join against the run-wide index.
+- **Origin:** 015 Session 2 routed pre-implementation architecture critique
+  (opus, caveat #2) — flagged the asymmetry as a real known limitation that
+  should be explicit rather than buried in a rejected-alternative. DW-11 asks
+  for "a manifest signal," which the index satisfies; per-module granularity
+  was out of DW-11's scope.
+- **Why deferred:** adding a module-level slot to `ParserOutput` is a
+  **structural envelope change** (a new top-level references array on every
+  `ParserOutput`, or a new module-level item type) — a full envelope version
+  bump with broad golden churn — for no completeness the index does not
+  already provide. The index is the complete run-wide signal DW-11 required;
+  the inline per-module surface is a convenience a consumer can synthesise by
+  joining on `ModuleName`.
+- **Trigger to pull back in:** a consumer needs per-module completeness
+  without joining against the run-wide index, OR a `ParserOutput` envelope
+  bump is being made for another reason and the module-level slot can ride it.
+- **Owning set candidate:** a future `parser-output-module-level-surface` set,
+  or fold into the next set that bumps the `ParserOutput`/manifest envelope.
+- **Mechanical backstop:** none needed (no incorrect output today — the index
+  is complete); the asymmetry is documented here and in
+  `015/s2-design-note.md`. The interpretation guide's unresolved-items section
+  should note module-level refs appear in the index only.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED
@@ -595,3 +630,12 @@
   2026-06-15** by the Set 013 whole-set devil's-advocate follow-up (both providers
   CHALLENGED; normalised onto the CLI-wide exit-code contract with human
   approval). Full entry retained above with its CLOSED banner.
+- **DW-11** — `unresolved-items.json` undercounts header / module-level unresolved
+  references — **CLOSED 2026-06-15** by `015-unresolved-items-completeness`: Session 1
+  (Layer A) surfaced procedure-HEADER refs via a dedup-additive procedure-scoped feed;
+  Session 2 (Layer B) gave MODULE-LEVEL refs a manifest home via
+  `EnumerateModuleLevelReferences` + the new `UnresolvedSource.ModuleLevelReference`
+  (which surfaced 2 real HHC cases — `vbObjectError` in `basDataOperations` Const
+  decls — disproving the original "zero cases" assumption). Full entry retained above
+  with its CLOSED banner. Per-module-`ParserOutput` completeness asymmetry carved out
+  to **DW-17**.

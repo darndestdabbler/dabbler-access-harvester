@@ -142,6 +142,34 @@ public static class ParserOutputProjector
                 yield return (kv.Key.Name, reference);
     }
 
+    /// <summary>
+    /// Enumerates every MODULE-LEVEL reference — one whose
+    /// <see cref="ResolvedReference.EnclosingScope"/> has no enclosing
+    /// <see cref="ProcedureScope"/> ancestor — i.e. exactly the references
+    /// <see cref="GroupReferencesByProcedure"/> drops. DW-11 Layer B: a
+    /// module-level unresolved reference (a <c>Const</c>/<c>Dim</c> initializer,
+    /// an <c>Implements &lt;unresolved&gt;</c>, a module <c>Private x As New
+    /// &lt;unresolved&gt;</c>) lives on <see cref="ResolvedModule.References"/>
+    /// but has no procedure <c>Body</c> to surface in, so it appears in neither
+    /// <c>Body.References</c> nor — before S2 — <c>unresolved-items.json</c>.
+    /// <see cref="UnresolvedItemAggregator"/> consumes this (wrapped as
+    /// <see cref="ModuleLevelReference"/>) to give those references the
+    /// run-wide index as their manifest home, at module scope
+    /// (<c>ProcedureName == null</c>). These references are, by construction,
+    /// disjoint from <see cref="EnumerateProcedureScopedReferences"/> (that
+    /// enumerator yields only references WITH an enclosing
+    /// <see cref="ProcedureScope"/>), so the two feeds never double-count.
+    /// </summary>
+    public static IEnumerable<ResolvedReference>
+        EnumerateModuleLevelReferences(ResolvedModule resolvedModule)
+    {
+        if (resolvedModule is null) throw new ArgumentNullException(nameof(resolvedModule));
+
+        foreach (var reference in resolvedModule.References)
+            if (FindEnclosingProcedureScope(reference.EnclosingScope) is null)
+                yield return reference;
+    }
+
     private static Dictionary<(string Name, ProcedureKind Kind), List<ResolvedReference>>
         GroupReferencesByProcedure(ResolvedModule resolvedModule)
     {

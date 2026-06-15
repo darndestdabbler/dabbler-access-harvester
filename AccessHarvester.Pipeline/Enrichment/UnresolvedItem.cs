@@ -172,6 +172,22 @@ public enum UnresolvedSource
     /// process the per-procedure record set see them in the same place.
     /// </summary>
     FunctionClassification,
+
+    /// <summary>
+    /// A MODULE-LEVEL VBA reference (a <c>Const</c>/<c>Dim</c> initializer,
+    /// an <c>Implements &lt;unresolved&gt;</c>, a module-scope
+    /// <c>As New &lt;unresolved&gt;</c>) that has no enclosing procedure, so
+    /// it carries a <see cref="UnresolvedLocation.ModuleName"/> but a null
+    /// <see cref="UnresolvedLocation.ProcedureName"/>. DW-11 Layer B (015 S2):
+    /// such references live on <c>ResolvedModule.References</c> but were
+    /// dropped by <c>ParserOutputProjector</c> (no procedure <c>Body</c> to
+    /// surface in) and so had no manifest signal at all; this source gives
+    /// them the run-wide index as their home. Sourced via the resolver's
+    /// procedure-less references, disjoint from
+    /// <see cref="FunctionClassification"/> (which is procedure-scoped), so
+    /// the two never double-count.
+    /// </summary>
+    ModuleLevelReference,
 }
 
 /// <summary>

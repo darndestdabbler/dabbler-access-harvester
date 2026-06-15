@@ -273,4 +273,117 @@ public sealed class UnresolvedItemsCompletenessTests
         Assert.Equal(inlineLine, header.Location.Line);
         Assert.Equal(inlineColumn, header.Location.Column);
     }
+
+    // ── Layer B: module-level unresolved references reach the index ─────
+    //
+    // DW-11 Layer B — a module-level unresolved reference (a Const/Dim
+    // initializer, an `Implements <unresolved>`, etc.) lives on
+    // resolvedModule.References with NO enclosing ProcedureScope, so
+    // ParserOutputProjector.GroupReferencesByProcedure drops it from
+    // Body.References ("the v1.0 schema has no module-level item type") AND
+    // it never reaches unresolved-items.json. 015 S2 closes the gap with a
+    // module-level feed mirroring the Layer A pattern: a new projector
+    // enumerator (EnumerateModuleLevelReferences) returns exactly the set the
+    // procedure grouping drops, and the aggregator surfaces them under the
+    // new UnresolvedSource.ModuleLevelReference with ProcedureName=null.
+
+    // The production aggregation including the Layer B module-level feed —
+    // mirrors Pipeline.cs after 015 S2.
+    private static IReadOnlyList<UnresolvedItem> AggregateWithModuleLevel(Chain c)
+    {
+        var procedureScoped = ParserOutputProjector
+            .EnumerateProcedureScopedReferences(c.Resolved)
+            .Select(scoped => new ProcedureScopedReference(
+                c.Resolved.ModuleScope.ModuleName, scoped.ProcedureName, scoped.Reference))
+            .ToList();
+
+        var moduleLevel = ParserOutputProjector
+            .EnumerateModuleLevelReferences(c.Resolved)
+            .Select(reference => new ModuleLevelReference(
+                c.Resolved.ModuleScope.ModuleName, reference))
+            .ToList();
+
+        return UnresolvedItemAggregator.Build(
+            navigationGraph: c.Navigation,
+            functionClassifications: c.Classifications,
+            procedureScopedReferences: procedureScoped,
+            moduleLevelReferences: moduleLevel);
+    }
+
+    [Fact]
+    public void LayerB_ModuleLevelUnresolvedRef_DroppedByProcedureScopedSurfaces_RecoveredByModuleLevelFeed()
+    {
+        // DW-11 proven reproducer: a module-level Const initializer referencing
+        // an undeclared name, plus a trivial procedure (so the module is not
+        // otherwise empty).
+        var c = Build(
+            "Public Const DemoConst = MissingThing\r\n" +
+            "Public Sub Demo()\r\nEnd Sub\r\n",
+            "modModuleLevel");
+
+        // (1) The resolver DOES produce the reference on the raw module — it is
+        //     simply module-scoped (no enclosing ProcedureScope).
+        Assert.Contains(
+            c.Resolved.References,
+            r => ParserOutputProjector.ExpressionText(r.Expression) == "MissingThing");
+
+        // (2) RED EVIDENCE: it is in NEITHER inline Body.References (the
+        //     projector drops module-scoped refs) NOR the post-S1 index.
+        var inline = InlineUnresolvedBodyReferences(c);
+        Assert.DoesNotContain(inline, r => r.OriginalText == "MissingThing");
+
+        var withHeaders = AggregateProductionEquivalent(c);
+        Assert.DoesNotContain(withHeaders, u => u.SurroundingText == "MissingThing");
+
+        // (3) GREEN: the module-level feed surfaces it under the new source,
+        //     at module scope (ProcedureName == null).
+        var withModuleLevel = AggregateWithModuleLevel(c);
+        var item = Assert.Single(
+            withModuleLevel.Where(u => u.SurroundingText == "MissingThing"));
+        Assert.Equal(UnresolvedSource.ModuleLevelReference, item.Source);
+        Assert.Equal(UnresolvedReasons.NotInScope, item.Reason);
+        Assert.Equal("modModuleLevel", item.Location.ModuleName);
+        Assert.Null(item.Location.ProcedureName);
+    }
+
+    [Fact]
+    public void LayerB_ModuleLevelFeed_DoesNotDoubleCount_ProcedureScopedRefs()
+    {
+        // A module carrying BOTH a module-level unresolved ref and a body
+        // unresolved ref. The module-level feed must surface ONLY the
+        // module-scoped reference; the body ref stays a single
+        // FunctionClassification item (no double-count across feeds).
+        var c = Build(
+            "Public Const DemoConst = MissingModule\r\n" +
+            "Public Sub Demo()\r\n    MsgBox MissingBody\r\nEnd Sub\r\n",
+            "modBoth2");
+
+        var index = AggregateWithModuleLevel(c);
+
+        // The module-level ref appears exactly once, under the module-level source.
+        var moduleItem = Assert.Single(index.Where(u => u.SurroundingText == "MissingModule"));
+        Assert.Equal(UnresolvedSource.ModuleLevelReference, moduleItem.Source);
+
+        // The body ref appears exactly once, under FunctionClassification — the
+        // module-level feed did not also claim it.
+        var bodyItem = Assert.Single(index.Where(u => u.SurroundingText == "MissingBody"));
+        Assert.Equal(UnresolvedSource.FunctionClassification, bodyItem.Source);
+    }
+
+    [Fact]
+    public void LayerB_ModuleFreeOfModuleLevelRefs_IsInert()
+    {
+        // A module with NO module-level unresolved ref: the Layer B feed adds
+        // nothing. This is the property that keeps HHC golden-neutral (DW-11:
+        // HHC has zero module-level unresolved cases).
+        var c = Build(
+            "Public Sub Demo()\r\n    MsgBox UnknownThing\r\nEnd Sub\r\n",
+            "modNoModuleLevel");
+
+        var withHeaders = AggregateProductionEquivalent(c);
+        var withModuleLevel = AggregateWithModuleLevel(c);
+
+        Assert.Equal(withHeaders.Count, withModuleLevel.Count);
+        Assert.DoesNotContain(withModuleLevel, u => u.Source == UnresolvedSource.ModuleLevelReference);
+    }
 }

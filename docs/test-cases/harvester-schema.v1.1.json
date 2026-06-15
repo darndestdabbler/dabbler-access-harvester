@@ -1270,7 +1270,7 @@
       "type": "object",
       "required": ["Source", "Reason", "ConstructDescription", "Location", "SuggestedNextSteps"],
       "properties": {
-        "Source": { "enum": ["Resolver", "SqlFormReference", "DynamicSqlSite", "NavigationTarget", "FunctionClassification"] },
+        "Source": { "enum": ["Resolver", "SqlFormReference", "DynamicSqlSite", "NavigationTarget", "FunctionClassification", "ModuleLevelReference"], "description": "Producer discriminator. 'ModuleLevelReference' added 015 S2 (DW-11 Layer B): a module-level VBA unresolved reference (a Const/Dim initializer, an Implements <unresolved>, a module-scope As New <unresolved>) carries ModuleName but null ProcedureName. Enum widened in place on the living v1.1 schema (the UnresolvedItem $def is additionalProperties-tolerant and this adds no property); old documents stay valid and the value only appears when a module-level unresolved reference exists, so no envelope version bump." },
         "Reason": { "type": "string" },
         "ConstructDescription": { "type": "string" },
         "Location": { "$ref": "#/$defs/UnresolvedLocation" },

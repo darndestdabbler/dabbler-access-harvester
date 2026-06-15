@@ -1,0 +1,34 @@
+A. **No double-count:** I tried to break the disjointness claim and could not break it on the shipped production path. The important point is that Layer B is not using a fuzzy heuristic; it is using the exact complement of the procedure grouping predicate. `GroupReferencesByProcedure` includes a reference iff `FindEnclosingProcedureScope(reference.EnclosingScope)` is non-null. `EnumerateModuleLevelReferences` includes a reference iff that same call returns null. For a given `ResolvedReference` instance evaluated against a fixed `EnclosingScope` chain, those are mutually exclusive. A module-level `Const`/`Dim` initializer that calls a function is still module-scoped; a weird intermediate scope that is neither module nor procedure still eventually either has a `ProcedureScope` ancestor or it does not; and even a malformed scope chain would misclassify or hang, not make the same reference satisfy both predicates at once. So I do **not** see a real cross-feed double-count bug here. The caveat is narrower: this is a partition of the resolver’s current scope graph, not a semantic proof about the AST. If some upstream bug sets `EnclosingScope` wrong, you can get wrong tagging or omission from the inline procedure surface, but not the same `ResolvedReference` emitted by both Layer A/B feeds unless a caller manually passes inconsistent inputs to `Build`. On concern A, I am satisfied.
+
+B. **Enum widening / contract correctness:** Under a strict immutable-schema semantic-versioning model, adding an enum member is a breaking change. Under the repo’s stated model, though, `harvester-schema.v1.1.json` is a **living** schema for the v1.1 envelope, and this change widens an existing string-valued discriminator rather than adding/removing a property. Old documents remain valid; new documents only gain the new value when the new producer case exists. Given that explicit project policy, I think “widen in place, no envelope bump” is acceptable here. I would only object if this repo claimed snapshot/immutable schema semantics for `v1.1`; based on the supplied context, it does not. So on B I would commit to **no bump required**.
+
+C. **Determinism tiebreaker:** The diagnosis for the observed HomeHealthCare reorder cluster is credible and the specific fix is directionally right: chained unresolved member-access links can share `(Source, module, procedure, line, column, reason)` and differ only by member name, and `List.Sort` is unstable for equal keys. Adding `SurroundingText` absolutely fixes that class of tie. However, I do **not** think the fix is complete, and I cannot sign off on the new comment’s claim that the order is now “total.” The comparer still ignores serialized fields that can differ between two items that share the current key: `Location.File`, `ConstructDescription`, and especially `AdditionalContext`. That means two distinct `UnresolvedItem`s can still compare equal and be non-byte-identical. Examples by source type:
+- `Resolver`: same code/location/name but different `message`, `severity`, or `file`.
+- `DynamicSqlSite`: same location/reason but different `fullCardinality` / `templateCount`.
+- `NavigationTarget`: same location/reason/text but different `action` / `sourceProcedureKind`.
+When those cases happen, residual nondeterminism is real, not benign. There is a benign residual class too—e.g. two byte-identical duplicates such as some repeated-name chain links—where equal-key reorder does not change bytes. But because non-identical equal-key items are still possible, the comparator is still not a total order over serialized output. So my split answer is:
+1. **Root cause for the observed reorder:** yes, likely correct.
+2. **Key now total:** no, not yet.
+3. **Updating the golden to the new canonical order:** yes, that is the right call; preserving the prior arbitrary order would just fossilize unstable behavior.
+
+D. **Superset / completeness boundary:** For DW-11, index-only is the right boundary. `unresolved-items.json` is the run-wide enumeration surface, and Layer B closes the proven hole there. The inline per-module `ParserOutput.Body.References` surface has no natural module-scope slot and is already tracked separately as DW-17. Forcing module-level refs into a procedure-body array this session would be the wrong abstraction and likely a larger schema/shape discussion. So I agree with the scope boundary.
+
+E. **Source tagging:** Using a distinct `ModuleLevelReference` source is defensible and preferable. Reusing `FunctionClassification` would blur provenance and suggest procedure-level classification semantics that do not apply here. Reusing `Resolver` would also be wrong; these are not raw diagnostics. The new source cleanly tells a consumer “this is a VBA unresolved reference, but at module scope, not procedure scope.” That distinction matters because `ProcedureName` is intentionally null.
+
+F. **Scope discipline / no weakened tests:** The production change set looks appropriately scoped: new projector enumerator, new aggregator feed, new record, source-enum widening, single call-site wiring, and three additive tests. I do not see evidence of assertions being weakened to force green. The only nit I noticed is a stale test comment in `LayerB_ModuleFreeOfModuleLevelRefs_IsInert` that still says HHC had zero module-level unresolved cases, which the session narrative explicitly disproves. That is commentary drift, not behavioral risk.
+
+G. **Lean / no-silent-drop / determinism:** On lean/no-silent-drop, this session is good. It fixes a real silent drop without injecting unrelated data, and it only emits the new source when the producer actually found a module-level unresolved ref. No default injection problem seen. The remaining blocker is determinism completeness from concern C: the added `SurroundingText` tiebreaker fixes the known observed instability but does not yet make the sort order fully canonical across all serialized `UnresolvedItem` shapes.
+
+```json
+{
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Major",
+      "location": "AccessHarvester.Pipeline/Enrichment/UnresolvedItemAggregator.cs",
+      "summary": "The updated SortDeterministically comparer still is not a total order over serialized UnresolvedItem values, so non-identical equal-key items can remain nondeterministically ordered.",
+      "fix": "Extend the comparer to include the remaining serialized fields that can differ after the current key matches (at minimum Location.File, ConstructDescription, and a deterministic comparison of AdditionalContext; SuggestedNextSteps may be compared too for completeness), or compare a canonical serialized form after the current primary key; add regression tests with same-prefix items that differ only in omitted fields."
+    }
+  ]
+}
+```

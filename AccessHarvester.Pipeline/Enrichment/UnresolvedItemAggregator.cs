@@ -66,7 +66,8 @@ public static class UnresolvedItemAggregator
         string? dynamicSqlProcedureName = null,
         NavigationGraph? navigationGraph = null,
         IEnumerable<FunctionClassification>? functionClassifications = null,
-        IEnumerable<ProcedureScopedReference>? procedureScopedReferences = null)
+        IEnumerable<ProcedureScopedReference>? procedureScopedReferences = null,
+        IEnumerable<ModuleLevelReference>? moduleLevelReferences = null)
     {
         var items = new List<UnresolvedItem>();
 
@@ -123,6 +124,19 @@ public static class UnresolvedItemAggregator
                 if (!bodyKeys.Contains(DedupKey(item)))
                     items.Add(item);
         }
+
+        // DW-11 Layer B (015 S2): module-level unresolved references — those on
+        // ResolvedModule.References with NO enclosing ProcedureScope (a Const/Dim
+        // initializer, an `Implements <unresolved>`, etc.) — are dropped by the
+        // projector (no procedure Body to surface in) and so reach NEITHER
+        // Body.References NOR the procedure-scoped feeds above. Surface them here
+        // under UnresolvedSource.ModuleLevelReference at module scope
+        // (ProcedureName=null). No dedup is needed against the procedure-scoped
+        // feeds: a module-level reference has no enclosing ProcedureScope, so it
+        // is disjoint from both procedure-scoped feeds by construction (those
+        // only ever carry references WITH a ProcedureScope).
+        if (moduleLevelReferences is not null)
+            items.AddRange(FromModuleLevelReferences(moduleLevelReferences));
 
         return SortDeterministically(items);
     }
@@ -416,6 +430,58 @@ public static class UnresolvedItemAggregator
         }
     }
 
+    /// <summary>
+    /// Projects MODULE-LEVEL resolver references (those with no enclosing
+    /// procedure) into <see cref="UnresolvedItem"/> records, surfacing only
+    /// those whose outcome is (after with-flattening) <c>Unresolved</c>.
+    /// DW-11 Layer B: this is the feed that gives a module-level unresolved
+    /// reference a manifest home in <c>unresolved-items.json</c>. The emitted
+    /// shape mirrors <see cref="FromProcedureScopedReferences"/> (same Reason /
+    /// description / member-name surrounding text) EXCEPT the source is
+    /// <see cref="UnresolvedSource.ModuleLevelReference"/> and
+    /// <see cref="UnresolvedLocation.ProcedureName"/> is null — the reference
+    /// has no enclosing procedure. Built by the caller from
+    /// <see cref="AccessHarvester.Pipeline.Manifest.ParserOutputProjector.EnumerateModuleLevelReferences"/>.
+    /// </summary>
+    public static IEnumerable<UnresolvedItem> FromModuleLevelReferences(
+        IEnumerable<ModuleLevelReference> references)
+    {
+        if (references is null) throw new ArgumentNullException(nameof(references));
+
+        foreach (var mlr in references)
+        {
+            var reason = UnresolvedReasonOf(mlr.Reference.Outcome);
+            if (reason is null) continue;   // resolved references do not surface
+
+            var expr = mlr.Reference.Expression;
+            var memberName = ExtractReferenceName(expr);
+            var ctx = memberName is null
+                ? null
+                : SortContext(new Dictionary<string, string>
+                {
+                    ["memberName"] = memberName,
+                });
+
+            yield return new UnresolvedItem
+            {
+                Source = UnresolvedSource.ModuleLevelReference,
+                Reason = reason,
+                ConstructDescription = DescribeResolverReason(reason, message: null),
+                Location = new UnresolvedLocation
+                {
+                    File = null,
+                    ModuleName = mlr.ModuleName,
+                    ProcedureName = null,
+                    Line = expr.Provenance.Line,
+                    Column = expr.Provenance.Column,
+                },
+                SurroundingText = memberName,
+                SuggestedNextSteps = LookupSuggestedNextSteps(reason),
+                AdditionalContext = ctx,
+            };
+        }
+    }
+
     // Returns the (post-with-flattening) Unresolved reason, or null when the
     // reference resolved. Mirrors FunctionClassificationBuilder.DispatchOutcome's
     // flattening so the two feeds agree on the reason for the SAME reference —
@@ -443,28 +509,85 @@ public static class UnresolvedItemAggregator
 
     // ── Sorting / lookup helpers ─────────────────────────────────────
 
-    private static IReadOnlyList<UnresolvedItem> SortDeterministically(List<UnresolvedItem> items)
+    // internal (not private) so UnresolvedItemAggregatorTests can pin the
+    // total-order property directly with hand-built items (the public feeds
+    // derive most fields from the key components, so a same-key/different-
+    // residual tie is hard to force end-to-end — see the determinism pin).
+    internal static IReadOnlyList<UnresolvedItem> SortDeterministically(List<UnresolvedItem> items)
     {
-        items.Sort(static (a, b) =>
+        // Precompute a canonical RESIDUAL key per item ONCE (covering every
+        // field NOT in the semantic comparison below), then sort. The semantic
+        // comparisons give a human-readable primary order; the residual is the
+        // final tiebreaker that makes the comparer a PROVABLY TOTAL order over
+        // the whole UnresolvedItem — two items that compare equal here are
+        // byte-identical, so List.Sort's non-stable introsort can never produce
+        // a different ordering for the same input SET regardless of incoming
+        // order or list size. (gpt-5-4 R1, 015 S2: SurroundingText alone left
+        // the key non-total — e.g. two Resolver diagnostics at one location
+        // with SurroundingText=null but different messages would still tie.)
+        var keyed = new List<(UnresolvedItem Item, string Residual)>(items.Count);
+        foreach (var it in items)
+            keyed.Add((it, CanonicalResidual(it)));
+
+        keyed.Sort(static (a, b) =>
         {
-            int c = ((int)a.Source).CompareTo((int)b.Source);
+            var (ia, ib) = (a.Item, b.Item);
+            int c = ((int)ia.Source).CompareTo((int)ib.Source);
             if (c != 0) return c;
-            c = string.Compare(a.Location.ModuleName ?? string.Empty,
-                               b.Location.ModuleName ?? string.Empty,
+            c = string.Compare(ia.Location.ModuleName ?? string.Empty,
+                               ib.Location.ModuleName ?? string.Empty,
                                StringComparison.OrdinalIgnoreCase);
             if (c != 0) return c;
-            c = string.Compare(a.Location.ProcedureName ?? string.Empty,
-                               b.Location.ProcedureName ?? string.Empty,
+            c = string.Compare(ia.Location.ProcedureName ?? string.Empty,
+                               ib.Location.ProcedureName ?? string.Empty,
                                StringComparison.OrdinalIgnoreCase);
             if (c != 0) return c;
-            c = (a.Location.Line ?? 0).CompareTo(b.Location.Line ?? 0);
+            c = (ia.Location.Line ?? 0).CompareTo(ib.Location.Line ?? 0);
             if (c != 0) return c;
-            c = (a.Location.Column ?? 0).CompareTo(b.Location.Column ?? 0);
+            c = (ia.Location.Column ?? 0).CompareTo(ib.Location.Column ?? 0);
             if (c != 0) return c;
-            return string.Compare(a.Reason, b.Reason, StringComparison.Ordinal);
+            c = string.Compare(ia.Reason, ib.Reason, StringComparison.Ordinal);
+            if (c != 0) return c;
+            // SurroundingText (member/identifier name): the common
+            // distinguisher for chained member-access links that share a start
+            // position and reason (e.g. `.Fields` vs `.Value`).
+            c = string.Compare(ia.SurroundingText ?? string.Empty,
+                               ib.SurroundingText ?? string.Empty,
+                               StringComparison.Ordinal);
+            if (c != 0) return c;
+            // Final total-order tiebreaker: the canonical residual over every
+            // remaining field (File, ConstructDescription, SuggestedNextSteps,
+            // AdditionalContext). Equal residual == byte-identical item.
+            return string.Compare(a.Residual, b.Residual, StringComparison.Ordinal);
         });
-        return items;
+
+        var result = new List<UnresolvedItem>(keyed.Count);
+        foreach (var k in keyed) result.Add(k.Item);
+        return result;
     }
+
+    // Options for the canonical-residual serialization (below). A plain,
+    // culture-invariant, compact serialization; deterministic because the only
+    // collection member, AdditionalContext, is a SortedDictionary (key order is
+    // stable) and UnresolvedSource serializes as a string via its type-level
+    // [JsonStringEnumConverter].
+    private static readonly System.Text.Json.JsonSerializerOptions ResidualJsonOptions =
+        new() { WriteIndented = false };
+
+    // The final, PROVABLY-TOTAL tiebreaker for SortDeterministically: an
+    // INJECTIVE canonical serialization of the WHOLE item. The semantic
+    // comparisons above give a human-readable primary order but are lossy by
+    // design — module/procedure compared OrdinalIgnoreCase, null Line/Column
+    // and null SurroundingText folded to 0/"" — so two items differing ONLY in
+    // a folded distinction (module-name case, null-vs-empty, null-vs-0) compare
+    // equal there. Serializing the entire item closes every such class at once:
+    // two items with identical JSON are byte-identical in the OUTPUT (so their
+    // order is immaterial), and any real difference — including the folded ones
+    // and any AdditionalContext key/value content (System.Text.Json quotes and
+    // escapes each separately, so there is no `key=value` delimiter ambiguity)
+    // — yields a distinct, deterministic residual. (gpt-5-4 R1+R2, 015 S2.)
+    private static string CanonicalResidual(UnresolvedItem item) =>
+        System.Text.Json.JsonSerializer.Serialize(item, ResidualJsonOptions);
 
     private static IReadOnlyDictionary<string, string>? SortContext(IDictionary<string, string> ctx)
     {
@@ -668,4 +791,22 @@ public static class UnresolvedItemAggregator
 public sealed record ProcedureScopedReference(
     string ModuleName,
     string ProcedureName,
+    ResolvedReference Reference);
+
+/// <summary>
+/// A resolver <see cref="ResolvedReference"/> that lives at MODULE scope —
+/// it has no enclosing procedure — paired with the module that owns it.
+/// DW-11 Layer B (015 S2): the <see cref="UnresolvedItemAggregator"/> consumes
+/// these so a module-level unresolved reference (a <c>Const</c>/<c>Dim</c>
+/// initializer, an <c>Implements &lt;unresolved&gt;</c>, etc.) reaches
+/// <c>unresolved-items.json</c> at module scope (<c>ProcedureName == null</c>).
+/// Built by the caller from
+/// <see cref="AccessHarvester.Pipeline.Manifest.ParserOutputProjector.EnumerateModuleLevelReferences"/>,
+/// which returns exactly the references the projector drops from
+/// <c>Body.References</c>. Disjoint from <see cref="ProcedureScopedReference"/>
+/// (that one carries only references WITH an enclosing procedure), so the two
+/// feeds never double-count.
+/// </summary>
+public sealed record ModuleLevelReference(
+    string ModuleName,
     ResolvedReference Reference);
