@@ -101,6 +101,7 @@ public static class IdentifyCleanupCommand
             IDateMaximaSampler? primary = null;
             bool comAvailable = false;
             string? comDegradationNote = null;
+            IReadOnlyList<string> samplerDegradations = [];
             IDisposable? primaryDisposable = null;
             if (!noCom && OperatingSystem.IsWindows() && TryLocateAccdb(inputRoot, db.Name, out string? accdbPath))
             {
@@ -110,28 +111,24 @@ public static class IdentifyCleanupCommand
                 primary = probeResult.Primary;
                 comAvailable = probeResult.ComAvailable;
                 comDegradationNote = probeResult.DegradationNote;
+                samplerDegradations = probeResult.SamplerDegradations;
                 primaryDisposable = probeResult.DisposableSampler;
                 if (probeResult.DegradationNote is not null)
                 {
                     Console.Error.WriteLine(
                         $"[identify-cleanup] COM date sampling failed: {probeResult.OriginalErrorMessage}. Falling back to DAO LastUpdated.");
                 }
+                foreach (var note in samplerDegradations)
+                    Console.Error.WriteLine($"[identify-cleanup] {note}");
             }
 
             CleanupFindings findings;
             try
             {
                 findings = CleanupAnalyser.Run(db, fallback, harvestDate, thresholdDays, comAvailable, primary);
-                // Prepend the COM-failure note only when the DAO fallback actually
-                // had data to use; otherwise the analyser's own "Date sampling
-                // unavailable: COM declined AND no IR LastUpdated values present"
-                // note is more accurate and the probe message would contradict it.
-                if (comDegradationNote is not null && findings.DateSignalSource != "unavailable")
-                {
-                    var augmented = new List<string> { comDegradationNote };
-                    augmented.AddRange(findings.DegradationNotes);
-                    findings = findings with { DegradationNotes = augmented };
-                }
+                // Fold COM-side degradation notes into the output (hermetically
+                // pinned by CleanupDegradationNotesTests; Set 014, O-1-5).
+                findings = CleanupDegradationNotes.Fold(findings, comDegradationNote, samplerDegradations);
             }
             finally
             {

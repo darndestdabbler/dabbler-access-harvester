@@ -21,6 +21,14 @@ public sealed class ComProbeResult
     public string? OriginalErrorMessage { get; init; }
     /// <summary>Disposable wrapper on the sampler (when one was instantiated). Caller owns disposal.</summary>
     public IDisposable? DisposableSampler { get; init; }
+    /// <summary>
+    /// Per-column read degradations surfaced by the sampler when it implements
+    /// <see cref="ISamplerDegradationSource"/> (Set 014, O-1-5). Empty when the
+    /// sampler reported no per-column failures or does not expose them. The CLI
+    /// folds these into <c>object-cleanup.json</c>'s degradation notes so a
+    /// swallowed per-column read is visible rather than silently dropped.
+    /// </summary>
+    public IReadOnlyList<string> SamplerDegradations { get; init; } = [];
 }
 
 /// <summary>
@@ -49,6 +57,11 @@ public static class ComDateMaximaProbe
         {
             sampler = samplerFactory();
             var probed = sampler.Sample(db);
+            // O-1-5 (Set 014): surface any per-column read failures the sampler
+            // swallowed during Sample() so they become visible degradation notes
+            // rather than reading as "column has no date data".
+            var samplerDegradations = (sampler as ISamplerDegradationSource)?.Degradations
+                ?? [];
             return new ComProbeResult
             {
                 Primary = new PreSampledSampler(probed),
@@ -56,6 +69,7 @@ public static class ComDateMaximaProbe
                 DegradationNote = null,
                 OriginalErrorMessage = null,
                 DisposableSampler = sampler as IDisposable,
+                SamplerDegradations = samplerDegradations,
             };
         }
         catch (Exception comEx)

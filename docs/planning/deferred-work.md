@@ -535,6 +535,53 @@
   pins the current exit-2 behaviour and names DW-15; flipping it to 1 is the
   owning session's first signal.
 
+### DW-16 — Sampler-side time-only-column skip (zero-date root cause) is deferred; analyser guard is the shipped fix
+- **What:** the headline zero-date misfire (a **time-only** `Date/Time` column's
+  `MAX()` presenting as `1899-12-30 HH:MM:SS`) is fixed at the **analyser** by the
+  Set 014 zero-date guard (`CleanupAnalyser` treats a sampled maximum whose date
+  component is *exactly* `1899-12-30` as no date signal). The **root-cause**
+  alternative — skip/special-case time-only columns at the COM sampler
+  (`AccessDateMaximaSampler`) so a time-of-day value never presents as a date
+  maximum at all — was **evaluated and deferred**.
+- **Origin:** Set 014 Session 1 (P6; the misfire + O-1-5 + O-2-6 set). The spec's
+  Step 3 instructed an explicit ship-or-defer decision on the sampler root cause.
+- **Why deferred:** **No reliable time-only signal exists at the sampler/IR.**
+  `IrTable.DateTimeColumnNames` is derived from the column `TypeName` containing
+  "Date"/"Time"; Access exposes a single `Date/Time` column type with no type-level
+  date-only / time-only / datetime distinction. Time-only-ness is a *Format*
+  property or a property of the stored data, not the column type — identifying it
+  would need a DAO `Format`-property read or a value probe, neither currently
+  surfaced. The analyser guard fully fixes the **observed** misfire (and is the
+  robust safety net regardless of *why* a maximum is the zero-date), but it is
+  **not** a complete correctness proof (the 014 R1/R2 cross-provider review
+  overturned an initial "provably complete" framing — see the accepted-false-
+  negatives bullet below). The sampler-side root cause would additionally let the
+  pipeline (a) avoid a wasted COM `MAX()` on a time-only column, (b) emit a
+  "time-only column skipped" diagnostic, and (c) supply the per-column provenance
+  needed to resolve the accepted false-negatives.
+- **Accepted false-negatives this DW also owns (014 R2 cross-provider review):**
+  because the sampler returns a single `MAX` across all of a table's DateTime
+  columns with **no per-column provenance**, the analyser guard cannot decide two
+  edge cases and accepts suppressing them: (a) a genuine record dated *exactly*
+  `1899-12-30` (in Access this value is the zero/default, so a meaningful real max
+  of exactly the epoch is effectively never observed); and (b) a real pre-epoch
+  date in one column masked by a sibling time-only column whose `1899-12-30` wins
+  the cross-column `MAX`. Both are undecidable without the per-column sampler
+  output this DW would add; neither occurs on the HHC fixture. Documented in-code
+  at `CleanupAnalyser`'s guard and pinned (as accepted behaviour) by
+  `Run_Suppresses_Exact_OleEpoch_Maximum_As_NoSignal`.
+- **Trigger to pull back in:** a `Format`/type signal that reliably identifies
+  time-only columns becomes available in the IR or via a DAO property read, OR a
+  consumer needs the sampler to positively distinguish "time-only column" from
+  "column genuinely empty / failed read", OR a consumer reports the exact-epoch /
+  masked-pre-epoch false-negative above, OR a sampler-fidelity set is scoped.
+- **Owning set candidate:** a future `cleanup-sampler-fidelity` set (small, P0-only
+  prereq), or folded into a set that adds column `Format`/type metadata to the IR.
+- **Mechanical backstop:** the analyser guard's hermetic pins
+  (`CleanupAnalyserTests.Run_Suppresses_TimeOnly_ZeroDate_Maximum_As_NoSignal` and
+  the exact-epoch / name-survives / real-date-survives siblings) pin the shipped
+  behaviour; the absence of a sampler-side skip is recorded here.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED

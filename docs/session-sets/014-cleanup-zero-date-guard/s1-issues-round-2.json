@@ -1,0 +1,10 @@
+{
+  "round": 2,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    { "severity": "Major", "location": "AccessHarvester.Pipeline/Cleanup/CleanupAnalyser.cs",
+      "summary": "Equality guard still suppresses a real maximum dated exactly 1899-12-30 (undecidable from the sentinel given single cross-column MAX); in-code comment overstated 'targets only' sentinels.",
+      "resolution": "Accepted-by-design false-negative (1899-12-30 is the Access zero/default, effectively never a real max; true fix needs per-column provenance = DW-16). Rewrote comment to list two accepted false-negatives; folded both into DW-16; documented the accepted behaviour on the exact-epoch test." }
+  ]
+}

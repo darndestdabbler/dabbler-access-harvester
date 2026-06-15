@@ -46,6 +46,42 @@ public class ComDateMaximaProbeTests
         public void Dispose() => Disposed = true;
     }
 
+    private sealed class DegradingSampler : IDateMaximaSampler, ISamplerDegradationSource
+    {
+        private readonly List<string> _degradations;
+        public DegradingSampler(params string[] degradations) => _degradations = [.. degradations];
+        public IReadOnlyList<string> Degradations => _degradations;
+        public IReadOnlyList<SampledDateMaximum> Sample(IrDatabase db) => [];
+    }
+
+    [Fact]
+    public void Probe_Surfaces_Sampler_PerColumn_Degradations()
+    {
+        // O-1-5 (Set 014): a sampler that swallowed a per-column read failure exposes
+        // it via ISamplerDegradationSource; the probe threads it onto the result so
+        // the CLI can fold it into object-cleanup.json's degradation notes.
+        var result = ComDateMaximaProbe.Probe(
+            () => new DegradingSampler(
+                "Date sampling failed for [tblA].[StartTime]: boom",
+                "Date sampling failed for [tblB].[EndTime]: kaboom"),
+            EmptyDb());
+
+        Assert.True(result.ComAvailable);
+        Assert.Equal(2, result.SamplerDegradations.Count);
+        Assert.Contains(result.SamplerDegradations, n => n.Contains("[tblA].[StartTime]"));
+        Assert.Contains(result.SamplerDegradations, n => n.Contains("[tblB].[EndTime]"));
+    }
+
+    [Fact]
+    public void Probe_Sampler_Without_Degradation_Source_Yields_Empty()
+    {
+        // A plain sampler (no ISamplerDegradationSource) yields an empty list, never null.
+        var result = ComDateMaximaProbe.Probe(() => new FakeSampler([]), EmptyDb());
+
+        Assert.NotNull(result.SamplerDegradations);
+        Assert.Empty(result.SamplerDegradations);
+    }
+
     [Fact]
     public void Probe_Success_Wraps_Cached_Samples_And_Sets_ComAvailable()
     {

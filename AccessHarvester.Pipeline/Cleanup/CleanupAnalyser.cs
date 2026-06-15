@@ -9,6 +9,19 @@ namespace AccessHarvester.Pipeline.Cleanup;
 /// <summary>Coordinates the cleanup detectors and assigns confidence tiers per §4.</summary>
 public static class CleanupAnalyser
 {
+    /// <summary>
+    /// OLE Automation epoch base date (1899-12-30) — Access's zero-date. Access
+    /// stores a Date/Time value's time-of-day as a fractional day on this base, so
+    /// a <c>MAX()</c> over a column that carries only time-of-day data returns
+    /// <c>1899-12-30 HH:MM:SS</c>. Set 014's zero-date guard treats a sampled
+    /// maximum whose date component is <b>exactly</b> this base as "no date signal"
+    /// rather than a spurious ~46176-day-stale finding. The match is on the epoch
+    /// day only (not "on or before"): a true pre-epoch maximum is a real, genuinely
+    /// stale date that must still flag — see the guard site for the accepted
+    /// exact-epoch / masked-pre-epoch false-negatives deferred to DW-16.
+    /// </summary>
+    private static readonly DateOnly OleEpochBaseDate = new(1899, 12, 30);
+
     /// <summary>Runs all detectors and returns the combined findings list.</summary>
     /// <param name="db">Parsed IR for the harvested database.</param>
     /// <param name="dateSampler">Fallback (DAO-metadata) sampler. Required; never null.</param>
@@ -82,6 +95,36 @@ public static class CleanupAnalyser
                 chosen = fallback;
             }
             if (chosen is null) continue;
+
+            // Zero-date guard (Set 014, O-2-6 / the headline misfire). A sampled
+            // maximum whose date component is *exactly* the OLE epoch base
+            // (1899-12-30) carries no calendar-meaningful date — it is the Access
+            // zero-date, produced when MAX() runs over a column whose only data is
+            // time-of-day (stored as a fractional day on that base, so the date
+            // component is always 1899-12-30 and the time is the fractional part).
+            // Treat it as "no date signal" (the same outcome as a table with no
+            // date data) rather than computing a ~46176-day-stale finding.
+            //
+            // Match the epoch DAY exactly (==), NOT "<=" (014 R1 Major): a genuine
+            // pre-1900 maximum (e.g. 1890-01-01) is a *real, genuinely stale* date
+            // that SHOULD flag — a "<=" floor would wrongly hide it. Equality matches
+            // only values landing precisely on 1899-12-30: the zero-date sentinel and
+            // the time-only fractional-day case.
+            //
+            // Accepted false-negatives, both deferred to DW-16 because they are
+            // undecidable at the analyser (the sampler returns a single MAX across
+            // ALL of a table's DateTime columns, with no per-column provenance and no
+            // "this came from a time-only column" signal):
+            //   (a) a genuine record dated *exactly* 1899-12-30 is suppressed. In
+            //       Access this value IS the zero/default, so a real, meaningful
+            //       business max of exactly 1899-12-30 is effectively never observed;
+            //       we accept suppressing it rather than re-admit the headline misfire.
+            //   (b) a real pre-epoch date in one column masked by a sibling time-only
+            //       column: the cross-column MAX surfaces the time-only 1899-12-30
+            //       (later than the pre-epoch real date), so the guard suppresses it.
+            // Neither occurs on the HHC fixture; both need per-column sampler output.
+            if (DateOnly.FromDateTime(chosen.MaxValue.UtcDateTime) == OleEpochBaseDate)
+                continue;
 
             int days = (int)Math.Floor((harvestUtc - chosen.MaxValue).TotalDays);
             if (days <= thresholdDays) continue;

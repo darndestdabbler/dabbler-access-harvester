@@ -1,0 +1,10 @@
+{
+  "round": 3,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    { "severity": "Minor", "location": "AccessHarvester.Pipeline/Cleanup/CleanupAnalyser.cs",
+      "summary": "OleEpochBaseDate XML-doc still said 'on or before' (stale `<=`-era wording) contradicting the `==` guard.",
+      "resolution": "Rewrote the field XML summary to state exact-epoch-day matching only; swept changed code/docs for other stale `<=`/'on or before' wording (none). R3 confirmed the Major resolution adequate and the helper/5 pins correct; this doc fix was the verifier's verbatim instruction." }
+  ]
+}

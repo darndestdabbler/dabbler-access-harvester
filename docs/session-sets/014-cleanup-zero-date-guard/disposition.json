@@ -1,0 +1,33 @@
+{
+  "status": "complete",
+  "summary": "Set 014 (006 P6, 1/1) — closed the identify-cleanup zero-date misfire + O-1-5 + O-2-6. CleanupAnalyser now suppresses a sampled maximum whose date component is EXACTLY the OLE epoch base 1899-12-30 (the time-only / zero-date sentinel) as no-signal, narrowed from an initial `<=` floor to `==` after the R1 cross-provider review found `<=` would hide genuine pre-1900 stale dates. AccessDateMaximaSampler no longer mislabels the Access local wall-clock value as UTC (SpecifyKind Utc -> Unspecified, behavior-preserving) and records per-column read failures as visible degradations via the new ISamplerDegradationSource, threaded through ComProbeResult.SamplerDegradations into object-cleanup.json notes. With this set the 006 review arc P0->P6 (sets 007-014) is COMPLETE.",
+  "files_changed": [
+    "AccessHarvester.Pipeline/Cleanup/CleanupAnalyser.cs",
+    "AccessHarvester.Pipeline/Cleanup/CleanupDegradationNotes.cs",
+    "AccessHarvester.Pipeline/Cleanup/DateMaximaSampler.cs",
+    "AccessHarvester.Pipeline/Cleanup/ComDateMaximaProbe.cs",
+    "AccessHarvester.Core/Com/AccessDateMaximaSampler.cs",
+    "AccessHarvester.Cli/Commands/IdentifyCleanupCommand.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Cleanup/CleanupAnalyserTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Cleanup/CleanupDegradationNotesTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/Cleanup/ComDateMaximaProbeTests.cs",
+    "docs/planning/deferred-work.md"
+  ],
+  "verification": {
+    "method": "cross-provider session-verification (routed, gpt-5-4)",
+    "rounds": 3,
+    "final_verdict": "VERIFIED-with-accepted-residual",
+    "notes": "R1 ISSUES_FOUND (Major: `<=` over-suppresses pre-1900 real dates -> narrowed to `==` + regression pin; Minor: CLI fold unpinned -> extracted CleanupDegradationNotes.Fold + 5 pins). R2 ISSUES_FOUND (Major reframed: real exact-1899-12-30 max is an undecidable accepted false-negative -> documented + folded into DW-16 + pinned accepted behaviour). R3 confirmed the Major resolution adequate and the helper/pins correct; one doc-only Minor (stale 'on or before' wording) fixed verbatim per the verifier instruction and swept for siblings (none)."
+  },
+  "tests": "62 cleanup hermetic tests + 907 total AccessHarvester.Pipeline.Tests green; solution builds 0 errors. COM-tier sampler behaviors (live TrySampleMax catch, SpecifyKind) exercised by the Access-COM integration tier, not hermetically (disclosed).",
+  "golden_impact": "None. Committed HHC object-cleanup.json golden is the --no-com/dao-metadata path with findings:[]; the guard can only suppress (0 stays 0) and COM-path changes do not touch --no-com. No-regen PROVEN byte-level: fresh `identify-cleanup --no-com --harvest-date 2026-06-05` against a temp copy of the golden ir/ reproduced dateSignalSource=dao-metadata, degradationNotes=[], findings=[] (modulo always-varying generatedAt).",
+  "deferred_work": [
+    "DW-16 (NEW) — sampler-side time-only-column skip (per-column date provenance). The analyser guard is the shipped fix; the sampler root cause is deferred (no time-only signal at IR/sampler; Access has a single Date/Time type). DW-16 also owns two accepted analyser false-negatives surfaced by the R2 review: a real max dated exactly 1899-12-30, and a real pre-epoch date masked by a sibling time-only column's cross-column MAX."
+  ],
+  "next_session_set": {
+    "slug": "015-unresolved-items-completeness",
+    "summary": "CONSUMER-DRIVEN-ONLY handoff: the 006 arc is complete and no DW trigger has fired. Routed recommendation proposes 015-unresolved-items-completeness (DW-11, has proven reproducers = a known aggregation bug rather than unproven need) as proactive hardening; runner-up is STOP/hold for a consumer report. Human decides whether to start 015 or hold. No 015 spec/stub authored (consumer-driven-only posture; STOP is a close runner-up).",
+    "recommended_orchestrator_tier": "mechanical"
+  },
+  "blockers": []
+}

@@ -1,0 +1,13 @@
+{
+  "round": 1,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    { "severity": "Major", "location": "AccessHarvester.Pipeline/Cleanup/CleanupAnalyser.cs",
+      "summary": "Guard `<= 1899-12-30` over-suppresses: a genuine pre-1900 maximum (e.g. 1890-01-01) is a real, genuinely-stale finding that should flag.",
+      "resolution": "Narrowed guard to date-component `== OleEpochBaseDate`; added Run_Keeps_PreEpoch_RealDate_As_Stale_Finding regression pin." },
+    { "severity": "Minor", "location": "AccessHarvester.Cli/Commands/IdentifyCleanupCommand.cs",
+      "summary": "New sampler-degradation note fold not hermetically pinned through the CLI layer.",
+      "resolution": "Extracted CleanupDegradationNotes.Fold pure helper; 5 hermetic pins in CleanupDegradationNotesTests." }
+  ]
+}

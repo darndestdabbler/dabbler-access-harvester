@@ -1,0 +1,90 @@
+{
+  "sessionSetName": "014-cleanup-zero-date-guard",
+  "createdDate": "2026-06-15T05:32:43.956727+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/verification-mode",
+      "dateTime": "2026-06-15T05:32:43.956727+00:00",
+      "description": "Operator set verificationMode: out-of-band-or-none.",
+      "status": "complete",
+      "routedApiCalls": [],
+      "kind": "verification_mode",
+      "choice": "out-of-band-or-none"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "s1-reground",
+      "dateTime": "2026-06-15T01:35:03.762447-04:00",
+      "description": "Re-grounded against current tree: AccessDateMaximaSampler SpecifyKind(Utc) at line 47 + per-column catch->null in TrySampleMax confirmed; CleanupAnalyser days calc has no zero-date floor; IR exposes only DateTimeColumnNames derived from TypeName (no time-only type signal at sampler). Committed HHC cleanup golden is --no-com/dao-metadata with 0 findings.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "s1-analyser-zero-date-guard",
+      "dateTime": "2026-06-15T01:39:07.192538-04:00",
+      "description": "O-2-6: added OleEpochBaseDate guard in CleanupAnalyser.Run \u2014 a chosen MaxValue whose date component <= 1899-12-30 is treated as no date signal (no stale finding). 4 hermetic pins added (time-only HH:MM, exact epoch, name-pattern survives guard, real-old-date survives). 56 cleanup tests + 901 Pipeline.Tests green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "s1-sampler-timeonly-decision",
+      "dateTime": "2026-06-15T01:39:07.193537-04:00",
+      "description": "Decision: ship analyser guard as the fix; DEFER sampler-side time-only skip as DW-16. Rationale: (1) no time-only type signal exists at IR/sampler (DateTimeColumnNames derives from TypeName Date/Time; Access has no date-only/time-only column type). (2) The analyser guard is provably COMPLETE for correctness: the sampler takes MAX across all of a table DateTime columns, so a real date in any sibling column dominates a time-only column zero-date \u2014 the guard only ever fires when the table has no real date signal to lose. Sampler root-cause is a visibility/faithfulness nicety, not a correctness gap.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "s1-sampler-timezone-degradation",
+      "dateTime": "2026-06-15T01:39:07.193537-04:00",
+      "description": "O-1-5: (a) timezone \u2014 replaced SpecifyKind(maxAcrossCols, Utc) with SpecifyKind(Unspecified) in AccessDateMaximaSampler so the local wall-clock value is no longer mislabelled UTC; offset-0 anchoring preserved (matches harvest-date anchoring), absolute instant unchanged. (b) swallow \u2014 per-column catch now records a degradation message; new ISamplerDegradationSource (Pipeline) threaded via ComProbeResult.SamplerDegradations into CLI DegradationNotes + stderr. 2 hermetic probe-channel pins added.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "s1-golden-or-no-regen",
+      "dateTime": "2026-06-15T01:39:07.193537-04:00",
+      "description": "No-regen PROVEN byte-level: ran identify-cleanup --no-com against a temp copy of the committed HHC ir/ (harvest-date 2026-06-05, threshold 90) \u2014 produced dateSignalSource=dao-metadata, degradationNotes=[], findings=[] identical to the committed object-cleanup.json (modulo always-varying generatedAt + a temp-dir-derived database name). Golden is the --no-com path; the guard can only suppress (0 findings stays 0); COM-path changes do not touch it. No regen needed.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "s1-verified",
+      "dateTime": "2026-06-15T01:51:34.744365-04:00",
+      "description": "Cross-provider session-verification (gpt-5-4), 3 adversarial rounds. R1 Major: <= guard over-suppresses genuine pre-1900 dates -> narrowed to date-component == OleEpochBaseDate + pre-epoch regression pin. R1 Minor: CLI fold unpinned -> extracted CleanupDegradationNotes.Fold + 5 hermetic pins. R2 Major (framing): real exact-1899-12-30 max is an accepted false-negative (Access zero/default; true fix needs per-column provenance) -> documented + folded into DW-16 + pinned accepted behaviour. R3: Major resolution confirmed adequate, helper/pins confirmed correct; single doc Minor (stale on-or-before wording) fixed + swept. 62 cleanup / 907 Pipeline.Tests green; no-regen byte-proven (--no-com).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "s1-next-set-authored",
+      "dateTime": "2026-06-15T01:52:52.998432-04:00",
+      "description": "Recorded consumer-driven-only handoff (routed recommendation). 006 review arc now COMPLETE (sets 007-014). No DW trigger fired. Routed analysis recommends 015-unresolved-items-completeness (DW-11, proven reproducers = known bug not unproven-need) as proactive hardening; runner-up STOP/hold. Did NOT author a full 015 spec/stub \u2014 posture is consumer-driven-only and STOP is a close runner-up; human decides whether to start 015 or hold for a consumer report.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "set-complete",
+      "dateTime": "2026-06-15T01:54:39.229419-04:00",
+      "description": "Closeout: disposition.json (before commit), change-log.md (routed summarization), next-session-set-recommendation.md (routed), per-round s1-issues*.json + raw s1-verification*.md saved. Swept spurious samples/HomeHealthCare.accdb diff. Committing + pushing, then close_session, then notify; Step 9 reorg review post-notify.",
+      "status": "complete",
+      "routedApiCalls": []
+    }
+  ]
+}

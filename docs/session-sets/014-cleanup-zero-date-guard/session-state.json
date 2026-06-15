@@ -1,12 +1,21 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "014-cleanup-zero-date-guard",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
       "title": "Zero-Date Guard + Sampler Timezone/Degradation Fixes (misfire, O-1-5, O-2-6)",
-      "status": "not-started"
+      "status": "in-progress",
+      "startedAt": "2026-06-15T01:32:43.956727-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "high"
+      },
+      "verificationVerdict": null
     }
   ]
 }
