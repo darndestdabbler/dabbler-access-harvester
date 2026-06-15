@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "018-manifest-source-location-column-convention",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Reconcile the source-location column base and close DW-26",
+      "status": "not-started"
+    }
+  ]
+}

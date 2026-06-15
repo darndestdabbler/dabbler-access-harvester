@@ -968,9 +968,12 @@
   manifest schema-validating for a real split/rich-VBA DB whose code has line-leading
   tokens), OR a parser/manifest location-fidelity set is scoped (natural bundle with
   the DW-1/DW-2/DW-4 parser-grammar-completeness items).
-- **Owning set candidate:** a future `parser-location-fidelity` /
-  `manifest-location-convention` set (small, P0-only prereq). **Golden-affecting under
-  option (a) — plan the HHC regen.**
+- **Owning set:** **`018-manifest-source-location-column-convention`** (authored
+  2026-06-15 by Set 017 Session 1 at human direction: spec + not-started v4 stub;
+  1 session — decide the column base via cross-provider consensus + human sign-off,
+  implement, flip the Set 017 known-limitation pin, validate StudentICT locally,
+  close DW-26). The mismatch is **column-only** (lines are already 1-based).
+  **Golden-affecting under Option A — plan the HHC regen.**
 - **Mechanical backstop:** `StudentIctLocalInvariantTests` pins the CURRENT
   (defective) reality as a known limitation — it asserts the StudentICT manifest is
   schema-**invalid**, that the failure set contains the `StartColumn` `[minimum]`
