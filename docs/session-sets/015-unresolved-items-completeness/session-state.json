@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "015-unresolved-items-completeness",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Layer A — procedure-header unresolved references reach the index",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Layer B — module-level unresolved references get a manifest home",
+      "status": "not-started"
+    }
+  ]
+}
