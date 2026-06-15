@@ -2752,3 +2752,38 @@ reference; if it proves out twice in *this* repo, propose promotion to
   collision behaviour hermetically (the golden corpus may simply lack the colliding
   construct, as HHC did). If a second synthesized-key merge hits the same
   collision-or-self-dedup trap, propose promoting to a Convention under Code Style.
+
+### A Corpus-Conditional Output Facet Should Be Nullable (Omitted), Not An Always-Emitted Empty Collection — So Non-Applicable Corpora Stay Golden-Neutral
+
+- **Context:** Adding a new manifest facet that only applies to *some*
+  databases. First hit in `016-ribbon-navigation-surface`: Session 1 added
+  `NavigationGraph.Ribbon` (only databases with a custom `USysRibbons` ribbon
+  have one) and Session 2 added `NavigationGraph.RibbonEntryPoints` (only a
+  database with a ribbon contributes callbacks). HomeHealthCare — the committed
+  golden corpus — has no custom ribbon.
+- **Failure or friction:** None realized — this records the decision that
+  *avoided* a golden-churn footgun. The manifest is serialized with
+  `JsonIgnoreCondition.WhenWritingNull`, which omits **null** but still writes an
+  **empty array** (`"RibbonEntryPoints": []`). Had the new facet been a
+  non-nullable `IReadOnlyList<T>` defaulting to `Array.Empty<T>()`, every
+  manifest — including HHC's committed golden — would have gained a new
+  `"...": []` line, breaking the "both sessions are golden-neutral on HHC" hard
+  constraint and forcing a golden regen for a facet HHC does not even have.
+- **Lesson:** When a facet is *conditional on a corpus feature*, model it as a
+  **nullable** member and leave it null on databases without the feature, so
+  `WhenWritingNull` omits it entirely. Reserve the always-emitted (possibly
+  empty) collection for facets that are *universal* (every corpus genuinely has
+  the concept, the list just happens to be empty). The null-vs-empty distinction
+  then carries real meaning to the consumer: **null = the feature is absent**;
+  **`[]` = the feature is present but contributed nothing** (e.g. a ribbon with
+  no callbacks). 016 ties `RibbonEntryPoints` to `Ribbon`: null when there is no
+  ribbon, a (possibly empty) list when a ribbon exists.
+- **Action for future sessions:** Before adding a manifest facet, ask "does
+  *every* corpus have this concept?" If no, make it nullable and prove HHC
+  byte-neutral with a fresh run (016 did, via `CanonicalGoldenRegressionTests`);
+  do not default it to an empty collection. The cross-provider verifier checks
+  for exactly this leak ("any path where an empty `[]` could appear in a
+  non-applicable manifest"). This surfaced twice in one set (same code area), so
+  it is recorded here; if a **different** session set independently makes the
+  same null-vs-empty call for a corpus-conditional facet, promote it to a
+  Convention under Output JSON Conventions in `project-guidance.md`.
