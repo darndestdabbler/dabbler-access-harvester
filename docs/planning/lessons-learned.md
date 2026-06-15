@@ -2640,3 +2640,37 @@ reference; if it proves out twice in *this* repo, propose promotion to
   the actual hit count against the finding's count; fix all, disclose any
   expansion. If a third "finding under-counted its sites" case appears, fold this
   into the existing floor-not-ceiling Convention candidate.
+
+### A Spec's Shorthand Threshold Inequality Is Design Intent, Not The Exact Predicate — Verify Boundary Direction And Granularity Before Shipping
+
+- **Context:** Implementing a numeric/temporal guard whose spec states the
+  threshold as a shorthand inequality. First hit in `014-cleanup-zero-date-guard`
+  Session 1 (2026-06-15): the spec wrote the zero-date guard as
+  "treat `MaxValue <= 1899-12-30` as no-signal" in three places, and the first
+  implementation took it literally as `DateOnly.FromDateTime(MaxValue) <= 1899-12-30`.
+- **Failure or friction:** The routed cross-provider R1 returned a Major: `<=`
+  over-suppresses. A genuine maximum *before* the OLE epoch (e.g. `1890-01-01`) is
+  a real, ~136-year-stale finding that *should* flag — the `<=` floor wrongly hid
+  it. The correct predicate was date-component **equality** (`== 1899-12-30`),
+  which catches exactly the two values the guard must suppress (the zero-date
+  sentinel and the time-only fractional-day case, both landing precisely on the
+  epoch day) without hiding real pre-epoch dates. The spec's `<=` was *intent*
+  ("the epoch is the sentinel"), not a literal predicate; it was also ambiguous on
+  granularity — read as an instant comparison `<= 1899-12-30T00:00:00` it would
+  have *missed* the headline time-only case (`1899-12-30 14:30:00` > midnight).
+- **Lesson:** A spec's shorthand boundary (`X <= sentinel`, `X > N`, `X within K`)
+  encodes the author's *intent about the sentinel*, not the exact comparison to
+  ship. Before coding it, check the predicate against **both** directions of the
+  contract: what it must **catch** (here: the zero-date + time-only fractional
+  day) AND what it must **not** suppress (here: genuine old-but-real dates). Pin
+  *both* sides with a hermetic test — the must-catch case and the
+  must-not-suppress boundary case — so an over-broad or mis-granular boundary is
+  caught locally rather than by the closeout verifier. (Same evidence-over-
+  inference discipline applied to a comparison operator.)
+- **Action for future sessions:** When a spec gives a threshold as an inequality,
+  before implementing: (1) restate the exact set of values that must trip the
+  guard and the exact set that must not; (2) pick the operator/granularity that
+  separates them (`==` vs `<`/`<=`, date-component vs instant, inclusive vs
+  exclusive); (3) add a must-not-suppress boundary pin alongside the must-catch
+  pin. If a second spec-shorthand boundary is mis-shipped this way, propose
+  promoting to a Convention under Code Style.
