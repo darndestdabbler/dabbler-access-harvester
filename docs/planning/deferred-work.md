@@ -455,9 +455,10 @@
   Northwind's real ribbon **locally** (never commit a Northwind golden — proprietary);
   pin the committed regression with a **synthetic** USysRibbons-shaped fixture + a
   hermetic producer test.
-- **Owning set candidate:** a focused `navigation-ribbon` set (small; P0-only prereq;
-  Northwind-local validation + synthetic committed pins). The natural next set now
-  that DW-11 is closed.
+- **Owning set:** **`016-ribbon-navigation-surface`** (authored 2026-06-15: spec +
+  not-started v4 stub; 2 sessions — S1 USysRibbons row-read + customUI parser →
+  `RibbonStructure`, S2 `onAction` → callback entry points + closeout; Northwind-local
+  validation + synthetic committed pins). The natural next set now that DW-11 is closed.
 - **Mechanical backstop:** the HHC golden's `NavigationGraph` omits `Ribbon` (null);
   the §5.7 interpretation-guide note records the deliberate null. The committed
   corpus has no custom ribbon, so the producer's regression pin must be synthetic.
