@@ -359,3 +359,51 @@ must-fix.** Two doc tightenings applied + two DW entries opened (DW-5, DW-6).
   change, per lean-by-default (factor the helper on a second real need).
 - **Fable:** pending-fable on all four — Fable may still weigh in on the DA-1
   severity and the DA-4 architecture call when restored.
+
+---
+
+## 014-cleanup-zero-date-guard — Session 1 (zero-date misfire + O-1-5 + O-2-6)
+
+Authored by **Opus 4.8**. Closes 006's P6 lane (final review-arc lane). The routed
+cross-provider `session-verification` (gpt-5-4, 3 adversarial rounds) is the
+mandatory check and is recorded in `s1-verification*.md`; the entries below are
+queued for the interim in-IDE devil's-advocate pair AND for Fable's eventual read.
+The set-wide devil's-advocate prompt is in `s1-devils-advocate-prompt.md`.
+
+### S1-1 — Analyser zero-date guard boundary (`==` vs `<=`)
+- **What:** `CleanupAnalyser` suppresses a sampled maximum whose date component is
+  *exactly* the OLE epoch base `1899-12-30` as no-signal. Initially implemented as
+  the spec's literal `<=` shorthand; **narrowed to `==`** after the routed R1
+  caught that `<=` would hide genuine pre-1900 stale dates (a real ~136-year-stale
+  finding that SHOULD flag).
+- **Risk: medium.** The `==` boundary is the right call for the *observed* misfire,
+  but it leaves two **accepted** false-negatives (a real max dated exactly
+  1899-12-30; a real pre-epoch date masked by a sibling time-only column's
+  cross-column MAX) that are undecidable at the analyser without per-column sampler
+  provenance — deferred to **DW-16**. The judgement that these are acceptable rests
+  on "1899-12-30 is the Access zero/default so a meaningful real max of exactly the
+  epoch is effectively never observed" — empirically plausible but not corpus-proven
+  (HHC has no such case).
+- **Why it benefits from a higher-tier read:** confirming there is no *third*
+  legitimate-finding-suppression case at the analyser given the single cross-column
+  MAX it consumes, and pressure-testing the "exactly-epoch is always the sentinel"
+  assumption against real-world Access schemas.
+
+### S1-2 — O-1-5 timezone fix is behavior-preserving
+- **What:** `AccessDateMaximaSampler` now `SpecifyKind(Unspecified)` (was `Utc`),
+  still wrapped `new DateTimeOffset(naive, TimeSpan.Zero)`. Claimed behavior-
+  preserving because the pipeline anchors both the sample and the harvest date at
+  offset 0, so day-difference arithmetic is unchanged.
+- **Risk: safer.** Routed R2 verified the `DateTimeOffset` ctor does not throw for
+  Unspecified+zero offset and arithmetic is unchanged. The COM-tier exercise of the
+  real `SpecifyKind` shape is the only un-hermetic part (disclosed).
+
+### S1-3 — O-1-5 per-column degradation channel
+- **What:** new `ISamplerDegradationSource` (Pipeline) lets the Core COM sampler
+  surface swallowed per-column read failures; threaded via
+  `ComProbeResult.SamplerDegradations` → CLI `object-cleanup.json` notes. Fold
+  extracted to the hermetically-pinned `CleanupDegradationNotes.Fold`.
+- **Risk: safer.** Channel + fold are hermetically pinned; only the live COM catch
+  is integration-tier. R3 audited the helper + 5 pins and confirmed equivalence.
+- **Interim (in-IDE pair):** pending.
+- **Fable:** pending-fable on S1-1's accepted-residual judgement in particular.
