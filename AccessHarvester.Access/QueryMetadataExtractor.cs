@@ -147,7 +147,13 @@ public static class QueryMetadataExtractor
         {
             char c = sql[i];
             if (c == '[') depth++;
-            else if (c == ']') { if (depth > 0) depth--; }
+            else if (c == ']')
+            {
+                // A doubled ']]' inside a bracketed name is an escaped literal
+                // ']', not a close (006 F-1-6 follow-up — Jet/Access escape).
+                if (depth > 0 && i + 1 < sql.Length && sql[i + 1] == ']') { i++; continue; }
+                if (depth > 0) depth--;
+            }
             else if (c == ';' && depth == 0) return sql[start..i];
         }
         return null;
@@ -166,7 +172,13 @@ public static class QueryMetadataExtractor
         {
             char c = s[i];
             if (c == '[') depth++;
-            else if (c == ']') { if (depth > 0) depth--; }
+            else if (c == ']')
+            {
+                // A doubled ']]' inside a bracketed name is an escaped literal
+                // ']', not a close (006 F-1-6 follow-up — Jet/Access escape).
+                if (depth > 0 && i + 1 < s.Length && s[i + 1] == ']') { i++; continue; }
+                if (depth > 0) depth--;
+            }
             else if (c == separator && depth == 0)
             {
                 yield return s[segStart..i];
@@ -174,6 +186,24 @@ public static class QueryMetadataExtractor
             }
         }
         yield return s[segStart..];
+    }
+
+    /// <summary>
+    /// Returns the index of the bracketed identifier's true closing <c>]</c> in
+    /// <paramref name="trimmed"/> (which starts with <c>[</c>), treating a doubled
+    /// <c>]]</c> as an escaped literal <c>]</c> inside the name per Jet/Access
+    /// syntax (006 F-1-6 follow-up). Returns -1 when there is no unescaped closing
+    /// bracket.
+    /// </summary>
+    private static int FindClosingBracket(string trimmed)
+    {
+        for (int k = 1; k < trimmed.Length; k++)
+        {
+            if (trimmed[k] != ']') continue;
+            if (k + 1 < trimmed.Length && trimmed[k + 1] == ']') { k++; continue; } // escaped ]]
+            return k;
+        }
+        return -1;
     }
 
     private static IEnumerable<QueryParameter> ParseParametersClause(string clauseBody)
@@ -191,15 +221,17 @@ public static class QueryMetadataExtractor
 
             if (trimmed.StartsWith('['))
             {
-                int closeBracket = trimmed.IndexOf(']');
+                // Find the true closing ']' — a doubled ']]' is an escaped literal
+                // ']' inside the name, not the terminator (006 F-1-6 follow-up).
+                int closeBracket = FindClosingBracket(trimmed);
                 if (closeBracket < 0)
                 {
-                    name = trimmed.TrimStart('[').Trim();
+                    name = trimmed.TrimStart('[').Replace("]]", "]").Trim();
                     dataType = null;
                 }
                 else
                 {
-                    name = trimmed.Substring(1, closeBracket - 1);
+                    name = trimmed.Substring(1, closeBracket - 1).Replace("]]", "]");
                     string remainder = trimmed[(closeBracket + 1)..].Trim();
                     dataType = remainder.Length > 0 ? remainder : null;
                 }

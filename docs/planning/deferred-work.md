@@ -494,7 +494,17 @@
   the §5.7 interpretation-guide note records that chain opens/reads resolve only
   positional-literal targets and bare two-bang control references.
 
-### DW-15 — `identify-cleanup` returns exit 2 (not the contract's 1) for usage errors
+### DW-15 — `identify-cleanup` returns exit 2 (not the contract's 1) for usage errors — **CLOSED 2026-06-15 (013 devil's-advocate follow-up)**
+> **CLOSED** by the Set 013 whole-set devil's-advocate review (GPT-5.4 + Gemini
+> 3.1 Pro both CHALLENGED the deferral as defeating the set's exit-code-honesty
+> mandate). With human approval, `IdentifyCleanupCommand.Run` was normalised onto
+> the CLI-wide contract: usage errors (unknown switch, missing/mutually-exclusive
+> `--in`/`--manifest`, bad `--threshold-days`/`--harvest-date`) now return **1**;
+> the unexpected-exception catch returns **2**; directory-not-found stays 1
+> (usage-class, matching `validate`). Pinned: `identify-cleanup` joined the
+> `CliUnknownSwitchTests` uniform exit-1 theory + two added usage-error pins
+> (`IdentifyCleanup_MissingRequiredOption_IsUsageErrorExit1`,
+> `IdentifyCleanup_BadThresholdDays_IsUsageErrorExit1`).
 - **What:** every CLI subcommand reports a usage error as exit **1** and an
   unexpected error as exit **2** (the usage text from F-1-3 states
   `1 = usage error`), **except `identify-cleanup`**, whose `Run` summary documents
@@ -534,3 +544,7 @@
   `012-switchboard-and-report-chain-edges` Sessions 2 (mechanical producers) +
   3 (code-behind producer). Full entry retained above with its CLOSED banner.
   Residual coverage gaps → **DW-14**.
+- **DW-15** — `identify-cleanup` exit 2 (not 1) for usage errors — **CLOSED
+  2026-06-15** by the Set 013 whole-set devil's-advocate follow-up (both providers
+  CHALLENGED; normalised onto the CLI-wide exit-code contract with human
+  approval). Full entry retained above with its CLOSED banner.

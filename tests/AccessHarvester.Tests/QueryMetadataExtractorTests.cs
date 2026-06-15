@@ -274,4 +274,38 @@ public class QueryMetadataExtractorTests
         Assert.Equal("Enter Fiscal Year:", declared[1].Name);
         Assert.Equal("Long", declared[1].DataType);
     }
+
+    // 006 F-1-6 follow-up (devil's-advocate, both providers): a doubled ']]' is a
+    // Jet/Access escaped literal ']' inside a bracketed name, not the terminator.
+    // The first-pass fix closed the name at the first ']' (and the depth scanners
+    // zeroed depth on it), so an escaped-']' name was misparsed.
+
+    [Fact]
+    public void ParseParameters_EscapedBracketInName_UnescapesAndKeepsType()
+    {
+        // GPT reproducer: was Name="a", DataType="]b] Text".
+        var parameters = QueryMetadataExtractor.ParseParameters(
+            "PARAMETERS [a]]b] Text;SELECT 1;");
+
+        var declared = parameters!.Where(p => p.Source == "declared").ToArray();
+        Assert.Single(declared);
+        Assert.Equal("a]b", declared[0].Name);
+        Assert.Equal("Text", declared[0].DataType);
+    }
+
+    [Fact]
+    public void ParseParameters_CommaAfterEscapedBracketInName_DoesNotSplit()
+    {
+        // Gemini's sharper case: a ',' AFTER the escaped ']]' is still inside the
+        // bracketed name, so the depth scanner must not split on it.
+        var parameters = QueryMetadataExtractor.ParseParameters(
+            "PARAMETERS [Has]]Bracket, And Comma] Long, [p2] Text;SELECT 1;");
+
+        var declared = parameters!.Where(p => p.Source == "declared").ToArray();
+        Assert.Equal(2, declared.Length);
+        Assert.Equal("Has]Bracket, And Comma", declared[0].Name);
+        Assert.Equal("Long", declared[0].DataType);
+        Assert.Equal("p2", declared[1].Name);
+        Assert.Equal("Text", declared[1].DataType);
+    }
 }

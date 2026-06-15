@@ -84,6 +84,28 @@ remains.
 `next-session-set-recommendation.md`, and the `014-cleanup-zero-date-guard`
 spec + v4 state stub.
 
+## Whole-set devil's-advocate follow-up (2026-06-15)
+
+A human-driven adversarial review of the complete set (GPT-5.4 + Gemini 3.1 Pro,
+prompt `set013-devils-advocate-prompt.md`) caught **two defects the routed
+`session-verification` had VERIFIED past** — the non-overlapping-blind-spot pass
+earning its keep:
+
+- **F-1-6 escaped-`]]` PARAMETERS names (both providers).** A doubled `]]`
+  (Jet/Access escaped literal `]`) was misparsed — `[a]]b]` read as name `a` /
+  type `]b] Text` instead of name `a]b` / type `Text`, and a `,`/`;` after the
+  `]]` could mis-split. **Fixed** in the two depth scanners + the per-entry name
+  parse (`FindClosingBracket` + `]]`→`]` unescape); new pins; re-proven
+  golden-neutral byte-level.
+- **DW-15 `identify-cleanup` exit 2 (both providers).** Both challenged the
+  deferral as defeating the set's exit-code-honesty mandate. With human approval,
+  **normalised** onto the CLI-wide contract (usage → 1, unexpected → 2;
+  directory-not-found stays 1). **DW-15 CLOSED.**
+
+Four other challenges were dispositioned **no-change** with rationale (F-1-2
+fail-honest is spec-mandated and GPT-endorsed; O-1-4 `--`-value is a pre-existing
+heuristic with an easy workaround). Full triage: `s2-devils-advocate-disposition.md`.
+
 ## Next session set
 
 **`014-cleanup-zero-date-guard`** (006 P6, the final unowned ranked set): the

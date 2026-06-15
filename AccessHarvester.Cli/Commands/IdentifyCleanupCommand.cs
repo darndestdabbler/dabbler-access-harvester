@@ -16,7 +16,9 @@ public static class IdentifyCleanupCommand
 {
     private static readonly JsonSerializerOptions _statusOpts = new() { WriteIndented = true };
 
-    /// <summary>Runs identify-cleanup. Returns 0 on success, 2 on usage error, 1 on other failure.</summary>
+    /// <summary>Runs identify-cleanup. Returns 0 on success, 1 on usage error, 2 on unexpected
+    /// failure — aligned with the CLI-wide exit-code contract (006 DW-15, normalised 013 follow-up;
+    /// was previously the inverted 2-on-usage/1-on-other convention).</summary>
     public static int Run(string[] args)
     {
         Dictionary<string, string> opts;
@@ -25,7 +27,7 @@ public static class IdentifyCleanupCommand
         {
             Console.Error.WriteLine($"identify-cleanup: {ex.Message}");
             PrintUsage();
-            return 2;
+            return 1;
         }
 
         bool hasIn = opts.ContainsKey("in");
@@ -34,13 +36,13 @@ public static class IdentifyCleanupCommand
         {
             Console.Error.WriteLine("identify-cleanup: --in <harvested-output-root> or --manifest <path> is required.");
             PrintUsage();
-            return 2;
+            return 1;
         }
         if (hasIn && hasManifest)
         {
             Console.Error.WriteLine("identify-cleanup: --in and --manifest are mutually exclusive.");
             PrintUsage();
-            return 2;
+            return 1;
         }
 
         int thresholdDays = 90;
@@ -50,7 +52,7 @@ public static class IdentifyCleanupCommand
                 || thresholdDays < 1)
             {
                 Console.Error.WriteLine("identify-cleanup: --threshold-days must be a positive integer (>= 1).");
-                return 2;
+                return 1;
             }
         }
 
@@ -61,7 +63,7 @@ public static class IdentifyCleanupCommand
                 DateTimeStyles.None, out harvestDate))
             {
                 Console.Error.WriteLine("identify-cleanup: --harvest-date must be a calendar date in YYYY-MM-DD format.");
-                return 2;
+                return 1;
             }
         }
 
@@ -163,7 +165,7 @@ public static class IdentifyCleanupCommand
         catch (Exception ex)
         {
             Console.Error.WriteLine($"identify-cleanup: unexpected error: {ex.Message}");
-            return 1;
+            return 2;
         }
     }
 

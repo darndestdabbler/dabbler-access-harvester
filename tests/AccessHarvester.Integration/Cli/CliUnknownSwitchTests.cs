@@ -15,10 +15,11 @@ namespace AccessHarvester.Integration.Cli;
 /// </summary>
 public sealed class CliUnknownSwitchTests
 {
-    // The eleven subcommands whose usage-error exit code is the harvester
-    // contract's 1. `identify-cleanup` is pinned separately: it uses exit 2 for
-    // every usage error by its own pre-existing (inverted) convention — see
-    // IdentifyCleanupExit2OnUnknownSwitch below and DW-15.
+    // All twelve subcommands report a usage error (here, an unknown switch) as the
+    // harvester contract's exit 1. `identify-cleanup` was the lone exception with
+    // an inverted exit-2-on-usage convention (DW-15); the 013 devil's-advocate pass
+    // (both GPT and Gemini) flagged that as defeating the set's exit-code-honesty
+    // mandate, so it was normalised onto exit 1 with the rest.
     [Theory]
     [InlineData("extract")]
     [InlineData("translate")]
@@ -27,6 +28,7 @@ public sealed class CliUnknownSwitchTests
     [InlineData("generate-docs")]
     [InlineData("validate")]
     [InlineData("identify-usage")]
+    [InlineData("identify-cleanup")]
     [InlineData("classify")]
     [InlineData("sanitize")]
     [InlineData("report-baseline")]
@@ -39,19 +41,22 @@ public sealed class CliUnknownSwitchTests
         Assert.Contains("Unknown option: --bogus", result.StdErr);
     }
 
-    // identify-cleanup returns exit 2 for ALL usage errors (its Run summary
-    // documents "0 on success, 2 on usage error, 1 on other failure" — inverted
-    // vs the rest of the CLI). O-1-4 only adds rejection; it deliberately does NOT
-    // renumber this command's exit code (out of P5 scope; recorded as DW-15).
-    // Before this set `identify-cleanup --bogus x` already exited 2 (via the
-    // "--in required" path), so the exit code is unchanged — only the message is
-    // now the precise "Unknown option" diagnostic.
+    // DW-15 normalisation (013 devil's-advocate follow-up): identify-cleanup's
+    // OTHER usage errors are now exit 1 too (were exit 2 under the inverted
+    // convention). These COM-free paths fail before any database work.
     [Fact]
-    public void IdentifyCleanup_UnknownSwitch_IsRejectedExit2()
+    public void IdentifyCleanup_MissingRequiredOption_IsUsageErrorExit1()
     {
-        var result = CliInvoker.Run("identify-cleanup", "--bogus", "x");
+        var result = CliInvoker.Run("identify-cleanup", "--threshold-days", "30");
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("required", result.StdErr);
+    }
 
-        Assert.Equal(2, result.ExitCode);
-        Assert.Contains("Unknown option: --bogus", result.StdErr);
+    [Fact]
+    public void IdentifyCleanup_BadThresholdDays_IsUsageErrorExit1()
+    {
+        var result = CliInvoker.Run("identify-cleanup", "--in", "x", "--threshold-days", "notanumber");
+        Assert.Equal(1, result.ExitCode);
+        Assert.Contains("threshold-days", result.StdErr);
     }
 }
