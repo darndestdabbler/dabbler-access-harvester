@@ -629,6 +629,49 @@
   `015/s2-design-note.md`. The interpretation guide's unresolved-items section
   should note module-level refs appear in the index only.
 
+### DW-18 — Resolver has no intrinsic-constant registry, so VBA built-in constants surface as `not-in-scope` (false-positive unresolved refs)
+- **What:** the resolver recognises built-in **functions** (a
+  `BuiltInFunctionRegistry`) but has **no registry for VBA intrinsic
+  *constants*** (`vbCrLf`, `vbTab`, `vbNullString`, the colour constants
+  `vbWhite`/`vbYellow`/…, the comparison/date/keycode/message-box constant
+  families, `vbObjectError`, etc.). Every use of one resolves to
+  `not-in-scope` and surfaces as an unresolved reference (inline
+  `ResolutionReason: "not-in-scope"` and, after 015, in `unresolved-items.json`
+  under `FunctionClassification` / `ModuleLevelReference`). These are
+  **false positives**: the identifiers are well-known language intrinsics the
+  resolver should bind as built-ins, not real "could not resolve" misses. They
+  dilute the unresolved index and can mislead a consumer triaging it.
+- **Origin:** 2026-06-15 NorthwindDevEdition **local** validation (the
+  HHC-only-verification gap the human flagged — see
+  `feedback_use_northwind_as_local_test_corpus`). A local Northwind harvest
+  surfaced `vbWhite`/`vbYellow` as module-level `not-in-scope`, **`vbCrLf` 17
+  times**, and `vbNullString`; HHC's golden likewise carries `vbObjectError`.
+  The breadth (a common string constant like `vbCrLf` is unrecognised) confirms
+  the gap is the *absence of a constant registry*, not a few missing entries —
+  but the exact intrinsic-constant set + values is the owning set's scope to
+  enumerate (hypothesis-not-verified until that set audits the registry).
+- **Why deferred:** out of scope for DW-11 (which faithfully *surfaces* what the
+  resolver could not bind — it does not decide what *should* bind) and for DW-13
+  (ribbon). Adding an intrinsic-constant registry is a **resolver-completeness**
+  change: it needs the canonical VBA/VBA-Access constant set with correct
+  values/types, and it is **golden-affecting** (every such reference flips from
+  `Unresolved`/`not-in-scope` to `Resolved` → `unresolved-items.json` shrinks and
+  the inline `ResolutionStatus`/`ResolutionReason` change), so it must land as a
+  deliberate set with a coordinated HHC golden regen, not folded into unrelated
+  work.
+- **Trigger to pull back in:** a consumer reports intrinsic constants polluting
+  the unresolved index, OR a resolver-completeness / grammar-completeness set is
+  scoped (natural bundling with DW-1/DW-2/DW-4), OR a migration consumer needs
+  intrinsic constants resolved to their values.
+- **Owning set candidate:** a future `resolver-builtin-constants` set (small,
+  P0-only prereq), or folded into the parser/resolver-completeness bundle
+  (DW-1..DW-4). **Golden-affecting — plan the HHC regen.**
+- **Mechanical backstop:** none committed (the false positives are only visible
+  on real corpora — HHC carries `vbObjectError` in the committed golden, which is
+  the one in-repo signal; the broader set shows only on the local Northwind run
+  pinned by `NorthwindLocalInvariantTests`). The owning set should add a hermetic
+  pin that a representative intrinsic constant resolves as built-in.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED

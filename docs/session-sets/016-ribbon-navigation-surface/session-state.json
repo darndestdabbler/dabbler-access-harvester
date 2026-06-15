@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "016-ribbon-navigation-surface",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "RibbonStructure facet — parse USysRibbons into NavigationGraph.Ribbon",
+      "status": "not-started"
+    },
+    {
+      "number": 2,
+      "title": "Ribbon entry points (onAction → callback) + closeout",
+      "status": "not-started"
+    }
+  ]
+}
