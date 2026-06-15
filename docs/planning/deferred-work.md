@@ -440,15 +440,27 @@
   custom ribbon, so there is no fixture to drive or pin a ribbon producer against;
   per the spec's Step 5 ribbon decision, populating it from a **real** custom-ribbon
   corpus is left here rather than synthesising a fixture.
-- **Why deferred:** no in-corpus signal to build against; populating it requires a
-  real `USysRibbons` corpus case so the producer is validated against ground truth
-  (not a hand-built fixture), consistent with the no-synthesized-fixture posture.
-- **Trigger to pull back in:** a harvested database with a custom `USysRibbons`
-  ribbon, OR a consumer needs the ribbon entry-point surface.
-- **Owning set candidate:** a future navigation-ribbon set (or folded into the next
-  set that ingests a custom-ribbon corpus).
+- **Why deferred (premise now CORRECTED 2026-06-15):** the original deferral said
+  "no in-corpus signal to build against." That was an **HHC-only** view.
+  **NorthwindDevEdition HAS a custom ribbon** — a local harvest (`run` →
+  `C:/temp`, gitignored, never committed) confirmed `USysRibbons` (one record,
+  `RibbonName` + `RibbonXML LONGTEXT`) is extracted to `raw|kb/ir/Tables/USysRibbons`
+  with a companion `modRibbonCallback` VBA module, while `NavigationGraph.Ribbon`
+  still ships null (no producer). So the ground-truth corpus the deferral was waiting
+  for **already exists locally**; the only reason this is still open is that nobody
+  scoped the producer. (Surfaced 2026-06-15 when the human flagged that verification
+  had run HHC-only — Northwind is the standing local test corpus.)
+- **Trigger to pull back in:** **AVAILABLE NOW** (Northwind's custom `USysRibbons`),
+  OR a consumer needs the ribbon entry-point surface. Validate the producer against
+  Northwind's real ribbon **locally** (never commit a Northwind golden — proprietary);
+  pin the committed regression with a **synthetic** USysRibbons-shaped fixture + a
+  hermetic producer test.
+- **Owning set candidate:** a focused `navigation-ribbon` set (small; P0-only prereq;
+  Northwind-local validation + synthetic committed pins). The natural next set now
+  that DW-11 is closed.
 - **Mechanical backstop:** the HHC golden's `NavigationGraph` omits `Ribbon` (null);
-  the §5.7 interpretation-guide note records the deliberate null.
+  the §5.7 interpretation-guide note records the deliberate null. The committed
+  corpus has no custom ribbon, so the producer's regression pin must be synthetic.
 
 ### DW-14 — Navigation-target resolution misses named-argument and indexer/`With` reference forms
 - **What:** the navigation layer resolves a `DoCmd.OpenForm/OpenReport` target only
