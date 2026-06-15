@@ -963,6 +963,7 @@
         "Edges": { "type": "array", "items": { "$ref": "#/$defs/NavigationEdge" } },
         "UnresolvedTargets": { "type": "array", "items": { "$ref": "#/$defs/UnresolvedNavigationTarget" } },
         "Ribbon": { "$ref": "#/$defs/RibbonStructure" },
+        "RibbonEntryPoints": { "type": "array", "items": { "$ref": "#/$defs/RibbonEntryPoint" }, "description": "Ribbon navigation entry points (016 S2 / DW-13): one record per custom-ribbon callback (every control onAction plus the root onLoad), resolved against the harvested VBA modules. Omitted when Ribbon is null (no custom ribbon contributes nothing, like Ribbon itself, so a non-ribbon corpus stays byte-neutral). Source order: root onLoad first, then a depth-first tabs -> groups -> controls -> children walk, then contextual tab sets." },
         "Switchboard": { "$ref": "#/$defs/SwitchboardStructure" },
         "Macros": { "type": "array", "items": { "$ref": "#/$defs/MacroChain" } },
         "ChainEdges": { "type": "array", "items": { "$ref": "#/$defs/ChainEdge" }, "description": "Cross-object navigation chain edges (R2-2 / DW-10): launcher -> report -> dialog -> query -> parameter relationships derived from embedded macros, record sources, and query parameters." },
@@ -1011,6 +1012,22 @@
         "Name": { "type": "string" },
         "OpensFormName": { "type": "string" },
         "CallsProcedure": { "$ref": "#/$defs/ProcedureReference" }
+      }
+    },
+
+    "RibbonEntryPoint": {
+      "type": "object",
+      "description": "One custom-ribbon callback (a control onAction or the ribbon root onLoad) resolved against the harvested VBA modules (016 S2 / DW-13). The ribbon analogue of NavigationEntryPoint. Resolution is a case-insensitive name match: Resolved (exactly one match; ResolvedProcedure names module + procedure), Unresolved (no match; surfaced explicitly, never dropped), Ambiguous (more than one match; ResolvedProcedure omitted, no module guessed). Design note: docs/session-sets/016-ribbon-navigation-surface/s2-ribbon-entry-point-consensus.md.",
+      "required": ["Kind", "CallbackName", "Resolution"],
+      "properties": {
+        "Kind": { "enum": ["OnAction", "OnLoad"], "description": "Whether the callback is a control onAction or the ribbon root onLoad." },
+        "CallbackName": { "type": "string", "description": "The callback procedure name exactly as authored in the ribbon XML onAction/onLoad attribute; preserved verbatim even when unresolved." },
+        "ControlType": { "type": "string", "description": "The owning control's element type (button/dropDown/...); omitted for the root onLoad entry." },
+        "ControlId": { "type": "string", "description": "The owning control's custom id; omitted for the root onLoad or a built-in idMso control." },
+        "ControlIdMso": { "type": "string", "description": "The owning control's built-in idMso; omitted for the root onLoad or a custom id control." },
+        "ControlLabel": { "type": "string", "description": "The owning control's display label; omitted when absent." },
+        "Resolution": { "enum": ["Resolved", "Unresolved", "Ambiguous"] },
+        "ResolvedProcedure": { "$ref": "#/$defs/ProcedureReference", "description": "Module + declared procedure name when Resolution is Resolved; omitted for Unresolved and Ambiguous." }
       }
     },
 

@@ -39,4 +39,16 @@ entry-point resolution. `continue-current-trajectory`.
 `next-session-set` recommendation; small.
 
 ### Actuals (filled after the session)
-_TBD — Session 2._
+- Orchestrator: Claude Opus 4.8 (`claude-opus-4-8[1m]`), effort high.
+- Routed calls: ribbon-entry-point model **design consensus** (gpt-5-4 + gemini-pro,
+  `architecture`) — both chose Option B (dedicated `RibbonEntryPoints` collection);
+  closeout-grade **session-verification** R1 (gpt-5-4, cross-provider) → **VERIFIED**,
+  no issues (embedded S1 evidence per the cross-session-evidence convention); routed
+  **next-session-set** recommendation (gpt-5-4, `summarization`) → consumer-driven-only STOP.
+- Work handled directly (mechanical, in-scope): the model record + 2 enums, the builder
+  derivation + procedure index, the schema `$def`, 10 hermetic tests, the Northwind local
+  invariant extension.
+- Outcome: **VERIFIED**; HHC golden byte-level reproduced via fresh COM run (neutral);
+  Northwind ribbon entry points validated locally; 952 hermetic Pipeline tests green;
+  DW-13 discharged; DW-20 narrowed (onLoad now resolved); set-wide in-IDE devil's-advocate
+  prompt authored for the human's GPT + Gemini run.

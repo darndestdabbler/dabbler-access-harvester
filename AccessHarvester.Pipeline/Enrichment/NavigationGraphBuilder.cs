@@ -85,6 +85,7 @@ public static class NavigationGraphBuilder
 
         var macros = inputs?.Macros is { } m ? (IReadOnlyList<MacroChain>)m.ToArray() : Array.Empty<MacroChain>();
         var entryPoints = BuildEntryPoints(inputs, macros);
+        var ribbonEntryPoints = BuildRibbonEntryPoints(inputs?.Ribbon, modules);
 
         return new NavigationGraph
         {
@@ -92,6 +93,7 @@ public static class NavigationGraphBuilder
             Edges = sortedEdges,
             UnresolvedTargets = sortedUnresolved,
             Ribbon = inputs?.Ribbon,
+            RibbonEntryPoints = ribbonEntryPoints,
             Switchboard = inputs?.Switchboard,
             Macros = macros,
         };
@@ -744,6 +746,140 @@ public static class NavigationGraphBuilder
         }
 
         return result;
+    }
+
+    // ── Ribbon entry-point derivation (016 S2 / DW-13) ────────────
+
+    // For each custom-ribbon callback — every control onAction plus the root
+    // onLoad — resolve the named procedure against the harvested modules and
+    // surface a RibbonEntryPoint. Returns null when there is no ribbon (the
+    // facet is omitted, exactly like NavigationGraph.Ribbon, so a non-ribbon
+    // corpus stays byte-neutral); a present-but-callback-less ribbon yields an
+    // empty list. Deterministic source order: root onLoad first, then a
+    // depth-first walk of tabs -> groups -> controls -> children, then the
+    // contextual tab sets. The resolution outcome itself is order-independent
+    // (a unique match resolves regardless of module iteration order; multiple
+    // matches are Ambiguous with no guessed module), so no extra sort is
+    // needed and the authored order is preserved.
+    private static IReadOnlyList<RibbonEntryPoint>? BuildRibbonEntryPoints(
+        RibbonStructure? ribbon,
+        IReadOnlyList<ResolvedModule> modules)
+    {
+        if (ribbon is null) return null;
+
+        // name (case-insensitive) -> the distinct (module, declared-name)
+        // procedures that carry it. A callback resolves only when exactly one
+        // procedure carries the name.
+        var byName = BuildProcedureIndex(modules);
+
+        var result = new List<RibbonEntryPoint>();
+
+        if (!string.IsNullOrEmpty(ribbon.OnLoad))
+            result.Add(ResolveCallback(RibbonCallbackKind.OnLoad, ribbon.OnLoad!, control: null, byName));
+
+        foreach (var tab in ribbon.Tabs)
+            CollectFromTab(tab, byName, result);
+        foreach (var set in ribbon.ContextualTabSets)
+            foreach (var tab in set.Tabs)
+                CollectFromTab(tab, byName, result);
+
+        return result;
+    }
+
+    private static void CollectFromTab(
+        RibbonTab tab,
+        IReadOnlyDictionary<string, List<ProcedureReference>> byName,
+        List<RibbonEntryPoint> result)
+    {
+        foreach (var group in tab.Groups)
+            foreach (var control in group.Controls)
+                CollectFromControl(control, byName, result);
+    }
+
+    // Depth-first, source order: a control's own onAction (if any) before its
+    // children's, so a splitButton/menu surfaces ahead of its nested items.
+    private static void CollectFromControl(
+        RibbonControl control,
+        IReadOnlyDictionary<string, List<ProcedureReference>> byName,
+        List<RibbonEntryPoint> result)
+    {
+        if (!string.IsNullOrEmpty(control.OnAction))
+            result.Add(ResolveCallback(RibbonCallbackKind.OnAction, control.OnAction!, control, byName));
+        foreach (var child in control.Children)
+            CollectFromControl(child, byName, result);
+    }
+
+    private static RibbonEntryPoint ResolveCallback(
+        RibbonCallbackKind kind,
+        string callbackName,
+        RibbonControl? control,
+        IReadOnlyDictionary<string, List<ProcedureReference>> byName)
+    {
+        RibbonCallbackResolution resolution;
+        ProcedureReference? resolved = null;
+        if (byName.TryGetValue(callbackName, out var matches) && matches.Count > 0)
+        {
+            if (matches.Count == 1)
+            {
+                resolution = RibbonCallbackResolution.Resolved;
+                resolved = matches[0];
+            }
+            else
+            {
+                // Found in more than one module — surface the ambiguity, never
+                // pick a module (faithful-mechanical).
+                resolution = RibbonCallbackResolution.Ambiguous;
+            }
+        }
+        else
+        {
+            resolution = RibbonCallbackResolution.Unresolved;
+        }
+
+        return new RibbonEntryPoint
+        {
+            Kind = kind,
+            CallbackName = callbackName,
+            ControlType = control?.ControlType,
+            ControlId = control?.Id,
+            ControlIdMso = control?.IdMso,
+            ControlLabel = control?.Label,
+            Resolution = resolution,
+            ResolvedProcedure = resolved,
+        };
+    }
+
+    // Index every harvested procedure by name (case-insensitive, VBA
+    // semantics). Two procedures sharing a name across modules both land under
+    // the key, which is what makes the callback Ambiguous. A name declared
+    // twice in the SAME module (illegal VBA, but the parser does not enforce
+    // it) is de-duplicated to one (module, name) entry so it does not falsely
+    // read as ambiguous.
+    private static IReadOnlyDictionary<string, List<ProcedureReference>> BuildProcedureIndex(
+        IReadOnlyList<ResolvedModule> modules)
+    {
+        var byName = new Dictionary<string, List<ProcedureReference>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var module in modules)
+        {
+            var moduleName = module.ModuleScope.ModuleName;
+            foreach (var item in module.Ast.Items)
+            {
+                if (item is not ParserProcedure proc) continue;
+                if (!byName.TryGetValue(proc.Name, out var list))
+                {
+                    list = new List<ProcedureReference>();
+                    byName[proc.Name] = list;
+                }
+                // De-dup on (module, procedure) so a same-module redeclaration
+                // does not inflate the match count into a false Ambiguous.
+                bool alreadyPresent = list.Any(p =>
+                    string.Equals(p.ModuleName, moduleName, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(p.ProcedureName, proc.Name, StringComparison.OrdinalIgnoreCase));
+                if (!alreadyPresent)
+                    list.Add(new ProcedureReference { ModuleName = moduleName, ProcedureName = proc.Name });
+            }
+        }
+        return byName;
     }
 
     private static MacroChain? FindAutoExec(IReadOnlyList<MacroChain> macros)

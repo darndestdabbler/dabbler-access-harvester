@@ -141,6 +141,43 @@ public sealed class NorthwindLocalInvariantTests
             var onActions = CollectOnActions(ribbon);
             Assert.Contains("cmdAbout_OnAction", onActions);
             Assert.Contains("ddMRU_OnAction", onActions);
+
+            // Invariant 7 (DW-13, 016 S2): the ribbon entry-point producer
+            // resolves the real onAction callbacks against the harvested
+            // modules. NavigationGraph.RibbonEntryPoints must be populated (a
+            // ribbon is present) and cmdAbout_OnAction must resolve to a
+            // procedure in modRibbonCallback. Every entry surfaces a resolution
+            // status — none is silently dropped.
+            var ribbonEntryPoints = manifest!.NavigationGraph!.RibbonEntryPoints;
+            Assert.True(ribbonEntryPoints is not null && ribbonEntryPoints.Count > 0,
+                "NavigationGraph.RibbonEntryPoints is null/empty on a database with a custom " +
+                "ribbon that defines onAction callbacks — the DW-13 S2 producer did not run.");
+
+            // Every entry carries one of the three explicit resolution states
+            // (never an unset/dropped callback).
+            Assert.All(ribbonEntryPoints!, ep => Assert.True(
+                ep.Resolution is RibbonCallbackResolution.Resolved
+                    or RibbonCallbackResolution.Unresolved
+                    or RibbonCallbackResolution.Ambiguous,
+                $"Ribbon entry point '{ep.CallbackName}' has no resolution status."));
+
+            var about = Assert.Single(ribbonEntryPoints!,
+                ep => ep.CallbackName == "cmdAbout_OnAction");
+            Assert.Equal(RibbonCallbackResolution.Resolved, about.Resolution);
+            Assert.Equal("modRibbonCallback", about.ResolvedProcedure!.ModuleName);
+            Assert.Equal("cmdAbout_OnAction", about.ResolvedProcedure.ProcedureName);
+
+            // Every distinct onAction the ribbon tree carries is surfaced as an
+            // entry point — proves the walk reaches nested controls, not just
+            // top-level ones. (Entry points may additionally cover the
+            // contextualTabs section, which CollectOnActions does not walk, so
+            // the entry-point set is a superset of the tab-tree onActions.)
+            var epOnActions = ribbonEntryPoints!
+                .Where(ep => ep.Kind == RibbonCallbackKind.OnAction)
+                .Select(ep => ep.CallbackName)
+                .ToHashSet(StringComparer.Ordinal);
+            Assert.Superset(epOnActions, onActions.ToHashSet(StringComparer.Ordinal));
+            Assert.Contains("ddMRU_OnAction", epOnActions);
         }
         finally
         {

@@ -431,7 +431,22 @@
   reproduces it); the `interpretation-guide.md` §4 note is the standing consumer
   guard.
 
-### DW-13 — Ribbon (`USysRibbons`) navigation surface is not produced
+### DW-13 — Ribbon (`USysRibbons`) navigation surface is not produced — **CLOSED 2026-06-15 (016 S1 + S2)**
+> **CLOSED** by `016-ribbon-navigation-surface`: Session 1 added the shape-gated
+> `USysRibbons (RibbonName, RibbonXML)` row-read (`RibbonExporter` +
+> `RibbonSignatureDetector`), the pure namespace-tolerant `RibbonXmlParser` →
+> recursive `RibbonStructure`, the `RibbonStructureBuilder`, and the
+> `Pipeline.BuildNavigationInputs` wiring so `NavigationGraph.Ribbon` is populated on
+> a custom-ribbon DB; Session 2 added the ribbon **entry-point** surface
+> (`NavigationGraph.RibbonEntryPoints`): every control `onAction` + the root `onLoad`
+> resolved against the harvested modules, with explicit `Resolved`/`Unresolved`/
+> `Ambiguous` (no guessed module). Validated against NorthwindDevEdition's real custom
+> ribbon **locally** (never committed — proprietary) via `NorthwindLocalInvariantTests`;
+> pinned with synthetic hermetic tests; HHC golden proven **byte-level neutral** by a
+> fresh COM run (no `USysRibbons` → `Ribbon`/`RibbonEntryPoints` omitted). Both sessions
+> cross-provider VERIFIED (gpt-5-4). Remainders carved out: **DW-20** (dynamic `get*`
+> callbacks → entry points) and **DW-21** (non-`<tabs>` customUI sections in the
+> structured view). Full entry retained below.
 - **What:** `NavigationGraph.Ribbon` / `NavigationGraphInputs.Ribbon` and the
   `RibbonStructure` model exist, but no producer reads `USysRibbons` custom-ribbon
   XML into structure, so the facet ships null on every corpus. (Carved out of DW-9,
@@ -706,19 +721,22 @@
   SQL feeds are not passed to the run-wide `Build`). Recorded here so the signature
   is fixed at the same time the feeds are wired.
 
-### DW-20 — Dynamic ribbon callbacks (`onLoad`, `get*`) are surfaced verbatim but not resolved to navigation entry points
-- **What:** the ribbon producer (016 S1) surfaces the `customUI@onLoad` callback
-  (typed slot `RibbonStructure.OnLoad`) and the dynamic control callback family
+### DW-20 — Dynamic ribbon control callbacks (`get*`) are surfaced verbatim but not resolved to navigation entry points
+- **What:** the ribbon producer surfaces the dynamic control callback family
   (`getItemCount`, `getItemLabel`, `getSelectedItemIndex`, `getItemID`,
-  `getVisible`, `getEnabled`, …) verbatim in each node's `Attributes` bag — but
-  only the **static `onAction`** is promoted to a typed slot and resolved (016 S2)
-  to a VBA navigation entry point. The dynamic callbacks are real ribbon→VBA edges
-  (a `getVisible` names a VBA function; `onLoad` names the ribbon-load handler) that
-  are **not** surfaced as entry points, so a consumer building the full ribbon→VBA
-  call graph must read them out of the `Attributes` bag itself.
+  `getVisible`, `getEnabled`, …) verbatim in each node's `Attributes` bag — but only
+  the **static `onAction`** (every control) and the **root `onLoad`** are promoted to
+  typed ribbon entry points and resolved against the harvested modules (016 S2,
+  `NavigationGraph.RibbonEntryPoints`). The dynamic `get*` callbacks are real
+  ribbon→VBA edges (a `getVisible` names a VBA function) that are **not** surfaced as
+  entry points, so a consumer building the full ribbon→VBA call graph must read them
+  out of the `Attributes` bag itself.
 - **Origin:** 016 Session 1 — cross-provider model consensus (gpt-5-4 flagged the
   non-`onAction` callbacks as real edges) + confirmed on the local NorthwindDevEdition
-  ribbon (`customUI@onLoad="ribbonLoaded"`, `ddMRU_GetItemCount`/`GetItemLabel`/…).
+  ribbon (`ddMRU_GetItemCount`/`GetItemLabel`/…). **Narrowed 2026-06-15 (016 S2):** the
+  `onLoad` part of the original deferral is now CLOSED — S2 resolves the root `onLoad`
+  to a `RibbonEntryPoint` (`Kind=OnLoad`) alongside the `onAction` callbacks; only the
+  per-control `get*` dynamic-callback family remains deferred here.
 - **Why deferred:** the 016 spec explicitly scopes the producer to the **static
   `onAction`** callback ("do not interpret … dynamic `getVisible`/`getEnabled`
   callbacks beyond recording the static `onAction`. If a consumer needs dynamic
@@ -726,7 +744,7 @@
   faithfully surfaced (in `Attributes`), so nothing is lost; only the convenience
   of a typed entry-point projection is deferred.
 - **Trigger to pull back in:** a consumer needs the full ribbon→VBA callback graph
-  (not just `onAction`), OR a ribbon-callback-completeness set is scoped.
+  (not just `onAction` + `onLoad`), OR a ribbon-callback-completeness set is scoped.
 - **Owning set candidate:** a future `ribbon-dynamic-callbacks` set (small, P0-only),
   or fold into a navigation-completeness set.
 - **Mechanical backstop:** the local `NorthwindLocalInvariantTests` exercises a ribbon
@@ -766,6 +784,13 @@
 - **DW-10** — Dialog→query→report chain edges (R2-2) — **CLOSED 2026-06-14** by
   `012-switchboard-and-report-chain-edges` Sessions 2 (mechanical producers) +
   3 (code-behind producer). Full entry retained above with its CLOSED banner.
+- **DW-13** — Ribbon (`USysRibbons`) navigation surface not produced — **CLOSED
+  2026-06-15** by `016-ribbon-navigation-surface`: Session 1 (USysRibbons row-read +
+  `RibbonXmlParser` → `NavigationGraph.Ribbon`) + Session 2 (`NavigationGraph.RibbonEntryPoints`:
+  `onAction` + root `onLoad` → resolved VBA entry points, explicit Unresolved/Ambiguous).
+  Northwind-local validation; synthetic committed pins; HHC golden byte-neutral. Full
+  entry retained above with its CLOSED banner. Remainders → **DW-20** (dynamic `get*`
+  callbacks) and **DW-21** (non-`<tabs>` customUI sections).
   Residual coverage gaps → **DW-14**.
 - **DW-15** — `identify-cleanup` exit 2 (not 1) for usage errors — **CLOSED
   2026-06-15** by the Set 013 whole-set devil's-advocate follow-up (both providers

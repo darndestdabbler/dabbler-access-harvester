@@ -1,7 +1,7 @@
 {
   "sessionSetName": "016-ribbon-navigation-surface",
   "createdDate": "2026-06-15T13:38:56.440525+00:00",
-  "totalSessions": 0,
+  "totalSessions": 2,
   "entries": [
     {
       "sessionNumber": 1,
@@ -92,6 +92,97 @@
       "stepKey": "s1-commit",
       "dateTime": "2026-06-15T10:20:48.492725-04:00",
       "description": "Staged + committing S1: RibbonExporter/RibbonSignatureDetector (COM shape-gated row-read), RibbonXmlParser/RibbonStructureBuilder/RibbonArtifact, extended RibbonStructure model, BuildNavigationInputs wiring, harvester-schema.v1.1 RibbonStructure def, hermetic pins + Northwind local invariant ext, DW-20/DW-21. HHC golden byte-neutral; samples/*.accdb swept.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "s2-reground",
+      "dateTime": "2026-06-15T11:29:20.398050-04:00",
+      "description": "Re-grounded S2: confirmed RibbonControl.OnAction + RibbonStructure.OnLoad carry callbacks (S1 output); studied NavigationGraphBuilder entry-point/switchboard precedent and ResolvedModule procedure-name resolution; verified baseline build green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "s2-design-consensus",
+      "dateTime": "2026-06-15T11:29:20.398050-04:00",
+      "description": "Cross-provider design consensus (gpt-5-4 + gemini-pro, architecture) on the ribbon entry-point model; both chose a dedicated NavigationGraph.RibbonEntryPoints collection (Option B) over extending the startup-roots EntryPoints; recorded in s2-ribbon-entry-point-consensus.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "task_type": "architecture",
+          "model": "gpt-5-4"
+        },
+        {
+          "task_type": "architecture",
+          "model": "gemini-pro"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "s2-ribbon-entry-points",
+      "dateTime": "2026-06-15T11:29:20.398050-04:00",
+      "description": "Implemented ribbon entry-point derivation: NavigationGraph.RibbonEntryPoints (nullable, omitted when no ribbon -> golden-neutral) + RibbonEntryPoint record + RibbonCallbackKind/RibbonCallbackResolution enums; NavigationGraphBuilder.BuildRibbonEntryPoints walks onLoad-first then DFS tabs/groups/controls/children/contextual sets and resolves callbacks name-only (case-insensitive) -> Resolved/Unresolved/Ambiguous (no guessed module); schema RibbonEntryPoint $def added (additive, optional).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "s2-synthetic-and-local-pins",
+      "dateTime": "2026-06-15T11:29:20.398050-04:00",
+      "description": "Pinned with 10 hermetic NavigationGraphBuilderTests (resolved/unresolved/ambiguous/case-insensitive/onLoad-first/nested-DFS/contextual/empty-not-null/idMso/no-ribbon-null) and extended NorthwindLocalInvariantTests (Invariant 7: real onAction callbacks resolve, cmdAbout_OnAction -> modRibbonCallback). 952 Pipeline.Tests green.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "s2-golden-neutral",
+      "dateTime": "2026-06-15T11:29:20.398050-04:00",
+      "description": "HHC golden proven byte-level neutral by a fresh COM run (CanonicalGoldenRegressionTests PASSED) + NorthwindDevEdition validated locally (NorthwindLocalInvariantTests PASSED, never committed). Swept Access-mutated samples/HomeHealthCare.accdb; no zombie msaccess.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "s2-verified",
+      "dateTime": "2026-06-15T11:29:20.398050-04:00",
+      "description": "Closeout-grade cross-provider session-verification (gpt-5-4) with embedded S1 evidence -> VERIFIED (R1, no issues). Authored s2-set-wide-evaluation-prompt.md (in-IDE GPT+Gemini devil's-advocate, primary).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "task_type": "session-verification",
+          "model": "gpt-5-4"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "s2-next-set-authored",
+      "dateTime": "2026-06-15T11:29:20.398050-04:00",
+      "description": "Routed next-session-set recommendation (gpt-5-4, summarization) -> consumer-driven-only STOP with pre-scoped bundles; DW-18 flagged as the golden-affecting one-to-watch. DW-13 discharged in deferred-work.md (CLOSED, retained); DW-20 narrowed (onLoad now resolved).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "task_type": "summarization",
+          "model": "gpt-5-4"
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "set-complete",
+      "dateTime": "2026-06-15T11:29:20.404963-04:00",
+      "description": "Set 016 complete (2/2): DW-13 closed both layers (ribbon structure S1 + ribbon entry points S2). Closeout artifacts written; set ready to close.",
       "status": "complete",
       "routedApiCalls": []
     }

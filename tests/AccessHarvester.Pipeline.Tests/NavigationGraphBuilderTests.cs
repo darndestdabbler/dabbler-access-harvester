@@ -714,4 +714,312 @@ End Sub");
         // VBA-side edges still produced:
         Assert.Single(graph.Edges);
     }
+
+    // ── Ribbon entry points (016 S2 / DW-13) ──────────────────────────
+
+    // A single control whose onAction names the given callback, inside one
+    // tab/group, so the ribbon-callback resolution path is exercised directly.
+    private static RibbonStructure RibbonWithButton(string onAction,
+        string controlId = "btnFoo", string label = "Foo", string controlType = "button")
+        => new()
+        {
+            Tabs = new[]
+            {
+                new RibbonTab
+                {
+                    Id = "tHome", Label = "Home",
+                    Groups = new[]
+                    {
+                        new RibbonGroup
+                        {
+                            Id = "gNav", Label = "Nav",
+                            Controls = new[]
+                            {
+                                new RibbonControl
+                                {
+                                    ControlType = controlType, Id = controlId,
+                                    Label = label, OnAction = onAction,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        };
+
+    private static NavigationGraph BuildWithModules(
+        NavigationGraphInputs? inputs, params (string Source, string Name)[] modules)
+    {
+        var resolved = modules.Select(m => Resolve(m.Source, m.Name)).ToArray();
+        var index = new CrossReferenceIndex(resolved);
+        return NavigationGraphBuilder.Build(resolved, index, inputs);
+    }
+
+    [Fact]
+    public void Build_NoRibbon_RibbonEntryPointsNull()
+    {
+        // No ribbon -> the facet is omitted entirely (like Ribbon), so a
+        // non-ribbon corpus (HHC) stays byte-neutral.
+        var graph = BuildOne(@"
+Sub Whatever()
+End Sub");
+        Assert.Null(graph.Ribbon);
+        Assert.Null(graph.RibbonEntryPoints);
+    }
+
+    [Fact]
+    public void Build_RibbonOnAction_MatchingProcedure_Resolves()
+    {
+        var inputs = new NavigationGraphInputs { Ribbon = RibbonWithButton("cmdAbout_OnAction") };
+        var graph = BuildWithModules(inputs,
+            (@"
+Sub cmdAbout_OnAction(control As IRibbonControl)
+End Sub", "modRibbonCallback"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal(RibbonCallbackKind.OnAction, ep.Kind);
+        Assert.Equal("cmdAbout_OnAction", ep.CallbackName);
+        Assert.Equal("button", ep.ControlType);
+        Assert.Equal("btnFoo", ep.ControlId);
+        Assert.Equal("Foo", ep.ControlLabel);
+        Assert.Equal(RibbonCallbackResolution.Resolved, ep.Resolution);
+        Assert.NotNull(ep.ResolvedProcedure);
+        Assert.Equal("modRibbonCallback", ep.ResolvedProcedure!.ModuleName);
+        Assert.Equal("cmdAbout_OnAction", ep.ResolvedProcedure.ProcedureName);
+    }
+
+    [Fact]
+    public void Build_RibbonOnAction_NoMatchingProcedure_IsExplicitUnresolved()
+    {
+        var inputs = new NavigationGraphInputs { Ribbon = RibbonWithButton("cmdGhost_OnAction") };
+        var graph = BuildWithModules(inputs,
+            (@"
+Sub SomethingElse()
+End Sub", "modOther"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal("cmdGhost_OnAction", ep.CallbackName); // preserved verbatim
+        Assert.Equal(RibbonCallbackResolution.Unresolved, ep.Resolution);
+        Assert.Null(ep.ResolvedProcedure);
+    }
+
+    [Fact]
+    public void Build_RibbonOnAction_NameInMultipleModules_IsAmbiguousNoGuess()
+    {
+        var inputs = new NavigationGraphInputs { Ribbon = RibbonWithButton("Shared_OnAction") };
+        var graph = BuildWithModules(inputs,
+            (@"
+Sub Shared_OnAction(control As IRibbonControl)
+End Sub", "modA"),
+            (@"
+Sub Shared_OnAction(control As IRibbonControl)
+End Sub", "modB"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal(RibbonCallbackResolution.Ambiguous, ep.Resolution);
+        Assert.Null(ep.ResolvedProcedure); // never picks a module
+    }
+
+    [Fact]
+    public void Build_RibbonOnAction_CaseInsensitiveMatch_PreservesDeclaredCasing()
+    {
+        // VBA is case-insensitive: a lower-case onAction resolves to the
+        // mixed-case declaration, and ResolvedProcedure carries the DECLARED
+        // casing while CallbackName keeps the authored casing.
+        var inputs = new NavigationGraphInputs { Ribbon = RibbonWithButton("openhome") };
+        var graph = BuildWithModules(inputs,
+            (@"
+Sub OpenHome()
+End Sub", "modNav"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal(RibbonCallbackResolution.Resolved, ep.Resolution);
+        Assert.Equal("openhome", ep.CallbackName);
+        Assert.Equal("OpenHome", ep.ResolvedProcedure!.ProcedureName);
+    }
+
+    [Fact]
+    public void Build_RibbonOnLoad_IsFirstAndResolves()
+    {
+        var ribbon = RibbonWithButton("cmdFoo_OnAction") with { OnLoad = "OnRibbonLoad" };
+        var inputs = new NavigationGraphInputs { Ribbon = ribbon };
+        var graph = BuildWithModules(inputs,
+            (@"
+Sub OnRibbonLoad(ribbon As IRibbonUI)
+End Sub
+Sub cmdFoo_OnAction(control As IRibbonControl)
+End Sub", "modRibbonCallback"));
+
+        Assert.Equal(2, graph.RibbonEntryPoints!.Count);
+        // onLoad is emitted first (deterministic source order).
+        var onLoad = graph.RibbonEntryPoints![0];
+        Assert.Equal(RibbonCallbackKind.OnLoad, onLoad.Kind);
+        Assert.Equal("OnRibbonLoad", onLoad.CallbackName);
+        Assert.Null(onLoad.ControlType); // root callback belongs to no control
+        Assert.Null(onLoad.ControlId);
+        Assert.Equal(RibbonCallbackResolution.Resolved, onLoad.Resolution);
+        Assert.Equal("modRibbonCallback", onLoad.ResolvedProcedure!.ModuleName);
+
+        Assert.Equal(RibbonCallbackKind.OnAction, graph.RibbonEntryPoints![1].Kind);
+    }
+
+    [Fact]
+    public void Build_RibbonNestedChildOnAction_IsSurfacedInDepthFirstOrder()
+    {
+        // splitButton with its own onAction and a nested menu button onAction:
+        // the parent surfaces before the child (DFS, source order).
+        var ribbon = new RibbonStructure
+        {
+            Tabs = new[]
+            {
+                new RibbonTab
+                {
+                    Id = "tHome",
+                    Groups = new[]
+                    {
+                        new RibbonGroup
+                        {
+                            Id = "gNav",
+                            Controls = new[]
+                            {
+                                new RibbonControl
+                                {
+                                    ControlType = "splitButton", Id = "sbParent",
+                                    OnAction = "Parent_OnAction",
+                                    Children = new[]
+                                    {
+                                        new RibbonControl
+                                        {
+                                            ControlType = "button", Id = "bChild",
+                                            OnAction = "Child_OnAction",
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        };
+        var inputs = new NavigationGraphInputs { Ribbon = ribbon };
+        var graph = BuildWithModules(inputs,
+            (@"
+Sub Parent_OnAction(control As IRibbonControl)
+End Sub
+Sub Child_OnAction(control As IRibbonControl)
+End Sub", "modCb"));
+
+        Assert.Equal(2, graph.RibbonEntryPoints!.Count);
+        Assert.Equal("Parent_OnAction", graph.RibbonEntryPoints![0].CallbackName);
+        Assert.Equal("Child_OnAction", graph.RibbonEntryPoints![1].CallbackName);
+    }
+
+    [Fact]
+    public void Build_RibbonContextualTabControlOnAction_IsSurfaced()
+    {
+        var ribbon = new RibbonStructure
+        {
+            ContextualTabSets = new[]
+            {
+                new RibbonContextualTabSet
+                {
+                    Id = "ctxSet",
+                    Tabs = new[]
+                    {
+                        new RibbonTab
+                        {
+                            Id = "ctxTab",
+                            Groups = new[]
+                            {
+                                new RibbonGroup
+                                {
+                                    Id = "ctxGrp",
+                                    Controls = new[]
+                                    {
+                                        new RibbonControl
+                                        {
+                                            ControlType = "button", Id = "ctxBtn",
+                                            OnAction = "Ctx_OnAction",
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        };
+        var inputs = new NavigationGraphInputs { Ribbon = ribbon };
+        var graph = BuildWithModules(inputs,
+            (@"
+Sub Ctx_OnAction(control As IRibbonControl)
+End Sub", "modCb"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Equal("Ctx_OnAction", ep.CallbackName);
+        Assert.Equal(RibbonCallbackResolution.Resolved, ep.Resolution);
+    }
+
+    [Fact]
+    public void Build_RibbonPresentButNoCallbacks_EmptyNotNull()
+    {
+        // A ribbon with no onAction/onLoad anywhere -> an empty (but non-null)
+        // list: the ribbon exists, it just contributes no callbacks. (Null is
+        // reserved for "no ribbon at all".)
+        var ribbon = new RibbonStructure
+        {
+            Tabs = new[]
+            {
+                new RibbonTab { IdMso = "TabHome" }, // built-in tab, no controls
+            },
+        };
+        var inputs = new NavigationGraphInputs { Ribbon = ribbon };
+        var graph = BuildWithModules(inputs, (@"
+Sub Noop()
+End Sub", "modNav"));
+
+        Assert.NotNull(graph.RibbonEntryPoints);
+        Assert.Empty(graph.RibbonEntryPoints!);
+    }
+
+    [Fact]
+    public void Build_RibbonBuiltInControlOnAction_SurfacesIdMso()
+    {
+        // A built-in idMso control can carry an onAction override; the metadata
+        // surfaces IdMso (and a null custom Id).
+        var ribbon = new RibbonStructure
+        {
+            Tabs = new[]
+            {
+                new RibbonTab
+                {
+                    Id = "tHome",
+                    Groups = new[]
+                    {
+                        new RibbonGroup
+                        {
+                            Id = "gNav",
+                            Controls = new[]
+                            {
+                                new RibbonControl
+                                {
+                                    ControlType = "button", IdMso = "FileSave",
+                                    OnAction = "Save_OnAction",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        };
+        var inputs = new NavigationGraphInputs { Ribbon = ribbon };
+        var graph = BuildWithModules(inputs, (@"
+Sub Save_OnAction(control As IRibbonControl)
+End Sub", "modCb"));
+
+        var ep = Assert.Single(graph.RibbonEntryPoints!);
+        Assert.Null(ep.ControlId);
+        Assert.Equal("FileSave", ep.ControlIdMso);
+        Assert.Equal(RibbonCallbackResolution.Resolved, ep.Resolution);
+    }
 }

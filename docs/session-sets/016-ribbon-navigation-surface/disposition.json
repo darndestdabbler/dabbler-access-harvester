@@ -1,39 +1,27 @@
 {
   "status": "completed",
-  "summary": "016 S1 (DW-13): populated NavigationGraph.Ribbon from a custom ribbon. Added a shape-gated USysRibbons (RibbonName, RibbonXML) COM/DAO row-read (RibbonExporter + RibbonSignatureDetector), a pure namespace-tolerant RibbonXmlParser (2006/01 + 2009/07, matched by local name) into a faithful recursive RibbonStructure (extended per gpt-5-4+gemini-pro consensus: nullable Id/Label, IdMso, open-string ControlType, verbatim Attributes bag, Children, ContextualTabSets, OnLoad, Name), a pure RibbonStructureBuilder, and BuildNavigationInputs wiring. harvester-schema.v1.1 RibbonStructure def updated (backward-compatible). HHC golden proven byte-level neutral (shape-gated produces nothing); real Northwind ribbon validated locally (never committed). Routed verification VERIFIED after 3 rounds; DW-20/DW-21 filed.",
+  "summary": "016 S2 (DW-13): added the ribbon entry-point surface NavigationGraph.RibbonEntryPoints (new dedicated collection, chosen over extending startup-roots EntryPoints by unanimous gpt-5-4 + gemini-pro design consensus). For every control onAction and the root onLoad, BuildRibbonEntryPoints resolves the callback name (case-insensitive, VBA semantics) against a procedure-name index of the harvested modules -> Resolved (unique match, ResolvedProcedure = module + declared name), Unresolved (no match, verbatim name retained, never dropped), or Ambiguous (>1 module, no guessed module). Faithful-mechanical: name match only, no signature/visibility interpretation; deterministic source order (onLoad first, then DFS tabs/groups/controls/children, then contextual tab sets). New RibbonEntryPoint record + RibbonCallbackKind/RibbonCallbackResolution enums; harvester-schema.v1.1 RibbonEntryPoint $def (additive, optional, no envelope bump). Nullable-when-no-ribbon => HHC golden byte-level neutral (proven via fresh COM run, not asserted). Real NorthwindDevEdition ribbon entry points validated locally (never committed): cmdAbout_OnAction -> modRibbonCallback, nested ddMRU_OnAction surfaced. 952 hermetic Pipeline tests (10 new). Routed cross-provider verification VERIFIED (R1, gpt-5-4) with embedded S1 cross-session evidence. DW-13 discharged (both layers); DW-20 narrowed (onLoad now resolved). Set complete; consumer-driven-only STOP handoff (DW-18 = golden-affecting one-to-watch).",
   "verification_method": "api",
   "files_changed": [
-    "AccessHarvester.Core/Extraction/RibbonExporter.cs",
-    "AccessHarvester.Core/Extraction/RibbonSignatureDetector.cs",
-    "AccessHarvester.Core/Pipeline.cs",
-    "AccessHarvester.Core/Translation/JsonPassthroughTranslator.cs",
     "AccessHarvester.Pipeline/Enrichment/NavigationGraph.cs",
-    "AccessHarvester.Pipeline/Enrichment/RibbonArtifact.cs",
-    "AccessHarvester.Pipeline/Enrichment/RibbonStructureBuilder.cs",
-    "AccessHarvester.Pipeline/Enrichment/RibbonXmlParser.cs",
+    "AccessHarvester.Pipeline/Enrichment/NavigationGraphBuilder.cs",
     "docs/test-cases/harvester-schema.v1.1.json",
-    "docs/planning/deferred-work.md",
-    "tests/AccessHarvester.Integration/Pipeline/NorthwindLocalInvariantTests.cs",
     "tests/AccessHarvester.Pipeline.Tests/NavigationGraphBuilderTests.cs",
-    "tests/AccessHarvester.Pipeline.Tests/RibbonXmlParserTests.cs",
-    "tests/AccessHarvester.Pipeline.Tests/RibbonStructureBuilderTests.cs",
-    "tests/AccessHarvester.Tests/RibbonSignatureDetectorTests.cs",
-    "docs/session-sets/016-ribbon-navigation-surface/s1-ribbon-model-consensus.md",
-    "docs/session-sets/016-ribbon-navigation-surface/s1-verification.md",
-    "docs/session-sets/016-ribbon-navigation-surface/s1-issues.json",
-    "docs/session-sets/016-ribbon-navigation-surface/s1-in-ide-devils-advocate-prompt.md"
+    "tests/AccessHarvester.Integration/Pipeline/NorthwindLocalInvariantTests.cs",
+    "docs/planning/deferred-work.md",
+    "docs/session-sets/016-ribbon-navigation-surface/s2-ribbon-entry-point-consensus.md",
+    "docs/session-sets/016-ribbon-navigation-surface/s2-verification.md",
+    "docs/session-sets/016-ribbon-navigation-surface/s2-issues.json",
+    "docs/session-sets/016-ribbon-navigation-surface/s2-set-wide-evaluation-prompt.md",
+    "docs/session-sets/016-ribbon-navigation-surface/next-session-set-recommendation.md",
+    "docs/session-sets/016-ribbon-navigation-surface/change-log.md",
+    "docs/session-sets/016-ribbon-navigation-surface/ai-assignment.md",
+    "docs/session-sets/016-ribbon-navigation-surface/disposition.json",
+    "docs/session-sets/016-ribbon-navigation-surface/activity-log.json",
+    "docs/session-sets/016-ribbon-navigation-surface/session-events.jsonl",
+    "docs/session-sets/016-ribbon-navigation-surface/session-state.json"
   ],
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-8",
-    "effort": "high",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Routed analysis recommends Opus 4.8 for the final session: closeout-grade synthesis (change-log, routed next-set recommendation, set-wide devil's-advocate) plus continuity with S1's faithful-mechanical ribbon design and the entry-point resolution that builds directly on it."
-    }
-  },
   "blockers": [],
   "verification_verdict": "VERIFIED"
 }

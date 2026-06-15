@@ -94,6 +94,34 @@ public sealed record NavigationGraph
     public RibbonStructure? Ribbon { get; init; }
 
     /// <summary>
+    /// Ribbon navigation entry points (016 S2 / DW-13): one record per
+    /// custom-ribbon callback — every control <c>onAction</c> plus the root
+    /// <c>onLoad</c> — resolved against the harvested VBA modules. The
+    /// "user clicks a ribbon button → runs this callback" surface, the ribbon
+    /// analogue of <see cref="EntryPoints"/>'s startup roots. Kept in its own
+    /// collection (not folded into <see cref="EntryPoints"/>, which models
+    /// application <i>startup</i> roots) per the S2 cross-provider design
+    /// consensus (<c>docs/session-sets/016-ribbon-navigation-surface/s2-ribbon-entry-point-consensus.md</c>).
+    /// <para>
+    /// Null (omitted from JSON) when <see cref="Ribbon"/> is null — a database
+    /// with no custom ribbon contributes nothing, exactly like
+    /// <see cref="Ribbon"/> itself, so a non-ribbon corpus stays byte-neutral.
+    /// Populated (possibly empty, when a ribbon defines no callbacks) only when
+    /// a ribbon is present. Emitted in deterministic source order: the root
+    /// <c>onLoad</c> first, then a depth-first walk of tabs → groups →
+    /// controls → children, then contextual tab sets.
+    /// </para>
+    /// <para>
+    /// An <c>onAction</c> whose name matches no harvested procedure is surfaced
+    /// as <see cref="RibbonCallbackResolution.Unresolved"/> (never dropped); a
+    /// name matching procedures in more than one module is
+    /// <see cref="RibbonCallbackResolution.Ambiguous"/> with no guessed module
+    /// — the unresolvable-constructs-are-explicit principle.
+    /// </para>
+    /// </summary>
+    public IReadOnlyList<RibbonEntryPoint>? RibbonEntryPoints { get; init; }
+
+    /// <summary>
     /// Top-level switchboard structure (entries from the
     /// <c>Switchboard Items</c> table), when supplied via
     /// <see cref="NavigationGraphInputs.Switchboard"/>. Null when no
@@ -543,6 +571,9 @@ public sealed record RibbonControl
     /// separators/boxes, or built-in <c>idMso</c> commands). The matching
     /// procedure may itself appear as
     /// <see cref="NavigationEdge.SourceProcedure"/> on one or more edges.
+    /// 016 S2 resolves each <c>onAction</c> to a
+    /// <see cref="RibbonEntryPoint"/> on
+    /// <see cref="NavigationGraph.RibbonEntryPoints"/>.
     /// </summary>
     public string? OnAction { get; init; }
 
@@ -558,6 +589,92 @@ public sealed record RibbonControl
     /// <c>box</c>/<c>gallery</c>'s contents). Empty for leaf controls.
     /// </summary>
     public IReadOnlyList<RibbonControl> Children { get; init; } = Array.Empty<RibbonControl>();
+}
+
+/// <summary>
+/// One ribbon navigation entry point (016 S2 / DW-13): a single custom-ribbon
+/// callback — a control's <c>onAction</c> or the ribbon root's <c>onLoad</c> —
+/// together with the result of resolving its name against the harvested VBA
+/// modules. The ribbon analogue of <see cref="NavigationEntryPoint"/>: a user
+/// clicking the control runs <see cref="CallbackName"/>, which (when it
+/// resolves uniquely) is the procedure named by <see cref="ResolvedProcedure"/>.
+/// </summary>
+/// <remarks>
+/// Faithful-mechanical: the callback is matched to a procedure by name only
+/// (case-insensitive, per VBA semantics) — no signature or visibility check,
+/// which would be interpretation. A name found in exactly one module resolves;
+/// a name found in none is <see cref="RibbonCallbackResolution.Unresolved"/>;
+/// a name found in more than one is <see cref="RibbonCallbackResolution.Ambiguous"/>
+/// with <see cref="ResolvedProcedure"/> left null (the producer never guesses
+/// which module). All cases are surfaced — none is silently dropped.
+/// </remarks>
+public sealed record RibbonEntryPoint
+{
+    /// <summary>Whether this entry came from a control <c>onAction</c> or the root <c>onLoad</c>.</summary>
+    public required RibbonCallbackKind Kind { get; init; }
+
+    /// <summary>
+    /// The callback procedure name exactly as authored in the ribbon XML
+    /// (the <c>onAction</c> / <c>onLoad</c> attribute value). This is the
+    /// identity the resolution keys off; preserved verbatim even when the
+    /// name does not resolve.
+    /// </summary>
+    public required string CallbackName { get; init; }
+
+    /// <summary>
+    /// The owning control's element type (e.g. <c>"button"</c>,
+    /// <c>"dropDown"</c>). Null for the ribbon-root <c>onLoad</c> entry, which
+    /// belongs to no control.
+    /// </summary>
+    public string? ControlType { get; init; }
+
+    /// <summary>The owning control's custom <c>id</c>, or null (root <c>onLoad</c>, or a built-in <c>idMso</c> control).</summary>
+    public string? ControlId { get; init; }
+
+    /// <summary>The owning control's built-in <c>idMso</c>, or null (root <c>onLoad</c>, or a custom <c>id</c> control).</summary>
+    public string? ControlIdMso { get; init; }
+
+    /// <summary>The owning control's display <c>label</c>, or null when absent / not applicable.</summary>
+    public string? ControlLabel { get; init; }
+
+    /// <summary>Whether the callback name resolved to a unique procedure, none, or several.</summary>
+    public required RibbonCallbackResolution Resolution { get; init; }
+
+    /// <summary>
+    /// The resolved procedure (module + declared procedure name) when
+    /// <see cref="Resolution"/> is <see cref="RibbonCallbackResolution.Resolved"/>;
+    /// null for <see cref="RibbonCallbackResolution.Unresolved"/> and
+    /// <see cref="RibbonCallbackResolution.Ambiguous"/>. The
+    /// <see cref="ProcedureReference.ModuleName"/> is always populated here
+    /// (a resolved ribbon callback always names its module), unlike the macro
+    /// <c>RunCode</c> entries on <see cref="NavigationEntryPoint.CallsProcedure"/>.
+    /// </summary>
+    public ProcedureReference? ResolvedProcedure { get; init; }
+}
+
+/// <summary>Discriminates the ribbon callback source on <see cref="RibbonEntryPoint.Kind"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum RibbonCallbackKind
+{
+    /// <summary>A control's <c>onAction</c> click callback.</summary>
+    OnAction,
+
+    /// <summary>The ribbon root's <c>onLoad</c> lifecycle callback (<c>customUI@onLoad</c>).</summary>
+    OnLoad,
+}
+
+/// <summary>Outcome of resolving a ribbon callback name on <see cref="RibbonEntryPoint.Resolution"/>.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum RibbonCallbackResolution
+{
+    /// <summary>The name matched exactly one harvested procedure; <see cref="RibbonEntryPoint.ResolvedProcedure"/> names it.</summary>
+    Resolved,
+
+    /// <summary>The name matched no harvested procedure (an explicit unresolved entry point — never dropped).</summary>
+    Unresolved,
+
+    /// <summary>The name matched procedures in more than one module; no module is guessed.</summary>
+    Ambiguous,
 }
 
 /// <summary>
