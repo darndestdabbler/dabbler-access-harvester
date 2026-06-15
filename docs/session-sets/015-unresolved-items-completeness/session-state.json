@@ -1,7 +1,7 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "015-unresolved-items-completeness",
-  "status": "in-progress",
+  "status": "complete",
   "sessions": [
     {
       "number": 1,
@@ -20,16 +20,16 @@
     {
       "number": 2,
       "title": "Layer B \u2014 module-level unresolved references get a manifest home",
-      "status": "in-progress",
+      "status": "complete",
       "startedAt": "2026-06-15T07:04:37.493549-04:00",
-      "completedAt": null,
+      "completedAt": "2026-06-15T07:50:10.741882-04:00",
       "orchestrator": {
         "engine": "claude-code",
         "provider": "anthropic",
         "model": "claude-opus-4-8",
         "effort": "high"
       },
-      "verificationVerdict": null
+      "verificationVerdict": "VERIFIED"
     }
   ]
 }
