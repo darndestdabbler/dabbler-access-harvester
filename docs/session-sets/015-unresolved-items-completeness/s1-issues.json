@@ -1,0 +1,38 @@
+{
+  "sessionSet": "015-unresolved-items-completeness",
+  "session": 1,
+  "scope": "DW-11 Layer A — procedure-header unresolved references reach the index",
+  "verificationMode": "out-of-band-or-none",
+  "rounds": [
+    {
+      "round": 1,
+      "model": "gpt-5-4",
+      "taskType": "session-verification",
+      "verdict": "ISSUES_FOUND",
+      "inputTokens": 12516,
+      "outputTokens": 12819,
+      "costUsd": 0.2236,
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "AccessHarvester.Pipeline/Enrichment/UnresolvedItemAggregator.cs",
+          "summary": "The procedure-scoped dedup loop used bodyKeys.Add(DedupKey(item)), which deduplicates WITHIN the new feed as well as against the body-only feed; distinct unresolved links of a chained member access in a header (Foo.Bar vs Foo.Bar.Baz) share (module,procedure,line,column,reason) and one was silently dropped, recreating an undercount inside Layer A.",
+          "disposition": "FIXED",
+          "resolution": "Demonstrated real (member-access provenance anchors at the chain start): added pin LayerA_ChainedHeaderUnresolvedRefs_AllReachIndex_NoIntraFeedDrop which was RED against R1 code. Fix: (1) non-mutating dedup — seed bodyKeys once from the FunctionClassification items and test !bodyKeys.Contains(...), never adding procedure-scoped keys back (dedup only against the body-only set, never intra-feed); (2) strengthened DedupKey to include SurroundingText (the member/identifier name), which both feeds derive from the same AST node via the same ExtractName switch, so the same body ref still suppresses (no double-count) while distinct chain links survive. Re-validated: 912/912 Pipeline.Tests green (pin now green), COM golden gate byte-identical."
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "model": "gpt-5-4",
+      "taskType": "session-verification",
+      "verdict": "VERIFIED",
+      "inputTokens": 2380,
+      "outputTokens": 4623,
+      "costUsd": 0.0753,
+      "issues": [],
+      "note": "Confirmed Contains fully closes the intra-feed drop (even repeated-name chains like Foo.Bar.Bar keep both links); adding SurroundingText creates no double-count hole since both feeds compute the name from the same node via the same logic; no new determinism issue (suppression no longer order-dependent)."
+    }
+  ],
+  "finalVerdict": "VERIFIED"
+}

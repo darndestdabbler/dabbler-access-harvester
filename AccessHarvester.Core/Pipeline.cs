@@ -646,15 +646,35 @@ public sealed class Pipeline
         // ── 5. Assemble and write ──────────────────────────────────────
         // F-2-2: aggregate unresolved items from the navigation graph's
         // unresolved targets + the per-procedure unresolved references the
-        // function-classification pass collected. This is exactly the
-        // aggregation the proven hermetic EndToEndFixtureTests exercise.
-        // Resolver diagnostics (ResolvedModule.Diagnostics) are not fed
-        // separately: the same unresolved references already surface via
-        // FunctionClassification.UnresolvedReferences, so adding them would
-        // double-emit one construct under two UnresolvedSource values.
+        // function-classification pass collected.
+        //
+        // DW-11 Layer A (015 S1): ALSO feed the full procedure-scoped resolver
+        // reference set (body + header) so an unresolved ref in a procedure
+        // HEADER — an Optional parameter's default expression — reaches
+        // unresolved-items.json. FunctionClassification.UnresolvedReferences is
+        // procedure-BODY-scoped only (FunctionClassificationBuilder walks
+        // procedureAst.Body), so header refs were dropped from the index even
+        // though ParserOutputProjector groups them into Body.References. The
+        // aggregator dedups the body overlap on (module+procedure+line+column+
+        // reason), so the only net-new items are the header refs — making the
+        // index a structural superset of the inline Body.References[Unresolved]
+        // set without double-counting. (Resolver diagnostics are still NOT fed
+        // separately: those same references already surface via these two
+        // procedure-scoped feeds, so adding them would double-emit one
+        // construct under two UnresolvedSource values.)
+        var procedureScopedReferences = resolvedModules
+            .SelectMany(module => ParserOutputProjector
+                .EnumerateProcedureScopedReferences(module)
+                .Select(scoped => new ProcedureScopedReference(
+                    ModuleName: module.ModuleScope.ModuleName,
+                    ProcedureName: scoped.ProcedureName,
+                    Reference: scoped.Reference)))
+            .ToList();
+
         var unresolvedItems = UnresolvedItemAggregator.Build(
             navigationGraph: navigationGraph,
-            functionClassifications: classifications);
+            functionClassifications: classifications,
+            procedureScopedReferences: procedureScopedReferences);
 
         // v1.1 (Session 2 of harvester-manifest-index-and-batch-readiness):
         // build the navigation index AFTER the per-object ir/ files have

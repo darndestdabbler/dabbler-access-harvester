@@ -65,7 +65,8 @@ public static class UnresolvedItemAggregator
         string? dynamicSqlModuleName = null,
         string? dynamicSqlProcedureName = null,
         NavigationGraph? navigationGraph = null,
-        IEnumerable<FunctionClassification>? functionClassifications = null)
+        IEnumerable<FunctionClassification>? functionClassifications = null,
+        IEnumerable<ProcedureScopedReference>? procedureScopedReferences = null)
     {
         var items = new List<UnresolvedItem>();
 
@@ -91,8 +92,59 @@ public static class UnresolvedItemAggregator
         if (functionClassifications is not null)
             items.AddRange(FromFunctionClassifications(functionClassifications));
 
+        // DW-11 Layer A (dedup-additive feed): the FunctionClassification
+        // feed above is procedure-BODY-scoped — FunctionClassificationBuilder
+        // walks `procedureAst.Body` only — so an unresolved reference in a
+        // procedure HEADER (an Optional parameter's default expression) never
+        // reaches the index even though ParserOutputProjector groups it into
+        // Body.References. Feed the full procedure-scoped reference set (body
+        // + header) and suppress any reference the body-only feed already
+        // emitted, matched on the shared (module, procedure, line, column,
+        // reason) key, so no reference is double-counted. The only net-new
+        // items are the header refs, which makes the index a structural
+        // superset of the inline Body.References[Unresolved] set.
+        if (procedureScopedReferences is not null)
+        {
+            // Suppress ONLY references the body-only feed already emitted —
+            // never dedup the procedure-scoped feed against itself. The key
+            // set is built once from the FunctionClassification items and is
+            // NOT mutated as we iterate: two legitimately-distinct unresolved
+            // refs that happen to share a key (e.g. the deeper links of a
+            // chained member access `Foo.Bar` / `Foo.Bar.Baz`, whose
+            // member-access provenance anchors at the chain start) must BOTH
+            // survive, or the index would undercount the inline references it
+            // is meant to be a superset of. (gpt-5-4 R1, 015 S1.)
+            var bodyKeys = new HashSet<(string, string, int, int, string, string)>();
+            foreach (var item in items)
+                if (item.Source == UnresolvedSource.FunctionClassification)
+                    bodyKeys.Add(DedupKey(item));
+
+            foreach (var item in FromProcedureScopedReferences(procedureScopedReferences))
+                if (!bodyKeys.Contains(DedupKey(item)))
+                    items.Add(item);
+        }
+
         return SortDeterministically(items);
     }
+
+    // The dedup key the procedure-scoped feed shares with the
+    // FunctionClassification feed. Both feeds source Line/Column from the
+    // SAME AST node's Provenance, the same (post-with-flattening) Unresolved
+    // reason, and the same member/identifier name for the same reference, so
+    // a body ref carried by both produces an identical key and is suppressed;
+    // a header ref (absent from the body-only feed) has no match and survives.
+    // The member name (SurroundingText) is part of the key because position +
+    // reason alone do NOT uniquely identify a reference: a chained member
+    // access emits several Unresolved links that share a start position and
+    // reason but differ by member name (`Bar` vs `Baz`) — without the name
+    // they would collide and one distinct reference would be lost.
+    private static (string, string, int, int, string, string) DedupKey(UnresolvedItem item) =>
+        (item.Location.ModuleName ?? string.Empty,
+         item.Location.ProcedureName ?? string.Empty,
+         item.Location.Line ?? 0,
+         item.Location.Column ?? 0,
+         item.Reason,
+         item.SurroundingText ?? string.Empty);
 
     // ── Per-subsystem projectors ──────────────────────────────────────
 
@@ -312,6 +364,83 @@ public static class UnresolvedItemAggregator
         }
     }
 
+    /// <summary>
+    /// Projects procedure-scoped resolver references (body AND header) into
+    /// <see cref="UnresolvedItem"/> records, surfacing only those whose
+    /// outcome is (after with-flattening) <c>Unresolved</c>. DW-11 Layer A:
+    /// this is the additive feed that carries procedure-HEADER unresolved
+    /// refs the body-only <see cref="FromFunctionClassifications"/> feed
+    /// drops. The emitted shape mirrors <see cref="FromFunctionClassifications"/>
+    /// exactly (same <see cref="UnresolvedSource.FunctionClassification"/>
+    /// source, description, member-name surrounding text), so a header ref
+    /// is indistinguishable in the index from a body ref — both are
+    /// procedure-scoped VBA references — and a body ref carried by both
+    /// feeds collapses under <see cref="Build"/>'s dedup.
+    /// </summary>
+    public static IEnumerable<UnresolvedItem> FromProcedureScopedReferences(
+        IEnumerable<ProcedureScopedReference> references)
+    {
+        if (references is null) throw new ArgumentNullException(nameof(references));
+
+        foreach (var psr in references)
+        {
+            var reason = UnresolvedReasonOf(psr.Reference.Outcome);
+            if (reason is null) continue;   // resolved references do not surface
+
+            var expr = psr.Reference.Expression;
+            var memberName = ExtractReferenceName(expr);
+            var ctx = memberName is null
+                ? null
+                : SortContext(new Dictionary<string, string>
+                {
+                    ["memberName"] = memberName,
+                });
+
+            yield return new UnresolvedItem
+            {
+                Source = UnresolvedSource.FunctionClassification,
+                Reason = reason,
+                ConstructDescription = DescribeResolverReason(reason, message: null),
+                Location = new UnresolvedLocation
+                {
+                    File = null,
+                    ModuleName = psr.ModuleName,
+                    ProcedureName = psr.ProcedureName,
+                    Line = expr.Provenance.Line,
+                    Column = expr.Provenance.Column,
+                },
+                SurroundingText = memberName,
+                SuggestedNextSteps = LookupSuggestedNextSteps(reason),
+                AdditionalContext = ctx,
+            };
+        }
+    }
+
+    // Returns the (post-with-flattening) Unresolved reason, or null when the
+    // reference resolved. Mirrors FunctionClassificationBuilder.DispatchOutcome's
+    // flattening so the two feeds agree on the reason for the SAME reference —
+    // which is what lets the dedup key collapse every body ref the
+    // FunctionClassification feed already carries.
+    private static string? UnresolvedReasonOf(ResolutionOutcome outcome) => outcome switch
+    {
+        ResolutionOutcome.Unresolved u => u.Reason,
+        ResolutionOutcome.ResolvedViaWithFlattening f => UnresolvedReasonOf(f.InnerOutcome),
+        _ => null,
+    };
+
+    // Mirror of FunctionClassificationBuilder.ClassificationVisitor.ExtractName
+    // so a header ref's SurroundingText / memberName matches the body-ref shape
+    // byte-for-byte.
+    private static string? ExtractReferenceName(Expression e) => e switch
+    {
+        IdentifierExpression i => i.Name,
+        MemberAccessExpression m => m.MemberName,
+        BangAccessExpression b => b.MemberName,
+        ImplicitWithMemberExpression w => w.MemberName,
+        ImplicitWithBangExpression w => w.MemberName,
+        _ => null,
+    };
+
     // ── Sorting / lookup helpers ─────────────────────────────────────
 
     private static IReadOnlyList<UnresolvedItem> SortDeterministically(List<UnresolvedItem> items)
@@ -523,3 +652,20 @@ public static class UnresolvedItemAggregator
         "Decide whether to extend the producer's reason set with a more specific code (the aggregator's lookup is missing this reason).",
     };
 }
+
+/// <summary>
+/// A resolver <see cref="ResolvedReference"/> paired with the module and
+/// procedure that lexically own it (body OR header). DW-11 Layer A: the
+/// <see cref="UnresolvedItemAggregator"/> consumes these — additively to the
+/// body-only <see cref="FunctionClassification.UnresolvedReferences"/> feed —
+/// so an unresolved reference in a procedure HEADER (an Optional parameter's
+/// default expression) reaches <c>unresolved-items.json</c>. Built by the
+/// caller from <see cref="AccessHarvester.Pipeline.Manifest.ParserOutputProjector.EnumerateProcedureScopedReferences"/>,
+/// which returns exactly the reference set the projector groups into
+/// <c>Body.References</c>, so the index is a structural superset of the
+/// inline references by construction.
+/// </summary>
+public sealed record ProcedureScopedReference(
+    string ModuleName,
+    string ProcedureName,
+    ResolvedReference Reference);

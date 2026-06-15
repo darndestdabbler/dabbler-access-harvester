@@ -117,6 +117,31 @@ public static class ParserOutputProjector
 
     // ── Reference grouping ────────────────────────────────────────────
 
+    /// <summary>
+    /// Enumerates every procedure-scoped reference (body AND header) that
+    /// <see cref="Project"/> groups into the per-procedure
+    /// <c>Body.References</c>, paired with the enclosing procedure's name.
+    /// DW-11 Layer A: <see cref="UnresolvedItemAggregator"/> consumes this
+    /// (wrapped as <see cref="ProcedureScopedReference"/>) to surface
+    /// procedure-HEADER unresolved refs — an Optional parameter's default
+    /// expression — that the body-only
+    /// <see cref="FunctionClassification.UnresolvedReferences"/> feed drops.
+    /// Because it reuses the SAME grouping <see cref="Project"/> uses,
+    /// the aggregated index is a structural superset of the inline
+    /// <c>Body.References</c> by construction. Module-level references (no
+    /// enclosing <see cref="ProcedureScope"/>) are excluded here exactly as
+    /// <see cref="Project"/> drops them — Layer B owns the module-level home.
+    /// </summary>
+    public static IEnumerable<(string ProcedureName, ResolvedReference Reference)>
+        EnumerateProcedureScopedReferences(ResolvedModule resolvedModule)
+    {
+        if (resolvedModule is null) throw new ArgumentNullException(nameof(resolvedModule));
+
+        foreach (var kv in GroupReferencesByProcedure(resolvedModule))
+            foreach (var reference in kv.Value)
+                yield return (kv.Key.Name, reference);
+    }
+
     private static Dictionary<(string Name, ProcedureKind Kind), List<ResolvedReference>>
         GroupReferencesByProcedure(ResolvedModule resolvedModule)
     {

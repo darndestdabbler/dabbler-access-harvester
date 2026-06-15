@@ -1,0 +1,26 @@
+{
+  "status": "in-progress",
+  "session": 1,
+  "summary": "Set 015 Session 1 (DW-11 Layer A) complete — set in-progress (Session 2 = Layer B remains). Procedure-HEADER unresolved references (an Optional parameter's default expression) now reach unresolved-items.json. Root cause: the index's VBA half is built from the procedure-BODY-only FunctionClassification.UnresolvedReferences feed (FunctionClassificationBuilder walks procedureAst.Body), so a header ref was dropped even though ParserOutputProjector groups it into Body.References. Fix — dedup-additive feed: the aggregator additionally consumes the full procedure-scoped resolver reference set (body + header) via the new ParserOutputProjector.EnumerateProcedureScopedReferences (the SAME set that builds Body.References, so the index is a structural superset by construction), filtered to (with-flattened) Unresolved, and suppresses the body overlap with a NON-MUTATING dedup on the key (module, procedure, line, column, reason, memberName). Net-new items are exactly the header refs, tagged Source=FunctionClassification with the body-ref shape. PROVEN GOLDEN-NEUTRAL byte-level on HomeHealthCare: CanonicalGoldenRegressionTests reproduces unresolved-items.json + manifest + kb + ir + reports-baseline byte-identical (no regen; HHC has zero header/module-level unresolved cases). VALIDATION: 5 hermetic pins in UnresolvedItemsCompletenessTests; full Pipeline.Tests 912/912; full solution builds.",
+  "verification_method": "routed cross-provider session-verification (gpt-5-4): R1 ISSUES_FOUND (1 Major: intra-feed dedup over-suppressed distinct chained-header refs, demonstrated via a red pin) -> fixed (non-mutating Contains + member-name in the dedup key) -> R2 VERIFIED",
+  "verification_verdict": "VERIFIED",
+  "verification_rounds": 2,
+  "files_changed": [
+    "AccessHarvester.Core/Pipeline.cs",
+    "AccessHarvester.Pipeline/Enrichment/UnresolvedItemAggregator.cs",
+    "AccessHarvester.Pipeline/Manifest/ParserOutputProjector.cs",
+    "tests/AccessHarvester.Pipeline.Tests/UnresolvedItemsCompletenessTests.cs",
+    "docs/session-sets/015-unresolved-items-completeness/s1-design-note.md",
+    "docs/session-sets/015-unresolved-items-completeness/ai-assignment.md",
+    "docs/session-sets/015-unresolved-items-completeness/ai-assignment-analysis-s1.md",
+    "docs/session-sets/015-unresolved-items-completeness/s1-verification.md",
+    "docs/session-sets/015-unresolved-items-completeness/s1-verification-r2.md",
+    "docs/session-sets/015-unresolved-items-completeness/s1-issues.json",
+    "docs/session-sets/015-unresolved-items-completeness/s1-devils-advocate-prompt.md",
+    "docs/session-sets/015-unresolved-items-completeness/activity-log.json",
+    "docs/session-sets/015-unresolved-items-completeness/disposition.json",
+    "tools/vahs015_s1_verify.py",
+    "tools/vahs015_s1_verify_r2.py",
+    "tools/vahs015_s1_closeout.py"
+  ]
+}

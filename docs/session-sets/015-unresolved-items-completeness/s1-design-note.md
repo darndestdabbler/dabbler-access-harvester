@@ -72,3 +72,45 @@ expression text) to match the body-ref shape so no body-ref output shifts.
    in-IDE devil's-advocate pair as primary — focus the contrarian hypothesis on the
    dedup key (could it suppress a *legitimately distinct* header ref that shares a
    body ref's line/column/reason?).
+
+---
+
+## Execution result (2026-06-15 — implemented + VERIFIED)
+
+**Implemented as designed**, with one dedup-key correction forced by the routed
+review. The feed is wired through a new public
+`ParserOutputProjector.EnumerateProcedureScopedReferences` (returns the SAME set the
+projector groups into `Body.References`, so the superset is by construction), a new
+`UnresolvedItemAggregator.FromProcedureScopedReferences` projector + the
+`ProcedureScopedReference` record, and a single new feed parameter on
+`UnresolvedItemAggregator.Build`. Pipeline.cs (one call site) builds the feed from
+`resolvedModules` and passes it.
+
+- **Open sub-decision resolved:** the net-new header item carries
+  `Source = FunctionClassification` (a header ref is indistinguishable in the index
+  from a body ref — both are procedure-scoped VBA references — and the body-ref
+  Source the golden already carries is unchanged). Fields mirror the body-ref shape
+  exactly (`Reason` ← with-flattened Unresolved reason; `Line/Column` ←
+  `expr.Provenance`; `SurroundingText`/`memberName` ← the same `ExtractName` switch
+  `FunctionClassificationBuilder` uses).
+- **Dedup-key correction (gpt-5-4 R1 Major, demonstrated + fixed):** the design's
+  5-tuple key `(module, procedure, line, column, reason)` was insufficient — a
+  chained unresolved member access in a header (`Foo.Bar` / `Foo.Bar.Baz`) emits
+  distinct links that share a start position + reason (member-access provenance
+  anchors at the chain start), so a mutating `Add`-based loop dropped the deeper link
+  and recreated an undercount. Fixed two ways: (a) the key gained a sixth component,
+  `SurroundingText` (the member name — `Bar` vs `Baz`), which both feeds derive
+  identically from the same node, so body refs still suppress (no double-count) while
+  chain links survive; (b) the dedup is **non-mutating** — `bodyKeys` is a snapshot of
+  the body-only feed and the procedure-scoped feed is tested with `Contains`, never
+  dedup'd against itself. Pinned by
+  `LayerA_ChainedHeaderUnresolvedRefs_AllReachIndex_NoIntraFeedDrop` (RED before the
+  fix, GREEN after).
+- **Golden:** proven byte-level neutral on HHC — `CanonicalGoldenRegressionTests`
+  reproduces `unresolved-items.json` + manifest + kb + ir + reports-baseline
+  byte-identical (no regen). HHC has zero header/module-level unresolved cases.
+- **Tests:** 5 hermetic pins in `UnresolvedItemsCompletenessTests`; full
+  `AccessHarvester.Pipeline.Tests` 912/912 green.
+- **Verification:** routed gpt-5-4 R1 ISSUES_FOUND (1 Major, fixed) → R2 VERIFIED.
+- **Scope:** Layer B (module-level refs) untouched — still dropped at projection;
+  Session 2 owns the manifest home.
