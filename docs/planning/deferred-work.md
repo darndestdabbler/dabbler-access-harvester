@@ -673,6 +673,39 @@
   pinned by `NorthwindLocalInvariantTests`). The owning set should add a hermetic
   pin that a representative intrinsic constant resolves as built-in.
 
+### DW-19 — `UnresolvedItemAggregator.Build` attributes SQL / dynamic-SQL feeds with SCALAR module/procedure names, but is called ONCE run-wide
+- **What:** `Build(...)` takes **scalar** `sqlFormReferenceModuleName` /
+  `sqlFormReferenceProcedureName` / `dynamicSqlModuleName` /
+  `dynamicSqlProcedureName` parameters to attribute the SQL form-reference and
+  dynamic-SQL feeds, but `Pipeline.cs` calls `Build(...)` **exactly once for the
+  whole run**. So those feeds are structurally incapable of carrying annotations
+  from **more than one module** in a single run-wide call — the scalar name would
+  mislabel every site with one module's name. The VBA feeds (resolver diagnostics,
+  navigation graph, function classifications, and the 015 procedure-scoped /
+  module-level feeds) do NOT have this problem: they carry per-item module/
+  procedure on each record. The limitation is currently **latent, not live**:
+  `Pipeline.cs` does not feed `formReferenceAnnotations` / `dynamicSqlResults` into
+  the run-wide `Build(...)` at all, so no SQL site is mis-attributed today.
+- **Origin:** 2026-06-15 Set 015 **set-wide adversarial review** (Gemini 3.1 Pro,
+  hypothesis 9 / highest-risk finding; GPT-5.4's pass did not flag it). Pre-existing
+  since the aggregator's introduction (Set 011 F-2-2); Set 015 neither introduced
+  nor worsened it — it only made the VBA half of the index complete, which threw the
+  SQL-half asymmetry into relief.
+- **Why deferred:** out of scope for DW-11 (VBA unresolved-reference completeness).
+  The fix belongs with the work that actually wires SQL form-references / dynamic-SQL
+  into the run-wide index — **DW-8** (DynamicSqlAnalyzer / FormReferenceResolver
+  output is not wired into `ParserOutput`). When DW-8 lands, `Build` must take the
+  SQL/dynamic feeds as **per-item-attributed collections** (each annotation carrying
+  its own module/procedure, like the VBA feeds) rather than a scalar name beside a
+  flat list — otherwise the "run-wide index" guarantee breaks for non-VBA inputs.
+- **Trigger to pull back in:** DW-8 (or any set) wires SQL form-references or
+  dynamic-SQL sites into the run-wide `unresolved-items.json`.
+- **Owning set candidate:** **DW-8**'s owning set (dynamic-SQL / form-reference
+  wiring) — fix the signature there, do not do it standalone.
+- **Mechanical backstop:** none (latent — no live mis-attribution today because the
+  SQL feeds are not passed to the run-wide `Build`). Recorded here so the signature
+  is fixed at the same time the feeds are wired.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED
