@@ -1425,35 +1425,36 @@ outputs.
 > unresolved code references were found," not necessarily "every construct in the
 > database resolved."
 >
-> **Scope caveat (DW-11): the unresolved surfaces undercount in two distinct
-> ways.** Neither affects the HomeHealthCare golden (that corpus exercises
-> neither case) but both will undercount on databases that do:
+> **Completeness (DW-11 closed 2026-06-15; one documented asymmetry — DW-17).**
+> `unresolved-items.json` is now the complete run-wide index of unresolved
+> references. There are two reference scopes and one carry-location asymmetry to
+> know about:
 >
-> 1. **Procedure-header unresolved references are missing from the run-wide
->    index, but present inline.** The VBA half of `unresolved-items.json` is drawn
->    from `FunctionClassification.UnresolvedReferences`, which the classifier
->    collects by walking only procedure **bodies**. An unresolved reference in a
->    procedure **header** — e.g. an optional parameter's default expression,
->    `Optional ByVal x As Variant = MissingThing` — is **absent from
->    `unresolved-items.json`** but **is** flagged inline on
->    `ParserOutput.Body.References[]` (the projector groups by procedure *scope*,
->    header included). For these, the inline per-reference fields are the complete
->    signal.
-> 2. **Module-level unresolved references have NO manifest-level signal at all.**
+> 1. **Procedure-scoped unresolved references — in the index AND inline.** Every
+>    unresolved reference inside a procedure — **body OR header** (a header case is
+>    an optional parameter's default expression,
+>    `Optional ByVal x As Variant = MissingThing`) — appears BOTH in
+>    `unresolved-items.json` (under `Source: "FunctionClassification"`) AND inline
+>    on `ParserOutput.Body.References[]` (with `ResolutionStatus: "Unresolved"` +
+>    `ResolutionReason`). 015 Session 1 (DW-11 Layer A) closed the prior gap where
+>    a procedure-**header** reference was inline-only and missing from the index.
+> 2. **Module-level unresolved references — in the index ONLY (DW-17).**
 >    References outside any procedure — a module-level `Const`/`Dim` initializer,
->    `Implements <unresolved>`, `Private x As New <unresolved>` — are dropped at
->    projection: `ParserOutputProjector` keeps only references with an enclosing
->    `ProcedureScope` (the v1.0 schema has no module-level item type). So such a
->    reference appears in **neither** `ParserOutput.Body.References[]` **nor**
->    `unresolved-items.json`. There is currently no complete manifest signal for
->    module-level unresolved references; until DW-11 lands, a consumer that must
->    account for them has to read the source directly.
+>    `Implements <unresolved>`, `Private x As New <unresolved>` — appear in
+>    `unresolved-items.json` under `Source: "ModuleLevelReference"` with **no
+>    `ProcedureName`** (they belong to no procedure). 015 Session 2 (DW-11 Layer B)
+>    added this index home. They are **not** carried in the per-module
+>    `ParserOutput` (the v1.0 `ParserOutput` schema has no module-level item type,
+>    so `Body.References[]` is procedure-scoped only) — this index-only carry
+>    location is the deliberate asymmetry tracked as **DW-17**. The HomeHealthCare
+>    golden carries two such entries (`vbObjectError` referenced in
+>    `basDataOperations` `Const` declarations).
 >
-> So the per-reference `ResolutionReason` / `ResolutionStatus` fields on each
-> `ParserOutput.Body.References[]` entry (see below) are the authoritative signal
-> for everything **inside a procedure** (body and header) — they capture the
-> header references the run-wide index omits — but they are **not** complete for
-> module-level references, which no manifest surface currently carries.
+> Net: read `unresolved-items.json` for the complete run-wide picture (procedure-
+> scoped + module-level). The inline `ParserOutput.Body.References[]` view is
+> complete for everything **inside a procedure** (body and header) but does **not**
+> carry module-level references — for those the run-wide index is the only manifest
+> signal (DW-17).
 
 `unresolved-items.json` is a flat list of `UnresolvedItem` records,
 one per reference the harvester could not fully bind. The record
@@ -1463,7 +1464,7 @@ shape:
 {
   "Source": "Resolver",
   "Reason": "member-access-on-unresolved-target",
-  "Severity": "Warning",
+  "ConstructDescription": "Member access whose target itself failed to resolve.",
   "Location": {
     "ModuleName": "Form_frmCaseManagement",
     "ProcedureName": "cboClient_AfterUpdate",
@@ -1473,27 +1474,49 @@ shape:
   "SurroundingText": "    Set rs = db.OpenRecordset(strSql)",
   "SuggestedNextSteps": [
     "Resolve the underlying target reference first; the member access cannot be bound until then."
-  ]
+  ],
+  "AdditionalContext": {
+    "severity": "Warning",
+    "message": "<resolver diagnostic message>"
+  }
 }
 ```
+
+A **`ModuleLevelReference`** entry has the same shape but **omits `ProcedureName`**
+(it belongs to no procedure) and carries `AdditionalContext.memberName`, e.g.
+`{ "Source": "ModuleLevelReference", "Reason": "not-in-scope", "Location":
+{ "ModuleName": "basDataOperations", "Line": 4, "Column": 36 }, "SurroundingText":
+"vbObjectError", "AdditionalContext": { "memberName": "vbObjectError" } }`.
 
 Fields:
 
 - **`Source`** — which producer surfaced the entry. One of
   `Resolver`, `SqlFormReference`, `DynamicSqlSite`,
-  `NavigationTarget`, `FunctionClassification`.
+  `NavigationTarget`, `FunctionClassification`, `ModuleLevelReference`.
+  (`ModuleLevelReference` was added by 015 S2 / DW-11 Layer B for unresolved
+  references outside any procedure; the value serialises as a string, so a
+  consumer deserialising `Source` into a closed enum must tolerate an unknown
+  value rather than reject the document.)
 - **`Reason`** — a stable string from the producer's closed reason
   set. The full set of reason codes and their meanings is at
   [`docs/session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md`](../session-sets/harvester-finish-canonical-parse-success-report/unresolved-reason-narrative.md).
   The narrative is the authoritative source — this guide summarises
   the shape only.
-- **`Severity`** — `Info`, `Warning`, or `Error`.
-- **`Location`** — module / procedure / line / column where the
-  unresolved reference appears. For SQL-sourced entries this is the
-  query file path; for navigation-target entries it is the host
-  form / control.
+- **`ConstructDescription`** — a one-line human description of the
+  construct, derived from the `Reason`.
+- **`Location`** — `ModuleName` / `ProcedureName` / `Line` / `Column` where the
+  unresolved reference appears. `ProcedureName` is **omitted** for
+  `ModuleLevelReference` entries (they belong to no procedure). For SQL-sourced
+  entries the location is the query file path; for navigation-target entries it is
+  the host form / control.
 - **`SurroundingText`** — a short string of source context (the line
   of VBA or the SQL fragment) to ease human review.
+- **`AdditionalContext`** — an optional ordinally-sorted string map of
+  producer-specific detail (omitted when empty). It carries `severity` +
+  `message` for `Resolver` entries (severity is **not** a top-level field —
+  there is no `Severity` property on the record), `memberName` for
+  `FunctionClassification` / `ModuleLevelReference` entries, the dispatch
+  `action` for `NavigationTarget` entries, etc.
 - **`SuggestedNextSteps`** — verbatim from
   `UnresolvedItemAggregator.SuggestedNextStepsLookup`. For stable
   reasons these are the per-reason recommendation strings; for the
@@ -1525,6 +1548,7 @@ classes at the high level:
 | `DynamicSqlSite` | concatenated-SQL build sites | The harvester cannot statically resolve string-built SQL. Surface the call site for human review or downstream symbolic execution. |
 | `NavigationTarget` | unresolved hyperlink / `DoCmd.OpenForm` / `DoCmd.OpenReport` targets | The target name could not be resolved against the harvested metadata. Typically a dynamic name or a typo. |
 | `FunctionClassification` | late-bound member chains the classifier could not statically bucket | Records carry a `LateBound` category. Consumer reads `UnresolvedReferences` on the matching `FunctionClassification` for the per-site detail. |
+| `ModuleLevelReference` | unresolved references outside any procedure (a `Const`/`Dim` initializer, `Implements <unresolved>`, `Private x As New <unresolved>`) | The same `UnresolvedReasons` set as the resolver/classifier (`not-in-scope`, etc.). Index-only — these do **not** appear in the per-module `ParserOutput` (DW-17); read `unresolved-items.json` for them. `ProcedureName` is omitted. |
 
 ---
 

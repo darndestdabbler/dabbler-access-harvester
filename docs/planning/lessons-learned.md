@@ -909,6 +909,41 @@ reference; if it proves out twice in *this* repo, propose promotion to
   sub-document-vs-envelope call, promote to a Convention under Output JSON
   Conventions.
 
+### A Non-Total Sort Comparer Is A Latent Determinism Trap — Adding Items Reshuffles Equal-Key Items
+
+- **Context:** `015-unresolved-items-completeness` Session 2 (2026-06-15). The
+  Layer B fix added 2 module-level items to the `UnresolvedItemAggregator` output,
+  then ran the HHC golden regen.
+- **Failure or friction:** the regen diff showed, besides the 2 net-new items, a
+  cluster of **same-key items that had swapped order**. Root cause:
+  `SortDeterministically`'s key `(Source, module, procedure, line, column, reason)`
+  was **not a total order** — a chained member access emits several Unresolved
+  links that share a start position + reason and differ only by member name
+  (`.Fields` vs `.Value`). `List.Sort` is a non-stable **introsort**, so the
+  relative order of equal-key items is an artifact of the pivot/partition, which
+  the input *size* perturbs. Adding 2 items elsewhere reshuffled equal-key pairs in
+  unrelated modules. The output was still reproducible run-to-run for a *fixed*
+  input, but it was a function of the sort's internals, not of the input set — a
+  trap that fires the next time any feed changes the item count or order.
+- **Lesson:** "Deterministic output" requires the sort comparer to be a **total
+  order over the whole emitted record**, not just over a readable prefix of fields.
+  A first attempt (add the member name as one more tiebreaker) was still non-total —
+  cross-provider review (gpt-5-4) showed items can tie on the extended key yet
+  differ in residual fields (`File`, `ConstructDescription`, `AdditionalContext`,
+  `SuggestedNextSteps`), and primary comparisons that fold values (OrdinalIgnoreCase
+  module/procedure, null→0 line/column, null→"" text) hide further distinctions.
+  The robust close is an **injective final tiebreaker**: a canonical serialization
+  of the entire record (here `JsonSerializer.Serialize(item)`, deterministic because
+  the only collection member is a `SortedDictionary` and the enum is string-
+  serialized). Two records with identical serialization are byte-identical in the
+  output (order immaterial); any difference yields a stable order.
+- **Action for future sessions:** when emitting a sorted collection whose order must
+  be byte-stable, either sort by a key proven total over every serialized field, or
+  append a canonical-serialization tiebreaker. Treat a golden reorder that appears
+  when you *added* unrelated items as a **non-total-comparer signal**, not noise —
+  and pin it with a permutation-stability test (feed the same set in two orders,
+  assert identical output) covering each folded-collision class.
+
 ### Register Full-Tier Sets That Verify Inline With `--verification-mode out-of-band-or-none`, Not `dedicated-sessions`
 
 - **Context:** Step-0 `start_session` for a Full-tier set whose workflow does

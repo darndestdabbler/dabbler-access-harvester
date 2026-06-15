@@ -63,8 +63,12 @@ public static class ParserOutputProjector
         }
 
         // Group module.References by enclosing ProcedureScope.
-        // Module-level references (no ProcedureScope ancestor) are dropped —
-        // the v1.0 schema has no module-level item type.
+        // Module-level references (no ProcedureScope ancestor) are dropped from
+        // this per-module ParserOutput — the v1.0 schema has no module-level item
+        // type. They are NOT lost: DW-11 Layer B (015 S2) surfaces them in the
+        // run-wide unresolved-items index via EnumerateModuleLevelReferences (the
+        // exact complement of this grouping). This index-only carry location is
+        // the deliberate asymmetry tracked as DW-17.
         var refsByProc = GroupReferencesByProcedure(resolvedModule);
 
         var items = new JsonArray();
