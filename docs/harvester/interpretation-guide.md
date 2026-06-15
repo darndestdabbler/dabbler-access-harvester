@@ -947,6 +947,39 @@ wants "all validation rules in the database" the manifest array is
 the answer; the per-table `ir/` file is the answer when the consumer
 wants "all validation rules on this specific table."
 
+#### Split front-end / back-end databases (linked tables, `Relationships: []`)
+
+When the harvested `.accdb` is the **front end (FE)** of a split
+application, its user tables are **linked attachments** to a separate
+**back-end (BE)** database; only a handful of tables (and `USysRibbons`)
+are truly local. Three consequences a consumer must expect:
+
+- **`Relationships` is empty (`[]`).** A split FE holds **no
+  relationships** — they live in the BE, which the FE harvest does not
+  open. An empty `Relationships` array on a database whose tables are
+  mostly linked is the *expected* shape of a split FE, **not** a harvest
+  failure or a relationship-free schema. To recover the relationship
+  graph for a split application, harvest the **BE** `.accdb` separately.
+- **Detect a linked table by its `Connect` + `SourceTableName`, not by
+  `IsLinked`.** A linked table's `TableMetadata.Connect` is a non-empty
+  DAO connect string (e.g. `MS Access;…;DATABASE=<path-to-BE>`) and
+  `SourceTableName` is its name on the BE. In `run` output the typed
+  `IsLinked` flag is **always null/omitted** and the raw `Attributes`
+  bitmask is not carried into the manifest table record (see
+  `docs/planning/deferred-work.md` DW-25), so the robust "is this linked"
+  signal is a non-empty `Connect` + `SourceTableName` — *not* `IsLinked`.
+- **The `Connect` string may contain a credential and an absolute path.**
+  For an Access-BE attachment, `Connect` can embed a **plaintext
+  password** (`PWD=…`) and the **absolute local filesystem path** to the
+  BE. Treat `Connect` as **sensitive**: do not publish or commit
+  harvested split-DB output without redaction (see DW-24). Consumers that
+  only need the BE *filename* (to pair an FE with its BE) should extract
+  the filename, not echo the whole `Connect`.
+
+(The only split-FE/BE corpus exercised to date is the local-only,
+gitignored StudentICTDatabase — see Set 017's
+`StudentIctLocalInvariantTests`; neither committed corpus is split.)
+
 #### Per-field type semantics
 
 The harvester is **metadata-only**: every column's type, size,

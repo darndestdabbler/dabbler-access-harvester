@@ -1,0 +1,166 @@
+{
+  "sessionSetName": "017-studentict-local-invariant-corpus",
+  "createdDate": "2026-06-15T17:44:08.076081+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/verification-mode",
+      "dateTime": "2026-06-15T17:44:08.076688+00:00",
+      "description": "Operator set verificationMode: out-of-band-or-none.",
+      "status": "complete",
+      "routedApiCalls": [],
+      "kind": "verification_mode",
+      "choice": "out-of-band-or-none"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/s1-reground-and-local-harvest",
+      "dateTime": "2026-06-15T13:49:48.747933-04:00",
+      "description": "Re-ran local FE harvest of StudentICTDatabase.accdb (foreground COM, output to C:/temp, discarded). Clean run (0 failed). Re-confirmed the 4 Project Overview facts (corrected linked-table count 13->9; Relationships 0; redacted plaintext password + absolute BE path in 9 Connect strings; Ribbon 'Help' w/ 5 RibbonEntryPoints all Resolved->modRibbonCallbacks; UnresolvedItems 3380 / 3315 FunctionClassification). New finding: IsLinked/Attributes absent from run-pipeline manifest table records -> DW-25. Confirmed FE/BE/.lnk gitignored. Evidence: s1-reground-evidence.md.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-06-15T13:50:34.452201-04:00",
+      "description": "Routed analysis to author ai-assignment.md body.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 619,
+          "outputTokens": 490,
+          "costUsd": 0.00567375
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/s1-studentict-invariant-tests",
+      "dateTime": "2026-06-15T14:02:45.770655-04:00",
+      "description": "Added skip-gated StudentIctLocalInvariantTests (mirrors NorthwindLocalInvariantTests): clean split-FE run; >=1 linked table Connect->BE filename + SourceTableName (never asserts PWD/abs path); Relationships empty (split-FE invariant); ribbon 'Help' + RibbonEntryPoints resolve OnRibbonLoad/OnActionButton->modRibbonCallbacks; FunctionClassification DW-18 witness. Schema validation surfaced a REAL producer bug -> known-limitation pin (DW-26): manifest does NOT validate because SourceLocation.StartColumn==0 (0-based) on line-leading VBA refs/calls violates schema minimum:1; HHC golden+Northwind validate (the other oneOf 'should be null' errors are losing-branch noise). Test PASSES 1/1 against local corpus (TRX-confirmed).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/s1-onboarding-deferred-work",
+      "dateTime": "2026-06-15T14:04:40.433448-04:00",
+      "description": "Filed DW-24 (linked-table Connect-string plaintext PWD + absolute BE path; no credential redaction), DW-25 (TableMetadata.IsLinked + raw Attributes absent from run-pipeline manifest table records; detect linked via Connect+SourceTableName), DW-26 (SourceLocation.StartColumn==0 0-based leak on line-leading VBA refs/calls violates schema minimum:1). Documented split-FE behaviour in interpretation-guide.md s5.5 (Relationships:[] expected; detect linked via Connect; Connect is sensitive).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/s1-golden-neutral",
+      "dateTime": "2026-06-15T14:05:58.924156-04:00",
+      "description": "Build clean (0 errors). New StudentIctLocalInvariantTests PASSES 1/1 against the local split corpus (TRX). HHC golden proven BYTE-LEVEL NEUTRAL: CanonicalGoldenRegressionTests PASSES 1/1 (fresh HHC run == committed golden, byte-for-byte) \u2014 this set touched no HHC-affecting producer (test + docs + deferred-work only). NorthwindLocalInvariantTests PASSES 1/1 (confirms Northwind schema-validates with the same validator -> corroborates DW-26 'StudentICT is the first corpus to surface StartColumn==0'). Reverted spurious samples/HomeHealthCare.accdb COM-touch.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/s1-verified",
+      "dateTime": "2026-06-15T14:09:13.980475-04:00",
+      "description": "Routed cross-provider session-verification (gpt-5-4).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 3947,
+          "outputTokens": 6414,
+          "costUsd": 0.1060775
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/s1-verified",
+      "dateTime": "2026-06-15T14:12:09.328787-04:00",
+      "description": "Routed gpt-5-4 verdict: ISSUES_FOUND, 2 Minor (both fixed). (1) DW-26 pin de-brittled: StartColumn==0 now proven via structural JSON walk (HasZeroStartColumn) + error match keyed on path+'[minimum]' keyword (dropped message prose + exact substring). (2) Ribbon assertions split into capability-level invariants (ribbon present w/ tab; onLoad/onActions Resolved w/ non-empty module) vs explicitly-labeled corpus-specific canaries ('Help'/'tab1'/'modRibbonCallbacks'); class header reworded. Test still PASSES 1/1; s1-issues.json saved.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/s1-verified",
+      "dateTime": "2026-06-15T14:15:21.355522-04:00",
+      "description": "Self-caught CREDENTIAL LEAK near-miss (devil's-advocate reasoning): the real BE password 'PWD=<value>' + absolute path had been written into 3 TRACKED files (s1-reground-evidence.md, deferred-work.md DW-24, activity-log.json). Redacted all to placeholders before any commit (the routed verifier could not catch this \u2014 its packet was already password-redacted). Authored s1-devils-advocate-prompt.md (bias-cautions preamble + 7 specific contrarian hypotheses A1-A7, two-pass) for the user's in-IDE GPT-5.4 + Gemini Pro PRIMARY closeout review; A1 explicitly re-checks the committed diff for any leaked credential/path. PAUSED for the in-IDE pass before closeout.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 9,
+      "stepKey": "session-1/s1-verified",
+      "dateTime": "2026-06-15T14:38:06.075196-04:00",
+      "description": "In-IDE devil's-advocate PRIMARY review (GPT-5.4 + Gemini 3.1 Pro): both UPHELD A1 (no credential leak), A2/A4/A5 (pin honest, DW-25 sound, no false green). A3 CHALLENGED by BOTH (Major): DW-26 mislocated root cause -> verified the VBA AST is intentionally 0-based (ANTLR; SourceLocation.cs) and ParserOutputProjector.BuildLocation projects it raw (no +1) while hardcoding top-level StartColumn=1; rewrote DW-26 as a 0-based-vs-1-based convention mismatch at projection w/ two golden-affecting fix options; updated test comments. A7 CHALLENGED by GPT (Major; Gemini upheld): added spec Execution Amendment authorizing the known-limitation pin (no silent drift). A6 CHALLENGED by Gemini (Minor): relaxed onLoad Assert.Single out of the capability block into canaries. Test still PASSES 1/1. s1-issues-round-2.json saved.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 10,
+      "stepKey": "session-1/s1-next-set-authored",
+      "dateTime": "2026-06-15T14:39:20.545932-04:00",
+      "description": "Routed analysis to author next-session-set-recommendation.md (consumer-driven-only handoff).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "analysis",
+          "inputTokens": 1046,
+          "outputTokens": 550,
+          "costUsd": 0.006807500000000001
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 11,
+      "stepKey": "session-1/s1-verified",
+      "dateTime": "2026-06-15T14:41:47.276699-04:00",
+      "description": "Routed re-verification (round 2, gpt-5-4) of the round-1 + devil's-advocate resolutions.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 4270,
+          "outputTokens": 7891,
+          "costUsd": 0.12904000000000002
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 12,
+      "stepKey": "session-1/s1-verified",
+      "dateTime": "2026-06-15T14:44:00.164903-04:00",
+      "description": "Routed final round (round 3, gpt-5-4): confirm the round-2 OnActionButton canary Minor is resolved.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 202,
+          "outputTokens": 141,
+          "costUsd": 0.00262
+        }
+      ]
+    }
+  ]
+}

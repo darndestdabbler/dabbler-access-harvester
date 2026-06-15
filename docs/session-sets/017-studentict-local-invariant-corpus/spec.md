@@ -145,7 +145,10 @@ custom-ribbon corpus, and a large DW-18 witness.
    the full pipeline runs clean on the split FE; at least one table surfaces a
    non-empty `Connect` + `SourceTableName` whose `Connect` references
    `StudentICTDatabase_BE.accdb` (the linked-table / split-FE surface); the manifest
-   schema-validates; `NavigationGraph.Ribbon` is populated and its
+   schema-validates **[amended at execution — see Execution Amendment below: this
+   invariant became a DW-26 known-limitation pin because the corpus is the first to
+   make a real 0-based-column-vs-1-based-schema mismatch schema-visible]**;
+   `NavigationGraph.Ribbon` is populated and its
    `RibbonEntryPoints` resolve (second-ribbon witness — `OnRibbonLoad` /
    `OnActionButton` → `modRibbonCallbacks`, all `Resolved`); `FunctionClassification`
    unresolved references are present (DW-18 witness). **Never** assert the absolute
@@ -178,6 +181,37 @@ custom-ribbon corpus, and a large DW-18 witness.
 **Progress keys:** `s1-reground-and-local-harvest`, `s1-studentict-invariant-tests`,
 `s1-onboarding-deferred-work`, `s1-golden-neutral`, `s1-verified`,
 `s1-next-set-authored`, `set-complete`
+
+---
+
+## Execution Amendment (2026-06-15) — the "manifest schema-validates" invariant became a DW-26 known-limitation pin
+
+Authored to reconcile a real-corpus finding the plan did not anticipate (surfaced in
+Step 2 and confirmed by the Step 5 in-IDE devil's-advocate review, GPT-5.4 + Gemini
+both Major on the root-cause framing; the spec-drift was GPT-5.4's A7 finding):
+
+The StudentICTDatabase manifest **does not schema-validate**. Manifest source-location
+columns are emitted **0-based** (the VBA AST's ANTLR convention,
+`SourceLocation.cs`: "Column is 0-based"), projected straight through by
+`ParserOutputProjector.BuildLocation` with no `+1`, while `harvester-schema.v1.1`'s
+`SourceLocation` `$def` declares `StartColumn` `minimum: 1`. A reference/call token at
+the first character of a line is column `0` → below the minimum. StudentICTDatabase is
+the first corpus to contain such a line-leading token; HomeHealthCare and
+NorthwindDevEdition validate only because their indented VBA happens to have no
+column-0 token, **not** because they honour a 1-based contract. This is recorded as
+**DW-26** (a deliberate, golden-affecting convention decision for a future owning set —
+normalise projection to 1-based, or relax the schema to `minimum: 0`).
+
+Per this set's Stop Rule ("a failing real-corpus invariant is a finding to record, not
+an assertion to soften"), the "manifest schema-validates" invariant in Session 1 Step 2
+is therefore implemented as a **known-limitation pin**: `StudentIctLocalInvariantTests`
+asserts the manifest is currently schema-**invalid**, that the failure is the
+`StartColumn` `[minimum]` class, and (structurally) that the manifest carries a numeric
+`StartColumn == 0`; its failure message instructs the owning session to flip the pin to
+assert full validity (like `NorthwindLocalInvariantTests`) and close DW-26 once the
+convention is reconciled. This is the accepted Session 1 outcome — **not** silent spec
+drift, and **not** a softened assertion. No producer/schema change was made in this set
+(corpus-onboarding scope only).
 
 ---
 

@@ -837,6 +837,148 @@
   table with garbage XML degrades rather than fabricating a ribbon; only a table
   with both columns AND valid customUI would mislead.
 
+### DW-24 — Linked-table `Connect` strings are harvested with a plaintext password and absolute local path (no credential redaction)
+- **What:** for a linked / split-database table, the harvester preserves the DAO
+  `Connect` string verbatim in `raw|kb/ir/Tables/*` and in the manifest
+  `TableMetadata.Connect`. For an Access back-end attachment that string can embed
+  a **plaintext password** (`PWD=…`) and the **absolute local filesystem path** to
+  the back-end. The harvester does **no** redaction of connection credentials or
+  path normalisation on `Connect` (nor on the per-field paths a linked ODBC/Excel
+  source could carry). A consumer that commits or shares harvested output for a
+  split DB therefore leaks a live credential and a machine path.
+- **Origin:** Set 017 (StudentICTDatabase onboarding). The proven witness: all 9
+  linked FE tables carry
+  `MS Access;PWD=<redacted>;DATABASE=<absolute-local-path>\StudentICTDatabase_BE.accdb`
+  — a plaintext password + absolute BE path (the literal values are deliberately
+  not reproduced here; reproducing them is the leak this DW is about). This is the
+  hard reason StudentICTDatabase can never
+  be a committed golden (it is local-only / gitignored), and the same risk applies
+  to **any** split DB a consumer harvests.
+- **Why deferred:** out of scope for Set 017 (corpus onboarding only — a local
+  invariant test + docs + this deferred-work filing). Redaction is a producer
+  change (a `sanitize`-stage and/or table-exporter behaviour) with its own design
+  surface: which keys to redact (`PWD`/`PASSWORD`), how to normalise/elide the
+  absolute back-end path while preserving the BE *filename* a consumer needs, and
+  whether to redact in-place or emit a `ConnectRedacted` companion. The faithful-
+  mechanical principle (preserve what Access wrote) is in tension with the
+  privacy/security concern, so the decision needs deliberate scoping, not an
+  inline patch.
+- **Trigger to pull back in:** a consumer reports a leaked credential/path in
+  harvested split-DB output, OR a `sanitize`/privacy-hardening set is scoped, OR
+  the harvester is positioned for consumers who routinely commit output.
+- **Owning set candidate:** a future `connect-string-redaction` / privacy-hardening
+  set (small, P0-only prereq), or fold into the next `sanitize`-stage set.
+- **Mechanical backstop:** `StudentIctLocalInvariantTests` asserts a linked table's
+  `Connect` references the BE **filename** (`StudentICTDatabase_BE.accdb`) but
+  **deliberately never asserts** the `PWD=` value or the absolute path — encoding,
+  by omission, the rule that those are sensitive. No committed pin is possible (the
+  only witness is the proprietary local corpus); the owning set adds a hermetic
+  redaction test on a synthetic `Connect` string.
+
+### DW-25 — `TableMetadata.IsLinked` (and the raw `Attributes` bitmask) are absent from `run`-pipeline manifest table records
+- **What:** in `run`-produced output, every table's `TableMetadata.IsLinked` is
+  **null/omitted** and the raw DAO `Attributes` bitmask is **dropped** from the
+  manifest record — even for a genuinely attached table whose `Attributes` has the
+  `dbAttachedTable` bit (`0x40000000`) set. Root cause (proven): the `run` pipeline
+  builds manifest `Tables` by deserialising `ir/Tables/*.ir.json` into
+  `TableMetadata` (`Pipeline.BuildTableExports`,
+  `AccessHarvester.Core/Pipeline.cs:1154-1190`). The raw `TableExporter` writes the
+  DAO dump with a **top-level** `Attributes`/`Connect`/`SourceTableName` but never a
+  derived `IsLinked`; on deserialisation the unmapped top-level `Attributes` key is
+  dropped (it is not under a `Properties` object), and `IsLinked` stays null because
+  the JSON has no such key. `DeriveIsLinked` exists only in `TableMetadataExtractor`
+  (`AccessHarvester.Access`, pinned by `TableMetadataExtractorTests`), a
+  classify-path COM extractor that is **not** on the `run` → manifest path. So the
+  `TableMetadata` doc-comment ("consumers that need a 'is this linked' boolean should
+  use `IsLinked`") is actively wrong for `run` output — the only linked signal there
+  is a non-empty `Connect` + `SourceTableName`.
+- **Origin:** Set 017 (StudentICTDatabase onboarding). HomeHealthCare and
+  NorthwindDevEdition are **not** split (no linked tables), so the gap was invisible
+  until the first split-FE corpus exercised it — the HHC golden likewise carries no
+  `IsLinked` key on any table.
+- **Why deferred:** out of scope for Set 017 (corpus onboarding only). The fix is a
+  producer change — derive `IsLinked` (and optionally carry the `Attributes`
+  bitmask) on the `run` table-build path, or transcode it into the IR — and it is
+  potentially golden-affecting (HHC table records would gain an `IsLinked` key), so
+  it must land as a deliberate set with a coordinated golden regen, not folded into
+  onboarding.
+- **Trigger to pull back in:** a consumer relies on `TableMetadata.IsLinked` from
+  `run` output (and is misled by its always-null value), OR a table-metadata-fidelity
+  set is scoped, OR the `TableMetadata` doc-comment is reconciled to reality.
+- **Owning set candidate:** a future `table-metadata-fidelity` set (small, P0-only
+  prereq). **Potentially golden-affecting — plan the HHC regen.**
+- **Mechanical backstop:** `StudentIctLocalInvariantTests` detects linked tables via
+  a non-empty `Connect` + `SourceTableName` (the robust `run`-output signal),
+  documenting by construction that `IsLinked` is not usable there. No committed pin
+  (HHC has no linked tables); the owning set adds one with the regen.
+
+### DW-26 — Manifest source-location columns are emitted 0-based (the AST's ANTLR convention) but the schema declares them 1-based (`minimum: 1`) — an unnormalised internal-vs-public convention mismatch at projection
+- **What:** the VBA parser's `SourceLocation` column is **0-based by design**
+  ("Column is 0-based (ANTLR convention)",
+  `AccessHarvester.Vba.Parser/Ast/SourceLocation.cs:3`; `AstBuilder` stores
+  `token.Column` / `ctx.Start.Column` directly). `ParserOutputProjector.BuildLocation`
+  (`AccessHarvester.Pipeline/Manifest/ParserOutputProjector.cs:426-433`) then projects
+  that **raw 0-based** column straight into the manifest
+  (`StartColumn = range.Start.Column`, **no `+1` normalisation**). But the committed
+  `harvester-schema.v1.1.json` defines a single `SourceLocation` `$def` with
+  `StartColumn: { minimum: 1 }` (a **1-based** public contract,
+  `harvester-schema.v1.1.json:249`), `$ref`'d by every Location field — and the same
+  projector even **hardcodes the synthetic top-level location to `StartColumn = 1`**
+  (`ParserOutputProjector.cs:115`). So the projector is internally inconsistent: it
+  fabricates 1-based for the document root but passes through 0-based for every real
+  reference/call. A token at the **first character of a line** is column `0` (0-based)
+  and is therefore below the schema's `minimum: 1` → a hard schema violation; the
+  manifest fails `SchemaValidator.Validate`.
+- **Corrected root-cause framing (Set 017 devil's-advocate review, GPT-5.4 + Gemini
+  both CHALLENGED the original write-up, Major):** this is **NOT** a "0-based leak on
+  a special line-leading code path" and the prior corpora do **NOT** honour a 1-based
+  contract. Every manifest column is 0-based; HomeHealthCare's golden has a `StartColumn`
+  **minimum of 1** (never 0) and NorthwindDevEdition validates **only because neither
+  corpus happens to contain a reference/call token at column 0** (their VBA is indented,
+  so even as 0-based values nothing lands on 0). The schema's `minimum: 1` is satisfied
+  **by luck**, not by a 1-based emission contract. The true defect is the
+  **convention mismatch**: 0-based AST columns projected into a 1-based-declared schema
+  without translation. StudentICTDatabase is simply the first corpus with a line-leading
+  (column-0) reference/call token that makes the mismatch schema-visible.
+- **Origin:** Set 017 (StudentICTDatabase onboarding); root cause corrected by the
+  Set 017 in-IDE devil's-advocate review (A3). Proven witness: the local StudentICT
+  manifest carries `StartColumn: 0` on 26 `ResolvedCallee.Location` entries plus ~250+
+  `References`/`Calls` Location entries (e.g. `GetDataType` at
+  `StartLine 9, StartColumn 0, EndColumn 11` — a `[0, len)` 0-based span).
+  *Note:* the thousands of OTHER errors the validator reports on this manifest
+  (`ResolvedTarget should be "null"`, `ItemKind Expected "Query"/"Expression"`,
+  `ParserOutput should be "null"`, `NavigationGraph should be "null"`) are
+  **losing-`oneOf`-branch noise** from `OutputFormat.List` — the same object-valued
+  fields validate fine on Northwind — NOT independent failures. The sole real,
+  non-recoverable assertion failure is the `StartColumn` minimum.
+- **Why deferred:** out of scope for Set 017 (corpus onboarding only; a producer/
+  schema change → stop at the boundary, record a DW). Per the set's Stop Rule a
+  failing real-corpus invariant is a finding, not an assertion to soften. The fix is a
+  **deliberate convention decision** for the owning set, with two mutually exclusive
+  options, BOTH golden-affecting in different ways:
+  (a) **Normalise to 1-based at projection** — `+1` the column in
+  `ParserOutputProjector.BuildLocation` (matching the schema and the projector's own
+  hardcoded top-level `=1`). This makes the contract genuinely 1-based but **shifts
+  every column in the HomeHealthCare golden by +1** → a large coordinated golden regen.
+  (b) **Relax the schema to `minimum: 0`** (0-based) and reconcile the hardcoded
+  top-level `=1` and any expected fixtures. No golden column churn, but the public
+  contract becomes 0-based and any consumer assuming 1-based must adjust.
+  Either way it is a deliberate envelope/schema decision, not an onboarding patch.
+- **Trigger to pull back in:** a consumer relies on a definite column base (or on the
+  manifest schema-validating for a real split/rich-VBA DB whose code has line-leading
+  tokens), OR a parser/manifest location-fidelity set is scoped (natural bundle with
+  the DW-1/DW-2/DW-4 parser-grammar-completeness items).
+- **Owning set candidate:** a future `parser-location-fidelity` /
+  `manifest-location-convention` set (small, P0-only prereq). **Golden-affecting under
+  option (a) — plan the HHC regen.**
+- **Mechanical backstop:** `StudentIctLocalInvariantTests` pins the CURRENT
+  (defective) reality as a known limitation — it asserts the StudentICT manifest is
+  schema-**invalid**, that the failure set contains the `StartColumn` `[minimum]`
+  class, and (structurally) that the manifest carries a numeric `StartColumn == 0` —
+  and its failure message instructs the owning session to flip the pin to assert
+  `IsValid` (like `NorthwindLocalInvariantTests`) and close DW-26 once the convention
+  is reconciled. No committed golden pin (HHC has no column-0 token).
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED

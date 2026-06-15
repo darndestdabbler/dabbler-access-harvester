@@ -1,0 +1,57 @@
+{
+  "sessionSet": "017-studentict-local-invariant-corpus",
+  "session": 1,
+  "round": 2,
+  "reviewKind": "in-IDE devil's-advocate (PRIMARY closeout review)",
+  "reviewers": ["gpt-5-4", "gemini-3.1-pro"],
+  "rawArtifacts": ["s1-devils-advocate-gpt-5-4.md", "s1-devils-advocate-reply-gemini.md", "s1-devils-advocate-prompt.md"],
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": "S1-R2-A3",
+      "severity": "Major",
+      "item": "A3",
+      "flaggedBy": ["gpt-5-4", "gemini-3.1-pro"],
+      "location": "docs/planning/deferred-work.md (DW-26); StudentIctLocalInvariantTests comments; AccessHarvester.Vba.Parser/Ast/SourceLocation.cs; AccessHarvester.Pipeline/Manifest/ParserOutputProjector.cs",
+      "summary": "DW-26's original write-up mislocated the root cause: it framed StartColumn==0 as a producer off-by-one on a line-leading code path and claimed prior corpora honour a 1-based contract. The VBA AST is intentionally 0-based (ANTLR; SourceLocation.cs:3); ParserOutputProjector.BuildLocation (line 431) projects it raw with no +1 while hardcoding the top-level to StartColumn=1 (line 115) and the schema requires minimum:1. HHC/Northwind validate only because they have no column-0 token, not by honouring 1-based.",
+      "resolution": "fixed",
+      "resolutionNote": "Independently verified the 0-based AST + raw projection + hardcoded top-level=1. Rewrote DW-26 as an internal-0-based-vs-public-1-based convention MISMATCH at projection, with two mutually-exclusive golden-affecting fix options (normalise projection +1, or relax schema to minimum:0). Updated the test's Invariant-2b comments to the convention-mismatch framing. The pin itself (IsValid==false + StartColumn [minimum] + structural StartColumn==0) is unchanged — it pins the public-contract failure regardless of which layer fixes it."
+    },
+    {
+      "id": "S1-R2-A7",
+      "severity": "Major",
+      "item": "A7",
+      "flaggedBy": ["gpt-5-4"],
+      "note": "Gemini UPHELD A7 (judged the pin adheres to the Stop Rule). Split verdict; sided with GPT-5.4's stricter reading because making the deviation explicit is cheap and removes any ambiguity.",
+      "location": "docs/session-sets/017-studentict-local-invariant-corpus/spec.md; StudentIctLocalInvariantTests",
+      "summary": "The spec still textually required the manifest to schema-validate and forbade weakening assertions, but the shipped test inverts that to Assert.False(IsValid) without an in-tree spec amendment reconciling the deviation — reads as silent spec drift.",
+      "resolution": "fixed",
+      "resolutionNote": "Added an 'Execution Amendment (2026-06-15)' section to spec.md explicitly authorizing the DW-26 known-limitation pin as the accepted Session 1 outcome (citing the Stop Rule that a failing real-corpus invariant is a finding, not a softened assertion), and annotated the Step-2 invariant line inline. The deviation is now explicit, not silent."
+    },
+    {
+      "id": "S1-R2-A6",
+      "severity": "Minor",
+      "item": "A6",
+      "flaggedBy": ["gemini-3.1-pro"],
+      "note": "GPT-5.4 UPHELD A6 (judged the split honest); Gemini found a residual mislabel.",
+      "location": "tests/AccessHarvester.Integration/Pipeline/StudentIctLocalInvariantTests.cs",
+      "summary": "An exact-count assertion (Assert.Single on the onLoad entry points) sat inside the CAPABILITY-LEVEL invariants block, though exactly-one-onLoad is a corpus-structure canary that a benign FE edit could break.",
+      "resolution": "fixed",
+      "resolutionNote": "Relaxed the capability block to 'NotEmpty onLoads + NotEmpty onActions, all Resolved with non-empty module' (no exact count). Moved Assert.Single(onLoads) into the CORPUS-SPECIFIC CANARIES block with the modRibbonCallbacks check."
+    },
+    {
+      "id": "S1-R2-A6b",
+      "severity": "Minor",
+      "item": "A6 (pass-2 note)",
+      "flaggedBy": ["gemini-3.1-pro"],
+      "location": "tests/AccessHarvester.Integration/Pipeline/StudentIctLocalInvariantTests.cs",
+      "summary": "The DW-18 witness uses a raw-substring check Assert.Contains(\"\\\"FunctionClassification\\\"\", unresolvedJson), brittle to JSON formatting.",
+      "resolution": "accepted-consequence",
+      "resolutionNote": "Left as-is for deliberate parity with the committed NorthwindLocalInvariantTests template (which uses the identical substring approach for its ModuleLevelReference/FunctionClassification witnesses). Gemini rated it benign/functional. Changing it here would diverge the two sibling tests; a future template-wide hardening can address both together."
+    }
+  ],
+  "leakNearMiss": {
+    "summary": "Before the in-IDE review, orchestrator self-caught (via A1-style reasoning) that the real BE password + absolute path had been written into 3 tracked files; redacted to placeholders before any commit. Both reviewers independently re-verified A1 as UPHELD (no leak in the committed surfaces).",
+    "files": ["s1-reground-evidence.md", "docs/planning/deferred-work.md", "activity-log.json"]
+  }
+}

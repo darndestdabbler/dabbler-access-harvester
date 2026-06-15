@@ -1,0 +1,21 @@
+{
+  "sessionSet": "017-studentict-local-invariant-corpus",
+  "session": 1,
+  "round": 3,
+  "reviewKind": "routed re-verification of round-1 + devil's-advocate resolutions",
+  "verifier": "gpt-5-4",
+  "rawArtifact": "s1-verification-round-2.md",
+  "verdict": "ISSUES_FOUND",
+  "note": "The three carried resolutions (A3 DW-26 reframe, A7 spec amendment, A6 capability/canary split) were VERIFIED; one NEW Minor was found.",
+  "issues": [
+    {
+      "id": "S1-R3-1",
+      "severity": "Minor",
+      "location": "StudentIctLocalInvariantTests.cs — CORPUS-SPECIFIC CANARIES block",
+      "summary": "The canary comment claimed all button callbacks share 'OnActionButton' but no assertion backed the claim (only Assert.Single(onLoads) + the modRibbonCallbacks module check existed).",
+      "fix": "Add the missing canary assertion or revise the comment.",
+      "resolution": "fixed",
+      "resolutionNote": "Added Assert.All(onActions, ep => Assert.Equal(\"OnActionButton\", ep.CallbackName)) so the comment is now backed by a real canary. Test still PASSES 1/1. No further routed round (Minor only; bounded-rounds guidance caps automatic verify cycles at 2 and this was a one-line comment/assertion reconciliation)."
+    }
+  ]
+}

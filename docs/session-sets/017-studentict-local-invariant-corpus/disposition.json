@@ -1,0 +1,36 @@
+{
+  "status": "completed",
+  "summary": "Set 017 (1/1, Full tier): onboarded the proprietary split-FE/BE StudentICTDatabase as a SECOND local-only invariant corpus (never committed; FE/BE/.lnk gitignored). Added skip-gated StudentIctLocalInvariantTests (gated on BOTH FE+BE present; mirrors NorthwindLocalInvariantTests): clean split-FE pipeline run; >=1 linked table with Connect+SourceTableName referencing the BE FILENAME (never the password/abs path); empty Relationships (split-FE invariant); custom ribbon 'Help' with onLoad/onAction entry points resolving (capability invariants) + corpus-specific canaries (modRibbonCallbacks, OnActionButton, single onLoad); FunctionClassification DW-18 witness. Re-grounding corrected the spec's linked-table count (13->9). Three findings filed as deferred work (all OUT of onboarding scope, none fixed): DW-24 (linked-table Connect strings carry a plaintext password + absolute BE path; no redaction), DW-25 (TableMetadata.IsLinked + raw Attributes absent from run-pipeline manifest table records; detect linked via Connect+SourceTableName), DW-26 (manifest source-location columns emitted 0-based per the AST's ANTLR convention but the schema declares minimum:1 -> any real split/rich-VBA corpus with a line-leading token yields a schema-INVALID manifest; pinned as a known-limitation test). Documented split-FE behaviour in interpretation-guide.md S5.5. HHC golden proven BYTE-LEVEL NEUTRAL (CanonicalGoldenRegressionTests 1/1; this set touched no producer). NorthwindLocalInvariantTests still 1/1. Verification: routed gpt-5-4 R1 (ISSUES_FOUND, 2 Minor fixed) + in-IDE devil's-advocate pair GPT-5.4+Gemini as PRIMARY (A3 Major BOTH: DW-26 root-cause reframed to a 0-based-vs-1-based convention mismatch at projection; A7 Major GPT: spec Execution Amendment added authorizing the known-limitation pin; A6 Minor Gemini: capability/canary split tightened) + routed R2 (3 resolutions VERIFIED, 1 new Minor fixed) + routed R3 (VERIFIED). Self-caught + redacted a credential near-miss (real password had been written into 3 tracked docs) before any commit. Repo remains consumer-driven-only; next-set recommendation is a recorded handoff (no concrete set authored).",
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "files_changed": [
+    "tests/AccessHarvester.Integration/Pipeline/StudentIctLocalInvariantTests.cs",
+    "docs/planning/deferred-work.md",
+    "docs/harvester/interpretation-guide.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/spec.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/ai-assignment.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-reground-evidence.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-verification.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-verification-round-2.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-verification-round-3.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-issues.json",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-issues-round-2.json",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-issues-round-3.json",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-devils-advocate-prompt.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-devils-advocate-gpt-5-4.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/s1-devils-advocate-reply-gemini.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/next-session-set-recommendation.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/change-log.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/ai-assignment.md",
+    "docs/session-sets/017-studentict-local-invariant-corpus/disposition.json",
+    "docs/session-sets/017-studentict-local-invariant-corpus/activity-log.json",
+    "docs/session-sets/017-studentict-local-invariant-corpus/session-events.jsonl",
+    "docs/session-sets/017-studentict-local-invariant-corpus/session-state.json"
+  ],
+  "verification_message_ids": [],
+  "next_session_set": {
+    "slug": "(none — consumer-driven-only handoff)",
+    "summary": "Repo is consumer-driven-only; no concrete next set authored. next-session-set-recommendation.md catalogs the open DW landscape; strongest pull-in candidates if a driver appears are DW-26 (schema-invalid manifests on real split/rich-VBA corpora — newly the highest-value correctness item) and DW-18 (intrinsic-constant registry; golden-affecting; huge StudentICT witness). Carries the StudentICT never-commit Hard Constraint + HHC-only golden rule."
+  },
+  "blockers": []
+}

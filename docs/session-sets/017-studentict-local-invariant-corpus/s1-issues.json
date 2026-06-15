@@ -1,0 +1,27 @@
+{
+  "sessionSet": "017-studentict-local-invariant-corpus",
+  "session": 1,
+  "round": 1,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": "S1-R1-1",
+      "severity": "Minor",
+      "location": "StudentIctLocalInvariantTests",
+      "summary": "The DW-26 known-limitation pin relied on validator message prose ('at least 1') and an exact raw-JSON substring ('\"StartColumn\": 0'), which can spuriously fail after a harmless validator message or manifest-formatting change.",
+      "fix": "Keep IsValid==false; assert StartColumn==0 by structurally walking the parsed manifest (HasZeroStartColumn), and key the error match on the schema PATH + keyword ('StartColumn' + '[minimum]') instead of the human message.",
+      "resolution": "fixed",
+      "resolutionNote": "Added HasZeroStartColumn(JsonElement) structural walk; changed error match to require '[minimum]' (the keyword) + 'StartColumn' (the InstanceLocation), dropping the 'at least 1' prose and the exact-substring scan."
+    },
+    {
+      "id": "S1-R1-2",
+      "severity": "Minor",
+      "location": "StudentIctLocalInvariantTests",
+      "summary": "Several ribbon assertions pinned exact corpus-specific names/ids ('Help', 'tab1', 'modRibbonCallbacks') while the test was described as asserting corpus-independent invariants.",
+      "fix": "Split capability-level invariants (custom ribbon present with >=1 tab; OnLoad/OnAction entry points surfaced and Resolved with a non-empty module) from corpus-specific canaries (exact names), and label the canaries explicitly.",
+      "resolution": "fixed",
+      "resolutionNote": "Added capability-level assertions (NotEmpty Tabs; Resolved + non-empty ModuleName on onLoad/onActions) and relabeled the exact 'Help'/'tab1'/'modRibbonCallbacks' checks as CORPUS-SPECIFIC CANARIES in both the inline comments and the class header."
+    }
+  ]
+}
