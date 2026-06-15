@@ -1,17 +1,30 @@
 {
   "schemaVersion": 4,
   "sessionSetName": "015-unresolved-items-completeness",
-  "status": "not-started",
+  "status": "in-progress",
   "sessions": [
     {
       "number": 1,
-      "title": "Layer A — procedure-header unresolved references reach the index",
-      "status": "not-started"
+      "title": "Layer A \u2014 procedure-header unresolved references reach the index",
+      "status": "in-progress",
+      "startedAt": "2026-06-15T02:07:33.196908-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "high"
+      },
+      "verificationVerdict": null
     },
     {
       "number": 2,
-      "title": "Layer B — module-level unresolved references get a manifest home",
-      "status": "not-started"
+      "title": "Layer B \u2014 module-level unresolved references get a manifest home",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
     }
   ]
 }
