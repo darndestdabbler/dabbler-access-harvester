@@ -2674,3 +2674,46 @@ reference; if it proves out twice in *this* repo, propose promotion to
   exclusive); (3) add a must-not-suppress boundary pin alongside the must-catch
   pin. If a second spec-shorthand boundary is mis-shipped this way, propose
   promoting to a Convention under Code Style.
+
+### A Synthesized Dedup Key Must Uniquely Identify The Element, And Dedup Only Against The Other Feed — Never Mutate The Key Set Mid-Pass
+
+- **Context:** Merging two feeds that overlap and deduplicating the overlap on a
+  *synthesized* key (not object identity). First hit in
+  `015-unresolved-items-completeness` Session 1 (2026-06-15): the unresolved-items
+  aggregator gained a procedure-scoped feed (body + header references) that had to
+  suppress the references the body-only `FunctionClassification` feed already
+  carried, keyed on `(module, procedure, line, column, reason)`.
+- **Failure or friction:** The routed cross-provider R1 returned a Major with a
+  concrete reproducer the implementation's own pins had missed. Two coupled bugs:
+  (1) **the positional key did not uniquely identify a reference** — a chained
+  unresolved member access (`Foo.Bar` / `Foo.Bar.Baz`) emits distinct links that
+  share a start line+column (member-access provenance anchors at the chain start)
+  and the same reason, so they collided on the key; (2) **the loop mutated the key
+  set as it iterated** (`hashSet.Add(key)` as the skip/keep test), so it deduped the
+  new feed *against itself*, not just against the other feed — the second colliding
+  link was silently dropped, recreating the very undercount the session existed to
+  fix, now inside the supposedly-fixed layer. A header-only collision had no
+  body-feed counterpart to "rescue" it, so the loss was real. (Confirmed by a pin
+  that was RED against the shipped code.)
+- **Lesson:** Two independent disciplines, both required. (a) A synthesized dedup
+  key must carry enough to *uniquely identify* the element across both feeds —
+  position + category is a frequent under-identifier because nested/chained
+  constructs legitimately share a position; add a discriminator both feeds derive
+  *identically from the same source* (here the member/identifier name, computed by
+  the same `ExtractName` switch, so the same physical reference still collapses
+  while distinct links separate). (b) To suppress overlap with feed A, test
+  membership against a **frozen snapshot** of A's keys (`Contains`), and never add
+  feed B's keys back into that set — a mutating `Add`-as-test silently dedups B
+  against itself and drops legitimately-distinct same-key elements. This is the
+  Evidence-Over-Inference principle applied to a merge: the "every body ref
+  collapses" parity argument was right, but it was an argument about the *keys that
+  matched*, and said nothing about the keys that *collided within the new feed*.
+- **Action for future sessions:** When writing a synthesized-key dedup between two
+  feeds: (1) ask "can two genuinely-distinct elements share this key?" and pin a
+  collision case (chained/nested constructs are the usual culprit) BEFORE shipping;
+  (2) seed the key set once from the feed you are suppressing against and test with
+  `Contains` — reserve mutating `Add` for genuine intra-feed dedup you actually
+  intend; (3) prove the merge is inert on the golden corpus byte-level AND pin the
+  collision behaviour hermetically (the golden corpus may simply lack the colliding
+  construct, as HHC did). If a second synthesized-key merge hits the same
+  collision-or-self-dedup trap, propose promoting to a Convention under Code Style.
