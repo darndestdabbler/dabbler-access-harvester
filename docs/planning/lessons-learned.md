@@ -2787,3 +2787,64 @@ reference; if it proves out twice in *this* repo, propose promotion to
   it is recorded here; if a **different** session set independently makes the
   same null-vs-empty call for a corpus-conditional facet, promote it to a
   Convention under Output JSON Conventions in `project-guidance.md`.
+
+### Redact A Corpus's Embedded Credential / Path From EVERY Committed Artifact, Not Just The Test
+
+- **Context:** Set 017 onboarded the proprietary split-FE/BE StudentICTDatabase as
+  a local-only corpus. Its sensitivity is a *credential*: every linked-table
+  `Connect` string embeds a plaintext `PWD=` and an absolute back-end path (→ DW-24).
+- **Failure or friction:** The orchestrator correctly kept the secret out of the
+  *test* assertions (asserting only the BE filename) — but then wrote the **literal
+  password + absolute path verbatim** into three *tracked* docs (`s1-reground-
+  evidence.md`, the DW-24 entry in `deferred-work.md`, and an `activity-log.json`
+  step description). That would have committed the credential to git just as surely
+  as committing the (gitignored) harvested output the never-commit rule forbids. It
+  was caught only by the orchestrator's own pre-commit devil's-advocate pass and
+  redacted to placeholders before any commit.
+- **Lesson:** When a corpus's sensitivity is a credential or machine path, "never
+  commit a derived artifact" is **not** sufficient — the literal value must be
+  redacted from *every* committed surface: DW entries, evidence/re-grounding docs,
+  `activity-log.json` step descriptions, the change-log, and any routed-prompt
+  script left on disk. Gitignoring the `.accdb`/IR protects nothing if you paste the
+  secret into a tracked `.md`. Critically, the routed `session-verification` packet
+  is *already* redacted before it is sent, so the **routed verifier structurally
+  cannot catch this leak** — only the in-IDE devil's-advocate pass (full repo
+  access) can. (Confirms the non-overlapping-blind-spots property of the two
+  reviews from a new angle: here the routed reviewer was blind by construction.)
+- **Action for future sessions:** Use placeholders (`PWD=<redacted>`,
+  `<absolute-local-path>\file.accdb`) in all prose; assert only a non-sensitive
+  discriminator (the BE *filename*, never the password/path) in tests; and put an
+  explicit "grep the committed diff for the literal credential/path" item in the
+  devil's-advocate prompt so the full-repo reviewer re-checks it. First hit:
+  Set 017 (DW-24). If this recurs in a second context, promote to a Convention.
+
+### When A Real Corpus Disproves A Spec Invariant, Pin The Finding As A Known-Limitation Test AND Amend The Spec — Don't Silently Invert It
+
+- **Context:** Set 017's spec listed "the manifest schema-validates" as a Session-1
+  invariant to assert. The real corpus *disproved* it: the StudentICTDatabase manifest
+  fails schema validation because manifest source-location columns are emitted 0-based
+  (the AST's ANTLR convention, projected with no `+1`) while the schema declares
+  `StartColumn minimum: 1` (DW-26). HHC/Northwind validate only because they happen to
+  have no column-0 token.
+- **Failure or friction:** The honest move is *not* to soften the assertion to force
+  green (the spec's Stop Rule forbids it) nor to commit a red test. The orchestrator
+  encoded a known-limitation pin (`Assert.False(IsValid)` + the specific failing
+  class + a structural trigger check, with a message that flips it when the producer
+  is fixed). But it initially did so **only in the test** — leaving the spec text
+  still requiring "schema-validates." The closeout devil's-advocate pass (GPT-5.4, A7)
+  flagged this as silent spec drift.
+- **Lesson:** A failing real-corpus invariant is a finding to *record mechanically*,
+  not an assertion to soften — but recording it has **two** halves: (1) a
+  known-limitation test pin that asserts the current (defective) reality and flips
+  the day the owning fix lands (name the DW in its failure message); and (2) an
+  explicit **spec amendment** (an "Execution Amendment" section) authorizing the
+  deviation, so the inverted assertion does not read as drift against the authored
+  plan. Skipping (2) leaves a reviewer unable to tell a principled known-limitation
+  pin from an orchestrator quietly abandoning a required invariant.
+- **Action for future sessions:** When a real corpus disproves a spec invariant,
+  file the DW (with the corrected root cause — verify it, don't infer it: Set 017's
+  DW-26 framing was itself corrected by the devil's-advocate pass from "line-leading
+  off-by-one" to "0-based-AST-vs-1-based-schema convention mismatch at projection"),
+  add the known-limitation pin, AND add a spec Execution-Amendment note in the same
+  session. First hit: Set 017 (DW-26 / A7). Promote to a Convention on a second
+  context.

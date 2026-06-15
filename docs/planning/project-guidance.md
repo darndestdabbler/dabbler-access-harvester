@@ -584,7 +584,14 @@ experiments only.
     confirming context: `011` Session 3 (the pair caught the C9
     `unresolved-items.json` undercount a clean routed R1 missed) and `012`
     Session 3 (the pair caught the C3 form/report name-collision — a wrong-data
-    bug — that routed R1–R4 had VERIFIED). The lessons-learned entry is
+    bug — that routed R1–R4 had VERIFIED). Third confirming context: `017`
+    Session 1 — the routed gpt-5-4 round VERIFIED the *approach* (modulo two
+    Minors), but the in-IDE pair (GPT-5.4 + Gemini, both Major on A3) caught that
+    the DW-26 *root cause was mislocated* ("line-leading off-by-one" → actually a
+    0-based-AST-vs-1-based-schema convention mismatch at projection) and that the
+    schema-invariant inversion was undocumented spec drift (A7). The routed
+    reviewer accepted the orchestrator's framing because the packet *carried* that
+    framing; the full-repo adversarial read did not. The lessons-learned entry is
     retained as the action-detail reference.
 - **Mark `[Obsolete]` instead of deleting types whose consumers a
   future session already owns.** Before physically deleting a type
