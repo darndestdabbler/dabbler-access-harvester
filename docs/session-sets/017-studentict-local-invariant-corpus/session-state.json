@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "017-studentict-local-invariant-corpus",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Add StudentICTDatabase as a local invariant corpus + onboarding findings",
+      "status": "not-started"
+    }
+  ]
+}

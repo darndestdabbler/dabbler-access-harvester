@@ -20,6 +20,12 @@ ai_router/router-metrics.jsonl
 # NorthwindDevEdition sample — Access mutates internal timestamps on every
 # open, producing byte-level changes even on read-only access.
 samples/NorthwindDevEdition.accdb
+samples/heads.ico
+samples/Student ICT Database
+samples/StudentICTDatabase.accdb
+samples/StudentICTDatabase_BE.accdb
+# Windows shortcut to the proprietary Student ICT DB (leaks name/path; never commit).
+samples/*.lnk
 
 # Access lock files (created when Access opens a .accdb; never committed).
 *.laccdb
