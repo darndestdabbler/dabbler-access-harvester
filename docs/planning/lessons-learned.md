@@ -2584,3 +2584,59 @@ reference; if it proves out twice in *this* repo, propose promotion to
   "Flag high-value/high-risk work … review it devil's-advocate" Convention an
   explicit clause that a clean routed VERIFIED does not waive the devil's-advocate
   pass on closeout-grade work, because the two have non-overlapping blind spots.
+
+### Consolidating Copy-Pasted Code Is The Moment To Close The Latent Gaps Every Copy Shared — A Closeout Verifier Will Look There
+
+- **Context:** A refactor that lifts N copy-pasted implementations to one shared
+  helper. First hit in `013-cli-input-robustness` Session 2 (2026-06-14, O-1-4 —
+  the seven `ParseOptions` copies → one `OptionParser`).
+- **Failure or friction:** The consolidation **faithfully preserved** a latent
+  gap present in all seven copies: a repeated option (`--out a --out b`) was
+  silently overwritten "last wins," so a malformed invocation still produced a
+  wrong-but-successful run. The change added unknown-switch + positional rejection
+  but carried the duplicate-option gap forward unquestioned. The routed
+  cross-provider verifier (gpt-5-4) flagged it **Major on R1** precisely because
+  centralising the logic made the one shared parser the obvious place the gap
+  *should* have been closed — a faithful dedup that ships the shared defect is a
+  verifier-magnet, and on this set (whose theme was exit-code / input honesty) it
+  was squarely on-theme. Fixed in one place; R2 VERIFIED.
+- **Lesson:** A consolidation is not a behaviour-neutral mechanical move — it is
+  the cheapest moment to fix edge cases the copies handled inconsistently or not
+  at all, because the shared helper becomes the single chokepoint. "I faithfully
+  preserved every copy's behaviour" is the *wrong* default when every copy shared
+  a gap that the session's own theme is about closing. Enumerate the edge cases
+  the originals handled (positional args, unknown keys, repeated keys, value
+  beginning with `--`, empty input) and decide **explicitly** which the
+  consolidation closes — then disclose that decision to the verifier rather than
+  letting it surface the omission.
+- **Action for future sessions:** When a session lifts copy-pasted logic to one
+  helper, list the input edge cases up front and pin a hermetic test for each the
+  consolidation now handles; surface any deliberately-preserved gap as a `DW-<n>`
+  entry. If a second consolidation refactor independently hits the same "faithful
+  dedup shipped a shared latent gap" pattern, promote to a Convention in
+  `project-guidance.md` → Conventions → Code Style.
+
+### Re-Grounding Found Four Connection-String Sites Where The Finding Named Two — A Finding's Site Count Is A Floor, Not A Ceiling
+
+- **Context:** Implementing a recorded review finding whose text enumerates the
+  affected call sites. First hit in `013-cli-input-robustness` Session 2
+  (2026-06-14, F-1-5 — the 006 finding named "two OLE DB helpers"; re-grounding
+  found **four** identical `BuildConnectionString` interpolations because sets
+  008–012 had added `OleDbRowSource` and `OleDbReportQueryExecutor` since the 006
+  probe was dated 2026-06-12).
+- **Failure or friction:** None realised — this records the discipline that
+  *avoided* a half-fix. Fixing only the two sites the finding named would have
+  left two identical defects, an obvious gap a closeout verifier would flag.
+- **Lesson:** A review finding's site enumeration reflects the tree *as of the
+  probe date*; later sets add parallel sites. This is the same
+  "reviewed-manifest-is-a-floor-not-a-ceiling" discipline applied to a *finding's
+  call-site list*: re-ground the count against the current tree (a `grep` for the
+  defective pattern), fix every instance, and disclose the expansion to the
+  verifier. Confirms the existing "A Reviewed Disposition/Inventory Manifest Is A
+  Floor, Not A Ceiling" lesson in a new shape (a finding's site list, not a
+  residue manifest).
+- **Action for future sessions:** Before implementing a finding that names
+  specific call sites, grep the defective pattern across the tree and reconcile
+  the actual hit count against the finding's count; fix all, disclose any
+  expansion. If a third "finding under-counted its sites" case appears, fold this
+  into the existing floor-not-ceiling Convention candidate.
