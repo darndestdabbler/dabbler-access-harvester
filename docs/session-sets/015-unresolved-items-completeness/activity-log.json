@@ -19,7 +19,7 @@
       "stepNumber": 1,
       "stepKey": "s1-reground-and-red-pin",
       "dateTime": "2026-06-15T02:10:50.088247-04:00",
-      "description": "Re-grounded Layer A against current tree: aggregator call Pipeline.cs:655 feeds functionClassifications only (body-only); FunctionClassificationBuilder.ClassificationVisitor.Visit walks procedureAst.Body only by design (FunctionClassificationBuilder.cs:177-187) \u2192 header unresolved refs dropped; resolvedModule.References DOES carry the header ref (projector GroupReferencesByProcedure groups by enclosing ProcedureScope incl. header \u2192 Body.References). DESIGN DECIDED (s1-design-note.md): dedup-additive feed \u2014 keep FunctionClassification feed unchanged, additionally feed procedure-scoped resolver Unresolved references deduped by module+procedure+line+column+reason; net-new = header refs only (zero on HHC \u2192 provably golden-neutral). Red pin encoded (LayerA_HeaderUnresolvedRef_DroppedByBodyOnlyFeed_RecoveredByProcedureScopedFeed): empirically confirms the header ref IS inline on Body.References and ABSENT from the body-only aggregation \u2014 the gap is real, not assumed.",
+      "description": "Re-grounded Layer A against current tree: aggregator call Pipeline.cs:655 feeds functionClassifications only (body-only); FunctionClassificationBuilder.ClassificationVisitor.Visit walks procedureAst.Body only by design (FunctionClassificationBuilder.cs:177-187) → header unresolved refs dropped; resolvedModule.References DOES carry the header ref (projector GroupReferencesByProcedure groups by enclosing ProcedureScope incl. header → Body.References). DESIGN DECIDED (s1-design-note.md): dedup-additive feed — keep FunctionClassification feed unchanged, additionally feed procedure-scoped resolver Unresolved references deduped by module+procedure+line+column+reason; net-new = header refs only (zero on HHC → provably golden-neutral). Red pin encoded (LayerA_HeaderUnresolvedRef_DroppedByBodyOnlyFeed_RecoveredByProcedureScopedFeed): empirically confirms the header ref IS inline on Body.References and ABSENT from the body-only aggregation — the gap is real, not assumed.",
       "status": "complete",
       "routedApiCalls": []
     },
@@ -46,7 +46,7 @@
       "stepNumber": 4,
       "stepKey": "s1-golden-or-no-regen",
       "dateTime": "2026-06-15T06:43:39.294329-04:00",
-      "description": "Golden assessed and proven byte-level NEUTRAL on HHC (no regen): CanonicalGoldenRegressionTests.HomeHealthCare_ReproducesGoldenOutput reproduces unresolved-items.json + manifest + kb + ir + reports-baseline byte-identical (foreground COM, TRX-confirmed), run twice \u2014 once after the initial impl and again after the R1 dedup-key fix. HHC has zero header/module-level unresolved cases (DW-11). Swept the samples/*.accdb timestamp churn.",
+      "description": "Golden assessed and proven byte-level NEUTRAL on HHC (no regen): CanonicalGoldenRegressionTests.HomeHealthCare_ReproducesGoldenOutput reproduces unresolved-items.json + manifest + kb + ir + reports-baseline byte-identical (foreground COM, TRX-confirmed), run twice — once after the initial impl and again after the R1 dedup-key fix. HHC has zero header/module-level unresolved cases (DW-11). Swept the samples/*.accdb timestamp churn.",
       "status": "complete",
       "routedApiCalls": []
     },
@@ -55,7 +55,7 @@
       "stepNumber": 5,
       "stepKey": "s1-verified",
       "dateTime": "2026-06-15T06:43:39.294329-04:00",
-      "description": "Routed cross-provider session-verification (gpt-5-4, focus on the dedup seam per the design note): R1 ISSUES_FOUND with 1 Major \u2014 bodyKeys.Add(...) dedup'd the procedure-scoped feed against itself, dropping a distinct chained-header link (Foo.Bar vs Foo.Bar.Baz share the 5-tuple key). DEMONSTRATED real (pin red pre-fix) and FIXED: non-mutating Contains (dedup only vs the body-only snapshot) + SurroundingText added to the key. R2 VERIFIED (empty issues). s1-issues.json + s1-devils-advocate-prompt.md authored.",
+      "description": "Routed cross-provider session-verification (gpt-5-4, focus on the dedup seam per the design note): R1 ISSUES_FOUND with 1 Major — bodyKeys.Add(...) dedup'd the procedure-scoped feed against itself, dropping a distinct chained-header link (Foo.Bar vs Foo.Bar.Baz share the 5-tuple key). DEMONSTRATED real (pin red pre-fix) and FIXED: non-mutating Contains (dedup only vs the body-only snapshot) + SurroundingText added to the key. R2 VERIFIED (empty issues). s1-issues.json + s1-devils-advocate-prompt.md authored.",
       "status": "complete",
       "routedApiCalls": [
         {
@@ -71,6 +71,93 @@
           "inputTokens": 2380,
           "outputTokens": 4623,
           "costUsd": 0.0753
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "s2-reground-and-red-pin",
+      "dateTime": "2026-06-15T08:30:00-04:00",
+      "description": "Re-grounded Layer B: ParserOutputProjector.GroupReferencesByProcedure still drops module-level refs (no ProcedureScope); empirically confirmed via probe that `Public Const DemoConst = MissingThing` yields one ResolvedModule.References entry (enclosingScope=ModuleScope, outcome=Unresolved). Encoded 3 Layer B pins (red-evidence: dropped from inline Body.References AND post-S1 index).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "s2-schema-decision",
+      "dateTime": "2026-06-15T08:30:00-04:00",
+      "description": "Schema decision recorded (s2-design-note.md): manifest home = run-wide index; new UnresolvedSource.ModuleLevelReference (ProcedureName=null); widen the living v1.1 Source enum only (no envelope bump, no ParserOutput change). Routed architecture critique (opus) SOUND-WITH-CAVEATS.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "opus",
+          "taskType": "architecture",
+          "costUsd": 0.2122
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "s2-layer-b-fix",
+      "dateTime": "2026-06-15T08:30:00-04:00",
+      "description": "Implemented EnumerateModuleLevelReferences + FromModuleLevelReferences + ModuleLevelReference record + enum value + schema widening + Pipeline.cs wiring. No double-count (disjoint by scope).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "s2-golden-regen",
+      "dateTime": "2026-06-15T08:30:00-04:00",
+      "description": "Golden-affecting: gate caught 2 real HHC module-level refs (vbObjectError in basDataOperations Const decls). HHC regenerated; proven multiset delta exactly +2 ModuleLevelReference items, 0 removed (count 1414->1416). Determinism hardening: injective CanonicalResidual final tiebreaker (the key was not a total order). Pipeline.Tests 922/922; golden+schema conformance 7/7 byte-identical.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "s2-verified",
+      "dateTime": "2026-06-15T08:30:00-04:00",
+      "description": "Routed cross-provider session-verification (gpt-5-4): R1 ISSUES (Major non-total comparer) -> R2 ISSUES (Major non-injective residual + Minor) -> R3 ISSUES (Minor pin breadth) -> R4 VERIFIED. In-IDE devil's-advocate prompt authored.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.1865
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.0989
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.0955
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.0169
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "s2-next-set-authored",
+      "dateTime": "2026-06-15T08:30:00-04:00",
+      "description": "Routed next-set recommendation (gemini-pro): consumer-driven-only handoff (DW-1..8, DW-14 bundling candidates). DW-11 discharged; new DW-17 (per-module ParserOutput asymmetry).",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-pro",
+          "taskType": "planning",
+          "costUsd": 0.0028
         }
       ]
     }
