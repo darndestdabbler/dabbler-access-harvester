@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "014-cleanup-zero-date-guard",
+  "status": "not-started",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Zero-Date Guard + Sampler Timezone/Degradation Fixes (misfire, O-1-5, O-2-6)",
+      "status": "not-started"
+    }
+  ]
+}

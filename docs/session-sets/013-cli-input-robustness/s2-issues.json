@@ -1,0 +1,24 @@
+{
+  "session": 2,
+  "verification_method": "routed cross-provider session-verification (gpt-5-4)",
+  "rounds": [
+    {
+      "round": 1,
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "AccessHarvester.Cli/OptionParser.cs",
+          "summary": "The shared parser silently overwrote repeated options (--out a --out b -> last wins), so a malformed invocation still degraded to a wrong-but-successful run instead of an honest usage error.",
+          "status": "fixed",
+          "resolution": "OptionParser.Parse now rejects a repeated --key (value or flag, case-insensitive) with ArgumentException -> exit-1 usage path. No subcommand documents a repeatable option (list-valued options take a single comma-separated value). Pinned by 3 new OptionParserTests cases. Pre-existing in all seven prior ParseOptions copies; O-1-4 consolidation made it closeable in one place."
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "verdict": "VERIFIED",
+      "issues": []
+    }
+  ]
+}

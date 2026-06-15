@@ -147,25 +147,12 @@ public static class IdentifyUsageCommand
             """);
     }
 
+    // 006 O-1-4: route through the shared OptionParser so an unknown --switch is
+    // an honest usage error. ValueOptions are the keys this command reads
+    // (--in, --manifest, --exclude-cleanup); --json-status is the sole flag.
+    private static readonly string[] ValueOptions = ["in", "manifest", "exclude-cleanup"];
+    private static readonly string[] FlagOptions = ["json-status"];
+
     private static Dictionary<string, string> ParseOptions(string[] args)
-    {
-        var opts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        string[] flagOptions = ["json-status"];
-        for (int i = 0; i < args.Length; i++)
-        {
-            string token = args[i];
-            if (!token.StartsWith("--", StringComparison.Ordinal))
-                throw new ArgumentException($"Unexpected positional argument: {token}");
-            string key = token[2..];
-            if (flagOptions.Contains(key, StringComparer.OrdinalIgnoreCase))
-                opts[key] = "true";
-            else
-            {
-                if (i + 1 >= args.Length || args[i + 1].StartsWith("--", StringComparison.Ordinal))
-                    throw new ArgumentException($"Option --{key} requires a value.");
-                opts[key] = args[++i];
-            }
-        }
-        return opts;
-    }
+        => OptionParser.Parse(args, ValueOptions, FlagOptions);
 }

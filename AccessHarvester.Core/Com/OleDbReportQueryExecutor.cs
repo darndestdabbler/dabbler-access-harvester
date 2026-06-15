@@ -81,7 +81,7 @@ public sealed class OleDbReportQueryExecutor : IReportQueryExecutor
         Exception? lastError = null;
         foreach (var provider in providers)
         {
-            string cs = $"Provider={provider};Data Source={path};Persist Security Info=False;";
+            string cs = AceConnectionString.Build(provider, path);
             try
             {
                 using var probe = new OleDbConnection(cs);

@@ -274,37 +274,14 @@ public static class GenerateMigrationCommand
             """);
     }
 
+    // 006 O-1-4: unknown-switch rejection (a typo like --datta must surface as a
+    // usage error, never quietly degrade the migration — a mistyped --data would
+    // otherwise flag every table as missing data and still "succeed" with exit 3)
+    // now lives in the shared OptionParser; this command was the original
+    // exemplar of the check that O-1-4 retrofits to every subcommand.
     private static readonly string[] ValueOptions = ["in", "out", "classification", "data"];
     private static readonly string[] FlagOptions = ["json-status"];
 
     private static Dictionary<string, string> ParseOptions(string[] args)
-    {
-        var opts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        for (int i = 0; i < args.Length; i++)
-        {
-            string token = args[i];
-            if (!token.StartsWith("--", StringComparison.Ordinal))
-                throw new ArgumentException($"Unexpected positional argument: {token}");
-            string key = token[2..];
-            bool isFlag = Array.Exists(FlagOptions, f => string.Equals(f, key, StringComparison.OrdinalIgnoreCase));
-            bool isValue = Array.Exists(ValueOptions, f => string.Equals(f, key, StringComparison.OrdinalIgnoreCase));
-            // Reject unknown switches rather than silently ignoring them: a typo
-            // (e.g. --datta) must surface as a usage error, never quietly degrade
-            // the migration (a mistyped --data would otherwise flag every table as
-            // missing data and still "succeed" with exit 3).
-            if (!isFlag && !isValue)
-                throw new ArgumentException($"Unknown option: --{key}");
-            if (isFlag)
-            {
-                opts[key] = "true";
-            }
-            else
-            {
-                if (i + 1 >= args.Length || args[i + 1].StartsWith("--", StringComparison.Ordinal))
-                    throw new ArgumentException($"Option --{key} requires a value.");
-                opts[key] = args[++i];
-            }
-        }
-        return opts;
-    }
+        => OptionParser.Parse(args, ValueOptions, FlagOptions);
 }

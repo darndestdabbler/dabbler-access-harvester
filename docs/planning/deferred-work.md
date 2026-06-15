@@ -494,6 +494,37 @@
   the §5.7 interpretation-guide note records that chain opens/reads resolve only
   positional-literal targets and bare two-bang control references.
 
+### DW-15 — `identify-cleanup` returns exit 2 (not the contract's 1) for usage errors
+- **What:** every CLI subcommand reports a usage error as exit **1** and an
+  unexpected error as exit **2** (the usage text from F-1-3 states
+  `1 = usage error`), **except `identify-cleanup`**, whose `Run` summary documents
+  and implements the inverted convention "0 on success, **2 on usage error**, 1 on
+  other failure." So a downstream consumer keying off exit codes reads an
+  `identify-cleanup` usage mistake (missing/mutually-exclusive `--in`/`--manifest`,
+  bad `--threshold-days`, now also an unknown `--switch`) as the harvester's
+  "unexpected error" (2) signal rather than "usage error" (1).
+- **Origin:** Set 013 Session 2 (006 P5), surfaced by the O-1-4 uniform
+  unknown-switch rejection — the new `CliUnknownSwitchTests` theory expected exit 1
+  and `identify-cleanup` returned 2.
+- **Why deferred:** **out of P5 scope.** O-1-4's deliverable is "unknown-switch
+  rejection on all seven subcommands, each command's accepted-option set
+  preserved" — it adds rejection, it does not renumber any command's exit codes.
+  The exit-2 value is `identify-cleanup`'s own pre-existing contract (before this
+  set, `identify-cleanup --bogus x` already exited 2 via the "--in required"
+  path), so the O-1-4 change is exit-code-preserving for this command — only the
+  message improved. Normalising 2→1 is a command-specific exit-code contract
+  change that could break a consumer already coded to `identify-cleanup`'s 2; per
+  the set's Stop Rule ("a fix that would make a previously-failing valid run pass
+  differently is a stop-and-disclose signal") it is recorded here, not done inline.
+- **Trigger to pull back in:** a CLI-exit-code-consistency set is scoped, OR a
+  consumer reports mis-reading an `identify-cleanup` usage error as an unexpected
+  error.
+- **Owning set candidate:** a future `cli-exit-code-consistency` set (small,
+  P0-only prereq), or folded into the next CLI-robustness set.
+- **Mechanical backstop:** `CliUnknownSwitchTests.IdentifyCleanup_UnknownSwitch_IsRejectedExit2`
+  pins the current exit-2 behaviour and names DW-15; flipping it to 1 is the
+  owning session's first signal.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED

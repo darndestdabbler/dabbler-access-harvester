@@ -256,28 +256,13 @@ public static class ReportBaselineCommand
         return value;
     }
 
+    // 006 O-1-4: this command's accepted value options. Combined with FlagOptions
+    // above, they drive the shared OptionParser, which now rejects any unknown
+    // --switch as a usage error instead of silently storing and ignoring it.
+    private static readonly string[] ValueOptions = ["db", "out", "reports", "params"];
+
     private static Dictionary<string, string> ParseOptions(string[] args)
-    {
-        var opts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        for (int i = 0; i < args.Length; i++)
-        {
-            var token = args[i];
-            if (!token.StartsWith("--"))
-                throw new ArgumentException($"Unexpected positional argument: {token}");
-            var key = token.Substring(2);
-            if (FlagOptions.Contains(key))
-            {
-                opts[key] = "true";
-            }
-            else
-            {
-                if (i + 1 >= args.Length || args[i + 1].StartsWith("--"))
-                    throw new ArgumentException($"Option --{key} requires a value.");
-                opts[key] = args[++i];
-            }
-        }
-        return opts;
-    }
+        => OptionParser.Parse(args, ValueOptions, FlagOptions);
 
     /// <summary>
     /// The <see cref="OleDbReportQueryExecutor"/> does not itself hold a

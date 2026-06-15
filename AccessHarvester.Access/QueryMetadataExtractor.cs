@@ -97,11 +97,15 @@ public static class QueryMetadataExtractor
         var parameters = new List<QueryParameter>();
         var seenPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-        // 1) Declared PARAMETERS clause.
-        var paramsMatch = ParametersClauseRegex.Match(sql);
-        if (paramsMatch.Success)
+        // 1) Declared PARAMETERS clause. Bracket-aware (006 F-1-6): a bracketed
+        //    [name] may legally contain ',' and ';' — DAO accepts
+        //    [Enter start date, please] and [Pick one; carefully] as single
+        //    parameters — so the clause terminator ';' and the entry separator
+        //    ',' are honoured only at bracket depth 0, never inside [...].
+        string? clauseBody = ExtractParametersClauseBody(sql);
+        if (clauseBody is not null)
         {
-            foreach (var p in ParseParametersClause(paramsMatch.Groups[1].Value))
+            foreach (var p in ParseParametersClause(clauseBody))
                 parameters.Add(p);
         }
 
@@ -122,11 +126,62 @@ public static class QueryMetadataExtractor
         return parameters.Count > 0 ? parameters : null;
     }
 
+    /// <summary>
+    /// Extracts the body of a leading <c>PARAMETERS &lt;body&gt;;</c> clause with
+    /// bracket awareness (006 F-1-6). Returns the text between the
+    /// <c>PARAMETERS</c> keyword and the first <c>;</c> that occurs at bracket
+    /// depth 0; returns <c>null</c> when the SQL does not open with a
+    /// <c>PARAMETERS</c> clause or the clause has no depth-0 terminator (matching
+    /// the prior regex's "no match → no declared parameters" behaviour). A
+    /// <c>;</c> inside a bracketed prompt name (e.g. <c>[Pick one; carefully]</c>)
+    /// no longer truncates the clause.
+    /// </summary>
+    private static string? ExtractParametersClauseBody(string sql)
+    {
+        var prefix = ParametersClausePrefixRegex.Match(sql);
+        if (!prefix.Success) return null;
+
+        int start = prefix.Length;
+        int depth = 0;
+        for (int i = start; i < sql.Length; i++)
+        {
+            char c = sql[i];
+            if (c == '[') depth++;
+            else if (c == ']') { if (depth > 0) depth--; }
+            else if (c == ';' && depth == 0) return sql[start..i];
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Splits <paramref name="s"/> on <paramref name="separator"/> occurrences at
+    /// bracket depth 0 only (006 F-1-6), so a separator inside a bracketed
+    /// identifier does not break one entry into two.
+    /// </summary>
+    private static IEnumerable<string> SplitTopLevel(string s, char separator)
+    {
+        int depth = 0;
+        int segStart = 0;
+        for (int i = 0; i < s.Length; i++)
+        {
+            char c = s[i];
+            if (c == '[') depth++;
+            else if (c == ']') { if (depth > 0) depth--; }
+            else if (c == separator && depth == 0)
+            {
+                yield return s[segStart..i];
+                segStart = i + 1;
+            }
+        }
+        yield return s[segStart..];
+    }
+
     private static IEnumerable<QueryParameter> ParseParametersClause(string clauseBody)
     {
-        // Split on commas at the top level. Bracketed identifiers in JET don't
-        // contain unescaped commas, so a plain split is sufficient.
-        foreach (var raw in clauseBody.Split(','))
+        // Split entries on top-level commas only (006 F-1-6). A bracketed
+        // identifier may legally contain a comma, so a bare clauseBody.Split(',')
+        // would shred [Enter start date, please] into two garbage entries.
+        foreach (var raw in SplitTopLevel(clauseBody, ','))
         {
             string trimmed = raw.Trim();
             if (trimmed.Length == 0) continue;
@@ -226,10 +281,13 @@ public static class QueryMetadataExtractor
     private static readonly RegexOptions DefaultRegex =
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
 
-    /// <summary>Matches a leading <c>PARAMETERS &lt;body&gt;;</c> clause.</summary>
-    private static readonly Regex ParametersClauseRegex = new(
-        @"\A\s*PARAMETERS\s+(.*?);",
-        DefaultRegex | RegexOptions.Singleline);
+    /// <summary>Matches the leading <c>PARAMETERS</c> keyword plus its trailing
+    /// whitespace; the clause body and its terminating depth-0 <c>;</c> are then
+    /// located by the bracket-aware scan in
+    /// <see cref="ExtractParametersClauseBody"/> (006 F-1-6).</summary>
+    private static readonly Regex ParametersClausePrefixRegex = new(
+        @"\A\s*PARAMETERS\s+",
+        DefaultRegex);
 
     /// <summary>Matches <c>[Forms]![X]</c> or <c>[Forms]![X]![Y]</c>.</summary>
     private static readonly Regex FormReferenceRegex = new(

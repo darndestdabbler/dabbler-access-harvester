@@ -21,11 +21,45 @@ namespace AccessHarvester.Cli;
 
 public static class Program
 {
-    private static readonly HashSet<string> FlagOptions = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "json-status",
-        "no-clean",
-    };
+    // Per-command accepted-option sets (006 O-1-4). Each Run* method passes its
+    // own value-option and flag-option names to the shared OptionParser so an
+    // unknown --switch is an honest usage error (exit 1) rather than a silently
+    // ignored token. These preserve each command's exact accepted-option set —
+    // the consolidation adds unknown-switch rejection, it does not change which
+    // options a command accepts.
+    private static readonly string[] ExtractValueOptions   = ["db", "out", "types"];
+    private static readonly string[] ExtractFlagOptions    = ["json-status", "no-clean"];
+    private static readonly string[] TranslateValueOptions = ["in", "out", "types"];
+    private static readonly string[] TranslateFlagOptions  = ["json-status", "no-clean"];
+    private static readonly string[] RunValueOptions       = ["db", "out", "types"];
+    private static readonly string[] RunFlagOptions        = ["json-status", "no-clean"];
+    private static readonly string[] GenerateDocsValueOptions = ["in", "out"];
+    private static readonly string[] GenerateDocsFlagOptions  = [];
+    private static readonly string[] ValidateValueOptions  = ["in", "manifest"];
+    private static readonly string[] ValidateFlagOptions   = ["json-status"];
+    private static readonly string[] ParseValueOptions     = ["in"];
+    private static readonly string[] ParseFlagOptions      = [];
+
+    // The single subcommand table (006 O-1-7). Both the dispatch switch and the
+    // bare-file-mode exclusion test derive from this one map, so adding a
+    // subcommand can no longer drift the two out of sync (a missed bare-file
+    // entry used to make `AccessHarvester <newcmd>` fall into implicit parse).
+    private static readonly IReadOnlyDictionary<string, Func<string[], int>> Commands =
+        new Dictionary<string, Func<string[], int>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["extract"]            = RunExtract,
+            ["translate"]          = RunTranslate,
+            ["run"]                = RunRun,
+            ["parse"]              = RunParse,
+            ["generate-docs"]      = RunGenerateDocs,
+            ["validate"]           = RunValidate,
+            ["identify-usage"]     = IdentifyUsageCommand.Run,
+            ["identify-cleanup"]   = IdentifyCleanupCommand.Run,
+            ["classify"]           = ClassifyCommand.Run,
+            ["sanitize"]           = SanitizeCommand.Run,
+            ["report-baseline"]    = ReportBaselineCommand.Run,
+            ["generate-migration"] = GenerateMigrationCommand.Run,
+        };
 
     private static readonly JsonSerializerOptions StatusJsonOptions = new() { WriteIndented = true };
 
@@ -109,40 +143,28 @@ public static class Program
         // Bare-file mode: if the sole argument is not a known subcommand,
         // not a help flag, and not an option flag, treat it as an implicit
         // `parse <file>` call so the harness contract `<exe> <file>` works
-        // without a subcommand prefix. Using a known-command exclusion set
-        // is more robust than a dot/separator heuristic and handles
-        // extensionless file paths correctly.
+        // without a subcommand prefix. The known-command exclusion is taken
+        // from the single Commands table (O-1-7) — more robust than a
+        // dot/separator heuristic, handles extensionless file paths, and can
+        // no longer drift from the dispatch switch.
         if (args.Length == 1
             && !args[0].StartsWith("--", StringComparison.Ordinal)
             && !IsHelpFlag(args[0])
             && !IsVersionFlag(args[0])
-            && args[0].ToLowerInvariant() is not ("extract" or "translate" or "run" or "parse" or "generate-docs" or "validate" or "identify-usage" or "identify-cleanup" or "classify" or "sanitize" or "report-baseline" or "generate-migration"))
+            && !Commands.ContainsKey(args[0]))
         {
             return RunParse(args);
         }
 
         var rest = args.Skip(1).ToArray();
-        return args[0].ToLowerInvariant() switch
-        {
-            "extract"         => RunExtract(rest),
-            "translate"       => RunTranslate(rest),
-            "run"             => RunRun(rest),
-            "parse"           => RunParse(rest),
-            "generate-docs"   => RunGenerateDocs(rest),
-            "validate"        => RunValidate(rest),
-            "identify-usage"  => IdentifyUsageCommand.Run(rest),
-            "identify-cleanup" => IdentifyCleanupCommand.Run(rest),
-            "classify"        => ClassifyCommand.Run(rest),
-            "sanitize"        => SanitizeCommand.Run(rest),
-            "report-baseline" => ReportBaselineCommand.Run(rest),
-            "generate-migration" => GenerateMigrationCommand.Run(rest),
-            _                 => UnknownCommand(args[0]),
-        };
+        return Commands.TryGetValue(args[0], out var handler)
+            ? handler(rest)
+            : UnknownCommand(args[0]);
     }
 
     private static int RunExtract(string[] args)
     {
-        var opts = ParseOptions(args);
+        var opts = OptionParser.Parse(args, ExtractValueOptions, ExtractFlagOptions);
         string db = Path.GetFullPath(Require(opts, "db"));
         string outDir = Path.GetFullPath(Require(opts, "out"));
         bool clean = !HasNoClean(opts);
@@ -179,7 +201,7 @@ public static class Program
 
     private static int RunTranslate(string[] args)
     {
-        var opts = ParseOptions(args);
+        var opts = OptionParser.Parse(args, TranslateValueOptions, TranslateFlagOptions);
         string rawDir = Path.GetFullPath(Require(opts, "in"));
         string kbDir = Path.GetFullPath(Require(opts, "out"));
         bool clean = !HasNoClean(opts);
@@ -214,7 +236,7 @@ public static class Program
 
     private static int RunRun(string[] args)
     {
-        var opts = ParseOptions(args);
+        var opts = OptionParser.Parse(args, RunValueOptions, RunFlagOptions);
         string db = Path.GetFullPath(Require(opts, "db"));
         string outDir = Path.GetFullPath(Require(opts, "out"));
         bool clean = !HasNoClean(opts);
@@ -300,7 +322,7 @@ public static class Program
     // Exit codes: 0 = success, 1 = usage error, 2 = unexpected error.
     private static int RunGenerateDocs(string[] args)
     {
-        var opts = ParseOptions(args);
+        var opts = OptionParser.Parse(args, GenerateDocsValueOptions, GenerateDocsFlagOptions);
         string manifestFile = Path.GetFullPath(Require(opts, "in"));
         string outDir = Path.GetFullPath(Require(opts, "out"));
 
@@ -342,7 +364,7 @@ public static class Program
     //   3  schema-validation errors found
     private static int RunValidate(string[] args)
     {
-        var opts = ParseOptions(args);
+        var opts = OptionParser.Parse(args, ValidateValueOptions, ValidateFlagOptions);
 
         bool hasIn       = opts.ContainsKey("in");
         bool hasManifest = opts.ContainsKey("manifest");
@@ -579,7 +601,7 @@ public static class Program
         }
         else if (args.Length > 0)
         {
-            var opts = ParseOptions(args);
+            var opts = OptionParser.Parse(args, ParseValueOptions, ParseFlagOptions);
             opts.TryGetValue("in", out sourceFile);
         }
 
@@ -853,29 +875,6 @@ public static class Program
     {
         Console.Out.WriteLine(
             $"AccessHarvester {DatabaseManifest.ResolveHarvesterVersion()} (schema v{SchemaVersionLiteral})");
-    }
-
-    private static Dictionary<string, string> ParseOptions(string[] args)
-    {
-        var opts = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        for (int i = 0; i < args.Length; i++)
-        {
-            var token = args[i];
-            if (!token.StartsWith("--"))
-                throw new ArgumentException($"Unexpected positional argument: {token}");
-            var key = token.Substring(2);
-            if (FlagOptions.Contains(key))
-            {
-                opts[key] = "true";
-            }
-            else
-            {
-                if (i + 1 >= args.Length || args[i + 1].StartsWith("--"))
-                    throw new ArgumentException($"Option --{key} requires a value.");
-                opts[key] = args[++i];
-            }
-        }
-        return opts;
     }
 
     private static string Require(Dictionary<string, string> opts, string key)

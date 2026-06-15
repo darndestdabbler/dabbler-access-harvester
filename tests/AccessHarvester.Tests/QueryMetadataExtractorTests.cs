@@ -214,4 +214,64 @@ public class QueryMetadataExtractorTests
     {
         Assert.Throws<System.ArgumentException>(() => QueryMetadataExtractor.Extract("[]"));
     }
+
+    // ── 006 F-1-6: bracket-aware PARAMETERS-clause tokenisation ──────────────────
+    // A bracketed prompt name may legally contain ',' and ';' (DAO accepts
+    // [Enter start date, please] and [Pick one; carefully] as single parameters).
+    // The prior parser split the clause body on a bare ',' (shredding one
+    // declared parameter into two garbage entries) and terminated the clause at
+    // the first ';' (truncating a name-internal ';'). Both are now bracket-aware.
+
+    [Fact]
+    public void ParseParameters_BracketedNameWithComma_IsOneParameter()
+    {
+        var parameters = QueryMetadataExtractor.ParseParameters(
+            "PARAMETERS [Enter start date, please] DateTime;SELECT 1;");
+
+        var declared = parameters!.Where(p => p.Source == "declared").ToArray();
+        Assert.Single(declared);
+        Assert.Equal("Enter start date, please", declared[0].Name);
+        Assert.Equal("DateTime", declared[0].DataType);
+    }
+
+    [Fact]
+    public void ParseParameters_BracketedNameWithSemicolon_IsNotTruncated()
+    {
+        var parameters = QueryMetadataExtractor.ParseParameters(
+            "PARAMETERS [Pick one; carefully] Text;SELECT 1;");
+
+        var declared = parameters!.Where(p => p.Source == "declared").ToArray();
+        Assert.Single(declared);
+        Assert.Equal("Pick one; carefully", declared[0].Name);
+        Assert.Equal("Text", declared[0].DataType);
+    }
+
+    [Fact]
+    public void ParseParameters_TwoBracketedNamesEachWithComma_AreTwoParameters()
+    {
+        var parameters = QueryMetadataExtractor.ParseParameters(
+            "PARAMETERS [Start, please] DateTime, [End, also] DateTime;SELECT 1;");
+
+        var declared = parameters!.Where(p => p.Source == "declared").ToArray();
+        Assert.Equal(2, declared.Length);
+        Assert.Equal("Start, please", declared[0].Name);
+        Assert.Equal("End, also", declared[1].Name);
+    }
+
+    [Fact]
+    public void ParseParameters_OrdinaryTwoParamClause_IsUnchanged()
+    {
+        // Regression guard: the HHC-shaped clause (no name-internal punctuation)
+        // must still yield exactly two declared parameters — the bracket-aware
+        // change is behaviour-preserving for ordinary clauses (golden-neutral).
+        var parameters = QueryMetadataExtractor.ParseParameters(
+            "PARAMETERS [Enter Provider ID:] Long, [Enter Fiscal Year:] Long;SELECT 1;");
+
+        var declared = parameters!.Where(p => p.Source == "declared").ToArray();
+        Assert.Equal(2, declared.Length);
+        Assert.Equal("Enter Provider ID:", declared[0].Name);
+        Assert.Equal("Long", declared[0].DataType);
+        Assert.Equal("Enter Fiscal Year:", declared[1].Name);
+        Assert.Equal("Long", declared[1].DataType);
+    }
 }

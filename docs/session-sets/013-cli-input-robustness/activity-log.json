@@ -1,7 +1,7 @@
 {
   "sessionSetName": "013-cli-input-robustness",
   "createdDate": "2026-06-14T17:19:55.585487+00:00",
-  "totalSessions": 0,
+  "totalSessions": 2,
   "entries": [
     {
       "sessionNumber": 1,
@@ -84,6 +84,119 @@
           "costUsd": 0.16359749999999998
         }
       ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/setup-reground",
+      "dateTime": "2026-06-14T20:55:01.347378-04:00",
+      "description": "Bootstrap + re-ground O-1-4/F-1-5/F-1-6/O-1-7 against the tree. Confirmed the seven ParseOptions copies (Program.cs shared by 6 subcommands + 6 command classes; only GenerateMigrationCommand rejected unknown keys). F-1-5 RE-GROUNDING DELTA: found FOUR identical BuildConnectionString interpolation sites (OleDbDaoSchemaReader/OleDbValueSampler/OleDbRowSource/OleDbReportQueryExecutor), not the two the spec named (008-012 added sites). Confirmed QueryMetadataExtractor.ParseParametersClause splits on bare ',' and the clause regex terminates at first ';'; HHC's two PARAMETERS queries have no ','/';' inside brackets.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/o-1-4-shared-parseoptions",
+      "dateTime": "2026-06-14T20:55:01.348442-04:00",
+      "description": "O-1-4: new shared OptionParser.Parse(args, valueOptions, flagOptions) rejects positional args, unknown --keys, and (added after R1 verification) repeated options; all seven ParseOptions copies now delegate to it with each command's exact accepted-option set preserved. O-1-7 folded in: single Commands dictionary feeds both the dispatch switch and the bare-file-mode exclusion. Pins: hermetic OptionParserTests (11 cases) + black-box CliUnknownSwitchTests (11 subcommands exit 1 + identify-cleanup exit 2).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/f-1-5-conn-string",
+      "dateTime": "2026-06-14T20:55:01.348442-04:00",
+      "description": "F-1-5: new AccessHarvester.Core.Com.AceConnectionString.Build(provider, path) via OleDbConnectionStringBuilder (quotes Data Source correctly); adopted at all FOUR OLE DB sites (re-grounding expansion disclosed). Pin: hermetic AceConnectionStringTests round-trips ordinary, ';'-bearing, and quote-bearing paths.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/f-1-6-bracket-params",
+      "dateTime": "2026-06-14T20:55:01.349429-04:00",
+      "description": "F-1-6: bracket-aware PARAMETERS tokenisation in QueryMetadataExtractor: ExtractParametersClauseBody scans for the first depth-0 ';' (no longer truncates on a name-internal ';'); SplitTopLevel splits entries on depth-0 ',' only (no longer shreds a name-internal ','). Prefix-only regex replaces the lazy capture. Pins: comma-in-bracket -> one param; semicolon-in-bracket -> not truncated; two comma-bearing names -> two; ordinary HHC-shaped clause -> two (regression).",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/o-1-7-dispatch-table",
+      "dateTime": "2026-06-14T20:55:01.349429-04:00",
+      "description": "O-1-7: bare-file-mode exclusion and subcommand dispatch now both derive from the single Commands table (StringComparer.OrdinalIgnoreCase), removing the hand-sync drift risk.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/dw-15-recorded",
+      "dateTime": "2026-06-14T20:55:01.350429-04:00",
+      "description": "DW-15 recorded: identify-cleanup returns exit 2 (not the contract's 1) for usage errors by its own pre-existing inverted convention. O-1-4 only adds rejection; renumbering the exit code is out of P5 scope (and the change is exit-code-preserving for this command - it already exited 2 via the --in-required path). Pinned by IdentifyCleanup_UnknownSwitch_IsRejectedExit2.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/build-test",
+      "dateTime": "2026-06-14T20:55:01.350429-04:00",
+      "description": "Validation green. dotnet build solution 0 errors. Hermetic AccessHarvester.Tests 691 passed/0 failed (incl. OptionParserTests 11, AceConnectionStringTests 3, QueryMetadataExtractor F-1-6 4). Black-box Integration (CliUnknownSwitchTests + CliTypesValidationTests) 15 passed. COM tier (CanonicalGoldenRegressionTests + ManifestSchemaConformanceTests + CliExtract/Run/Translate) 10 passed -> F-1-6 GOLDEN-NEUTRAL byte-level (golden reproduced without regen). Swept spurious samples/HomeHealthCare.accdb touch; reaped one COM-wedged testhost via WMI.",
+      "status": "complete",
+      "routedApiCalls": []
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 8,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-06-14T20:55:01.351429-04:00",
+      "description": "Cross-provider routed session-verification (gpt-5-4). R1 ISSUES_FOUND: 1 Major - shared parser silently overwrote repeated options (--out a --out b -> last wins), still a wrong-but-successful run on malformed input. Fixed: OptionParser rejects repeated --key (value+flag, case-insensitive) + 3 new pins. R2 VERIFIED, empty issues. s2-issues.json logged.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.16873
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.01134
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 9,
+      "stepKey": "session-2/next-set-authored",
+      "dateTime": "2026-06-14T20:55:01.351429-04:00",
+      "description": "Authored next set 014-cleanup-zero-date-guard (006 P6: zero-date misfire + O-1-5 + O-2-6) via routed recommendation (gpt-5-4 planning): spec.md + v4 not-started session-state.json stub + next-session-set-recommendation.md (Hard Constraints carried verbatim). Recommended Opus 4.8 @ low, P0-only, 1 session - closes the 006 review arc.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "planning",
+          "inputTokens": 0,
+          "outputTokens": 0,
+          "costUsd": 0.0
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 10,
+      "stepKey": "session-2/closeout",
+      "dateTime": "2026-06-14T20:55:01.352437-04:00",
+      "description": "Closeout: disposition.json, change-log.md, set-wide devil's-advocate prompt (set013-devils-advocate-prompt.md, for human-driven GPT+Gemini), activity-log backfill; commit+push; close_session; notify; Step 9 reorg review.",
+      "status": "complete",
+      "routedApiCalls": []
     }
   ]
 }
