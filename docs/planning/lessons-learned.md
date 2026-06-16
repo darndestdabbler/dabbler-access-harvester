@@ -2848,3 +2848,68 @@ reference; if it proves out twice in *this* repo, propose promotion to
   add the known-limitation pin, AND add a spec Execution-Amendment note in the same
   session. First hit: Set 017 (DW-26 / A7). Promote to a Convention on a second
   context.
+
+### Never Run The Whole Solution's COM Tests In One `dotnet test` — Run The Integration Project Separately And Targeted
+
+- **Context:** End-of-session validation of an output-affecting change (Set 018,
+  DW-26). The orchestrator ran `dotnet test` over the **whole solution** (all test
+  projects at once) to validate hermetic + COM coverage in one shot.
+- **Failure or friction:** The whole-solution run **wedged a COM testhost for ~3
+  hours** with zero console/TRX output — a COM-RPC-wedged `testhost.exe` (12 CPU-sec,
+  no progress) that `timeout`/`Stop-Process`/`taskkill` could not reap. It cost the
+  session ~3h of wall-clock before it was noticed (the harness had auto-backgrounded
+  the long run). The same COM tests, run **per-project and targeted**, all passed in
+  seconds-to-minutes: the integration project alone was 77 passed / 3 skipped in 2m39s;
+  the three DW-26-critical COM tests in 56s. So the wedge was contention/teardown in
+  the *whole-solution* invocation (multiple projects' COM tests interleaved + an
+  orphaned `-Embedding` Access instance), not any individual test.
+- **Lesson:** A whole-solution `dotnet test` that sweeps every project's COM tests
+  together is the high-risk way to validate on Windows + Access. It interleaves
+  multiple test hosts against ACE OLE DB's file locks and is the observed wedge
+  trigger. Reap a wedged testhost with **WMI `Win32_Process.Terminate` by exact PID**
+  (`Invoke-CimMethod -InputObject $p -MethodName Terminate`) — `taskkill`/`Stop-Process`
+  do not kill a COM-RPC-wedged host (confirms `project_wedged_testhost_wmi_terminate`,
+  second context). Only reap `MSACCESS.EXE` instances whose command line is
+  `-Embedding` (COM-automation orphans, parent `svchost`) by **exact PID** — never a
+  blunt by-name kill (an interactive user database has a `.accdb` path in its command
+  line, not `-Embedding`).
+- **Action for future sessions:** Validate in **targeted, foreground, per-project**
+  batches: run the hermetic test projects (no COM — cannot wedge) together, and run
+  `tests/AccessHarvester.Integration` **separately** with a bounded `timeout` and the
+  TRX `<Counters>` as the completion signal. Never background a `dotnet test` (the
+  harness may auto-background a long run — keep each invocation scoped so it stays
+  foreground). If a host wedges, WMI-Terminate it by PID and continue per-project. If
+  a second session hits the whole-solution wedge, promote this to a Convention in
+  `project-guidance.md`.
+
+### Evidence-Over-Inference, Second Context In The DW-26 Lineage: Verify A Pre-Existing Doc Comment Against The Producer Code Before Propagating It
+
+- **Context:** Set 018 (DW-26) closeout. While recording the new DW-27 (the
+  manifest-vs-`unresolved-items.json` column-base offset), the orchestrator described
+  the index as **mixed-base** — "navigation-graph and function-classification columns
+  are 1-based; resolver/SQL are 0-based" — and propagated that into the DW-27 entry,
+  the interpretation guide, and the schema `$def` description.
+- **Failure or friction:** The "1-based" claim was lifted **verbatim from a
+  pre-existing `UnresolvedLocation.Column` doc comment** without checking the actual
+  producers. The shipped code (`FunctionClassificationBuilder` → `expr.Provenance.Column`,
+  `NavigationGraphBuilder.LocationOf` → `range.Start.Column`, both raw ANTLR 0-based)
+  makes the index **uniformly 0-based**. The pre-existing comment was simply wrong, and
+  the orchestrator amplified it across three more docs. Both in-IDE devil's-advocate
+  providers (GPT-5.4 Major + Gemini Moderate) independently caught it; the routed
+  verifier had **endorsed** the (wrong) DW-27 framing.
+- **Lesson:** This is the existing **Evidence-Over-Inference** Principle applied to
+  *documentation*, and the **second context in the DW-26 lineage** (Set 017's DW-26
+  root-cause framing was itself corrected by the devil's-advocate pass; see the entry
+  above). A pre-existing comment is a *claim*, not evidence — especially a comment
+  about a numbering/base convention, which is exactly the class of fact that drifts
+  silently. The in-IDE devil's-advocate pair with full repo access remains the
+  reliable catch for "the code says X but the docs/another-comment says Y" mismatches
+  that a routed verifier (seeing only the curated packet) cannot.
+- **Action for future sessions:** Before repeating any base/convention claim (0- vs
+  1-based, inclusive vs exclusive, scalar vs per-item) from a doc comment into a new
+  artifact, trace it to the **producer line** that sets the value and confirm against a
+  committed golden value if one exists. When a verification packet asserts a
+  convention, embed the producer snippet so the verifier can check it rather than
+  trusting the prose. This pattern (devil's-advocate-primary catching a convention
+  mischaracterisation the routed pass endorsed) has now recurred across Sets 015, 017,
+  and 018 — it is a strong promotion candidate for a `project-guidance.md` Convention.
