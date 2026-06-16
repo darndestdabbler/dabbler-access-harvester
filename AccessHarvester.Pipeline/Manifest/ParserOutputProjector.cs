@@ -111,6 +111,10 @@ public static class ParserOutputProjector
                 {
                     ["File"] = moduleName,
                     ["Module"] = moduleName,
+                    // Synthetic document-root location: line 1, column 1 in the
+                    // 1-based SourceLocation contract. Now consistent with the
+                    // DW-26 normalisation in BuildLocation (every real
+                    // reference/call column is +1'd to the same 1-based base).
                     ["StartLine"] = 1,
                     ["StartColumn"] = 1,
                 },
@@ -427,10 +431,22 @@ public static class ParserOutputProjector
     {
         return new JsonObject
         {
+            // DW-26 (Set 018): the VBA AST stores columns 0-based (ANTLR
+            // convention, SourceLocation.cs); the manifest's public
+            // SourceLocation contract is 1-based (harvester-schema $def
+            // StartColumn/EndColumn minimum:1), matching the already-1-based
+            // lines, the human-editor convention, and the synthetic top-level
+            // location this projector hardcodes to StartColumn=1. Normalise the
+            // column base here, at the producer boundary, by +1 on BOTH ends.
+            // The range stays half-open [Start, End): EndColumn is the column
+            // immediately AFTER the last character (exclusive), e.g. an 11-char
+            // token at 0-based [0,11) projects to 1-based [1,12) — width is
+            // preserved; the EndColumn is NOT converted to inclusive. Lines are
+            // already 1-based and pass through unchanged.
             ["StartLine"] = range.Start.Line,
-            ["StartColumn"] = range.Start.Column,
+            ["StartColumn"] = range.Start.Column + 1,
             ["EndLine"] = range.End.Line,
-            ["EndColumn"] = range.End.Column,
+            ["EndColumn"] = range.End.Column + 1,
         };
     }
 

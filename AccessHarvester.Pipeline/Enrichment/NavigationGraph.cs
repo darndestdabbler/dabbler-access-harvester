@@ -264,7 +264,10 @@ public sealed record NavigationEdge
     public required int SourceLine { get; init; }
 
     /// <summary>
-    /// 1-based source column of the dispatch call.
+    /// 0-based source column of the dispatch call, carried verbatim from the
+    /// AST provenance (ANTLR convention; no normalisation). Surfaced 0-based
+    /// in unresolved-items.json — contrast the per-module manifest's 1-based
+    /// <c>SourceLocation</c> column (DW-26 / DW-27).
     /// </summary>
     public required int SourceColumn { get; init; }
 
@@ -386,7 +389,10 @@ public sealed record UnresolvedNavigationTarget
     public required int SourceLine { get; init; }
 
     /// <summary>
-    /// 1-based source column of the dispatch call.
+    /// 0-based source column of the dispatch call, carried verbatim from the
+    /// AST provenance (ANTLR convention; no normalisation). Surfaced 0-based
+    /// in unresolved-items.json — contrast the per-module manifest's 1-based
+    /// <c>SourceLocation</c> column (DW-26 / DW-27).
     /// </summary>
     public required int SourceColumn { get; init; }
 

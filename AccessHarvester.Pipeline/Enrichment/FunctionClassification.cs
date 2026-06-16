@@ -405,8 +405,11 @@ public sealed record UnresolvedReferenceFact
     public required int Line { get; init; }
 
     /// <summary>
-    /// 1-based column of the reference site, sourced from the AST
-    /// expression's <see cref="AccessHarvester.Vba.Parser.Ast.Provenance.Column"/>.
+    /// 0-based column of the reference site, sourced verbatim from the AST
+    /// expression's <see cref="AccessHarvester.Vba.Parser.Ast.Provenance.Column"/>
+    /// (ANTLR convention; no normalisation). Surfaced 0-based in
+    /// unresolved-items.json — contrast the per-module manifest's 1-based
+    /// <c>SourceLocation</c> column (DW-26 / DW-27). (Line above is 1-based.)
     /// </summary>
     public required int Column { get; init; }
 

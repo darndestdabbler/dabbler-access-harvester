@@ -1,0 +1,53 @@
+{
+  "sessionSet": "018-manifest-source-location-column-convention",
+  "session": 1,
+  "rounds": [
+    {
+      "round": 1,
+      "verifier": "gpt-5-4",
+      "method": "routed session-verification (prose-first + trailing JSON)",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Minor",
+          "location": "tests/AccessHarvester.Pipeline.Tests/Manifest/ParserOutputProjectorTests.cs",
+          "summary": "Projection_HasNoZeroColumn_EvenWithLineLeadingToken comment overstated the proof ('Proves BuildLocation is the only column-emitting path').",
+          "fix": "Reword the comment to the test's actual local scope; attribute the global 'only emitter' confidence to the re-grounding sweep + golden value-diff + StudentICT witness.",
+          "resolution": "FIXED (comment reworded; no behavioural change).",
+          "status": "resolved"
+        }
+      ],
+      "endorsements": [
+        "Correctness of +1 on both ends (half-open exclusive End): width truly preserved; clean.",
+        "Golden delta proof methodology: sound.",
+        "DW-27 scope (keep index out of scope): correct call; LayerA re-pin faithful, not weakening; no missed public-manifest surface.",
+        "Schema description-only edit: cannot change validation.",
+        "Test integrity: StudentICT + LayerA pins genuine and stronger."
+      ]
+    },
+    {
+      "round": 2,
+      "verifier": "in-IDE devil's-advocate pair (gpt-5-4 + gemini-3.1-pro), PRIMARY per spec, full repo access",
+      "method": "human-run adversarial review (packet: s1-devils-advocate-packet.md)",
+      "verdict": "ISSUES_FOUND",
+      "issues": [
+        {
+          "severity": "Major",
+          "location": "docs/harvester/interpretation-guide.md; docs/planning/deferred-work.md (DW-27); docs/test-cases/harvester-schema.v1.1.json; AccessHarvester.Pipeline/Enrichment/UnresolvedItem.cs; AccessHarvester.Pipeline/Enrichment/FunctionClassification.cs; AccessHarvester.Pipeline/Enrichment/NavigationGraph.cs; tests/.../UnresolvedItemsCompletenessTests.cs",
+          "summary": "DW-27 / interpretation-guide / schema-description / pre-existing record comments claimed unresolved-items.json is mixed-base (nav-graph + function-classification '1-based', resolver/SQL '0-based'); the shipped producers all pass raw 0-based ANTLR/Provenance columns, so the index is UNIFORMLY 0-based. Both reviewers flagged it (GPT Major, Gemini Moderate); independently verified against FunctionClassificationBuilder.cs:388-389, NavigationGraphBuilder.cs:648-650, AstBuilder.cs:1215, and the HHC golden (Column:4 on a 4-space-indented line = 0-based).",
+          "fix": "Option (a) per both reviewers: correct the docs/comments to state the index is uniformly 0-based (raw ANTLR, all sources); the manifest-inline-vs-index offset is a uniform +1. Code unchanged (no producer was 1-based). DW-27 restated: normalising the index is a uniform +1 but golden-affecting (unresolved-items.json + classification/navigation Column fields), deferred.",
+          "resolution": "FIXED. Corrected UnresolvedLocation.Column doc, FunctionClassification.Column doc, NavigationGraph SourceColumn docs (x2), DW-27 entry + DW-26 banner residual, interpretation-guide note, schema SourceLocation description, and the LayerA test comment. Rebuilt Pipeline (0 errors); 28 affected hermetic tests pass; inline==index+1 pin unchanged. No code/behaviour/golden change.",
+          "status": "resolved"
+        }
+      ],
+      "endorsements": [
+        "Missed 0-based leak: UPHELD (both) — BuildLocation + synthetic root are the only schema-gated SourceLocation column emitters; no other leak.",
+        "EndColumn semantics: UPHELD (both) — +1 on half-open [Start,End) is width-preserving for all token sizes incl. zero-width.",
+        "DW-27 boundary: UPHELD (both) — keeping the index out of DW-26 scope is structurally necessary; dedup keys off raw provenance and is not broken.",
+        "Schema edit: UPHELD (both) — description annotations are non-validating; CLI embeds the same file (no copy-drift).",
+        "Manifest SourceLocation rebasing: 'looks sound' (GPT) / 'perfectly isolates and normalizes' (Gemini)."
+      ]
+    }
+  ],
+  "finalVerdict": "VERIFIED — all findings resolved. R1 Minor (comment) + R2 Major (docs/comments mischaracterised the index column base) were both documentation-accuracy fixes; no behavioural, golden, or schema-validation change. The core DW-26 column-base normalisation was independently UPHELD by the routed verifier and both in-IDE devil's-advocate providers."
+}

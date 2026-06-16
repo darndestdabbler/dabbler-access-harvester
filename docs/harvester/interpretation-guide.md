@@ -1519,6 +1519,23 @@ outputs.
 > complete for everything **inside a procedure** (body and header) but does **not**
 > carry module-level references — for those the run-wide index is the only manifest
 > signal (DW-17).
+>
+> **Column base — manifest 1-based, index uniformly 0-based (DW-26 closed; DW-27
+> open).** `ParserOutput.Body.References[].Location` (and every other manifest
+> `SourceLocation`) is **1-based** in both line AND column, with `EndColumn`
+> **exclusive** (one past the last character, so `EndColumn - StartColumn` is the
+> token width). Set 018 (DW-26) normalised the producer's 0-based ANTLR columns to
+> this base. The separate `unresolved-items.json` `Location.Column`, by contrast,
+> preserves every producer's value **verbatim**, and **all** of them — resolver, SQL
+> form-reference, navigation-graph, AND function-classification — carry the parser's
+> **0-based** ANTLR column. So `unresolved-items.json` columns (and the
+> `Column`/`SourceColumn` fields on the manifest classification / navigation arrays)
+> are **uniformly 0-based**. When you correlate an `unresolved-items.json` entry back
+> to its inline `Body.References[]` location, the index column is **1 less** than the
+> manifest column for **every** reference regardless of `Source` (`inline == index +
+> 1`); the line matches exactly. This cross-artifact column off-by-one is tracked as
+> **DW-27** (normalising the index — a uniform `+1`, golden-affecting — is deferred to
+> a resolver-provenance set).
 
 `unresolved-items.json` is a flat list of `UnresolvedItem` records,
 one per reference the harvester could not fully bind. The record

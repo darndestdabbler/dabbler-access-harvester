@@ -248,13 +248,27 @@ public sealed class UnresolvedItemsCompletenessTests
     }
 
     [Fact]
-    public void LayerA_HeaderRef_IndexPositionMatchesInlineReference()
+    public void LayerA_HeaderRef_IndexPositionCorrelatesWithInlineReference()
     {
-        // Pin the position contract for a header ref: the index entry's
-        // Line/Column are populated and align with the inline Body.References
-        // location, so a consumer can correlate the two views. (HHC has zero
-        // header refs, so the golden gate never exercises this path — it is
-        // pinned only here.)
+        // Pin the position correlation between the two views of a header ref so a
+        // consumer can map an unresolved-items.json entry back to the manifest's
+        // inline Body.References location. (HHC has zero header refs, so the golden
+        // gate never exercises this path — it is pinned only here.)
+        //
+        // DW-26 (Set 018): the manifest's inline Body.References Location is now
+        // emitted 1-BASED (ParserOutputProjector.BuildLocation +1's the AST's
+        // 0-based ANTLR column to honour the schema's SourceLocation minimum:1 and
+        // the 1-based line:col contract). The unresolved-items.json index, by
+        // contrast, preserves every producer's RAW column VERBATIM and ALL feeds
+        // (resolver, SQL form-reference, navigation-graph, AND function-
+        // classification — this header ref is FunctionClassification-sourced) carry
+        // the 0-based ANTLR column. So the index is UNIFORMLY 0-based and the two
+        // views correlate at a fixed +1 column offset for ANY procedure-scoped ref:
+        // inline (1-based) == index (0-based) + 1. The LINE is 1-based on both and
+        // matches exactly. This cross-artifact offset is out of DW-26's scope
+        // (normalising the index is a uniform +1 but golden-affecting, deferred to a
+        // resolver-provenance set); it is recorded as DW-27. A consumer correlating
+        // the two surfaces by column must apply the +1 until DW-27 lands.
         var c = Build(
             "Public Sub Demo(Optional ByVal x As Variant = MissingThing)\r\nEnd Sub\r\n",
             "modHeaderPos");
@@ -273,8 +287,11 @@ public sealed class UnresolvedItemsCompletenessTests
 
         Assert.NotNull(header.Location.Line);
         Assert.NotNull(header.Location.Column);
+        // Line: identical 1-based value on both surfaces.
         Assert.Equal(inlineLine, header.Location.Line);
-        Assert.Equal(inlineColumn, header.Location.Column);
+        // Column: the inline manifest column is 1-based; the index column is the
+        // raw 0-based producer value. They correlate at a fixed +1 (DW-26/DW-27).
+        Assert.Equal(inlineColumn, header.Location.Column + 1);
     }
 
     // ── Layer B: module-level unresolved references reach the index ─────

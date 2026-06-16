@@ -1,0 +1,40 @@
+{
+  "status": "completed",
+  "summary": "Set 018 (1/1, Full tier): closed DW-26 via Option A — normalise manifest source-location COLUMNS to 1-based at projection. Cross-provider consensus (gpt-5-4 + gemini-pro, UNANIMOUS Option A) + human sign-off recorded BEFORE any code change. ParserOutputProjector.BuildLocation now +1's both StartColumn and EndColumn (half-open [Start,End) rebased; EndColumn stays exclusive; width preserved); the synthetic top-level was already 1 and is left consistent; schema UNCHANGED (producer fixed to honour the existing SourceLocation minimum:1). HHC golden regenerated in-commit and the delta proven byte/value-level to be EXACTLY a uniform +1 on 5941 BuildLocation-derived StartColumn/EndColumn leaves (11882 total), zero non-column/non-+1 diffs, zero top-level Source/Location diffs; kb/ir/unresolved-items byte-neutral. StudentIctLocalInvariantTests pin FLIPPED from known-limitation (schema-invalid on StartColumn[minimum]) to assert schema-VALID + a structural no-StartColumn==0 witness; validated locally (COM). New hermetic pins: line-leading AST-column-0 token -> StartColumn 1 (EndColumn 13, width preserved) + a no-zero-column leak guard. Schema $def + interpretation-guide document 1-based columns and exclusive EndColumn. DW-26 CLOSED; new DW-27 recorded (unresolved-items.json columns are UNIFORMLY 0-based — all producers pass raw ANTLR/provenance — so the index is a uniform +1 behind the now-1-based manifest inline column; normalising it is golden-affecting, deferred). Verification: routed gpt-5-4 R1 (ISSUES_FOUND, 1 Minor comment overclaim -> fixed) + in-IDE devil's-advocate pair gpt-5-4 + gemini-3.1-pro as PRIMARY (both UPHELD the core work; 1 Major BOTH: the DW-27/guide/schema-description/pre-existing record comments mischaracterised the index as mixed-base — the producers are all raw 0-based -> corrected all docs/comments to uniformly-0-based; code unchanged, re-verified against producer code + golden). Both findings documentation-only; no behavioural/golden/schema-validation change. Validation: 2614 hermetic passing (Pipeline 958, Vba.Grammar 295, Vba.Parser 92, Vba.Resolver 410, Sql.Grammar 85, SymbolDb 71, AccessHarvester.Tests 703) + 77 COM integration passed / 3 skipped (CanonicalGoldenRegressionTests golden gate byte-equal, StudentICT now schema-valid, Northwind valid). Operational: a whole-solution dotnet test wedged a COM testhost ~3h (reaped via WMI Terminate); re-validated in targeted foreground per-project batches. Repo remains consumer-driven-only; next-set recommendation is a recorded handoff (no concrete set authored).",
+  "verification_method": "api",
+  "verification_verdict": "VERIFIED",
+  "files_changed": [
+    "AccessHarvester.Pipeline/Manifest/ParserOutputProjector.cs",
+    "AccessHarvester.Pipeline/Enrichment/UnresolvedItem.cs",
+    "AccessHarvester.Pipeline/Enrichment/FunctionClassification.cs",
+    "AccessHarvester.Pipeline/Enrichment/NavigationGraph.cs",
+    "docs/test-cases/harvester-schema.v1.1.json",
+    "tests/AccessHarvester.Pipeline.Tests/Manifest/ParserOutputProjectorTests.cs",
+    "tests/AccessHarvester.Pipeline.Tests/UnresolvedItemsCompletenessTests.cs",
+    "tests/AccessHarvester.Integration/Pipeline/StudentIctLocalInvariantTests.cs",
+    "docs/planning/deferred-work.md",
+    "docs/harvester/interpretation-guide.md",
+    "samples/GoldenOutput/HomeHealthCare/manifest.json",
+    "docs/session-sets/018-manifest-source-location-column-convention/spec.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/s1-column-base-consensus-2026-06-15.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/s1-verification.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/s1-issues.json",
+    "docs/session-sets/018-manifest-source-location-column-convention/s1-devils-advocate-packet.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/s1-devils-advocate-gpt-5-4.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/s1-devils-advocate-reply-gemini.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/next-session-set-recommendation.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/change-log.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/ai-assignment.md",
+    "docs/session-sets/018-manifest-source-location-column-convention/disposition.json",
+    "docs/session-sets/018-manifest-source-location-column-convention/activity-log.json",
+    "docs/session-sets/018-manifest-source-location-column-convention/session-events.jsonl",
+    "docs/session-sets/018-manifest-source-location-column-convention/session-state.json"
+  ],
+  "verification_message_ids": [],
+  "next_session_set": {
+    "slug": "(none — consumer-driven-only handoff)",
+    "summary": "Repo is consumer-driven-only; no concrete next set authored. next-session-set-recommendation.md catalogs the open DW landscape. Strongest golden-affecting pull-in candidates if a driver appears: DW-18 (intrinsic-constant resolver registry; huge StudentICT witness) and the new DW-27 (normalise unresolved-items.json / classification columns to 1-based; natural bundle with DW-17 + DW-19). Carries the StudentICT never-commit + plaintext-credential Hard Constraint, the HHC-only golden rule, and the new 'do not run the whole solution's COM tests in one dotnet test' operational rule.",
+    "verification_verdict_followups": []
+  },
+  "blockers": []
+}

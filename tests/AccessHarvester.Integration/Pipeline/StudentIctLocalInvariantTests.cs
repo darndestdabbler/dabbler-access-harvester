@@ -36,9 +36,12 @@ namespace AccessHarvester.Integration.Pipeline;
 //   - CORPUS-SPECIFIC CANARIES — exact names/ids for THIS corpus (ribbon "Help",
 //     module "modRibbonCallbacks") that pin the harvested structure tightly to
 //     catch a producer regression; a benign FE edit would legitimately change them.
-// One check is a KNOWN-LIMITATION pin (DW-26): this corpus's manifest does NOT
-// currently schema-validate (a 0-based StartColumn leak), so the test pins that
-// defect rather than asserting full validity.
+// DW-26 (Set 018) is now CLOSED: this corpus is the witness that drove it. It is
+// the only one with a line-leading (AST column 0) reference/call token, so before
+// Set 018 its manifest emitted a 0-based StartColumn below the schema minimum and
+// was schema-invalid. The pin now asserts full schema validity (the column base is
+// normalised to 1-based at projection) plus a structural witness that no
+// StartColumn==0 survives.
 //
 // SkippableFact-gated: it skips when Access COM is absent OR when EITHER the
 // gitignored StudentICTDatabase.accdb (FE) or StudentICTDatabase_BE.accdb (BE)
@@ -98,47 +101,31 @@ public sealed class StudentIctLocalInvariantTests
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             Assert.NotNull(manifest);
 
-            // Invariant 2b — KNOWN LIMITATION (DW-26): the StudentICTDatabase
-            // manifest does NOT currently schema-validate. Manifest source-location
-            // columns are emitted 0-based — the VBA AST's ANTLR convention
-            // (SourceLocation.cs: "Column is 0-based"), projected straight through by
-            // ParserOutputProjector.BuildLocation with no +1 — while the schema's
-            // SourceLocation $def declares StartColumn `minimum: 1` (and the projector
-            // itself hardcodes the synthetic top-level location to StartColumn=1). A
-            // reference/call token at the FIRST character of a line is column 0, which
-            // falls below the schema minimum. This corpus is the first with such a
-            // line-leading token, so it is the first to make the 0-based-vs-1-based
-            // convention mismatch schema-visible: HHC (golden min column 1) and
-            // NorthwindDevEdition validate only because their indented VBA happens to
-            // have no column-0 token — NOT because they honour a 1-based contract.
-            // The thousands of OTHER validator errors (`ResolvedTarget should be
-            // "null"`, `ItemKind Expected Query/Expression`, `ParserOutput should be
-            // "null"`) are losing-oneOf-branch noise — the same object-valued fields
-            // validate fine on Northwind — NOT real failures. Reconciling the column
-            // convention (normalise projection to 1-based, OR relax the schema to
-            // minimum:0) is a deliberate, golden-affecting decision out of this
-            // corpus-onboarding set's scope (see DW-26); per the spec Stop Rule a
-            // failing real-corpus invariant is a finding to record, not an assertion
-            // to soften. This pin asserts the CURRENT reality so the gap surfaces
-            // mechanically and flips the day DW-26 lands.
+            // Invariant 2b — DW-26 CLOSED (Set 018): the StudentICTDatabase
+            // manifest now SCHEMA-VALIDATES. This corpus is the DW-26 witness: it is
+            // the only one with a line-leading (AST column 0) reference/call token,
+            // so before Set 018 its manifest emitted StartColumn 0 — below the
+            // schema's SourceLocation `minimum: 1` — and was schema-INVALID. Set 018
+            // normalised the projector's source-location column base to 1-based
+            // (ParserOutputProjector.BuildLocation +1 on both Start and End,
+            // width-preserving; the synthetic top-level location was already 1), so a
+            // line-leading token now projects StartColumn 1 and the manifest conforms.
+            // (HHC and NorthwindDevEdition schema-validated even before Set 018, but
+            // only because their indented VBA never lands a token at column 0 — they
+            // passed by luck, not by honouring a 1-based contract.)
             var schemaResult = new SchemaValidator(RepoPaths.SchemaFile()).Validate(manifestJson);
-            Assert.False(schemaResult.IsValid,
-                "DW-26 appears fixed: the StudentICTDatabase manifest now schema-validates. " +
-                "Update this known-limitation pin to assert IsValid (like " +
-                "NorthwindLocalInvariantTests) and close DW-26 in docs/planning/deferred-work.md.");
-            // Key the failure on the schema PATH + keyword, not the validator's human
-            // message wording — robust to a validator message-text change. Each error
-            // is formatted "<InstanceLocation>: [<keyword>] <message>", so an
-            // InstanceLocation ending in /StartColumn with the [minimum] keyword is the
-            // DW-26 class.
-            Assert.Contains(schemaResult.Errors,
-                e => e.Contains("StartColumn", StringComparison.Ordinal)
-                     && e.Contains("[minimum]", StringComparison.Ordinal));
-            // Prove the trigger STRUCTURALLY (robust to JSON whitespace/formatting):
-            // some SourceLocation in the manifest carries a numeric StartColumn of 0.
-            Assert.True(HasZeroStartColumn(manifestJson),
-                "Expected a numeric StartColumn == 0 somewhere in the manifest (the DW-26 trigger). " +
-                "If none is present, DW-26 may be fixed — re-evaluate this known-limitation pin.");
+            Assert.True(schemaResult.IsValid,
+                "StudentICTDatabase manifest failed schema validation after DW-26 " +
+                "(it must be schema-valid once the column base is normalised to 1-based):\n  - " +
+                string.Join("\n  - ", schemaResult.Errors));
+            // Structural witness that the DW-26 normalisation actually reached THIS
+            // corpus (robust to JSON whitespace and to schema-message changes): no
+            // SourceLocation carries a numeric StartColumn of 0 — the line-leading
+            // token that was column 0 pre-Set-018 is now column 1. Proves the
+            // PRODUCER fix, not merely schema conformance.
+            Assert.False(HasZeroStartColumn(manifestJson),
+                "A SourceLocation StartColumn == 0 remains in the StudentICTDatabase manifest — " +
+                "the DW-26 column-base normalisation did not reach this corpus.");
 
             // Invariant 3 (split-FE / linked-table surface): at least one table
             // is a linked attachment whose Connect references the BE filename and

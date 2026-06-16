@@ -912,7 +912,26 @@
   documenting by construction that `IsLinked` is not usable there. No committed pin
   (HHC has no linked tables); the owning set adds one with the regen.
 
-### DW-26 — Manifest source-location columns are emitted 0-based (the AST's ANTLR convention) but the schema declares them 1-based (`minimum: 1`) — an unnormalised internal-vs-public convention mismatch at projection
+### DW-26 — Manifest source-location columns are emitted 0-based (the AST's ANTLR convention) but the schema declares them 1-based (`minimum: 1`) — an unnormalised internal-vs-public convention mismatch at projection — **CLOSED 2026-06-15 (018 S1, Option A)**
+> **CLOSED** by `018-manifest-source-location-column-convention` Session 1.
+> Cross-provider consensus (gpt-5-4 + gemini-pro, UNANIMOUS) + human sign-off chose
+> **Option A — normalise columns to 1-based at projection**:
+> `ParserOutputProjector.BuildLocation` now adds `+1` to BOTH `StartColumn` and
+> `EndColumn` (width-preserving; the half-open `[Start, End)` span is rebased to
+> 1-based, e.g. `[0,11) → [1,12)`; `EndColumn` stays exclusive). The synthetic
+> per-module top-level location was already hardcoded `=1` and is left unchanged,
+> now consistent. Schema UNCHANGED (the producer was fixed to honour the existing
+> `minimum: 1` contract). HHC golden regenerated in the same commit; the delta was
+> proven byte/codepoint-level to be EXACTLY a uniform `+1` on the 5941
+> BuildLocation-derived `StartColumn`/`EndColumn` values (the 32 synthetic top-level
+> stay at 1; no other byte moved). The Set 017 known-limitation pin in
+> `StudentIctLocalInvariantTests` was flipped to assert the manifest schema-VALIDATES
+> (+ a structural witness that no `StartColumn==0` survives); validated locally.
+> Hermetic pins added (`ParserOutputProjectorTests`: line-leading column-0 token →
+> `StartColumn 1`, width preserved, no zero-column leak). Residual: the
+> `unresolved-items.json` index keeps its verbatim **uniformly 0-based** column base, so
+> every index column is now a uniform `+1` behind the manifest inline column — carved out
+> as **DW-27**.
 - **What:** the VBA parser's `SourceLocation` column is **0-based by design**
   ("Column is 0-based (ANTLR convention)",
   `AccessHarvester.Vba.Parser/Ast/SourceLocation.cs:3`; `AstBuilder` stores
@@ -982,6 +1001,53 @@
   `IsValid` (like `NorthwindLocalInvariantTests`) and close DW-26 once the convention
   is reconciled. No committed golden pin (HHC has no column-0 token).
 
+### DW-27 — `unresolved-items.json` index columns are uniformly 0-based (raw ANTLR), so every index column is now 1 behind the manifest's 1-based inline column
+- **What:** Set 018 (DW-26) normalised the **manifest** source-location column base to
+  1-based at `ParserOutputProjector.BuildLocation`. The `unresolved-items.json` index,
+  built by `UnresolvedItemAggregator`, preserves each producer's column **verbatim** and
+  **every** producer carries the parser layer's **0-based** ANTLR column: resolver
+  diagnostics, SQL form-reference annotations, **and** the navigation-graph /
+  function-classification facts all flow straight from `expr.Provenance.Column` /
+  `range.Start.Column` with no rebasing (`FunctionClassificationBuilder` →
+  `UnresolvedReferenceFact.Column = expr.Provenance.Column`; `NavigationGraphBuilder.LocationOf`
+  → `range.Start.Column`; provenance originates at `AstBuilder` `token.Column`, ANTLR
+  0-based). So the index is **uniformly 0-based**, not mixed-base. After Set 018 **every**
+  procedure-scoped unresolved reference therefore appears in `manifest.json`
+  `Body.References[].Location` as **1-based** but in `unresolved-items.json`
+  `Location.Column` as **0-based** — a **uniform `+1`** gap (independent of `Source`). A
+  consumer correlating the two surfaces by column applies a single `+1` (pinned by
+  `UnresolvedItemsCompletenessTests.LayerA_HeaderRef_IndexPositionCorrelatesWithInlineReference`,
+  which asserts `inline == index + 1`).
+  > **Corrected 2026-06-16** by the Set 018 in-IDE devil's-advocate pair (gpt-5-4 Major +
+  > gemini-3.1-pro): the original DW-27 write-up (and the pre-existing
+  > `UnresolvedLocation.Column` / `FunctionClassification.Column` /
+  > `NavigationTarget.SourceColumn` doc comments) wrongly claimed nav-graph /
+  > function-classification columns were already 1-based. The shipped producers pass raw
+  > 0-based provenance; the index is uniformly 0-based. Docs/comments corrected in the
+  > same session; the code is unchanged (no producer was 1-based to begin with).
+- **Origin:** Set 018 Session 1 re-grounding + the in-IDE devil's-advocate correction
+  (the DW-26 fix surfaced the cross-artifact offset; the reviewers corrected the
+  mixed-base mischaracterisation to uniform-0-based).
+- **Why deferred:** out of DW-26's scope (the spec scopes it to the manifest
+  source-location **column base only** and forbids folding in other concerns).
+  Normalising the index to 1-based would be a **uniform `+1`** across every feed (all are
+  0-based today, so the dedup keys shift together and stay aligned — no collapse risk),
+  but it is a **producer-contract change that is golden-affecting**: the HHC
+  `unresolved-items.json` carries 0-based columns (e.g. the `vbObjectError` module-level
+  refs) and the `FunctionClassification` / `NavigationTarget` `Column`/`SourceColumn`
+  fields in the manifest classification arrays would all shift `+1`, requiring a
+  coordinated regen. That belongs to a deliberate resolver/provenance-normalisation set,
+  not DW-26.
+- **Trigger to pull back in:** a consumer reports the manifest-vs-index column
+  off-by-one, OR a resolver-provenance / unresolved-items-column-normalisation set is
+  scoped (natural bundle with DW-17, the other unresolved-items granularity asymmetry,
+  and DW-19, the SQL-feed attribution).
+- **Owning set candidate:** a future `unresolved-items-column-normalisation` /
+  resolver-provenance set (small, P0-only prereq).
+- **Mechanical backstop:** `LayerA_HeaderRef_IndexPositionCorrelatesWithInlineReference`
+  pins the current `inline == index + 1` relationship and names DW-26/DW-27; flipping it
+  back to plain equality is the owning session's signal that the bases are unified.
+
 ## Closed
 
 - **DW-9** — Switchboard / Macro / EntryPoint navigation inputs — **CLOSED
@@ -1011,3 +1077,13 @@
   decls — disproving the original "zero cases" assumption). Full entry retained above
   with its CLOSED banner. Per-module-`ParserOutput` completeness asymmetry carved out
   to **DW-17**.
+- **DW-26** — Manifest source-location columns emitted 0-based vs schema-declared
+  1-based — **CLOSED 2026-06-15** by `018-manifest-source-location-column-convention`
+  Session 1 (**Option A**, unanimous cross-provider consensus + human sign-off):
+  `ParserOutputProjector.BuildLocation` now `+1`s both `StartColumn`/`EndColumn` to a
+  uniform 1-based base (width-preserving; `EndColumn` stays exclusive); schema
+  unchanged; HHC golden regenerated in-commit with the delta proven byte-level to be
+  exactly the uniform `+1` (5941 nodes; 32 synthetic top-level stay at 1); StudentICT
+  pin flipped to assert validity; hermetic column-0 pins added. Full entry retained
+  above with its CLOSED banner. Cross-artifact index column asymmetry carved out to
+  **DW-27**.

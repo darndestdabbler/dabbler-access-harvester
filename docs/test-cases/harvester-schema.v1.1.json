@@ -241,14 +241,15 @@
 
     "SourceLocation": {
       "type": "object",
+      "description": "A source position in a VBA module. Lines AND columns are 1-based (DW-26 / Set 018: the producer normalises the parser's 0-based ANTLR columns to 1-based at projection, matching the line base and the human-editor convention). The span is half-open [Start, End): EndColumn is the column immediately AFTER the last character (EXCLUSIVE), so EndColumn - StartColumn is the character width. Note: the separate unresolved-items.json index carries producer-verbatim columns that are uniformly 0-based (raw ANTLR, all sources), i.e. 1 less than this manifest column for the same reference (DW-27).",
       "required": ["StartLine", "StartColumn"],
       "properties": {
         "File": { "type": "string" },
         "Module": { "type": "string" },
-        "StartLine": { "type": "integer", "minimum": 1 },
-        "StartColumn": { "type": "integer", "minimum": 1 },
-        "EndLine": { "type": "integer", "minimum": 1 },
-        "EndColumn": { "type": "integer", "minimum": 1 }
+        "StartLine": { "type": "integer", "minimum": 1, "description": "1-based start line." },
+        "StartColumn": { "type": "integer", "minimum": 1, "description": "1-based start column (column of the first character)." },
+        "EndLine": { "type": "integer", "minimum": 1, "description": "1-based end line." },
+        "EndColumn": { "type": "integer", "minimum": 1, "description": "1-based EXCLUSIVE end column (one past the last character); EndColumn - StartColumn = width." }
       }
     },
 

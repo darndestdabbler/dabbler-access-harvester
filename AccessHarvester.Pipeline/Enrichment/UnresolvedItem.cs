@@ -225,14 +225,19 @@ public sealed record UnresolvedLocation
     public int? Line { get; init; }
 
     /// <summary>
-    /// Column position as the producer recorded it. The convention
-    /// follows the producer's own emission: navigation-graph and
-    /// function-classification facts use 1-based columns; resolver
-    /// diagnostics and SQL form-reference annotations use the parser
-    /// layer's 0-based ANTLR convention. The aggregator preserves the
-    /// producer's value verbatim rather than normalising — round-trip
-    /// fidelity is more useful to consumers that cross-reference back
-    /// to the upstream record than a uniform numbering.
+    /// Column position as the producer recorded it. Every feed
+    /// (resolver diagnostics, SQL form-reference annotations,
+    /// navigation-graph facts, and function-classification facts) carries
+    /// the parser layer's <b>0-based</b> ANTLR column verbatim — the value
+    /// flows straight from <see cref="AccessHarvester.Vba.Parser.Ast.Provenance.Column"/>
+    /// / <c>range.Start.Column</c> with no normalisation. The aggregator
+    /// preserves it rather than rebasing, so round-trip fidelity to the
+    /// upstream record holds and the cross-feed dedup keys compare like
+    /// for like. NOTE (DW-26 / Set 018): the per-module manifest's
+    /// <c>ParserOutput.Body.References[].Location</c> column is now
+    /// <b>1-based</b>, so this index column is 1 LESS than the manifest's
+    /// inline column for the same reference (DW-27 tracks normalising this
+    /// index to match).
     /// </summary>
     public int? Column { get; init; }
 }

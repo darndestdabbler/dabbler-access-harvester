@@ -165,6 +165,96 @@ End Sub";
             "Expected at least one Unresolved reference for DoUnknownThing");
     }
 
+    // ── Tests: DW-26 source-location column base (1-based, Set 018) ───
+    //
+    // The VBA AST stores columns 0-based (ANTLR); the manifest's public
+    // SourceLocation contract is 1-based (schema $def StartColumn/EndColumn
+    // minimum:1). ParserOutputProjector.BuildLocation normalises the base by
+    // +1 on BOTH ends, width-preserving (half-open [Start,End)). HHC and
+    // Northwind validate their goldens by luck (indented VBA never lands a
+    // token at column 0); these pins exercise the line-leading column-0 token
+    // that the StudentICTDatabase corpus has and the committed goldens lack.
+
+    [Fact]
+    public void LineLeadingReference_ProjectsOneBasedStartColumn_NotZero()
+    {
+        // `MissingThing` sits at the FIRST character of its line → AST column 0
+        // (0-based). Before DW-26 the projector emitted StartColumn 0 (below the
+        // schema minimum:1); after, it must emit StartColumn 1.
+        const string source =
+            "Option Explicit\r\n" +
+            "Public Sub DoSomething()\r\n" +
+            "MissingThing\r\n" +
+            "End Sub\r\n";
+        var root = Project(Resolve(source));
+        var item = Item(root, 0)!;
+        var reference = item["Body"]!["References"]!.AsArray()
+            .Single(r => r!["OriginalText"]?.GetValue<string>() == "MissingThing")!;
+        var loc = reference["Location"]!;
+
+        // 1-based start column (was 0 pre-DW-26). Line is already 1-based.
+        Assert.Equal(1, loc["StartColumn"]!.GetValue<int>());
+        Assert.Equal(3, loc["StartLine"]!.GetValue<int>());
+
+        // Width preserved: the half-open span still covers exactly the 12-char
+        // token ("MissingThing"). EndColumn is exclusive (one past the last
+        // char), rebased to 1 → [1, 13).
+        int width = loc["EndColumn"]!.GetValue<int>() - loc["StartColumn"]!.GetValue<int>();
+        Assert.Equal("MissingThing".Length, width);
+        Assert.Equal(13, loc["EndColumn"]!.GetValue<int>());
+    }
+
+    [Fact]
+    public void Projection_HasNoZeroColumn_EvenWithLineLeadingToken()
+    {
+        // Leak guard (this fixture): no StartColumn/EndColumn of 0 anywhere in the
+        // projected tree, even when a token starts at AST column 0, and the
+        // synthetic root still starts at 1. This pins that BuildLocation normalises
+        // a line-leading token; it does NOT by itself prove BuildLocation is the
+        // ONLY column-emitting manifest surface — that global confidence comes from
+        // the Set-018 re-grounding sweep (BuildLocation + the hardcoded top-level
+        // are the only two StartColumn/EndColumn sites), the HHC golden value-diff
+        // (every changed leaf a +1 column shift, nothing else), and the StudentICT
+        // real-corpus witness now schema-validating.
+        const string source =
+            "Option Explicit\r\n" +
+            "Public Sub DoSomething()\r\n" +
+            "MissingThing\r\n" +
+            "End Sub\r\n";
+        var root = Project(Resolve(source));
+
+        Assert.False(AnyColumnIsZero(root),
+            "A SourceLocation StartColumn/EndColumn of 0 remains after DW-26 " +
+            "normalisation — a raw 0-based column leaked into the manifest.");
+
+        // The synthetic document-root location stays at the 1-based origin.
+        Assert.Equal(1, root["Source"]!["Location"]!["StartColumn"]!.GetValue<int>());
+    }
+
+    private static bool AnyColumnIsZero(JsonNode? node)
+    {
+        switch (node)
+        {
+            case JsonObject obj:
+                foreach (var (key, value) in obj)
+                {
+                    if ((key == "StartColumn" || key == "EndColumn")
+                        && value is JsonValue v
+                        && v.TryGetValue(out int col)
+                        && col == 0)
+                        return true;
+                    if (AnyColumnIsZero(value)) return true;
+                }
+                return false;
+            case JsonArray arr:
+                foreach (var element in arr)
+                    if (AnyColumnIsZero(element)) return true;
+                return false;
+            default:
+                return false;
+        }
+    }
+
     // ── Tests: F-3-6 ResolutionReason surfacing ──────────────────────
 
     [Fact]
