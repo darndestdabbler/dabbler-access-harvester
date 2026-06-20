@@ -49,6 +49,22 @@ consumer download + checksum-verify procedure.
   signal), **the Delegation Discipline rules (when to route vs. handle
   directly)**, and the mandatory rules list. Do not duplicate that
   content here.
+- [`greenfield-matrix-protocol.md`](https://raw.githubusercontent.com/darndestdabbler/dabbler-ai-orchestration/master/docs/greenfield-matrix-protocol.md)
+  (canonical, lives in `dabbler-ai-orchestration`) — **this repo is the
+  SUPPORTING (diff-class-confounded) signal in the Set 075 greenfield
+  finding-power pilot** (its packaging/small diffs are snippet-fittable and
+  favor `push`; `dabbler-platform` is the lead). On **source-code-bearing
+  build sessions** (skip doc / planning / mechanical ones), run the
+  provider×surface verification matrix at **Step 6, BEFORE remediation**,
+  following the standard instruction addendum
+  [`greenfield-matrix-addendum.md`](https://raw.githubusercontent.com/darndestdabbler/dabbler-ai-orchestration/master/ai_router/prompt-templates/greenfield-matrix-addendum.md);
+  adjudicate every finding against the fixed
+  [`greenfield-adjudication-rubric.md`](https://raw.githubusercontent.com/darndestdabbler/dabbler-ai-orchestration/master/docs/greenfield-adjudication-rubric.md),
+  recording the run's `diffClass` (`source-dominated` / `packaging-small`);
+  freeze the run and ship the `matrix-run/` telemetry back to the canonical
+  set dir (`telemetry/dabbler-access-harvester/<session>/`). Requires
+  `dabbler-ai-router >= 0.26.0` (see `requirements.txt`). The matrix varies
+  *provider*, not framing (both arms stay strong adversarial — L-069-2).
 - [`docs/session-state-schema.md`](https://raw.githubusercontent.com/darndestdabbler/dabbler-ai-orchestration/master/docs/session-state-schema.md)
   (canonical, lives in `dabbler-ai-orchestration`) — the authoritative
   schema for `session-state.json`. Required reading before hand-editing

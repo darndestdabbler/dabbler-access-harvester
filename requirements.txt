@@ -23,4 +23,11 @@
 # observed across all four sessions of set 006. Verdicts for sets closed
 # under 0.10.0 live only in each session's disposition.json/sN-verification*.md;
 # the nulls in those sets' session-state.json are historical, not data loss.
-dabbler-ai-router>=0.15.0
+#
+# Floor raised to >=0.26.0 (2026-06-20, canonical Set 075 S2): this repo is the
+# SUPPORTING (diff-class-confounded) signal in the greenfield finding-power
+# pilot. The provider×surface verification matrix + the verification-only
+# application mode (`python -m ai_router.verification_only_app`) the pilot runs
+# at Step 6 first ship in 0.26.0. See the greenfield-matrix-protocol referenced
+# from CLAUDE.md.
+dabbler-ai-router>=0.26.0
