@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 4,
+  "sessionSetName": "019-accessharvester-dotnet-tool-packaging",
+  "status": "in-progress",
+  "sessions": [
+    {
+      "number": 1,
+      "title": "Make the CLI packable as a dotnet tool and prove it runs",
+      "status": "in-progress",
+      "startedAt": "2026-06-20T18:33:56.371229-04:00",
+      "completedAt": null,
+      "orchestrator": {
+        "engine": "claude-code",
+        "provider": "anthropic",
+        "model": "claude-opus-4-8",
+        "effort": "medium"
+      },
+      "verificationVerdict": null
+    },
+    {
+      "number": 2,
+      "title": "Publish pipeline + first-push guardrails",
+      "status": "not-started",
+      "startedAt": null,
+      "completedAt": null,
+      "orchestrator": null,
+      "verificationVerdict": null
+    }
+  ]
+}

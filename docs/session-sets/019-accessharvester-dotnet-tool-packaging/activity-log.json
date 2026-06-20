@@ -1,0 +1,17 @@
+{
+  "sessionSetName": "019-accessharvester-dotnet-tool-packaging",
+  "createdDate": "2026-06-20T22:33:56.377932+00:00",
+  "totalSessions": 0,
+  "entries": [
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-001/verification-mode",
+      "dateTime": "2026-06-20T22:33:56.377932+00:00",
+      "description": "Operator set verificationMode: out-of-band-or-none.",
+      "status": "complete",
+      "kind": "verification_mode",
+      "choice": "out-of-band-or-none"
+    }
+  ]
+}
