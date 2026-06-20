@@ -10,21 +10,70 @@
   </PropertyGroup>
 
   <!--
-    Publish-time defaults for the self-contained Windows distribution.
-    Only Publish* properties live here so plain `dotnet build` (used by
-    every test project) stays framework-dependent and RID-neutral. The
-    publish script at tools/publish/publish.ps1 supplies
-    the self-contained and runtime flags at invocation time.
+    `dotnet tool` packaging (set 019). This is an ADDITIVE distribution
+    channel alongside the self-contained single-file GitHub Releases zip
+    (tools/publish/publish.ps1). A `dotnet tool` is framework-dependent:
+    it relies on the consumer's installed .NET 10 runtime and does NOT
+    bundle it the way the self-contained exe does. The COM-based
+    extract/run path still requires Windows + Microsoft Access regardless
+    of channel; hermetic subcommands (parse/validate) run anywhere.
 
-    PublishTrimmed is false: ANTLR4 generated runtime + DAO COM interop
-    rely on reflection the IL trimmer cannot follow safely, and
-    Microsoft.Data.Sqlite carries native deps the extraction host must
-    see. EnableCompressionInSingleFile cuts the artifact to a more
-    reasonable size; IncludeNativeLibrariesForSelfExtract is required
-    so the SQLite native binaries are extracted alongside the managed
-    payload at first run.
+    PackageId is a permanent public-ID claim on nuget.org; the first push
+    and its guardrails (and the package license decision) land in
+    session 2. The package version is NOT set here: it inherits the
+    solution-wide <Version> from Directory.Build.props, which is already
+    the single source of truth for the runtime version output and the
+    GitHub Release bundle name, so the tool version maps 1:1 to a known
+    harvester build with no second version scheme.
   -->
   <PropertyGroup>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>access-harvester</ToolCommandName>
+    <IsPackable>true</IsPackable>
+    <PackageId>Dabbler.AccessHarvester.Tool</PackageId>
+    <Authors>darndestdabbler</Authors>
+    <Description>Dabbler Access Harvester CLI. Harvests Microsoft Access (.accdb/.mdb) metadata — forms, reports, queries, macros, ribbons, tables, modules — into structured JSON a downstream AI can interpret and document. The extract/run/report-baseline subcommands are COM-based and require Windows + Microsoft Access; parse/translate/generate-docs/validate/generate-migration are file-to-file and run anywhere the .NET 10 runtime does.</Description>
+    <PackageTags>dotnet-tool;access;msaccess;accdb;mdb;metadata;migration;dabbler</PackageTags>
+    <RepositoryUrl>https://github.com/darndestdabbler/dabbler-access-harvester</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/darndestdabbler/dabbler-access-harvester</PackageProjectUrl>
+    <!--
+      A tool-specific README (not the repo-overview root README.md): the
+      packaged README is what nuget.org renders for tool consumers, so it
+      must use the installed command name `access-harvester` rather than
+      the source-build / self-contained `AccessHarvester` exe name.
+    -->
+    <PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Packed at the package root so nuget.org renders it as the README. -->
+    <None Include="..\docs\harvester\nuget-readme.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+
+  <!--
+    Publish-time defaults for the self-contained Windows distribution.
+    These are RID-gated so they activate ONLY during the self-contained
+    publish (tools/publish/publish.ps1 passes the win-x64 runtime flag,
+    which sets RuntimeIdentifier). Plain `dotnet build` (every test project) and
+    `dotnet pack` (the tool package) are RID-neutral, so single-file /
+    self-extract props never leak into them — a tool package must not be
+    single-file (set 019 risk #1).
+
+    PublishTrimmed is false: ANTLR4's generated runtime and the
+    DAO / System.Data.OleDb COM interop rely on reflection the IL trimmer
+    cannot follow safely. EnableCompressionInSingleFile cuts the artifact
+    to a more reasonable size; IncludeNativeLibrariesForSelfExtract makes
+    the self-extracting exe drop any bundled native/runtime-specific
+    assets (the .NET runtime natives and the win-RID runtime assets such
+    as System.Data.OleDb) to disk at first run rather than memory-mapping
+    them. (The CLI does NOT depend on Microsoft.Data.Sqlite — that is an
+    AccessHarvester.SymbolDb-only dependency the CLI never references — so
+    despite set 019 risk #2's premise, no SQLite native asset is in this
+    project's closure or its tool package; verified against the pack
+    output and AccessHarvester.deps.json.)
+  -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
     <PublishSingleFile>true</PublishSingleFile>
     <PublishTrimmed>false</PublishTrimmed>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>

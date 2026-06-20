@@ -94,7 +94,9 @@ AccessHarvester validate --manifest <path-to-manifest.json>
 ```
 
 Validates a `DatabaseManifest` JSON produced by `run` against the
-harvester-schema v1.0 that is embedded in the binary. `--in` locates
+harvester-schema embedded in the binary (both `v1.0` and `v1.1` are
+embedded; `validate` dispatches on the manifest's declared
+`schemaVersion` — current output is `v1.1`). `--in` locates
 `manifest.json` recursively under the `run` output root. `--manifest`
 validates a single specified file. Exit code 0 = conforms; 3 = schema
 errors found (details on stderr). Pure file-to-file; no Access required.

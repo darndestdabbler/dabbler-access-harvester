@@ -1,0 +1,31 @@
+{
+  "session": 1,
+  "round": 1,
+  "verifier": "gpt-5-4",
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "id": "S1-R1-1",
+      "severity": "Major",
+      "location": "docs/harvester/install.md",
+      "summary": "The dotnet-tool docs implied a runtime-only host could install the tool, but `dotnet tool install`/`update` are SDK commands.",
+      "fix": "State that install/update require the .NET 10 SDK; running the installed tool needs only the .NET 10 runtime.",
+      "resolution_status": "fixed",
+      "resolution_note": "install.md channel table, Option A '.NET prerequisites' block, and the shared prerequisite paragraph now distinguish SDK-to-install from runtime-to-run."
+    },
+    {
+      "id": "S1-R1-2",
+      "severity": "Major",
+      "location": "README.md / AccessHarvester.Cli.csproj",
+      "summary": "The packed README was the repo-overview README.md, which uses the `AccessHarvester` exe-name in examples — wrong command for a tool whose command is `access-harvester`.",
+      "fix": "Add a tool-specific README using `access-harvester` and point PackageReadmeFile at it.",
+      "resolution_status": "fixed",
+      "resolution_note": "Added docs/harvester/nuget-readme.md (uses access-harvester throughout) and repointed <PackageReadmeFile> + the packed <None> item at it; repack confirmed the nuspec <readme> is nuget-readme.md with 0 stale command lines."
+    }
+  ],
+  "round_2": {
+    "verifier": "gpt-5-4",
+    "verdict": "VERIFIED",
+    "issues": []
+  }
+}

@@ -5,10 +5,88 @@ migration-repo orchestrator, human evaluator) how to install and invoke
 the harvester CLI **without** cloning the repository or building from
 source.
 
-The harvester ships as a **self-contained Windows binary**: one
-`AccessHarvester.exe` that carries its own .NET runtime, native
-SQLite dependencies, and managed payload inside a single
-self-extracting executable.
+There are **two acquisition channels**; pick by whether the host already
+has a .NET 10 runtime:
+
+| Channel | Shape | Host .NET prerequisite | Best for |
+|---|---|---|---|
+| **`dotnet tool`** (`Dabbler.AccessHarvester.Tool`, command `access-harvester`) | Framework-dependent NuGet tool | **`dotnet tool install` needs the .NET 10 SDK** (the `dotnet tool` command ships with the SDK, not the runtime); running the already-installed tool needs only the .NET 10 **runtime** | A developer who already has the .NET SDK and wants a one-line `dotnet tool install` and a pinnable version |
+| **Self-contained Release zip** (`AccessHarvester.exe`) | Single self-extracting Windows exe carrying its own .NET runtime + managed payload | **None — runtime is bundled** | A host with no .NET installed at all, or a strict integrity-verified (SHA-256) download |
+
+The two channels ship the **same CLI surface and the same version line**
+(both read the solution-wide `<Version>`; a `dotnet tool` version maps
+1:1 to the matching GitHub Release tag). They differ only in whether the
+.NET runtime is bundled.
+
+**The host prerequisite is identical for both:** the COM-based
+`extract` / `run` / `report-baseline` subcommands require **Windows +
+Microsoft Access**; the file-to-file subcommands
+(`parse`, `translate`, `generate-docs`, `validate`, `generate-migration`)
+run anywhere the .NET 10 runtime does. A `dotnet tool` can be installed on
+any RID that has the .NET 10 SDK, but the COM subcommands still only
+function on a properly provisioned Windows + Access host — distribution
+channel does not change that.
+
+---
+
+## Option A — `dotnet tool` (framework-dependent)
+
+> **Availability.** The package publishes to nuget.org via the
+> tag-triggered release pipeline (set `019` session 2). Until the first
+> tagged publish lands, acquire it from a local package feed: run
+> `dotnet pack AccessHarvester.Cli/AccessHarvester.Cli.csproj -c Release
+> -o <feed-dir>` from a clone, then add `--add-source <feed-dir>` to the
+> install command below.
+
+Install (or update) globally — this exposes the `access-harvester`
+command on `PATH`:
+
+```bash
+dotnet tool install --global Dabbler.AccessHarvester.Tool
+# update an existing install:
+dotnet tool update  --global Dabbler.AccessHarvester.Tool
+# pin a specific version (recommended for reproducible tooling):
+dotnet tool install --global Dabbler.AccessHarvester.Tool --version 1.2.0
+```
+
+Or pin it to a repo via a local tool manifest (no global `PATH` change):
+
+```bash
+dotnet new tool-manifest          # once per repo, creates .config/dotnet-tools.json
+dotnet tool install Dabbler.AccessHarvester.Tool
+dotnet tool run access-harvester --version
+```
+
+**.NET prerequisites.** A `dotnet tool` is **framework-dependent** — it
+does *not* bundle the .NET runtime. Two distinct requirements follow:
+
+- **To install or update** the tool you need the **.NET 10 SDK**: the
+  `dotnet tool install` / `dotnet tool update` commands are provided by
+  the SDK, not by the runtime alone. A host with only the .NET runtime
+  cannot run them — use the self-contained Release zip (Option B) on such
+  a host instead.
+- **To run** the already-installed `access-harvester` you need only the
+  **.NET 10 runtime**.
+
+Unlike the self-contained exe, all managed and runtime-specific assets
+(ANTLR runtime, `System.Data.OleDb` win-RID assets, the embedded schemas)
+are restored through the normal NuGet tool dependency graph into
+`~/.dotnet/tools` and resolve from there. The harvester CLI does **not**
+depend on `Microsoft.Data.Sqlite`, so no SQLite native asset is involved
+in this channel.
+
+After install, run the "Verifying an install" smoke check (below) using
+the `access-harvester` command in place of `AccessHarvester.exe`.
+
+---
+
+## Option B — self-contained Release zip
+
+The harvester also ships as a **self-contained Windows binary**: one
+`AccessHarvester.exe` that carries its own .NET runtime and managed
+payload inside a single self-extracting executable. This is the right
+artifact for a host **without** a .NET 10 runtime, or when you want a
+strict integrity-verified (SHA-256) download.
 
 ---
 
@@ -307,9 +385,11 @@ AccessHarvester 1.2.0 (schema v1.1)
   changes; a major bump means a breaking surface or schema change.
 - **`schema v<version>`** — the version of
   `harvester-schema.v<version>.json` the produced manifests conform
-  to. Current value: `1.0`. Downstream consumers should pin their
-  integration to a specific schema version; the harvester maintains
-  backwards-compatible schema bumps within a major version line.
+  to. Current value: `1.1` (the binary embeds both `v1.0` and `v1.1`
+  and `validate` dispatches on the manifest's declared `schemaVersion`).
+  Downstream consumers should pin their integration to a specific schema
+  version; the harvester maintains backwards-compatible schema bumps
+  within a major version line.
 
 A release artifact filename should encode both the harvester semver and
 the schema version it produces, e.g.,

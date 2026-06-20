@@ -12,6 +12,89 @@
       "status": "complete",
       "kind": "verification_mode",
       "choice": "out-of-band-or-none"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 1,
+      "stepKey": "session-1/setup",
+      "dateTime": "2026-06-20T19:22:58.831110-04:00",
+      "description": "Read spec + guidance; registered start; baseline-committed scaffolding (session-start ref 60490e6).",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 2,
+      "stepKey": "session-1/ai-assignment",
+      "dateTime": "2026-06-20T19:22:58.831633-04:00",
+      "description": "Routed analysis authored ai-assignment.md.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gemini-flash",
+          "taskType": "analysis",
+          "costUsd": 0.0011114
+        }
+      ]
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 3,
+      "stepKey": "session-1/csproj-packaging",
+      "dateTime": "2026-06-20T19:22:58.831633-04:00",
+      "description": "Added PackAsTool/ToolCommandName=access-harvester/PackageId=Dabbler.AccessHarvester.Tool + metadata; RID-gated the single-file publish props so they do not leak into pack/build (risk #1). Evidence: CLI has no Microsoft.Data.Sqlite dependency (SymbolDb-only), so risk #2's SQLite premise does not apply; corrected the false SQLite comment.",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 4,
+      "stepKey": "session-1/pack-install-smoke",
+      "dateTime": "2026-06-20T19:22:58.832150-04:00",
+      "description": "dotnet pack -> local feed -> global install -> 4 hermetic smoke checks pass (--version/--help/parse 214 nodes/validate schema v1.1) from ~/.dotnet/tools; package confirmed NOT single-file with ANTLR+OleDb assets + DotnetToolSettings.xml.",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 5,
+      "stepKey": "session-1/install-docs",
+      "dateTime": "2026-06-20T19:22:58.832669-04:00",
+      "description": "Extended docs/harvester/install.md with the dotnet tool channel (Option A/B, SDK-to-install vs runtime-to-run, host caveats).",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 6,
+      "stepKey": "session-1/build-test",
+      "dateTime": "2026-06-20T19:22:58.833186-04:00",
+      "description": "Solution build green; PackagedBinarySmokeTests 5/5 (self-contained publish unchanged, single-file exe, 0 loose DLLs).",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 7,
+      "stepKey": "session-1/greenfield-matrix",
+      "dateTime": "2026-06-20T19:22:58.833186-04:00",
+      "description": "Ran the Set-075 greenfield verification matrix (push:anthropic claude-sonnet-4-6 + pull:openai gpt-5.4; pull:google skipped DeterministicServantViolation) on 60490e6..WORKTREE. diffClass=packaging-small. Adjudicated union=1 TP (F2 doc schema-version staleness, caught by pull:openai); 2 FP. Froze matrix-run/ + adjudication.md + metadata.json; shipped telemetry to dabbler-ai-orchestration 075 (committed+pushed).",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 1,
+      "stepNumber": 8,
+      "stepKey": "session-1/verification",
+      "dateTime": "2026-06-20T19:22:58.833717-04:00",
+      "description": "Routed cross-provider session-verification (gpt-5-4). R1 ISSUES_FOUND: 2 Major (install.md SDK-vs-runtime; packed README used wrong command name). Fixed both (SDK/runtime distinction; added tool-specific nuget-readme.md + repointed PackageReadmeFile). R2 VERIFIED, 0 issues.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.1955975
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.140745
+        }
+      ]
     }
   ]
 }
