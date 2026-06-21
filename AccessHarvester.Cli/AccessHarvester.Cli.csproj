@@ -19,8 +19,11 @@
     of channel; hermetic subcommands (parse/validate) run anywhere.
 
     PackageId is a permanent public-ID claim on nuget.org; the first push
-    and its guardrails (and the package license decision) land in
-    session 2. The package version is NOT set here: it inherits the
+    and its guardrails landed in session 2 (the tag-triggered
+    .github/workflows/nuget-publish.yml validate→publish pipeline; the
+    package license, set below, was deferred to S2 by design because a
+    first-push license expression is permanent). The package version is
+    NOT set here: it inherits the
     solution-wide <Version> from Directory.Build.props, which is already
     the single source of truth for the runtime version output and the
     GitHub Release bundle name, so the tool version maps 1:1 to a known
@@ -38,6 +41,28 @@
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/darndestdabbler/dabbler-access-harvester</PackageProjectUrl>
     <!--
+      Package license (set 019 S2 — deferred from S1 by design because a
+      first-push license expression on nuget.org is permanent, spec risk
+      #4). MIT, chosen by the owner to stay consistent with the rest of
+      the Dabbler ecosystem (dabbler-platform ships PackageLicenseExpression
+      = MIT for its published packages under the same nuget.org account).
+      The repo root carries a LICENSE file with the same MIT text; the SPDX
+      expression below is what nuget.org renders.
+
+      The tool's runtime dependency closure carries no copyleft: ANTLR's
+      Antlr4.Runtime.Standard is BSD-3-Clause; everything else bundled
+      (the json-everything family, Humanizer, and the System.* assemblies)
+      is MIT. Because a `dotnet tool` package declares no NuGet
+      <dependencies> and instead REDISTRIBUTES its dependency DLLs inside
+      the package, the licenses of every redistributed component must
+      travel with it: THIRD-PARTY-NOTICES.txt (packed at the package root)
+      reproduces the ANTLR BSD-3-Clause text and the MIT license + the
+      copyright holders for every bundled MIT assembly.
+    -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <Copyright>Copyright (c) darndestdabbler</Copyright>
+    <!--
       A tool-specific README (not the repo-overview root README.md): the
       packaged README is what nuget.org renders for tool consumers, so it
       must use the installed command name `access-harvester` rather than
@@ -46,9 +71,45 @@
     <PackageReadmeFile>nuget-readme.md</PackageReadmeFile>
   </PropertyGroup>
 
+  <!--
+    Reproducible-build + symbol metadata for the published tool package
+    (set 019 S2), mirroring the dabbler-platform NuGet precedent so a
+    consumer can step into harvester code against the published commit.
+    All of these are pack/publish-scoped: IncludeSymbols / SymbolPackageFormat
+    only affect `dotnet pack`; ContinuousIntegrationBuild is gated on CI;
+    Microsoft.SourceLink.GitHub is PrivateAssets="all" (build-time only, no
+    runtime dependency leak). Plain `dotnet build` / `dotnet test` and the
+    RID-gated self-contained publish are unaffected.
+  -->
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- Packed at the package root so nuget.org renders it as the README. -->
     <None Include="..\docs\harvester\nuget-readme.md" Pack="true" PackagePath="\" Visible="false" />
+    <!--
+      Third-party license notices for every assembly this tool package
+      redistributes (ANTLR BSD-3-Clause + the MIT json-everything /
+      Humanizer / System.* assemblies), shipped at the package root so the
+      required attribution travels with the bundled binaries.
+    -->
+    <None Include="..\THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="\" Visible="false" />
+    <!--
+      Pack the MIT LICENSE text at the package root too, so THIRD-PARTY-NOTICES.txt's
+      "see LICENSE" reference resolves INSIDE the distributed .nupkg (the nuspec
+      license element stays the MIT SPDX expression — this is a plain content file,
+      not <PackageLicenseFile>, so the two do not conflict).
+    -->
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
   <!--

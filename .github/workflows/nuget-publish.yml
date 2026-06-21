@@ -1,0 +1,295 @@
+name: NuGet Publish (dotnet tool)
+
+# Publishes the Dabbler.AccessHarvester.Tool `dotnet tool` package to
+# nuget.org. This is ADDITIVE to the self-contained GitHub Releases zip
+# produced by release.yml (which triggers on plain `v*.*.*` tags); this
+# workflow is namespaced to `nuget-v*` tags so the two never double-fire on
+# the same push (set 019 S2; mirrors the dabbler-platform precedent).
+#
+# Idempotent + guarded by design:
+#   * validate job packs ONCE and uploads the exact artifact the publish
+#     job pushes (build-once / promote-artifacts) — `--skip-duplicate` only
+#     helps when a rerun pushes the same bits.
+#   * resolve-context asserts the tag's semver equals Directory.Build.props
+#     <Version> (the single version source of truth — drift guard, risk #3).
+#   * validate asserts the packed package ID is exactly
+#     Dabbler.AccessHarvester.Tool (typo guard for the permanent public ID,
+#     risk #4) and smoke-installs + runs the packed tool from a local feed.
+#   * publish uses nuget.org trusted publishing (GitHub OIDC -> short-lived
+#     1 h key); no long-lived secret exists in the repo.
+#
+# workflow_dispatch performs a no-burn dry run against GitHub Packages so the
+# whole pack->push mechanic is exercised without claiming a nuget.org ID.
+
+on:
+  push:
+    tags:
+      - "nuget-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: SemVer to validate and dry-run against GitHub Packages (must equal Directory.Build.props <Version>)
+        required: true
+        type: string
+
+concurrency:
+  group: nuget-publish-${{ github.ref_name || inputs.version }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  CI: true
+
+permissions:
+  contents: read
+
+jobs:
+  resolve-context:
+    name: Resolve And Verify Version
+    runs-on: windows-latest
+    outputs:
+      artifact_name: ${{ steps.context.outputs.artifact_name }}
+      package_source: ${{ steps.context.outputs.package_source }}
+      publish_target: ${{ steps.context.outputs.publish_target }}
+      version: ${{ steps.context.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - id: context
+        name: Parse + verify version source
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          # Unanchored SemVer core; anchors applied at each use site.
+          $semVerCore = '(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z]+(?:\.[0-9A-Za-z-]+)*)?)'
+
+          if ($env:EVENT_NAME -eq 'push') {
+              if ($env:REF_NAME -notmatch "^nuget-v$semVerCore$") {
+                  throw "Tag '$($env:REF_NAME)' must match nuget-v<semver>, e.g. nuget-v1.2.0"
+              }
+              $version = $Matches.version
+              $publishTarget = 'nuget.org'
+              $packageSource = 'https://api.nuget.org/v3/index.json'
+          }
+          elseif ($env:EVENT_NAME -eq 'workflow_dispatch') {
+              if ($env:INPUT_VERSION -notmatch "^$semVerCore$") {
+                  throw "Input version '$($env:INPUT_VERSION)' must be a SemVer value such as 1.2.0"
+              }
+              $version = $Matches.version
+              $publishTarget = 'github-packages'
+              $packageSource = "https://nuget.pkg.github.com/$($env:REPOSITORY_OWNER)/index.json"
+          }
+          else {
+              throw "Unsupported event '$($env:EVENT_NAME)'"
+          }
+
+          # Drift guard (risk #3): the tag/input must match the single version
+          # source of truth so a published tool version always maps 1:1 to a
+          # known harvester build. Directory.Build.props is that SSOT.
+          [xml]$props = Get-Content Directory.Build.props
+          $propsVersion = ($props.Project.PropertyGroup | Where-Object { $_.Version }).Version
+          if (-not $propsVersion) { throw "Could not read <Version> from Directory.Build.props" }
+          $propsVersion = "$propsVersion".Trim()
+          if ($version -ne $propsVersion) {
+              throw "Version mismatch: tag/input '$version' != Directory.Build.props <Version> '$propsVersion'. Bump Directory.Build.props and re-tag so the tool version tracks the harvester release line."
+          }
+
+          Write-Host "Resolved version : $version"
+          Write-Host "Publish target   : $publishTarget"
+
+          "artifact_name=accessharvester-tool-nupkg-$version" >> $env:GITHUB_OUTPUT
+          "package_source=$packageSource" >> $env:GITHUB_OUTPUT
+          "publish_target=$publishTarget" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+  validate:
+    name: Validate, Pack And Smoke-Install
+    needs: resolve-context
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - id: pack
+        name: Pack the tool package
+        shell: pwsh
+        run: |
+          $packOutput = Join-Path $env:RUNNER_TEMP 'accessharvester-pack'
+          if (Test-Path $packOutput) { Remove-Item -Recurse -Force $packOutput }
+
+          # Pack the CLI directly (not the full solution) so the COM-bound
+          # test projects never enter the graph. Version is RID-neutral and
+          # inherited from Directory.Build.props (no /p:Version override —
+          # the props value is the SSOT, already drift-verified above).
+          dotnet pack AccessHarvester.Cli/AccessHarvester.Cli.csproj `
+            --configuration Release `
+            --nologo `
+            -v minimal `
+            -o $packOutput
+          if ($LASTEXITCODE -ne 0) { throw "dotnet pack failed" }
+
+          "pack_output=$packOutput" >> $env:GITHUB_OUTPUT
+
+      - name: Verify packed package identity (typo guard, risk #4)
+        shell: pwsh
+        env:
+          EXPECTED_VERSION: ${{ needs.resolve-context.outputs.version }}
+        run: |
+          $packOutput = '${{ steps.pack.outputs.pack_output }}'
+          $expectedId = 'Dabbler.AccessHarvester.Tool'
+          $expectedNupkg = "$expectedId.$($env:EXPECTED_VERSION).nupkg"
+
+          $nupkgs = @(Get-ChildItem -Path $packOutput -Filter '*.nupkg')
+          if ($nupkgs.Count -ne 1) {
+              throw "Expected exactly 1 .nupkg in $packOutput, found $($nupkgs.Count): $($nupkgs.Name -join ', ')"
+          }
+          if ($nupkgs[0].Name -ne $expectedNupkg) {
+              throw "Packed package '$($nupkgs[0].Name)' does not match expected ID/version '$expectedNupkg'. The public ID is permanent — refusing to publish a mis-identified package."
+          }
+
+          # The symbols package is expected (snupkg) but not required to publish.
+          $snupkgs = @(Get-ChildItem -Path $packOutput -Filter '*.snupkg')
+          Write-Host "Package identity OK: $($nupkgs[0].Name) (+ $($snupkgs.Count) symbol package)"
+
+      - name: Smoke-install + run the packed tool (package-validation dry run)
+        shell: pwsh
+        run: |
+          $packOutput = '${{ steps.pack.outputs.pack_output }}'
+          $toolPath = Join-Path $env:RUNNER_TEMP 'accessharvester-toolinstall'
+          if (Test-Path $toolPath) { Remove-Item -Recurse -Force $toolPath }
+
+          # Tool-path install (not --global) so the runner's profile is not
+          # mutated and the run is self-contained. Proves the packed tool
+          # restores its ANTLR/managed assets from the package, not just from
+          # the self-extracting single-file publish (set 019 risk #2).
+          dotnet tool install Dabbler.AccessHarvester.Tool `
+            --tool-path $toolPath `
+            --add-source $packOutput `
+            --version '${{ needs.resolve-context.outputs.version }}'
+          if ($LASTEXITCODE -ne 0) { throw "dotnet tool install from local feed failed" }
+
+          $exe = Join-Path $toolPath 'access-harvester.exe'
+          if (-not (Test-Path $exe)) { throw "Installed command not found at $exe" }
+
+          # Hermetic subcommands only (no Access/COM on the runner): --help and
+          # a no-op `validate` usage path both resolve managed + ANTLR assets.
+          & $exe --help
+          if ($LASTEXITCODE -ne 0) { throw "access-harvester --help failed (exit $LASTEXITCODE)" }
+          Write-Host "Smoke run OK: access-harvester --help resolved from the tool install location"
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ needs.resolve-context.outputs.artifact_name }}
+          path: |
+            ${{ steps.pack.outputs.pack_output }}\*.nupkg
+            ${{ steps.pack.outputs.pack_output }}\*.snupkg
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-nuget-org:
+    name: Publish To NuGet.org
+    if: ${{ needs.resolve-context.outputs.publish_target == 'nuget.org' }}
+    needs:
+      - resolve-context
+      - validate
+    runs-on: windows-latest
+    # Gate behind a (protected, if the plan allows) environment so the publish
+    # of a permanent public ID is an auditable, optionally-reviewed step. The
+    # environment also carries the nuget.org trusted-publishing OIDC claim.
+    environment: ${{ vars.NUGET_PUBLISH_ENVIRONMENT || 'nuget-publish' }}
+    permissions:
+      contents: read
+      id-token: write          # lets GitHub mint the OIDC token nuget.org trusted publishing exchanges for a short-lived API key
+    steps:
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ needs.resolve-context.outputs.artifact_name }}
+          path: ${{ runner.temp }}\accessharvester-publish
+
+      # Trusted publishing: exchange the GitHub OIDC token for a short-lived
+      # (1 h) nuget.org API key. No long-lived secret. Requested immediately
+      # before the push because the key expires in one hour.
+      - name: NuGet login (OIDC -> temporary API key)
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
+        with:
+          # nuget.org profile name (NOT an email) that owns the trusted-publishing policy.
+          user: darndestdabbler
+
+      - name: Push package (+ symbols) to NuGet.org
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+          PACKAGE_SOURCE: ${{ needs.resolve-context.outputs.package_source }}
+        run: |
+          $publishDir = Join-Path $env:RUNNER_TEMP 'accessharvester-publish'
+          $packages = @(Get-ChildItem -Path $publishDir -Filter '*.nupkg' | Sort-Object Name)
+          if (-not $packages) { throw "No .nupkg artifacts found in $publishDir" }
+
+          foreach ($package in $packages) {
+              # `dotnet nuget push` auto-pushes the sibling .snupkg symbol package.
+              dotnet nuget push $package.FullName `
+                --api-key $env:NUGET_API_KEY `
+                --source $env:PACKAGE_SOURCE `
+                --skip-duplicate
+              if ($LASTEXITCODE -ne 0) { throw "dotnet nuget push failed for $($package.Name)" }
+          }
+
+  dry-run-github-packages:
+    name: Dry-Run Publish To GitHub Packages
+    if: ${{ needs.resolve-context.outputs.publish_target == 'github-packages' }}
+    needs:
+      - resolve-context
+      - validate
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: ${{ needs.resolve-context.outputs.artifact_name }}
+          path: ${{ runner.temp }}\accessharvester-publish
+
+      - name: Push package to GitHub Packages (no nuget.org ID burned)
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PACKAGE_SOURCE: ${{ needs.resolve-context.outputs.package_source }}
+        run: |
+          $publishDir = Join-Path $env:RUNNER_TEMP 'accessharvester-publish'
+          $packages = @(Get-ChildItem -Path $publishDir -Filter '*.nupkg' | Sort-Object Name)
+          if (-not $packages) { throw "No .nupkg artifacts found in $publishDir" }
+
+          foreach ($package in $packages) {
+              dotnet nuget push $package.FullName `
+                --api-key $env:GITHUB_TOKEN `
+                --source $env:PACKAGE_SOURCE `
+                --skip-duplicate
+              if ($LASTEXITCODE -ne 0) { throw "dotnet nuget push (GitHub Packages) failed for $($package.Name)" }
+          }

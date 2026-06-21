@@ -1,0 +1,31 @@
+Round 2 re-verification: the Round 1 Major is resolved. The original defect was that the tool package redistributed MIT-licensed assemblies but only named them, without carrying their notices. The new `THIRD-PARTY-NOTICES.txt` materially fixes that: it now reproduces ANTLR’s full BSD-3-Clause text and includes the full MIT license text plus enumerated copyright holders for the redistributed MIT components. Given the stated evidence that the corrected file is actually shipped at the package root of the `.nupkg`, I do not see a remaining Critical/Major license-attribution gap of the same class.
+
+Concern 1 — publish pipeline correctness / determinism / idempotence: the workflow is structurally sound for the intended “build once, then promote artifacts” model. `validate` performs the single `dotnet pack`, uploads the resulting `.nupkg`/`.snupkg`, and `publish-*` downloads and pushes those exact artifacts without rebuilding. That satisfies the important determinism invariant here: the bits being published are the bits that passed validation. `--skip-duplicate` gives the expected idempotence on rerun of the same version. This is not “fully reproducible build” determinism in the formal supply-chain sense, but it does meet the session goal and the specific build-once/promote-artifacts requirement.
+
+Concern 2 — irreversibility guardrails: the meaningful guardrails are real and mostly well placed. The tag/input-to-`Directory.Build.props` equality check prevents version drift. The packed filename assertion is a reasonable typo/public-ID guard because the `.nupkg` name is derived from `PackageId` + `Version`, and the subsequent tool install uses the expected package ID. The local-feed smoke install/run is the right class of proof for “tool works from package layout, not only from self-contained publish output.” The GitHub Packages manual path is also a legitimate no-burn rehearsal for pack/upload/push mechanics. The environment gate is honestly presented as optional/plan-dependent, not as a guaranteed blocker. The only nuance is that the GitHub-Packages dry run does not exercise the nuget.org OIDC exchange itself, so trusted-publishing misconfiguration would still be discovered only on the first real nuget.org publish. That is a fail-closed gap, not one that burns the wrong permanent ID.
+
+Concern 3 — risk #1, single-file/self-extract property leakage into pack: I do not see a leak path in the shown implementation. The publish-only properties are gated on `$(RuntimeIdentifier) != ''`, and the workflow’s `dotnet pack` invocation is RID-neutral and targets the CLI project directly. That is exactly the right shape to keep single-file/self-extract behavior out of `dotnet pack`.
+
+Concern 4 — risk #3, single-sourced versioning and tag namespacing: this is correctly done. The CLI csproj does not declare its own version, so it inherits `Directory.Build.props`. The workflow then independently reads `Directory.Build.props` and requires the pushed `nuget-v<semver>` tag (or manual input) to equal that value. That prevents a second version scheme from creeping in. The trigger namespace separation also looks correct: `nuget-v*` cannot collide with the existing plain `v*.*.*` release tag pattern, so the two workflows will not double-fire on the same tag.
+
+Concern 5 — license correctness: the important answer is yes, the Round 1 Major is fixed. The package now has an MIT SPDX expression for the project itself, a root repository `LICENSE`, and a shipped `THIRD-PARTY-NOTICES.txt` that carries the full ANTLR BSD-3-Clause text plus a consolidated MIT notice for the redistributed MIT assemblies. Based on the dependency closure you enumerated, I do not see an unhandled copyleft obligation. I do, however, see one new non-blocking documentation/package-content nit: `THIRD-PARTY-NOTICES.txt` tells readers to “see LICENSE,” but the package evidence says only `THIRD-PARTY-NOTICES.txt` and `nuget-readme.md` are packed at the package root. Since `LICENSE` is not actually shipped in the `.nupkg`, that reference is dead inside the distributed artifact. That is not a legal blocker because the nuspec license expression is present, but it is a real packaged-file reference mismatch.
+
+Concern 6 — OIDC trusted publishing wiring: the publish job wiring looks correct. It grants `id-token: write`, uses `NuGet/login@v1`, and passes the returned API key into `dotnet nuget push` against nuget.org. Assuming the one-time nuget.org trusted-publishing policy is configured for this repo/workflow and `user: darndestdabbler` matches the nuget.org owner profile, this should work. I do not see a silent no-op path; a bad policy or owner mismatch should fail the login/push step loudly. As noted above, the manual GitHub-Packages dry run does not validate this auth path, but that is an operational caveat, not a material correctness defect.
+
+Concern 7 — honesty of the cross-repo pin: this is honest. The sibling repo changes clearly say the packaging and publish pipeline exist upstream but the package is not yet live on nuget.org until one-time account/policy setup plus first tag push occurs. It does not falsely claim public availability.
+
+Concern 8 — broken internal links / references: the markdown links and workflow/file references shown are internally consistent. The one concrete bad reference I can substantiate is the packaged `THIRD-PARTY-NOTICES.txt` pointing to `LICENSE` even though `LICENSE` is not packed into the `.nupkg`. I do not see another broken internal doc link from the provided material.
+
+```json
+{
+  "verdict": "ISSUES_FOUND",
+  "issues": [
+    {
+      "severity": "Minor",
+      "location": "THIRD-PARTY-NOTICES.txt",
+      "summary": "The shipped notice file tells package consumers to \"see LICENSE\", but LICENSE is not included in the .nupkg.",
+      "fix": "Either pack LICENSE into the package root as well, or change the wording to refer to the package's MIT license expression / repository LICENSE instead of a packaged LICENSE file."
+    }
+  ]
+}
+```

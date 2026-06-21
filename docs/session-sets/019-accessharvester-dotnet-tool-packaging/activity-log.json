@@ -1,7 +1,7 @@
 {
   "sessionSetName": "019-accessharvester-dotnet-tool-packaging",
   "createdDate": "2026-06-20T22:33:56.377932+00:00",
-  "totalSessions": 0,
+  "totalSessions": 2,
   "entries": [
     {
       "sessionNumber": 1,
@@ -93,6 +93,74 @@
           "model": "gpt-5-4",
           "taskType": "session-verification",
           "costUsd": 0.140745
+        }
+      ]
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 1,
+      "stepKey": "session-2/setup",
+      "dateTime": "2026-06-20T20:22:26.528978-04:00",
+      "description": "Read spec + guidance + workflow; registered session 2 start (session-start ref 0fb87b8). Confirmed router 0.26.1, keys present (DABBLER_-prefixed).",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 2,
+      "stepKey": "session-2/package-license",
+      "dateTime": "2026-06-20T20:22:26.528978-04:00",
+      "description": "Resolved the S1-deferred package license: owner chose MIT (ecosystem-consistent with dabbler-platform). Added PackageLicenseExpression=MIT + PackageRequireLicenseAcceptance=false + Copyright to the CLI csproj; root LICENSE (MIT) + THIRD-PARTY-NOTICES.txt; SourceLink + snupkg symbols (pack/publish-scoped). Evidence: CLI dep closure = ANTLR (BSD-3-Clause) + System.Data.OleDb/JsonSchema.Net/Humanizer/json-everything (MIT), no copyleft.",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 3,
+      "stepKey": "session-2/publish-pipeline",
+      "dateTime": "2026-06-20T20:22:26.528978-04:00",
+      "description": "Added .github/workflows/nuget-publish.yml (tag-triggered nuget-v*, namespaced away from the existing v*.*.* release.yml). OIDC trusted publishing (NuGet/login@v1, id-token:write, environment gate), build-once/promote-artifacts, --skip-duplicate, .snupkg symbols. Guardrails: version-drift guard (tag == Directory.Build.props <Version>), package-ID/typo assertion, smoke install+run from local feed, workflow_dispatch GitHub-Packages dry run. Actions pinned to commit SHAs (platform precedent).",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 4,
+      "stepKey": "session-2/docs-and-crossrepo-pin",
+      "dateTime": "2026-06-20T20:22:26.528978-04:00",
+      "description": "Added docs/harvester/nuget-publish.md runbook (one-time maintainer setup + tag flow + guardrail table); updated install.md availability note. Cross-repo: pinned the migration-orchestrator playbook Step 00 <CONFIRM> + workaround-ledger elimination path (honest framing: pipeline landed, package not yet live until first tagged publish + nuget.org setup).",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 5,
+      "stepKey": "session-2/build-test-pack-smoke",
+      "dateTime": "2026-06-20T20:22:26.528978-04:00",
+      "description": "dotnet build (Release) green; AccessHarvester.Tests 703 passed/2 skipped/0 failed; dotnet pack -> Dabbler.AccessHarvester.Tool.1.2.0.nupkg + .snupkg (nuspec license=MIT expr, DotnetTool type); local-feed install -> access-harvester --version = 'AccessHarvester 1.2.0 (schema v1.1)', --help exit 0.",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 6,
+      "stepKey": "session-2/greenfield-matrix",
+      "dateTime": "2026-06-20T20:34:01.179498-04:00",
+      "description": "Ran the Set-075 greenfield matrix (push:anthropic sonnet + pull:openai gpt-5.4 + pull:google gemini; skipped=0, no DeterministicServantViolation this run) on 0fb87b8..WORKTREE. diffClass=packaging-small. adjudicated_union_TP=0: all 5 consolidated findings were push-only FP/artifacts (F1/F3 push-elision of the session's new untracked files THIRD-PARTY-NOTICES.txt + nuget-publish.md which DO exist; F2 dup; F4/F5 ISSUES_FOUND parse fragments); both pull arms returned clean VERIFIED. 2nd Set-019 data point counter to the packaging-small=favors-push prior. Froze matrix-run/ (preserved S1 as matrix-run-s1/); telemetry shipped to 075.",
+      "status": "complete"
+    },
+    {
+      "sessionNumber": 2,
+      "stepNumber": 7,
+      "stepKey": "session-2/verification",
+      "dateTime": "2026-06-20T20:34:01.179498-04:00",
+      "description": "Routed cross-provider session-verification (gpt-5-4). R1 ISSUES_FOUND 1 Major: THIRD-PARTY-NOTICES.txt only NAMED the MIT deps without their notices. Evidence-checked the .nupkg (a dotnet tool bundles its dep DLLs, no <dependencies>) -> rewrote notices with full MIT text + .NET Foundation/Greg Dennis copyrights. R2 ISSUES_FOUND 1 Minor only (notices 'see LICENSE' but LICENSE not packed) -> per Set-071 materiality a Minor-only round is effectively VERIFIED; fixed anyway by packing LICENSE at the package root. No blocking findings remain.",
+      "status": "complete",
+      "routedApiCalls": [
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.2302125
+        },
+        {
+          "model": "gpt-5-4",
+          "taskType": "session-verification",
+          "costUsd": 0.177645
         }
       ]
     }

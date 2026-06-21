@@ -31,12 +31,17 @@ channel does not change that.
 
 ## Option A — `dotnet tool` (framework-dependent)
 
-> **Availability.** The package publishes to nuget.org via the
-> tag-triggered release pipeline (set `019` session 2). Until the first
-> tagged publish lands, acquire it from a local package feed: run
-> `dotnet pack AccessHarvester.Cli/AccessHarvester.Cli.csproj -c Release
-> -o <feed-dir>` from a clone, then add `--add-source <feed-dir>` to the
-> install command below.
+> **Availability.** The tag-triggered publish pipeline is in place
+> (`.github/workflows/nuget-publish.yml`, set `019` session 2): pushing a
+> `nuget-v<semver>` tag validates and publishes the package to nuget.org
+> via trusted publishing. The first public push additionally requires the
+> maintainer's one-time nuget.org setup (account, trusted-publishing
+> policy) — see
+> [`docs/harvester/nuget-publish.md`](nuget-publish.md). **Until that
+> first tagged publish lands**, acquire the tool from a local package
+> feed: run `dotnet pack AccessHarvester.Cli/AccessHarvester.Cli.csproj
+> -c Release -o <feed-dir>` from a clone, then add `--add-source
+> <feed-dir>` to the install command below.
 
 Install (or update) globally — this exposes the `access-harvester`
 command on `PATH`:

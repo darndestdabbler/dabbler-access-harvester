@@ -1,28 +1,22 @@
 {
   "status": "completed",
-  "summary": "Set 019 Session 1: AccessHarvester.Cli now packs as the dotnet tool Dabbler.AccessHarvester.Tool (command access-harvester), proven to install from a local feed and run (4 smoke checks); single-file publish props RID-gated so they do not leak into pack; self-contained publish unchanged (5/5 smoke). install.md documents both channels; a tool-specific nuget-readme.md was added. Greenfield matrix ran (packaging-small, 1 TP adjudicated, telemetry shipped to 075). Cross-provider verification VERIFIED at R2. Session 2 (publish pipeline + first-push guardrails + package license) remains.",
+  "summary": "Set 019 Session 2 (final): added the tag-triggered, guarded nuget.org publish pipeline for Dabbler.AccessHarvester.Tool (.github/workflows/nuget-publish.yml) — OIDC trusted publishing, build-once/promote-artifacts, --skip-duplicate, .snupkg symbols, environment gate, SHA-pinned actions; namespaced to nuget-v* so it never collides with the existing v*.*.* Release zip workflow. Irreversibility guardrails: version-drift guard (tag == Directory.Build.props <Version>, risk #3), package-ID/typo assertion (risk #4), smoke install+run from a local feed (risk #2), and a workflow_dispatch GitHub-Packages dry run. Resolved the S1-deferred package license: MIT (owner choice, ecosystem-consistent) via PackageLicenseExpression + root LICENSE + THIRD-PARTY-NOTICES.txt; added SourceLink + symbols. Docs: new docs/harvester/nuget-publish.md runbook + install.md availability note. Cross-repo: pinned the migration-orchestrator playbook Step 00 <CONFIRM> + workaround-ledger elimination path (honest: pipeline landed, package not yet live until the maintainer's one-time nuget.org setup + first nuget-v<semver> tag). Build green; AccessHarvester.Tests 703/0; pack + local-feed install verified. Greenfield matrix ran (packaging-small, adjudicated_union_TP=0 — all push-elision FPs; both pull arms clean; telemetry shipped to 075). Cross-provider verification: R1 1 Major (incomplete third-party notices) FIXED with .nupkg evidence; R2 Minor-only (effectively VERIFIED) also fixed. Set 019 complete.",
   "files_changed": [
     "AccessHarvester.Cli/AccessHarvester.Cli.csproj",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.txt",
+    ".github/workflows/nuget-publish.yml",
+    "docs/harvester/nuget-publish.md",
     "docs/harvester/install.md",
-    "README.md",
-    "docs/harvester/nuget-readme.md",
-    "docs/session-sets/019-accessharvester-dotnet-tool-packaging/ai-assignment.md",
-    "docs/session-sets/019-accessharvester-dotnet-tool-packaging/s1-verification.md",
-    "docs/session-sets/019-accessharvester-dotnet-tool-packaging/s1-verification-round-2.md",
-    "docs/session-sets/019-accessharvester-dotnet-tool-packaging/matrix-run/"
+    "docs/session-sets/019-accessharvester-dotnet-tool-packaging/matrix-run/",
+    "docs/session-sets/019-accessharvester-dotnet-tool-packaging/s2-verification.md",
+    "docs/session-sets/019-accessharvester-dotnet-tool-packaging/s2-verification-round-2.md",
+    "docs/session-sets/019-accessharvester-dotnet-tool-packaging/s2-issues.json",
+    "../dabbler-access-migration-orchestrator/docs/playbooks/migration-playbook.md",
+    "../dabbler-access-migration-orchestrator/docs/planning/harvester-integration-workarounds.md"
   ],
   "verification_method": "api",
   "verification_message_ids": [],
-  "next_orchestrator": {
-    "engine": "claude-code",
-    "provider": "anthropic",
-    "model": "claude-opus-4-8",
-    "effort": "medium",
-    "reason": {
-      "code": "continue-current-trajectory",
-      "specifics": "Session 2 (tag-triggered idempotent nuget.org publish + first-push guardrails + the deferred package license decision) is precise, irreversible-public-ID work that suits the same Opus 4.8 orchestrator that did S1's packaging."
-    }
-  },
   "blockers": [],
   "verification_verdict": "VERIFIED"
 }

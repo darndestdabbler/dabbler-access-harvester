@@ -1,37 +1,57 @@
 # Remediation report - dabbler-access-harvester
 
-- committed ref: 60490e6..WORKTREE
-- generated at: 2026-06-20T18:56:14.183878-04:00
+- committed ref: 0fb87b8..WORKTREE
+- generated at: 2026-06-20T20:34:01.179498-04:00
 - provenance complete: False
-- NOTE: provenance is incomplete (pushUnkeyed=1, pullUnkeyed=2); a defect both surfaces caught but neither keyed appears as two separate entries.
-- findings: 3
+- NOTE: provenance is incomplete (pushUnkeyed=5, pullUnkeyed=0); a defect both surfaces caught but neither keyed appears as two separate entries.
+- findings: 5
 
-## 1. [Major] completeness - pull-only
-- defect key: (unkeyed)
-- surfaces: pull
-- (pull) Violation: the spec's Session 2 requires 'A deterministic, idempotent publish of Dabbler.AccessHarvester.Tool to nuget.org' and ends with 'the tool is publishable on a version tag, idempotently and safely' plus 'A tag-triggered, idempotent, guarded nuget.org publish path.' Impact: this merge would ship without the promised publication channel or first-push guardrails; downstream users still cannot acquire the tool from nuget.org as the set claims, and the release pipeline does not exercise or protect the permanent public package ID at all. Evidence: .github/workflows/release.yml only runs tools/publish/publish.ps1, verifies a zip and .sha256 under publish/release, and creates a GitHub draft release; it contains no dotnet pack, no dotnet nuget push --skip-duplicate, no package validation, and no nuget secret/environment wiring. docs/session-sets/019-accessharvester-dotnet-tool-packaging/spec.md explicitly requires those steps, but the repository implementation stops at the pre-existing GitHub Releases channel. Fix: add the missing tag-triggered pack/push workflow with skip-duplicate, validation/ID guardrails, and the required secret/environment protection before closing the set.
-
-## 2. [Major] contract-drift - pull-only
-- defect key: (unkeyed)
-- surfaces: pull
-- (pull) Violation: the docs repeatedly describe current CLI/schema behavior, but the repository disagrees. README.md says validate checks 'the harvester-schema v1.0 that is embedded in the binary', while Program.cs now supports both 1.0 and 1.1 and PrintVersion/CliBootstrapTests assert 'schema v1.1'; docs/harvester/install.md's Versioning convention says 'Current value: 1.0' even though Directory.Build.props sets Version 1.2.0 and Program.cs surfaces schema v1.1. Impact: these are load-bearing consumer docs for install and validation behavior; leaving them wrong can cause downstream integrators to pin or validate against the wrong schema contract and undermines confidence that the set actually verified what it claims. Evidence: README.md validate section still states 'harvester-schema v1.0'; AccessHarvester.Cli/Program.cs defines SupportedSchemaVersions = ["1.0", "1.1"], SchemaVersionLiteral = DatabaseManifest.SchemaVersionLiteral, and PrintVersion emits 'schema v{SchemaVersionLiteral}'; tests/AccessHarvester.Integration/Cli/CliBootstrapTests.cs asserts '--version' contains 'schema v1.1'; docs/harvester/install.md's Versioning convention still says 'Current value: 1.0'. Fix: update README.md and install.md to the actual current schema/version behavior everywhere they describe current validation/version output.
-
-## 3. [(unspecified)] (uncategorized) - push-only
+## 1. [Major] Completeness / Correctness - push-only
 - defect key: (unkeyed)
 - surfaces: push
-- (push) if the property was previously present and is now missing \u2014 because it changes the behavior of the existing publish path in a way the comment explicitly describes as intended. But I cannot confirm it was previously present without seeing the full old file. The diff context only shows `-10,21 +10,64` \u2014 the old content shown is the comment block only, and the old PropertyGroup's properties are not shown in the `-` lines (the diff starts mid-removal of the comment). This means the old PropertyGroup properties aren't visible in the diff excerpt provided.
+- (push) `THIRD-PARTY-NOTICES.txt` is packed but not present in the changeset and its existence is unverified
 
-Given this uncertainty, I'll flag it as a nit/minor since I cannot prove from the available evidence that `EnableCompressionInSingleFile` was previously present and is now absent.
-
-### 8. The install.md old content mentions "native SQLite dependencies"
-
-The removed text said: *"carries its own .NET runtime, native SQLite dependencies, and managed payload"* \u2014 the new Option B text removes "native SQLite dependencies" \u2014 consistent with the csproj comment's claim that SQLite is not a CLI dependency.
+- **Category:** Completeness / Correctness
+- **Severity:** Major
+- **Violation:** The `.csproj` adds `<None Include="..\THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="\" Visible="false" />` and the inline comment asserts "BSD-3-Clause requires the copyright notice to travel with binary redistributions" \u2014 the pack entry is the stated compliance mechanism for this obligation.
+- **Impact:** If `THIRD-PARTY-NOTICES.txt` does not exist at the repo root, `dotnet pack` will either error or silently omit the file. Silent omission means the published `.nupkg` ships without the BSD-3-Clause attribution that the code explicitly claims it carries, creating a license compliance failure for every consumer. A reviewer seeing this would require confirmation the file exists before merging.
+- **Evidence:** The diff's changed paths are exhaustive for this commit range. `THIRD-PARTY-NOTICES.txt` does not appear anywhere in the changed paths or unified diff. The original response's description of the changeset does not flag this gap, treating the compliance claim as fulfilled when the file's existence is unverified by the evidence in front of us.
 
 ---
 
-## Verdict
+## 2. [Major] Completeness - push-only
+- defect key: (unkeyed)
+- surfaces: push
+- (push) `THIRD-PARTY-NOTICES.txt` is referenced in the build but absent from the diff**
+- **Category:** Completeness
+- **Severity:** Major
+- **Details:**
+  - **Violation:** `AccessHarvester.Cli.csproj` adds `<None Include="..\THIRD-PARTY-NOTICES.txt" Pack="true" PackagePath="\" Visible="false" />` with the explicit rationale that "BSD-3-Clause requires the copyright notice to travel with binary redistributions." This is a functional build dependency.
+  - **Impact:** If the file does not exist at the repo root, `dotnet pack` will fail, breaking the NuGet publish pipeline \u2014 the primary deliverable of this session set. Additionally, if the file is simply absent, the BSD-3-Clause compliance claim made in the `.csproj` comment is unsubstantiated and potentially a license violation.
+  - **Evidence:** `THIRD-PARTY-NOTICES.txt` does not appear in `[changed paths]`. The diff range covers `0fb87b8..WORKTREE`. The `.csproj` comment treats this as a new addition tied to set 019 S2. No prior session (`matrix-run-s1` artifacts) mentions this file's pre-existence.
 
-**VERIFIED**
+## 3. [Major] Completeness - push-only
+- defect key: (unkeyed)
+- surfaces: push
+- (push) `docs/harvester/nuget-publish.md` is linked in `install.md` but absent from the diff**
+- **Category:** Completeness
+- **Severity:** Major
+- **Details:**
+  - **Violation:** `install.md` adds the text: "The first public push additionally requires the maintainer's one-time nuget.org setup (account, trusted-publishing policy) \u2014 see [`docs/harvester/nuget-publish.md`](nuget-publish.md)." This is presented as a navigable link, not a placeholder.
+  - **Impact:** The link is broken if the file doesn't exist. The session's stated purpose is "Publish pipeline + first-push guardrails" \u2014 the guardrail documentation is the core deliverable. A user or maintainer following the setup instructions hits a 404. This would change a reasonable reviewer's merge decision: published documentation with a broken link to the primary setup guide is not mergeable.
+  - **Evidence:** `docs/harvester/nuget-publish.md` does not appear in `[changed paths]`. The session is marked `in-progress`, but the `install.md` change treats the link as a live reference, not a forward declaration.
 
-I examined: the conditional gate on `$(RuntimeIdentifier)` for isolation of single-file publish properties from `dotnet pack`; the PackageId/version inheritance logic; the README inclusion syntax; the license omission (explicitly deferred with documentation); the documentation accuracy for both channels; the `dotnet tool run` syntax; consistency between comment claims and actual properties; and the alignment between old and new content. The response correctly identifies the two-channel design, accurately gates the self-contained publish properties, and the documentation accurately reflects the implementation. No Critical or Major defect can be substantiated from the evidence in front of me.
+---
+
+## 4. [(unspecified)] (uncategorized) - push-only
+- defect key: (unkeyed)
+- surfaces: push
+- (push) S FOUND**
+
+###
+
+## 5. [(unspecified)] (uncategorized) - push-only
+- defect key: (unkeyed)
+- surfaces: push
+- (push) S FOUND
 
