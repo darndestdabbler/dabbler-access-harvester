@@ -31,7 +31,10 @@ account/owner actions on nuget.org and GitHub, not code.
    `user: darndestdabbler` — that is the nuget.org **profile name, NOT the
    email**. They already match in the committed workflow.
 2. **Create a trusted-publishing policy** on nuget.org
-   (Account → *Trusted Publishing*) with these exact fields:
+   (Account → *Trusted Publishing*) with these fields:
+   - **Policy name:** a free-text label for your own reference only — it has
+     **no functional meaning** and does not need to match anything. Suggested:
+     `Dabbler.AccessHarvester.Tool`.
    - **Package owner / Subject:** `darndestdabbler`
    - **Package:** `Dabbler.AccessHarvester.Tool` (a *glob* / the `Dabbler.`
      prefix is fine once the prefix is reserved; before first publish the
