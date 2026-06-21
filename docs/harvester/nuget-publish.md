@@ -17,26 +17,57 @@ build-once / promote-artifacts, `--skip-duplicate`).
 ## One-time maintainer setup (cannot be automated)
 
 These must exist **before the first `nuget-v…` tag push**. They are
-account/owner actions on nuget.org and GitHub, not code:
+account/owner actions on nuget.org and GitHub, not code.
 
-1. **Create a nuget.org account/org** under the `darndestdabbler` profile
-   (the `user:` value in the publish job's `NuGet/login` step).
-2. **Create a trusted-publishing policy** on nuget.org for this repo and
-   the `nuget-publish.yml` workflow, scoped to the `Dabbler.AccessHarvester.Tool`
-   package ID (or the `Dabbler.` prefix once reserved). Trusted publishing
-   exchanges a GitHub OIDC token for a short-lived (1 h) API key at push
-   time, so **no long-lived `NUGET_API_KEY` secret is stored in the repo.**
-3. **Create the `nuget-publish` GitHub Environment** (name overridable via
-   the `NUGET_PUBLISH_ENVIRONMENT` repo variable). If the repo's plan
-   supports environment protection rules, add **required reviewers** so the
-   first push of a permanent public ID is a one-click human gate. (On a
-   private repo without protection rules, GitHub rejects the required-reviewers
-   rule — the environment still carries the OIDC claim but cannot gate, so a
-   tag push auto-publishes. This matched the platform's experience.)
+> **This is the same OIDC trusted-publishing mechanism that published all
+> of the `Dabbler.*` `dabbler-platform` packages to nuget.org on
+> 2026-05-30** (every push returned `Created`). The fields below are
+> filled in with the proven values from that setup. The platform's only
+> real snag was a **workflow-filename mismatch** between its policy and its
+> workflow file — see step 2; getting that field right up front avoids it.
+
+1. **nuget.org account/profile `darndestdabbler`** (email
+   `darndestdabbler@gmail.com`). The publish job's `NuGet/login` step uses
+   `user: darndestdabbler` — that is the nuget.org **profile name, NOT the
+   email**. They already match in the committed workflow.
+2. **Create a trusted-publishing policy** on nuget.org
+   (Account → *Trusted Publishing*) with these exact fields:
+   - **Package owner / Subject:** `darndestdabbler`
+   - **Package:** `Dabbler.AccessHarvester.Tool` (a *glob* / the `Dabbler.`
+     prefix is fine once the prefix is reserved; before first publish the
+     policy can name the literal ID for a not-yet-existent package).
+   - **Repository owner / Repository:** `darndestdabbler` /
+     `dabbler-access-harvester`.
+   - **Workflow file:** `nuget-publish.yml` — ⚠️ **must match this repo's
+     workflow filename EXACTLY.** This is the field the platform tripped on:
+     its policy named `build.yml`, so it had to *rename* its workflow file to
+     match. Here the file is already `nuget-publish.yml`; enter that string
+     verbatim (no path, no leading `.github/workflows/`).
+   - **Environment:** `nuget-publish` — must match the `environment:` in the
+     publish job (its default is `nuget-publish`; only override if you also
+     set the `NUGET_PUBLISH_ENVIRONMENT` repo variable to the same value).
+
+   Trusted publishing then exchanges the GitHub OIDC token for a short-lived
+   (1 h) API key at push time, so **no long-lived `NUGET_API_KEY` secret is
+   stored in the repo.**
+3. **Create the `nuget-publish` GitHub Environment** (Settings →
+   Environments; name overridable via the `NUGET_PUBLISH_ENVIRONMENT` repo
+   variable — keep it `nuget-publish` to match the platform precedent and
+   the policy's Environment field above). If the repo's plan supports
+   environment protection rules, add **required reviewers** so the first
+   push of a permanent public ID is a one-click human gate. (On a private
+   repo without protection rules, GitHub rejects the required-reviewers rule
+   — the environment still carries the OIDC claim but cannot gate, so a tag
+   push auto-publishes. This is exactly what the platform observed.)
 4. **(Post-first-publish)** apply for the **`Dabbler` ID-prefix
    reservation** on nuget.org. nuget.org grants prefix reservation to an
    account that already owns matching published IDs, so this is a
    *post*-first-push action, not a pre-push blocker.
+
+Once these exist, follow *Cutting a release* below. Strongly recommended
+for the very first push: run the **GitHub Packages dry run** (the
+`workflow_dispatch` path) first — it exercises the whole pack→validate→push
+mechanic without claiming a permanent nuget.org ID.
 
 ---
 
